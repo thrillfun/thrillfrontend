@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="36.5" height="35.5" viewBox="0 0 36.5 35.5">
+  <defs>
+    <filter id="Fill_1" x="0" y="0" width="36.5" height="35.5" filterUnits="userSpaceOnUse">
+      <feOffset dy="0.5" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="0.25" result="blur"/>
+      <feFlood flood-opacity="0.149"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="comment_Icon" transform="translate(0.683 0.25)">
+    <g transform="matrix(1, 0, 0, 1, -0.68, -0.25)" filter="url(#Fill_1)">
+      <path id="Fill_1-2" data-name="Fill 1" d="M19.2,34h0a1.7,1.7,0,0,1-1.7-1.7V29.948A18.979,18.979,0,0,1,5.125,25.561,13.88,13.88,0,0,1,0,14.973,13.879,13.879,0,0,1,5.126,4.386,18.976,18.976,0,0,1,17.5,0,19.194,19.194,0,0,1,29.284,3.9a14.3,14.3,0,0,1,5.63,9.581A12.145,12.145,0,0,1,35,14.932c0,.007,0,.014,0,.021s0,.014,0,.02,0,.014,0,.022,0,.015,0,.022v.037c0,.024,0,.049,0,.074s0,.068,0,.1,0,.045,0,.068l0,.094c-.114,4.445-2.083,8.555-5.85,12.216a34.92,34.92,0,0,1-9.212,6.228A1.69,1.69,0,0,1,19.2,34Zm6.594-20.172a2.33,2.33,0,1,0,2.337,2.33A2.336,2.336,0,0,0,25.795,13.828Zm-8.294,0a2.33,2.33,0,1,0,2.336,2.33A2.336,2.336,0,0,0,17.5,13.828Zm-8.3,0a2.33,2.33,0,1,0,2.336,2.33A2.336,2.336,0,0,0,9.205,13.828Z" transform="translate(0.75 0.25)" fill="rgba(255,255,255,0.9)"/>
+    </g>
+  </g>
+</svg>

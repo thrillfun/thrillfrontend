@@ -1,0 +1,25 @@
+<svg id="spinning_disc" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="49" height="49" viewBox="0 0 49 49">
+  <defs>
+    <radialGradient id="radial-gradient" cx="0.5" cy="0.5" r="0.508" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#232323"/>
+      <stop offset="0.995" stop-color="#202020"/>
+      <stop offset="1" stop-color="#e9e9e9"/>
+    </radialGradient>
+    <linearGradient id="linear-gradient" x1="0.235" y1="0.194" x2="0.714" y2="0.769" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#181818"/>
+      <stop offset="0.473" stop-color="#353434"/>
+      <stop offset="0.509" stop-color="#333"/>
+      <stop offset="1" stop-color="#1f1e1d"/>
+    </linearGradient>
+  </defs>
+  <g id="Disc">
+    <circle id="Disc-2" data-name="Disc" cx="24.5" cy="24.5" r="24.5" transform="translate(0 49) rotate(-90)" fill="url(#radial-gradient)"/>
+    <circle id="Disc-3" data-name="Disc" cx="24.5" cy="24.5" r="24.5" transform="translate(0 49) rotate(-90)" fill="url(#linear-gradient)"/>
+  </g>
+  <circle id="Cover" cx="13.5" cy="13.5" r="13.5" transform="translate(11 11)" fill="#2dcbc8"/>
+  <g id="music-note" transform="translate(16 16.779)">
+    <path id="Path_30" data-name="Path 30" d="M9,13a2.292,2.292,0,0,1-2.5,2A2.292,2.292,0,0,1,4,13a2.292,2.292,0,0,1,2.5-2A2.292,2.292,0,0,1,9,13Z" fill="#fff"/>
+    <path id="Path_31" data-name="Path 31" d="M9,3V13H8V3Z" fill="#fff" fill-rule="evenodd"/>
+    <path id="Path_32" data-name="Path 32" d="M8,2.82a1,1,0,0,1,.8-.98l3-.6a1,1,0,0,1,1.2.98V4L8,5Z" fill="#fff"/>
+  </g>
+</svg>

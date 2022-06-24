@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+  <g id="Group_10487" data-name="Group 10487" transform="translate(0 0.005)">
+    <g id="Ellipse_23" data-name="Ellipse 23" transform="translate(0 -0.005)" fill="#fff" stroke="#1e234d" stroke-width="2">
+      <circle cx="18" cy="18" r="18" stroke="none"/>
+      <circle cx="18" cy="18" r="17" fill="none"/>
+    </g>
+    <text id="_" data-name="₹" transform="translate(24 27.995)" fill="#161823" font-size="23" font-family="SegoeUI, Segoe UI"><tspan x="-12.398" y="0">₹</tspan></text>
+  </g>
+</svg>

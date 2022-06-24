@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "882291140458",
+    "project_id": "algebraic-envoy-350105",
+    "storage_bucket": "algebraic-envoy-350105.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882291140458:android:c2f1ab980d5111983e6713",
+        "android_client_info": {
+          "package_name": "com.example.thrill"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "882291140458-a1er1ioqvd1bkn4enq7b8lofuh0hrj06.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.thrill",
+            "certificate_hash": "6ec95f09dff029b97083735ab5133d6f9406a142"
+          }
+        },
+        {
+          "client_id": "882291140458-h2ljmnevqujd77nn4s3c6l5d6blj7m50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARlZ8FnRMLBCdmepxUhpodWEJre_Ii8GQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "882291140458-h2ljmnevqujd77nn4s3c6l5d6blj7m50.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,7 @@
+<svg id="qr-code-scan" xmlns="http://www.w3.org/2000/svg" width="30.407" height="30.407" viewBox="0 0 30.407 30.407">
+  <path id="Path_96" data-name="Path 96" d="M0,.95A.95.95,0,0,1,.95,0h5.7a.95.95,0,0,1,0,1.9H1.9V6.652a.95.95,0,1,1-1.9,0Zm22.805,0a.95.95,0,0,1,.95-.95h5.7a.95.95,0,0,1,.95.95v5.7a.95.95,0,0,1-1.9,0V1.9H23.756a.95.95,0,0,1-.95-.95ZM.95,22.805a.95.95,0,0,1,.95.95v4.751H6.652a.95.95,0,1,1,0,1.9H.95a.95.95,0,0,1-.95-.95v-5.7a.95.95,0,0,1,.95-.95Zm28.507,0a.95.95,0,0,1,.95.95v5.7a.95.95,0,0,1-.95.95h-5.7a.95.95,0,0,1,0-1.9h4.751V23.756A.95.95,0,0,1,29.457,22.805ZM7.6,7.6H9.5V9.5H7.6Z" fill="#fff"/>
+  <path id="Path_97" data-name="Path 97" d="M11.5,2H2v9.5h9.5ZM3.9,3.9H9.6V9.6H3.9ZM7.7,19.1H5.8V21H7.7Z" transform="translate(1.801 1.801)" fill="#fff"/>
+  <path id="Path_98" data-name="Path 98" d="M11.5,13.5H2V23h9.5ZM3.9,15.4H9.6v5.7H3.9ZM19.1,4H21V5.9H19.1Z" transform="translate(1.801 3.602)" fill="#fff"/>
+  <path id="Path_99" data-name="Path 99" d="M9.9,2h9.5v9.5H9.9Zm1.9,1.9V9.6h5.7V3.9ZM8,13.4v3.8H9.9v1.9H8V21h3.8V17.2h1.9V21h1.9V19.1h3.8V17.2H13.7V13.4Zm3.8,3.8H9.9V15.3h1.9ZM19.4,21H17.5v1.9H13.7v1.9h5.7Zm-7.6,3.8V22.9H8v1.9Z" transform="translate(7.204 1.801)" fill="#fff"/>
+  <path id="Path_100" data-name="Path 100" d="M12,9.9h3.8V8H12Z" transform="translate(10.805 7.204)" fill="#fff"/>
+</svg>
