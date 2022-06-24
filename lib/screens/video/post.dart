@@ -476,15 +476,9 @@ class _PostVideoState extends State<PostVideo> {
                       )
                     ],
                   ),
-                  const Spacer(),
-                  isProcessing?
-                  RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        TextSpan(text: "${percentage.toStringAsFixed(0)}%", style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
-                        const TextSpan(text: "\nPlease wait, processing video...", style: TextStyle(color: Colors.black)),
-                      ])
-                  ):
+                  const SizedBox(
+                    height: 25,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -578,9 +572,6 @@ class _PostVideoState extends State<PostVideo> {
                           ))
                     ],
                   ),
-                  const SizedBox(
-                    height: 40,
-                  )
                 ],
               ).h(getHeight(context) - kToolbarHeight),
       ),
