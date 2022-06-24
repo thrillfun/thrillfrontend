@@ -279,22 +279,7 @@ class HomeState extends State<Home> {
                                           ? SvgPicture.asset(
                                               'assets/verified.svg',
                                             )
-                                          : const SizedBox(width: 2)
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        state.list[index].description,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline6!
-                                            .copyWith(color: Colors.white),
-                                      ),
+                                          : const SizedBox(width: 2),
                                       InkWell(
                                         onTap: () async {
                                           await isLogined().then((value) async {
@@ -325,20 +310,20 @@ class HomeState extends State<Home> {
                                                     user: state.list[index].user);
                                               }
                                               SharedPreferences pref =
-                                                  await SharedPreferences
-                                                      .getInstance();
+                                              await SharedPreferences
+                                                  .getInstance();
                                               pref.setStringList(
                                                   'followList', followList);
 
                                               BlocProvider.of<VideoBloc>(context)
                                                   .add(FollowUnfollow(
-                                                      action: followList.contains(
-                                                              state.list[index].id
-                                                                  .toString())
-                                                          ? "follow"
-                                                          : "unfollow",
-                                                      publisherId: state
-                                                          .list[index].user.id));
+                                                  action: followList.contains(
+                                                      state.list[index].id
+                                                          .toString())
+                                                      ? "follow"
+                                                      : "unfollow",
+                                                  publisherId: state
+                                                      .list[index].user.id));
                                               setState(() {});
                                             } else {
                                               showAlertDialog(context);
@@ -350,19 +335,35 @@ class HomeState extends State<Home> {
                                           padding: const EdgeInsets.all(4),
                                           decoration: BoxDecoration(
                                               borderRadius:
-                                                  BorderRadius.circular(5),
+                                              BorderRadius.circular(5),
                                               border: Border.all(
                                                   color: Colors.white, width: 1)),
                                           child:  Center(
                                             child: Text(
                                               followList.contains(state.list[index].id.toString())
-                                              ? "Following" : "Follow",
+                                                  ? "Following" : "Follow",
                                               style:
-                                                  const TextStyle(color: Colors.white),
+                                              const TextStyle(color: Colors.white),
                                             ),
                                           ),
                                         ),
                                       )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        state.list[index].description,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headline6!
+                                            .copyWith(color: Colors.white),
+                                      ),
+
                                     ],
                                   ),
                                   const SizedBox(

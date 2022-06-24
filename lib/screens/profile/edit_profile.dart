@@ -284,14 +284,8 @@ class _EditProfileState extends State<EditProfile> {
                           width: 25,
                         ),
                         IconButton(
-                          onPressed: () async {
-                            String result =
-                                await linkDialog(linkYouTube, youtubeURL,widget.user.youtube);
-                            if (result != 'no' && result.isNotEmpty) {
-                              final tile = socialList.firstWhere(
-                                  (item) => item.title == 'youtube');
-                              setState(() => tile.url = result);
-                            }
+                          onPressed: () {
+                             linkDialog(linkYouTube, youtubeURL,widget.user.youtube,"youtube");
                           },
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.only(),
@@ -302,14 +296,8 @@ class _EditProfileState extends State<EditProfile> {
                           width: 10,
                         ),
                         IconButton(
-                          onPressed: () async {
-                            String result =
-                                await linkDialog(linkFacebook, facebookURL,widget.user.facebook);
-                            if (result != 'no' && result.isNotEmpty) {
-                              final tile = socialList.firstWhere(
-                                  (element) => element.title == 'facebook');
-                              setState(() => tile.url = result);
-                            }
+                          onPressed: (){
+                            linkDialog(linkFacebook, facebookURL,widget.user.facebook,"facebook");
                           },
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.only(),
@@ -320,14 +308,8 @@ class _EditProfileState extends State<EditProfile> {
                           width: 10,
                         ),
                         IconButton(
-                          onPressed: () async {
-                            String result =
-                                await linkDialog(linkInstagram, instagramURL,widget.user.instagram);
-                            if (result != 'no' && result.isNotEmpty) {
-                              final tile = socialList.firstWhere(
-                                  (element) => element.title == 'instagram');
-                              setState(() => tile.url = result);
-                            }
+                          onPressed: (){
+                            linkDialog(linkInstagram, instagramURL,widget.user.instagram,"instagram");
                           },
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.only(),
@@ -338,14 +320,8 @@ class _EditProfileState extends State<EditProfile> {
                           width: 10,
                         ),
                         IconButton(
-                          onPressed: () async {
-                            String result =
-                                await linkDialog(linkTwitter, twitterURL,widget.user.twitter);
-                            if (result != 'no' && result.isNotEmpty) {
-                              final tile = socialList.firstWhere(
-                                  (element) => element.title == 'twitter');
-                              setState(() => tile.url = result);
-                            }
+                          onPressed: (){
+                             linkDialog(linkTwitter, twitterURL,widget.user.twitter,"twitter");
                           },
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.only(),
@@ -367,10 +343,10 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  Future<String> linkDialog(String title, String link,String setTitle) async {
+ linkDialog(String title, String link,String setTitle,String name)  {
     controller.clear();
     controller.text=setTitle;
-    String socialType = await showDialog(
+    showDialog(
         context: context,
         builder: (_) => Center(
               child: Material(
@@ -424,8 +400,21 @@ class _EditProfileState extends State<EditProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context, controller.text);
+                            onPressed: (){
+                              Navigator.pop(context);
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              setData(name,);
+                              BlocProvider.of<ProfileBloc>(context).add(
+                                ProfileValidation(
+                                    userNameCtr.text,
+                                    firstNameCtr.text,
+                                    lastNameCtr.text,
+                                    bioCtr.text,
+                                    "",
+                                    dropDownGender,
+                                    websiteCtr.text,
+                                    socialList),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                                 fixedSize: const Size(120, 40),
@@ -438,7 +427,7 @@ class _EditProfileState extends State<EditProfile> {
                             )),
                         ElevatedButton(
                             onPressed: () {
-                              Navigator.pop(context, "no");
+                              Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
                                 fixedSize: const Size(120, 40),
@@ -458,8 +447,32 @@ class _EditProfileState extends State<EditProfile> {
                 ),
               ).w(getWidth(context) * .90),
             ));
-    return socialType;
   }
+void setData(String name) {
+  switch (name) {
+    case "youtube":
+      final tile = socialList.firstWhere(
+              (item) => item.title == 'youtube');
+      setState(() => tile.url = controller.text);
+      break;
+    case "facebook":
+      final tile = socialList.firstWhere(
+              (item) => item.title == 'facebook');
+      setState(() => tile.url = controller.text);
+      break;
+    case "instagram":
+      final tile = socialList.firstWhere(
+              (item) => item.title == 'instagram');
+      setState(() => tile.url = controller.text);
+      break;
+    case "twitter":
+      final tile = socialList.firstWhere(
+              (item) => item.title == 'twitter');
+      setState(() => tile.url = controller.text);
+      break;
+  }
+
+}
 
   void pickImage(BuildContext context) async {
     var source = await imagePickerSheet(context);

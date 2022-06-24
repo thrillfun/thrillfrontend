@@ -84,7 +84,7 @@ class _DiscoverState extends State<Discover> {
                             height: 200,
                             enlargeCenterPage: true,
                             enableInfiniteScroll: false,
-                            autoPlay: true,
+                            autoPlay: false,
                           ),
                           itemCount: bannerList.length,
                           itemBuilder: (context, index, realIndex) {
