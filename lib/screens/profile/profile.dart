@@ -206,7 +206,8 @@ class _ProfileState extends State<Profile> {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
+                      state.userModel.youtube.isEmpty
+                      ? SizedBox(width: 1,) : IconButton(
                         onPressed: () {},
                         iconSize: 25,
                         padding: const EdgeInsets.only(),
@@ -216,7 +217,8 @@ class _ProfileState extends State<Profile> {
                       const SizedBox(
                         width: 5,
                       ),
-                      IconButton(
+                      state.userModel.facebook.isEmpty
+                          ? SizedBox(width: 1,) : IconButton(
                         onPressed: () {},
                         iconSize: 25,
                         padding: const EdgeInsets.only(),
@@ -226,7 +228,8 @@ class _ProfileState extends State<Profile> {
                       const SizedBox(
                         width: 5,
                       ),
-                      IconButton(
+                      state.userModel.instagram.isEmpty
+                          ? SizedBox(width: 1,) : IconButton(
                         onPressed: () {},
                         iconSize: 25,
                         padding: const EdgeInsets.only(),
@@ -236,7 +239,8 @@ class _ProfileState extends State<Profile> {
                       const SizedBox(
                         width: 5,
                       ),
-                      IconButton(
+                      state.userModel.twitter.isEmpty
+                          ? SizedBox(width: 1,) : IconButton(
                         onPressed: () {},
                         iconSize: 25,
                         padding: const EdgeInsets.only(),

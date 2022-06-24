@@ -99,6 +99,7 @@ class ResetPasswordScreen extends StatelessWidget {
                           VxPinView(
                             count: 4,
                             obscureText: true,
+                            space:15,
                             type: VxPinBorderType.round,
                             keyboardType: TextInputType.number,
                             fill: false,
@@ -133,6 +134,7 @@ class ResetPasswordScreen extends StatelessWidget {
                           VxPinView(
                             count: 4,
                             obscureText: true,
+                            space:15,
                             type: VxPinBorderType.round,
                             keyboardType: TextInputType.number,
                             fill: false,
