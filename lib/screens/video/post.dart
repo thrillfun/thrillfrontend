@@ -360,9 +360,6 @@ class _PostVideoState extends State<PostVideo> {
                       Text("Chosen Sound", style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.grey),),
                     ],
                   ).w(MediaQuery.of(context).size.width*.90),
-                  const SizedBox(
-                    height: 20,
-                  ),
                   Row(
                     children: [
                       const SizedBox(

@@ -41,4 +41,5 @@ class RestUrl {
   static const String deactiveAc = baseUrl + "user/deactivate-account-request";
   static const String checkAcStatus = baseUrl + "user/check-user-status";
   static const String userVerification = baseUrl + "user/request-verification";
+  static const String getHashtagList = baseUrl + "hashtag/list";
 }
