@@ -118,7 +118,7 @@ class LoginScreen extends StatelessWidget {
                                               width: 2),
                                           borderRadius: BorderRadius.circular(10)),
                                       constraints: BoxConstraints(
-                                          maxWidth:getWidth(context) * .80),
+                                          maxWidth:getWidth(context) * .70),
                                       prefixIcon: const Icon(Icons.phone_android_outlined, color: ColorManager.deepPurple,),
                                       errorText: state is OnError
                                           ? state.isEmail
@@ -134,6 +134,7 @@ class LoginScreen extends StatelessWidget {
                                 VxPinView(
                                   count: 4,
                                   obscureText: true,
+                                  space:28,
                                   type: VxPinBorderType.round,
                                   keyboardType: TextInputType.number,
                                   fill: false,
