@@ -36,9 +36,10 @@ class RestUrl {
   static const String favrateSundHastagRemoveAdd = baseUrl + "favorite/add-to-favorite";
   static const String getFavriteList = baseUrl + "favorite/user-favorites-list";
   static const String getSoundCategories = baseUrl + "sound/categories";
-
   static const String notificationSetting = baseUrl + "user/push-notification-settings";
   static const String deactiveAc = baseUrl + "user/deactivate-account-request";
   static const String checkAcStatus = baseUrl + "user/check-user-status";
   static const String userVerification = baseUrl + "user/request-verification";
+
+
 }
