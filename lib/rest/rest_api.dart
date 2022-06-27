@@ -186,7 +186,7 @@ class RestApi {
   }
 
   static Future<http.Response> postVideo(String videoUrl,
-      String sound,String category,String hashtags,String visibility,
+      String sound,String soundName,String category,String hashtags,String visibility,
       int isCommentAllowed,String description,String filterImg,String language, gifName) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
@@ -203,6 +203,7 @@ class RestApi {
         'user_id': current.id.toString(),
         'video': videoUrl,
         'sound': sound,
+        'sound_name': soundName,
         'filter': filterImg,
         'language': language,
         'category': category,
@@ -727,7 +728,7 @@ class RestApi {
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var result = await RestClient.getData(
-        RestUrl.getPrivateVideo,
+        RestUrl.getHashtagList,
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -735,7 +736,6 @@ class RestApi {
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
-
     return response;
   }
 
