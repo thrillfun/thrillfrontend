@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:thrill/screens/payment_history.dart';
-
 import '../../common/color.dart';
 import '../../common/strings.dart';
 

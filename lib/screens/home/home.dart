@@ -14,6 +14,7 @@ import '../../rest/rest_url.dart';
 import '../../utils/util.dart';
 import '../../widgets/image_rotate.dart';
 import '../../widgets/video_item.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 
 class Home extends StatefulWidget {
@@ -117,7 +118,7 @@ class HomeState extends State<Home> {
                         },
                       ),
                       Positioned(
-                        bottom: 160,
+                        bottom: 100,
                         right: 10,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -141,8 +142,8 @@ class HomeState extends State<Home> {
                                     });
                                   },
                                   child: Container(
-                                    height: 55,
-                                    width: 55,
+                                    height: 45,
+                                    width: 45,
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(50)),
                                     child: ClipRRect(
@@ -401,6 +402,7 @@ class HomeState extends State<Home> {
                                   const SizedBox(
                                     height: 5,
                                   ),
+
                                   Row(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
@@ -409,18 +411,13 @@ class HomeState extends State<Home> {
                                         width: 5,
                                       ),
                                       Flexible(
-                                        child: Text(
+                                        child:
                                           state.list[index].sound_name.isEmpty
-                                              ? 'Original sound - @Fintory'
-                                              : '${state.list[index].sound_name} - @${state.list[index].sound_category_name}',
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                          style: const TextStyle(
-                                              color: Colors.white, fontSize: 15),
-                                        ),
+                                              ? "Original sound - @Fintory".marquee(textStyle:TextStyle(color: Colors.white)).h2(context)
+                                              : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle:TextStyle(color: Colors.white)).h2(context),
                                       ),
                                     ],
-                                  )
+                                  ),
                                 ],
                               ),
                             ),

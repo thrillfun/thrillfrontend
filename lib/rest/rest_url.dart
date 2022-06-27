@@ -26,7 +26,6 @@ class RestUrl {
   static const String getVideoFields = baseUrl + "video/field-data";
   static const String getBanner = baseUrl + "banners";
   static const String getVideoByHashtag = baseUrl + "hashtag/top-hashtags-videos";
-  static const String getPrivateVideo = baseUrl + "video/private";
   static const String postCommentOnVideo = baseUrl + "video/comment";
   static const String commentLikeDislike = baseUrl + "video/comment-like";
   static const String followUnfollow = baseUrl + "user/follow-unfollow-user";
@@ -36,10 +35,18 @@ class RestUrl {
   static const String favrateSundHastagRemoveAdd = baseUrl + "favorite/add-to-favorite";
   static const String getFavriteList = baseUrl + "favorite/user-favorites-list";
   static const String getSoundCategories = baseUrl + "sound/categories";
-
   static const String notificationSetting = baseUrl + "user/push-notification-settings";
   static const String deactiveAc = baseUrl + "user/deactivate-account-request";
   static const String checkAcStatus = baseUrl + "user/check-user-status";
   static const String userVerification = baseUrl + "user/request-verification";
+
+  static const String getPrivateVideo = baseUrl + "video/private";
+
+
+  static const String userAllVideo = baseUrl + "video/user-videos";
+  static const String userLikedVideo = baseUrl + "user/user-liked-videos";
+  static const String userPrivateVideo = baseUrl + "video/private";
+
   static const String getHashtagList = baseUrl + "hashtag/list";
+
 }
