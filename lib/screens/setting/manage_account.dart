@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:thrill/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../common/strings.dart';
 import '../../rest/rest_api.dart';
@@ -23,6 +25,16 @@ class ManageAccount extends StatefulWidget {
 }
 
 class _ManageAccountState extends State<ManageAccount> {
+
+  bool isLoading=true;
+  UserModel? user;
+
+  @override
+  void initState() {
+    getProfile();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +55,7 @@ class _ManageAccountState extends State<ManageAccount> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
+        child: isLoading ? const Center(child: CircularProgressIndicator(color: Colors.lightBlue),): Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
@@ -57,11 +69,14 @@ class _ManageAccountState extends State<ManageAccount> {
               height: 20,
             ),
             Text(
-              "Username",
+              "Username : ${user!.username}",
               style: TextStyle(color: Colors.grey.shade600),
             ),
+            const SizedBox(
+              height: 20,
+            ),
             Text(
-              "Phone",
+              "Phone : ${user!.phone}",
               style: TextStyle(color: Colors.grey.shade600),
             )
           ],
@@ -111,5 +126,20 @@ class _ManageAccountState extends State<ManageAccount> {
       closeDialogue(context);
       showErrorToast(context, json['message']);
     }
+  }
+
+
+  getProfile()async{
+    try{
+      var instance = await SharedPreferences.getInstance();
+      var loginData=instance.getString('currentUser');
+      user=UserModel.fromJson(jsonDecode(loginData!));
+      isLoading=false;
+    } catch(e){
+      isLoading=false;
+      Navigator.pop(context);
+      showErrorToast(context, e.toString());
+    }
+    setState((){});
   }
 }
