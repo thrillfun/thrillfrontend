@@ -47,9 +47,6 @@ class RestUrl {
   static const String userLikedVideo = baseUrl + "user/user-liked-videos";
   static const String userPrivateVideo = baseUrl + "video/private";
 
-
-
-
   static const String getHashtagList = baseUrl + "hashtag/list";
 
 }
