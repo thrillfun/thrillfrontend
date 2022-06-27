@@ -21,6 +21,16 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
+
+  bool isLoading=true;
+
+  @override
+  void initState() {
+    loadWalletInfo();
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -109,7 +119,7 @@ class _WalletState extends State<Wallet> {
                     ),
 
                     Container(
-                      width:getWidth(context) * .70,
+                      width:getWidth(context) * .85,
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         border: Border.all(width: 2,color: Colors.grey.shade400),
@@ -141,38 +151,15 @@ class _WalletState extends State<Wallet> {
                         }).toList(),
                       ),
                     ),
-                     const SizedBox(
-                      height: 10,
-                    ),
-
-                    TextFormField(
-                      maxLength: 10,
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                          hintText: "Amount",
-                          isDense: true,
-                          counterText: '',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
-                                  width: 2),
-                              borderRadius: BorderRadius.circular(10)),
-                          constraints: BoxConstraints(
-                              maxWidth:getWidth(context) * .70),),
-                    ),
-
                     const SizedBox(
                       height: 10,
                     ),
                     TextFormField(
                       maxLength: 10,
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        hintText: "Fee",
+                        hintText: "Enter upi",
                         isDense: true,
                         counterText: '',
                         border: OutlineInputBorder(
@@ -183,7 +170,91 @@ class _WalletState extends State<Wallet> {
                                 width: 2),
                             borderRadius: BorderRadius.circular(10)),
                         constraints: BoxConstraints(
-                            maxWidth:getWidth(context) * .70),),
+                            maxWidth:getWidth(context) * .85),),
+                    ),
+                     const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      width:getWidth(context) * .85,
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                          border: Border.all(width: 2,color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(8)
+                      ),
+                      child: DropdownButton(
+                        menuMaxHeight: 180,
+                        value:"Phone Pay",
+                        style: const TextStyle(color: Colors.grey, fontSize: 17),
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.grey,
+                          size: 35,
+                        ),
+                        onChanged: (String? value) {
+                          setState(() {
+                            setState(() {
+
+                            });
+                          });
+                        },
+                        items: ["Phone Pay","Paytm","Google Pay"].map((String item) {
+                          return DropdownMenuItem(
+                            value: item,
+                            child: Text(item),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 22,right: 22),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          TextFormField(
+                            maxLength: 10,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              hintText: "Amount",
+                              isDense: true,
+                              counterText: '',
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                      width: 2),
+                                  borderRadius: BorderRadius.circular(10)),
+                              constraints: BoxConstraints(
+                                  maxWidth:getWidth(context)/2.3),),
+                          ),
+                          TextFormField(
+                            maxLength: 10,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              hintText: "Fee",
+                              isDense: true,
+                              counterText: '',
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                      width: 2),
+                                  borderRadius: BorderRadius.circular(10)),
+                              constraints: BoxConstraints(
+                                  maxWidth:getWidth(context) /2.5),),
+                          ),
+                        ],
+                      ),
                     ),
 
                     const SizedBox(
@@ -263,5 +334,9 @@ class _WalletState extends State<Wallet> {
         ),
       ),
     );
+  }
+
+  void loadWalletInfo()async {
+
   }
 }
