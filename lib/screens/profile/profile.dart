@@ -82,16 +82,16 @@ class _ProfileState extends State<Profile> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(2),
                           height: 111,
                           width: 111,
-                          decoration:  BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: ColorManager.spinColorDivider)
-                          ),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: ColorManager.spinColorDivider)),
                           child: state.userModel.avatar.isNotEmpty
                               ? ClipOval(
-                                child: CachedNetworkImage(
+                                  child: CachedNetworkImage(
                                     fit: BoxFit.cover,
                                     imageUrl:
                                         '${RestUrl.profileUrl}${state.userModel.avatar}',
@@ -99,11 +99,16 @@ class _ProfileState extends State<Profile> {
                                       child: CircularProgressIndicator(),
                                     ),
                                   ),
-                              )
+                                )
                               : Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: SvgPicture.asset('assets/profile.svg',width: 10,height: 10,fit: BoxFit.contain,),
-                              )),
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: SvgPicture.asset(
+                                    'assets/profile.svg',
+                                    width: 10,
+                                    height: 10,
+                                    fit: BoxFit.contain,
+                                  ),
+                                )),
                       const SizedBox(
                         width: 15,
                       ),
@@ -207,46 +212,58 @@ class _ProfileState extends State<Profile> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       state.userModel.youtube.isEmpty
-                      ? const SizedBox(width: 1,) : IconButton(
-                        onPressed: () {},
-                        iconSize: 25,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: SvgPicture.asset('assets/youtube.svg'),
-                      ),
+                          ? const SizedBox(
+                              width: 1,
+                            )
+                          : IconButton(
+                              onPressed: () {},
+                              iconSize: 25,
+                              padding: const EdgeInsets.only(),
+                              constraints: const BoxConstraints(),
+                              icon: SvgPicture.asset('assets/youtube.svg'),
+                            ),
                       const SizedBox(
                         width: 5,
                       ),
                       state.userModel.facebook.isEmpty
-                          ? const SizedBox(width: 1,) : IconButton(
-                        onPressed: () {},
-                        iconSize: 25,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: SvgPicture.asset('assets/facebook.svg'),
-                      ),
+                          ? const SizedBox(
+                              width: 1,
+                            )
+                          : IconButton(
+                              onPressed: () {},
+                              iconSize: 25,
+                              padding: const EdgeInsets.only(),
+                              constraints: const BoxConstraints(),
+                              icon: SvgPicture.asset('assets/facebook.svg'),
+                            ),
                       const SizedBox(
                         width: 5,
                       ),
                       state.userModel.instagram.isEmpty
-                          ? const SizedBox(width: 1,) : IconButton(
-                        onPressed: () {},
-                        iconSize: 25,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: SvgPicture.asset('assets/insta.svg'),
-                      ),
+                          ? const SizedBox(
+                              width: 1,
+                            )
+                          : IconButton(
+                              onPressed: () {},
+                              iconSize: 25,
+                              padding: const EdgeInsets.only(),
+                              constraints: const BoxConstraints(),
+                              icon: SvgPicture.asset('assets/insta.svg'),
+                            ),
                       const SizedBox(
                         width: 5,
                       ),
                       state.userModel.twitter.isEmpty
-                          ? const SizedBox(width: 1,) : IconButton(
-                        onPressed: () {},
-                        iconSize: 25,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: SvgPicture.asset('assets/twitter.svg'),
-                      )
+                          ? const SizedBox(
+                              width: 1,
+                            )
+                          : IconButton(
+                              onPressed: () {},
+                              iconSize: 25,
+                              padding: const EdgeInsets.only(),
+                              constraints: const BoxConstraints(),
+                              icon: SvgPicture.asset('assets/twitter.svg'),
+                            )
                     ],
                   ),
                   const SizedBox(
@@ -503,7 +520,7 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  feed() {
+  feed() async {
     return Flexible(
       child: GridView.builder(
           padding: const EdgeInsets.all(2),

@@ -25,6 +25,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
 
     var result = await _loginRepository.getProfile(current.id);
+    var resultLikes = await _loginRepository.getLikesVideo();
+    var resultPrivate = await _loginRepository.getPrivateVideo();
+    var resultPublic = await _loginRepository.getPublicVideo();
+
     if (result['status']) {
       try {
         UserModel user = UserModel.fromJson(result['data']['user']);
