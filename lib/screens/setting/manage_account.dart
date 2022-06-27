@@ -59,6 +59,10 @@ class _ManageAccountState extends State<ManageAccount> {
             Text(
               "Username",
               style: TextStyle(color: Colors.grey.shade600),
+            ),
+            Text(
+              "Phone",
+              style: TextStyle(color: Colors.grey.shade600),
             )
           ],
         ),
