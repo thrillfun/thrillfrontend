@@ -14,6 +14,7 @@ class VideoPlayerItem extends StatefulWidget {
   final int currentPageIndex;
   final bool isPaused;
   final int videoId;
+  final VoidCallback? callback;
 
   const VideoPlayerItem(
       {Key? key,
@@ -22,7 +23,8 @@ class VideoPlayerItem extends StatefulWidget {
       required this.currentPageIndex,
       required this.isPaused,
       required this.filter,
-      required this.videoId})
+      required this.videoId,
+        this.callback})
       : super(key: key);
 
   @override
@@ -32,6 +34,7 @@ class VideoPlayerItem extends StatefulWidget {
 class _VideoPlayerItemState extends State<VideoPlayerItem> {
   VideoPlayerController? videoPlayerController;
   bool isLoading = true;
+  bool showGIF = true;
   bool initialized = false;
   bool isDispose= false;
   Timer? _timer;
@@ -44,7 +47,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
           if (videoPlayerController!.value.isInitialized) {
-            videoPlayerController!.play();
+            if (!showGIF) videoPlayerController!.play();
             videoPlayerController!.setLooping(true);
             videoPlayerController!.setVolume(1);
             initialized = true;
@@ -106,24 +109,40 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
         decoration: const BoxDecoration(
           color: Colors.black,
         ),
-        child: Stack(
-          children: [
-            !initialized
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : VideoPlayer(videoPlayerController!),
-            widget.filter.isEmpty
-                ? const SizedBox(width: 10)
-                : !initialized
-                    ? const SizedBox(width: 10)
-                    : Image.asset(
-                        widget.filter,
-                        fit: BoxFit.cover,
-                        width: getWidth(context),
-                        height: getHeight(context),
-                      )
-          ],
+        child: GestureDetector(
+          onLongPressStart: onLongPressStart,
+          onLongPressEnd: onLongPressEnd,
+          onDoubleTap: widget.callback,
+          onTap: onTap,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              !initialized
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : VideoPlayer(videoPlayerController!),
+              widget.filter.isEmpty
+                  ? const SizedBox(width: 10)
+                  : !showGIF
+                      ? const SizedBox(width: 10)
+                      : Image.asset(
+                          widget.filter,
+                          fit: BoxFit.cover,
+                          width: getWidth(context),
+                          height: getHeight(context),
+                        ),
+              Positioned(
+                top: 70,
+                  child: Visibility(
+                    visible: videoPlayerController!.value.volume==0?true:false,
+                    child: IconButton(
+                      icon: const Icon(Icons.volume_off,color: Colors.white,size: 40,),
+                      onPressed: ()=> videoPlayerController!.setVolume(1).then((value) => setState((){})),
+                    ),
+                  ))
+            ],
+          ),
         ),
       ),
     );
@@ -161,6 +180,24 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
         pref.setStringList('viewList', viewList);
         setState(() {});
       }
+    }
+  }
+
+  onLongPressStart(LongPressStartDetails d)async{
+    setState((){showGIF = false;});
+    await Future.delayed(const Duration(milliseconds: 100));
+    videoPlayerController!.pause();
+  }
+
+  onLongPressEnd(LongPressEndDetails d){
+    setState((){showGIF = true;});
+  }
+
+  onTap(){
+    if(videoPlayerController!.value.volume>=1){
+      videoPlayerController!.setVolume(0).then((value) => setState((){}));
+    } else {
+      videoPlayerController!.setVolume(1).then((value) => setState((){}));
     }
   }
 

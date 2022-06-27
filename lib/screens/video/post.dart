@@ -3,6 +3,7 @@ import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 import 'package:ffmpeg_kit_flutter_full/statistics.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
@@ -42,14 +43,15 @@ class _PostVideoState extends State<PostVideo> {
   bool commentsSwitch = true, duetSwitch = true;
   late VideoPlayerController videoPlayerController;
   final SimpleS3 _simpleS3 = SimpleS3();
-  List<HashtagModel> hashTags = List<HashtagModel>.empty(growable: true);
-  List<String> hashTagsSelected = List<String>.empty(growable: true);
   List<CategoryModel> videoCategory = List<CategoryModel>.empty(growable: true);
   List<LanguagesModel> videoLanguage = List<LanguagesModel>.empty(growable: true);
   bool isLoading = true, isProcessing = false, wasSuccess = false;
   String newName = '';
   double percentage = 0;
   int radioGroupValue = 0;
+  List<HashtagModel> hashtagsList = List<HashtagModel>.empty(growable: true);
+  List<String> selectedHashtags = List<String>.empty(growable: true);
+  TextEditingController hashtagTextFieldController = TextEditingController();
 
   @override
   void initState() {
@@ -60,6 +62,7 @@ class _PostVideoState extends State<PostVideo> {
     }
     createGIF();
     loadVideoFields();
+    getHashtags();
     videoPlayerController =
     VideoPlayerController.file(
         File(widget.data.filePath))
@@ -69,8 +72,8 @@ class _PostVideoState extends State<PostVideo> {
             videoPlayerController.setVolume(1);
             setState(() {});
           });
-
   }
+
 
   @override
   void dispose() {
@@ -216,57 +219,115 @@ class _PostVideoState extends State<PostVideo> {
                   const SizedBox(
                     height: 5,
                   ),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 1,
-                      crossAxisSpacing: 1,
-                      childAspectRatio: 2.6,
-                    ),
-                    itemCount: hashTags.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return GestureDetector(
-                        onTap: () {
-                          addAndRemove(hashTags[index].id.toString());
-                        },
-                        child: Wrap(
-                          children: <Widget>[
-                            SizedBox(
-                              width: 135.0,
-                              height: 50.0,
-                              child: Card(
-                                color: hashTagsSelected
-                                        .contains(hashTags[index].id.toString())
-                                    ? Colors.cyanAccent
-                                    : Colors.white,
-                                semanticContainer: true,
-                                clipBehavior: Clip.antiAliasWithSaveLayer,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50.0),
-                                ),
-                                elevation: 3,
-                                margin: const EdgeInsets.all(4),
-                                child: Center(
-                                  child: Text(
-                                    hashTags[index].name,
-                                    style: TextStyle(
-                                      color: hashTagsSelected.contains(
-                                              hashTags[index].id.toString())
-                                          ? Colors.white
-                                          : Colors.grey,
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
+                  // GridView.builder(
+                  //   shrinkWrap: true,
+                  //   physics: const NeverScrollableScrollPhysics(),
+                  //   gridDelegate:
+                  //       const SliverGridDelegateWithFixedCrossAxisCount(
+                  //     crossAxisCount: 3,
+                  //     mainAxisSpacing: 1,
+                  //     crossAxisSpacing: 1,
+                  //     childAspectRatio: 2.6,
+                  //   ),
+                  //   itemCount: hashTags.length,
+                  //   itemBuilder: (BuildContext context, int index) {
+                  //     return GestureDetector(
+                  //       onTap: () {
+                  //         addAndRemove(hashTags[index].id.toString());
+                  //       },
+                  //       child: Wrap(
+                  //         children: <Widget>[
+                  //           SizedBox(
+                  //             width: 135.0,
+                  //             height: 50.0,
+                  //             child: Card(
+                  //               color: hashTagsSelected
+                  //                       .contains(hashTags[index].id.toString())
+                  //                   ? Colors.cyanAccent
+                  //                   : Colors.white,
+                  //               semanticContainer: true,
+                  //               clipBehavior: Clip.antiAliasWithSaveLayer,
+                  //               shape: RoundedRectangleBorder(
+                  //                 borderRadius: BorderRadius.circular(50.0),
+                  //               ),
+                  //               elevation: 3,
+                  //               margin: const EdgeInsets.all(4),
+                  //               child: Center(
+                  //                 child: Text(
+                  //                   hashTags[index].name,
+                  //                   style: TextStyle(
+                  //                     color: hashTagsSelected.contains(
+                  //                             hashTags[index].id.toString())
+                  //                         ? Colors.white
+                  //                         : Colors.grey,
+                  //                     fontSize: 14.0,
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runSpacing: 10,
+                    spacing: 10,
+                    children: [
+                      Visibility(
+                        visible: selectedHashtags.length<3?true:false,
+                        child: GestureDetector(
+                          onTap: ()async{
+                            addNewTagDialog();
+
+                          },
+                          child: Card(
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            elevation: 3,
+                            margin: const EdgeInsets.all(4),
+                            child: const Padding(
+                              padding: EdgeInsets.all(10.0),
+                              child: Text(
+                                "Add Hashtag",
+                                style: TextStyle(
+                                  color: ColorManager.cyan,
+                                  fontSize: 14.0,
                                 ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      );
-                    },
+                      ),
+                      for(var element in selectedHashtags)
+                      Chip(
+                        backgroundColor: Colors.white,
+                        elevation: 3,
+                        deleteIcon: const Icon(Icons.delete_forever, size: 18, color: Colors.red,),
+                        onDeleted: (){
+                          setState(() {
+                            selectedHashtags.remove(element);
+                          });
+                          },
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        useDeleteButtonTooltip: true,
+                        label: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Text(
+                            element,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14.0,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                   const SizedBox(
                     height: 20,
@@ -360,9 +421,6 @@ class _PostVideoState extends State<PostVideo> {
                       Text("Chosen Sound", style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.grey),),
                     ],
                   ).w(MediaQuery.of(context).size.width*.90),
-                  const SizedBox(
-                    height: 20,
-                  ),
                   Row(
                     children: [
                       const SizedBox(
@@ -476,15 +534,9 @@ class _PostVideoState extends State<PostVideo> {
                       )
                     ],
                   ),
-                  const Spacer(),
-                  isProcessing?
-                  RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        TextSpan(text: "${percentage.toStringAsFixed(0)}%", style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
-                        const TextSpan(text: "\nPlease wait, processing video...", style: TextStyle(color: Colors.black)),
-                      ])
-                  ):
+                  const SizedBox(
+                    height: 25,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -578,22 +630,10 @@ class _PostVideoState extends State<PostVideo> {
                           ))
                     ],
                   ),
-                  const SizedBox(
-                    height: 40,
-                  )
                 ],
               ).h(getHeight(context) - kToolbarHeight),
       ),
     );
-  }
-
-  void addAndRemove(String tag) {
-    if (hashTagsSelected.contains(tag)) {
-      hashTagsSelected.remove(tag);
-    } else {
-      hashTagsSelected.add(tag);
-    }
-    setState(() {});
   }
 
   void loadVideoFields() async {
@@ -601,13 +641,8 @@ class _PostVideoState extends State<PostVideo> {
       var result = await RestApi.getVideoFields();
       var json = jsonDecode(result.body);
       if (json['status']) {
-        hashTags.clear();
         videoCategory.clear();
         videoLanguage.clear();
-
-        hashTags = List<HashtagModel>.from(
-                json['data']['hashtags'].map((i) => HashtagModel.fromJson(i)))
-            .toList(growable: true);
 
         videoCategory = List<CategoryModel>.from(json['data']['categories']
             .map((i) => CategoryModel.fromJson(i))).toList(growable: true);
@@ -663,7 +698,7 @@ class _PostVideoState extends State<PostVideo> {
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
         String tagList =
-        jsonEncode(hashTagsSelected);
+        jsonEncode(selectedHashtags);
         var result = await RestApi.postVideo(
             videoId,
             "${radioGroupValue==0?0:widget.data.addSoundModel?.id??0}",
@@ -731,7 +766,7 @@ class _PostVideoState extends State<PostVideo> {
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
         String tagList =
-        jsonEncode(hashTagsSelected);
+        jsonEncode(selectedHashtags);
         var result = await RestApi.postVideo(
             videoId,
             "${radioGroupValue==0?0:widget.data.addSoundModel?.id??0}",
@@ -770,4 +805,102 @@ class _PostVideoState extends State<PostVideo> {
 
   processVideoWithoutSound(String draftORpost)async{}
   processVideoWithSound(String draftORpost)async{}
+  getHashtags()async{
+    try{
+      var response = await RestApi.getHashtagList();
+      var json = jsonDecode(response.body);
+      if(json['status']){
+        List jsonList = json['data'] as List;
+        hashtagsList = jsonList.map((e) => HashtagModel.fromJson(e)).toList();
+        setState((){});
+      }
+    } catch(e){
+      showErrorToast(context, e.toString());
+    }
+  }
+
+  addNewTagDialog(){
+    hashtagTextFieldController.clear();
+    List<HashtagModel> suggestedHashtags = List<HashtagModel>.empty(growable: true);
+    showDialog(context: context, builder: (_)=>StatefulBuilder(
+      builder: (BuildContext context, void Function(void Function()) setState) {
+        return Center(
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              height: getHeight(context)*.60,
+              width: getWidth(context)*.90,
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15)
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 10,),
+                  Row(
+                    children: [
+                      const SizedBox(width: 10,),
+                      Expanded(
+                        child: TextFormField(
+                        maxLength: 10,
+                        controller: hashtagTextFieldController,
+                        onChanged: (String txt){
+                          if(txt.isEmpty){
+                            setState(() => suggestedHashtags = List.empty(growable: true));
+                          } else {
+                            for(var element in hashtagsList){
+                              if(element.name.toLowerCase().contains(txt.toLowerCase())){
+                                setState(()=>suggestedHashtags.add(element));
+                              }
+                            }
+                          }
+                        },
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          hintText: "Input Hashtag",
+                          isDense: true,
+                          counterText: '',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                  width: 2),
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),),
+                      IconButton(
+                          onPressed: (){
+                            if(hashtagTextFieldController.text.trim().isNotEmpty){
+                              selectedHashtags.add(hashtagTextFieldController.text);
+                            }
+                            Navigator.pop(context);
+                          }, icon: Icon(hashtagTextFieldController.text.isEmpty?Icons.close:Icons.check))
+                    ],
+                  ),
+                  const SizedBox(height: 10,),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: suggestedHashtags.length,
+                        itemBuilder: (BuildContext context, int index){
+                          return ListTile(
+                            title: Text(suggestedHashtags[index].name),
+                            trailing: IconButton(onPressed: (){
+                              selectedHashtags.add(suggestedHashtags[index].name);
+                              Navigator.pop(context);
+                            }, icon: const Icon(Icons.check)),
+                          );
+                        }
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    )).then((value) => setState((){}));
+  }
 }
