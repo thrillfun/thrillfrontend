@@ -1,13 +1,11 @@
 import 'dart:io';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full/media_information_session.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/core.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
-import 'package:ffmpeg_kit_flutter_full/ffprobe_kit.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/post_data.dart';
@@ -224,7 +222,7 @@ class _PreviewState extends State<Preview> {
     PostData newPostData = PostData(
         filePath: widget.data.filePath,
         filterName: widget.data.filterName,
-        addSoundModel: widget.data.addSoundModel,
+        pickedSoundPath: widget.data.pickedSoundPath,
         map: {"start": rangeController.start.toInt().toInt(), "end":rangeController.end.toInt()}
     );
     await Navigator.pushNamed(context, "/postVideo",arguments: newPostData);

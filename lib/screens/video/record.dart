@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
@@ -13,7 +14,6 @@ import 'package:velocity_x/velocity_x.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../main.dart';
-import '../../models/add_sound_model.dart';
 import '../../utils/util.dart';
 
 class Record extends StatefulWidget {
@@ -48,7 +48,8 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
   String filterImage = "";
   List<String> effectsfirst = List<String>.empty(growable: true);
   String? selectedSound;
-  AddSoundModel? addSoundModel;
+  //AddSoundModel? addSoundModel;
+  String? pickedSoundPath;
   AudioPlayer audioPlayer = AudioPlayer();
   Timer? autoStopRecordingTimer;
   Duration videoDuration = const Duration();
@@ -449,6 +450,24 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                       //     });
                       //   }
                       // });
+                      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['mp3'], allowMultiple: false);
+                      if(result!=null){
+                        File file = File(result.files.single.path!);
+                        double size = file.lengthSync()/1000000;
+                        String name = file.path.split('/').last.split('.').first;
+                        if(size < 6){
+                          if(size > 0.2){
+                            setState(() {
+                              pickedSoundPath = file.path;
+                              selectedSound = name;
+                            });
+                          } else {
+                            showErrorToast(context, "File Size too Small!!");
+                          }
+                        } else {
+                          showErrorToast(context, "Max File Size is 5 MB");
+                        }
+                      }
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -657,7 +676,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController!.pause();
                             }
-                            PostData m = PostData(filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel);
+                            PostData m = PostData(filePath: mainPath, filterName: filterImage, pickedSoundPath: pickedSoundPath);
                             Navigator.pushNamed(context, "/preview",arguments: m);
 
                           } else {
@@ -759,7 +778,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController!.pause();
                             }
-                            PostData m = PostData(filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel);
+                            PostData m = PostData(filePath: mainPath, filterName: filterImage, pickedSoundPath: pickedSoundPath);
                             Navigator.pushNamed(context, "/preview",arguments: m);
                           },
                           child: VxCircle(
@@ -921,8 +940,8 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
       return;
     }
     try {
-      if(addSoundModel!=null){
-        await audioPlayer.play("$saveCacheDirectory${addSoundModel!.sound}", isLocal: true);
+      if(pickedSoundPath!=null){
+        await audioPlayer.play(pickedSoundPath!, isLocal: true);
       }
       await cameraController!.startVideoRecording();
       autoStopRecordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {

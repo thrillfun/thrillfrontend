@@ -57,7 +57,7 @@ class _PostVideoState extends State<PostVideo> {
   void initState() {
     super.initState();
     FFmpegKitConfig.enableStatisticsCallback(statisticsCallback);
-    if(widget.data.addSoundModel!=null){
+    if(widget.data.pickedSoundPath!=null){
       radioGroupValue = 1;
     }
     createGIF();
@@ -91,25 +91,25 @@ class _PostVideoState extends State<PostVideo> {
 
   startProcessing(String draftORpost)async{
     String outputPath = '$saveDirectory$newName.mp4';
-    String audioFilePath = "$saveCacheDirectory${widget.data.addSoundModel?.sound}";
+    String? audioFilePath = widget.data.pickedSoundPath;
     File videoFile = File(widget.data.filePath);
     // print(outputPath);
     // print(audioFilePath);
     // print(videoFile.path);
 
-    if(widget.data.addSoundModel==null || radioGroupValue==0){
+    if(widget.data.pickedSoundPath==null || radioGroupValue==0){
       FFmpegKit.execute("-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -c copy -t ${widget.data.map!["end"]} -c:a aac $outputPath").then((session) async {
         final returnCode = await session.getReturnCode();
 
         if (ReturnCode.isSuccess(returnCode)) {
-          print("============================> Success!!!!");
+          // print("============================> Success!!!!");
           setState(() {
             isProcessing = false;
             wasSuccess = true;
             draftORpost=='draft'?draftUpload():postUpload();
           });
         } else {
-          print("============================> Failed!!!!");
+          // print("============================> Failed!!!!");
           closeDialogue(context);
           showErrorToast(context, "Video processing failed!");
           setState(()=>isProcessing = false);
@@ -125,12 +125,12 @@ class _PostVideoState extends State<PostVideo> {
       ).then((session) async {
         final returnCode = await session.getReturnCode();
         final logs = await session.getLogsAsString();
-        final logList = logs.split('\n');
-        print("============================> LOG STARTED!!!!");
-        for(var e in logList){
-          print(e);
-        }
-        print("============================> LOG ENDED!!!!");
+        //final logList = logs.split('\n');
+        // print("============================> LOG STARTED!!!!");
+        // for(var e in logList){
+          // print(e);
+        // }
+        // print("============================> LOG ENDED!!!!");
         if (ReturnCode.isSuccess(returnCode)) {
           //print("============================> Success!!!!");
           setState(() {
@@ -411,7 +411,7 @@ class _PostVideoState extends State<PostVideo> {
                         value: 1,
                         groupValue: radioGroupValue,
                         onChanged: (int? val) {
-                          if(widget.data.addSoundModel==null){
+                          if(widget.data.pickedSoundPath==null){
                             showErrorToast(context, "You did not chosen any sound!!");
                           } else {
                             setState(() => radioGroupValue = val ?? 1);
@@ -664,18 +664,20 @@ class _PostVideoState extends State<PostVideo> {
       final returnCode = await session.getReturnCode();
 
       if (ReturnCode.isSuccess(returnCode)) {
-        print("============================> GIF Success!!!!");
+        // print("============================> GIF Success!!!!");
       } else {
-        print("============================> GIF Error!!!!");
+        // print("============================> GIF Error!!!!");
       }
     });
   }
 
   draftUpload()async{
-    int currentUnix = DateTime.now().millisecondsSinceEpoch;
+    int currentUnix =
+        DateTime.now().millisecondsSinceEpoch;
     String videoId = '$currentUnix.mp4';
 
-    await _simpleS3.uploadFile(
+    await _simpleS3
+        .uploadFile(
       wasSuccess?
       File('$saveDirectory$newName.mp4'):
       File(widget.data.filePath),
@@ -686,7 +688,8 @@ class _PostVideoState extends State<PostVideo> {
       fileName: videoId,
       s3FolderPath: "test",
       accessControl: S3AccessControl.publicRead,
-    ).then((value) async {
+    )
+        .then((value) async {
       await _simpleS3.uploadFile(
         File('$saveCacheDirectory$newName.gif'),
         "thrillvideo",
@@ -697,40 +700,90 @@ class _PostVideoState extends State<PostVideo> {
         fileName: '$currentUnix.gif',
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
-        String tagList =
-        jsonEncode(selectedHashtags);
-        var result = await RestApi.postVideo(
-            videoId,
-            "${radioGroupValue==0?0:widget.data.addSoundModel?.id??0}",
-            dropDownCategoryValue,
-            tagList,
-            "Private",
-            commentsSwitch ? 1 : 0,
-            desCtr.text,
-            widget.data.filterName.isEmpty
-                ? ''
-                : widget.data.filterName,
-            dropDownLanguageValue,
-            '$currentUnix.gif'
-        );
-        var json = jsonDecode(result.body);
-        closeDialogue(context);
-        if (json['status']) {
-          File recordedVideoFile = File(widget.data.filePath);
-          File processedVideoFile = File('$saveDirectory$newName.mp4');
-          recordedVideoFile.delete();
-          processedVideoFile.delete();
-          BlocProvider.of<VideoBloc>(context)
-              .add(const VideoLoading());
-          showSuccessToast(context,
-              "Video has been saved successfully");
-          await Future.delayed(
-              const Duration(milliseconds: 200));
-          Navigator.pushNamedAndRemoveUntil(
-              context, '/', (route) => false);
+        if(widget.data.pickedSoundPath==null){
+          String tagList =
+          jsonEncode(selectedHashtags);
+          var result = await RestApi.postVideo(
+              videoId,
+              widget.data.pickedSoundPath==null?"":"$currentUnix.mp3",
+              widget.data.pickedSoundPath?.split('/').last.split('.').first??"",
+              dropDownCategoryValue,
+              tagList,
+              "Public",
+              commentsSwitch ? 1 : 0,
+              desCtr.text,
+              widget.data.filterName.isEmpty
+                  ? ''
+                  : widget.data.filterName,
+              dropDownLanguageValue,
+              '$currentUnix.gif');
+          var json = jsonDecode(result.body);
+          closeDialogue(context);
+          if (json['status']) {
+            BlocProvider.of<VideoBloc>(context)
+                .add(const VideoLoading());
+            showSuccessToast(context,
+                "Video has been posted successfully");
+            await Future.delayed(
+                const Duration(milliseconds: 200));
+            File recordedVideoFile = File(widget.data.filePath);
+            File processedVideoFile = File('$saveDirectory$newName.mp4');
+            recordedVideoFile.delete();
+            processedVideoFile.delete();
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/', (route) => false);
+          } else {
+            showErrorToast(
+                context, json['message']);
+          }
         } else {
-          showErrorToast(
-              context, json['message']);
+          await _simpleS3
+              .uploadFile(
+            File(widget.data.pickedSoundPath!),
+            "thrillvideo",
+            "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+            AWSRegions.usEast1,
+            debugLog: true,
+            fileName: '$currentUnix.mp3',
+            s3FolderPath: "sound",
+            accessControl: S3AccessControl.publicRead,
+          ).then((value) async {
+            String tagList =
+            jsonEncode(selectedHashtags);
+            var result = await RestApi.postVideo(
+                videoId,
+                widget.data.pickedSoundPath==null?"":"$currentUnix.mp3",
+                widget.data.pickedSoundPath?.split('/').last.split('.').first??"",
+                dropDownCategoryValue,
+                tagList,
+                "Private",
+                commentsSwitch ? 1 : 0,
+                desCtr.text,
+                widget.data.filterName.isEmpty
+                    ? ''
+                    : widget.data.filterName,
+                dropDownLanguageValue,
+                '$currentUnix.gif');
+            var json = jsonDecode(result.body);
+            closeDialogue(context);
+            if (json['status']) {
+              BlocProvider.of<VideoBloc>(context)
+                  .add(const VideoLoading());
+              showSuccessToast(context,
+                  "Video has been saved successfully");
+              await Future.delayed(
+                  const Duration(milliseconds: 200));
+              File recordedVideoFile = File(widget.data.filePath);
+              File processedVideoFile = File('$saveDirectory$newName.mp4');
+              recordedVideoFile.delete();
+              processedVideoFile.delete();
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/', (route) => false);
+            } else {
+              showErrorToast(
+                  context, json['message']);
+            }
+          });
         }
       });
     });
@@ -765,39 +818,90 @@ class _PostVideoState extends State<PostVideo> {
         fileName: '$currentUnix.gif',
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
-        String tagList =
-        jsonEncode(selectedHashtags);
-        var result = await RestApi.postVideo(
-            videoId,
-            "${radioGroupValue==0?0:widget.data.addSoundModel?.id??0}",
-            dropDownCategoryValue,
-            tagList,
-            "Public",
-            commentsSwitch ? 1 : 0,
-            desCtr.text,
-            widget.data.filterName.isEmpty
-                ? ''
-                : widget.data.filterName,
-            dropDownLanguageValue,
-            '$currentUnix.gif');
-        var json = jsonDecode(result.body);
-        closeDialogue(context);
-        if (json['status']) {
-          BlocProvider.of<VideoBloc>(context)
-              .add(const VideoLoading());
-          showSuccessToast(context,
-              "Video has been posted successfully");
-          await Future.delayed(
-              const Duration(milliseconds: 200));
-          File recordedVideoFile = File(widget.data.filePath);
-          File processedVideoFile = File('$saveDirectory$newName.mp4');
-          recordedVideoFile.delete();
-          processedVideoFile.delete();
-          Navigator.pushNamedAndRemoveUntil(
-              context, '/', (route) => false);
+        if(widget.data.pickedSoundPath==null){
+          String tagList =
+          jsonEncode(selectedHashtags);
+          var result = await RestApi.postVideo(
+              videoId,
+              widget.data.pickedSoundPath==null?"":"$currentUnix.mp3",
+              widget.data.pickedSoundPath?.split('/').last.split('.').first??"",
+              dropDownCategoryValue,
+              tagList,
+              "Public",
+              commentsSwitch ? 1 : 0,
+              desCtr.text,
+              widget.data.filterName.isEmpty
+                  ? ''
+                  : widget.data.filterName,
+              dropDownLanguageValue,
+              '$currentUnix.gif');
+          var json = jsonDecode(result.body);
+          closeDialogue(context);
+          if (json['status']) {
+            BlocProvider.of<VideoBloc>(context)
+                .add(const VideoLoading());
+            showSuccessToast(context,
+                "Video has been posted successfully");
+            await Future.delayed(
+                const Duration(milliseconds: 200));
+            File recordedVideoFile = File(widget.data.filePath);
+            File processedVideoFile = File('$saveDirectory$newName.mp4');
+            recordedVideoFile.delete();
+            processedVideoFile.delete();
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/', (route) => false);
+          } else {
+            showErrorToast(
+                context, json['message']);
+          }
         } else {
-          showErrorToast(
-              context, json['message']);
+          await _simpleS3
+              .uploadFile(
+            File(widget.data.pickedSoundPath!),
+            "thrillvideo",
+            "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+            AWSRegions.usEast1,
+            debugLog: true,
+            fileName: '$currentUnix.mp3',
+            s3FolderPath: "sound",
+            accessControl: S3AccessControl.publicRead,
+          ).then((value) async {
+            String tagList =
+            jsonEncode(selectedHashtags);
+            var result = await RestApi.postVideo(
+                videoId,
+                widget.data.pickedSoundPath==null?"":"$currentUnix.mp3",
+                widget.data.pickedSoundPath?.split('/').last.split('.').first??"",
+                dropDownCategoryValue,
+                tagList,
+                "Public",
+                commentsSwitch ? 1 : 0,
+                desCtr.text,
+                widget.data.filterName.isEmpty
+                    ? ''
+                    : widget.data.filterName,
+                dropDownLanguageValue,
+                '$currentUnix.gif');
+            var json = jsonDecode(result.body);
+            closeDialogue(context);
+            if (json['status']) {
+              BlocProvider.of<VideoBloc>(context)
+                  .add(const VideoLoading());
+              showSuccessToast(context,
+                  "Video has been posted successfully");
+              await Future.delayed(
+                  const Duration(milliseconds: 200));
+              File recordedVideoFile = File(widget.data.filePath);
+              File processedVideoFile = File('$saveDirectory$newName.mp4');
+              recordedVideoFile.delete();
+              processedVideoFile.delete();
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/', (route) => false);
+            } else {
+              showErrorToast(
+                  context, json['message']);
+            }
+          });
         }
       });
     });

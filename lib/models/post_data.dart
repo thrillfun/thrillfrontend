@@ -1,9 +1,8 @@
-import 'add_sound_model.dart';
 
 class PostData{
   String filePath,filterName;
-  AddSoundModel? addSoundModel;
+  String? pickedSoundPath;
   Map? map;
 
-  PostData({required this.filePath, required this.filterName, this.addSoundModel, this.map});
+  PostData({required this.filePath, required this.filterName, this.pickedSoundPath, this.map});
 }
