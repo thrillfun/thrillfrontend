@@ -138,6 +138,14 @@ class _PreviewState extends State<Preview> {
                 min: 0,
                 initialValues: sfRangeValues,
                 activeColor: Colors.transparent,
+                startThumbIcon: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
+                ),
+                endThumbIcon: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
+                ),
                 onChanged: (SfRangeValues val){
                   setState(() {});
                 },
@@ -197,8 +205,8 @@ class _PreviewState extends State<Preview> {
       print("============================> LOG ENDED!!!!");
 
       if (ReturnCode.isSuccess(returnCode)) {
-        MediaInformationSession info = await FFprobeKit.getMediaInformation(outputPath);
-        Map? _gifInfo = info.getMediaInformation()?.getAllProperties()?["streams"][0];
+        //MediaInformationSession info = await FFprobeKit.getMediaInformation(outputPath);
+        //Map? _gifInfo = info.getMediaInformation()?.getAllProperties()?["streams"][0];
         print("============================> Success!!!!");
         setState((){
           thumbList.addAll(directory.listSync());
