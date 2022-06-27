@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/social_url_model.dart';
+import 'package:thrill/models/video_model.dart';
 import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
 part 'profile_event.dart';
@@ -24,22 +25,39 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     var currentUser = pref.getString('currentUser');
     UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
 
-    var result = await _loginRepository.getProfile(current.id);
+    List<VideoModel> likeList=List<VideoModel>.empty(growable: true);
+    List<VideoModel> privateList=List<VideoModel>.empty(growable: true);
+    List<VideoModel> publicList=List<VideoModel>.empty(growable: true);
+
     var resultLikes = await _loginRepository.getLikesVideo();
     var resultPrivate = await _loginRepository.getPrivateVideo();
     var resultPublic = await _loginRepository.getPublicVideo();
 
+    var result = await _loginRepository.getProfile(current.id);
+
     if (result['status']) {
       try {
+        likeList = List<VideoModel>.from(
+            resultLikes['data'].map((i) => VideoModel.fromJson(i)))
+            .toList(growable: true);
+
+        privateList = List<VideoModel>.from(
+            resultPrivate['data'].map((i) => VideoModel.fromJson(i)))
+            .toList(growable: true);
+
+        publicList = List<VideoModel>.from(
+            resultPublic['data'].map((i) => VideoModel.fromJson(i)))
+            .toList(growable: true);
+
         UserModel user = UserModel.fromJson(result['data']['user']);
         await pref.setString('currentUser', jsonEncode(user.toJson()),);
 
-        emit(ProfileLoaded(userModel: user, status: true, message: 'success'));
+        emit(ProfileLoaded(userModel: user,likesList:likeList,privateList:privateList,publicList: publicList, status: true, message: 'success'));
       } catch (e) {
-        emit(ProfileLoaded(userModel:current,status: false, message: e.toString()));
+        emit(ProfileLoaded(userModel:current,likesList: const [],privateList: const [],publicList: const [],status: false, message: e.toString()));
       }
     } else {
-      emit(ProfileLoaded(userModel:current, status: false, message: result['message']));
+      emit(ProfileLoaded(userModel:current,likesList: const [],privateList:const [],publicList: const [], status: false, message: result['message']));
     }
   }
 

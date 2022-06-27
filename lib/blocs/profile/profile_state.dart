@@ -26,12 +26,15 @@ class ProfileLoaded extends ProfileState {
   UserModel userModel;
   String message;
   bool status;
+  List<VideoModel> likesList;
+  List<VideoModel> privateList;
+  List<VideoModel> publicList;
 
-  ProfileLoaded({required this.userModel,required this.status, required this.message});
+  ProfileLoaded({required this.userModel,required this.likesList,required this.privateList,required this.publicList,required this.status, required this.message});
 
 
   @override
-  List<Object> get props => [userModel,status,message];
+  List<Object> get props => [userModel,likesList,privateList,publicList,status,message];
 }
 
 class ProfileInProcess extends ProfileState {
