@@ -16,6 +16,7 @@ import '../../widgets/image_rotate.dart';
 import '../../widgets/video_item.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -84,6 +85,37 @@ class HomeState extends State<Home> {
                         pageIndex: index,
                         filter: state.list[index].filter,
                         videoId: state.list[index].id,
+                        callback: ()async{
+                          if (likeList.isEmpty) {
+                            likeList.add(state.list[index].id.toString());
+                            state.list[index]
+                                .copyWith(likes: state.list[index].likes++);
+                          } else {
+                            if (likeList.contains(
+                                state.list[index].id.toString())) {
+                              likeList
+                                  .remove(state.list[index].id.toString());
+                              state.list[index].copyWith(
+                                  likes: state.list[index].likes--);
+                            } else {
+                              likeList.add(state.list[index].id.toString());
+                              state.list[index].copyWith(
+                                  likes: state.list[index].likes++);
+                            }
+                          }
+                          SharedPreferences pref =
+                          await SharedPreferences.getInstance();
+                          pref.setStringList('likeList', likeList);
+
+                          BlocProvider.of<VideoBloc>(context).add(
+                              AddRemoveLike(
+                                  isAdded: likeList.contains(
+                                      state.list[index].id.toString())
+                                      ? 1
+                                      : 0,
+                                  videoId: state.list[index].id));
+                          setState(() {});
+                        },
                       ),
                       Positioned(
                         bottom: 100,
@@ -392,7 +424,7 @@ class HomeState extends State<Home> {
                             const RotatedImage("test.png"),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   );
                 }),
