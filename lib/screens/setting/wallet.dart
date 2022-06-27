@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
+import '../../utils/util.dart';
 
 class Wallet extends StatefulWidget {
   const Wallet({Key? key}) : super(key: key);
@@ -14,10 +15,9 @@ class Wallet extends StatefulWidget {
   static Route route() {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) =>  const Wallet(),
+      builder: (context) => const Wallet(),
     );
   }
-
 }
 
 class _WalletState extends State<Wallet> {
@@ -30,6 +30,7 @@ class _WalletState extends State<Wallet> {
           image: DecorationImage(
               image: AssetImage('assets/splash.png'), fit: BoxFit.cover)),
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -44,84 +45,182 @@ class _WalletState extends State<Wallet> {
               },
               icon: const Icon(Icons.arrow_back_ios)),
         ),
-        body: Column(
-          children: [
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset(
-                  'assets/rupee.svg',
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                RichText(
-                    text: const TextSpan(children: [
-                  TextSpan(
-                      text: availableBalance + '\n',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  TextSpan(
-                      text: '500.00/-',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 32)),
-                ]))
-              ],
-            ),
-            const Spacer(),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * .75,
-              color: Colors.white,
-              child: Column(
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  SvgPicture.asset(
+                    'assets/rupee.svg',
+                  ),
                   const SizedBox(
-                    height: 35,
+                    width: 10,
                   ),
-                  availableBal(currency: 'dollar'),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  availableBal(currency: 'euro'),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  availableBal(currency: 'sar'),
-                  const Spacer(
-                    flex: 5,
-                  ),
-                  TextButton(
-                      onPressed: () {
-                       Navigator.pushNamed(context, '/paymentHistory');
-                      },
-                      child: const Text(
-                        paymentHistory,
+                  RichText(
+                      text: const TextSpan(children: [
+                    TextSpan(
+                        text: availableBalance + '\n',
                         style:
-                            TextStyle(color: ColorManager.cyan, fontSize: 18),
-                      )),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          primary: ColorManager.deepPurple,
-                          fixedSize:
-                              Size(MediaQuery.of(context).size.width * .60, 50),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50))),
-                      child: const Text(
-                        withdrawAmount,
-                        style: TextStyle(fontSize: 20),
-                      )),
-                  const Spacer(
-                    flex: 1,
-                  ),
+                            TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    TextSpan(
+                        text: '500.00/-',
+                        style:
+                            TextStyle(fontWeight: FontWeight.bold, fontSize: 32)),
+                  ]))
                 ],
               ),
-            )
-          ],
+              const SizedBox(
+                height: 20,
+              ),
+              Container(
+                padding: const EdgeInsets.only(bottom: 60),
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height+120,
+                color: Colors.white,
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 35,
+                    ),
+                    availableBal(currency: 'dollar'),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    availableBal(currency: 'euro'),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    availableBal(currency: 'sar'),
+                    const SizedBox(
+                      height: 28,
+                    ),
+                    const Text(
+                      "Withdraw",
+                      style:
+                          TextStyle(color: ColorManager.cyan, fontSize: 18),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+
+                    Container(
+                      width:getWidth(context) * .70,
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 2,color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(8)
+                      ),
+                      child: DropdownButton(
+                        menuMaxHeight: 180,
+                        value:"USD",
+                        style: const TextStyle(color: Colors.grey, fontSize: 17),
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.grey,
+                          size: 35,
+                        ),
+                        onChanged: (String? value) {
+                          setState(() {
+                            setState(() {
+
+                            });
+                          });
+                        },
+                        items: ["USD","INR","EUR"].map((String item) {
+                          return DropdownMenuItem(
+                            value: item,
+                            child: Text(item),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                     const SizedBox(
+                      height: 10,
+                    ),
+
+                    TextFormField(
+                      maxLength: 10,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                          hintText: "Amount",
+                          isDense: true,
+                          counterText: '',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                  width: 2),
+                              borderRadius: BorderRadius.circular(10)),
+                          constraints: BoxConstraints(
+                              maxWidth:getWidth(context) * .70),),
+                    ),
+
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
+                      maxLength: 10,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        hintText: "Fee",
+                        isDense: true,
+                        counterText: '',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 2),
+                            borderRadius: BorderRadius.circular(10)),
+                        constraints: BoxConstraints(
+                            maxWidth:getWidth(context) * .70),),
+                    ),
+
+                    const SizedBox(
+                      height: 40,
+                    ),
+                    ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                            primary: ColorManager.deepPurple,
+                            fixedSize: Size(
+                                MediaQuery.of(context).size.width * .60, 50),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50))),
+                        child: const Text(
+                          withdrawAmount,
+                          style: TextStyle(fontSize: 20),
+                        )),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/paymentHistory');
+                        },
+                        child: const Text(
+                          paymentHistory,
+                          style:
+                          TextStyle(color: ColorManager.cyan, fontSize: 18),
+                        )),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
