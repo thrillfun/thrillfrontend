@@ -665,7 +665,7 @@ class RestApi {
     var loginData=instance.getString('currentUser');
     UserModel user=UserModel.fromJson(jsonDecode(loginData!));
     var result = await RestClient.postData(
-      RestUrl.userPrivateVideo,
+      RestUrl.userAllVideo,
       headers: {
         'Authorization': 'Bearer $token',
       },
@@ -688,7 +688,7 @@ class RestApi {
     UserModel user=UserModel.fromJson(jsonDecode(loginData!));
 
     var result = await RestClient.postData(
-      RestUrl.getPrivateVideo,
+      RestUrl.userLikedVideo,
       headers: {
         'Authorization': 'Bearer $token',
       },
