@@ -657,16 +657,66 @@ class RestApi {
     return response;
   }
 
+
+
+  static Future<http.Response> getUserPublicVideo() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var loginData=instance.getString('currentUser');
+    UserModel user=UserModel.fromJson(jsonDecode(loginData!));
+    var result = await RestClient.postData(
+      RestUrl.userPrivateVideo,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'user_id': user.id.toString(),
+      },
+    );
+
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
+  static Future<http.Response> getUserLikedVideo() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var loginData=instance.getString('currentUser');
+    UserModel user=UserModel.fromJson(jsonDecode(loginData!));
+
+    var result = await RestClient.postData(
+      RestUrl.getPrivateVideo,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'user_id': user.id.toString(),
+      }
+    );
+
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
+  static Future<http.Response> getUserPrivateVideo() async {
+
   static Future<http.Response> getHashtagList() async {
+
     http.Response response;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var result = await RestClient.getData(
-      RestUrl.getHashtagList,
       headers: {
         'Authorization': 'Bearer $token',
       },
     );
+
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
