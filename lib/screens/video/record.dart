@@ -440,15 +440,15 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 const Spacer(),
                 TextButton(
                     onPressed: () async {
-                      await Navigator.pushNamed(context, "/addSound").then((value) {
-                        if(value!=null){
-                          AddSoundModel? addSoundModelTemp = value as AddSoundModel?;
-                          setState((){
-                            addSoundModel = addSoundModelTemp;
-                            selectedSound=addSoundModelTemp?.name;
-                          });
-                        }
-                      });
+                      // await Navigator.pushNamed(context, "/addSound").then((value) {
+                      //   if(value!=null){
+                      //     AddSoundModel? addSoundModelTemp = value as AddSoundModel?;
+                      //     setState((){
+                      //       addSoundModel = addSoundModelTemp;
+                      //       selectedSound = addSoundModelTemp?.name;
+                      //     });
+                      //   }
+                      // });
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -884,7 +884,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     // Initialize controller
     try {
       await cameraController.initialize();
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error initializing camera: $e');
     }
 
@@ -966,7 +966,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
         _isRecordingInProgress = true;
         //  print(_isRecordingInProgress);
       });
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error starting to record video: $e');
     }
   }
@@ -983,7 +983,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
         //  print(_isRecordingInProgress);
       });
       return file;
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error stopping video recording: $e');
       return null;
     }
@@ -996,7 +996,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.pauseVideoRecording();
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error pausing video recording: $e');
     }
   }
@@ -1008,7 +1008,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.resumeVideoRecording();
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error resuming video recording: $e');
     }
   }
