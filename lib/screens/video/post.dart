@@ -72,7 +72,6 @@ class _PostVideoState extends State<PostVideo> {
             videoPlayerController.setVolume(1);
             setState(() {});
           });
-
   }
 
 
