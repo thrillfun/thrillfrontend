@@ -1,15 +1,20 @@
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../common/color.dart';
 import '../common/strings.dart';
 
-
 class SoundDetails extends StatefulWidget {
   const SoundDetails({Key? key, required this.title}) : super(key: key);
   final String title;
+  static const String routeName = '/soundDetails';
+  static Route route({required String title_}) {
+    return MaterialPageRoute(
+      settings: const RouteSettings(name: routeName),
+      builder: (context) => SoundDetails(title: title_),
+    );
+  }
 
   @override
   State<SoundDetails> createState() => _SoundDetailsState();
@@ -49,6 +54,7 @@ class _SoundDetailsState extends State<SoundDetails> {
               Container(
                 height: 120,
                 width: 100,
+                padding: const EdgeInsets.all(35),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
                     color: ColorManager.cyan),
@@ -141,67 +147,88 @@ class _SoundDetailsState extends State<SoundDetails> {
           const SizedBox(
             height: 20,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                   // Get.to(() => const Favourites());
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: ColorManager.deepPurple,
-                      fixedSize:
-                          Size(MediaQuery.of(context).size.width * .30, 30),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50))),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(
-                        Icons.bookmark_outline_outlined,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        save,
-                        style: TextStyle(fontSize: 16),
-                      )
-                    ],
-                  )),
-              const SizedBox(
-                width: 15,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                   // Get.to(() => const Record());
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: ColorManager.cyan,
-                      fixedSize:
-                          Size(MediaQuery.of(context).size.width * .30, 30),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50))),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        'assets/cam.png',
-                        scale: 1.5,
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      const Text(
-                        create,
-                        style: TextStyle(fontSize: 16),
-                      )
-                    ],
-                  ))
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     ElevatedButton(
+          //         onPressed: () {
+          //          // Get.to(() => const Favourites());
+          //         },
+          //         style: ElevatedButton.styleFrom(
+          //             primary: ColorManager.deepPurple,
+          //             fixedSize:
+          //                 Size(MediaQuery.of(context).size.width * .30, 30),
+          //             shape: RoundedRectangleBorder(
+          //                 borderRadius: BorderRadius.circular(50))),
+          //         child: Row(
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: const [
+          //             Icon(
+          //               Icons.bookmark_outline_outlined,
+          //               color: Colors.white,
+          //               size: 20,
+          //             ),
+          //             SizedBox(
+          //               width: 10,
+          //             ),
+          //             Text(
+          //               save,
+          //               style: TextStyle(fontSize: 16),
+          //             )
+          //           ],
+          //         )),
+          //     const SizedBox(
+          //       width: 15,
+          //     ),
+          //     ElevatedButton(
+          //         onPressed: () {
+          //          // Get.to(() => const Record());
+          //         },
+          //         style: ElevatedButton.styleFrom(
+          //             primary: ColorManager.cyan,
+          //             fixedSize:
+          //                 Size(MediaQuery.of(context).size.width * .30, 30),
+          //             shape: RoundedRectangleBorder(
+          //                 borderRadius: BorderRadius.circular(50))),
+          //         child: Row(
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: [
+          //             Image.asset(
+          //               'assets/cam.png',
+          //               scale: 1.5,
+          //             ),
+          //             const SizedBox(
+          //               width: 10,
+          //             ),
+          //             const Text(
+          //               create,
+          //               style: TextStyle(fontSize: 16),
+          //             )
+          //           ],
+          //         ))
+          //   ],
+          // ),
+          ElevatedButton(
+              onPressed: () {
+                // Get.to(() => const Record());
+              },
+              style: ElevatedButton.styleFrom(
+                  primary: ColorManager.cyan,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50))),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.camera_alt_outlined),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "Use Audio",
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              )),
           const SizedBox(
             height: 20,
           ),
