@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:thrill/rest/rest_api.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../utils/util.dart';
@@ -23,6 +26,8 @@ class Wallet extends StatefulWidget {
 class _WalletState extends State<Wallet> {
 
   bool isLoading=true;
+
+  List<String> payType=List<String>.empty(growable: true);
 
   @override
   void initState() {
@@ -337,6 +342,14 @@ class _WalletState extends State<Wallet> {
   }
 
   void loadWalletInfo()async {
+   var result=await RestApi.getCommissionSetting();
+   var json=jsonDecode(result.body);
+   var payList=json['data'][0]['value'];
 
+   print(payList);
+
+  // payType.addAll(iterable);
+
+  // print(json);
   }
 }
