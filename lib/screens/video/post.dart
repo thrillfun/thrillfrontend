@@ -337,7 +337,7 @@ class _PostVideoState extends State<PostVideo> {
                     width: MediaQuery.of(context).size.width * .90,
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
+                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey, width: 1)),
                     child: DropdownButton<LanguagesModel>(
                       value: videoLanguage[0],
@@ -370,7 +370,7 @@ class _PostVideoState extends State<PostVideo> {
                     width: MediaQuery.of(context).size.width * .90,
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
+                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey, width: 1)),
                     child: DropdownButton<CategoryModel>(
                       value: videoCategory[0],
@@ -705,11 +705,11 @@ class _PostVideoState extends State<PostVideo> {
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              widget.data.pickedSoundPath==null?"":"$currentUnix.mp3",
-              widget.data.pickedSoundPath?.split('/').last.split('.').first??"",
+              widget.data.pickedSoundPath==null?"Original Sound":"$currentUnix.mp3",
+              widget.data.pickedSoundPath?.split('/').last.split('.').first??"Original Sound",
               dropDownCategoryValue,
               tagList,
-              "Public",
+              "Private",
               commentsSwitch ? 1 : 0,
               desCtr.text,
               widget.data.filterName.isEmpty
@@ -723,7 +723,7 @@ class _PostVideoState extends State<PostVideo> {
             BlocProvider.of<VideoBloc>(context)
                 .add(const VideoLoading());
             showSuccessToast(context,
-                "Video has been posted successfully");
+                "Video has been saved successfully");
             await Future.delayed(
                 const Duration(milliseconds: 200));
             File recordedVideoFile = File(widget.data.filePath);
@@ -823,8 +823,8 @@ class _PostVideoState extends State<PostVideo> {
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              widget.data.pickedSoundPath==null?"":"$currentUnix.mp3",
-              widget.data.pickedSoundPath?.split('/').last.split('.').first??"",
+              widget.data.pickedSoundPath==null?"Original Sound":"$currentUnix.mp3",
+              widget.data.pickedSoundPath?.split('/').last.split('.').first??"Original Sound",
               dropDownCategoryValue,
               tagList,
               "Public",
