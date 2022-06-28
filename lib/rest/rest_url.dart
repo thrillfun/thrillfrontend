@@ -39,14 +39,14 @@ class RestUrl {
   static const String deactiveAc = baseUrl + "user/deactivate-account-request";
   static const String checkAcStatus = baseUrl + "user/check-user-status";
   static const String userVerification = baseUrl + "user/request-verification";
-
   static const String getPrivateVideo = baseUrl + "video/private";
-
-
   static const String userAllVideo = baseUrl + "video/user-videos";
   static const String userLikedVideo = baseUrl + "user/user-liked-videos";
   static const String userPrivateVideo = baseUrl + "video/private";
-
   static const String getHashtagList = baseUrl + "hashtag/list";
+
+  static const String settingAdminCommission = baseUrl + "settings";
+  static const String getUserWalletBalance = baseUrl + "wallet/balance";
+
 
 }
