@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/rest/rest_api.dart';
+import 'package:thrill/screens/sound_details.dart';
 import '../../common/strings.dart';
 import '../../models/comment_model.dart';
 import '../../models/user.dart';
@@ -421,7 +422,11 @@ class HomeState extends State<Home> {
                                 ],
                               ),
                             ),
-                            const RotatedImage("test.png"),
+                            GestureDetector(
+                              onTap:(){
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>SoundDetails(title: "title")));
+                              },
+                                child: const RotatedImage("test.png")),
                           ],
                         ),
                       ),

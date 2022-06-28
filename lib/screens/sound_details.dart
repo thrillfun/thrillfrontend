@@ -1,15 +1,20 @@
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../common/color.dart';
 import '../common/strings.dart';
 
-
 class SoundDetails extends StatefulWidget {
   const SoundDetails({Key? key, required this.title}) : super(key: key);
   final String title;
+  static const String routeName = '/soundDetails';
+  static Route route({required String title_}) {
+    return MaterialPageRoute(
+      settings: const RouteSettings(name: routeName),
+      builder: (context) => SoundDetails(title: title_),
+    );
+  }
 
   @override
   State<SoundDetails> createState() => _SoundDetailsState();
@@ -49,6 +54,7 @@ class _SoundDetailsState extends State<SoundDetails> {
               Container(
                 height: 120,
                 width: 100,
+                padding: const EdgeInsets.all(35),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
                     color: ColorManager.cyan),
