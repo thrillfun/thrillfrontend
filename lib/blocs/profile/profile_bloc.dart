@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/models/private_model.dart';
 import 'package:thrill/models/social_url_model.dart';
 import 'package:thrill/models/video_model.dart';
 import '../../models/user.dart';
@@ -25,9 +26,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     var currentUser = pref.getString('currentUser');
     UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
 
-    List<VideoModel> likeList=List<VideoModel>.empty(growable: true);
-    List<VideoModel> privateList=List<VideoModel>.empty(growable: true);
-    List<VideoModel> publicList=List<VideoModel>.empty(growable: true);
+    List<PrivateModel> likeList=List<PrivateModel>.empty(growable: true);
+    List<PrivateModel> privateList=List<PrivateModel>.empty(growable: true);
+    List<PrivateModel> publicList=List<PrivateModel>.empty(growable: true);
 
     var resultLikes = await _loginRepository.getLikesVideo();
     var resultPrivate = await _loginRepository.getPrivateVideo();
@@ -36,27 +37,32 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     var result = await _loginRepository.getProfile(current.id);
 
     if (result['status']) {
-      try {
-        likeList = List<VideoModel>.from(
-            resultLikes['data'].map((i) => VideoModel.fromJson(i)))
+      // try {
+        likeList = List<PrivateModel>.from(
+            resultLikes['data'].map((i) => PrivateModel.fromJson(i)))
             .toList(growable: true);
 
-        privateList = List<VideoModel>.from(
-            resultPrivate['data'].map((i) => VideoModel.fromJson(i)))
+        privateList = List<PrivateModel>.from(
+            resultPrivate['data'].map((i) => PrivateModel.fromJson(i)))
             .toList(growable: true);
 
-        publicList = List<VideoModel>.from(
-            resultPublic['data'].map((i) => VideoModel.fromJson(i)))
+        publicList = List<PrivateModel>.from(
+            resultPublic['data'].map((i) => PrivateModel.fromJson(i)))
             .toList(growable: true);
 
         UserModel user = UserModel.fromJson(result['data']['user']);
         await pref.setString('currentUser', jsonEncode(user.toJson()),);
 
         emit(ProfileLoaded(userModel: user,likesList:likeList,privateList:privateList,publicList: publicList, status: true, message: 'success'));
-      } catch (e) {
-        emit(ProfileLoaded(userModel:current,likesList: const [],privateList: const [],publicList: const [],status: false, message: e.toString()));
-      }
+        print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+      // } catch (e) {
+      //   print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+      //   print(e.toString());
+      //   print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+      //   emit(ProfileLoaded(userModel:current,likesList: const [],privateList: const [],publicList: const [],status: false, message: e.toString()));
+      // }
     } else {
+      print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
       emit(ProfileLoaded(userModel:current,likesList: const [],privateList:const [],publicList: const [], status: false, message: result['message']));
     }
   }
