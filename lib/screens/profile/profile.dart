@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/models/video_model.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../blocs/profile/profile_bloc.dart';
@@ -82,16 +83,16 @@ class _ProfileState extends State<Profile> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(2),
                           height: 111,
                           width: 111,
-                          decoration:  BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: ColorManager.spinColorDivider)
-                          ),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: ColorManager.spinColorDivider)),
                           child: state.userModel.avatar.isNotEmpty
                               ? ClipOval(
-                                child: CachedNetworkImage(
+                                  child: CachedNetworkImage(
                                     fit: BoxFit.cover,
                                     imageUrl:
                                         '${RestUrl.profileUrl}${state.userModel.avatar}',
@@ -99,11 +100,16 @@ class _ProfileState extends State<Profile> {
                                       child: CircularProgressIndicator(),
                                     ),
                                   ),
-                              )
+                                )
                               : Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: SvgPicture.asset('assets/profile.svg',width: 10,height: 10,fit: BoxFit.contain,),
-                              )),
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: SvgPicture.asset(
+                                    'assets/profile.svg',
+                                    width: 10,
+                                    height: 10,
+                                    fit: BoxFit.contain,
+                                  ),
+                                )),
                       const SizedBox(
                         width: 15,
                       ),
@@ -207,46 +213,58 @@ class _ProfileState extends State<Profile> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       state.userModel.youtube.isEmpty
-                      ? SizedBox(width: 1,) : IconButton(
-                        onPressed: () {},
-                        iconSize: 25,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: SvgPicture.asset('assets/youtube.svg'),
-                      ),
+                          ? const SizedBox(
+                              width: 1,
+                            )
+                          : IconButton(
+                              onPressed: () {},
+                              iconSize: 25,
+                              padding: const EdgeInsets.only(),
+                              constraints: const BoxConstraints(),
+                              icon: SvgPicture.asset('assets/youtube.svg'),
+                            ),
                       const SizedBox(
                         width: 5,
                       ),
                       state.userModel.facebook.isEmpty
-                          ? SizedBox(width: 1,) : IconButton(
-                        onPressed: () {},
-                        iconSize: 25,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: SvgPicture.asset('assets/facebook.svg'),
-                      ),
+                          ? const SizedBox(
+                              width: 1,
+                            )
+                          : IconButton(
+                              onPressed: () {},
+                              iconSize: 25,
+                              padding: const EdgeInsets.only(),
+                              constraints: const BoxConstraints(),
+                              icon: SvgPicture.asset('assets/facebook.svg'),
+                            ),
                       const SizedBox(
                         width: 5,
                       ),
                       state.userModel.instagram.isEmpty
-                          ? SizedBox(width: 1,) : IconButton(
-                        onPressed: () {},
-                        iconSize: 25,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: SvgPicture.asset('assets/insta.svg'),
-                      ),
+                          ? const SizedBox(
+                              width: 1,
+                            )
+                          : IconButton(
+                              onPressed: () {},
+                              iconSize: 25,
+                              padding: const EdgeInsets.only(),
+                              constraints: const BoxConstraints(),
+                              icon: SvgPicture.asset('assets/insta.svg'),
+                            ),
                       const SizedBox(
                         width: 5,
                       ),
                       state.userModel.twitter.isEmpty
-                          ? SizedBox(width: 1,) : IconButton(
-                        onPressed: () {},
-                        iconSize: 25,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: SvgPicture.asset('assets/twitter.svg'),
-                      )
+                          ? const SizedBox(
+                              width: 1,
+                            )
+                          : IconButton(
+                              onPressed: () {},
+                              iconSize: 25,
+                              padding: const EdgeInsets.only(),
+                              constraints: const BoxConstraints(),
+                              icon: SvgPicture.asset('assets/twitter.svg'),
+                            )
                     ],
                   ),
                   const SizedBox(
@@ -479,7 +497,11 @@ class _ProfileState extends State<Profile> {
                   const SizedBox(
                     height: 5,
                   ),
-                  tabview(state.userModel)
+                  tabview(
+                      state.userModel,
+                      state.publicList.isEmpty ? [] : state.publicList,
+                      state.privateList.isEmpty ? [] : state.privateList,
+                      state.likesList.isEmpty ? [] : state.likesList)
                 ],
               ).h(getHeight(context) + 3 * 80).scrollVertical();
             } else {
@@ -493,36 +515,55 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  tabview(UserModel userModel) {
+  tabview(UserModel userModel, List<VideoModel> publicList,
+      List<VideoModel> privateList, List<VideoModel> likesList) {
     if (selectedTab == 0) {
-      return feed();
+      return feed(publicList);
     } else if (selectedTab == 1) {
-      return lock();
+      return lock(privateList);
     } else {
-      return fav(userModel);
+      return fav(userModel, likesList);
     }
   }
 
-  feed() {
-    return Flexible(
+  feed(List<VideoModel> publicList) {
+    return publicList.isEmpty
+        ? RichText(
+        textAlign: TextAlign.center,
+        text: const TextSpan(children: [
+          TextSpan(
+              text: '\n\n\n' "User's Public Video",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold)),
+          TextSpan(
+              text: '\n\n'
+                  "Public Videos are currently not available",
+              style: TextStyle(fontSize: 17, color: Colors.grey))
+        ]))
+        : Flexible(
       child: GridView.builder(
           padding: const EdgeInsets.all(2),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, crossAxisSpacing: 1.8, mainAxisSpacing: 1.8),
-          itemCount: 9,
+              crossAxisCount: 3,
+              crossAxisSpacing: 1.8,
+              mainAxisSpacing: 1.8),
+          itemCount: publicList.length,
           itemBuilder: (BuildContext context, int index) {
             return Stack(
               fit: StackFit.expand,
               children: [
                 CachedNetworkImage(
                     placeholder: (a, b) => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                      child: CircularProgressIndicator(),
+                    ),
                     fit: BoxFit.cover,
-                    imageUrl:
-                        'https://media-cldnry.s-nbcnews.com/image/upload/newscms/2019_02/2709956/190109-tiktok-app-ew-124p.jpg'),
+                    imageUrl:publicList[index].gif_image.isEmpty
+                        ? '${RestUrl.thambUrl}thumb-not-available.png'
+                        : '${RestUrl.gifUrl}${publicList[index].gif_image}'),
                 Positioned(
                     bottom: 5,
                     left: 5,
@@ -536,7 +577,7 @@ class _ProfileState extends State<Profile> {
                           size: 20,
                         ),
                         Text(
-                          '${Random().nextInt(500)}M',
+                          publicList[index].views.toString(),
                           style: const TextStyle(
                               color: Colors.white, fontSize: 13),
                         ),
@@ -546,7 +587,7 @@ class _ProfileState extends State<Profile> {
                           size: 20,
                         ),
                         Text(
-                          '${Random().nextInt(10) + 1}M',
+                          publicList[index].likes.toString(),
                           style: const TextStyle(
                               color: Colors.white, fontSize: 13),
                         ),
@@ -558,24 +599,149 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  lock() {
-    return const SizedBox();
-  }
-
-  fav(UserModel userModel) {
-    return RichText(
+  lock(List<VideoModel> privateList) {
+    return privateList.isEmpty
+        ? RichText(
         textAlign: TextAlign.center,
-        text: TextSpan(children: [
-          const TextSpan(
-              text: '\n\n\n' "This user's liked videos or private",
+        text: const TextSpan(children: [
+          TextSpan(
+              text: '\n\n\n' "User's Private Video",
               style: TextStyle(
                   fontSize: 18,
                   color: Colors.black,
                   fontWeight: FontWeight.bold)),
           TextSpan(
               text: '\n\n'
-                  "Videos liked by @ ${userModel.username.isNotEmpty ? userModel.username : 'anonymous'} are currently hidden",
-              style: const TextStyle(fontSize: 17, color: Colors.grey))
-        ]));
+                  "Private Videos are currently not available",
+              style: TextStyle(fontSize: 17, color: Colors.grey))
+        ]))
+        : Flexible(
+      child: GridView.builder(
+          padding: const EdgeInsets.all(2),
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 1.8,
+              mainAxisSpacing: 1.8),
+          itemCount: privateList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                CachedNetworkImage(
+                    placeholder: (a, b) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    fit: BoxFit.cover,
+                    imageUrl:privateList[index].gif_image.isEmpty
+                        ? '${RestUrl.thambUrl}thumb-not-available.png'
+                        : '${RestUrl.gifUrl}${privateList[index].gif_image}'),
+                Positioned(
+                    bottom: 5,
+                    left: 5,
+                    right: 5,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Icon(
+                          Icons.visibility,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        Text(
+                          privateList[index].views.toString(),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 13),
+                        ),
+                        const Icon(
+                          Icons.favorite,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        Text(
+                          privateList[index].likes.toString(),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 13),
+                        ),
+                      ],
+                    ))
+              ],
+            );
+          }),
+    );
+  }
+
+  fav(UserModel userModel, List<VideoModel> likesList) {
+    return likesList.isEmpty
+        ? RichText(
+            textAlign: TextAlign.center,
+            text: const TextSpan(children: [
+              TextSpan(
+                  text: '\n\n\n' "User's liked Video",
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: '\n\n'
+                      "Videos liked are currently not available",
+                  style: TextStyle(fontSize: 17, color: Colors.grey))
+            ]))
+        : Flexible(
+            child: GridView.builder(
+                padding: const EdgeInsets.all(2),
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 1.8,
+                    mainAxisSpacing: 1.8),
+                itemCount: likesList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CachedNetworkImage(
+                          placeholder: (a, b) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                          fit: BoxFit.cover,
+                          imageUrl:likesList[index].gif_image.isEmpty
+                              ? '${RestUrl.thambUrl}thumb-not-available.png'
+                              : '${RestUrl.gifUrl}${likesList[index].gif_image}'),
+                      Positioned(
+                          bottom: 5,
+                          left: 5,
+                          right: 5,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              const Icon(
+                                Icons.visibility,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              Text(
+                                likesList[index].views.toString(),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 13),
+                              ),
+                              const Icon(
+                                Icons.favorite,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              Text(
+                                  likesList[index].likes.toString(),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 13),
+                              ),
+                            ],
+                          ))
+                    ],
+                  );
+                }),
+          );
   }
 }

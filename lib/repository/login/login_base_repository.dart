@@ -16,4 +16,8 @@ abstract class BaseLoginRepository {
   Future<void> resetPass(String phone,String password);
 
   Future<void> getProfile(int userId);
+
+  Future<void> getLikesVideo();
+  Future<void> getPrivateVideo();
+  Future<void> getPublicVideo();
 }

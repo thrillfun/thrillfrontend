@@ -74,4 +74,34 @@ class LoginRepository extends BaseLoginRepository {
     } catch (_) {}
     return null;
   }
+
+  @override
+  Future<dynamic> getLikesVideo()async {
+    try {
+      var result = await RestApi.getUserLikedVideo();
+      var json = jsonDecode(result.body);
+      return json;
+    } catch (_) {}
+    return null;
+  }
+
+  @override
+  Future<dynamic> getPrivateVideo()async {
+    try {
+      var result = await RestApi.getUserPrivateVideo();
+      var json = jsonDecode(result.body);
+      return json;
+    } catch (_) {}
+    return null;
+  }
+
+  @override
+  Future<dynamic> getPublicVideo()async {
+    try {
+      var result = await RestApi.getUserPublicVideo();
+      var json = jsonDecode(result.body);
+      return json;
+    } catch (_) {}
+    return null;
+  }
 }
