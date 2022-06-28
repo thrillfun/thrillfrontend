@@ -147,67 +147,88 @@ class _SoundDetailsState extends State<SoundDetails> {
           const SizedBox(
             height: 20,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                   // Get.to(() => const Favourites());
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: ColorManager.deepPurple,
-                      fixedSize:
-                          Size(MediaQuery.of(context).size.width * .30, 30),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50))),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(
-                        Icons.bookmark_outline_outlined,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        save,
-                        style: TextStyle(fontSize: 16),
-                      )
-                    ],
-                  )),
-              const SizedBox(
-                width: 15,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                   // Get.to(() => const Record());
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: ColorManager.cyan,
-                      fixedSize:
-                          Size(MediaQuery.of(context).size.width * .30, 30),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50))),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        'assets/cam.png',
-                        scale: 1.5,
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      const Text(
-                        create,
-                        style: TextStyle(fontSize: 16),
-                      )
-                    ],
-                  ))
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     ElevatedButton(
+          //         onPressed: () {
+          //          // Get.to(() => const Favourites());
+          //         },
+          //         style: ElevatedButton.styleFrom(
+          //             primary: ColorManager.deepPurple,
+          //             fixedSize:
+          //                 Size(MediaQuery.of(context).size.width * .30, 30),
+          //             shape: RoundedRectangleBorder(
+          //                 borderRadius: BorderRadius.circular(50))),
+          //         child: Row(
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: const [
+          //             Icon(
+          //               Icons.bookmark_outline_outlined,
+          //               color: Colors.white,
+          //               size: 20,
+          //             ),
+          //             SizedBox(
+          //               width: 10,
+          //             ),
+          //             Text(
+          //               save,
+          //               style: TextStyle(fontSize: 16),
+          //             )
+          //           ],
+          //         )),
+          //     const SizedBox(
+          //       width: 15,
+          //     ),
+          //     ElevatedButton(
+          //         onPressed: () {
+          //          // Get.to(() => const Record());
+          //         },
+          //         style: ElevatedButton.styleFrom(
+          //             primary: ColorManager.cyan,
+          //             fixedSize:
+          //                 Size(MediaQuery.of(context).size.width * .30, 30),
+          //             shape: RoundedRectangleBorder(
+          //                 borderRadius: BorderRadius.circular(50))),
+          //         child: Row(
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: [
+          //             Image.asset(
+          //               'assets/cam.png',
+          //               scale: 1.5,
+          //             ),
+          //             const SizedBox(
+          //               width: 10,
+          //             ),
+          //             const Text(
+          //               create,
+          //               style: TextStyle(fontSize: 16),
+          //             )
+          //           ],
+          //         ))
+          //   ],
+          // ),
+          ElevatedButton(
+              onPressed: () {
+                // Get.to(() => const Record());
+              },
+              style: ElevatedButton.styleFrom(
+                  primary: ColorManager.cyan,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50))),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.camera_alt_outlined),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "Use Audio",
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              )),
           const SizedBox(
             height: 20,
           ),
