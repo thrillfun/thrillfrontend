@@ -47,6 +47,6 @@ class RestUrl {
 
   static const String settingAdminCommission = baseUrl + "settings";
   static const String getUserWalletBalance = baseUrl + "wallet/balance";
-
+  static const String withdrawRequest = baseUrl + "wallet/withdraw";
 
 }
