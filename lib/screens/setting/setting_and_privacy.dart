@@ -172,7 +172,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
               ),
               InkWell(
                 onTap: () {
-                  share();
+                  //share();
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
