@@ -33,7 +33,7 @@ class _WalletState extends State<Wallet> {
   TextEditingController feeCtr = TextEditingController();
   TextEditingController upiCtr = TextEditingController();
   TextEditingController amtCtr = TextEditingController();
-  String selectedCurrecny="",selectedPayment="";
+  String selectedCurrecny = "", selectedPayment = "";
 
   @override
   void initState() {
@@ -155,7 +155,7 @@ class _WalletState extends State<Wallet> {
                               ),
                               onChanged: (String? value) {
                                 setState(() {
-                                  setState(() {});
+                                  selectedCurrecny = value!;
                                 });
                               },
                               items: currencyType.map((String item) {
@@ -212,7 +212,7 @@ class _WalletState extends State<Wallet> {
                               ),
                               onChanged: (String? value) {
                                 setState(() {
-                                  setState(() {});
+                                  selectedPayment = value!;
                                 });
                               },
                               items: payType.map((String item) {
@@ -283,18 +283,40 @@ class _WalletState extends State<Wallet> {
                             height: 40,
                           ),
                           ElevatedButton(
-                              onPressed: () {
-                                if(upiCtr.text.isEmpty){
+                              onPressed: () async {
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                                if (upiCtr.text.isEmpty) {
                                   showErrorToast(context, "Enter Upi");
-                                }else{
-                                  if(amtCtr.text.isEmpty){
+                                } else {
+                                  if (amtCtr.text.isEmpty) {
                                     showErrorToast(context, "Enter Amount");
-                                  }else{
-                                    print(selectedCurrecny);
-                                    print(upiCtr.text);
-                                    print(selectedPayment);
-                                    print(amtCtr.text);
-                                    print(feeCtr.text);
+                                  } else {
+                                    progressDialogue(context);
+                                    try {
+                                      var result =
+                                          await RestApi.sendWithdrawlRequest(
+                                              selectedCurrecny,
+                                              upiCtr.text,
+                                              selectedPayment,
+                                              amtCtr.text);
+                                      var json = jsonDecode(result.body);
+                                      if (json['status']) {
+                                        amtCtr.text = "";
+                                        upiCtr.text = "";
+                                        setState(() {});
+                                        closeDialogue(context);
+                                        showSuccessToast(
+                                            context, json['message']);
+                                      } else {
+                                        closeDialogue(context);
+                                        showErrorToast(
+                                            context, json['message']);
+                                      }
+                                    } catch (e) {
+                                      closeDialogue(context);
+                                      showErrorToast(context, e.toString());
+                                    }
                                   }
                                 }
                               },
@@ -387,7 +409,7 @@ class _WalletState extends State<Wallet> {
       var arrayList = jsonDecode(json['data'][0]['value']);
       List<String> payTitle = List<String>.from(arrayList);
       payType.addAll(payTitle);
-      selectedPayment=payType[0];
+      selectedPayment = payType[0];
       adminCommission = int.parse(json['data'][1]['value']);
 
       var resultBal = await RestApi.getWalletBalance();
@@ -400,8 +422,8 @@ class _WalletState extends State<Wallet> {
       var arrayListCurrency = json['data'][2]['value'];
       List<String> currencyTitle = List<String>.from(arrayListCurrency);
       currencyType.addAll(currencyTitle);
-      selectedCurrecny=currencyType[0];
-      feeCtr.text= '${adminCommission.toString()}% fees';
+      selectedCurrecny = currencyType[0];
+      feeCtr.text = '${adminCommission.toString()}% fees';
       isLoading = false;
       setState(() {});
     } catch (e) {

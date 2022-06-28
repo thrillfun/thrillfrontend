@@ -769,4 +769,27 @@ class RestApi {
     return response;
   }
 
+  static Future<http.Response> sendWithdrawlRequest(String currency,String upiId,String payMethod,String amount) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.withdrawRequest,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'currency': currency,
+        'payment_address_user': upiId,
+        'payment_network_user': payMethod,
+        'amount': amount
+      },
+    );
+
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
 }
