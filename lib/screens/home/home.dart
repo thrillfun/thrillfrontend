@@ -16,7 +16,6 @@ import '../../widgets/image_rotate.dart';
 import '../../widgets/video_item.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -25,15 +24,14 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
+
   int selectedTopIndex = 0;
   List<String> likeList = List<String>.empty(growable: true);
   List<Comments> commentList = List<Comments>.empty(growable: true);
   List<String> likeComment = List<String>.empty(growable: true);
   TextEditingController msgCtr = TextEditingController();
   List<String> followList = List<String>.empty(growable: true);
-
-  final PageController _pageController =
-      PageController(initialPage: 0, keepPage: true);
+  final PageController _pageController = PageController(initialPage: 0, keepPage: true);
   int _currentPage = 0;
   bool _isOnPageTurning = false;
   String isError = '';
@@ -413,7 +411,7 @@ class HomeState extends State<Home> {
                                       Flexible(
                                         child:
                                           state.list[index].sound_name.isEmpty
-                                              ? "Original sound - @Fintory".marquee(textStyle:TextStyle(color: Colors.white)).h2(context)
+                                              ? "Original sound - @Fintory".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
                                               : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle:TextStyle(color: Colors.white)).h2(context),
                                       ),
                                     ],
@@ -423,7 +421,7 @@ class HomeState extends State<Home> {
                             ),
                             GestureDetector(
                               onTap:(){
-                                Navigator.push(context, MaterialPageRoute(builder: (_)=>SoundDetails(title: "title")));
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>const SoundDetails(title: "title")));
                               },
                                 child: const RotatedImage("test.png")),
                           ],

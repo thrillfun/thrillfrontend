@@ -70,7 +70,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 selectedIndex = 0;
               });
             },
-            child: SizedBox(
+            child: Container(
+              color: Colors.black,
               width: MediaQuery.of(context).size.width * .19,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
