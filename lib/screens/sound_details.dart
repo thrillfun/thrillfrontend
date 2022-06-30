@@ -36,7 +36,6 @@ class _SoundDetailsState extends State<SoundDetails> {
     super.initState();
     getVideos();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
