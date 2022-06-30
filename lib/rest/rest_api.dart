@@ -251,6 +251,7 @@ class RestApi {
       RestUrl.postComment,
       headers: {
         'Authorization': 'Bearer $token',
+        "Accept": 'application/json; charset=ASCII'
       },
       body: {
         'video_id': videoId.toString(),
@@ -259,7 +260,9 @@ class RestApi {
       },
     );
 
-    response = http.Response(jsonEncode(result), 200);
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
     return response;
   }
 
@@ -276,7 +279,9 @@ class RestApi {
         'video_id': videoId.toString(),
       },
     );
-    response = http.Response(jsonEncode(result), 200);
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
     return response;
   }
 
@@ -803,6 +808,27 @@ class RestApi {
         'Authorization': 'Bearer $token',
       },
     );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
+
+  static Future<http.Response> getVideosBySound(String sound) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.videoBySound,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'sound': sound
+      },
+    );
+
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
