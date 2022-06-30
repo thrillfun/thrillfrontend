@@ -6,7 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/rest/rest_api.dart';
-import 'package:thrill/screens/sound_details.dart';
 import '../../common/strings.dart';
 import '../../models/comment_model.dart';
 import '../../models/user.dart';
@@ -411,7 +410,7 @@ class HomeState extends State<Home> {
                                       Flexible(
                                         child:
                                           state.list[index].sound_name.isEmpty
-                                              ? "Original sound - @Fintory".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
+                                              ? "Original Sound".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
                                               : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle:TextStyle(color: Colors.white)).h2(context),
                                       ),
                                     ],
@@ -420,8 +419,16 @@ class HomeState extends State<Home> {
                               ),
                             ),
                             GestureDetector(
-                              onTap:(){
-                                Navigator.push(context, MaterialPageRoute(builder: (_)=>const SoundDetails(title: "title")));
+                              onTap:() async {
+                                await isLogined().then((value) {
+                                  if (value) {
+                                    if(state.list[index].sound.isNotEmpty){
+                                      Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                    }
+                                  } else {
+                                    showAlertDialog(context);
+                                  }
+                                });
                               },
                                 child: const RotatedImage("test.png")),
                           ],
@@ -617,8 +624,7 @@ class HomeState extends State<Home> {
                                                       .comment,
                                                   style: TextStyle(
                                                       fontSize: 16,
-                                                      color:
-                                                          Colors.grey.shade700))
+                                                      color: Colors.grey.shade700))
                                             ])),
                                           ),
                                           Column(

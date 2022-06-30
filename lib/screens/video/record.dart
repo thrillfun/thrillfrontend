@@ -17,17 +17,18 @@ import '../../main.dart';
 import '../../utils/util.dart';
 
 class Record extends StatefulWidget {
-  const Record({Key? key}) : super(key: key);
+  const Record({Key? key, required this.soundMap}) : super(key: key);
+  final Map? soundMap;
 
   @override
   State<Record> createState() => _RecordState();
 
   static const String routeName = '/record';
 
-  static Route route() {
+  static Route route({Map? soundMap_}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => const Record(),
+      builder: (context) => Record(soundMap: soundMap_,),
     );
   }
 }
@@ -116,6 +117,10 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    if(widget.soundMap!=null){
+      selectedSound = widget.soundMap?["soundName"];
+      pickedSoundPath = widget.soundMap?["soundPath"];
+    }
     onNewCameraSelected(cameras[0]);
     super.initState();
 
@@ -676,7 +681,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController!.pause();
                             }
-                            PostData m = PostData(filePath: mainPath, filterName: filterImage, pickedSoundPath: pickedSoundPath);
+                            PostData m = PostData(filePath: file.path, filterName: filterImage, pickedSoundPath: pickedSoundPath);
                             Navigator.pushNamed(context, "/preview",arguments: m);
 
                           } else {

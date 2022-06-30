@@ -98,54 +98,80 @@ class _PostVideoState extends State<PostVideo> {
     // print(videoFile.path);
 
     if(widget.data.pickedSoundPath==null || radioGroupValue==0){
-      FFmpegKit.execute("-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -c copy -t ${widget.data.map!["end"]} -c:a aac $outputPath").then((session) async {
-        final returnCode = await session.getReturnCode();
+      try{
+        FFmpegKit.execute(
+            "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c:a aac $outputPath"
+            //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
+        ).then((session) async {
+          final returnCode = await session.getReturnCode();
+          // final logs = await session.getLogsAsString();
+          // final logList = logs.split('\n');
+          // print("============================> LOG STARTED!!!!");
+          // for(var e in logList){
+          // print(e);
+          // }
+          // print("============================> LOG ENDED!!!!");
 
-        if (ReturnCode.isSuccess(returnCode)) {
-          // print("============================> Success!!!!");
-          setState(() {
-            isProcessing = false;
-            wasSuccess = true;
-            draftORpost=='draft'?draftUpload():postUpload();
-          });
-        } else {
-          // print("============================> Failed!!!!");
-          closeDialogue(context);
-          showErrorToast(context, "Video processing failed!");
-          setState(()=>isProcessing = false);
-          Navigator.pop(context);
-        }
-      });
+          if (ReturnCode.isSuccess(returnCode)) {
+            // print("============================> Success!!!!");
+            setState(() {
+              isProcessing = false;
+              wasSuccess = true;
+              draftORpost=='draft'?draftUpload():postUpload();
+            });
+          } else {
+            // print("============================> Failed!!!!");
+            closeDialogue(context);
+            showErrorToast(context, "Video processing failed!");
+            setState(()=>isProcessing = false);
+            Navigator.pop(context);
+          }
+        });
+      } catch(e){
+        closeDialogue(context);
+        print(e.toString());
+        showErrorToast(context, "Video Processing Failed");
+      }
     } else {
-      FFmpegKit.execute(
+      try{
+        String start = Duration(seconds: widget.data.map!["start"]).toString().split('.').first;
+        String end = Duration(seconds: widget.data.map!["end"]).toString().split('.').first;
+        String time = (int.parse(widget.data.map!["end"].toString())-int.parse(widget.data.map!["start"].toString())).toString();
+        FFmpegKit.execute(
           //"-y -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a $outputPath"
           //"-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -qscale 5 -c:a aac $outputPath"
           //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
-          "-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -c:v copy -c:a aac $outputPath"
-      ).then((session) async {
-        final returnCode = await session.getReturnCode();
-        final logs = await session.getLogsAsString();
-        //final logList = logs.split('\n');
-        // print("============================> LOG STARTED!!!!");
-        // for(var e in logList){
+            //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
+            "-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 $outputPath"
+        ).then((session) async {
+          final returnCode = await session.getReturnCode();
+          // final logs = await session.getLogsAsString();
+          // final logList = logs.split('\n');
+          // print("============================> LOG STARTED!!!!");
+          // for(var e in logList){
           // print(e);
-        // }
-        // print("============================> LOG ENDED!!!!");
-        if (ReturnCode.isSuccess(returnCode)) {
-          //print("============================> Success!!!!");
-          setState(() {
-            isProcessing = false;
-            wasSuccess = true;
-            draftORpost=='draft'?draftUpload():postUpload();
-          });
-        } else {
-          //print("============================> Failed!!!!");
-          closeDialogue(context);
-          showErrorToast(context, "Video processing failed!");
-          setState(()=>isProcessing = false);
-          Navigator.pop(context);
-        }
-      });
+          // }
+          // print("============================> LOG ENDED!!!!");
+          if (ReturnCode.isSuccess(returnCode)) {
+            //print("============================> Success!!!!");
+            setState(() {
+              isProcessing = false;
+              wasSuccess = true;
+              draftORpost=='draft'?draftUpload():postUpload();
+            });
+          } else {
+            //print("============================> Failed!!!!");
+            closeDialogue(context);
+            showErrorToast(context, "Video processing failed!");
+            setState(()=>isProcessing = false);
+            Navigator.pop(context);
+          }
+        });
+      } catch(e){
+        closeDialogue(context);
+        print(e.toString());
+        showErrorToast(context, "Video Processing Failed");
+      }
     }
   }
 

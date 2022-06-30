@@ -2,7 +2,7 @@ import 'package:thrill/models/user.dart';
 
 class VideoModel {
   int id, comments;
-  String video, description, filter, gif_image, sound_name, sound_category_name;
+  String video, description, filter, gif_image, sound, sound_name, sound_category_name;
   int likes,views;
   UserModel user;
 
@@ -15,6 +15,7 @@ class VideoModel {
       this.user,
       this.filter,
       this.gif_image,
+      this.sound,
       this.sound_name,
       this.sound_category_name,this.views);
 
@@ -30,6 +31,7 @@ class VideoModel {
         users,
         json['filter'] ?? '',
         json['gif_image'] ?? '',
+        json['sound'] ?? '',
         json['sound_name'] ?? '',
         json['sound_category_name'] ?? '',json['views'] ?? 0);
   }
@@ -44,6 +46,7 @@ class VideoModel {
     data['user'] = user.toJson();
     data['filter'] = filter;
     data['gif_image'] = gif_image;
+    data['sound'] = sound;
     data['sound_name'] = sound_name;
     data['sound_category_name'] = sound_category_name;
     data['views'] = views;
@@ -59,6 +62,7 @@ class VideoModel {
       UserModel? user,
       String? filter,
       String? gif_image,
+        String? sound,
         String? sound_name,
         String? sound_category_name,
         int? views,
@@ -73,6 +77,7 @@ class VideoModel {
         this.filter,
         this.gif_image,
         this.sound_name,
+        this.sound,
         this.sound_category_name,
       views ?? this.views,
     );
