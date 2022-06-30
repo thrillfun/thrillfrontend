@@ -52,6 +52,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
             videoPlayerController!.setVolume(1);
             initialized = true;
             showGIF = true;
+            _start = videoPlayerController!.value.duration.inSeconds~/2;
             startTimer();
             setState(() {});
           }
