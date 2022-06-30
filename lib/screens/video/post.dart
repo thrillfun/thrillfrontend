@@ -141,7 +141,7 @@ class _PostVideoState extends State<PostVideo> {
           //"-y -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a $outputPath"
           //"-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -qscale 5 -c:a aac $outputPath"
           //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
-            //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
+          //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
             "-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 $outputPath"
         ).then((session) async {
           final returnCode = await session.getReturnCode();
