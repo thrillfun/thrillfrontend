@@ -77,14 +77,10 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
           oneSec,
               (Timer timer) {
             if (_start == 0) {
-              setState(() {
                 timer.cancel();
-              });
               callViewApi();
             } else {
-              setState(() {
                 _start--;
-              });
             }
           },
         );
