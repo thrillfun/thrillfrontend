@@ -86,7 +86,8 @@ class _PostVideoState extends State<PostVideo> {
     final int seconds = videoPlayerController.value.duration.inMilliseconds;
     final double percent = (time/seconds)*100;
     //print("Progress ====>>> ${percent.toStringAsFixed(0)}%");
-    setState(()=>percentage=percent);
+    percentage = percent;
+    if (mounted) setState((){});
   }
 
   startProcessing(String draftORpost)async{

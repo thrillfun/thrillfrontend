@@ -679,7 +679,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                           int size = file.lengthSync()~/1000000;
                           if(size < 31){
                             if (_isPlayPause) {
-                              videoController!.pause();
+                              videoController?.pause();
                             }
                             PostData m = PostData(filePath: file.path, filterName: filterImage, pickedSoundPath: pickedSoundPath);
                             Navigator.pushNamed(context, "/preview",arguments: m);

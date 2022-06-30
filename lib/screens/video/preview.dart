@@ -37,11 +37,11 @@ class _PreviewState extends State<Preview> {
 
   @override
   void initState() {
-    createThumbs();
     videoPlayerController =
     VideoPlayerController.file(
         File(widget.data.filePath))
       ..initialize().then((value) {
+        createThumbs();
         videoPlayerController.play();
         videoPlayerController.setLooping(true);
         videoPlayerController.setVolume(1);
@@ -94,7 +94,7 @@ class _PreviewState extends State<Preview> {
               child: ElevatedButton(
                   onPressed:
                   rangeController.end-rangeController.start<15?
-                  null:continuePressed,
+                  null:rangeController.end-rangeController.start>60?null:continuePressed,
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(getWidth(context)*.60, 45),
                     shape: RoundedRectangleBorder(
@@ -163,10 +163,13 @@ class _PreviewState extends State<Preview> {
             top: 100, left: 30, right: 30,
               child: Text(
                 rangeController.end-rangeController.start<15?
-                  "Error: Minimum video duration is\n15 seconds!":"",
+                  "Error: Minimum video duration is\n15 seconds!":
+                rangeController.end-rangeController.start>60?
+                "Error: Maximum video duration is\n60 seconds!":"",
                 style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.red),
                 textAlign: TextAlign.center,
               )),
+
           Positioned(
             bottom: 130,
               left: 10,
@@ -186,13 +189,14 @@ class _PreviewState extends State<Preview> {
   }
 
   createThumbs()async{
+    double frameRate = 5/videoPlayerController.value.duration.inSeconds;
     DateTime dateTime = DateTime.now();
     String outputPath = "$saveCacheDirectory${dateTime.day}${dateTime.month}${dateTime.year}${dateTime.hour}${dateTime.minute}${dateTime.second}/";
     directory = Directory(outputPath);
     if(!directory.existsSync()){
       directory.createSync();
     }
-    FFmpegKit.execute("-i ${widget.data.filePath} -r 1/3 -f image2 ${outputPath}image-%3d.png").then((session) async {
+    FFmpegKit.execute("-i ${widget.data.filePath} -r $frameRate -f image2 ${outputPath}image-%3d.png").then((session) async {
       final returnCode = await session.getReturnCode();
       final logs = await session.getLogsAsString();
       final logList = logs.split('\n');
