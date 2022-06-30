@@ -681,7 +681,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController!.pause();
                             }
-                            PostData m = PostData(filePath: mainPath, filterName: filterImage, pickedSoundPath: pickedSoundPath);
+                            PostData m = PostData(filePath: file.path, filterName: filterImage, pickedSoundPath: pickedSoundPath);
                             Navigator.pushNamed(context, "/preview",arguments: m);
 
                           } else {
