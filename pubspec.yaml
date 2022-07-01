@@ -63,6 +63,8 @@ dependencies:
   qr_code_scanner: ^0.7.0
   flutter_svg: ^1.0.3
   syncfusion_flutter_sliders: ^20.1.61
+  file_picker: ^4.6.1
+  share_plus: ^4.0.10
 
 dev_dependencies:
   flutter_test:

@@ -3,6 +3,7 @@ import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/screen.dart';
+import 'package:thrill/screens/sound_details.dart';
 
 import '../models/vidio_discover_model.dart';
 import '../screens/new_song.dart';
@@ -31,7 +32,7 @@ class AppRouter {
       case Profile.routeName:
         return Profile.route();
       case Record.routeName:
-        return Record.route();
+        return Record.route(soundMap_: settings.arguments as Map?);
       case PostVideo.routeName:
         return PostVideo.route(videoData: settings.arguments as PostData);
       case SpinTheWheel.routeName:
@@ -72,6 +73,8 @@ class AppRouter {
         return RequestVerification.route();
       case Preview.routeName:
         return Preview.route(videoData: settings.arguments as PostData);
+      case SoundDetails.routeName:
+        return SoundDetails.route(map_: settings.arguments as Map);
       default:
         return _errorRoute();
     }

@@ -34,7 +34,7 @@ class VideoPlayerItem extends StatefulWidget {
 class _VideoPlayerItemState extends State<VideoPlayerItem> {
   VideoPlayerController? videoPlayerController;
   bool isLoading = true;
-  bool showGIF = true;
+  bool showGIF = false;
   bool initialized = false;
   bool isDispose= false;
   Timer? _timer;
@@ -51,6 +51,8 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
             videoPlayerController!.setLooping(true);
             videoPlayerController!.setVolume(1);
             initialized = true;
+            showGIF = true;
+            _start = videoPlayerController!.value.duration.inSeconds~/2;
             startTimer();
             setState(() {});
           }
@@ -76,14 +78,10 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
           oneSec,
               (Timer timer) {
             if (_start == 0) {
-              setState(() {
                 timer.cancel();
-              });
               callViewApi();
             } else {
-              setState(() {
                 _start--;
-              });
             }
           },
         );
@@ -185,7 +183,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   onLongPressStart(LongPressStartDetails d)async{
     setState((){showGIF = false;});
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 250));
     videoPlayerController!.pause();
   }
 

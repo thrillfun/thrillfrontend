@@ -12,6 +12,7 @@ import 'package:velocity_x/velocity_x.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
+import '../../models/private_model.dart';
 import '../../models/user.dart';
 import '../../rest/rest_url.dart';
 
@@ -515,8 +516,8 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  tabview(UserModel userModel, List<VideoModel> publicList,
-      List<VideoModel> privateList, List<VideoModel> likesList) {
+  tabview(UserModel userModel, List<PrivateModel> publicList,
+      List<PrivateModel> privateList, List<PrivateModel> likesList) {
     if (selectedTab == 0) {
       return feed(publicList);
     } else if (selectedTab == 1) {
@@ -526,7 +527,7 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  feed(List<VideoModel> publicList) {
+  feed(List<PrivateModel> publicList) {
     return publicList.isEmpty
         ? RichText(
         textAlign: TextAlign.center,
@@ -545,7 +546,7 @@ class _ProfileState extends State<Profile> {
         : Flexible(
       child: GridView.builder(
           padding: const EdgeInsets.all(2),
-          physics: const NeverScrollableScrollPhysics(),
+          //physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
@@ -599,7 +600,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  lock(List<VideoModel> privateList) {
+  lock(List<PrivateModel> privateList) {
     return privateList.isEmpty
         ? RichText(
         textAlign: TextAlign.center,
@@ -672,7 +673,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  fav(UserModel userModel, List<VideoModel> likesList) {
+  fav(UserModel userModel, List<PrivateModel> likesList) {
     return likesList.isEmpty
         ? RichText(
             textAlign: TextAlign.center,

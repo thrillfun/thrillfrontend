@@ -1,13 +1,11 @@
 import 'dart:io';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full/media_information_session.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/core.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
-import 'package:ffmpeg_kit_flutter_full/ffprobe_kit.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/post_data.dart';
@@ -39,11 +37,11 @@ class _PreviewState extends State<Preview> {
 
   @override
   void initState() {
-    createThumbs();
     videoPlayerController =
     VideoPlayerController.file(
         File(widget.data.filePath))
       ..initialize().then((value) {
+        createThumbs();
         videoPlayerController.play();
         videoPlayerController.setLooping(true);
         videoPlayerController.setVolume(1);
@@ -96,7 +94,7 @@ class _PreviewState extends State<Preview> {
               child: ElevatedButton(
                   onPressed:
                   rangeController.end-rangeController.start<15?
-                  null:continuePressed,
+                  null:rangeController.end-rangeController.start>60?null:continuePressed,
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(getWidth(context)*.60, 45),
                     shape: RoundedRectangleBorder(
@@ -138,6 +136,14 @@ class _PreviewState extends State<Preview> {
                 min: 0,
                 initialValues: sfRangeValues,
                 activeColor: Colors.transparent,
+                startThumbIcon: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
+                ),
+                endThumbIcon: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
+                ),
                 onChanged: (SfRangeValues val){
                   setState(() {});
                 },
@@ -157,10 +163,13 @@ class _PreviewState extends State<Preview> {
             top: 100, left: 30, right: 30,
               child: Text(
                 rangeController.end-rangeController.start<15?
-                  "Error: Minimum video duration is\n15 seconds!":"",
+                  "Error: Minimum video duration is\n15 seconds!":
+                rangeController.end-rangeController.start>60?
+                "Error: Maximum video duration is\n60 seconds!":"",
                 style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.red),
                 textAlign: TextAlign.center,
               )),
+
           Positioned(
             bottom: 130,
               left: 10,
@@ -180,13 +189,14 @@ class _PreviewState extends State<Preview> {
   }
 
   createThumbs()async{
+    double frameRate = 5/videoPlayerController.value.duration.inSeconds;
     DateTime dateTime = DateTime.now();
     String outputPath = "$saveCacheDirectory${dateTime.day}${dateTime.month}${dateTime.year}${dateTime.hour}${dateTime.minute}${dateTime.second}/";
     directory = Directory(outputPath);
     if(!directory.existsSync()){
       directory.createSync();
     }
-    FFmpegKit.execute("-i ${widget.data.filePath} -r 1/3 -f image2 ${outputPath}image-%3d.png").then((session) async {
+    FFmpegKit.execute("-i ${widget.data.filePath} -r $frameRate -f image2 ${outputPath}image-%3d.png").then((session) async {
       final returnCode = await session.getReturnCode();
       final logs = await session.getLogsAsString();
       final logList = logs.split('\n');
@@ -197,8 +207,8 @@ class _PreviewState extends State<Preview> {
       print("============================> LOG ENDED!!!!");
 
       if (ReturnCode.isSuccess(returnCode)) {
-        MediaInformationSession info = await FFprobeKit.getMediaInformation(outputPath);
-        Map? _gifInfo = info.getMediaInformation()?.getAllProperties()?["streams"][0];
+        //MediaInformationSession info = await FFprobeKit.getMediaInformation(outputPath);
+        //Map? _gifInfo = info.getMediaInformation()?.getAllProperties()?["streams"][0];
         print("============================> Success!!!!");
         setState((){
           thumbList.addAll(directory.listSync());
@@ -216,7 +226,7 @@ class _PreviewState extends State<Preview> {
     PostData newPostData = PostData(
         filePath: widget.data.filePath,
         filterName: widget.data.filterName,
-        addSoundModel: widget.data.addSoundModel,
+        pickedSoundPath: widget.data.pickedSoundPath,
         map: {"start": rangeController.start.toInt().toInt(), "end":rangeController.end.toInt()}
     );
     await Navigator.pushNamed(context, "/postVideo",arguments: newPostData);

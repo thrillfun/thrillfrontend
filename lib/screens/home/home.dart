@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +15,6 @@ import '../../widgets/image_rotate.dart';
 import '../../widgets/video_item.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -25,22 +23,23 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
+
   int selectedTopIndex = 0;
   List<String> likeList = List<String>.empty(growable: true);
   List<Comments> commentList = List<Comments>.empty(growable: true);
   List<String> likeComment = List<String>.empty(growable: true);
   TextEditingController msgCtr = TextEditingController();
   List<String> followList = List<String>.empty(growable: true);
-
-  final PageController _pageController =
-      PageController(initialPage: 0, keepPage: true);
+  final PageController _pageController = PageController(initialPage: 0, keepPage: true);
   int _currentPage = 0;
   bool _isOnPageTurning = false;
   String isError = '';
+  UserModel? userModel;
 
   @override
   void initState() {
     loadLikes();
+    getUserData();
     _pageController.addListener(_scrollListener);
     super.initState();
   }
@@ -297,12 +296,27 @@ class HomeState extends State<Home> {
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
-                                        '@${state.list[index].user.username}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline6!
-                                            .copyWith(color: Colors.white),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          await isLogined().then((value) {
+                                            if (value) {
+                                              Navigator.pushNamed(
+                                                  context, "/viewProfile", arguments: {
+                                                "userModel": state.list[index].user,
+                                                "getProfile": false
+                                              });
+                                            } else {
+                                              showAlertDialog(context);
+                                            }
+                                          });
+                                        },
+                                        child: Text(
+                                          '@${state.list[index].user.username}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline6!
+                                              .copyWith(color: Colors.white),
+                                        ),
                                       ),
                                       const SizedBox(
                                         width: 5,
@@ -313,70 +327,73 @@ class HomeState extends State<Home> {
                                               'assets/verified.svg',
                                             )
                                           : const SizedBox(width: 2),
-                                      InkWell(
-                                        onTap: () async {
-                                          await isLogined().then((value) async {
-                                            if (value) {
-                                              if (followList.contains(state
-                                                  .list[index].id
-                                                  .toString())) {
-                                                followList.remove(state
+                                      Visibility(
+                                        visible: userModel?.id==state.list[index].user.id?false:true,
+                                        child: InkWell(
+                                          onTap: () async {
+                                            await isLogined().then((value) async {
+                                              if (value) {
+                                                if (followList.contains(state
                                                     .list[index].id
-                                                    .toString());
-                                                int followers = int.parse(state
-                                                    .list[index].user.followers);
-                                                followers--;
-                                                state.list[index].user.followers =
-                                                    followers.toString();
-                                                state.list[index].copyWith(
-                                                    user: state.list[index].user);
-                                              } else {
-                                                followList.add(state
-                                                    .list[index].id
-                                                    .toString());
-                                                int followers = int.parse(state
-                                                    .list[index].user.followers);
-                                                followers++;
-                                                state.list[index].user.followers =
-                                                    followers.toString();
-                                                state.list[index].copyWith(
-                                                    user: state.list[index].user);
-                                              }
-                                              SharedPreferences pref =
-                                              await SharedPreferences
-                                                  .getInstance();
-                                              pref.setStringList(
-                                                  'followList', followList);
+                                                    .toString())) {
+                                                  followList.remove(state
+                                                      .list[index].id
+                                                      .toString());
+                                                  int followers = int.parse(state
+                                                      .list[index].user.followers);
+                                                  followers--;
+                                                  state.list[index].user.followers =
+                                                      followers.toString();
+                                                  state.list[index].copyWith(
+                                                      user: state.list[index].user);
+                                                } else {
+                                                  followList.add(state
+                                                      .list[index].id
+                                                      .toString());
+                                                  int followers = int.parse(state
+                                                      .list[index].user.followers);
+                                                  followers++;
+                                                  state.list[index].user.followers =
+                                                      followers.toString();
+                                                  state.list[index].copyWith(
+                                                      user: state.list[index].user);
+                                                }
+                                                SharedPreferences pref =
+                                                await SharedPreferences
+                                                    .getInstance();
+                                                pref.setStringList(
+                                                    'followList', followList);
 
-                                              BlocProvider.of<VideoBloc>(context)
-                                                  .add(FollowUnfollow(
-                                                  action: followList.contains(
-                                                      state.list[index].id
-                                                          .toString())
-                                                      ? "follow"
-                                                      : "unfollow",
-                                                  publisherId: state
-                                                      .list[index].user.id));
-                                              setState(() {});
-                                            } else {
-                                              showAlertDialog(context);
-                                            }
-                                          });
-                                        },
-                                        child: Container(
-                                          margin: const EdgeInsets.only(left: 8),
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                              BorderRadius.circular(5),
-                                              border: Border.all(
-                                                  color: Colors.white, width: 1)),
-                                          child:  Center(
-                                            child: Text(
-                                              followList.contains(state.list[index].id.toString())
-                                                  ? "Following" : "Follow",
-                                              style:
-                                              const TextStyle(color: Colors.white),
+                                                BlocProvider.of<VideoBloc>(context)
+                                                    .add(FollowUnfollow(
+                                                    action: followList.contains(
+                                                        state.list[index].id
+                                                            .toString())
+                                                        ? "follow"
+                                                        : "unfollow",
+                                                    publisherId: state
+                                                        .list[index].user.id));
+                                                setState(() {});
+                                              } else {
+                                                showAlertDialog(context);
+                                              }
+                                            });
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.only(left: 8),
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                BorderRadius.circular(5),
+                                                border: Border.all(
+                                                    color: Colors.white, width: 1)),
+                                            child:  Center(
+                                              child: Text(
+                                                followList.contains(state.list[index].id.toString())
+                                                    ? "Following" : "Follow",
+                                                style:
+                                                const TextStyle(color: Colors.white),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -413,7 +430,7 @@ class HomeState extends State<Home> {
                                       Flexible(
                                         child:
                                           state.list[index].sound_name.isEmpty
-                                              ? "Original sound - @Fintory".marquee(textStyle:TextStyle(color: Colors.white)).h2(context)
+                                              ? "Original Sound".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
                                               : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle:TextStyle(color: Colors.white)).h2(context),
                                       ),
                                     ],
@@ -421,7 +438,19 @@ class HomeState extends State<Home> {
                                 ],
                               ),
                             ),
-                            const RotatedImage("test.png"),
+                            GestureDetector(
+                              onTap:() async {
+                                await isLogined().then((value) {
+                                  if (value) {
+                                    if(state.list[index].sound.isNotEmpty){
+                                      Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                    }
+                                  } else {
+                                    showAlertDialog(context);
+                                  }
+                                });
+                              },
+                                child: const RotatedImage("test.png")),
                           ],
                         ),
                       ),
@@ -615,8 +644,7 @@ class HomeState extends State<Home> {
                                                       .comment,
                                                   style: TextStyle(
                                                       fontSize: 16,
-                                                      color:
-                                                          Colors.grey.shade700))
+                                                      color: Colors.grey.shade700))
                                             ])),
                                           ),
                                           Column(
@@ -843,5 +871,12 @@ class HomeState extends State<Home> {
         return alert;
       },
     );
+  }
+  
+  getUserData() async {
+    var pref = await SharedPreferences.getInstance();
+    var currentUser = pref.getString('currentUser');
+    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
+    setState(()=> userModel = current);
   }
 }

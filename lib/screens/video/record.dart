@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
@@ -13,21 +14,21 @@ import 'package:velocity_x/velocity_x.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../main.dart';
-import '../../models/add_sound_model.dart';
 import '../../utils/util.dart';
 
 class Record extends StatefulWidget {
-  const Record({Key? key}) : super(key: key);
+  const Record({Key? key, required this.soundMap}) : super(key: key);
+  final Map? soundMap;
 
   @override
   State<Record> createState() => _RecordState();
 
   static const String routeName = '/record';
 
-  static Route route() {
+  static Route route({Map? soundMap_}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => const Record(),
+      builder: (context) => Record(soundMap: soundMap_,),
     );
   }
 }
@@ -48,7 +49,8 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
   String filterImage = "";
   List<String> effectsfirst = List<String>.empty(growable: true);
   String? selectedSound;
-  AddSoundModel? addSoundModel;
+  //AddSoundModel? addSoundModel;
+  String? pickedSoundPath;
   AudioPlayer audioPlayer = AudioPlayer();
   Timer? autoStopRecordingTimer;
   Duration videoDuration = const Duration();
@@ -115,6 +117,10 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    if(widget.soundMap!=null){
+      selectedSound = widget.soundMap?["soundName"];
+      pickedSoundPath = widget.soundMap?["soundPath"];
+    }
     onNewCameraSelected(cameras[0]);
     super.initState();
 
@@ -440,15 +446,33 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 const Spacer(),
                 TextButton(
                     onPressed: () async {
-                      await Navigator.pushNamed(context, "/addSound").then((value) {
-                        if(value!=null){
-                          AddSoundModel? addSoundModelTemp = value as AddSoundModel?;
-                          setState((){
-                            addSoundModel = addSoundModelTemp;
-                            selectedSound=addSoundModelTemp?.name;
-                          });
+                      // await Navigator.pushNamed(context, "/addSound").then((value) {
+                      //   if(value!=null){
+                      //     AddSoundModel? addSoundModelTemp = value as AddSoundModel?;
+                      //     setState((){
+                      //       addSoundModel = addSoundModelTemp;
+                      //       selectedSound = addSoundModelTemp?.name;
+                      //     });
+                      //   }
+                      // });
+                      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['mp3'], allowMultiple: false);
+                      if(result!=null){
+                        File file = File(result.files.single.path!);
+                        double size = file.lengthSync()/1000000;
+                        String name = file.path.split('/').last.split('.').first;
+                        if(size < 6){
+                          if(size > 0.2){
+                            setState(() {
+                              pickedSoundPath = file.path;
+                              selectedSound = name;
+                            });
+                          } else {
+                            showErrorToast(context, "File Size too Small!!");
+                          }
+                        } else {
+                          showErrorToast(context, "Max File Size is 5 MB");
                         }
-                      });
+                      }
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -655,9 +679,9 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                           int size = file.lengthSync()~/1000000;
                           if(size < 31){
                             if (_isPlayPause) {
-                              videoController!.pause();
+                              videoController?.pause();
                             }
-                            PostData m = PostData(filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel);
+                            PostData m = PostData(filePath: file.path, filterName: filterImage, pickedSoundPath: pickedSoundPath);
                             Navigator.pushNamed(context, "/preview",arguments: m);
 
                           } else {
@@ -759,7 +783,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController!.pause();
                             }
-                            PostData m = PostData(filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel);
+                            PostData m = PostData(filePath: mainPath, filterName: filterImage, pickedSoundPath: pickedSoundPath);
                             Navigator.pushNamed(context, "/preview",arguments: m);
                           },
                           child: VxCircle(
@@ -884,7 +908,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     // Initialize controller
     try {
       await cameraController.initialize();
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error initializing camera: $e');
     }
 
@@ -921,8 +945,8 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
       return;
     }
     try {
-      if(addSoundModel!=null){
-        await audioPlayer.play("$saveCacheDirectory${addSoundModel!.sound}", isLocal: true);
+      if(pickedSoundPath!=null){
+        await audioPlayer.play(pickedSoundPath!, isLocal: true);
       }
       await cameraController!.startVideoRecording();
       autoStopRecordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
@@ -966,7 +990,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
         _isRecordingInProgress = true;
         //  print(_isRecordingInProgress);
       });
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error starting to record video: $e');
     }
   }
@@ -983,7 +1007,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
         //  print(_isRecordingInProgress);
       });
       return file;
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error stopping video recording: $e');
       return null;
     }
@@ -996,7 +1020,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.pauseVideoRecording();
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error pausing video recording: $e');
     }
   }
@@ -1008,7 +1032,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.resumeVideoRecording();
-    } on CameraException catch (e) {
+    } on CameraException {
       // print('Error resuming video recording: $e');
     }
   }

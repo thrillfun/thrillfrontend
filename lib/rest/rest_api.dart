@@ -186,7 +186,7 @@ class RestApi {
   }
 
   static Future<http.Response> postVideo(String videoUrl,
-      String sound,String category,String hashtags,String visibility,
+      String sound,String soundName,String category,String hashtags,String visibility,
       int isCommentAllowed,String description,String filterImg,String language, gifName) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
@@ -203,6 +203,7 @@ class RestApi {
         'user_id': current.id.toString(),
         'video': videoUrl,
         'sound': sound,
+        'sound_name': soundName,
         'filter': filterImg,
         'language': language,
         'category': category,
@@ -250,6 +251,7 @@ class RestApi {
       RestUrl.postComment,
       headers: {
         'Authorization': 'Bearer $token',
+        "Accept": 'application/json; charset=ASCII'
       },
       body: {
         'video_id': videoId.toString(),
@@ -258,7 +260,9 @@ class RestApi {
       },
     );
 
-    response = http.Response(jsonEncode(result), 200);
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
     return response;
   }
 
@@ -275,7 +279,9 @@ class RestApi {
         'video_id': videoId.toString(),
       },
     );
-    response = http.Response(jsonEncode(result), 200);
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
     return response;
   }
 
@@ -724,7 +730,7 @@ class RestApi {
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var result = await RestClient.getData(
-        RestUrl.getPrivateVideo,
+        RestUrl.getHashtagList,
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -732,7 +738,6 @@ class RestApi {
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
-
     return response;
   }
 
@@ -783,6 +788,44 @@ class RestApi {
         'payment_address_user': upiId,
         'payment_network_user': payMethod,
         'amount': amount
+      },
+    );
+
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
+
+  static Future<http.Response> getPaymentHistory() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.getData(
+      RestUrl.paymentHistory,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
+
+  static Future<http.Response> getVideosBySound(String sound) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.videoBySound,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'sound': sound
       },
     );
 

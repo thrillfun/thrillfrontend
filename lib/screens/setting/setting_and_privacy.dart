@@ -6,7 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
 import 'package:velocity_x/velocity_x.dart';
-
+import 'package:share_plus/share_plus.dart';
 import '../../common/strings.dart';
 
 class SettingAndPrivacy extends StatefulWidget {
@@ -172,7 +172,8 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
               ),
               InkWell(
                 onTap: () {
-                  share();
+                  //share();
+                  Share.share('text');
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
