@@ -1,12 +1,9 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/models/video_model.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../blocs/profile/profile_bloc.dart';
@@ -26,7 +23,7 @@ class Profile extends StatefulWidget {
   static Route route() {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => Profile(),
+      builder: (context) => const Profile(),
     );
   }
 }
@@ -183,7 +180,7 @@ class _ProfileState extends State<Profile> {
                                 RichText(
                                     text: TextSpan(children: [
                                   TextSpan(
-                                      text: '${state.userModel.likes} \n',
+                                      text: '${state.userModel.likes.isEmpty?0:state.userModel.likes} \n',
                                       style: const TextStyle(
                                           color: Colors.black, fontSize: 17)),
                                   const TextSpan(
