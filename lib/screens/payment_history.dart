@@ -58,6 +58,7 @@ class _PaymentHistoryState extends State<PaymentHistory> {
       paymentHistoryList.isEmpty?
       Center(child: Text("Payment History Not Found!", style: Theme.of(context).textTheme.headline3,),):
       ListView.builder(
+          shrinkWrap: true,
           itemCount: paymentHistoryList.length,
           itemBuilder: (BuildContext context, int index) {
             return Padding(
@@ -66,8 +67,8 @@ class _PaymentHistoryState extends State<PaymentHistory> {
               child: Row(
                 children: [
                   Container(
-                    height: 60,
-                    width: 60,
+                    height: 55,
+                    width: 55,
                     padding: const EdgeInsets.all(5),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
@@ -82,13 +83,15 @@ class _PaymentHistoryState extends State<PaymentHistory> {
                     child: RichText(
                       text: TextSpan(children: [
                         TextSpan(
-                            text: paymentHistoryList[index].transactionStatus=="Pending"?
-                            paymentHistoryList[index].transactionStatus:
-                            paymentHistoryList[index].transactionId.toString(),
-                            style: const TextStyle(
+                            text: paymentHistoryList[index].transactionStatus,
+                            style:  TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Colors.black)),
+                                fontSize: 17,
+                                color: paymentHistoryList[index].transactionStatus=="Pending"
+                                ? Colors.blue :
+                                paymentHistoryList[index].transactionStatus=="Completed"
+                                    ? Colors.green
+                                :Colors.red)),
                         const TextSpan(text: '\n'),
                         const WidgetSpan(
                             child: SizedBox(
@@ -96,19 +99,26 @@ class _PaymentHistoryState extends State<PaymentHistory> {
                         )),
                         TextSpan(
                             text: DateFormat(dateTimeFormat)
-                                .format(DateTime.parse(paymentHistoryList[index].createDate)),
-                            style: const TextStyle(color: Colors.grey))
+                                .format(DateTime.parse(paymentHistoryList[index].createDate)
+
+                            ),
+                            style: const TextStyle(color: Colors.grey)),
+                        const WidgetSpan(
+                            child: SizedBox(
+                              width: 5,
+                            )),
+
                       ]),
                     ),
                   ),
                   Text(
                     paymentHistoryList[index].currency,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                   Text(
                     ' ${paymentHistoryList[index].amount}/-',
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 22),
+                        fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   const SizedBox(
                     width: 10,
@@ -129,6 +139,7 @@ class _PaymentHistoryState extends State<PaymentHistory> {
       isLoading = false;
       setState((){});
     } catch(e){
+      print(e.toString());
       setState(()=>isLoading = false);
     }
   }
