@@ -206,18 +206,23 @@ class HomeState extends State<Home> {
                                   }
                                 });
                               },
-                              child: likeList
-                                      .contains(state.list[index].id.toString())
-                                  ? const Icon(
-                                      Icons.favorite,
-                                      color: Colors.red,
-                                      size: 28,
-                                    )
-                                  : const Icon(
-                                      Icons.favorite_border,
-                                      color: Colors.white,
-                                      size: 28,
-                                    ),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 500),
+                                child: likeList
+                                    .contains(state.list[index].id.toString())
+                                    ? const Icon(
+                                  Icons.favorite,
+                                  key: ValueKey("like"),
+                                  color: Colors.red,
+                                  size: 28,
+                                )
+                                    : const Icon(
+                                  Icons.favorite_border,
+                                  key: ValueKey("unlike"),
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ),
                             ),
                             Text(
                               state.list[index].likes.toString(),
