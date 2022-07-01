@@ -436,7 +436,7 @@ class HomeState extends State<Home> {
                                         child:
                                           state.list[index].sound_name.isEmpty
                                               ? "Original Sound".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
-                                              : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle:TextStyle(color: Colors.white)).h2(context),
+                                              : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                       ),
                                     ],
                                   ),
@@ -559,7 +559,7 @@ class HomeState extends State<Home> {
     try {
       progressDialogue(context);
       var result = await RestApi.getCommentListOnVideo(videoId);
-      var json = jsonDecode(result.body);
+      var json = jsonDecode(utf8.decode(result.bodyBytes));
       closeDialogue(context);
       if (json['status']) {
         commentList.clear();

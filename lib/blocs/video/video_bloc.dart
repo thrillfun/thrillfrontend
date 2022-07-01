@@ -22,6 +22,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
   void _onVideoLoading(VideoLoading event, Emitter<VideoState> emit) async {
     emit(VideoInitial());
     var result = await _videoRepository.getVideo();
+    print(result);
     if (result['status']) {
       try {
         list = List<VideoModel>.from(

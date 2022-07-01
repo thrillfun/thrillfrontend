@@ -121,7 +121,9 @@ class RestApi {
       RestUrl.getVideoList,
     );
 
-    response = http.Response(jsonEncode(result), 200);
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
     return response;
   }
 
@@ -198,6 +200,7 @@ class RestApi {
       RestUrl.postNewVideo,
       headers: {
         'Authorization': 'Bearer $token',
+        "Accept": 'application/json; charset=utf-8'
       },
       body: {
         'user_id': current.id.toString(),
@@ -214,7 +217,9 @@ class RestApi {
         'gif_image':gifName
       },
     );
-    response = http.Response(jsonEncode(result), 200);
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
     return response;
   }
 
@@ -251,7 +256,7 @@ class RestApi {
       RestUrl.postComment,
       headers: {
         'Authorization': 'Bearer $token',
-        "Accept": 'application/json; charset=ASCII'
+        "Accept": 'application/json; charset=utf-8'
       },
       body: {
         'video_id': videoId.toString(),
