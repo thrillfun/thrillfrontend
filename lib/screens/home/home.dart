@@ -436,7 +436,7 @@ class HomeState extends State<Home> {
                                         child:
                                           state.list[index].sound_name.isEmpty
                                               ? "Original Sound".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
-                                              : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle:TextStyle(color: Colors.white)).h2(context),
+                                              : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                       ),
                                     ],
                                   ),
