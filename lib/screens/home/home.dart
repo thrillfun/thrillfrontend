@@ -559,7 +559,7 @@ class HomeState extends State<Home> {
     try {
       progressDialogue(context);
       var result = await RestApi.getCommentListOnVideo(videoId);
-      var json = jsonDecode(result.body);
+      var json = jsonDecode(utf8.decode(result.bodyBytes));
       closeDialogue(context);
       if (json['status']) {
         commentList.clear();
