@@ -161,8 +161,6 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
       } else {
         videoPlayerController!.play();
       }
-    } else {
-      videoPlayerController!.pause();
     }
   }
 
