@@ -71,6 +71,8 @@ class AppRouter {
         return Notifications.route();
       case RequestVerification.routeName:
         return RequestVerification.route();
+      case PaymentRequest.routeName:
+        return PaymentRequest.route();
       case Preview.routeName:
         return Preview.route(videoData: settings.arguments as PostData);
       case SoundDetails.routeName:

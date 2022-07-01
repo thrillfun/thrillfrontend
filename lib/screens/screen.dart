@@ -28,3 +28,4 @@ export 'payment_history.dart';
 export 'tag_details.dart';
 export 'setting/request_verification.dart';
 export 'video/preview.dart';
+export 'setting/payment_request.dart';
