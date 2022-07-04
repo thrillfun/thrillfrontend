@@ -538,7 +538,7 @@ class RestApi {
     return response;
   }
 
-  static Future<http.Response> getSoundList(int categoryId) async {
+  static Future<http.Response> getSoundList() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
@@ -548,7 +548,7 @@ class RestApi {
         'Authorization': 'Bearer $token',
       },
       body: {
-        "category_id": categoryId.toString(),
+        //"category_id": categoryId.toString(),
       },
     );
     response = http.Response(jsonEncode(result), 200);

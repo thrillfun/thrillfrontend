@@ -14,15 +14,4 @@ class AddSoundModel {
         json['updated_at'] ?? '',
     );
   }
-
-  Map<String, dynamic> toJson() {
-    var data = <String, dynamic>{};
-    data['id'] = id;
-    data['category'] = category;
-    data['sound'] = sound;
-    data['name'] = name;
-    data['created_at'] = createDate;
-    data['updated_at'] = uploadDate;
-    return data;
-  }
 }

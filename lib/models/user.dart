@@ -19,6 +19,7 @@ class UserModel {
       box_three;
   LevelModel levels;
   String is_verified;
+  String referral_code;
 
   UserModel(
       this.id,
@@ -47,7 +48,10 @@ class UserModel {
       this.total_videos,
       this.box_two,
       this.box_three,
-      this.levels,this.is_verified);
+      this.levels,
+      this.is_verified,
+      this.referral_code,
+      );
 
   factory UserModel.fromJson(dynamic json) {
     LevelModel levels;
@@ -79,7 +83,10 @@ class UserModel {
         json['total_videos'] ?? '',
         json['box_two'] ?? '',
         json['box_three'] ?? '',
-        levels,json['is_verified'] ?? '0');
+        levels,
+        json['is_verified'] ?? '0',
+        json['referral_code'] ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -112,37 +119,41 @@ class UserModel {
     data['box_three'] = box_three;
     data['levels'] = levels.toJson();
     data['is_verified'] = is_verified;
+    data['referral_code'] = referral_code;
     return data;
   }
 
-  UserModel copyWith(
-      {int? id,
-      String? name,
-      String? facebook,
-      String? firebase_token,
-      String? phone,
-      String? youtube,
-      String? instagram,
-      String? dob,
-      String? bio,
-      String? twitter,
-      String? social_login_type,
-      String? social_login_id,
-      String? avatar,
-      String? website_url,
-      String? email,
-      String? gender,
-      String? username,
-      String? first_name,
-      String? last_name,
-      String? referral_count,
-      String? following,
-      String? followers,
-      String? likes,
-      String? total_videos,
-      String? box_two,
-      String? box_three,
-      LevelModel? levels,String? is_verified}) {
+  UserModel copyWith({
+    int? id,
+    String? name,
+    String? facebook,
+    String? firebase_token,
+    String? phone,
+    String? youtube,
+    String? instagram,
+    String? dob,
+    String? bio,
+    String? twitter,
+    String? social_login_type,
+    String? social_login_id,
+    String? avatar,
+    String? website_url,
+    String? email,
+    String? gender,
+    String? username,
+    String? first_name,
+    String? last_name,
+    String? referral_count,
+    String? following,
+    String? followers,
+    String? likes,
+    String? total_videos,
+    String? box_two,
+    String? box_three,
+    LevelModel? levels,
+    String? is_verified,
+    String? referral_code,
+  }) {
     return UserModel(
       id ?? this.id,
       name ?? this.name,
@@ -170,7 +181,9 @@ class UserModel {
       total_videos ?? this.total_videos,
       box_two ?? this.box_two,
       box_three ?? this.box_three,
-      levels ?? this.levels, is_verified ?? this.is_verified
+      levels ?? this.levels,
+      is_verified ?? this.is_verified,
+      referral_code ?? this.referral_code,
     );
   }
 }
