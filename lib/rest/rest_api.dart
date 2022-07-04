@@ -840,4 +840,21 @@ class RestApi {
 
     return response;
   }
+
+
+
+
+  static Future<http.Response> getAvailableProbilityCounter() async {
+    http.Response response;
+
+    var result = await RestClient.getData(
+      RestUrl.getProbilityCounter,
+    );
+
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
 }
