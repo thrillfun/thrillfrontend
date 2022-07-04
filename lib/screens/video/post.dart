@@ -57,7 +57,7 @@ class _PostVideoState extends State<PostVideo> {
   void initState() {
     super.initState();
     FFmpegKitConfig.enableStatisticsCallback(statisticsCallback);
-    if(widget.data.pickedSoundPath!=null){
+    if(widget.data.addSoundModel!=null){
       radioGroupValue = 1;
     }
     createGIF();
@@ -92,13 +92,13 @@ class _PostVideoState extends State<PostVideo> {
 
   startProcessing(String draftORpost)async{
     String outputPath = '$saveDirectory$newName.mp4';
-    String? audioFilePath = widget.data.pickedSoundPath;
+    String? audioFilePath = widget.data.addSoundModel?.sound;
     File videoFile = File(widget.data.filePath);
     // print(outputPath);
     // print(audioFilePath);
     // print(videoFile.path);
 
-    if(widget.data.pickedSoundPath==null || radioGroupValue==0){
+    if(widget.data.addSoundModel==null || radioGroupValue==0){
       try{
         FFmpegKit.execute(
             "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c:a aac $outputPath"
@@ -438,7 +438,7 @@ class _PostVideoState extends State<PostVideo> {
                         value: 1,
                         groupValue: radioGroupValue,
                         onChanged: (int? val) {
-                          if(widget.data.pickedSoundPath==null){
+                          if(widget.data.addSoundModel==null){
                             showErrorToast(context, "You did not chosen any sound!!");
                           } else {
                             setState(() => radioGroupValue = val ?? 1);
@@ -727,13 +727,13 @@ class _PostVideoState extends State<PostVideo> {
         fileName: '$currentUnix.gif',
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
-        if(widget.data.pickedSoundPath==null){
+        if(widget.data.addSoundModel==null){
           String tagList =
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              widget.data.pickedSoundPath==null?"Original Sound":"$currentUnix.mp3",
-              widget.data.pickedSoundPath?.split('/').last.split('.').first??"Original Sound",
+              "Original Sound",
+              "Original Sound",
               dropDownCategoryValue,
               tagList,
               "Private",
@@ -766,7 +766,7 @@ class _PostVideoState extends State<PostVideo> {
         } else {
           await _simpleS3
               .uploadFile(
-            File(widget.data.pickedSoundPath!),
+            File(widget.data.addSoundModel!.sound),
             "thrillvideo",
             "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
             AWSRegions.usEast1,
@@ -779,8 +779,8 @@ class _PostVideoState extends State<PostVideo> {
             jsonEncode(selectedHashtags);
             var result = await RestApi.postVideo(
                 videoId,
-                widget.data.pickedSoundPath==null?"":"$currentUnix.mp3",
-                widget.data.pickedSoundPath?.split('/').last.split('.').first??"",
+                widget.data.addSoundModel==null?"":"$currentUnix.mp3",
+                widget.data.addSoundModel?.name??"",
                 dropDownCategoryValue,
                 tagList,
                 "Private",
@@ -845,13 +845,13 @@ class _PostVideoState extends State<PostVideo> {
         fileName: '$currentUnix.gif',
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
-        if(widget.data.pickedSoundPath==null){
+        if(widget.data.addSoundModel==null){
           String tagList =
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              widget.data.pickedSoundPath==null?"Original Sound":"$currentUnix.mp3",
-              widget.data.pickedSoundPath?.split('/').last.split('.').first??"Original Sound",
+              "Original Sound",
+              "Original Sound",
               dropDownCategoryValue,
               tagList,
               "Public",
@@ -884,7 +884,7 @@ class _PostVideoState extends State<PostVideo> {
         } else {
           await _simpleS3
               .uploadFile(
-            File(widget.data.pickedSoundPath!),
+            File(widget.data.addSoundModel!.sound),
             "thrillvideo",
             "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
             AWSRegions.usEast1,
@@ -897,8 +897,8 @@ class _PostVideoState extends State<PostVideo> {
             jsonEncode(selectedHashtags);
             var result = await RestApi.postVideo(
                 videoId,
-                widget.data.pickedSoundPath==null?"":"$currentUnix.mp3",
-                widget.data.pickedSoundPath?.split('/').last.split('.').first??"",
+                widget.data.addSoundModel==null?"":"$currentUnix.mp3",
+                widget.data.addSoundModel?.name??"",
                 dropDownCategoryValue,
                 tagList,
                 "Public",

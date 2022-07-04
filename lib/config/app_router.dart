@@ -66,7 +66,7 @@ class AppRouter {
       case TagDetails.routeName:
         return TagDetails.route(video: settings.arguments as DiscoverVideo);
       case NewSong.routeName:
-        return NewSong.route(newSongCategoryId);
+        return NewSong.route();
       case Notifications.routeName:
         return Notifications.route();
       case RequestVerification.routeName:
