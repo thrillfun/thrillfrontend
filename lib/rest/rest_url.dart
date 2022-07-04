@@ -52,4 +52,7 @@ class RestUrl {
   static const String paymentHistory = baseUrl + "wallet/withdraw-history";
   static const String videoBySound = baseUrl + "sound/videosbysound";
 
+  static const String getProbilityCounter = baseUrl + "spin-wheel/counter-data";
+
+
 }
