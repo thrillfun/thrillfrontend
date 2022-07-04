@@ -2,10 +2,14 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
+import '../../blocs/video/video_bloc.dart';
 import '../../common/strings.dart';
 import '../../models/user.dart';
 import '../../rest/rest_url.dart';
@@ -31,9 +35,11 @@ class _ViewProfileState extends State<ViewProfile> {
 
   int selectedTab = 0;
   UserModel? userModel;
+  List<String> followList = List.empty(growable: true);
 
   @override
   void initState() {
+    getFollowList();
     if(widget.mapData["getProfile"]){
       getProfile();
     } else {
@@ -183,20 +189,43 @@ class _ViewProfileState extends State<ViewProfile> {
                 width: 10,
               ),
               GestureDetector(
-                onTap: () {},
+                // onTap: () async {
+                //   String action = '';
+                //   if (followList.contains(userModel?.id.toString())) {
+                //     followList.remove(userModel?.id.toString());
+                //     int followers = int.parse(userModel!.followers)-1;
+                //     action = "unfollow";
+                //   } else {
+                //     followList.add(userModel!.id.toString());
+                //     int followers = int.parse(userModel!.followers)+1;
+                //     action = "follow";
+                //   }
+                //   SharedPreferences pref = await SharedPreferences.getInstance();
+                //   pref.setStringList('followList', followList);
+                //
+                //   try {
+                //     var result = await RestApi.followUserAndUnfollow(userModel!.id,action);
+                //     var json = jsonDecode(result.body);
+                //     print(json);
+                //   } catch (_) {
+                //
+                //   }
+                //   setState(() {});
+                // },
                 child: Material(
                   borderRadius: BorderRadius.circular(50),
                   elevation: 10,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      height: 32,
+                    padding: const EdgeInsets.only(left: 10, right: 5),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         border:
                             Border.all(color: Colors.grey.shade300, width: 1)),
-                    child: SvgPicture.asset(
-                      'assets/person-check.svg',
-                    ),
+                    child: SizedBox(height: 10,
+                    child: followList.contains(userModel?.id.toString())?
+                    SvgPicture.asset('assets/person-check.svg',):
+                    const Icon(Icons.person_add_alt_sharp),)
                   ),
                 ),
               ),
@@ -205,7 +234,8 @@ class _ViewProfileState extends State<ViewProfile> {
               ),
               GestureDetector(
                 onTap: () {
-                  share();
+                  //share();
+                  Share.share('I found this awesome person in the great platform called Thrill!!!');
                 },
                 child: Material(
                   borderRadius: BorderRadius.circular(50),
@@ -315,6 +345,12 @@ class _ViewProfileState extends State<ViewProfile> {
         ],
       ),
     );
+  }
+
+  getFollowList()async{
+    var pref = await SharedPreferences.getInstance();
+    followList = pref.getStringList('followList') ?? [];
+    setState(() {});
   }
 
   getProfile()async{
