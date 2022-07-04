@@ -37,7 +37,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     var result = await _loginRepository.getProfile(current.id);
 
     if (result['status']) {
-      // try {
+      try {
         likeList = List<PrivateModel>.from(
             resultLikes['data'].map((i) => PrivateModel.fromJson(i)))
             .toList(growable: true);
@@ -54,15 +54,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         await pref.setString('currentUser', jsonEncode(user.toJson()),);
 
         emit(ProfileLoaded(userModel: user,likesList:likeList,privateList:privateList,publicList: publicList, status: true, message: 'success'));
-        print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
-      // } catch (e) {
-      //   print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-      //   print(e.toString());
-      //   print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-      //   emit(ProfileLoaded(userModel:current,likesList: const [],privateList: const [],publicList: const [],status: false, message: e.toString()));
-      // }
+      } catch (e) {
+        print(e.toString());
+        emit(ProfileLoaded(userModel:current,likesList: const [],privateList: const [],publicList: const [],status: false, message: e.toString()));
+      }
     } else {
-      print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
       emit(ProfileLoaded(userModel:current,likesList: const [],privateList:const [],publicList: const [], status: false, message: result['message']));
     }
   }

@@ -1,11 +1,8 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:thrill/models/history_model.dart';
 import 'package:thrill/rest/rest_api.dart';
-
 import '../common/strings.dart';
 
 class PaymentHistory extends StatefulWidget {
@@ -80,48 +77,62 @@ class _PaymentHistoryState extends State<PaymentHistory> {
                     width: 10,
                   ),
                   Expanded(
-                    child: RichText(
-                      text: TextSpan(children: [
-                        TextSpan(
-                            text: paymentHistoryList[index].transactionStatus,
-                            style:  TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                                color: paymentHistoryList[index].transactionStatus=="Pending"
-                                ? Colors.blue :
-                                paymentHistoryList[index].transactionStatus=="Completed"
-                                    ? Colors.green
-                                :Colors.red)),
-                        const TextSpan(text: '\n'),
-                        const WidgetSpan(
-                            child: SizedBox(
-                          height: 20,
-                        )),
-                        TextSpan(
-                            text: DateFormat(dateTimeFormat)
-                                .format(DateTime.parse(paymentHistoryList[index].createDate)
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(children: [
+                                  TextSpan(
+                                      text: paymentHistoryList[index].transactionStatus,
+                                      style:  TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 17,
+                                          color: paymentHistoryList[index].transactionStatus=="Pending"
+                                              ? Colors.blue :
+                                          paymentHistoryList[index].transactionStatus=="Completed"
+                                              ? Colors.green
+                                              :Colors.red)),
+                                  const TextSpan(text: '\n'),
+                                  const WidgetSpan(
+                                      child: SizedBox(
+                                        height: 15,
+                                      )),
+                                  TextSpan(
+                                      text: DateFormat(dateTimeFormat)
+                                          .format(DateTime.parse(paymentHistoryList[index].createDate)
 
+                                      ),
+                                      style: const TextStyle(color: Colors.grey)),
+                                  const WidgetSpan(
+                                      child: SizedBox(
+                                        width: 5,
+                                      )),
+
+                                ]),
+                              ),
                             ),
-                            style: const TextStyle(color: Colors.grey)),
-                        const WidgetSpan(
-                            child: SizedBox(
-                              width: 5,
-                            )),
-
-                      ]),
+                            Text(
+                              paymentHistoryList[index].currency,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            Text(
+                              ' ${paymentHistoryList[index].amount}/-',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 2,),
+                        SelectableText(paymentHistoryList[index].transaction_id.isEmpty?
+                        "":"Tx: ${paymentHistoryList[index].transaction_id}", maxLines: 1,)
+                      ],
                     ),
-                  ),
-                  Text(
-                    paymentHistoryList[index].currency,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  Text(
-                    ' ${paymentHistoryList[index].amount}/-',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                  const SizedBox(
-                    width: 10,
                   )
                 ],
               ),

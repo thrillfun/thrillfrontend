@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/rest/rest_api.dart';
@@ -85,39 +86,48 @@ class HomeState extends State<Home> {
                         filter: state.list[index].filter,
                         videoId: state.list[index].id,
                         callback: ()async{
-                          if (likeList.isEmpty) {
-                            likeList.add(state.list[index].id.toString());
-                            state.list[index]
-                                .copyWith(likes: state.list[index].likes++);
-                          } else {
-                            if (likeList.contains(
-                                state.list[index].id.toString())) {
-                              likeList
-                                  .remove(state.list[index].id.toString());
-                              state.list[index].copyWith(
-                                  likes: state.list[index].likes--);
-                            } else {
-                              likeList.add(state.list[index].id.toString());
-                              state.list[index].copyWith(
-                                  likes: state.list[index].likes++);
-                            }
-                          }
-                          SharedPreferences pref =
-                          await SharedPreferences.getInstance();
-                          pref.setStringList('likeList', likeList);
+                          await isLogined().then((value) async {
+                            if (value) {
+                              if (likeList.isEmpty) {
+                                likeList
+                                    .add(state.list[index].id.toString());
+                                state.list[index].copyWith(
+                                    likes: state.list[index].likes++);
+                              } else {
+                                if (likeList.contains(
+                                    state.list[index].id.toString())) {
+                                  likeList.remove(
+                                      state.list[index].id.toString());
+                                  state.list[index].copyWith(
+                                      likes: state.list[index].likes--);
+                                } else {
+                                  likeList
+                                      .add(state.list[index].id.toString());
+                                  state.list[index].copyWith(
+                                      likes: state.list[index].likes++);
+                                }
+                              }
+                              SharedPreferences pref =
+                              await SharedPreferences.getInstance();
+                              pref.setStringList('likeList', likeList);
 
-                          BlocProvider.of<VideoBloc>(context).add(
-                              AddRemoveLike(
-                                  isAdded: likeList.contains(
-                                      state.list[index].id.toString())
-                                      ? 1
-                                      : 0,
-                                  videoId: state.list[index].id));
-                          setState(() {});
+                              BlocProvider.of<VideoBloc>(context).add(
+                                  AddRemoveLike(
+                                      isAdded: likeList.contains(state
+                                          .list[index].id
+                                          .toString())
+                                          ? 1
+                                          : 0,
+                                      videoId: state.list[index].id));
+                              setState(() {});
+                            } else {
+                              showAlertDialog(context);
+                            }
+                          });
                         },
                       ),
                       Positioned(
-                        bottom: 100,
+                        bottom: 120,
                         right: 10,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -206,18 +216,23 @@ class HomeState extends State<Home> {
                                   }
                                 });
                               },
-                              child: likeList
-                                      .contains(state.list[index].id.toString())
-                                  ? const Icon(
-                                      Icons.favorite,
-                                      color: Colors.red,
-                                      size: 28,
-                                    )
-                                  : const Icon(
-                                      Icons.favorite_border,
-                                      color: Colors.white,
-                                      size: 28,
-                                    ),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 500),
+                                child: likeList
+                                    .contains(state.list[index].id.toString())
+                                    ? const Icon(
+                                  Icons.favorite,
+                                  key: ValueKey("like"),
+                                  color: Colors.red,
+                                  size: 28,
+                                )
+                                    : const Icon(
+                                  Icons.favorite_border,
+                                  key: ValueKey("unlike"),
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ),
                             ),
                             Text(
                               state.list[index].likes.toString(),
@@ -263,12 +278,18 @@ class HomeState extends State<Home> {
                               height: 18,
                             ),
                             GestureDetector(
-                                onTap: () {},
+                                onTap: () async {
+                                  Share.share('You need to watch this awesome video only on Thrill!!!');
+                                },
                                 child: SvgPicture.asset(
                                   'assets/share.svg',
                                   height: 22,
                                   width: 22,
-                                )),
+                                ),
+                            ),
+                            const SizedBox(
+                              height: 25,
+                            ),
                           ],
                         ),
                       ),
@@ -431,7 +452,7 @@ class HomeState extends State<Home> {
                                         child:
                                           state.list[index].sound_name.isEmpty
                                               ? "Original Sound".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
-                                              : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle:TextStyle(color: Colors.white)).h2(context),
+                                              : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                       ),
                                     ],
                                   ),
@@ -554,7 +575,7 @@ class HomeState extends State<Home> {
     try {
       progressDialogue(context);
       var result = await RestApi.getCommentListOnVideo(videoId);
-      var json = jsonDecode(result.body);
+      var json = jsonDecode(utf8.decode(result.bodyBytes));
       closeDialogue(context);
       if (json['status']) {
         commentList.clear();

@@ -173,7 +173,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
               InkWell(
                 onTap: () {
                   //share();
-                  Share.share('text');
+                  Share.share('Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me.');
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
