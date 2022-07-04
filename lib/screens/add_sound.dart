@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/sound_category_model.dart';
 import 'package:thrill/rest/rest_api.dart';
-import 'package:thrill/screens/new_song.dart';
 import 'package:thrill/utils/util.dart';
 import '../common/color.dart';
 import '../common/strings.dart';
@@ -126,7 +125,6 @@ class _AddSoundState extends State<AddSound> {
                 itemBuilder: (BuildContext context, int index) {
                   return ElevatedButton(
                       onPressed: () async {
-                        newSongCategoryId = discoverList[index].id;
                         await Navigator.pushNamed(context, "/newSong").then((value) async {
                           if(value!=null){
                             AddSoundModel? addSoundModelTemp = value as AddSoundModel?;

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/screens/home/discover.dart';
 import 'package:thrill/screens/profile/profile.dart';
+import 'package:thrill/widgets/video_item.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../repository/login/login_repository.dart';
 import 'home.dart';
@@ -68,6 +69,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
             onTap: () {
               setState(() {
                 selectedIndex = 0;
+                //reelsPlayerController?.play();
               });
             },
             child: Container(
@@ -101,6 +103,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 if (value) {
                   setState(() {
                     selectedIndex = 1;
+                    reelsPlayerController?.pause();
                   });
                 } else {
                   showAlertDialog(context);
@@ -137,6 +140,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
               await isLogined().then((value) {
                 if (value) {
                   Navigator.pushNamed(context, '/spin');
+                  reelsPlayerController?.pause();
                 } else {
                   showAlertDialog(context);
                 }
@@ -157,6 +161,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 if (value) {
                   setState(() {
                     selectedIndex = 2;
+                    reelsPlayerController?.pause();
                   });
                 } else {
                   showAlertDialog(context);
@@ -194,6 +199,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 if (value) {
                   setState(() {
                     selectedIndex = 3;
+                    reelsPlayerController?.pause();
                   });
                 } else {
                   showAlertDialog(context);

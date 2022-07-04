@@ -138,13 +138,15 @@ class HomeState extends State<Home> {
                               children: [
                                 GestureDetector(
                                   onTap: () async {
-                                    await isLogined().then((value) {
+                                    await isLogined().then((value) async {
                                       if (value) {
-                                        Navigator.pushNamed(
+                                        reelsPlayerController?.pause();
+                                        await Navigator.pushNamed(
                                             context, "/viewProfile", arguments: {
                                           "userModel": state.list[index].user,
                                           "getProfile": false
                                         });
+                                        reelsPlayerController?.play();
                                       } else {
                                         showAlertDialog(context);
                                       }
@@ -319,13 +321,13 @@ class HomeState extends State<Home> {
                                     children: [
                                       GestureDetector(
                                         onTap: () async {
-                                          await isLogined().then((value) {
+                                          await isLogined().then((value) async {
                                             if (value) {
-                                              Navigator.pushNamed(
-                                                  context, "/viewProfile", arguments: {
-                                                "userModel": state.list[index].user,
-                                                "getProfile": false
+                                              reelsPlayerController?.pause();
+                                              await Navigator.pushNamed(context, "/viewProfile", arguments: {
+                                                "userModel": state.list[index].user, "getProfile": false
                                               });
+                                              reelsPlayerController?.play();
                                             } else {
                                               showAlertDialog(context);
                                             }
@@ -461,10 +463,12 @@ class HomeState extends State<Home> {
                             ),
                             GestureDetector(
                               onTap:() async {
-                                await isLogined().then((value) {
+                                await isLogined().then((value) async {
                                   if (value) {
                                     if(state.list[index].sound.isNotEmpty){
-                                      Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                      reelsPlayerController?.pause();
+                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                      reelsPlayerController?.play();
                                     }
                                   } else {
                                     showAlertDialog(context);
@@ -547,9 +551,11 @@ class HomeState extends State<Home> {
                     const SizedBox(width: 10),
                     IconButton(
                         onPressed: ()async {
-                          await isLogined().then((value) {
+                          await isLogined().then((value) async {
                             if (value) {
-                              Navigator.pushNamed(context, "/record");
+                              reelsPlayerController?.pause();
+                              await Navigator.pushNamed(context, "/record");
+                              reelsPlayerController?.play();
                             } else {
                               showAlertDialog(context);
                             }
@@ -897,7 +903,9 @@ class HomeState extends State<Home> {
   getUserData() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
-    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
-    setState(()=> userModel = current);
+    if(currentUser!=null){
+      UserModel current = UserModel.fromJson(jsonDecode(currentUser));
+      setState(()=> userModel = current);
+    }
   }
 }

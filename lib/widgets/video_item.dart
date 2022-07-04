@@ -8,6 +8,8 @@ import 'package:thrill/utils/util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../rest/rest_url.dart';
 
+VideoPlayerController? reelsPlayerController;
+
 class VideoPlayerItem extends StatefulWidget {
   final String videoUrl, filter;
   final int pageIndex;
@@ -32,7 +34,6 @@ class VideoPlayerItem extends StatefulWidget {
 }
 
 class _VideoPlayerItemState extends State<VideoPlayerItem> {
-  VideoPlayerController? videoPlayerController;
   bool isLoading = true;
   bool showGIF = false;
   bool initialized = false;
@@ -43,16 +44,16 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   void initState() {
     super.initState();
-      videoPlayerController = VideoPlayerController.network(
+      reelsPlayerController = VideoPlayerController.network(
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
-          if (videoPlayerController!.value.isInitialized) {
-            if (!showGIF) videoPlayerController!.play();
-            videoPlayerController!.setLooping(true);
-            videoPlayerController!.setVolume(1);
+          if (reelsPlayerController!.value.isInitialized) {
+            if (!showGIF) reelsPlayerController!.play();
+            reelsPlayerController!.setLooping(true);
+            reelsPlayerController!.setVolume(1);
             initialized = true;
             showGIF = true;
-            _start = videoPlayerController!.value.duration.inSeconds~/2;
+            _start = reelsPlayerController!.value.duration.inSeconds~/2;
             startTimer();
             setState(() {});
           }
@@ -64,7 +65,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   void dispose() {
     super.dispose();
     _timer?.cancel();
-    if(videoPlayerController!=null){videoPlayerController!.dispose();}
+    //if(reelsPlayerController!=null){reelsPlayerController!.dispose();}
     isDispose=true;
   }
 
@@ -94,9 +95,9 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     if (widget.pageIndex == widget.currentPageIndex &&
         !widget.isPaused &&
         initialized) {
-      videoPlayerController!.play();
+      reelsPlayerController!.play();
     } else {
-      videoPlayerController!.pause();
+      reelsPlayerController!.pause();
     }
     return VisibilityDetector(
       onVisibilityChanged: _handleVisibilityDetector,
@@ -119,7 +120,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
-                  : VideoPlayer(videoPlayerController!),
+                  : VideoPlayer(reelsPlayerController!),
               widget.filter.isEmpty
                   ? const SizedBox(width: 10)
                   : !showGIF
@@ -133,10 +134,10 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
               Positioned(
                 top: 70,
                   child: Visibility(
-                    visible: videoPlayerController!.value.volume==0?true:false,
+                    visible: reelsPlayerController!.value.volume==0?true:false,
                     child: IconButton(
                       icon: const Icon(Icons.volume_off,color: Colors.white,size: 40,),
-                      onPressed: ()=> videoPlayerController!.setVolume(1).then((value) => setState((){})),
+                      onPressed: ()=> reelsPlayerController!.setVolume(1).then((value) => setState((){})),
                     ),
                   ))
             ],
@@ -150,16 +151,16 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     double d=info.visibleFraction*100;
     print(d);
     if(mounted){
-      videoPlayerController!.pause();
+      reelsPlayerController!.pause();
       if (d < 60) {
-        videoPlayerController!.pause();
+        reelsPlayerController!.pause();
         if (initialized &&
             widget.pageIndex == widget.currentPageIndex &&
             !widget.isPaused) {
-          videoPlayerController!.pause();
+          reelsPlayerController!.pause();
         }
       } else {
-        videoPlayerController!.play();
+        reelsPlayerController!.play();
       }
     }
   }
@@ -182,7 +183,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   onLongPressStart(LongPressStartDetails d)async{
     setState((){showGIF = false;});
     await Future.delayed(const Duration(milliseconds: 250));
-    videoPlayerController!.pause();
+    reelsPlayerController!.pause();
   }
 
   onLongPressEnd(LongPressEndDetails d){
@@ -190,10 +191,10 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   }
 
   onTap(){
-    if(videoPlayerController!.value.volume>=1){
-      videoPlayerController!.setVolume(0).then((value) => setState((){}));
+    if(reelsPlayerController!.value.volume>=1){
+      reelsPlayerController!.setVolume(0).then((value) => setState((){}));
     } else {
-      videoPlayerController!.setVolume(1).then((value) => setState((){}));
+      reelsPlayerController!.setVolume(1).then((value) => setState((){}));
     }
   }
 
