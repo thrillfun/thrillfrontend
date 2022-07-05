@@ -10,6 +10,7 @@ import 'package:thrill/utils/util.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../models/earnSpin_model.dart';
+import '../../models/probility_counter.dart';
 import '../../models/wheelDetails_model.dart';
 import '../../rest/rest_url.dart';
 
@@ -44,10 +45,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   List<EarnSpin> earnList = List<EarnSpin>.empty(growable: true);
   WheelDetails? wheelDetails;
   var listForReward = [];
-
-  int winRewardId=2;
-  int winChance=2;
-  int winCounter=0;
+  int rewardId=0;
 
   @override
   void dispose() {
@@ -350,34 +348,32 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   }
 
   spinTheWheelTap() async {
-
-    print(listForReward);
-    var element = getRandomElement(listForReward);
-    print(element);
-    print(winRewardId);
-     if(winChance>0){
-       print(winChance);
-       if(element==winRewardId){
-         print("yes");
-         winChance--;
-         if(winChance==0){
-           print("remove");
-           listForReward.remove(element);
-         }
+    try {
+       if (remainingChance > 0) {
+         setState(() {
+          isSpin = true;
+         });
+          listForReward.clear();
+          var result = await RestApi.getAvailableProbilityCounter();
+          var jsonResult=jsonDecode(result.body);
+          listForReward = List<ProbilityCounter>.from(
+              jsonResult['data'].map((i) => ProbilityCounter.fromJson(i)))
+              .toList(growable: true);
+          ProbilityCounter element = getRandomElement(listForReward) as ProbilityCounter;
+          int id=element.id-1;
+          rewardId=element.id;
+          setState(() {
+            selectedInt = id;
+            controller.add(selectedInt);
+          });
+       }else{
+         setState(() {
+           isSpin = true;
+         });
        }
-      }
-    setState(() {
-      // isSpin = true;
-      winChance;
-      selectedInt = element;
-      // selectedInt = Random().nextInt(wheelDetails!.wheelRewards.length);
-      controller.add(selectedInt);
-    });
-    /* if (remainingChance > 0) {
-
-    } else {
-      showErrorToast(context, "Don`t have wheel change");
-    }*/
+    }catch(e){
+      showErrorToast(context, e.toString());
+    }
   }
 
   Widget winnerLayout(RecentRewards recentReward) {
@@ -422,13 +418,11 @@ class _SpinTheWheelState extends State<SpinTheWheel>
       var json = jsonDecode(result.body);
       if (json['status']) {
         wheelDetails = WheelDetails.fromJson(json['data']);
-        for(int i=0; i<wheelDetails!.wheelRewards.length;i++){
-         if(wheelDetails!.wheelRewards[i].is_image==1) {
-           listForReward.add(i);
-         }
-        }
         remainingChance = int.parse(wheelDetails!.available_chance);
         usedChanceValue = int.parse(wheelDetails!.used_chance);
+      }
+      if (remainingChance == 0) {
+        isSpin = true;
       }
       var resultEarn = await RestApi.getWheelEarnedDetails();
       var jsonEarn = jsonDecode(resultEarn.body);
@@ -449,10 +443,8 @@ class _SpinTheWheelState extends State<SpinTheWheel>
 
   void updateSpin() async {
     try {
-     // print(selectedInt);
-      /*  progressDialogue(context);
-      int wheelId = wheelDetails!.wheelRewards[selectedInt].id;
-      var result = await RestApi.updateWheel(wheelId);
+      progressDialogue(context);
+      var result = await RestApi.updateWheel(rewardId);
       var json = jsonDecode(result.body);
       closeDialogue(context);
       if (json['status']) {
@@ -463,7 +455,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
         setState(() {});
       } else {
         showErrorToast(context, json['message']);
-      }*/
+      }
     } catch (e) {
       closeDialogue(context);
       showErrorToast(context, e.toString());
