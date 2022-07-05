@@ -226,7 +226,7 @@ class _PreviewState extends State<Preview> {
     PostData newPostData = PostData(
         filePath: widget.data.filePath,
         filterName: widget.data.filterName,
-        pickedSoundPath: widget.data.pickedSoundPath,
+        addSoundModel: widget.data.addSoundModel,
         map: {"start": rangeController.start.toInt().toInt(), "end":rangeController.end.toInt()}
     );
     await Navigator.pushNamed(context, "/postVideo",arguments: newPostData);

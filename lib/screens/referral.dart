@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
-
 import '../common/color.dart';
 import '../common/strings.dart';
+import '../models/user.dart';
 
 class Referral extends StatefulWidget {
   const Referral({Key? key}) : super(key: key);
@@ -23,6 +28,13 @@ class Referral extends StatefulWidget {
 
 class _ReferralState extends State<Referral> {
   bool checkBoxValue = true;
+  UserModel? userModel;
+
+  @override
+  initState(){
+    super.initState();
+    getUserData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,15 +71,15 @@ class _ReferralState extends State<Referral> {
             ),
             RichText(
                 textAlign: TextAlign.center,
-                text: const TextSpan(children: [
-                  TextSpan(
+                text: TextSpan(children: [
+                  const TextSpan(
                       text: totalReferral + '\n',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
                   TextSpan(
-                      text: '00',
+                      text: "${userModel?.referral_count}",
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
+                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
                 ])),
             const Spacer(),
             Container(
@@ -118,16 +130,24 @@ class _ReferralState extends State<Referral> {
                         border: Border.all(color: Colors.grey, width: 1)),
                     child: Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                             child: Text(
-                          'ABCD1234',
-                          style: TextStyle(
+                          '${userModel?.referral_code}',
+                          style: const TextStyle(
                               fontSize: 18,
                               color: Colors.grey,
                               fontWeight: FontWeight.bold),
                         )),
                         IconButton(
-                            onPressed: () {}, icon: const Icon(Icons.copy))
+                            onPressed: () {
+                              try{
+                                Clipboard.setData(ClipboardData(text: userModel?.referral_code)).then((_){
+                                  showSuccessToast(context, "Referral Code Copied to Clipboard!");
+                                });
+                              } catch(e){
+                                showErrorToast(context, e.toString());
+                              }
+                            }, icon: const Icon(Icons.copy))
                       ],
                     ),
                   ),
@@ -165,7 +185,12 @@ class _ReferralState extends State<Referral> {
                   ),
                   ElevatedButton(
                       onPressed: () {
-                        share();
+                        //share();
+                        if(checkBoxValue){
+                          Share.share("Hi, I am inviting you to Thrill a great short video app. Use my referral code: ${userModel?.referral_code} to earn rewards.");
+                        } else {
+                          showErrorToast(context, "You must agree to Privacy Policy!");
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                           primary: ColorManager.deepPurple,
@@ -424,5 +449,12 @@ class _ReferralState extends State<Referral> {
             ],
           );
         });
+  }
+
+  getUserData() async {
+    var pref = await SharedPreferences.getInstance();
+    var currentUser = pref.getString('currentUser');
+    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
+    setState(()=> userModel = current);
   }
 }
