@@ -861,4 +861,46 @@ class RestApi {
     return response;
   }
 
+  static Future<http.Response> getCmsPage(String slug) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.cmsPage,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'slug': slug
+      },
+    );
+
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
+
+  static Future<http.Response> getSiteSettings() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.siteSettings,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        //'slug': slug
+      },
+    );
+
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
+
 }
