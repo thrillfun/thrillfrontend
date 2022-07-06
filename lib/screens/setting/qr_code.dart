@@ -49,6 +49,15 @@ class _QrCodeState extends State<QrCode> {
   }
 
   @override
+  void reassemble() {
+    super.reassemble();
+    if (Platform.isAndroid) {
+      qrViewController?.pauseCamera();
+    }
+    qrViewController?.resumeCamera();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.deepPurple,
@@ -95,7 +104,7 @@ class _QrCodeState extends State<QrCode> {
                   qrViewController?.pauseCamera();
                   if(scanData.code!.contains("Thrill")){
                     Navigator.pushNamed(context, "/viewProfile",
-                        arguments: {"id":scanData.code!.split(':').last, "getProfile":true});
+                        arguments: {"id":scanData.code!.split(':').last.split('\n').first, "getProfile":true});
                   } else {
                     popUpDialog();
                   }
@@ -105,7 +114,6 @@ class _QrCodeState extends State<QrCode> {
           }),
     );
   }
-
   Widget qrView(){
     if (userModel==null) {
       return const Center(child: Text("Something went wrong!"),);
@@ -290,7 +298,7 @@ class _QrCodeState extends State<QrCode> {
     UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
     setState(() {
       userModel = current;
-      qrData = "Thrill User ID :${userModel?.id}";
+      qrData = "Thrill User ID :${userModel?.id}\nProfile: www.thrill.com/user";
     });
   }
 }

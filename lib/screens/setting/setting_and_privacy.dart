@@ -272,7 +272,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                 height: 15,
               ),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/termsOfService');
+                },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -291,7 +293,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                 height: 10,
               ),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/privacyPolicy');
+                },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
