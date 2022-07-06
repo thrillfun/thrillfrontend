@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:thrill/rest/rest_api.dart';
+import 'package:thrill/utils/util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../common/strings.dart';
 
@@ -19,6 +24,17 @@ class CustomerSupport extends StatefulWidget {
 }
 
 class _CustomerSupportState extends State<CustomerSupport> {
+
+  String number = '';
+  String email = '';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    getEmailAndNumber();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +53,9 @@ class _CustomerSupportState extends State<CustomerSupport> {
             color: Colors.black,
             icon: const Icon(Icons.arrow_back_ios)),
       ),
-      body: SingleChildScrollView(
+      body: isLoading?
+      const Center(child: CircularProgressIndicator(),):
+      SingleChildScrollView(
         child: Column(
           children: [
             Image.asset('assets/Image27.png'),
@@ -60,7 +78,18 @@ class _CustomerSupportState extends State<CustomerSupport> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    if(number.isNotEmpty){
+                      try{
+                        Uri emailURI = Uri(scheme: 'tel', path: number);
+                        launchUrl(emailURI);
+                      } catch(e){
+                        showErrorToast(context, e.toString());
+                      }
+                    } else {
+                      showErrorToast(context, "Something went wrong!");
+                    }
+                  },
                   child: Container(
                     height: 180,
                     width: 155,
@@ -91,7 +120,18 @@ class _CustomerSupportState extends State<CustomerSupport> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    if(email.isNotEmpty){
+                      try{
+                        Uri emailURI = Uri(scheme: 'mailto', path: email);
+                        launchUrl(emailURI);
+                      } catch(e){
+                        showErrorToast(context, e.toString());
+                      }
+                    } else {
+                      showErrorToast(context, "Something went wrong!");
+                    }
+                  },
                   child: Container(
                     height: 180,
                     width: 155,
@@ -127,5 +167,24 @@ class _CustomerSupportState extends State<CustomerSupport> {
         ),
       ),
     );
+  }
+
+  getEmailAndNumber()async{
+    try{
+      var response = await RestApi.getSiteSettings();
+      var json = jsonDecode(response.body);
+      List jsonList = json['data'];
+      for(var element in jsonList){
+        if(element['name']=='phone'){
+          setState(()=>number=element['value']);
+        } else if(element['name']=='email'){
+          setState(()=>email=element['value']);
+        }
+      }
+      setState(()=>isLoading=false);
+    } catch(e){
+      setState(()=>isLoading=false);
+      showErrorToast(context, e.toString());
+    }
   }
 }

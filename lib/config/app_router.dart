@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/user.dart';
+import 'package:thrill/screens/privacy_policy.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/screen.dart';
 import 'package:thrill/screens/sound_details.dart';
+import 'package:thrill/screens/terms_of_service.dart';
 
 import '../models/vidio_discover_model.dart';
 import '../screens/new_song.dart';
@@ -77,6 +79,10 @@ class AppRouter {
         return Preview.route(videoData: settings.arguments as PostData);
       case SoundDetails.routeName:
         return SoundDetails.route(map_: settings.arguments as Map);
+      case TermsOfService.routeName:
+        return TermsOfService.route();
+      case PrivacyPolicy.routeName:
+        return PrivacyPolicy.route();
       default:
         return _errorRoute();
     }

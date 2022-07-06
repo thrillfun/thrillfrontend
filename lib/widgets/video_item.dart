@@ -55,7 +55,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
             showGIF = true;
             _start = reelsPlayerController!.value.duration.inSeconds~/2;
             startTimer();
-            setState(() {});
+            if (mounted) setState(() {});
           }
         });
 

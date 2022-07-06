@@ -53,6 +53,8 @@ class RestUrl {
   static const String videoBySound = baseUrl + "sound/videosbysound";
 
   static const String getProbilityCounter = baseUrl + "spin-wheel/counter-data";
+  static const String cmsPage = baseUrl + "CmsPage";
+  static const String siteSettings = baseUrl + "SiteSettings";
 
 
 }
