@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -5,9 +7,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/models/user.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../common/strings.dart';
+import '../../rest/rest_url.dart';
 
 class SettingAndPrivacy extends StatefulWidget {
   const SettingAndPrivacy({Key? key}) : super(key: key);
@@ -27,6 +31,12 @@ class SettingAndPrivacy extends StatefulWidget {
 }
 
 class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -631,7 +641,14 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
         });
   }
 
-  switchAccountLayout() {
+  switchAccountLayout()async{
+    var pref = await SharedPreferences.getInstance();
+    List<String> users = pref.getStringList('allUsers') ?? [];
+    List<UserModel> usersModel = List.empty(growable: true);
+    users.insert(0, pref.getString('currentUser')!);
+    for(var element in users){
+      usersModel.add(UserModel.fromJson(jsonDecode(element)));
+    }
     return showModalBottomSheet(
         context: context,
         backgroundColor: Colors.white,
@@ -672,62 +689,73 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
               const SizedBox(
                 height: 15,
               ),
-              Row(
-                children: [
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  Container(
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    height: 90,
-                    width: 90,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                    ),
-                    child: CachedNetworkImage(
-                      fit: BoxFit.cover,
-                      imageUrl:
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3F3e5C2_4KVWpSSvmBDVb8iPGyRnDB5DVPA&usqp=CAU',
-                      placeholder: (a, b) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(
-                              '@kanikasharma',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                            Icon(
-                              Icons.check,
-                              size: 30,
-                              color: ColorManager.cyan,
-                            ),
-                            SizedBox(
-                              width: 10,
-                            )
-                          ],
+              Expanded(
+                  child: ListView.builder(
+                    itemCount: usersModel.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        onTap: (){
+                          print(index);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          color: Colors.white,
+                          child: Row(
+                            children: [
+                              const SizedBox(
+                                width: 30,
+                              ),
+                              Container(
+                                clipBehavior: Clip.antiAliasWithSaveLayer,
+                                height: 90,
+                                width: 90,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                ),
+                                child: CachedNetworkImage(
+                                  fit: BoxFit.cover,
+                                  imageUrl: '${RestUrl.profileUrl}${usersModel[index].avatar}',
+                                  placeholder: (a, b) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 5,),
+                                    Text(
+                                      usersModel[index].username,
+                                      style: const TextStyle(fontSize: 18),
+                                    ),
+                                    Text(usersModel[index].name),
+                                    const SizedBox(height: 5,),
+                                  ],
+                                ),
+                              ),
+                              index==0?
+                              const Icon(
+                                Icons.check,
+                                size: 30,
+                                color: ColorManager.cyan,
+                              ):const SizedBox(),
+                              const SizedBox(width: 20,)
+                            ],
+                          ),
                         ),
-                        const Text('Kanika Sharma')
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                      );
+                    },)),
               const SizedBox(
                 height: 20,
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  //Navigator.pushNamed(context, '/login');
+                },
                 child: Row(
                   children: [
                     const SizedBox(
@@ -748,7 +776,10 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                     )
                   ],
                 ),
-              )
+              ),
+              const SizedBox(
+                height: 20,
+              ),
             ],
           );
         });
