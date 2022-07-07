@@ -60,8 +60,8 @@ void _onTextChange(TextChangeEvent event, Emitter<LoginState> emit) async {
           event.email, event.password);
       if (result['status']) {
         try {
-          UserModel user = UserModel.fromJson(result['data']['user']);
           var pref = await SharedPreferences.getInstance();
+          UserModel user = UserModel.fromJson(result['data']['user']);
           await pref.setString('currentUser', jsonEncode(user.toJson()),);
           await pref.setString('currentToken', result['data']['token']);
           await pref.setStringList('likeList', likeList);
@@ -71,6 +71,17 @@ void _onTextChange(TextChangeEvent event, Emitter<LoginState> emit) async {
           await pref.setStringList('favSound', favSound);
           await pref.setStringList('favTag', favHastag);
           emit(const LoginStatus(message: "Success", status: true));
+
+          List<String> users = pref.getStringList('allUsers') ?? [];
+          users.insert(0, pref.getString('currentUser')!);
+          await pref.setStringList('allUsers', users);
+          await pref.setString('${user.id}currentToken', result['data']['token']);
+          await pref.setStringList('${user.id}likeList', likeList);
+          await pref.setStringList('${user.id}commentList', commetList);
+          await pref.setStringList('${user.id}viewList', viewVideoList);
+          await pref.setStringList('${user.id}followList', followList);
+          await pref.setStringList('${user.id}favSound', favSound);
+          await pref.setStringList('${user.id}favTag', favHastag);
         } catch (e) {
           emit(LoginStatus(message: e.toString(), status: false));
         }
@@ -86,9 +97,9 @@ void _onTextChange(TextChangeEvent event, Emitter<LoginState> emit) async {
       if (account != null) {
         var result = await _loginRepository.socialLoginRegister(account.id,'google', account.email,account.displayName ?? '');
         if (result['status']) {
+          var pref = await SharedPreferences.getInstance();
           try {
             UserModel user = UserModel.fromJson(result['data']['user']);
-            var pref = await SharedPreferences.getInstance();
             await pref.setString('currentUser', jsonEncode(user.toJson()),);
             await pref.setString('currentToken', result['data']['token']);
             await pref.setStringList('likeList', likeList);
@@ -98,6 +109,17 @@ void _onTextChange(TextChangeEvent event, Emitter<LoginState> emit) async {
             await pref.setStringList('favSound', favSound);
             await pref.setStringList('favTag', favHastag);
             emit(const LoginStatus(message: "Success", status: true));
+
+            List<String> users = pref.getStringList('allUsers') ?? [];
+            users.insert(0, pref.getString('currentUser')!);
+            await pref.setStringList('allUsers', users);
+            await pref.setString('${user.id}currentToken', result['data']['token']);
+            await pref.setStringList('${user.id}likeList', likeList);
+            await pref.setStringList('${user.id}commentList', commetList);
+            await pref.setStringList('${user.id}viewList', viewVideoList);
+            await pref.setStringList('${user.id}followList', followList);
+            await pref.setStringList('${user.id}favSound', favSound);
+            await pref.setStringList('${user.id}favTag', favHastag);
           } catch (e) {
             emit(LoginStatus(message: e.toString(), status: false));
           }
@@ -135,6 +157,17 @@ void _onTextChange(TextChangeEvent event, Emitter<LoginState> emit) async {
           await pref.setStringList('favSound', favSound);
           await pref.setStringList('favTag', favHastag);
           emit(const LoginStatus(message: "Success", status: true));
+
+          List<String> users = pref.getStringList('allUsers') ?? [];
+          users.insert(0, pref.getString('currentUser')!);
+          await pref.setStringList('allUsers', users);
+          await pref.setString('${user.id}currentToken', result['data']['token']);
+          await pref.setStringList('${user.id}likeList', likeList);
+          await pref.setStringList('${user.id}commentList', commetList);
+          await pref.setStringList('${user.id}viewList', viewVideoList);
+          await pref.setStringList('${user.id}followList', followList);
+          await pref.setStringList('${user.id}favSound', favSound);
+          await pref.setStringList('${user.id}favTag', favHastag);
         } catch (e) {
           emit(LoginStatus(message: e.toString(), status: false));
         }
