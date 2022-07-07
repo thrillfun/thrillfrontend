@@ -5,34 +5,33 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
 import 'package:velocity_x/velocity_x.dart';
-
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../utils/util.dart';
 
 class LoginScreen extends StatelessWidget {
-  LoginScreen({Key? key}) : super(key: key);
-
+  LoginScreen({Key? key, this.isMultiLogin}) : super(key: key);
   static const String routeName = '/login';
+  final String? isMultiLogin;
 
-  static Route route() {
+  static Route route({String? multiLogin}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
       builder: (context) => BlocProvider(
         create: (context) => LoginBloc(loginRepository: LoginRepository()),
-        child: LoginScreen(),
+        child: LoginScreen(isMultiLogin: multiLogin,),
       ),
     );
   }
 
-  TextEditingController emailCtr = TextEditingController();
- String mPin="";
+  final TextEditingController emailCtr = TextEditingController();
+  String mPin="";
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: ()async{
-        return false;
+        return isMultiLogin==null?false:true;
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -62,6 +61,16 @@ class LoginScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
+                        isMultiLogin!=null?
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: IconButton(
+                              onPressed: (){Navigator.pop(context);},
+                              constraints: const BoxConstraints(),
+                              padding: const EdgeInsets.only(left: 10, top: 10),
+                              icon: const Icon(Icons.arrow_back)
+                          ),
+                        ):
                         const Spacer(),
                         Image.asset(
                           'assets/logo.png',
@@ -154,19 +163,22 @@ class LoginScreen extends StatelessWidget {
                                 )
                                     : const SizedBox(width: 5,)
                                     :  const SizedBox(width: 5,),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 40),
-                                  child: Align(
-                                    alignment: Alignment.topRight,
-                                    child: TextButton(
-                                      onPressed: () {
-                                        Navigator.pushNamed(context, '/forgotPass');
-                                      },
-                                      child: Text(
-                                        forgotPassword,
-                                        style: TextStyle(
-                                            color: Colors.grey.shade700,
-                                            fontSize: 16),
+                                Visibility(
+                                  visible: isMultiLogin!=null?false:true,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 40),
+                                    child: Align(
+                                      alignment: Alignment.topRight,
+                                      child: TextButton(
+                                        onPressed: () {
+                                          Navigator.pushNamed(context, '/forgotPass');
+                                        },
+                                        child: Text(
+                                          forgotPassword,
+                                          style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontSize: 16),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -181,7 +193,7 @@ class LoginScreen extends StatelessWidget {
                                         TextChangeEvent(
                                             email: emailCtr.text,
                                             password: mPin,
-                                            loginType: 'normal'
+                                            loginType: 'normal',
                                         ));
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -232,7 +244,7 @@ class LoginScreen extends StatelessWidget {
                                             TextChangeEvent(
                                                 email: emailCtr.text,
                                                 password: mPin,
-                                                loginType: 'facebook'
+                                                loginType: 'facebook',
                                             ));
                                       },
                                       child: Container(
@@ -254,7 +266,7 @@ class LoginScreen extends StatelessWidget {
                                             TextChangeEvent(
                                                 email: emailCtr.text,
                                                 password: mPin,
-                                                loginType: 'google'
+                                                loginType: 'google',
                                             ));
                                       },
                                       child: Container(
@@ -274,24 +286,27 @@ class LoginScreen extends StatelessWidget {
                                 const SizedBox(
                                   height: 40,
                                 ),
-                                RichText(
-                                    text:TextSpan(children: [
-                                      TextSpan(
-                                          text: dontHaveAnAccount,
+                                Visibility(
+                                  visible: isMultiLogin!=null?false:true,
+                                  child: RichText(
+                                      text:TextSpan(children: [
+                                        TextSpan(
+                                            text: dontHaveAnAccount,
+                                            style: TextStyle(
+                                                color: Colors.grey.shade600,
+                                                fontSize: 18),),
+                                       TextSpan(
+                                         recognizer: TapGestureRecognizer()..onTap = (){
+                                           Navigator.pushReplacementNamed(context, "/Signup");
+                                         },
+                                          text: signUp,
                                           style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                              fontSize: 18),),
-                                     TextSpan(
-                                       recognizer: TapGestureRecognizer()..onTap = (){
-                                         Navigator.pushReplacementNamed(context, "/Signup");
-                                       },
-                                        text: signUp,
-                                        style: TextStyle(
-                                            color: Colors.grey.shade900,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                      )
-                                    ])),
+                                              color: Colors.grey.shade900,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ])),
+                                ),
                                 const SizedBox(
                                   height: 60,
                                 ),
