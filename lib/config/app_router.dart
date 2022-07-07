@@ -14,7 +14,7 @@ class AppRouter {
   static Route onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case "/":
-        return BottomNavigation.route();
+        return BottomNavigation.route(initIndex: settings.arguments as int?);
       case SignUp.routeName:
         return SignUp.route();
       case EditProfile.routeName:

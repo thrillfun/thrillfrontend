@@ -8,26 +8,29 @@ import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/widgets/video_item.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../blocs/profile/profile_bloc.dart';
+import '../../main.dart';
 import '../../repository/login/login_repository.dart';
 import '../../utils/util.dart';
 import 'home.dart';
 import 'notifications.dart';
 
+bool popupDisplayed = false;
 class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({Key? key}) : super(key: key);
+  const BottomNavigation({Key? key, this.initialIndex}) : super(key: key);
+  final int? initialIndex;
 
   @override
   State<BottomNavigation> createState() => _BottomNavigationState();
 
   static const String routeName = '/';
 
-  static Route route() {
+  static Route route({int? initIndex}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
       builder: (context) => BlocProvider(
         create: (context) => ProfileBloc(loginRepository: LoginRepository())
           ..add(ProfileLoading()),
-        child: const BottomNavigation(),
+        child: BottomNavigation(initialIndex: initIndex,),
       ),
     );
   }
@@ -44,7 +47,11 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   @override
   void initState() {
-    showPromotionalPopup();
+    if (widget.initialIndex!=null) selectedIndex = widget.initialIndex??0;
+    if(!popupDisplayed){
+      showPromotionalPopup();
+      popupDisplayed = true;
+    }
     super.initState();
   }
 
@@ -287,12 +294,12 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   showPromotionalPopup()async{
     await Future.delayed(const Duration(seconds: 5));
-    showDialog(context: context, builder: (_)=>Material(
+    showDialog(context: navigatorKey.currentContext!, builder: (_)=>Material(
       type: MaterialType.transparency,
       child: Center(
         child: Container(
-          height: getHeight(context)*.80,
-          width: getWidth(context)*.90,
+          height: getHeight(navigatorKey.currentContext!)*.80,
+          width: getWidth(navigatorKey.currentContext!)*.90,
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
@@ -313,7 +320,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 top: -10,
                 right: -10,
                 child: GestureDetector(
-                  onTap: (){Navigator.pop(context);},
+                  onTap: (){Navigator.pop(navigatorKey.currentContext!);},
                   child: VxCircle(
                     radius: 30,
                     backgroundColor: Colors.red,

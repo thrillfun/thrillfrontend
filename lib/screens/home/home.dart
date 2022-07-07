@@ -571,11 +571,15 @@ class HomeState extends State<Home> {
                                 onTap: () async {
                                   await isLogined().then((value) {
                                     if (value) {
-                                      Navigator.pushNamed(
-                                          context, "/viewProfile", arguments: {
-                                        "userModel": state.list[index].user,
-                                        "getProfile": false
-                                      });
+                                      if(userModel?.id==state.list[index].user.id){
+                                        Navigator.pushReplacementNamed(context, '/', arguments: 3);
+                                      } else {
+                                        Navigator.pushNamed(
+                                            context, "/viewProfile", arguments: {
+                                          "userModel": state.list[index].user,
+                                          "getProfile": false
+                                        });
+                                      }
                                     } else {
                                       showAlertDialog(context);
                                     }
