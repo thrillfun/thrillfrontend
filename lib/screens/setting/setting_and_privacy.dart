@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/models/user.dart';
+import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../common/strings.dart';
@@ -371,13 +372,67 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
               ),
               InkWell(
                 onTap: () async{
-                  SharedPreferences preferences =
-                  await SharedPreferences.getInstance();
-                  await preferences.clear();
-                  GoogleSignIn googleSignIn = GoogleSignIn();
-                  await googleSignIn.signOut();
-                  await FacebookAuth.instance.logOut();
-                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
+                  showDialog(context: context, builder: (_)=>Center(
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: Container(
+                        width: getWidth(context)*.80,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10)
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("Are you sure you want to logout?",
+                              style: Theme.of(context).textTheme.headline3,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 5,),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              child: Text("This will also logout all your linked account if any.",
+                                style: Theme.of(context).textTheme.headline4,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 25,),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ElevatedButton(
+                                    onPressed: (){
+                                      Navigator.pop(context);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        primary: Colors.red
+                                    ),
+                                    child: const Text("No")
+                                ),
+                                const SizedBox(width: 15,),
+                                ElevatedButton(
+                                    onPressed: () async {
+                                      SharedPreferences preferences =
+                                      await SharedPreferences.getInstance();
+                                      await preferences.clear();
+                                      GoogleSignIn googleSignIn = GoogleSignIn();
+                                      await googleSignIn.signOut();
+                                      await FacebookAuth.instance.logOut();
+                                      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        primary: Colors.green
+                                    ),
+                                    child: const Text("Yes")
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ));
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -645,7 +700,6 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
     var pref = await SharedPreferences.getInstance();
     List<String> users = pref.getStringList('allUsers') ?? [];
     List<UserModel> usersModel = List.empty(growable: true);
-    users.insert(0, pref.getString('currentUser')!);
     for(var element in users){
       usersModel.add(UserModel.fromJson(jsonDecode(element)));
     }
@@ -656,132 +710,286 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(30), topRight: Radius.circular(30))),
         builder: (BuildContext context) {
-          return Column(
-            children: [
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+          return StatefulBuilder(
+            builder: (BuildContext context, void Function(void Function()) setState) {
+              return Column(
                 children: [
                   const SizedBox(
-                    width: 50,
+                    height: 20,
                   ),
-                  const Expanded(
-                    child: Text(
-                      switchAccount,
-                      style:
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 50,
+                      ),
+                      const Expanded(
+                        child: Text(
+                          switchAccount,
+                          style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                      textAlign: TextAlign.center,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.close))
+                    ],
+                  ),
+                  const Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Expanded(
+                      child: ListView.builder(
+                        itemCount: usersModel.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return GestureDetector(
+                            onTap: (){
+                              if(index!=0){
+                                showDialog(context: context, builder: (_)=>Center(
+                                  child: Material(
+                                    type: MaterialType.transparency,
+                                    child: Container(
+                                      width: getWidth(context)*.80,
+                                      padding: const EdgeInsets.symmetric(vertical: 15),
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(10)
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text("Are you sure you want to switch to ${usersModel[index].name} ?",
+                                            style: Theme.of(context).textTheme.headline3,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(height: 25,),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ElevatedButton(
+                                                  onPressed: (){
+                                                    Navigator.pop(context);
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                      primary: Colors.red
+                                                  ),
+                                                  child: const Text("No")
+                                              ),
+                                              const SizedBox(width: 15,),
+                                              ElevatedButton(
+                                                  onPressed: () async {
+                                                    try{
+                                                      await pref.setString('${usersModel[0].id}currentToken', pref.getString('currentUser')!);
+                                                      await pref.setStringList('${usersModel[0].id}likeList', pref.getStringList('likeList')!);
+                                                      await pref.setStringList('${usersModel[0].id}commentList', pref.getStringList('commentList')!);
+                                                      await pref.setStringList('${usersModel[0].id}viewList', pref.getStringList('viewList')!);
+                                                      await pref.setStringList('${usersModel[0].id}followList', pref.getStringList('followList')!);
+                                                      await pref.setStringList('${usersModel[0].id}favSound', pref.getStringList('favSound')!);
+                                                      await pref.setStringList('${usersModel[0].id}favTag', pref.getStringList('favTag')!);
+                                                      await pref.setString('${usersModel[0].id}currentToken', pref.getString('currentToken')!);
+
+                                                      String usr = users[index];
+                                                      users.removeAt(index);
+                                                      users.insert(0, usr);
+                                                      await pref.setStringList('allUsers', users);
+
+                                                      await pref.setString('currentUser', usr,);
+                                                      await pref.setString('currentToken', pref.getString('${usersModel[index].id}currentToken')!);
+                                                      await pref.setStringList('likeList', pref.getStringList('${usersModel[index].id}likeList')!);
+                                                      await pref.setStringList('commentList', pref.getStringList('${usersModel[index].id}commentList')!);
+                                                      await pref.setStringList('viewList', pref.getStringList('${usersModel[index].id}viewList')!);
+                                                      await pref.setStringList('followList', pref.getStringList('${usersModel[index].id}followList')!);
+                                                      await pref.setStringList('favSound', pref.getStringList('${usersModel[index].id}favSound')!);
+                                                      await pref.setStringList('favTag', pref.getStringList('${usersModel[index].id}favTag')!);
+                                                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true);
+                                                    } catch(e){
+                                                      showErrorToast(context, e.toString());
+                                                    }
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                      primary: Colors.green
+                                                  ),
+                                                  child: const Text("Yes")
+                                              )
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ));
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              color: Colors.white,
+                              child: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 30,
+                                  ),
+                                  Container(
+                                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                                    height: 90,
+                                    width: 90,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                            color: ColorManager.spinColorDivider)
+                                    ),
+                                    child: usersModel[index].avatar.isEmpty?
+                                    Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: SvgPicture.asset(
+                                        'assets/profile.svg',
+                                        width: 10,
+                                        height: 10,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ):
+                                    CachedNetworkImage(
+                                      fit: BoxFit.cover,
+                                      imageUrl: '${RestUrl.profileUrl}${usersModel[index].avatar}',
+                                      placeholder: (a, b) => const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: 5,),
+                                        Text(
+                                          usersModel[index].username,
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
+                                        Text(usersModel[index].name),
+                                        const SizedBox(height: 5,),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                      onPressed: ()async{
+                                        if(index!=0){
+                                        showDialog(context: context, builder: (_)=>Center(
+                                          child: Material(
+                                            type: MaterialType.transparency,
+                                            child: Container(
+                                              width: getWidth(context)*.80,
+                                              padding: const EdgeInsets.symmetric(vertical: 15),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius: BorderRadius.circular(10)
+                                              ),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text("Are you sure you want to logout ${usersModel[index].name} ?",
+                                                  style: Theme.of(context).textTheme.headline3,
+                                                  textAlign: TextAlign.center,
+                                                  ),
+                                                  const SizedBox(height: 25,),
+                                                  Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      ElevatedButton(
+                                                          onPressed: (){
+                                                            Navigator.pop(context);
+                                                          },
+                                                          style: ElevatedButton.styleFrom(
+                                                            primary: Colors.red
+                                                          ),
+                                                          child: const Text("No")
+                                                      ),
+                                                      const SizedBox(width: 15,),
+                                                      ElevatedButton(
+                                                          onPressed: () async {
+                                                            await pref.remove('${usersModel[index].id}currentToken');
+                                                            await pref.remove('${usersModel[index].id}likeList');
+                                                            await pref.remove('${usersModel[index].id}commentList');
+                                                            await pref.remove('${usersModel[index].id}viewList');
+                                                            await pref.remove('${usersModel[index].id}followList');
+                                                            await pref.remove('${usersModel[index].id}favSound');
+                                                            await pref.remove('${usersModel[index].id}favTag');
+                                                            users.removeAt(index);
+                                                            usersModel.removeAt(index);
+                                                            await pref.setStringList('allUsers', users);
+                                                            setState(() {});
+                                                            Navigator.pop(context);
+                                                          },
+                                                          style: ElevatedButton.styleFrom(
+                                                              primary: Colors.green
+                                                          ),
+                                                          child: const Text("Yes")
+                                                      )
+                                                    ],
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ));
+                                        }
+                                      },
+                                      padding: const EdgeInsets.only(right: 25),
+                                      constraints: const BoxConstraints(minWidth: 80),
+                                      icon: index==0?const Icon(
+                                        Icons.check,
+                                        size: 30,
+                                        color: ColorManager.cyan,
+                                      ):const Text("Logout", style: TextStyle(fontSize: 15, color: Colors.red, fontWeight: FontWeight.bold),))
+                                ],
+                              ),
+                            ),
+                          );
+                        },)),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  usersModel.length>=2?
+                  Text("Max 2 Accounts can be linked", style: Theme.of(context).textTheme.headline4?.copyWith(color: Colors.red),):
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/login', arguments: 'multiLogin');
+                    },
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        VxCircle(
+                          radius: 50,
+                          backgroundColor: Colors.grey.shade200,
+                          child: const Icon(Icons.add),
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        const Text(
+                          addAccount,
+                          style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        )
+                      ],
                     ),
                   ),
-                  IconButton(
-                      onPressed: () {
-                      Navigator.pop(context);
-                      },
-                      icon: const Icon(Icons.close))
+                  const SizedBox(
+                    height: 20,
+                  ),
                 ],
-              ),
-              const Divider(
-                color: Colors.grey,
-                thickness: 1,
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Expanded(
-                  child: ListView.builder(
-                    itemCount: usersModel.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return GestureDetector(
-                        onTap: (){
-                          print(index);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          color: Colors.white,
-                          child: Row(
-                            children: [
-                              const SizedBox(
-                                width: 30,
-                              ),
-                              Container(
-                                clipBehavior: Clip.antiAliasWithSaveLayer,
-                                height: 90,
-                                width: 90,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                ),
-                                child: CachedNetworkImage(
-                                  fit: BoxFit.cover,
-                                  imageUrl: '${RestUrl.profileUrl}${usersModel[index].avatar}',
-                                  placeholder: (a, b) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 5,),
-                                    Text(
-                                      usersModel[index].username,
-                                      style: const TextStyle(fontSize: 18),
-                                    ),
-                                    Text(usersModel[index].name),
-                                    const SizedBox(height: 5,),
-                                  ],
-                                ),
-                              ),
-                              index==0?
-                              const Icon(
-                                Icons.check,
-                                size: 30,
-                                color: ColorManager.cyan,
-                              ):const SizedBox(),
-                              const SizedBox(width: 20,)
-                            ],
-                          ),
-                        ),
-                      );
-                    },)),
-              const SizedBox(
-                height: 20,
-              ),
-              GestureDetector(
-                onTap: () {
-                  //Navigator.pushNamed(context, '/login');
-                },
-                child: Row(
-                  children: [
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    VxCircle(
-                      radius: 50,
-                      backgroundColor: Colors.grey.shade200,
-                      child: const Icon(Icons.add),
-                    ),
-                    const SizedBox(
-                      width: 15,
-                    ),
-                    const Text(
-                      addAccount,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-            ],
-          );
+              );
+            },);
         });
   }
 }

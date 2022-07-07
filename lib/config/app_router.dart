@@ -22,7 +22,7 @@ class AppRouter {
       case SplashScreen.routeName:
         return SplashScreen.route();
       case LoginScreen.routeName:
-        return LoginScreen.route();
+        return LoginScreen.route(multiLogin: settings.arguments as String?);
       case ForgotPasswordScreen.routeName:
         return ForgotPasswordScreen.route();
       case ResetPasswordScreen.routeName:
