@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,19 +38,22 @@ class HomeState extends State<Home> {
   bool _isOnPageTurning = false;
   String isError = '';
   UserModel? userModel;
-
+  List<int> adIndexes = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300];
+  InterstitialAd? interstitialAd;
   PreloadPageController? preloadPageController;
   int current = 0;
   bool isOnPageTurning = false;
 
   @override
   void initState() {
+    loadInterstitialAd();
     loadLikes();
     getUserData();
     _pageController.addListener(_scrollListener);
     preloadPageController = PreloadPageController();
     preloadPageController!.addListener(scrollListener);
     showPromotionalPopup();
+    interstitialAd?.dispose();
     super.initState();
   }
 
@@ -492,10 +496,16 @@ class HomeState extends State<Home> {
                 }),*/
 
               PreloadPageView.builder(
-              controller: preloadPageController,
-              scrollDirection: Axis.vertical,
-              preloadPagesCount: 3,
-              itemCount: state.list.length, //Notice this
+                  controller: preloadPageController,
+                  onPageChanged: (int index){
+                    if(adIndexes.contains(index)){
+                      print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+                      showAd();
+                    }
+                    },
+                  scrollDirection: Axis.vertical,
+                  preloadPagesCount: 3,
+                  itemCount: state.list.length, //Notice this
               itemBuilder: (BuildContext context, int index) {
                 return Stack(
                   fit: StackFit.expand,
@@ -1392,5 +1402,37 @@ class HomeState extends State<Home> {
         ),
       ),
     ));
+  }
+
+  loadInterstitialAd()async{
+    InterstitialAd.load(
+      adUnitId: homeInterstitialAdUnit,
+      request: const AdRequest(),
+      adLoadCallback:
+      InterstitialAdLoadCallback(
+          onAdLoaded: (InterstitialAd ad) {
+        interstitialAd = ad;
+      }, onAdFailedToLoad: (LoadAdError error) {
+        interstitialAd = null;
+      }),
+    );
+
+  }
+
+  showAd()async{
+    if (interstitialAd != null ) {
+      interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+          onAdDismissedFullScreenContent: (InterstitialAd ad) {
+            ad.dispose();
+            interstitialAd = null;
+            loadInterstitialAd();
+            },
+          onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+            ad.dispose();
+            interstitialAd = null;
+            loadInterstitialAd();
+          });
+      interstitialAd!.show();
+    }
   }
 }
