@@ -52,7 +52,6 @@ class HomeState extends State<Home> {
     _pageController.addListener(_scrollListener);
     preloadPageController = PreloadPageController();
     preloadPageController!.addListener(scrollListener);
-    showPromotionalPopup();
     interstitialAd?.dispose();
     super.initState();
   }
@@ -1359,49 +1358,6 @@ class HomeState extends State<Home> {
       UserModel current = UserModel.fromJson(jsonDecode(currentUser));
       setState(()=> userModel = current);
     }
-  }
-
-  showPromotionalPopup()async{
-    await Future.delayed(const Duration(seconds: 5));
-    showDialog(context: context, builder: (_)=>Material(
-      type: MaterialType.transparency,
-      child: Center(
-        child: Container(
-          height: getHeight(context)*.80,
-          width: getWidth(context)*.90,
-          decoration: BoxDecoration(
-              color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.black, width: 2)
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                left: 2, right: 2, bottom: 2, top: 2,
-                child: CachedNetworkImage(
-                  fit: BoxFit.fill,
-                  imageUrl: "https://cdn.dribbble.com/users/6005356/screenshots/14155452/new_post_mobile_banner_poster-01.png",
-                  placeholder: (a,b)=>const Center(child: CircularProgressIndicator(),),
-                ),
-              ),
-              Positioned(
-                top: -10,
-                right: -10,
-                child: GestureDetector(
-                  onTap: (){Navigator.pop(context);},
-                  child: VxCircle(
-                    radius: 30,
-                    backgroundColor: Colors.red,
-                    child: const Icon(Icons.close, color: Colors.white,),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ));
   }
 
   loadInterstitialAd()async{
