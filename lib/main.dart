@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/repository/video/video_repository.dart';
 import 'config/app_router.dart';
@@ -17,6 +18,7 @@ void main() async {
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
+  MobileAds.instance.initialize();
   await Firebase.initializeApp();
   try {
     cameras = await availableCameras();
