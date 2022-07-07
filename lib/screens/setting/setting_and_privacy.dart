@@ -765,7 +765,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text("Are you sure you want to switch to ${usersModel[index].name} ?",
+                                          Text("Are you sure you want to switch to ${usersModel[index].name}?",
                                             style: Theme.of(context).textTheme.headline3,
                                             textAlign: TextAlign.center,
                                           ),
