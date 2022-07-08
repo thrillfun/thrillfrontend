@@ -11,6 +11,7 @@ import 'config/theme.dart';
 import 'screens/screen.dart';
 
 List<CameraDescription> cameras = [];
+GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Thrill',
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         theme: theme(),
         onGenerateRoute: AppRouter.onGenerateRoute,

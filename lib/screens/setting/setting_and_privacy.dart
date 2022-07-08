@@ -765,9 +765,12 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text("Are you sure you want to switch to ${usersModel[index].name}?",
-                                            style: Theme.of(context).textTheme.headline3,
-                                            textAlign: TextAlign.center,
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                                            child: Text("Are you sure you want to switch to ${usersModel[index].name}?",
+                                              style: Theme.of(context).textTheme.headline3,
+                                              textAlign: TextAlign.center,
+                                            ),
                                           ),
                                           const SizedBox(height: 25,),
                                           Row(
@@ -810,6 +813,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                                       await pref.setStringList('favTag', pref.getStringList('${usersModel[index].id}favTag')!);
                                                       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true);
                                                     } catch(e){
+                                                      Navigator.pop(context);
                                                       showErrorToast(context, e.toString());
                                                     }
                                                   },
@@ -895,9 +899,12 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  Text("Are you sure you want to logout ${usersModel[index].name} ?",
-                                                  style: Theme.of(context).textTheme.headline3,
-                                                  textAlign: TextAlign.center,
+                                                  Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                                    child: Text("Are you sure you want to logout ${usersModel[index].name} ?",
+                                                    style: Theme.of(context).textTheme.headline3,
+                                                    textAlign: TextAlign.center,
+                                                    ),
                                                   ),
                                                   const SizedBox(height: 25,),
                                                   Row(
