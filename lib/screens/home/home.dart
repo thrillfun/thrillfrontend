@@ -498,7 +498,6 @@ class HomeState extends State<Home> {
                   controller: preloadPageController,
                   onPageChanged: (int index){
                     if(adIndexes.contains(index)){
-                      print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                       showAd();
                     }
                     },

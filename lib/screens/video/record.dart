@@ -927,7 +927,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       if(addSoundModel!=null){
-        print(addSoundModel!.sound);
         await audioPlayer.play(addSoundModel!.sound, isLocal: true);
       }
       await cameraController!.startVideoRecording();
