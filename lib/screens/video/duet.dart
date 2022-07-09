@@ -246,6 +246,7 @@ class _RecordDuetState extends State<RecordDuet> {
       //   await audioPlayer.play(addSoundModel!.sound, isLocal: true);
       // }
       videoController!.seekTo(const Duration(seconds: 0));
+      videoController!.play();
       await cameraController!.startVideoRecording();
       autoStopRecordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
         if(sliderValue>=videoController!.value.duration.inSeconds){
