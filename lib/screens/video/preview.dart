@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full/return_code.dart';
+import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_min_gpl/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/core.dart';
@@ -227,6 +227,7 @@ class _PreviewState extends State<Preview> {
         filePath: widget.data.filePath,
         filterName: widget.data.filterName,
         addSoundModel: widget.data.addSoundModel,
+        isDuet: false,
         map: {"start": rangeController.start.toInt().toInt(), "end":rangeController.end.toInt()}
     );
     await Navigator.pushNamed(context, "/postVideo",arguments: newPostData);

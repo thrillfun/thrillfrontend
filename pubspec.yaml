@@ -57,7 +57,7 @@ dependencies:
   audioplayers: ^0.20.1
   #camera_deep_ar:
   file_support: ^1.0.3+6
-  ffmpeg_kit_flutter_full: 4.5.1
+  ffmpeg_kit_flutter_min_gpl: 4.5.1-LTS
   video_player: ^2.4.4
   qr_flutter: ^4.0.0
   qr_code_scanner: ^0.7.0

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/user.dart';
+import 'package:thrill/models/video_model.dart';
 import 'package:thrill/screens/privacy_policy.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/screen.dart';
 import 'package:thrill/screens/sound_details.dart';
 import 'package:thrill/screens/terms_of_service.dart';
+import 'package:thrill/screens/video/duet.dart';
 
 import '../models/vidio_discover_model.dart';
 import '../screens/new_song.dart';
@@ -83,6 +85,8 @@ class AppRouter {
         return TermsOfService.route();
       case PrivacyPolicy.routeName:
         return PrivacyPolicy.route();
+      case RecordDuet.routeName:
+        return RecordDuet.route(settings.arguments as VideoModel);
       default:
         return _errorRoute();
     }

@@ -52,8 +52,13 @@ class HomeState extends State<Home> {
     _pageController.addListener(_scrollListener);
     preloadPageController = PreloadPageController();
     preloadPageController!.addListener(scrollListener);
-    interstitialAd?.dispose();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    interstitialAd?.dispose();
+    super.dispose();
   }
 
   @override
@@ -494,68 +499,70 @@ class HomeState extends State<Home> {
                   );
                 }),*/
 
-              PreloadPageView.builder(
-                  controller: preloadPageController,
+              PageView.builder(
+                  //controller: preloadPageController,
                   onPageChanged: (int index){
                     if(adIndexes.contains(index)){
                       showAd();
                     }
                     },
                   scrollDirection: Axis.vertical,
-                  preloadPagesCount: 3,
+                  //preloadPagesCount: 3,
                   itemCount: state.list.length, //Notice this
               itemBuilder: (BuildContext context, int index) {
                 return Stack(
                   fit: StackFit.expand,
                   children: [
-                    VideoPlayerItem(
-                      videoUrl: state.list[index].video,
-                      isPaused: _isOnPageTurning,
-                      currentPageIndex: current,
-                      pageIndex: index,
-                      filter: state.list[index].filter,
-                      videoId: state.list[index].id,
-                      callback: ()async{
-                        await isLogined().then((value) async {
-                          if (value) {
-                            if (likeList.isEmpty) {
-                              likeList
-                                  .add(state.list[index].id.toString());
-                              state.list[index].copyWith(
-                                  likes: state.list[index].likes++);
-                            } else {
-                              if (likeList.contains(
-                                  state.list[index].id.toString())) {
-                                likeList.remove(
-                                    state.list[index].id.toString());
-                                state.list[index].copyWith(
-                                    likes: state.list[index].likes--);
-                              } else {
+                    StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
+                      return VideoPlayerItem(
+                        videoUrl: state.list[index].video,
+                        isPaused: _isOnPageTurning,
+                        currentPageIndex: current,
+                        pageIndex: index,
+                        filter: state.list[index].filter,
+                        videoId: state.list[index].id,
+                        callback: ()async{
+                          await isLogined().then((value) async {
+                            if (value) {
+                              if (likeList.isEmpty) {
                                 likeList
                                     .add(state.list[index].id.toString());
                                 state.list[index].copyWith(
                                     likes: state.list[index].likes++);
+                              } else {
+                                if (likeList.contains(
+                                    state.list[index].id.toString())) {
+                                  likeList.remove(
+                                      state.list[index].id.toString());
+                                  state.list[index].copyWith(
+                                      likes: state.list[index].likes--);
+                                } else {
+                                  likeList
+                                      .add(state.list[index].id.toString());
+                                  state.list[index].copyWith(
+                                      likes: state.list[index].likes++);
+                                }
                               }
-                            }
-                            SharedPreferences pref =
-                            await SharedPreferences.getInstance();
-                            pref.setStringList('likeList', likeList);
+                              SharedPreferences pref =
+                              await SharedPreferences.getInstance();
+                              pref.setStringList('likeList', likeList);
 
-                            BlocProvider.of<VideoBloc>(context).add(
-                                AddRemoveLike(
-                                    isAdded: likeList.contains(state
-                                        .list[index].id
-                                        .toString())
-                                        ? 1
-                                        : 0,
-                                    videoId: state.list[index].id));
-                            setState(() {});
-                          } else {
-                            showAlertDialog(context);
-                          }
-                        });
-                      },
-                    ),
+                              BlocProvider.of<VideoBloc>(context).add(
+                                  AddRemoveLike(
+                                      isAdded: likeList.contains(state
+                                          .list[index].id
+                                          .toString())
+                                          ? 1
+                                          : 0,
+                                      videoId: state.list[index].id));
+                              setState(() {});
+                            } else {
+                              showAlertDialog(context);
+                            }
+                          });
+                        },
+                      );
+                    }, ),
                     Positioned(
                       bottom: 120,
                       right: 10,
@@ -702,7 +709,15 @@ class HomeState extends State<Home> {
                             height: 18,
                           ),
                           GestureDetector(
-                              onTap: () async {},
+                              onTap: () async {
+                                await isLogined().then((value) {
+                                  if (value) {
+                                    Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
+                                  } else {
+                                    showAlertDialog(context);
+                                  }
+                                });
+                              },
                               child: SvgPicture.asset(
                                 'assets/duet.svg',
                                 height: 30,
