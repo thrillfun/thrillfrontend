@@ -189,3 +189,4 @@ const String myFavourites = 'My Favourites';
 const String newSong = 'New Song';
 const String addAccount = 'Add Account';
 const String paymentHistory = 'Payment History';
+const String type = 'Type...';

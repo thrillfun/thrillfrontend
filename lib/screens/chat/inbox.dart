@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../common/strings.dart';
+import '../../common/strings.dart';
 
 class Inbox extends StatefulWidget {
   const Inbox({Key? key}) : super(key: key);

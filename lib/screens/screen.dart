@@ -20,7 +20,7 @@ export 'setting/free_up_space.dart';
 export 'setting/manage_account.dart';
 export 'setting/push_notifications.dart';
 export 'home/notifications.dart';
-export 'inbox.dart';
+export 'chat/inbox.dart';
 export 'referral.dart';
 export 'favourites.dart';
 export 'add_sound.dart';

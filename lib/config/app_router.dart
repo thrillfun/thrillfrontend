@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/models/video_model.dart';
+import 'package:thrill/screens/chat/chat_screen.dart';
 import 'package:thrill/screens/privacy_policy.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/screen.dart';
@@ -87,6 +88,8 @@ class AppRouter {
         return PrivacyPolicy.route();
       case RecordDuet.routeName:
         return RecordDuet.route(settings.arguments as VideoModel);
+      case ChatScreen.routeName:
+        return ChatScreen.route(settings.arguments as UserModel);
       default:
         return _errorRoute();
     }
