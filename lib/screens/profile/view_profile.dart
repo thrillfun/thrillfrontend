@@ -164,7 +164,7 @@ class _ViewProfileState extends State<ViewProfile> {
             children: [
               GestureDetector(
                 onTap: () {
-                 Navigator.pushNamed(context, '/inbox');
+                 Navigator.pushNamed(context, '/chatScreen', arguments: userModel);
                 },
                 child: Material(
                   borderRadius: BorderRadius.circular(50),
