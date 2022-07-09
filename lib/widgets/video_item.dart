@@ -40,6 +40,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   bool isDispose= false;
   Timer? _timer;
   int _start = 40;
+  bool isBuffering = false;
 
   @override
   void initState() {
@@ -48,7 +49,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
           if (reelsPlayerController!.value.isInitialized) {
-            if (!showGIF) reelsPlayerController!.play();
+            reelsPlayerController!.play();
             reelsPlayerController!.setLooping(true);
             reelsPlayerController!.setVolume(1);
             initialized = true;
@@ -56,6 +57,13 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
             _start = reelsPlayerController!.value.duration.inSeconds~/2;
             startTimer();
             if (mounted) setState(() {});
+            reelsPlayerController?.addListener(() {
+              if(reelsPlayerController!.value.isBuffering){
+                if (mounted) setState(()=>isBuffering = true);
+              } else {
+                if (mounted && isBuffering && !reelsPlayerController!.value.isBuffering) setState(()=>isBuffering = false);
+              }
+            });
           }
         });
 
@@ -139,7 +147,21 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       icon: const Icon(Icons.volume_off,color: Colors.white,size: 40,),
                       onPressed: ()=> reelsPlayerController!.setVolume(1).then((value) => setState((){})),
                     ),
-                  ))
+                  )),
+              Visibility(
+                visible: isBuffering,
+                child: Center(
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                        text: TextSpan(children: [
+                          const WidgetSpan(child: CircularProgressIndicator()),
+                          TextSpan(text: '\n\nBuffering', style: Theme.of(context).textTheme.headline3!.copyWith(
+                            shadows: [const Shadow(color: Colors.white, offset: Offset(0,0), blurRadius: 30)]
+                          ))
+                        ])
+                    )
+                ),
+              ),
             ],
           ),
         ),

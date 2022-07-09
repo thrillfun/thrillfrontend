@@ -662,7 +662,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController?.pause();
                             }
-                            PostData m = PostData(filePath: file.path, filterName: filterImage, addSoundModel: addSoundModel);
+                            PostData m = PostData(filePath: file.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
                             Navigator.pushNamed(context, "/preview",arguments: m);
 
                           } else {
@@ -764,7 +764,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController!.pause();
                             }
-                            PostData m = PostData(filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel);
+                            PostData m = PostData(filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
                             Navigator.pushNamed(context, "/preview",arguments: m);
                           },
                           child: VxCircle(
