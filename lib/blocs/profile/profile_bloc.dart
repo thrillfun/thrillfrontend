@@ -1,11 +1,9 @@
-
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/private_model.dart';
 import 'package:thrill/models/social_url_model.dart';
-import 'package:thrill/models/video_model.dart';
 import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
 part 'profile_event.dart';
@@ -55,7 +53,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
         emit(ProfileLoaded(userModel: user,likesList:likeList,privateList:privateList,publicList: publicList, status: true, message: 'success'));
       } catch (e) {
-        print(e.toString());
         emit(ProfileLoaded(userModel:current,likesList: const [],privateList: const [],publicList: const [],status: false, message: e.toString()));
       }
     } else {

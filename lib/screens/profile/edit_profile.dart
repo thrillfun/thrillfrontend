@@ -119,7 +119,7 @@ class _EditProfileState extends State<EditProfile> {
             closeDialogue(context);
             if (state.status) {
               showSuccessToast(context, state.message);
-              BlocProvider.of<ProfileBloc>(context).add(ProfileLoading());
+              BlocProvider.of<ProfileBloc>(context).add(const ProfileLoading());
               Future.delayed(const Duration(milliseconds: 150)).then((value) {
                 Navigator.pop(context, "/profile");
               });

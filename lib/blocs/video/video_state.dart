@@ -11,11 +11,11 @@ class VideoInitial extends VideoState {
 
 class VideoLoded extends VideoState {
 
-  List<VideoModel> list;
-  String message;
-  bool status;
+  final List<VideoModel> list;
+  final  String message;
+  final bool status;
 
-  VideoLoded(this.list,{required this.status, required this.message});
+  const VideoLoded(this.list,{required this.status, required this.message});
   
   
   @override
@@ -23,9 +23,9 @@ class VideoLoded extends VideoState {
 }
 
 class LikeDislike extends VideoState {
-  int counter;
+  final int counter;
 
-  LikeDislike(this.counter);
+  const LikeDislike(this.counter);
 
 
   @override

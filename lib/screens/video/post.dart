@@ -103,13 +103,13 @@ class _PostVideoState extends State<PostVideo> {
             "-i ${widget.data.downloadedDuetFilePath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 -s 720x1280 -vcodec libx264 $outputPath"
         ).then((session) async {
           final returnCode = await session.getReturnCode();
-          final logs = await session.getLogsAsString();
-          final logList = logs.split('\n');
-          print("============================> LOG STARTED!!!!");
-          for(var e in logList){
-            print(e);
-          }
-          print("============================> LOG ENDED!!!!");
+          // final logs = await session.getLogsAsString();
+          // final logList = logs.split('\n');
+          // print("============================> LOG STARTED!!!!");
+          // for(var e in logList){
+          //   print(e);
+          // }
+          //print("============================> LOG ENDED!!!!");
 
           if (ReturnCode.isSuccess(returnCode)) {
             // print("============================> Success!!!!");
@@ -128,7 +128,7 @@ class _PostVideoState extends State<PostVideo> {
         });
       } catch(e){
         closeDialogue(context);
-        print(e.toString());
+        //print(e.toString());
         showErrorToast(context, "Video Processing Failed");
       }
     } else {
@@ -139,13 +139,13 @@ class _PostVideoState extends State<PostVideo> {
             //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
           ).then((session) async {
             final returnCode = await session.getReturnCode();
-            final logs = await session.getLogsAsString();
-            final logList = logs.split('\n');
-            print("============================> LOG STARTED!!!!");
-            for(var e in logList){
-              print(e);
-            }
-            print("============================> LOG ENDED!!!!");
+            // final logs = await session.getLogsAsString();
+            // final logList = logs.split('\n');
+            // print("============================> LOG STARTED!!!!");
+            // for(var e in logList){
+            //   print(e);
+            // }
+            // print("============================> LOG ENDED!!!!");
 
             if (ReturnCode.isSuccess(returnCode)) {
               // print("============================> Success!!!!");
@@ -164,7 +164,7 @@ class _PostVideoState extends State<PostVideo> {
           });
         } catch(e){
           closeDialogue(context);
-          print(e.toString());
+          //print(e.toString());
           showErrorToast(context, "Video Processing Failed");
         }
       } else {
@@ -205,7 +205,7 @@ class _PostVideoState extends State<PostVideo> {
           });
         } catch(e){
           closeDialogue(context);
-          print(e.toString());
+          //print(e.toString());
           showErrorToast(context, "Video Processing Failed");
         }
       }

@@ -14,18 +14,18 @@ class VideoLoading extends VideoEvent {
 }
 
 class AddRemoveLike extends VideoEvent {
-  int isAdded;
-  int videoId;
-  AddRemoveLike({required this.videoId,required this.isAdded});
+  final int isAdded;
+  final int videoId;
+  const AddRemoveLike({required this.videoId,required this.isAdded});
 
   @override
   List<Object?> get props => [videoId,isAdded];
 }
 
 class FollowUnfollow extends VideoEvent {
-  int publisherId;
-  String action;
-  FollowUnfollow({required this.publisherId,required this.action});
+  final int publisherId;
+  final String action;
+  const FollowUnfollow({required this.publisherId,required this.action});
 
   @override
   List<Object?> get props => [publisherId,action];

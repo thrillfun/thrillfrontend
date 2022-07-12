@@ -6,8 +6,8 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../utils/util.dart';
 
-class ForgotPasswordScreen extends StatelessWidget {
-  ForgotPasswordScreen({Key? key}) : super(key: key);
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({Key? key}) : super(key: key);
 
   static const String routeName = '/forgotPass';
 
@@ -16,11 +16,16 @@ class ForgotPasswordScreen extends StatelessWidget {
       settings: const RouteSettings(name: routeName),
       builder: (context) => BlocProvider(
         create: (context) => LoginBloc(loginRepository: LoginRepository()),
-        child: ForgotPasswordScreen(),
+        child: const ForgotPasswordScreen(),
       ),
     );
   }
 
+  @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   TextEditingController phoneCtr = TextEditingController();
 
   @override

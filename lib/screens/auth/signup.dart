@@ -11,26 +11,36 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../utils/util.dart';
 
-class SignUp extends StatelessWidget {
+class SignUp extends StatefulWidget {
   static const String routeName = '/Signup';
 
-  SignUp({Key? key}) : super(key: key);
+  const SignUp({Key? key}) : super(key: key);
 
   static Route route() {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
       builder: (context) => BlocProvider(
         create: (context) => SignupBloc(loginRepository: LoginRepository()),
-        child: SignUp(),
+        child: const SignUp(),
       ),
     );
   }
 
+  @override
+  State<SignUp> createState() => _SignUpState();
+}
+
+class _SignUpState extends State<SignUp> {
   TextEditingController nameCtr = TextEditingController();
+
   TextEditingController phoneCtr = TextEditingController();
+
   TextEditingController dobCtr = TextEditingController();
+
   DateTime selectedDate = DateTime.now();
+
   String mPin="";
+
   late DateTime initDate = DateTime(
     selectedDate.year - 13,
     selectedDate.month,
@@ -140,7 +150,7 @@ class SignUp extends StatelessWidget {
                           TextFormField(
                             controller: phoneCtr,
                             maxLength: 10,
-                            keyboardType: TextInputType.name,
+                            keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                                 counterText: '',

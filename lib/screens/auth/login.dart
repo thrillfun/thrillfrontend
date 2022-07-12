@@ -9,8 +9,8 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../utils/util.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({Key? key, this.isMultiLogin}) : super(key: key);
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key, this.isMultiLogin}) : super(key: key);
   static const String routeName = '/login';
   final String? isMultiLogin;
 
@@ -24,14 +24,20 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailCtr = TextEditingController();
+
   String mPin="";
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: ()async{
-        return isMultiLogin==null?false:true;
+        return widget.isMultiLogin==null?false:true;
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -61,7 +67,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        isMultiLogin!=null?
+                        widget.isMultiLogin!=null?
                         Align(
                           alignment: Alignment.topLeft,
                           child: IconButton(
@@ -164,7 +170,7 @@ class LoginScreen extends StatelessWidget {
                                     : const SizedBox(width: 5,)
                                     :  const SizedBox(width: 5,),
                                 Visibility(
-                                  visible: isMultiLogin!=null?false:true,
+                                  visible: widget.isMultiLogin!=null?false:true,
                                   child: Padding(
                                     padding: const EdgeInsets.only(right: 40),
                                     child: Align(
@@ -287,7 +293,7 @@ class LoginScreen extends StatelessWidget {
                                   height: 40,
                                 ),
                                 Visibility(
-                                  visible: isMultiLogin!=null?false:true,
+                                  visible: widget.isMultiLogin!=null?false:true,
                                   child: RichText(
                                       text:TextSpan(children: [
                                         TextSpan(
@@ -323,5 +329,4 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-
 }

@@ -209,7 +209,6 @@ class _ViewProfileState extends State<ViewProfile> {
                   try {
                     var result = await RestApi.followUserAndUnfollow(userModel!.id,action);
                     var json = jsonDecode(result.body);
-                    print(json);
                   } catch (_) {
 
                   }

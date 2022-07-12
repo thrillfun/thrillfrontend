@@ -10,10 +10,10 @@ abstract class ProfileEvent extends Equatable {
 class ProfileValidation extends ProfileEvent {
   final String userName, firstName, lastName, bio, gender;
   final String websiteUrl;
-  List<SocialUrlModel> list;
+  final List<SocialUrlModel> list;
   final String profileImage;
 
-  ProfileValidation(this.userName, this.firstName, this.lastName, this.bio,
+  const ProfileValidation(this.userName, this.firstName, this.lastName, this.bio,
       this.profileImage, this.gender, this.websiteUrl, this.list);
 
   @override
@@ -30,7 +30,7 @@ class ProfileValidation extends ProfileEvent {
 }
 
 class ProfileLoading extends ProfileEvent {
-  ProfileLoading();
+  const ProfileLoading();
   @override
   List<Object> get props => [];
 }
