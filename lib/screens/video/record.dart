@@ -874,6 +874,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     return tempFile;
   }
 
+
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     final previousCameraController = controller;
     // Instantiating the camera controller
