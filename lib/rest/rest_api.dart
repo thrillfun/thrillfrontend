@@ -689,7 +689,7 @@ class RestApi {
 
     return response;
   }
-  static Future<http.Response> getUserLikedVideo() async {
+  static Future<http.Response> getUserLikedVideo({int? userID}) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
@@ -702,7 +702,7 @@ class RestApi {
         'Authorization': 'Bearer $token',
       },
       body: {
-        'user_id': user.id.toString(),
+        'user_id': userID==null?user.id.toString():userID.toString(),
       }
     );
 
@@ -893,6 +893,28 @@ class RestApi {
       },
       body: {
         //'slug': slug
+      },
+    );
+
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+
+    return response;
+  }
+
+  static Future<http.Response> getUserPublicVideos(int id) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+
+    var result = await RestClient.postData(
+      RestUrl.userAllVideo,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'user_id': id.toString()
       },
     );
 

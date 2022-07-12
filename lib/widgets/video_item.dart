@@ -49,6 +49,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
           if (reelsPlayerController!.value.isInitialized) {
+            //reelsPlayerController!.setPlaybackSpeed(2);
             reelsPlayerController!.play();
             reelsPlayerController!.setLooping(true);
             reelsPlayerController!.setVolume(1);

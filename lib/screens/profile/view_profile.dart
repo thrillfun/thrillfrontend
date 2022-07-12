@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,6 +8,7 @@ import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../common/strings.dart';
+import '../../models/private_model.dart';
 import '../../models/user.dart';
 import '../../rest/rest_url.dart';
 
@@ -34,6 +34,9 @@ class _ViewProfileState extends State<ViewProfile> {
   int selectedTab = 0;
   UserModel? userModel;
   List<String> followList = List.empty(growable: true);
+  List<PrivateModel> publicVideos = List.empty(growable: true);
+  List<PrivateModel> favVideos = List.empty(growable: true);
+  bool isPublicVideosLoaded = false, isFavVideosLoaded = false;
 
   @override
   void initState() {
@@ -43,6 +46,8 @@ class _ViewProfileState extends State<ViewProfile> {
     } else {
       setState(()=>userModel = widget.mapData["userModel"]);
     }
+    getUserPublicVideos(widget.mapData["getProfile"]?widget.mapData["id"]:userModel?.id);
+    getUserLikedVideos(widget.mapData["getProfile"]?widget.mapData["id"]:userModel?.id);
     super.initState();
   }
 
@@ -374,23 +379,27 @@ class _ViewProfileState extends State<ViewProfile> {
   }
 
   feed() {
-    return Flexible(
+    return isPublicVideosLoaded?
+    publicVideos.isEmpty?
+        const Text("No Videos Found!"):
+    Flexible(
       child: GridView.builder(
           padding: const EdgeInsets.all(2),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3, crossAxisSpacing: 1.8, mainAxisSpacing: 1.8),
-          itemCount: 9,
+          itemCount: publicVideos.length,
           itemBuilder: (BuildContext context, int index) {
             return Stack(
               fit: StackFit.expand,
               children: [
                 CachedNetworkImage(
                     placeholder: (a, b) => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                      child: CircularProgressIndicator(),
+                    ),
                     fit: BoxFit.cover,
-                    imageUrl:
-                        'https://media-cldnry.s-nbcnews.com/image/upload/newscms/2019_02/2709956/190109-tiktok-app-ew-124p.jpg'),
+                    imageUrl:publicVideos[index].gif_image.isEmpty
+                        ? '${RestUrl.thambUrl}thumb-not-available.png'
+                        : '${RestUrl.gifUrl}${publicVideos[index].gif_image}'),
                 Positioned(
                     bottom: 5,
                     left: 5,
@@ -404,7 +413,7 @@ class _ViewProfileState extends State<ViewProfile> {
                           size: 20,
                         ),
                         Text(
-                          '${Random().nextInt(500)}M',
+                          publicVideos[index].views.toString(),
                           style: const TextStyle(
                               color: Colors.white, fontSize: 13),
                         ),
@@ -414,7 +423,7 @@ class _ViewProfileState extends State<ViewProfile> {
                           size: 20,
                         ),
                         Text(
-                          '${Random().nextInt(10) + 1}M',
+                          publicVideos[index].likes.toString(),
                           style: const TextStyle(
                               color: Colors.white, fontSize: 13),
                         ),
@@ -423,11 +432,14 @@ class _ViewProfileState extends State<ViewProfile> {
               ],
             );
           }),
-    );
+    ):
+    const CircularProgressIndicator();
   }
 
   fav() {
-    return RichText(
+    return  isFavVideosLoaded?
+    favVideos.isEmpty?
+    RichText(
         textAlign: TextAlign.center,
         text: TextSpan(children: [
           const TextSpan(
@@ -440,7 +452,59 @@ class _ViewProfileState extends State<ViewProfile> {
               text: '\n\n'
                   "Videos liked by @${userModel!.username.isNotEmpty ? userModel?.username : 'anonymous'} are currently hidden",
               style: const TextStyle(fontSize: 17, color: Colors.grey))
-        ]));
+        ])):
+    Flexible(
+      child: GridView.builder(
+          padding: const EdgeInsets.all(2),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3, crossAxisSpacing: 1.8, mainAxisSpacing: 1.8),
+          itemCount: favVideos.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                CachedNetworkImage(
+                    placeholder: (a, b) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    fit: BoxFit.cover,
+                    imageUrl:favVideos[index].gif_image.isEmpty
+                        ? '${RestUrl.thambUrl}thumb-not-available.png'
+                        : '${RestUrl.gifUrl}${favVideos[index].gif_image}'),
+                Positioned(
+                    bottom: 5,
+                    left: 5,
+                    right: 5,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Icon(
+                          Icons.visibility,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        Text(
+                          favVideos[index].views.toString(),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 13),
+                        ),
+                        const Icon(
+                          Icons.favorite,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        Text(
+                          favVideos[index].likes.toString(),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 13),
+                        ),
+                      ],
+                    ))
+              ],
+            );
+          }),
+    ):
+    const CircularProgressIndicator();
   }
 
   share() {
@@ -757,5 +821,35 @@ class _ViewProfileState extends State<ViewProfile> {
             ],
           );
         });
+  }
+
+  getUserPublicVideos(int userID)async{
+    try{
+      var response = await RestApi.getUserPublicVideos(userID);
+      var json = jsonDecode(response.body);
+      List jsonList = json['data'];
+      setState(() {
+        publicVideos = jsonList.map((e) => PrivateModel.fromJson(e)).toList();
+        isPublicVideosLoaded = true;
+      });
+    } catch(e){
+      showErrorToast(context, e.toString());
+      setState(()=>isPublicVideosLoaded=true);
+    }
+  }
+
+  getUserLikedVideos(int userID)async{
+    try{
+      var response = await RestApi.getUserLikedVideo(userID: userID);
+      var json = jsonDecode(response.body);
+      List jsonList = json['data'];
+      setState(() {
+        favVideos = jsonList.map((e) => PrivateModel.fromJson(e)).toList();
+        isFavVideosLoaded = true;
+      });
+    } catch(e){
+      showErrorToast(context, e.toString());
+      setState(()=>isFavVideosLoaded=true);
+    }
   }
 }
