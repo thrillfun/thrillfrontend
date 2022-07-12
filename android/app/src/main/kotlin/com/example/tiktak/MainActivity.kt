@@ -1,4 +1,4 @@
-package com.example.thrill
+package com.thrill
 
 import io.flutter.embedding.android.FlutterActivity
 
