@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "882291140458",
+    "firebase_url": "https://algebraic-envoy-350105-default-rtdb.firebaseio.com",
     "project_id": "algebraic-envoy-350105",
     "storage_bucket": "algebraic-envoy-350105.appspot.com"
   },
@@ -19,6 +20,14 @@
           "android_info": {
             "package_name": "com.example.thrill",
             "certificate_hash": "6ec95f09dff029b97083735ab5133d6f9406a142"
+          }
+        },
+        {
+          "client_id": "882291140458-dvtj25fvt6q4h6jaghl7727bis0fdu80.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.thrill",
+            "certificate_hash": "ad35685512420a611a27e3958b771d8aae31ce92"
           }
         },
         {

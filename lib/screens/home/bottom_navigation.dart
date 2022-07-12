@@ -298,8 +298,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
       type: MaterialType.transparency,
       child: Center(
         child: Container(
-          height: getHeight(navigatorKey.currentContext!)*.80,
-          width: getWidth(navigatorKey.currentContext!)*.90,
+          height: getHeight(navigatorKey.currentContext!)*.97,
+          width: getWidth(navigatorKey.currentContext!)*.97,
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),

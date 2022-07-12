@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:camera/camera.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:video_player/video_player.dart';
 import '../../common/color.dart';
@@ -41,6 +42,7 @@ class _RecordDuetState extends State<RecordDuet> {
   bool isCameraInitialized = false;
   bool _isPlayPause = false;
   bool _isRecordingInProgress = false;
+  bool _isRearCameraSelected = false;
   double sliderValue = 0;
   double sliderMaxValue = 100;
   String mainPath = "";
@@ -79,6 +81,7 @@ class _RecordDuetState extends State<RecordDuet> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white54,
       body: videoDownloaded?
       SafeArea(
           child: Column(
@@ -117,76 +120,115 @@ class _RecordDuetState extends State<RecordDuet> {
                   height: getHeight(context)*.40,
                   child: controller!.buildPreview())
                   : const SizedBox(),
-              const SizedBox(height: 5,),
-              _videoFile == null
-                  ? GestureDetector(
-                onTap: () async {
-                  if (_isRecordingInProgress) {
-                    XFile? rawVideo = await stopVideoRecording();
-                    //await audioPlayer.stop();
-                    autoStopRecordingTimer?.cancel();
-                    File videoFile = File(rawVideo!.path);
+              const SizedBox(height: 10,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        if(controller?.value.flashMode==FlashMode.torch){
+                          controller?.setFlashMode(FlashMode.off).then((value) => setState((){}));
+                        } else {
+                          controller?.setFlashMode(FlashMode.torch).then((value) => setState((){}));
+                        }
+                      },
+                      iconSize: 40,
+                      padding: const EdgeInsets.only(left: 20),
+                      icon: SvgPicture.asset(controller?.value.flashMode==FlashMode.torch?'assets/flash_on.svg':'assets/flash_of.svg')),
+                        _videoFile == null
+                      ? GestureDetector(
+                    onTap: () async {
+                      if (_isRecordingInProgress) {
+                        XFile? rawVideo = await stopVideoRecording();
+                        //await audioPlayer.stop();
+                        autoStopRecordingTimer?.cancel();
+                        File videoFile = File(rawVideo!.path);
 
-                    int currentUnix =
-                        DateTime.now().millisecondsSinceEpoch;
+                        int currentUnix =
+                            DateTime.now().millisecondsSinceEpoch;
 
-                    Directory? directory;
-                    try {
-                      if (Platform.isIOS) {
-                        directory =
-                        await getApplicationDocumentsDirectory();
+                        Directory? directory;
+                        try {
+                          if (Platform.isIOS) {
+                            directory =
+                            await getApplicationDocumentsDirectory();
+                          } else {
+                            directory =
+                                Directory('/storage/emulated/0/Download');
+                          }
+                        } catch (_) {}
+                        String fileFormat =
+                            videoFile.path.split('.').last;
+
+                        _videoFile = await videoFile.copy(
+                            '${directory!.path}/$currentUnix.$fileFormat');
+                        setState(() {
+                          sliderValue=0;
+                          mainNameFirst = '$currentUnix.$fileFormat';
+                        });
+                        //_startVideoPlayer(_videoFile!.path);
+                        PostData m = PostData(filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
+                        Navigator.pushReplacementNamed(context, "/postVideo", arguments: m);
                       } else {
-                        directory =
-                            Directory('/storage/emulated/0/Download');
+                        await startVideoRecording();
                       }
-                    } catch (_) {}
-                    String fileFormat =
-                        videoFile.path.split('.').last;
-
-                    _videoFile = await videoFile.copy(
-                        '${directory!.path}/$currentUnix.$fileFormat');
-                    setState(() {
-                      sliderValue=0;
-                      mainNameFirst = '$currentUnix.$fileFormat';
-                    });
-                    //_startVideoPlayer(_videoFile!.path);
-                    PostData m = PostData(filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
-                    Navigator.pushReplacementNamed(context, "/postVideo", arguments: m);
-                  } else {
-                    await startVideoRecording();
-                  }
-                },
-                child: VxCircle(
-                  radius: 70,
-                  backgroundColor: _isRecordingInProgress
-                      ? Colors.red
-                      : Colors.white,
-                  border: Border.all(
-                      color: _isRecordingInProgress
-                          ? Colors.white
-                          : Colors.black,
-                      width: 5),
-                ),
+                    },
+                    child: VxCircle(
+                      radius: 70,
+                      backgroundColor: _isRecordingInProgress
+                          ? Colors.red
+                          : Colors.white,
+                      border: Border.all(
+                          color: _isRecordingInProgress
+                              ? Colors.white
+                              : Colors.black,
+                          width: 5),
+                    ),
+                  )
+                      : GestureDetector(
+                    onTap: () async {
+                      if (_isPlayPause) {
+                        videoController!.pause();
+                      } else {
+                        videoController!.play();
+                      }
+                      setState(() {
+                        _isPlayPause = !_isPlayPause;
+                      });
+                    },
+                    child: VxCircle(
+                      radius: 70,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                          _isPlayPause ? Icons.pause : Icons.play_arrow),
+                      border: Border.all(color: Colors.black, width: 5),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      if (!_isRecordingInProgress) {
+                        setState(() {
+                          isCameraInitialized = false;
+                        });
+                        onNewCameraSelected(
+                          cameras[_isRearCameraSelected ? 0 : 1],
+                        );
+                        setState(() {
+                          _isRearCameraSelected = !_isRearCameraSelected;
+                        });
+                      }
+                    },
+                    iconSize: 40,
+                    padding: const EdgeInsets.only(right: 20),
+                    icon: Icon(
+                      _isRearCameraSelected
+                          ? Icons.camera_front
+                          : Icons.camera_rear,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               )
-                  : GestureDetector(
-                onTap: () async {
-                  if (_isPlayPause) {
-                    videoController!.pause();
-                  } else {
-                    videoController!.play();
-                  }
-                  setState(() {
-                    _isPlayPause = !_isPlayPause;
-                  });
-                },
-                child: VxCircle(
-                  radius: 70,
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                      _isPlayPause ? Icons.pause : Icons.play_arrow),
-                  border: Border.all(color: Colors.black, width: 5),
-                ),
-              ),
             ],
           )
       ):

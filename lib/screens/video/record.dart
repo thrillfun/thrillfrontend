@@ -34,8 +34,8 @@ class Record extends StatefulWidget {
 }
 
 class _RecordState extends State<Record> with WidgetsBindingObserver {
-  int selectedDuration = 35;
 
+  int selectedDuration = 35;
   CameraController? controller;
   bool _isCameraInitialized = false;
   bool _isRearCameraSelected = false;
@@ -53,6 +53,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
   AudioPlayer audioPlayer = AudioPlayer();
   Timer? autoStopRecordingTimer;
   Duration videoDuration = const Duration();
+  String speed = '1';
 
   /*final deepArController = CameraDeepArController(config);
   String _platformVersion = 'Unknown';
@@ -501,17 +502,28 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                     ),
                   ),
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if(controller?.value.flashMode==FlashMode.torch){
+                          controller?.setFlashMode(FlashMode.off).then((value) => setState((){}));
+                        } else {
+                          controller?.setFlashMode(FlashMode.torch).then((value) => setState((){}));
+                        }
+                      },
                       iconSize: 40,
-                      icon: SvgPicture.asset('assets/flash_on.svg')),
-                  IconButton(
-                      onPressed: () {},
-                      iconSize: 40,
-                      icon: SvgPicture.asset('assets/stopwatch.svg')),
-                  IconButton(
-                      onPressed: () {},
-                      iconSize: 45,
-                      icon: SvgPicture.asset('assets/woman-makeup.svg'))
+                      padding: const EdgeInsets.only(left: 5),
+                      icon: SvgPicture.asset(controller?.value.flashMode==FlashMode.torch?'assets/flash_on.svg':'assets/flash_of.svg')),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: IconButton(
+                      key: UniqueKey(),
+                        onPressed: () {speedHandler();},
+                        iconSize: 40,
+                        icon: Text("${speed}x".padLeft(3, ' '),style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.white),),),
+                  )
+                  // IconButton(
+                  //     onPressed: () {},
+                  //     iconSize: 45,
+                  //     icon: SvgPicture.asset('assets/woman-makeup.svg'))
                 ],
               )),
           Positioned(
@@ -862,6 +874,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     return tempFile;
   }
 
+
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     final previousCameraController = controller;
     // Instantiating the camera controller
@@ -1016,5 +1029,29 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     } on CameraException {
       // print('Error resuming video recording: $e');
     }
+  }
+
+  speedHandler(){
+    switch(speed){
+      case('.3'):
+        speed = '.5';
+        break;
+      case('.5'):
+        speed = '1';
+        break;
+      case('1'):
+        speed = '2';
+        break;
+      case('2'):
+        speed = '3';
+        break;
+      case('3'):
+        speed = '.3';
+        break;
+      default:
+        speed = '1';
+        break;
+    }
+    setState(() {});
   }
 }

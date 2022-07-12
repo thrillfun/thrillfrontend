@@ -30,8 +30,17 @@ class SignUp extends StatelessWidget {
   TextEditingController phoneCtr = TextEditingController();
   TextEditingController dobCtr = TextEditingController();
   DateTime selectedDate = DateTime.now();
-
   String mPin="";
+  late DateTime initDate = DateTime(
+    selectedDate.year - 13,
+    selectedDate.month,
+    selectedDate.day,
+    selectedDate.hour,
+    selectedDate.minute,
+    selectedDate.second,
+    selectedDate.millisecond,
+    selectedDate.microsecond,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +172,9 @@ class SignUp extends StatelessWidget {
                             onTap: () async {
                               String? bday = await _selectDate(context);
                               if (bday != null) {
-                                dobCtr.text = bday.split(' ').first;
+                                if(bday.isNotEmpty && bday!='null'){
+                                  dobCtr.text = bday.split(' ').first;
+                                }
                               }
                             },
                             decoration: InputDecoration(
@@ -195,7 +206,6 @@ class SignUp extends StatelessWidget {
                             obscureText: true,
                             type: VxPinBorderType.round,
                             keyboardType: TextInputType.number,
-                            fill: false,
                             color: Colors.grey,
                             contentColor: Colors.black,
                             onChanged: (txt){
@@ -337,10 +347,10 @@ class SignUp extends StatelessWidget {
   Future<String?> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: selectedDate,
+        initialDate: initDate,
         firstDate: DateTime(1922, 8),
         helpText: "Choose Your Birthday",
-        lastDate: selectedDate);
+        lastDate: initDate);
     return picked.toString();
   }
 }

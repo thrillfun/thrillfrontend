@@ -29,6 +29,8 @@ class Referral extends StatefulWidget {
 class _ReferralState extends State<Referral> {
   bool checkBoxValue = true;
   UserModel? userModel;
+  int referralCount = 0;
+  String referralCode = '';
 
   @override
   initState(){
@@ -77,7 +79,7 @@ class _ReferralState extends State<Referral> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
                   TextSpan(
-                      text: "${userModel?.referral_count}",
+                      text: "$referralCount",
                       style:
                           const TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
                 ])),
@@ -171,7 +173,9 @@ class _ReferralState extends State<Referral> {
                         ),
                       ),
                       TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/privacyPolicy');
+                          },
                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
                           child: const Text(
                             privacyPolicy,
