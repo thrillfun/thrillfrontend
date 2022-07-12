@@ -96,6 +96,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 children: [
                   Image.asset(
                     'assets/home.png',
+                    color: selectedIndex == 0 ? Colors.white : Colors.white60,
                     scale: 1.4,
                     width: 20,
                   ),
@@ -105,8 +106,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   Text(
                     'Home',
                     style: TextStyle(
-                        color:
-                            selectedIndex == 0 ? Colors.white : Colors.white60,
+                        color: selectedIndex == 0 ? Colors.white : Colors.white60,
                         fontSize: 9),
                   )
                 ],
@@ -134,6 +134,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 children: [
                   Image.asset(
                     'assets/search.png',
+                    color: selectedIndex == 1 ? Colors.white : Colors.white60,
                     scale: 1.4,
                     width: 20,
                   ),
@@ -143,8 +144,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   Text(
                     'Discover',
                     style: TextStyle(
-                        color:
-                            selectedIndex == 1 ? Colors.white : Colors.white60,
+                        color: selectedIndex == 1 ? Colors.white : Colors.white60,
                         fontSize: 9),
                   )
                 ],
@@ -192,6 +192,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 children: [
                   Image.asset(
                     'assets/bell.png',
+                    color: selectedIndex == 2 ? Colors.white : Colors.white60,
                     scale: 1.4,
                     width: 20,
                   ),
@@ -201,8 +202,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   Text(
                     'Notification',
                     style: TextStyle(
-                        color:
-                            selectedIndex == 2 ? Colors.white : Colors.white60,
+                        color: selectedIndex == 2 ? Colors.white : Colors.white60,
                         fontSize: 9),
                   )
                 ],
@@ -232,6 +232,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                     opacity: selectedIndex == 3 ? 0.99 : 0.60,
                     child: SvgPicture.asset(
                       'assets/profile.svg',
+                      color: selectedIndex == 3 ? Colors.white : Colors.white60,
                       width: 20,
                     ),
                   ),
@@ -241,8 +242,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   Text(
                     'Profile',
                     style: TextStyle(
-                        color:
-                            selectedIndex == 3 ? Colors.white : Colors.white60,
+                        color: selectedIndex == 3 ? Colors.white : Colors.white60,
                         fontSize: 9),
                   )
                 ],

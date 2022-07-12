@@ -8,14 +8,14 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:882291140458:android:c2f1ab980d5111983e6713",
+        "mobilesdk_app_id": "1:882291140458:android:f9d674826c50863b3e6713",
         "android_client_info": {
           "package_name": "com.thrill"
         }
       },
       "oauth_client": [
         {
-          "client_id": "882291140458-a1er1ioqvd1bkn4enq7b8lofuh0hrj06.apps.googleusercontent.com",
+          "client_id": "882291140458-behib0fo2ptllrbqtvmj1pnp9n7soai2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.thrill",
@@ -23,7 +23,7 @@
           }
         },
         {
-          "client_id": "882291140458-dvtj25fvt6q4h6jaghl7727bis0fdu80.apps.googleusercontent.com",
+          "client_id": "882291140458-ubtbgtejppebc0hlamavrgijn37ntohh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.thrill",
