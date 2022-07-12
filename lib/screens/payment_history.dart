@@ -150,7 +150,6 @@ class _PaymentHistoryState extends State<PaymentHistory> {
       isLoading = false;
       setState((){});
     } catch(e){
-      print(e.toString());
       setState(()=>isLoading = false);
     }
   }

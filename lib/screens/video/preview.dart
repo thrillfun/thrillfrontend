@@ -198,23 +198,23 @@ class _PreviewState extends State<Preview> {
     }
     FFmpegKit.execute("-i ${widget.data.filePath} -r $frameRate -f image2 ${outputPath}image-%3d.png").then((session) async {
       final returnCode = await session.getReturnCode();
-      final logs = await session.getLogsAsString();
-      final logList = logs.split('\n');
-      print("============================> LOG STARTED!!!!");
-      for(var e in logList){
-        print(e);
-      }
-      print("============================> LOG ENDED!!!!");
+      // final logs = await session.getLogsAsString();
+      // final logList = logs.split('\n');
+      // print("============================> LOG STARTED!!!!");
+      // for(var e in logList){
+      //   print(e);
+      // }
+      //print("============================> LOG ENDED!!!!");
 
       if (ReturnCode.isSuccess(returnCode)) {
         //MediaInformationSession info = await FFprobeKit.getMediaInformation(outputPath);
         //Map? _gifInfo = info.getMediaInformation()?.getAllProperties()?["streams"][0];
-        print("============================> Success!!!!");
+        //print("============================> Success!!!!");
         setState((){
           thumbList.addAll(directory.listSync());
         });
       } else {
-        print("============================> Failed!!!!");
+        //print("============================> Failed!!!!");
         setState((){
         });
       }

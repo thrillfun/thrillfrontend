@@ -7,7 +7,7 @@ class ChatController {
   }
 
   static Future<void> sendMsg(String chatId, ChatMsg message) {
-    return FirebaseDatabase.instance.ref().child('chats').child(chatId).push().set(message.toJson()).onError((error, stackTrace) => print(error.toString()));
+    return FirebaseDatabase.instance.ref().child('chats').child(chatId).push().set(message.toJson());
   }
 
   static Stream<List<ChatMsg>> getChatMsg(String chatId) {

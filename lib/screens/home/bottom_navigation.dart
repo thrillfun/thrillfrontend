@@ -29,7 +29,7 @@ class BottomNavigation extends StatefulWidget {
       settings: const RouteSettings(name: routeName),
       builder: (context) => BlocProvider(
         create: (context) => ProfileBloc(loginRepository: LoginRepository())
-          ..add(ProfileLoading()),
+          ..add(const ProfileLoading()),
         child: BottomNavigation(initialIndex: initIndex,),
       ),
     );
@@ -298,8 +298,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
       type: MaterialType.transparency,
       child: Center(
         child: Container(
-          height: getHeight(navigatorKey.currentContext!)*.97,
-          width: getWidth(navigatorKey.currentContext!)*.97,
+          height: getHeight(navigatorKey.currentContext!)*.90,
+          width: getWidth(navigatorKey.currentContext!)*.90,
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
@@ -311,8 +311,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
               Positioned(
                 left: 2, right: 2, bottom: 2, top: 2,
                 child: CachedNetworkImage(
-                  fit: BoxFit.fill,
-                  imageUrl: "https://cdn.dribbble.com/users/6005356/screenshots/14155452/new_post_mobile_banner_poster-01.png",
+                  fit: BoxFit.contain,
+                  imageUrl: "https://www.techgropse.com/common/images/android/android-app-development-img.png",
                   placeholder: (a,b)=>const Center(child: CircularProgressIndicator(),),
                 ),
               ),

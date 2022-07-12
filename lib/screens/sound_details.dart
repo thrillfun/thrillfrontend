@@ -229,7 +229,6 @@ class _SoundDetailsState extends State<SoundDetails> {
           ElevatedButton(
               onPressed: () async {
                 String sound = widget.map["sound"];
-                print("$saveCacheDirectory$sound");
                 File file = File('$saveCacheDirectory$sound');
                     try{
                       if(await file.exists()){

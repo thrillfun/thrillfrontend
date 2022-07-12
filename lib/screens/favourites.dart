@@ -1,14 +1,10 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/hashtags_model.dart';
-
 import '../common/color.dart';
 import '../common/strings.dart';
 import '../models/video_model.dart';

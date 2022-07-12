@@ -48,14 +48,14 @@ class _QrCodeState extends State<QrCode> {
     super.dispose();
   }
 
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      qrViewController?.pauseCamera();
-    }
-    qrViewController?.resumeCamera();
-  }
+  // @override
+  // void reassemble() {
+  //   super.reassemble();
+  //   if (Platform.isAndroid) {
+  //     qrViewController?.pauseCamera();
+  //   }
+  //   qrViewController?.resumeCamera();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -298,7 +298,7 @@ class _QrCodeState extends State<QrCode> {
     UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
     setState(() {
       userModel = current;
-      qrData = "Thrill User ID :${userModel?.id}\nProfile: www.thrill.com/user";
+      qrData = "Thrill User ID :${userModel?.id}\nProfile: www.google.com";
     });
   }
 }

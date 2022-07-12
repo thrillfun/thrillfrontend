@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class RotatedImage extends StatefulWidget {
   final String image;
 
-  const RotatedImage(this.image);
+  const RotatedImage(this.image, {Key? key}) : super(key: key);
 
   @override
   _RotatedImageState createState() => _RotatedImageState();

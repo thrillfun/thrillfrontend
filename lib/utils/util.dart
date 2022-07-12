@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 T getRandomElement<T>(List<T> list) {
-  final random = new Random();
+  final random = Random();
   var i = random.nextInt(list.length);
   return list[i];
 }

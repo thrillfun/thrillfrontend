@@ -1,9 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-
 import '../../common/color.dart';
-import '../../common/strings.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 

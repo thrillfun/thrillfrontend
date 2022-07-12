@@ -1,21 +1,17 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/rest/rest_api.dart';
-import 'package:thrill/rest/rest_client.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
-
 import '../common/strings.dart';
 import '../models/hashtags_model.dart';
 import '../models/vidio_discover_model.dart';
 
 class TagDetails extends StatefulWidget {
-  TagDetails({Key? key, required this.tag}) : super(key: key);
-  DiscoverVideo tag;
+  const TagDetails({Key? key, required this.tag}) : super(key: key);
+  final DiscoverVideo tag;
 
   @override
   State<TagDetails> createState() => _TagDetailsState();
