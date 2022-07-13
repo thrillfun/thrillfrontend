@@ -59,7 +59,7 @@ class _EditProfileState extends State<EditProfile> {
       lastNameCtr.text = widget.user.last_name;
       websiteCtr.text = widget.user.website_url;
       bioCtr.text = widget.user.bio;
-      dropDownGender=widget.user.gender;
+      dropDownGender=widget.user.gender.isEmpty?"Male":widget.user.gender;
 
       socialList.add(SocialUrlModel('youtube', widget.user.youtube));
       socialList.add(SocialUrlModel('facebook', widget.user.facebook));

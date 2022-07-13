@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/repository/video/video_repository.dart';
+import 'package:thrill/screens/home/home.dart';
 part 'video_event.dart';
 part 'video_state.dart';
 
@@ -18,7 +19,14 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
 
   void _onVideoLoading(VideoLoading event, Emitter<VideoState> emit) async {
     emit(VideoInitial());
-    var result = await _videoRepository.getVideo();
+    var result;
+    if(selectedTopIndex == 0){
+      result = await _videoRepository.getFollowingVideos();
+    } else if (selectedTopIndex == 1){
+      result = await _videoRepository.getVideo();
+    } else {
+      result = await _videoRepository.getPopularVideos();
+    }
     if (result['status']) {
       try {
         list = List<VideoModel>.from(

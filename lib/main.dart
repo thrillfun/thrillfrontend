@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
             create: (context) => VideoBloc(videoRepository: VideoRepository())
-              ..add(const VideoLoading())),
+              ..add(const VideoLoading(selectedTabIndex: 1))),
       ],
       child: MaterialApp(
         title: 'Thrill',

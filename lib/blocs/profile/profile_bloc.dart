@@ -73,15 +73,20 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }else if(event.bio.isEmpty){
       emit(const ValidationStatus(message: "Bio required", status: false));
     }else{
-        var result=await _loginRepository.updateProfile(event.userName, event.firstName, event.lastName, event.profileImage, event.gender, event.websiteUrl, event.bio, event.list);
-         if(result['status']){
-           UserModel user = UserModel.fromJson(result['data']['user']);
-           var pref = await SharedPreferences.getInstance();
-           await pref.setString('currentUser', jsonEncode(user.toJson()),);
-           emit(ValidationStatus(message: result['message'], status: true));
-         }else {
-           emit(ValidationStatus(message:result['message'], status: false));
-         }
+         try{
+          var result=await _loginRepository.updateProfile(event.userName, event.firstName, event.lastName, event.profileImage, event.gender, event.websiteUrl, event.bio, event.list);
+          var json = jsonDecode(result);
+          if(json['status']){
+            UserModel user = UserModel.fromJson(json['data']['user']);
+            var pref = await SharedPreferences.getInstance();
+            await pref.setString('currentUser', jsonEncode(user.toJson()),);
+            emit(ValidationStatus(message: json['message'], status: true));
+          }else {
+            emit(ValidationStatus(message:json['message'], status: false));
+          }
+        } catch(e){
+          emit(ValidationStatus(message:e.toString(), status: false));
+        }
     }
   }
 }

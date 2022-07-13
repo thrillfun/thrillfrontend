@@ -5,6 +5,7 @@ class VideoModel {
   String video, description, filter, gif_image, sound, sound_name, sound_category_name;
   int likes,views;
   UserModel user;
+  String speed;
 
   VideoModel(
       this.id,
@@ -17,7 +18,7 @@ class VideoModel {
       this.gif_image,
       this.sound,
       this.sound_name,
-      this.sound_category_name,this.views);
+      this.sound_category_name,this.views,this.speed);
 
   factory VideoModel.fromJson(dynamic json) {
     UserModel users;
@@ -33,7 +34,8 @@ class VideoModel {
         json['gif_image'] ?? '',
         json['sound'] ?? '',
         json['sound_name'] ?? '',
-        json['sound_category_name'] ?? '',json['views'] ?? 0);
+        json['sound_category_name'] ?? '',json['views'] ?? 0,
+        json['speed'] ?? '1');
   }
 
   Map<String, dynamic> toJson() {
@@ -50,6 +52,7 @@ class VideoModel {
     data['sound_name'] = sound_name;
     data['sound_category_name'] = sound_category_name;
     data['views'] = views;
+    data['speed'] = speed;
     return data;
   }
 
@@ -66,6 +69,7 @@ class VideoModel {
         String? sound_name,
         String? sound_category_name,
         int? views,
+        String? speed
       }) {
     return VideoModel(
         id ?? this.id,
@@ -80,6 +84,7 @@ class VideoModel {
         this.sound,
         this.sound_category_name,
       views ?? this.views,
+        this.speed
     );
   }
 }
