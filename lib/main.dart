@@ -38,13 +38,21 @@ class MyApp extends StatelessWidget {
             create: (context) => VideoBloc(videoRepository: VideoRepository())
               ..add(const VideoLoading(selectedTabIndex: 1))),
       ],
-      child: MaterialApp(
-        title: 'Thrill',
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        theme: theme(),
-        onGenerateRoute: AppRouter.onGenerateRoute,
-        initialRoute: SplashScreen.routeName,
+      child: GestureDetector(
+        onTap: () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus &&
+              currentFocus.focusedChild != null) {
+            FocusManager.instance.primaryFocus?.unfocus();
+          }},
+        child: MaterialApp(
+          title: 'Thrill',
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          theme: theme(),
+          onGenerateRoute: AppRouter.onGenerateRoute,
+          initialRoute: SplashScreen.routeName,
+        ),
       ),
     );
   }
