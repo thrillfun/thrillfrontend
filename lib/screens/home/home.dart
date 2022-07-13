@@ -18,6 +18,7 @@ import '../../widgets/image_rotate.dart';
 import '../../widgets/video_item.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+int selectedTopIndex = 1;
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -27,7 +28,6 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> {
 
-  int selectedTopIndex = 0;
   List<String> likeList = List<String>.empty(growable: true);
   List<Comments> commentList = List<Comments>.empty(growable: true);
   List<String> likeComment = List<String>.empty(growable: true);
@@ -70,19 +70,48 @@ class HomeState extends State<Home> {
           child: CircularProgressIndicator(color: Colors.lightBlueAccent),
         );
       } else if (state is VideoLoded) {
-        if (state.list.isEmpty) {
-          return Container(
-              decoration: const BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage('assets/splash.png'))),
-              child:  Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                ),
-              ));
-        } else {
+        // if (state.list.isEmpty) {
+        //   return Container(
+        //       decoration: const BoxDecoration(
+        //           image: DecorationImage(
+        //               fit: BoxFit.cover,
+        //               image: AssetImage('assets/splash.png'))),
+        //       child:  Center(
+        //         child: selectedTopIndex==0?
+        //         const Text("No Following Videos Found!",
+        //           style: TextStyle(color: Colors.white, fontSize: 14),):
+        //         selectedTopIndex==1?
+        //         RichText(
+        //           textAlign: TextAlign.center,
+        //           text: TextSpan(
+        //               children: [
+        //             const TextSpan(text: "No Videos Found!",
+        //               style: TextStyle(color: Colors.white, fontSize: 14),),
+        //             const TextSpan(text: "\nBe the first to post a video!!\n"),
+        //             WidgetSpan(
+        //                 child: IconButton(
+        //                 onPressed: ()async {
+        //                   await isLogined().then((value) async {
+        //                     if (value) {
+        //                       reelsPlayerController?.pause();
+        //                       await Navigator.pushNamed(context, "/record");
+        //                       reelsPlayerController?.play();
+        //                     } else {
+        //                       showAlertDialog(context);
+        //                     }
+        //                   });
+        //                 },
+        //                 iconSize: 28,
+        //                 icon: const Icon(
+        //                   Icons.camera_alt_rounded,
+        //                   color: Colors.white,
+        //                 )))
+        //           ]),
+        //         ):
+        //         const Text("No Popular Videos Found!",
+        //           style: TextStyle(color: Colors.white, fontSize: 14),),
+        //       ));
+        // } else {
           return Stack(
             children:[
              /* PageView.builder(
@@ -498,71 +527,79 @@ class HomeState extends State<Home> {
                     ],
                   );
                 }),*/
-
-              PageView.builder(
-                  //controller: preloadPageController,
+              state.list.isEmpty?
+              Container(
+                  decoration: const BoxDecoration(
+                      image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: AssetImage('assets/splash.png'))),
+                  child:  Center(
+                    child:  Text("No ${selectedTopIndex==0?"Following":selectedTopIndex==1?"Related":"Popular"} Videos Found!",
+                      style: const TextStyle(color: Colors.white, fontSize: 14),),
+                  )):
+              PreloadPageView.builder(
+                  controller: preloadPageController,
                   onPageChanged: (int index){
                     if(adIndexes.contains(index)){
                       showAd();
                     }
-                    },
+                  },
                   scrollDirection: Axis.vertical,
-                  //preloadPagesCount: 3,
+                  preloadPagesCount: 3,
                   itemCount: state.list.length, //Notice this
               itemBuilder: (BuildContext context, int index) {
                 return Stack(
                   fit: StackFit.expand,
                   children: [
-                    StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
-                      return VideoPlayerItem(
-                        videoUrl: state.list[index].video,
-                        isPaused: _isOnPageTurning,
-                        currentPageIndex: current,
-                        pageIndex: index,
-                        filter: state.list[index].filter,
-                        videoId: state.list[index].id,
-                        callback: ()async{
-                          await isLogined().then((value) async {
-                            if (value) {
-                              if (likeList.isEmpty) {
+                    VideoPlayerItem(
+                      videoUrl: state.list[index].video,
+                      speed: state.list[index].speed,
+                      isPaused: _isOnPageTurning,
+                      currentPageIndex: current,
+                      pageIndex: index,
+                      filter: state.list[index].filter,
+                      videoId: state.list[index].id,
+                      callback: ()async{
+                        await isLogined().then((value) async {
+                          if (value) {
+                            if (likeList.isEmpty) {
+                              likeList
+                                  .add(state.list[index].id.toString());
+                              state.list[index].copyWith(
+                                  likes: state.list[index].likes++);
+                            } else {
+                              if (likeList.contains(
+                                  state.list[index].id.toString())) {
+                                likeList.remove(
+                                    state.list[index].id.toString());
+                                state.list[index].copyWith(
+                                    likes: state.list[index].likes--);
+                              } else {
                                 likeList
                                     .add(state.list[index].id.toString());
                                 state.list[index].copyWith(
                                     likes: state.list[index].likes++);
-                              } else {
-                                if (likeList.contains(
-                                    state.list[index].id.toString())) {
-                                  likeList.remove(
-                                      state.list[index].id.toString());
-                                  state.list[index].copyWith(
-                                      likes: state.list[index].likes--);
-                                } else {
-                                  likeList
-                                      .add(state.list[index].id.toString());
-                                  state.list[index].copyWith(
-                                      likes: state.list[index].likes++);
-                                }
                               }
-                              SharedPreferences pref =
-                              await SharedPreferences.getInstance();
-                              pref.setStringList('likeList', likeList);
-
-                              BlocProvider.of<VideoBloc>(context).add(
-                                  AddRemoveLike(
-                                      isAdded: likeList.contains(state
-                                          .list[index].id
-                                          .toString())
-                                          ? 1
-                                          : 0,
-                                      videoId: state.list[index].id));
-                              setState(() {});
-                            } else {
-                              showAlertDialog(context);
                             }
-                          });
-                        },
-                      );
-                    }, ),
+                            SharedPreferences pref =
+                            await SharedPreferences.getInstance();
+                            pref.setStringList('likeList', likeList);
+
+                            BlocProvider.of<VideoBloc>(context).add(
+                                AddRemoveLike(
+                                    isAdded: likeList.contains(state
+                                        .list[index].id
+                                        .toString())
+                                        ? 1
+                                        : 0,
+                                    videoId: state.list[index].id));
+                            setState(() {});
+                          } else {
+                            showAlertDialog(context);
+                          }
+                        });
+                      },
+                    ),
                     Positioned(
                       bottom: 120,
                       right: 10,
@@ -929,10 +966,6 @@ class HomeState extends State<Home> {
               }
               ),
 
-
-
-
-
               Positioned(
                 top: 30,
                 left: 0,
@@ -945,6 +978,8 @@ class HomeState extends State<Home> {
                         onPressed: () {
                           setState(() {
                             selectedTopIndex = 0;
+                            BlocProvider.of<VideoBloc>(context).add(
+                                VideoLoading(selectedTabIndex: selectedTopIndex));
                           });
                         },
                         child: Text(
@@ -967,6 +1002,8 @@ class HomeState extends State<Home> {
                         onPressed: () {
                           setState(() {
                             selectedTopIndex = 1;
+                            BlocProvider.of<VideoBloc>(context).add(
+                                VideoLoading(selectedTabIndex: selectedTopIndex));
                           });
                         },
                         child: Text(
@@ -989,6 +1026,8 @@ class HomeState extends State<Home> {
                         onPressed: () {
                           setState(() {
                             selectedTopIndex = 2;
+                            BlocProvider.of<VideoBloc>(context).add(
+                                VideoLoading(selectedTabIndex: selectedTopIndex));
                           });
                         },
                         child: Text(
@@ -1022,7 +1061,7 @@ class HomeState extends State<Home> {
               ),
             ]
           );
-        }
+        //}
       }
       return Container();
     }));

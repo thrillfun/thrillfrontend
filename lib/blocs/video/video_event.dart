@@ -7,10 +7,11 @@ abstract class VideoEvent extends Equatable {
   List<Object?> get props => [];
 }
 class VideoLoading extends VideoEvent {
-   const VideoLoading();
+   const VideoLoading({required this.selectedTabIndex});
+   final int selectedTabIndex;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [selectedTabIndex];
 }
 
 class AddRemoveLike extends VideoEvent {

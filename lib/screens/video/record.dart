@@ -674,7 +674,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController?.pause();
                             }
-                            PostData m = PostData(filePath: file.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
+                            PostData m = PostData(speed: speed, filePath: file.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
                             Navigator.pushNamed(context, "/preview",arguments: m);
 
                           } else {
@@ -776,7 +776,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             if (_isPlayPause) {
                               videoController!.pause();
                             }
-                            PostData m = PostData(filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
+                            PostData m = PostData(speed: speed, filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
                             Navigator.pushNamed(context, "/preview",arguments: m);
                           },
                           child: VxCircle(
@@ -858,6 +858,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     if (path.isNotEmpty) {
       videoController = VideoPlayerController.file(File(path));
       await videoController!.initialize().then((_) {
+        videoController!.setPlaybackSpeed(double.parse(speed));
         setState(() {});
         mainPath = path;
         _isPlayPause = true;

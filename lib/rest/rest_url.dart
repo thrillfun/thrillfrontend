@@ -55,6 +55,8 @@ class RestUrl {
   static const String getProbilityCounter = baseUrl + "spin-wheel/counter-data";
   static const String cmsPage = baseUrl + "CmsPage";
   static const String siteSettings = baseUrl + "SiteSettings";
+  static const String popularVideos = baseUrl + "video/popular";
+  static const String followingVideos = baseUrl + "video/following";
 
 
 }

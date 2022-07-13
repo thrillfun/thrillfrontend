@@ -17,6 +17,7 @@ class VideoPlayerItem extends StatefulWidget {
   final bool isPaused;
   final int videoId;
   final VoidCallback? callback;
+  final String speed;
 
   const VideoPlayerItem(
       {Key? key,
@@ -26,6 +27,7 @@ class VideoPlayerItem extends StatefulWidget {
       required this.isPaused,
       required this.filter,
       required this.videoId,
+      required this.speed,
         this.callback})
       : super(key: key);
 
@@ -49,7 +51,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
           if (reelsPlayerController!.value.isInitialized) {
-            //reelsPlayerController!.setPlaybackSpeed(2);
+            reelsPlayerController!.setPlaybackSpeed(widget.speed.contains('x')?double.parse(widget.speed.replaceAll('x', '')):double.parse(widget.speed));
             reelsPlayerController!.play();
             reelsPlayerController!.setLooping(true);
             reelsPlayerController!.setVolume(1);

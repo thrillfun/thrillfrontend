@@ -16,6 +16,26 @@ class VideoRepository extends VideoBaseRepository{
   }
 
   @override
+  Future<dynamic> getFollowingVideos() async{
+    try {
+      var result = await RestApi.getFollowingVideos();
+      var json = jsonDecode(result.body);
+      return json;
+    } catch (_) {}
+    return null;
+  }
+
+  @override
+  Future<dynamic> getPopularVideos() async{
+    try {
+      var result = await RestApi.getPopularVideos();
+      var json = jsonDecode(result.body);
+      return json;
+    } catch (_) {}
+    return null;
+  }
+
+  @override
   Future<dynamic> likeDislike(int videoId, int isLike)async {
     try {
       var result = await RestApi.likeAndDislike(videoId,isLike);

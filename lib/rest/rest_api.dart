@@ -35,7 +35,8 @@ class RestApi {
         'dob': dob,
         'password': password,
         'social_login_type': 'normal',
-        'firebase_token': token
+        'firebase_token': token,
+        'gender': "Male"
       },
     );
 
@@ -97,9 +98,13 @@ class RestApi {
         request.files.add(file);
       }
       response = await http.Response.fromStream(await request.send());
+      print(response.body);
       if (response != null) {
         if (response.statusCode == 200) {
-          response = response;
+          print(response.body);
+          response = http.Response(jsonEncode(response.body), 200,headers: {
+            HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+          });
         } else if (response.statusCode == 404) {
           response = http.Response(jsonEncode({'status': false, 'message': '404'}), 200);
         } else if (response.statusCode == 401) {
@@ -110,6 +115,7 @@ class RestApi {
       }
     } catch (e) {
       response = http.Response(jsonEncode({'status': false, 'message': e.toString()}), 200);
+      print(e.toString());
     }
     return response;
   }
@@ -189,7 +195,7 @@ class RestApi {
 
   static Future<http.Response> postVideo(String videoUrl,
       String sound,String soundName,String category,String hashtags,String visibility,
-      int isCommentAllowed,String description,String filterImg,String language, gifName) async {
+      int isCommentAllowed,String description,String filterImg,String language, String gifName, String speed) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
@@ -214,7 +220,8 @@ class RestApi {
         'visibility': visibility,
         'is_comment_allowed':isCommentAllowed.toString(),
         'description':description,
-        'gif_image':gifName
+        'gif_image':gifName,
+        'speed': speed
       },
     );
     response = http.Response(jsonEncode(result), 200,headers: {
@@ -922,6 +929,38 @@ class RestApi {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
 
+    return response;
+  }
+
+  static Future<http.Response> getPopularVideos() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.getData(
+      RestUrl.popularVideos,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> getFollowingVideos() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.getData(
+      RestUrl.followingVideos,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
     return response;
   }
 

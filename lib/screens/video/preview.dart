@@ -224,6 +224,7 @@ class _PreviewState extends State<Preview> {
   continuePressed()async{
     videoPlayerController.pause();
     PostData newPostData = PostData(
+        speed: widget.data.speed,
         filePath: widget.data.filePath,
         filterName: widget.data.filterName,
         addSoundModel: widget.data.addSoundModel,

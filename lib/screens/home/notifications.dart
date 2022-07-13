@@ -19,6 +19,13 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
+
+  @override
+  void initState() {
+    getNotifications();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,5 +107,8 @@ class _NotificationsState extends State<Notifications> {
                 ),
               );
             }));
+  }
+
+  getNotifications()async{
   }
 }

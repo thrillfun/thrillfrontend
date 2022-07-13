@@ -167,7 +167,7 @@ class _RecordDuetState extends State<RecordDuet> {
                           mainNameFirst = '$currentUnix.$fileFormat';
                         });
                         //_startVideoPlayer(_videoFile!.path);
-                        PostData m = PostData(filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
+                        PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
                         Navigator.pushReplacementNamed(context, "/postVideo", arguments: m);
                       } else {
                         await startVideoRecording();
@@ -320,7 +320,7 @@ class _RecordDuetState extends State<RecordDuet> {
             sliderValue=0;
           });
           //_startVideoPlayer(_videoFile!.path);
-          PostData m = PostData(filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
+          PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
           Navigator.pushReplacementNamed(context, "/postVideo",arguments: m);
         } else {
           //videoDuration+=const Duration(seconds: 1);

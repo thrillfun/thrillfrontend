@@ -779,12 +779,13 @@ class _PostVideoState extends State<PostVideo> {
                   ? ''
                   : widget.data.filterName,
               dropDownLanguageValue,
-              '$currentUnix.gif');
+              '$currentUnix.gif',
+              widget.data.speed);
           var json = jsonDecode(result.body);
           closeDialogue(context);
           if (json['status']) {
             BlocProvider.of<VideoBloc>(context)
-                .add(const VideoLoading());
+                .add(const VideoLoading(selectedTabIndex: 1));
             showSuccessToast(context,
                 "Video has been saved successfully");
             await Future.delayed(
@@ -826,12 +827,13 @@ class _PostVideoState extends State<PostVideo> {
                     ? ''
                     : widget.data.filterName,
                 dropDownLanguageValue,
-                '$currentUnix.gif');
+                '$currentUnix.gif',
+                widget.data.speed);
             var json = jsonDecode(result.body);
             closeDialogue(context);
             if (json['status']) {
               BlocProvider.of<VideoBloc>(context)
-                  .add(const VideoLoading());
+                  .add( const VideoLoading(selectedTabIndex: 1));
               showSuccessToast(context,
                   "Video has been saved successfully");
               await Future.delayed(
@@ -897,12 +899,13 @@ class _PostVideoState extends State<PostVideo> {
                   ? ''
                   : widget.data.filterName,
               dropDownLanguageValue,
-              '$currentUnix.gif');
+              '$currentUnix.gif',
+              widget.data.speed);
           var json = jsonDecode(result.body);
           closeDialogue(context);
           if (json['status']) {
             BlocProvider.of<VideoBloc>(context)
-                .add(const VideoLoading());
+                .add( const VideoLoading(selectedTabIndex: 1));
             showSuccessToast(context,
                 "Video has been posted successfully");
             await Future.delayed(
@@ -944,12 +947,13 @@ class _PostVideoState extends State<PostVideo> {
                     ? ''
                     : widget.data.filterName,
                 dropDownLanguageValue,
-                '$currentUnix.gif');
+                '$currentUnix.gif',
+                widget.data.speed);
             var json = jsonDecode(result.body);
             closeDialogue(context);
             if (json['status']) {
               BlocProvider.of<VideoBloc>(context)
-                  .add(const VideoLoading());
+                  .add( const VideoLoading(selectedTabIndex: 1));
               showSuccessToast(context,
                   "Video has been posted successfully");
               await Future.delayed(
@@ -970,8 +974,6 @@ class _PostVideoState extends State<PostVideo> {
     });
   }
 
-  processVideoWithoutSound(String draftORpost)async{}
-  processVideoWithSound(String draftORpost)async{}
   getHashtags()async{
     try{
       var response = await RestApi.getHashtagList();
