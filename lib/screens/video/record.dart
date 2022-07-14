@@ -409,7 +409,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
 
 */
 
-
           Positioned(
             top: 2, left: 0, right: 0,
             child: SliderTheme(
@@ -706,36 +705,40 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                       ? GestureDetector(
                           onTap: () async {
                             if (_isRecordingInProgress) {
-                              XFile? rawVideo = await stopVideoRecording();
-                              await audioPlayer.stop();
-                              autoStopRecordingTimer?.cancel();
-                              File videoFile = File(rawVideo!.path);
-
-                              int currentUnix =
-                                  DateTime.now().millisecondsSinceEpoch;
-
-                              Directory? directory;
-                              try {
-                                if (Platform.isIOS) {
-                                  directory =
-                                      await getApplicationDocumentsDirectory();
-                                } else {
-                                  directory =
-                                      Directory('/storage/emulated/0/Download');
-                                }
-                              } catch (_) {}
-                              String fileFormat =
-                                  videoFile.path.split('.').last;
-
-                              _videoFile = await videoFile.copy(
-                                  '${directory!.path}/$currentUnix.$fileFormat');
-                              setState(() {
-                                sliderValue=0;
-                                mainNameFirst = '$currentUnix.$fileFormat';
-                              });
-                              _startVideoPlayer(_videoFile!.path);
+                              pauseVideoRecording();
+                              // XFile? rawVideo = await stopVideoRecording();
+                              // await audioPlayer.stop();
+                              // autoStopRecordingTimer?.cancel();
+                              // File videoFile = File(rawVideo!.path);
+                              //
+                              // int currentUnix =
+                              //     DateTime.now().millisecondsSinceEpoch;
+                              //
+                              // Directory? directory;
+                              // try {
+                              //   if (Platform.isIOS) {
+                              //     directory =
+                              //         await getApplicationDocumentsDirectory();
+                              //   } else {
+                              //     directory =
+                              //         Directory('/storage/emulated/0/Download');
+                              //   }
+                              // } catch (_) {}
+                              // String fileFormat = videoFile.path.split('.').last;
+                              //
+                              // _videoFile = await videoFile.copy(
+                              //     '${directory!.path}/$currentUnix.$fileFormat');
+                              // setState(() {
+                              //   sliderValue = 0;
+                              //   mainNameFirst = '$currentUnix.$fileFormat';
+                              // });
+                              // _startVideoPlayer(_videoFile!.path);
                             } else {
-                               await startVideoRecording();
+                              if(sliderValue<=0){
+                                await startVideoRecording();
+                              } else {
+                                resumeVideoRecording();
+                              }
                             }
                           },
                           child: VxCircle(
@@ -821,9 +824,9 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                   return InkWell(
                   onTap: () {
                      if(index==0){
-                         filterImage = "";
-                      }else{
-                         filterImage = effectsfirst[index];
+                       filterImage = "";
+                      } else {
+                       filterImage = effectsfirst[index];
                       }
                       setState(() {});
                       Navigator.pop(context);
@@ -874,7 +877,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     await tempFile.writeAsBytes(data.buffer.asUint8List(), flush: true);
     return tempFile;
   }
-
 
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     final previousCameraController = controller;
@@ -945,40 +947,42 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
       }
       await cameraController!.startVideoRecording();
       autoStopRecordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-        if(videoDuration.inSeconds>=selectedDuration){
-          autoStopRecordingTimer?.cancel();
-          XFile? rawVideo = await stopVideoRecording();
-          await audioPlayer.stop();
-          File videoFile = File(rawVideo!.path);
+        if(_isRecordingInProgress){
+          if(videoDuration.inSeconds>=selectedDuration){
+            autoStopRecordingTimer?.cancel();
+            XFile? rawVideo = await stopVideoRecording();
+            await audioPlayer.stop();
+            File videoFile = File(rawVideo!.path);
 
-          int currentUnix =
-              DateTime.now().millisecondsSinceEpoch;
+            int currentUnix =
+                DateTime.now().millisecondsSinceEpoch;
 
-          Directory? directory;
-          try {
-            if (Platform.isIOS) {
-              directory =
-              await getApplicationDocumentsDirectory();
-            } else {
-              directory =
-                  Directory('/storage/emulated/0/Download');
-            }
-          } catch (_) {}
-          String fileFormat =
-              videoFile.path.split('.').last;
+            Directory? directory;
+            try {
+              if (Platform.isIOS) {
+                directory =
+                await getApplicationDocumentsDirectory();
+              } else {
+                directory =
+                    Directory('/storage/emulated/0/Download');
+              }
+            } catch (_) {}
+            String fileFormat =
+                videoFile.path.split('.').last;
 
-          _videoFile = await videoFile.copy(
-              '${directory!.path}/$currentUnix.$fileFormat');
-          setState(() {
-            mainNameFirst='$currentUnix.$fileFormat';
-            sliderValue=0;
-          });
-          _startVideoPlayer(_videoFile!.path);
-        } else {
-          videoDuration+=const Duration(seconds: 1);
-          setState(() {
-            sliderValue+=1;
-          });
+            _videoFile = await videoFile.copy(
+                '${directory!.path}/$currentUnix.$fileFormat');
+            setState(() {
+              mainNameFirst='$currentUnix.$fileFormat';
+              sliderValue=0;
+            });
+            _startVideoPlayer(_videoFile!.path);
+          } else {
+            videoDuration+=const Duration(seconds: 1);
+            setState(() {
+              sliderValue+=1;
+            });
+          }
         }
       });
       setState(() {
@@ -1010,13 +1014,13 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
 
   Future<void> pauseVideoRecording() async {
     if (!controller!.value.isRecordingVideo) {
-      // Video recording is not in progress
       return;
     }
     try {
       await controller!.pauseVideoRecording();
+      setState(()=>_isRecordingInProgress=false);
     } on CameraException {
-      // print('Error pausing video recording: $e');
+      //ss
     }
   }
 
@@ -1027,6 +1031,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.resumeVideoRecording();
+      setState(()=>_isRecordingInProgress=true);
     } on CameraException {
       // print('Error resuming video recording: $e');
     }
