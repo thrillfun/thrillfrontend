@@ -537,15 +537,15 @@ class HomeState extends State<Home> {
                     child:  Text("No ${selectedTopIndex==0?"Following":selectedTopIndex==1?"Related":"Popular"} Videos Found!",
                       style: const TextStyle(color: Colors.white, fontSize: 14),),
                   )):
-              PreloadPageView.builder(
-                  controller: preloadPageController,
+              PageView.builder(
+                  //controller: preloadPageController,
                   onPageChanged: (int index){
                     if(adIndexes.contains(index)){
                       showAd();
                     }
                   },
                   scrollDirection: Axis.vertical,
-                  preloadPagesCount: 3,
+                  //preloadPagesCount: 3,
                   itemCount: state.list.length, //Notice this
               itemBuilder: (BuildContext context, int index) {
                 return Stack(

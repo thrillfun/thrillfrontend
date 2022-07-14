@@ -554,14 +554,21 @@ class _ProfileState extends State<Profile> {
             return Stack(
               fit: StackFit.expand,
               children: [
-                CachedNetworkImage(
-                    placeholder: (a, b) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    fit: BoxFit.cover,
-                    imageUrl:publicList[index].gif_image.isEmpty
-                        ? '${RestUrl.thambUrl}thumb-not-available.png'
-                        : '${RestUrl.gifUrl}${publicList[index].gif_image}'),
+                // CachedNetworkImage(
+                //     placeholder: (a, b) => const Center(
+                //       child: CircularProgressIndicator(),
+                //     ),
+                //     fit: BoxFit.cover,
+                //     imageUrl:publicList[index].gif_image.isEmpty
+                //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                //         : '${RestUrl.gifUrl}${publicList[index].gif_image}'),
+                Image.network(
+                  '${RestUrl.gifUrl}${publicList[index].gif_image}',
+                  loadingBuilder: (context, child, loadingProgress) =>
+                  (loadingProgress == null) ? child : const Center(child: CircularProgressIndicator()),
+                  errorBuilder: (context, error, stackTrace) => Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
+                  fit: BoxFit.cover,
+                ),
                 Positioned(
                     bottom: 5,
                     left: 5,
@@ -671,6 +678,9 @@ class _ProfileState extends State<Profile> {
   }
 
   fav(UserModel userModel, List<PrivateModel> likesList) {
+    for(var el in likesList){
+      print('${RestUrl.gifUrl}${el.gif_image}');
+    }
     return likesList.isEmpty
         ? RichText(
             textAlign: TextAlign.center,
@@ -700,14 +710,22 @@ class _ProfileState extends State<Profile> {
                   return Stack(
                     fit: StackFit.expand,
                     children: [
-                      CachedNetworkImage(
-                          placeholder: (a, b) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                          fit: BoxFit.cover,
-                          imageUrl:likesList[index].gif_image.isEmpty
-                              ? '${RestUrl.thambUrl}thumb-not-available.png'
-                              : '${RestUrl.gifUrl}${likesList[index].gif_image}'),
+                      // CachedNetworkImage(
+                      //     placeholder: (a, b) => const Center(
+                      //           child: CircularProgressIndicator(),
+                      //         ),
+                      //     fit: BoxFit.cover,
+                      //     errorWidget: (context, string, dynamic)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
+                      //     imageUrl:likesList[index].gif_image.isEmpty
+                      //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                      //         : '${RestUrl.gifUrl}${likesList[index].gif_image}'),
+                      Image.network(
+                        '${RestUrl.gifUrl}${likesList[index].gif_image}',
+                        loadingBuilder: (context, child, loadingProgress) =>
+                        (loadingProgress == null) ? child : const Center(child: CircularProgressIndicator()),
+                        errorBuilder: (context, error, stackTrace) => Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
+                        fit: BoxFit.cover,
+                      ),
                       Positioned(
                           bottom: 5,
                           left: 5,

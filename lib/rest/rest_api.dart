@@ -98,10 +98,8 @@ class RestApi {
         request.files.add(file);
       }
       response = await http.Response.fromStream(await request.send());
-      print(response.body);
       if (response != null) {
         if (response.statusCode == 200) {
-          print(response.body);
           response = http.Response(jsonEncode(response.body), 200,headers: {
             HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
           });
@@ -115,7 +113,6 @@ class RestApi {
       }
     } catch (e) {
       response = http.Response(jsonEncode({'status': false, 'message': e.toString()}), 200);
-      print(e.toString());
     }
     return response;
   }

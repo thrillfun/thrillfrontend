@@ -40,6 +40,7 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   String dropDownGender = '';
   TextEditingController controller = TextEditingController();
+  TextEditingController nameCtr = TextEditingController();
   TextEditingController userNameCtr = TextEditingController();
   TextEditingController firstNameCtr = TextEditingController();
   TextEditingController lastNameCtr = TextEditingController();
@@ -54,6 +55,7 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void initState() {
     setState(() {
+      nameCtr.text = widget.user.name;
       userNameCtr.text = widget.user.username;
       firstNameCtr.text = widget.user.first_name;
       lastNameCtr.text = widget.user.last_name;
@@ -190,33 +192,41 @@ class _EditProfileState extends State<EditProfile> {
                     const SizedBox(
                       height: 15,
                     ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: firstNameCtr,
-                            decoration: const InputDecoration(
-                                isDense: true, label: Text(firstName)),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        Expanded(
-                          child: TextFormField(
-                            controller: lastNameCtr,
-                            decoration: const InputDecoration(
-                                isDense: true, label: Text(lastName)),
-                          ),
-                        ),
-                      ],
-                    ).w(getWidth(context) * .90),
+                    TextFormField(
+                      controller: nameCtr,
+                      decoration: InputDecoration(
+                          isDense: true,
+                          constraints:
+                          BoxConstraints(maxWidth: getWidth(context) * .90),
+                          label: const Text(fullName)),
+                    ),
+                    // Row(
+                    //   children: [
+                    //     Expanded(
+                    //       child: TextFormField(
+                    //         controller: firstNameCtr,
+                    //         decoration: const InputDecoration(
+                    //             isDense: true, label: Text(firstName)),
+                    //       ),
+                    //     ),
+                    //     const SizedBox(
+                    //       width: 20,
+                    //     ),
+                    //     Expanded(
+                    //       child: TextFormField(
+                    //         controller: lastNameCtr,
+                    //         decoration: const InputDecoration(
+                    //             isDense: true, label: Text(lastName)),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ).w(getWidth(context) * .90),
                     const SizedBox(
                       height: 15,
                     ),
                     DropdownButton(
                       value:dropDownGender,
-                      style: const TextStyle(color: Colors.grey, fontSize: 17),
+                      style: TextStyle(color: Colors.grey.shade800, fontSize: 17),
                       isExpanded: true,
                       icon: const Icon(
                         Icons.keyboard_arrow_down,

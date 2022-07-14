@@ -43,29 +43,9 @@ class _NewSongState extends State<NewSong> {
     return Scaffold(
         appBar: AppBar(
           elevation: 0.5,
-          title: GestureDetector(
-            onTap: () async {
-              FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['mp3'], allowMultiple: false);
-              if(result!=null){
-                File file = File(result.files.single.path!);
-                double size = file.lengthSync()/1000000;
-                String name = file.path.split('/').last.split('.').first;
-                if(size < 6){
-                  if(size > 0.2){
-                    AddSoundModel addSoundModel = AddSoundModel(0, 0, file.path, name, '', '');
-                    Navigator.pop(context, addSoundModel);
-                  } else {
-                    showErrorToast(context, "File Size too Small!!");
-                  }
-                } else {
-                  showErrorToast(context, "Max File Size is 5 MB");
-                }
-              }
-            },
-            child: const Text(
-              "Upload Music",
-              style: TextStyle(color: Colors.black),
-            ),
+          title: const Text(
+            "Choose Music",
+            style: TextStyle(color: Colors.black),
           ),
           centerTitle: true,
           backgroundColor: Colors.white,
@@ -86,7 +66,40 @@ class _NewSongState extends State<NewSong> {
           //           icon: const Icon(Icons.check)),
           //   ),
           // ],
-        ),
+        ),floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: ElevatedButton(
+            onPressed: () async {
+              FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['mp3'], allowMultiple: false);
+              if(result!=null){
+                File file = File(result.files.single.path!);
+                double size = file.lengthSync()/1000000;
+                String name = file.path.split('/').last.split('.').first;
+                if(size < 6){
+                  if(size > 0.2){
+                    AddSoundModel addSoundModel = AddSoundModel(0, 0, file.path, name, '', '');
+                    Navigator.pop(context, addSoundModel);
+                  } else {
+                    showErrorToast(context, "File Size too Small!!");
+                  }
+                } else {
+                  showErrorToast(context, "Max File Size is 5 MB");
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+                primary: ColorManager.cyan,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50))),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.music_note),
+                Text(
+                  "Choose From Device",
+                  style: TextStyle(fontSize: 16),
+                )
+              ],
+            )),
         body: isLoading?
             const Center(child: CircularProgressIndicator(),): newSongList.isEmpty?
             const Center(child: Text("No Songs Found!"),):
