@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/models/video_model.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../blocs/profile/profile_bloc.dart';
@@ -551,54 +552,68 @@ class _ProfileState extends State<Profile> {
               mainAxisSpacing: 1.8),
           itemCount: publicList.length,
           itemBuilder: (BuildContext context, int index) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                // CachedNetworkImage(
-                //     placeholder: (a, b) => const Center(
-                //       child: CircularProgressIndicator(),
-                //     ),
-                //     fit: BoxFit.cover,
-                //     imageUrl:publicList[index].gif_image.isEmpty
-                //         ? '${RestUrl.thambUrl}thumb-not-available.png'
-                //         : '${RestUrl.gifUrl}${publicList[index].gif_image}'),
-                Image.network(
-                  '${RestUrl.gifUrl}${publicList[index].gif_image}',
-                  loadingBuilder: (context, child, loadingProgress) =>
-                  (loadingProgress == null) ? child : const Center(child: CircularProgressIndicator()),
-                  errorBuilder: (context, error, stackTrace) => Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
-                  fit: BoxFit.cover,
-                ),
-                Positioned(
-                    bottom: 5,
-                    left: 5,
-                    right: 5,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        const Icon(
-                          Icons.visibility,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        Text(
-                          publicList[index].views.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                        const Icon(
-                          Icons.favorite,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        Text(
-                          publicList[index].likes.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                      ],
-                    ))
-              ],
+            return GestureDetector(
+              onTap: (){
+                VideoModel vModel = VideoModel(
+                    publicList[index].id,
+                    publicList[index].comments.length,
+                    publicList[index].video,
+                    publicList[index].description,
+                    publicList[index].likes,
+                    publicList[index].user,
+                    publicList[index].filter,
+                    publicList[index].gif_image,
+                    publicList[index].sound_name,
+                    publicList[index].sound_name,
+                    publicList[index].sound_category_name,
+                    publicList[index].views,
+                    publicList[index].speed
+                );
+                Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': vModel});
+              },
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // CachedNetworkImage(
+                  //     placeholder: (a, b) => const Center(
+                  //       child: CircularProgressIndicator(),
+                  //     ),
+                  //     fit: BoxFit.cover,
+                  //     imageUrl:publicList[index].gif_image.isEmpty
+                  //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                  //         : '${RestUrl.gifUrl}${publicList[index].gif_image}'),
+                  imgNet('${RestUrl.gifUrl}${publicList[index].gif_image}'),
+                  Positioned(
+                      bottom: 5,
+                      left: 5,
+                      right: 5,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Icon(
+                            Icons.visibility,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            publicList[index].views.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                          const Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            publicList[index].likes.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                        ],
+                      ))
+                ],
+              ),
             );
           }),
     );
@@ -631,56 +646,74 @@ class _ProfileState extends State<Profile> {
               mainAxisSpacing: 1.8),
           itemCount: privateList.length,
           itemBuilder: (BuildContext context, int index) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                CachedNetworkImage(
-                    placeholder: (a, b) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    fit: BoxFit.cover,
-                    imageUrl:privateList[index].gif_image.isEmpty
-                        ? '${RestUrl.thambUrl}thumb-not-available.png'
-                        : '${RestUrl.gifUrl}${privateList[index].gif_image}'),
-                Positioned(
-                    bottom: 5,
-                    left: 5,
-                    right: 5,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        const Icon(
-                          Icons.visibility,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        Text(
-                          privateList[index].views.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                        const Icon(
-                          Icons.favorite,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        Text(
-                          privateList[index].likes.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                      ],
-                    ))
-              ],
+            return GestureDetector(
+              onTap: (){
+                VideoModel vModel = VideoModel(
+                    privateList[index].id,
+                    privateList[index].comments.length,
+                    privateList[index].video,
+                    privateList[index].description,
+                    privateList[index].likes,
+                    privateList[index].user,
+                    privateList[index].filter,
+                    privateList[index].gif_image,
+                    privateList[index].sound_name,
+                    privateList[index].sound_name,
+                    privateList[index].sound_category_name,
+                    privateList[index].views,
+                    privateList[index].speed
+                );
+                Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': vModel});
+              },
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // CachedNetworkImage(
+                  //     placeholder: (a, b) => const Center(
+                  //       child: CircularProgressIndicator(),
+                  //     ),
+                  //     fit: BoxFit.cover,
+                  //     imageUrl:privateList[index].gif_image.isEmpty
+                  //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                  //         : '${RestUrl.gifUrl}${privateList[index].gif_image}'),
+                  imgNet('${RestUrl.gifUrl}${privateList[index].gif_image}'),
+                  Positioned(
+                      bottom: 5,
+                      left: 5,
+                      right: 5,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Icon(
+                            Icons.visibility,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            privateList[index].views.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                          const Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            privateList[index].likes.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                        ],
+                      ))
+                ],
+              ),
             );
           }),
     );
   }
 
   fav(UserModel userModel, List<PrivateModel> likesList) {
-    for(var el in likesList){
-      print('${RestUrl.gifUrl}${el.gif_image}');
-    }
     return likesList.isEmpty
         ? RichText(
             textAlign: TextAlign.center,
@@ -707,55 +740,69 @@ class _ProfileState extends State<Profile> {
                     mainAxisSpacing: 1.8),
                 itemCount: likesList.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // CachedNetworkImage(
-                      //     placeholder: (a, b) => const Center(
-                      //           child: CircularProgressIndicator(),
-                      //         ),
-                      //     fit: BoxFit.cover,
-                      //     errorWidget: (context, string, dynamic)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
-                      //     imageUrl:likesList[index].gif_image.isEmpty
-                      //         ? '${RestUrl.thambUrl}thumb-not-available.png'
-                      //         : '${RestUrl.gifUrl}${likesList[index].gif_image}'),
-                      Image.network(
-                        '${RestUrl.gifUrl}${likesList[index].gif_image}',
-                        loadingBuilder: (context, child, loadingProgress) =>
-                        (loadingProgress == null) ? child : const Center(child: CircularProgressIndicator()),
-                        errorBuilder: (context, error, stackTrace) => Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned(
-                          bottom: 5,
-                          left: 5,
-                          right: 5,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              const Icon(
-                                Icons.visibility,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                likesList[index].views.toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                              const Icon(
-                                Icons.favorite,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                  likesList[index].likes.toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                            ],
-                          ))
-                    ],
+                  return GestureDetector(
+                    onTap: (){
+                      VideoModel vModel = VideoModel(
+                          likesList[index].id,
+                          likesList[index].comments.length,
+                          likesList[index].video,
+                          likesList[index].description,
+                          likesList[index].likes,
+                          likesList[index].user,
+                          likesList[index].filter,
+                          likesList[index].gif_image,
+                          likesList[index].sound_name,
+                          likesList[index].sound_name,
+                          likesList[index].sound_category_name,
+                          likesList[index].views,
+                          likesList[index].speed
+                      );
+                      Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': vModel});
+                    },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // CachedNetworkImage(
+                        //     placeholder: (a, b) => const Center(
+                        //           child: CircularProgressIndicator(),
+                        //         ),
+                        //     fit: BoxFit.cover,
+                        //     errorWidget: (context, string, dynamic)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
+                        //     imageUrl:likesList[index].gif_image.isEmpty
+                        //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                        //         : '${RestUrl.gifUrl}${likesList[index].gif_image}'),
+                        imgNet('${RestUrl.gifUrl}${likesList[index].gif_image}'),
+                        Positioned(
+                            bottom: 5,
+                            left: 5,
+                            right: 5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                const Icon(
+                                  Icons.visibility,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  likesList[index].views.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                                const Icon(
+                                  Icons.favorite,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                    likesList[index].likes.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                              ],
+                            ))
+                      ],
+                    ),
                   );
                 }),
           );

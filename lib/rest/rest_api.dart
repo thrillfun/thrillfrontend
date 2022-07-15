@@ -961,4 +961,43 @@ class RestApi {
     return response;
   }
 
+  static Future<http.Response> sendOTP(String mobileNumber) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.sendOTP,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'phone': mobileNumber
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> verifyOTP(String mobileNumber, String otp) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.verifyOTP,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'phone': mobileNumber,
+        'otp': otp
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
 }

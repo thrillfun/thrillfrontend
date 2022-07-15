@@ -458,7 +458,8 @@ class _EditProfileState extends State<EditProfile> {
               ).w(getWidth(context) * .90),
             ));
   }
-void setData(String name) {
+
+  void setData(String name) {
   switch (name) {
     case "youtube":
       final tile = socialList.firstWhere(

@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/models/video_model.dart';
+import 'package:thrill/screens/auth/otp_verification.dart';
 import 'package:thrill/screens/chat/chat_screen.dart';
 import 'package:thrill/screens/privacy_policy.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/screen.dart';
-import 'package:thrill/screens/sound_details.dart';
+import 'package:thrill/screens/sound/sound_details.dart';
 import 'package:thrill/screens/terms_of_service.dart';
 import 'package:thrill/screens/video/duet.dart';
 
 import '../models/vidio_discover_model.dart';
-import '../screens/new_song.dart';
+import '../screens/sound/new_song.dart';
 
 class AppRouter {
   static Route onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case "/":
-        return BottomNavigation.route(initIndex: settings.arguments as int?);
+        return BottomNavigation.route(map: settings.arguments as Map?);
       case SignUp.routeName:
         return SignUp.route();
       case EditProfile.routeName:
@@ -90,6 +91,8 @@ class AppRouter {
         return RecordDuet.route(settings.arguments as VideoModel);
       case ChatScreen.routeName:
         return ChatScreen.route(settings.arguments as UserModel);
+      case OtpVerification.routeName:
+        return OtpVerification.route(settings.arguments as String);
       default:
         return _errorRoute();
     }

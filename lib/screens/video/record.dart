@@ -533,7 +533,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 height: 60,
                 color: Colors.black,
                 child: Visibility(
-                  visible: !_isRecordingInProgress && _videoFile==null,
+                  visible: sliderValue==0?true:false,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -659,7 +659,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Visibility(
-                    visible: !_isRecordingInProgress && _videoFile==null,
+                    visible: sliderValue==0?true:false,
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
@@ -675,7 +675,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             }
                             PostData m = PostData(speed: speed, filePath: file.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
                             Navigator.pushNamed(context, "/preview",arguments: m);
-
                           } else {
                             showErrorToast(context, "Max File Size is 30 MB");
                           }
@@ -944,6 +943,9 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     try {
       if(addSoundModel!=null){
         await audioPlayer.play(addSoundModel!.sound, isLocal: true);
+        audioPlayer.onPlayerCompletion.listen((event) async {
+          await audioPlayer.play(addSoundModel!.sound, isLocal: true);
+        });
       }
       await cameraController!.startVideoRecording();
       autoStopRecordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
@@ -974,7 +976,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 '${directory!.path}/$currentUnix.$fileFormat');
             setState(() {
               mainNameFirst='$currentUnix.$fileFormat';
-              sliderValue=0;
             });
             _startVideoPlayer(_videoFile!.path);
           } else {
@@ -1018,6 +1019,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.pauseVideoRecording();
+      await audioPlayer.pause();
       setState(()=>_isRecordingInProgress=false);
     } on CameraException {
       //ss
@@ -1031,6 +1033,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.resumeVideoRecording();
+      await audioPlayer.resume();
       setState(()=>_isRecordingInProgress=true);
     } on CameraException {
       // print('Error resuming video recording: $e');

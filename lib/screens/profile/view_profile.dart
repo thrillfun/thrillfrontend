@@ -391,14 +391,15 @@ class _ViewProfileState extends State<ViewProfile> {
             return Stack(
               fit: StackFit.expand,
               children: [
-                CachedNetworkImage(
-                    placeholder: (a, b) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    fit: BoxFit.cover,
-                    imageUrl:publicVideos[index].gif_image.isEmpty
-                        ? '${RestUrl.thambUrl}thumb-not-available.png'
-                        : '${RestUrl.gifUrl}${publicVideos[index].gif_image}'),
+                // CachedNetworkImage(
+                //     placeholder: (a, b) => const Center(
+                //       child: CircularProgressIndicator(),
+                //     ),
+                //     fit: BoxFit.cover,
+                //     imageUrl:publicVideos[index].gif_image.isEmpty
+                //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                //         : '${RestUrl.gifUrl}${publicVideos[index].gif_image}'),
+                imgNet('${RestUrl.gifUrl}${publicVideos[index].gif_image}'),
                 Positioned(
                     bottom: 5,
                     left: 5,
@@ -462,14 +463,15 @@ class _ViewProfileState extends State<ViewProfile> {
             return Stack(
               fit: StackFit.expand,
               children: [
-                CachedNetworkImage(
-                    placeholder: (a, b) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    fit: BoxFit.cover,
-                    imageUrl:favVideos[index].gif_image.isEmpty
-                        ? '${RestUrl.thambUrl}thumb-not-available.png'
-                        : '${RestUrl.gifUrl}${favVideos[index].gif_image}'),
+                // CachedNetworkImage(
+                //     placeholder: (a, b) => const Center(
+                //       child: CircularProgressIndicator(),
+                //     ),
+                //     fit: BoxFit.cover,
+                //     imageUrl:favVideos[index].gif_image.isEmpty
+                //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                //         : '${RestUrl.gifUrl}${favVideos[index].gif_image}'),
+                imgNet('${RestUrl.gifUrl}${favVideos[index].gif_image}'),
                 Positioned(
                     bottom: 5,
                     left: 5,

@@ -20,21 +20,21 @@ import 'notifications.dart';
 
 bool popupDisplayed = false;
 class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({Key? key, this.initialIndex}) : super(key: key);
-  final int? initialIndex;
+  const BottomNavigation({Key? key, this.mapData}) : super(key: key);
+  final Map? mapData;
 
   @override
   State<BottomNavigation> createState() => _BottomNavigationState();
 
   static const String routeName = '/';
 
-  static Route route({int? initIndex}) {
+  static Route route({Map? map}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
       builder: (context) => BlocProvider(
         create: (context) => ProfileBloc(loginRepository: LoginRepository())
           ..add(const ProfileLoading()),
-        child: BottomNavigation(initialIndex: initIndex,),
+        child: BottomNavigation(mapData: map,),
       ),
     );
   }
@@ -42,8 +42,8 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   int selectedIndex = 0;
-  List screens = [
-    const Home(),
+  late List screens = [
+    Home(vModel: widget.mapData?['videoModel']),
     const Discover(),
     const Notifications(),
     const Profile(),
@@ -51,7 +51,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   @override
   void initState() {
-    if (widget.initialIndex!=null) selectedIndex = widget.initialIndex??0;
+    if (widget.mapData?['index']!=null) selectedIndex = widget.mapData?['index']??0;
     if(!popupDisplayed){
       showPromotionalPopup();
       popupDisplayed = true;

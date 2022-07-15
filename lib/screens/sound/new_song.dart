@@ -8,8 +8,8 @@ import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/rest/rest_url.dart';
-import '../rest/rest_api.dart';
-import '../utils/util.dart';
+import '../../rest/rest_api.dart';
+import '../../utils/util.dart';
 
 class NewSong extends StatefulWidget {
   const NewSong({Key? key}) : super(key: key);
@@ -237,7 +237,7 @@ class _NewSongState extends State<NewSong> {
       } else {
         progressDialogue(context);
         await FileSupport().downloadCustomLocation(
-          url: "${RestUrl.downloadSound}${newSongList[index].sound}",
+          url: "${RestUrl.awsSoundUrl}${newSongList[index].sound}",
           path: saveCacheDirectory,
           filename: newSongList[index].sound.split('.').first,
           extension: ".${newSongList[index].sound.split('.').last}",

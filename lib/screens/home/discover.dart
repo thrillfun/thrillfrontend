@@ -265,15 +265,37 @@ class _DiscoverState extends State<Discover> {
             itemCount: discoverVideo.hashVideo.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (BuildContext context2, int index2) {
-              return Container(
-                margin: const EdgeInsets.all(2),
-                width: 112,
-                child: CachedNetworkImage(
-                  fit: BoxFit.cover,
-                  imageUrl:
-                  discoverVideo.hashVideo[index2].gif_image.isEmpty
-                  ? '${RestUrl.thambUrl}thumb-not-available.png'
-                  : '${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}',
+              return GestureDetector(
+                onTap: (){
+                  // VideoModel vModel = VideoModel(
+                  //     discoverVideo.hashVideo[index2].id,
+                  //     discoverVideo.hashVideo[index2].,
+                  //     privateList[index].video,
+                  //     privateList[index].description,
+                  //     privateList[index].likes,
+                  //     privateList[index].user,
+                  //     privateList[index].filter,
+                  //     privateList[index].gif_image,
+                  //     privateList[index].sound_name,
+                  //     privateList[index].sound_name,
+                  //     privateList[index].sound_category_name,
+                  //     privateList[index].views,
+                  //     privateList[index].speed
+                  // );
+                  // Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': vModel});
+                },
+                child: Container(
+                  margin: const EdgeInsets.all(2),
+                  padding: const EdgeInsets.only(left: 5),
+                  width: 120,
+                  child: imgNet('${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}'),
+                  // CachedNetworkImage(
+                  //   fit: BoxFit.cover,
+                  //   imageUrl:
+                  //   discoverVideo.hashVideo[index2].gif_image.isEmpty
+                  //   ? '${RestUrl.thambUrl}thumb-not-available.png'
+                  //   : '${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}',
+                  // ),
                 ),
               );
             },

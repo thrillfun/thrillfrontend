@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +11,7 @@ import 'package:velocity_x/velocity_x.dart';
 
 import '../../common/color.dart';
 import '../../common/strings.dart';
+import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
 class SignUp extends StatefulWidget {
@@ -237,14 +240,25 @@ class _SignUpState extends State<SignUp> {
                             height: 40,
                           ),
                           ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               FocusScope.of(context).requestFocus(FocusNode());
-                              BlocProvider.of<SignupBloc>(context).add(
-                                  SignupValidation(
-                                      dob: dobCtr.text,
-                                      password: mPin,
-                                      fullName: nameCtr.text,
-                                      mobile: phoneCtr.text));
+                              if(nameCtr.text.isNotEmpty){
+                                if(phoneCtr.text.isNotEmpty && phoneCtr.text.length==10){
+                                  if(dobCtr.text.isNotEmpty){
+                                    if(mPin.isNotEmpty && mPin.length==4){
+                                      sendOTP();
+                                    } else {
+                                      showErrorToast(context, "M-PIN must be 4 digit");
+                                    }
+                                  } else {
+                                    showErrorToast(context, "DOB Required");
+                                  }
+                                } else {
+                                  showErrorToast(context, "Invalid or Empty Mobile Number");
+                                }
+                              } else {
+                                showErrorToast(context, "Full Name Required");
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                                 fixedSize: Size(getWidth(context) * .80, 55),
@@ -362,5 +376,39 @@ class _SignUpState extends State<SignUp> {
         helpText: "Choose Your Birthday",
         lastDate: initDate);
     return picked.toString();
+  }
+
+  sendOTP()async{
+    try{
+      progressDialogue(context);
+      var response = await RestApi.sendOTP(phoneCtr.text);
+      var json = jsonDecode(response.body);
+      closeDialogue(context);
+      if(json['status']){
+        await Navigator.pushNamed(context, '/otpVerification', arguments: phoneCtr.text).then((value){
+          if(value!=null){
+            bool isSuccess = value as bool;
+            if(isSuccess){
+              BlocProvider.of<SignupBloc>(context).add(
+                  SignupValidation(
+                      dob: dobCtr.text,
+                      password: mPin,
+                      fullName: nameCtr.text,
+                      mobile: phoneCtr.text));
+            } else {
+              showErrorToast(context, "OTP Verification Failed!");
+            }
+          } else {
+            showErrorToast(context, "OTP Verification Canceled!");
+          }
+        });
+        showSuccessToast(context, "OTP Sent Successfully");
+      } else {
+        showErrorToast(context, json['message'].toString());
+      }
+    } catch(e){
+      closeDialogue(context);
+      showErrorToast(context, e.toString());
+    }
   }
 }

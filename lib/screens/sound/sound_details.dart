@@ -7,9 +7,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
-import '../common/color.dart';
-import '../common/strings.dart';
-import '../rest/rest_url.dart';
+import '../../common/color.dart';
+import '../../common/strings.dart';
+import '../../rest/rest_url.dart';
 
 class SoundDetails extends StatefulWidget {
   const SoundDetails({Key? key, required this.map}) : super(key: key);

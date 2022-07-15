@@ -8,6 +8,7 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
+import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import '../../common/strings.dart';
 import '../../models/comment_model.dart';
@@ -20,7 +21,8 @@ import 'package:velocity_x/velocity_x.dart';
 
 int selectedTopIndex = 1;
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({Key? key, this.vModel}) : super(key: key);
+  final VideoModel? vModel;
 
   @override
   State<Home> createState() => HomeState();
@@ -70,48 +72,11 @@ class HomeState extends State<Home> {
           child: CircularProgressIndicator(color: Colors.lightBlueAccent),
         );
       } else if (state is VideoLoded) {
-        // if (state.list.isEmpty) {
-        //   return Container(
-        //       decoration: const BoxDecoration(
-        //           image: DecorationImage(
-        //               fit: BoxFit.cover,
-        //               image: AssetImage('assets/splash.png'))),
-        //       child:  Center(
-        //         child: selectedTopIndex==0?
-        //         const Text("No Following Videos Found!",
-        //           style: TextStyle(color: Colors.white, fontSize: 14),):
-        //         selectedTopIndex==1?
-        //         RichText(
-        //           textAlign: TextAlign.center,
-        //           text: TextSpan(
-        //               children: [
-        //             const TextSpan(text: "No Videos Found!",
-        //               style: TextStyle(color: Colors.white, fontSize: 14),),
-        //             const TextSpan(text: "\nBe the first to post a video!!\n"),
-        //             WidgetSpan(
-        //                 child: IconButton(
-        //                 onPressed: ()async {
-        //                   await isLogined().then((value) async {
-        //                     if (value) {
-        //                       reelsPlayerController?.pause();
-        //                       await Navigator.pushNamed(context, "/record");
-        //                       reelsPlayerController?.play();
-        //                     } else {
-        //                       showAlertDialog(context);
-        //                     }
-        //                   });
-        //                 },
-        //                 iconSize: 28,
-        //                 icon: const Icon(
-        //                   Icons.camera_alt_rounded,
-        //                   color: Colors.white,
-        //                 )))
-        //           ]),
-        //         ):
-        //         const Text("No Popular Videos Found!",
-        //           style: TextStyle(color: Colors.white, fontSize: 14),),
-        //       ));
-        // } else {
+        if(widget.vModel!=null){
+          if(state.list[0].id!=widget.vModel!.id){
+            state.list.insert(0, widget.vModel!);
+          }
+        }
           return Stack(
             children:[
              /* PageView.builder(
@@ -807,11 +772,15 @@ class HomeState extends State<Home> {
                                       onTap: () async {
                                         await isLogined().then((value) {
                                           if (value) {
-                                            Navigator.pushNamed(
-                                                context, "/viewProfile", arguments: {
-                                              "userModel": state.list[index].user,
-                                              "getProfile": false
-                                            });
+                                            if(userModel?.id==state.list[index].user.id){
+                                              Navigator.pushReplacementNamed(context, '/', arguments: 3);
+                                            } else {
+                                              Navigator.pushNamed(
+                                                  context, "/viewProfile", arguments: {
+                                                "userModel": state.list[index].user,
+                                                "getProfile": false
+                                              });
+                                            }
                                           } else {
                                             showAlertDialog(context);
                                           }
