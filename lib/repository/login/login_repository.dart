@@ -40,9 +40,6 @@ class LoginRepository extends BaseLoginRepository {
     try {
       var result = await RestApi.updateProfile(fname, lname, imageFile, username, gender, webUrl, bio,list);
       var json = jsonDecode(result.body);
-      print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
-      print(json);
-      print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
       return json;
     } catch (e) {
       print(e.toString());

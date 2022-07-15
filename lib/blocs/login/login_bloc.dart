@@ -184,12 +184,12 @@ void _onPhoneValidation(PhoneValidation event, Emitter<LoginState> emit) async {
       emit(const OnValidation(message: "Min Phone digit 10", status: false));
     } else {
       emit(LoginValidated());
-      var result = await _loginRepository.isPhoneExist(event.phone);
-      if (result['status']) {
+      // var result = await _loginRepository.isPhoneExist(event.phone);
+      // if (result['status']) {
         emit(const LoginStatus(message: "Success", status: true));
-      } else {
-        emit(LoginStatus(message: result['message'].toString(), status: false));
-      }
+      // } else {
+      //   emit(LoginStatus(message: result['message'].toString(), status: false));
+      // }
     }
 
 }

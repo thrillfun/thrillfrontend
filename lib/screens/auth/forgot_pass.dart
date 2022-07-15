@@ -167,7 +167,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       progressDialogue(context);
       var response = await RestApi.checkPhone(phoneCtr.text);
       var json = jsonDecode(response.body);
-      print(json);
       closeDialogue(context);
       if(json['status']){
         await Navigator.pushNamed(context, '/otpVerification', arguments: phoneCtr.text).then((value){

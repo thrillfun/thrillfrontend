@@ -221,6 +221,5 @@ class _OtpVerificationState extends State<OtpVerification> {
         setState(()=>resendDuration -= const Duration(seconds: 1));
       }
     });
-    setState(() {});
   }
 }
