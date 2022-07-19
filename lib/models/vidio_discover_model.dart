@@ -1,25 +1,29 @@
+import 'package:thrill/models/video_model.dart';
+
 class DiscoverVideo{
   int hashtag_id,video_count;
   String hashtag_name;
   List<HashVideo> hashVideo;
+  List<VideoModel> videoModel;
 
 
   DiscoverVideo(this.hashtag_id, this.video_count, this.hashtag_name,
-      this.hashVideo);
+      this.hashVideo,this.videoModel);
 
   factory DiscoverVideo.fromJson(dynamic json) {
     List<HashVideo> videoList=List<HashVideo>.empty(growable: true);
+    List<VideoModel> videoModelList=List<VideoModel>.empty(growable: true);
     List jsonList= json['videos'] as List;
     videoList = jsonList.map((e) => HashVideo.fromJson(e)).toList();
-
+    videoModelList = jsonList.map((e) => VideoModel.fromJson(e)).toList();
     return DiscoverVideo(
         json['hashtag_id']?? 0,
         json['video_count'] ?? 0,
         json['hashtag_name'] ?? '',
-        videoList
+        videoList,
+        videoModelList
     );
   }
-
 }
 
 

@@ -232,7 +232,7 @@ class _SoundDetailsState extends State<SoundDetails> {
                 File file = File('$saveCacheDirectory$sound');
                     try{
                       if(await file.exists()){
-                        Navigator.pushReplacementNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
+                        Navigator.pushNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
                       } else {
                         progressDialogue(context);
                         await FileSupport().downloadCustomLocation(
@@ -243,7 +243,7 @@ class _SoundDetailsState extends State<SoundDetails> {
                           progress: (progress) async {},
                         );
                         closeDialogue(context);
-                        Navigator.pushReplacementNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
+                        Navigator.pushNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
                       }
                     } catch(e){
                       closeDialogue(context);

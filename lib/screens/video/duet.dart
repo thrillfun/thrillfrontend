@@ -101,25 +101,38 @@ class _RecordDuetState extends State<RecordDuet> {
                 ),
               ),
               SizedBox(
+                height: getHeight(context)*.80,
                 width: getWidth(context),
-                height: getHeight(context)*.40,
-                child: videoController != null &&
-                    videoController!.value.isInitialized
-                    ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: AspectRatio(
-                    aspectRatio: videoController!.value.aspectRatio,
-                    child: VideoPlayer(videoController!),
-                  ),
-                )
-                    : Container(),
+                child: Stack(
+                  children: [
+                    SizedBox(
+                      width: getWidth(context),
+                      height: getHeight(context)*.80,
+                      child: videoController != null &&
+                          videoController!.value.isInitialized
+                          ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: AspectRatio(
+                          aspectRatio: 1/videoController!.value.aspectRatio,
+                          child: VideoPlayer(videoController!),
+                        ),
+                      )
+                          : Container(),
+                    ),
+                    isCameraInitialized && _videoFile == null
+                        ? Positioned(
+                      bottom: 0, right: 0,
+                          child: SizedBox(
+                      //width: getWidth(context),
+                          height: getHeight(context)*.40,
+                          child: AspectRatio(
+                              aspectRatio: 1/controller!.value.aspectRatio,
+                              child: controller!.buildPreview())),
+                        )
+                        : const SizedBox(),
+                  ],
+                ),
               ),
-              isCameraInitialized && _videoFile == null
-                  ? SizedBox(
-                  width: getWidth(context),
-                  height: getHeight(context)*.40,
-                  child: controller!.buildPreview())
-                  : const SizedBox(),
               const SizedBox(height: 10,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -139,38 +152,38 @@ class _RecordDuetState extends State<RecordDuet> {
                       ? GestureDetector(
                     onTap: () async {
                       if (_isRecordingInProgress) {
-                        XFile? rawVideo = await stopVideoRecording();
-                        //await audioPlayer.stop();
-                        autoStopRecordingTimer?.cancel();
-                        File videoFile = File(rawVideo!.path);
-
-                        int currentUnix =
-                            DateTime.now().millisecondsSinceEpoch;
-
-                        Directory? directory;
-                        try {
-                          if (Platform.isIOS) {
-                            directory =
-                            await getApplicationDocumentsDirectory();
-                          } else {
-                            directory =
-                                Directory('/storage/emulated/0/Download');
-                          }
-                        } catch (_) {}
-                        String fileFormat =
-                            videoFile.path.split('.').last;
-
-                        _videoFile = await videoFile.copy(
-                            '${directory!.path}/$currentUnix.$fileFormat');
-                        setState(() {
-                          sliderValue=0;
-                          mainNameFirst = '$currentUnix.$fileFormat';
-                        });
-                        //_startVideoPlayer(_videoFile!.path);
-                        PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
-                        Navigator.pushReplacementNamed(context, "/postVideo", arguments: m);
+                        pauseVideoRecording();
+                        // XFile? rawVideo = await stopVideoRecording();
+                        // //await audioPlayer.stop();
+                        // autoStopRecordingTimer?.cancel();
+                        // File videoFile = File(rawVideo!.path);
+                        // int currentUnix = DateTime.now().millisecondsSinceEpoch;
+                        // Directory? directory;
+                        // try {
+                        //   if (Platform.isIOS) {
+                        //     directory = await getApplicationDocumentsDirectory();
+                        //   } else {
+                        //     directory = Directory('/storage/emulated/0/Download');
+                        //   }
+                        // } catch (_) {}
+                        // String fileFormat =
+                        //     videoFile.path.split('.').last;
+                        //
+                        // _videoFile = await videoFile.copy(
+                        //     '${directory!.path}/$currentUnix.$fileFormat');
+                        // setState(() {
+                        //   sliderValue=0;
+                        //   mainNameFirst = '$currentUnix.$fileFormat';
+                        // });
+                        // //_startVideoPlayer(_videoFile!.path);
+                        // PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
+                        // Navigator.pushReplacementNamed(context, "/postVideo", arguments: m);
                       } else {
-                        await startVideoRecording();
+                        if(sliderValue<=0){
+                          await startVideoRecording();
+                        } else {
+                          resumeVideoRecording();
+                        }
                       }
                     },
                     child: VxCircle(
@@ -280,58 +293,49 @@ class _RecordDuetState extends State<RecordDuet> {
   Future<void> startVideoRecording() async {
     final CameraController? cameraController = controller;
     if (controller!.value.isRecordingVideo) {
-      // A recording has already started, do nothing.
       return;
     }
     try {
-      // if(addSoundModel!=null){
-      //   await audioPlayer.play(addSoundModel!.sound, isLocal: true);
-      // }
       videoController!.seekTo(const Duration(seconds: 0));
       videoController!.play();
       await cameraController!.startVideoRecording();
       autoStopRecordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-        if(sliderValue>=videoController!.value.duration.inSeconds){
-          autoStopRecordingTimer?.cancel();
-          XFile? rawVideo = await stopVideoRecording();
-          //await audioPlayer.stop();
-          File videoFile = File(rawVideo!.path);
-
-          int currentUnix =
-              DateTime.now().millisecondsSinceEpoch;
-
-          Directory? directory;
-          try {
-            if (Platform.isIOS) {
-              directory =
-              await getApplicationDocumentsDirectory();
-            } else {
-              directory =
-                  Directory('/storage/emulated/0/Download');
-            }
-          } catch (_) {}
-          String fileFormat =
-              videoFile.path.split('.').last;
-
-          _videoFile = await videoFile.copy(
-              '${directory!.path}/$currentUnix.$fileFormat');
-          setState(() {
-            mainNameFirst='$currentUnix.$fileFormat';
-            sliderValue=0;
-          });
-          //_startVideoPlayer(_videoFile!.path);
-          PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
-          Navigator.pushReplacementNamed(context, "/postVideo",arguments: m);
-        } else {
-          //videoDuration+=const Duration(seconds: 1);
-          setState(() {
-            sliderValue+=1;
-          });
+        if(_isRecordingInProgress){
+          if(sliderValue>=videoController!.value.duration.inSeconds){
+            autoStopRecordingTimer?.cancel();
+            XFile? rawVideo = await stopVideoRecording();
+            File videoFile = File(rawVideo!.path);
+            int currentUnix = DateTime.now().millisecondsSinceEpoch;
+            Directory? directory;
+            try {
+              if (Platform.isIOS) {
+                directory =
+                await getApplicationDocumentsDirectory();
+              } else {
+                directory = Directory('/storage/emulated/0/Download');
+              }
+            } catch (_) {}
+            String fileFormat = videoFile.path.split('.').last;
+            _videoFile = await videoFile.copy(
+                '${directory!.path}/$currentUnix.$fileFormat');
+            setState(() {
+              mainNameFirst='$currentUnix.$fileFormat';
+              //sliderValue=0;
+            });
+            //_startVideoPlayer(_videoFile!.path);
+            PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
+            await Navigator.pushNamed(context, "/postVideo",arguments: m);
+            Navigator.pop(context);
+          } else {
+            //videoDuration+=const Duration(seconds: 1);
+            setState(() {
+              sliderValue+=1;
+            });
+          }
         }
       });
       setState(() {
         _isRecordingInProgress = true;
-        //  print(_isRecordingInProgress);
       });
     } on CameraException {
       // print('Error starting to record video: $e');
@@ -382,6 +386,33 @@ class _RecordDuetState extends State<RecordDuet> {
     } catch(e){
       Navigator.pop(context);
       showErrorToast(context, e.toString());
+    }
+  }
+
+  Future<void> pauseVideoRecording() async {
+    if (!controller!.value.isRecordingVideo) {
+      return;
+    }
+    try {
+      await controller!.pauseVideoRecording();
+      await videoController!.pause();
+      setState(()=>_isRecordingInProgress=false);
+    } on CameraException {
+      //ss
+    }
+  }
+
+  Future<void> resumeVideoRecording() async {
+    if (!controller!.value.isRecordingVideo) {
+      // No video recording was in progress
+      return;
+    }
+    try {
+      await controller!.resumeVideoRecording();
+      await videoController!.play();
+      setState(()=>_isRecordingInProgress=true);
+    } on CameraException {
+      // print('Error resuming video recording: $e');
     }
   }
 }

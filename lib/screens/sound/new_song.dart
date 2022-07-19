@@ -55,18 +55,8 @@ class _NewSongState extends State<NewSong> {
               },
               color: Colors.black,
               icon: const Icon(Icons.close)),
-          // actions: [
-          //   Visibility(
-          //     visible: checkBoxIndex!=99999999?true:false,
-          //       child: IconButton(
-          //           onPressed: () {
-          //             Navigator.pop(context, newSongList[checkBoxIndex]);
-          //           },
-          //           color: Colors.black,
-          //           icon: const Icon(Icons.check)),
-          //   ),
-          // ],
-        ),floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: ElevatedButton(
             onPressed: () async {
               FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['mp3'], allowMultiple: false);
@@ -75,7 +65,7 @@ class _NewSongState extends State<NewSong> {
                 double size = file.lengthSync()/1000000;
                 String name = file.path.split('/').last.split('.').first;
                 if(size < 6){
-                  if(size > 0.2){
+                  if(size > 0.1){
                     AddSoundModel addSoundModel = AddSoundModel(0, 0, file.path, name, '', '');
                     Navigator.pop(context, addSoundModel);
                   } else {

@@ -47,6 +47,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   void initState() {
     super.initState();
+    reelsPlayerController?.pause();
       reelsPlayerController = VideoPlayerController.network(
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
@@ -103,13 +104,13 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.pageIndex == widget.currentPageIndex &&
-        !widget.isPaused &&
-        initialized) {
-      reelsPlayerController!.play();
-    } else {
-      reelsPlayerController!.pause();
-    }
+    // if (widget.pageIndex == widget.currentPageIndex &&
+    //     !widget.isPaused &&
+    //     initialized) {
+    //   if (!reelsPlayerController!.value.isPlaying) reelsPlayerController!.play();
+    // } else {
+    //   reelsPlayerController!.pause();
+    // }
     return VisibilityDetector(
       onVisibilityChanged: _handleVisibilityDetector,
       key: Key('my-widget-${widget.pageIndex}'),
@@ -176,17 +177,17 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     double d=info.visibleFraction*100;
     print(d);
     if(mounted){
-      reelsPlayerController!.pause();
-      if (d < 60) {
-        reelsPlayerController!.pause();
-        if (initialized &&
-            widget.pageIndex == widget.currentPageIndex &&
-            !widget.isPaused) {
-          reelsPlayerController!.pause();
-        }
-      } else {
-        reelsPlayerController!.play();
-      }
+      // reelsPlayerController!.pause();
+      // if (d < 60) {
+      //   reelsPlayerController!.pause();
+      //   if (initialized &&
+      //       widget.pageIndex == widget.currentPageIndex &&
+      //       !widget.isPaused) {
+      //     reelsPlayerController!.pause();
+      //   }
+      // } else {
+      //   reelsPlayerController!.play();
+      // }
     }
   }
 
@@ -207,12 +208,12 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   onLongPressStart(LongPressStartDetails d)async{
     setState((){showGIF = false;});
-    await Future.delayed(const Duration(milliseconds: 250));
-    reelsPlayerController!.pause();
+    reelsPlayerController?.pause();
   }
 
   onLongPressEnd(LongPressEndDetails d){
     setState((){showGIF = true;});
+    reelsPlayerController?.play();
   }
 
   onTap(){

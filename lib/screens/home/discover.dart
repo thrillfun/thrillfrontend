@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:thrill/models/banner_model.dart';
+import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
@@ -24,6 +25,7 @@ class _DiscoverState extends State<Discover> {
 
   List<BannerModel> bannerList = List<BannerModel>.empty(growable: true);
   List<DiscoverVideo> videoList = List<DiscoverVideo>.empty(growable: true);
+  List<VideoModel> videoModelList = List<VideoModel>.empty(growable: true);
 
   @override
   void initState() {
@@ -189,25 +191,23 @@ class _DiscoverState extends State<Discover> {
   }
 
   void loadAllData() async {
-    try {
+    //try {
       var bannerResult = await RestApi.getDiscoverBanner();
       var json = jsonDecode(bannerResult.body);
       bannerList.clear();
-      bannerList =
-          List<BannerModel>.from(json.map((i) => BannerModel.fromJson(i)))
-              .toList(growable: true);
-
+      bannerList = List<BannerModel>.from(json.map((i) => BannerModel.fromJson(i))).toList(growable: true);
       var videoResult = await RestApi.getVideoWithHash();
       var jsonResult = jsonDecode(videoResult.body);
       videoList.clear();
-      videoList = List<DiscoverVideo>.from(
-              jsonResult['data'].map((i) => DiscoverVideo.fromJson(i)))
-          .toList(growable: true);
-
+      videoList = List<DiscoverVideo>.from(jsonResult['data'].map((i) => DiscoverVideo.fromJson(i))).toList(growable: true);
+      //final List vList = jsonResult['data']['videos'] as List;
+      //videoModelList = List<VideoModel>.from(jsonResult['data'].map((i) => VideoModel.fromJson(i))).toList(growable: true);
       setState(() {
         isLoading = false;
       });
-    } catch (_) {}
+    // } catch (e) {
+    //   print(e.toString());
+    // }
   }
 
   Widget listWidget(DiscoverVideo discoverVideo, int index) {
@@ -267,22 +267,7 @@ class _DiscoverState extends State<Discover> {
             itemBuilder: (BuildContext context2, int index2) {
               return GestureDetector(
                 onTap: (){
-                  // VideoModel vModel = VideoModel(
-                  //     discoverVideo.hashVideo[index2].id,
-                  //     discoverVideo.hashVideo[index2].,
-                  //     privateList[index].video,
-                  //     privateList[index].description,
-                  //     privateList[index].likes,
-                  //     privateList[index].user,
-                  //     privateList[index].filter,
-                  //     privateList[index].gif_image,
-                  //     privateList[index].sound_name,
-                  //     privateList[index].sound_name,
-                  //     privateList[index].sound_category_name,
-                  //     privateList[index].views,
-                  //     privateList[index].speed
-                  // );
-                  // Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': vModel});
+                   Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': discoverVideo.videoModel[index2]});
                 },
                 child: Container(
                   margin: const EdgeInsets.all(2),

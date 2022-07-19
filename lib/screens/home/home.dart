@@ -28,7 +28,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => HomeState();
 }
 
-class HomeState extends State<Home> {
+class HomeState extends State<Home> with WidgetsBindingObserver{
 
   List<String> likeList = List<String>.empty(growable: true);
   List<Comments> commentList = List<Comments>.empty(growable: true);
@@ -577,16 +577,19 @@ class HomeState extends State<Home> {
                             children: [
                               GestureDetector(
                                 onTap: () async {
-                                  await isLogined().then((value) {
+                                  await isLogined().then((value) async {
                                     if (value) {
                                       if(userModel?.id==state.list[index].user.id){
-                                        Navigator.pushReplacementNamed(context, '/', arguments: 3);
+                                        reelsPlayerController?.pause();
+                                        Navigator.pushReplacementNamed(context, '/', arguments: {'index' : 3});
                                       } else {
-                                        Navigator.pushNamed(
+                                        reelsPlayerController?.pause();
+                                        await Navigator.pushNamed(
                                             context, "/viewProfile", arguments: {
                                           "userModel": state.list[index].user,
                                           "getProfile": false
                                         });
+                                        reelsPlayerController?.play();
                                       }
                                     } else {
                                       showAlertDialog(context);
@@ -712,9 +715,11 @@ class HomeState extends State<Home> {
                           ),
                           GestureDetector(
                               onTap: () async {
-                                await isLogined().then((value) {
+                                await isLogined().then((value) async {
                                   if (value) {
-                                    Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
+                                    reelsPlayerController?.pause();
+                                    await Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
+                                    reelsPlayerController?.play();
                                   } else {
                                     showAlertDialog(context);
                                   }
@@ -770,16 +775,19 @@ class HomeState extends State<Home> {
                                   children: [
                                     GestureDetector(
                                       onTap: () async {
-                                        await isLogined().then((value) {
+                                        await isLogined().then((value) async {
                                           if (value) {
                                             if(userModel?.id==state.list[index].user.id){
-                                              Navigator.pushReplacementNamed(context, '/', arguments: 3);
+                                              reelsPlayerController?.pause();
+                                              Navigator.pushReplacementNamed(context, '/', arguments: {'index':3});
                                             } else {
-                                              Navigator.pushNamed(
+                                              reelsPlayerController?.pause();
+                                              await Navigator.pushNamed(
                                                   context, "/viewProfile", arguments: {
                                                 "userModel": state.list[index].user,
                                                 "getProfile": false
                                               });
+                                              reelsPlayerController?.play();
                                             }
                                           } else {
                                             showAlertDialog(context);
@@ -889,7 +897,6 @@ class HomeState extends State<Home> {
                                           .headline6!
                                           .copyWith(color: Colors.white),
                                     ),
-
                                   ],
                                 ),
                                 const SizedBox(
@@ -916,10 +923,12 @@ class HomeState extends State<Home> {
                           ),
                           GestureDetector(
                               onTap:() async {
-                                await isLogined().then((value) {
+                                await isLogined().then((value) async {
                                   if (value) {
                                     if(state.list[index].sound.isNotEmpty){
-                                      Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                      reelsPlayerController?.pause();
+                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                      reelsPlayerController?.play();
                                     }
                                   } else {
                                     showAlertDialog(context);
@@ -946,6 +955,7 @@ class HomeState extends State<Home> {
                     TextButton(
                         onPressed: () {
                           setState(() {
+                            reelsPlayerController?.pause();
                             selectedTopIndex = 0;
                             BlocProvider.of<VideoBloc>(context).add(
                                 VideoLoading(selectedTabIndex: selectedTopIndex));
@@ -970,6 +980,7 @@ class HomeState extends State<Home> {
                     TextButton(
                         onPressed: () {
                           setState(() {
+                            reelsPlayerController?.pause();
                             selectedTopIndex = 1;
                             BlocProvider.of<VideoBloc>(context).add(
                                 VideoLoading(selectedTabIndex: selectedTopIndex));
@@ -994,6 +1005,7 @@ class HomeState extends State<Home> {
                     TextButton(
                         onPressed: () {
                           setState(() {
+                            reelsPlayerController?.pause();
                             selectedTopIndex = 2;
                             BlocProvider.of<VideoBloc>(context).add(
                                 VideoLoading(selectedTabIndex: selectedTopIndex));
@@ -1350,10 +1362,12 @@ class HomeState extends State<Home> {
   }
 
   showAlertDialog(BuildContext context) {
+    reelsPlayerController?.play();
     Widget continueButton = TextButton(
       child: const Text("OK"),
       onPressed: () async {
         Navigator.pop(context);
+        reelsPlayerController?.pause();
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
     );

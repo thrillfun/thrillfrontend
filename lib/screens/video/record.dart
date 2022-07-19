@@ -167,8 +167,15 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
       body: SafeArea(
           child: Stack(
         children: [
+          Container(
+            height: getHeight(context),
+            width: getWidth(context),
+            color: Colors.black,
+          ),
           _isCameraInitialized && _videoFile == null
-              ? controller!.buildPreview()
+              ? AspectRatio(
+              aspectRatio: 1/controller!.value.aspectRatio,
+              child: controller!.buildPreview())
               : Stack(
                   children: [
                     SizedBox(
@@ -179,7 +186,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
                               child: AspectRatio(
-                                aspectRatio: videoController!.value.aspectRatio,
+                                aspectRatio: 1/videoController!.value.aspectRatio,
                                 child: VideoPlayer(videoController!),
                               ),
                             )
