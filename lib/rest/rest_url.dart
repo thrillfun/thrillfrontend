@@ -57,6 +57,9 @@ class RestUrl {
   static const String siteSettings = baseUrl + "SiteSettings";
   static const String popularVideos = baseUrl + "video/popular";
   static const String followingVideos = baseUrl + "video/following";
+  static const String sendOTP = baseUrl + "send-otp";
+  static const String verifyOTP = baseUrl + "verify-otp";
+  static const String notificationList = baseUrl + "user/notification-list";
 
 
 }

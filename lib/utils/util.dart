@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../rest/rest_url.dart';
+
 T getRandomElement<T>(List<T> list) {
   final random = Random();
   var i = random.nextInt(list.length);
@@ -64,5 +66,15 @@ progressDialogue(BuildContext context) {
 
 closeDialogue(BuildContext context) {
   Navigator.pop(context);
+}
+
+Widget imgNet(String imgPath){
+  return Image.network(
+    imgPath,
+    loadingBuilder: (context, child, loadingProgress) =>
+    (loadingProgress == null) ? child : const Center(child: CircularProgressIndicator()),
+    errorBuilder: (context, error, stackTrace) => Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
+    fit: BoxFit.cover,
+  );
 }
 

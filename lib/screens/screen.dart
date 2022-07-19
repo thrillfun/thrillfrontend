@@ -23,7 +23,7 @@ export 'home/notifications.dart';
 export 'chat/inbox.dart';
 export 'referral.dart';
 export 'favourites.dart';
-export 'add_sound.dart';
+export 'sound/add_sound.dart';
 export 'payment_history.dart';
 export 'tag_details.dart';
 export 'setting/request_verification.dart';

@@ -535,7 +535,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                         thumbShape: SliderComponentShape.noThumb,
                         trackHeight: 3),
                     child: Slider(
-                        max: 100,
+                        max: 110,
                         min: 0,
                         value: double.parse(earnModel.current_level) * 10,
                         activeColor: ColorManager.cyan,

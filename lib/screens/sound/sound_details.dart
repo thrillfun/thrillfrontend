@@ -7,9 +7,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
-import '../common/color.dart';
-import '../common/strings.dart';
-import '../rest/rest_url.dart';
+import '../../common/color.dart';
+import '../../common/strings.dart';
+import '../../rest/rest_url.dart';
 
 class SoundDetails extends StatefulWidget {
   const SoundDetails({Key? key, required this.map}) : super(key: key);
@@ -232,7 +232,7 @@ class _SoundDetailsState extends State<SoundDetails> {
                 File file = File('$saveCacheDirectory$sound');
                     try{
                       if(await file.exists()){
-                        Navigator.pushReplacementNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
+                        Navigator.pushNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
                       } else {
                         progressDialogue(context);
                         await FileSupport().downloadCustomLocation(
@@ -243,7 +243,7 @@ class _SoundDetailsState extends State<SoundDetails> {
                           progress: (progress) async {},
                         );
                         closeDialogue(context);
-                        Navigator.pushReplacementNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
+                        Navigator.pushNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
                       }
                     } catch(e){
                       closeDialogue(context);

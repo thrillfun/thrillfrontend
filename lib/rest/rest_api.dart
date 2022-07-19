@@ -98,10 +98,8 @@ class RestApi {
         request.files.add(file);
       }
       response = await http.Response.fromStream(await request.send());
-      print(response.body);
       if (response != null) {
         if (response.statusCode == 200) {
-          print(response.body);
           response = http.Response(jsonEncode(response.body), 200,headers: {
             HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
           });
@@ -115,7 +113,6 @@ class RestApi {
       }
     } catch (e) {
       response = http.Response(jsonEncode({'status': false, 'message': e.toString()}), 200);
-      print(e.toString());
     }
     return response;
   }
@@ -954,6 +951,61 @@ class RestApi {
     var token = instance.getString('currentToken');
     var result = await RestClient.getData(
       RestUrl.followingVideos,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> sendOTP(String mobileNumber) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.sendOTP,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'phone': mobileNumber
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> verifyOTP(String mobileNumber, String otp) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.verifyOTP,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'phone': mobileNumber,
+        'otp': otp
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> getNotificationList() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.getData(
+      RestUrl.notificationList,
       headers: {
         'Authorization': 'Bearer $token',
       },

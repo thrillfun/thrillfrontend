@@ -167,8 +167,15 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
       body: SafeArea(
           child: Stack(
         children: [
+          Container(
+            height: getHeight(context),
+            width: getWidth(context),
+            color: Colors.black,
+          ),
           _isCameraInitialized && _videoFile == null
-              ? controller!.buildPreview()
+              ? AspectRatio(
+              aspectRatio: 1/controller!.value.aspectRatio,
+              child: controller!.buildPreview())
               : Stack(
                   children: [
                     SizedBox(
@@ -179,7 +186,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
                               child: AspectRatio(
-                                aspectRatio: videoController!.value.aspectRatio,
+                                aspectRatio: 1/videoController!.value.aspectRatio,
                                 child: VideoPlayer(videoController!),
                               ),
                             )
@@ -409,7 +416,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
 
 */
 
-
           Positioned(
             top: 2, left: 0, right: 0,
             child: SliderTheme(
@@ -534,7 +540,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 height: 60,
                 color: Colors.black,
                 child: Visibility(
-                  visible: !_isRecordingInProgress && _videoFile==null,
+                  visible: sliderValue==0?true:false,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -660,7 +666,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Visibility(
-                    visible: !_isRecordingInProgress && _videoFile==null,
+                    visible: sliderValue==0?true:false,
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
@@ -676,7 +682,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                             }
                             PostData m = PostData(speed: speed, filePath: file.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
                             Navigator.pushNamed(context, "/preview",arguments: m);
-
                           } else {
                             showErrorToast(context, "Max File Size is 30 MB");
                           }
@@ -706,36 +711,40 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                       ? GestureDetector(
                           onTap: () async {
                             if (_isRecordingInProgress) {
-                              XFile? rawVideo = await stopVideoRecording();
-                              await audioPlayer.stop();
-                              autoStopRecordingTimer?.cancel();
-                              File videoFile = File(rawVideo!.path);
-
-                              int currentUnix =
-                                  DateTime.now().millisecondsSinceEpoch;
-
-                              Directory? directory;
-                              try {
-                                if (Platform.isIOS) {
-                                  directory =
-                                      await getApplicationDocumentsDirectory();
-                                } else {
-                                  directory =
-                                      Directory('/storage/emulated/0/Download');
-                                }
-                              } catch (_) {}
-                              String fileFormat =
-                                  videoFile.path.split('.').last;
-
-                              _videoFile = await videoFile.copy(
-                                  '${directory!.path}/$currentUnix.$fileFormat');
-                              setState(() {
-                                sliderValue=0;
-                                mainNameFirst = '$currentUnix.$fileFormat';
-                              });
-                              _startVideoPlayer(_videoFile!.path);
+                              pauseVideoRecording();
+                              // XFile? rawVideo = await stopVideoRecording();
+                              // await audioPlayer.stop();
+                              // autoStopRecordingTimer?.cancel();
+                              // File videoFile = File(rawVideo!.path);
+                              //
+                              // int currentUnix =
+                              //     DateTime.now().millisecondsSinceEpoch;
+                              //
+                              // Directory? directory;
+                              // try {
+                              //   if (Platform.isIOS) {
+                              //     directory =
+                              //         await getApplicationDocumentsDirectory();
+                              //   } else {
+                              //     directory =
+                              //         Directory('/storage/emulated/0/Download');
+                              //   }
+                              // } catch (_) {}
+                              // String fileFormat = videoFile.path.split('.').last;
+                              //
+                              // _videoFile = await videoFile.copy(
+                              //     '${directory!.path}/$currentUnix.$fileFormat');
+                              // setState(() {
+                              //   sliderValue = 0;
+                              //   mainNameFirst = '$currentUnix.$fileFormat';
+                              // });
+                              // _startVideoPlayer(_videoFile!.path);
                             } else {
-                               await startVideoRecording();
+                              if(sliderValue<=0){
+                                await startVideoRecording();
+                              } else {
+                                resumeVideoRecording();
+                              }
                             }
                           },
                           child: VxCircle(
@@ -821,9 +830,9 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                   return InkWell(
                   onTap: () {
                      if(index==0){
-                         filterImage = "";
-                      }else{
-                         filterImage = effectsfirst[index];
+                       filterImage = "";
+                      } else {
+                       filterImage = effectsfirst[index];
                       }
                       setState(() {});
                       Navigator.pop(context);
@@ -874,7 +883,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     await tempFile.writeAsBytes(data.buffer.asUint8List(), flush: true);
     return tempFile;
   }
-
 
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     final previousCameraController = controller;
@@ -942,43 +950,47 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     try {
       if(addSoundModel!=null){
         await audioPlayer.play(addSoundModel!.sound, isLocal: true);
+        audioPlayer.onPlayerCompletion.listen((event) async {
+          await audioPlayer.play(addSoundModel!.sound, isLocal: true);
+        });
       }
       await cameraController!.startVideoRecording();
       autoStopRecordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-        if(videoDuration.inSeconds>=selectedDuration){
-          autoStopRecordingTimer?.cancel();
-          XFile? rawVideo = await stopVideoRecording();
-          await audioPlayer.stop();
-          File videoFile = File(rawVideo!.path);
+        if(_isRecordingInProgress){
+          if(videoDuration.inSeconds>=selectedDuration){
+            autoStopRecordingTimer?.cancel();
+            XFile? rawVideo = await stopVideoRecording();
+            await audioPlayer.stop();
+            File videoFile = File(rawVideo!.path);
 
-          int currentUnix =
-              DateTime.now().millisecondsSinceEpoch;
+            int currentUnix =
+                DateTime.now().millisecondsSinceEpoch;
 
-          Directory? directory;
-          try {
-            if (Platform.isIOS) {
-              directory =
-              await getApplicationDocumentsDirectory();
-            } else {
-              directory =
-                  Directory('/storage/emulated/0/Download');
-            }
-          } catch (_) {}
-          String fileFormat =
-              videoFile.path.split('.').last;
+            Directory? directory;
+            try {
+              if (Platform.isIOS) {
+                directory =
+                await getApplicationDocumentsDirectory();
+              } else {
+                directory =
+                    Directory('/storage/emulated/0/Download');
+              }
+            } catch (_) {}
+            String fileFormat =
+                videoFile.path.split('.').last;
 
-          _videoFile = await videoFile.copy(
-              '${directory!.path}/$currentUnix.$fileFormat');
-          setState(() {
-            mainNameFirst='$currentUnix.$fileFormat';
-            sliderValue=0;
-          });
-          _startVideoPlayer(_videoFile!.path);
-        } else {
-          videoDuration+=const Duration(seconds: 1);
-          setState(() {
-            sliderValue+=1;
-          });
+            _videoFile = await videoFile.copy(
+                '${directory!.path}/$currentUnix.$fileFormat');
+            setState(() {
+              mainNameFirst='$currentUnix.$fileFormat';
+            });
+            _startVideoPlayer(_videoFile!.path);
+          } else {
+            videoDuration+=const Duration(seconds: 1);
+            setState(() {
+              sliderValue+=1;
+            });
+          }
         }
       });
       setState(() {
@@ -1010,13 +1022,14 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
 
   Future<void> pauseVideoRecording() async {
     if (!controller!.value.isRecordingVideo) {
-      // Video recording is not in progress
       return;
     }
     try {
       await controller!.pauseVideoRecording();
+      await audioPlayer.pause();
+      setState(()=>_isRecordingInProgress=false);
     } on CameraException {
-      // print('Error pausing video recording: $e');
+      //ss
     }
   }
 
@@ -1027,6 +1040,8 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.resumeVideoRecording();
+      await audioPlayer.resume();
+      setState(()=>_isRecordingInProgress=true);
     } on CameraException {
       // print('Error resuming video recording: $e');
     }

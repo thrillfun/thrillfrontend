@@ -123,7 +123,7 @@ class _PostVideoState extends State<PostVideo> {
             closeDialogue(context);
             showErrorToast(context, "Video processing failed!");
             setState(()=>isProcessing = false);
-            Navigator.pop(context);
+            //Navigator.pop(context);
           }
         });
       } catch(e){
@@ -159,7 +159,7 @@ class _PostVideoState extends State<PostVideo> {
               closeDialogue(context);
               showErrorToast(context, "Video processing failed!");
               setState(()=>isProcessing = false);
-              Navigator.pop(context);
+              //Navigator.pop(context);
             }
           });
         } catch(e){
@@ -200,7 +200,7 @@ class _PostVideoState extends State<PostVideo> {
               closeDialogue(context);
               showErrorToast(context, "Video processing failed!");
               setState(()=>isProcessing = false);
-              Navigator.pop(context);
+              //Navigator.pop(context);
             }
           });
         } catch(e){
@@ -768,7 +768,7 @@ class _PostVideoState extends State<PostVideo> {
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              "Original Sound",
+              "",
               "Original Sound",
               dropDownCategoryValue,
               tagList,
@@ -888,7 +888,7 @@ class _PostVideoState extends State<PostVideo> {
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              "Original Sound",
+              "",
               "Original Sound",
               dropDownCategoryValue,
               tagList,

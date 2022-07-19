@@ -95,6 +95,31 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
               ),
               InkWell(
                 onTap: () {
+                  Navigator.pushNamed(context, '/inbox');
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/Inbox.svg',
+                      height: 16,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      inbox,
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              InkWell(
+                onTap: () {
                   Navigator.pushNamed(context, '/privacy');
                 },
                 child: Row(

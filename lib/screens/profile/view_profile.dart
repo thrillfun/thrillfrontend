@@ -10,6 +10,7 @@ import 'package:velocity_x/velocity_x.dart';
 import '../../common/strings.dart';
 import '../../models/private_model.dart';
 import '../../models/user.dart';
+import '../../models/video_model.dart';
 import '../../rest/rest_url.dart';
 
 class ViewProfile extends StatefulWidget {
@@ -41,11 +42,11 @@ class _ViewProfileState extends State<ViewProfile> {
   @override
   void initState() {
     getFollowList();
-    if(widget.mapData["getProfile"]){
-      getProfile();
-    } else {
-      setState(()=>userModel = widget.mapData["userModel"]);
-    }
+      if(widget.mapData["getProfile"]){
+        getProfile();
+      } else {
+        setState(()=>userModel = widget.mapData["userModel"]);
+      }
     getUserPublicVideos(widget.mapData["getProfile"]?widget.mapData["id"]:userModel?.id);
     getUserLikedVideos(widget.mapData["getProfile"]?widget.mapData["id"]:userModel?.id);
     super.initState();
@@ -196,22 +197,21 @@ class _ViewProfileState extends State<ViewProfile> {
                   String action = '';
                   if (followList.contains(userModel?.id.toString())) {
                     followList.remove(userModel?.id.toString());
-                    int followers = int.parse(userModel!.followers)-1;
+                    //int followers = int.parse(userModel!.followers)-1;
                     action = "unfollow";
                   } else {
                     followList.add(userModel!.id.toString());
-                    int followers = int.parse(userModel!.followers)+1;
+                    //int followers = int.parse(userModel!.followers)+1;
                     action = "follow";
                   }
                   SharedPreferences pref = await SharedPreferences.getInstance();
                   pref.setStringList('followList', followList);
 
                   try {
-                    var result = await RestApi.followUserAndUnfollow(userModel!.id,action);
-                    var json = jsonDecode(result.body);
-                  } catch (_) {
-
-                  }
+                    //var result =
+                    await RestApi.followUserAndUnfollow(userModel!.id,action);
+                    //var json = jsonDecode(result.body);
+                  } catch (_) {}
                   setState(() {});
                 },
                 child: Material(
@@ -359,7 +359,7 @@ class _ViewProfileState extends State<ViewProfile> {
 
   getProfile()async{
     try{
-      var response = await RestApi.getUserProfile(int.parse(widget.mapData["id"]));
+      var response = await RestApi.getUserProfile(widget.mapData["id"]);
       var json = jsonDecode(response.body);
       userModel = UserModel.fromJson(json["data"]["user"]);
       setState((){});
@@ -388,47 +388,68 @@ class _ViewProfileState extends State<ViewProfile> {
               crossAxisCount: 3, crossAxisSpacing: 1.8, mainAxisSpacing: 1.8),
           itemCount: publicVideos.length,
           itemBuilder: (BuildContext context, int index) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                CachedNetworkImage(
-                    placeholder: (a, b) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    fit: BoxFit.cover,
-                    imageUrl:publicVideos[index].gif_image.isEmpty
-                        ? '${RestUrl.thambUrl}thumb-not-available.png'
-                        : '${RestUrl.gifUrl}${publicVideos[index].gif_image}'),
-                Positioned(
-                    bottom: 5,
-                    left: 5,
-                    right: 5,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        const Icon(
-                          Icons.visibility,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        Text(
-                          publicVideos[index].views.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                        const Icon(
-                          Icons.favorite,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        Text(
-                          publicVideos[index].likes.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                      ],
-                    ))
-              ],
+            return GestureDetector(
+              onTap: (){
+                VideoModel vModel = VideoModel(
+                    publicVideos[index].id,
+                    publicVideos[index].comments.length,
+                    publicVideos[index].video,
+                    publicVideos[index].description,
+                    publicVideos[index].likes,
+                    publicVideos[index].user,
+                    publicVideos[index].filter,
+                    publicVideos[index].gif_image,
+                    publicVideos[index].sound_name,
+                    publicVideos[index].sound_name,
+                    publicVideos[index].sound_category_name,
+                    publicVideos[index].views,
+                    publicVideos[index].speed
+                );
+                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': vModel});
+              },
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // CachedNetworkImage(
+                  //     placeholder: (a, b) => const Center(
+                  //       child: CircularProgressIndicator(),
+                  //     ),
+                  //     fit: BoxFit.cover,
+                  //     imageUrl:publicVideos[index].gif_image.isEmpty
+                  //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                  //         : '${RestUrl.gifUrl}${publicVideos[index].gif_image}'),
+                  imgNet('${RestUrl.gifUrl}${publicVideos[index].gif_image}'),
+                  Positioned(
+                      bottom: 5,
+                      left: 5,
+                      right: 5,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Icon(
+                            Icons.visibility,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            publicVideos[index].views.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                          const Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            publicVideos[index].likes.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                        ],
+                      ))
+                ],
+              ),
             );
           }),
     ):
@@ -459,47 +480,68 @@ class _ViewProfileState extends State<ViewProfile> {
               crossAxisCount: 3, crossAxisSpacing: 1.8, mainAxisSpacing: 1.8),
           itemCount: favVideos.length,
           itemBuilder: (BuildContext context, int index) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                CachedNetworkImage(
-                    placeholder: (a, b) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    fit: BoxFit.cover,
-                    imageUrl:favVideos[index].gif_image.isEmpty
-                        ? '${RestUrl.thambUrl}thumb-not-available.png'
-                        : '${RestUrl.gifUrl}${favVideos[index].gif_image}'),
-                Positioned(
-                    bottom: 5,
-                    left: 5,
-                    right: 5,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        const Icon(
-                          Icons.visibility,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        Text(
-                          favVideos[index].views.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                        const Icon(
-                          Icons.favorite,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        Text(
-                          favVideos[index].likes.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                      ],
-                    ))
-              ],
+            return GestureDetector(
+              onTap: (){
+                VideoModel vModel = VideoModel(
+                    favVideos[index].id,
+                    favVideos[index].comments.length,
+                    favVideos[index].video,
+                    favVideos[index].description,
+                    favVideos[index].likes,
+                    favVideos[index].user,
+                    favVideos[index].filter,
+                    favVideos[index].gif_image,
+                    favVideos[index].sound_name,
+                    favVideos[index].sound_name,
+                    favVideos[index].sound_category_name,
+                    favVideos[index].views,
+                    favVideos[index].speed
+                );
+                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': vModel});
+              },
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // CachedNetworkImage(
+                  //     placeholder: (a, b) => const Center(
+                  //       child: CircularProgressIndicator(),
+                  //     ),
+                  //     fit: BoxFit.cover,
+                  //     imageUrl:favVideos[index].gif_image.isEmpty
+                  //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                  //         : '${RestUrl.gifUrl}${favVideos[index].gif_image}'),
+                  imgNet('${RestUrl.gifUrl}${favVideos[index].gif_image}'),
+                  Positioned(
+                      bottom: 5,
+                      left: 5,
+                      right: 5,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Icon(
+                            Icons.visibility,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            favVideos[index].views.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                          const Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            favVideos[index].likes.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                        ],
+                      ))
+                ],
+              ),
             );
           }),
     ):
@@ -838,7 +880,7 @@ class _ViewProfileState extends State<ViewProfile> {
   }
 
   getUserLikedVideos(int userID)async{
-    try{
+    //try{
       var response = await RestApi.getUserLikedVideo(userID: userID);
       var json = jsonDecode(response.body);
       List jsonList = json['data'];
@@ -846,9 +888,9 @@ class _ViewProfileState extends State<ViewProfile> {
         favVideos = jsonList.map((e) => PrivateModel.fromJson(e)).toList();
         isFavVideosLoaded = true;
       });
-    } catch(e){
-      showErrorToast(context, e.toString());
-      setState(()=>isFavVideosLoaded=true);
-    }
+    // } catch(e){
+    //   showErrorToast(context, e.toString());
+    //   setState(()=>isFavVideosLoaded=true);
+    // }
   }
 }

@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
 import '../../common/strings.dart';
 
 class Inbox extends StatefulWidget {
@@ -20,6 +19,16 @@ class Inbox extends StatefulWidget {
 }
 
 class _InboxState extends State<Inbox> {
+
+  bool isLoading  = true;
+  List inboxList = List.empty(growable: true);
+
+  @override
+  void initState() {
+    getInbox();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,8 +65,7 @@ class _InboxState extends State<Inbox> {
                       ),
                       child: CachedNetworkImage(
                         fit: BoxFit.cover,
-                        imageUrl:
-                            'https://www.pngall.com/wp-content/uploads/12/Avatar-Profile-Vector-PNG-Clipart.png',
+                        imageUrl: 'https://www.pngall.com/wp-content/uploads/12/Avatar-Profile-Vector-PNG-Clipart.png',
                         placeholder: (a, b) => const Center(
                           child: CircularProgressIndicator(),
                         ),
@@ -70,18 +78,23 @@ class _InboxState extends State<Inbox> {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: RichText(
-                            text: TextSpan(children: [
-                          const TextSpan(
-                              text: 'Peter Drinklage',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold)),
-                          TextSpan(
-                              text: '\nHi, Lorem Ipsum, test some, do some...',
-                              style: TextStyle(
-                                  fontSize: 16, color: Colors.grey.shade700))
-                        ])),
+                            text: TextSpan(
+                                children: [
+                                  const TextSpan(
+                                      text: 'Peter Drinklage',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold)),
+                                  TextSpan(
+                                      text: '\nHi, Lorem Ipsum, test some, do some...',
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.grey.shade700
+                                      ),
+                                  ),
+                                ]
+                            ),
+                        ),
                       ),
                     ),
                     const Padding(
@@ -133,5 +146,9 @@ class _InboxState extends State<Inbox> {
         return ("${difference.inDays} ${prefix[4]}");
       }
     }
+  }
+
+  getInbox()async{
+
   }
 }

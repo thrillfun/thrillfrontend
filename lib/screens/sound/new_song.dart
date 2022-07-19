@@ -8,8 +8,8 @@ import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/rest/rest_url.dart';
-import '../rest/rest_api.dart';
-import '../utils/util.dart';
+import '../../rest/rest_api.dart';
+import '../../utils/util.dart';
 
 class NewSong extends StatefulWidget {
   const NewSong({Key? key}) : super(key: key);
@@ -43,15 +43,29 @@ class _NewSongState extends State<NewSong> {
     return Scaffold(
         appBar: AppBar(
           elevation: 0.5,
-          title: GestureDetector(
-            onTap: () async {
+          title: const Text(
+            "Choose Music",
+            style: TextStyle(color: Colors.black),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              color: Colors.black,
+              icon: const Icon(Icons.close)),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: ElevatedButton(
+            onPressed: () async {
               FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['mp3'], allowMultiple: false);
               if(result!=null){
                 File file = File(result.files.single.path!);
                 double size = file.lengthSync()/1000000;
                 String name = file.path.split('/').last.split('.').first;
                 if(size < 6){
-                  if(size > 0.2){
+                  if(size > 0.1){
                     AddSoundModel addSoundModel = AddSoundModel(0, 0, file.path, name, '', '');
                     Navigator.pop(context, addSoundModel);
                   } else {
@@ -62,31 +76,20 @@ class _NewSongState extends State<NewSong> {
                 }
               }
             },
-            child: const Text(
-              "Upload Music",
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              color: Colors.black,
-              icon: const Icon(Icons.close)),
-          // actions: [
-          //   Visibility(
-          //     visible: checkBoxIndex!=99999999?true:false,
-          //       child: IconButton(
-          //           onPressed: () {
-          //             Navigator.pop(context, newSongList[checkBoxIndex]);
-          //           },
-          //           color: Colors.black,
-          //           icon: const Icon(Icons.check)),
-          //   ),
-          // ],
-        ),
+            style: ElevatedButton.styleFrom(
+                primary: ColorManager.cyan,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50))),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.music_note),
+                Text(
+                  "Choose From Device",
+                  style: TextStyle(fontSize: 16),
+                )
+              ],
+            )),
         body: isLoading?
             const Center(child: CircularProgressIndicator(),): newSongList.isEmpty?
             const Center(child: Text("No Songs Found!"),):
@@ -224,7 +227,7 @@ class _NewSongState extends State<NewSong> {
       } else {
         progressDialogue(context);
         await FileSupport().downloadCustomLocation(
-          url: "${RestUrl.downloadSound}${newSongList[index].sound}",
+          url: "${RestUrl.awsSoundUrl}${newSongList[index].sound}",
           path: saveCacheDirectory,
           filename: newSongList[index].sound.split('.').first,
           extension: ".${newSongList[index].sound.split('.').last}",
