@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:camera/camera.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +53,7 @@ class _RecordDuetState extends State<RecordDuet> {
   AddSoundModel? addSoundModel;
   bool videoDownloaded = false;
   File? duetFile;
+  String downloadProgress = '0';
 
   @override
   initState(){
@@ -69,6 +69,18 @@ class _RecordDuetState extends State<RecordDuet> {
       'assets/filter5.gif',
       'assets/filter7.gif'
     });
+    videoController = VideoPlayerController.network(
+        '${RestUrl.videoUrl}${widget.videoModel.video}'
+    )
+      ..initialize().then((value) {
+        if (videoController!.value.isInitialized) {
+          videoController!.play();
+          videoController!.setLooping(true);
+          videoController!.setVolume(1);
+          sliderMaxValue = videoController!.value.duration.inSeconds.toDouble();
+          if (mounted) setState(() {});
+        }
+      });
   }
 
   @override
@@ -82,7 +94,7 @@ class _RecordDuetState extends State<RecordDuet> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white54,
-      body: videoDownloaded?
+      body: videoController?.value.isInitialized??false?
       SafeArea(
           child: Column(
             children: [
@@ -130,6 +142,14 @@ class _RecordDuetState extends State<RecordDuet> {
                               child: controller!.buildPreview())),
                         )
                         : const SizedBox(),
+                    Visibility(
+                      visible: !_isRecordingInProgress,
+                      child: IconButton(
+                          onPressed: (){Navigator.pop(context);},
+                          color: Colors.red,
+                          icon: const Icon(Icons.close)
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -323,9 +343,7 @@ class _RecordDuetState extends State<RecordDuet> {
               //sliderValue=0;
             });
             //_startVideoPlayer(_videoFile!.path);
-            PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
-            await Navigator.pushNamed(context, "/postVideo",arguments: m);
-            Navigator.pop(context);
+            navigateOrWait();
           } else {
             //videoDuration+=const Duration(seconds: 1);
             setState(() {
@@ -361,31 +379,28 @@ class _RecordDuetState extends State<RecordDuet> {
   }
 
   downloadVideo()async{
-    String randomString = '${Random().nextInt(9999)}${Random().nextInt(9999)}';
-    duetFile = File('$saveCacheDirectory$randomString.mp4');
+    duetFile = File('$saveCacheDirectory${widget.videoModel.video}');
     try{
-      await FileSupport().downloadCustomLocation(
-        url: '${RestUrl.videoUrl}${widget.videoModel.video}',
-        path: saveCacheDirectory,
-        filename: randomString,
-        extension: ".mp4",
-        progress: (progress) async {},
-      );
-      videoController = VideoPlayerController.network(
-          '${RestUrl.videoUrl}${widget.videoModel.video}')
-        ..initialize().then((value) {
-          if (videoController!.value.isInitialized) {
-            videoController!.play();
-            videoController!.setLooping(true);
-            videoController!.setVolume(1);
-            sliderMaxValue = videoController!.value.duration.inSeconds.toDouble();
-            videoDownloaded = true;
-            if (mounted) setState(() {});
-          }
-        });
+      // if(duetFile!.existsSync()){
+      //   setState(()=>videoDownloaded = true);
+      // } else {
+      if(duetFile!.existsSync()) duetFile!.deleteSync();
+        await FileSupport().downloadCustomLocation(
+          url: '${RestUrl.videoUrl}${widget.videoModel.video}',
+          path: saveCacheDirectory,
+          filename: widget.videoModel.video.split('.').first,
+          extension: ".mp4",
+          progress: (progress) async {
+            downloadProgress=progress;
+            print(progress);
+          },
+        );
+        setState(()=>videoDownloaded = true);
+      //}
     } catch(e){
       Navigator.pop(context);
       showErrorToast(context, e.toString());
+      setState(()=>videoDownloaded = false);
     }
   }
 
@@ -413,6 +428,25 @@ class _RecordDuetState extends State<RecordDuet> {
       setState(()=>_isRecordingInProgress=true);
     } on CameraException {
       // print('Error resuming video recording: $e');
+    }
+  }
+
+  navigateOrWait()async{
+    if(downloadProgress=='100'){
+      PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
+      await Navigator.pushNamed(context, "/postVideo",arguments: m);
+      Navigator.pop(context);
+    } else {
+      progressDialogue(context);
+      Timer.periodic(const Duration(), (timer) async {
+        if(downloadProgress=='100'){
+          closeDialogue(context);
+          timer.cancel();
+          PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
+          await Navigator.pushNamed(context, "/postVideo",arguments: m);
+          Navigator.pop(context);
+        }
+      });
     }
   }
 }

@@ -276,16 +276,20 @@ class _SoundDetailsState extends State<SoundDetails> {
   }
 
   getVideos()async{
-    try{
+    //try{
       var response = await RestApi.getVideosBySound(widget.map["sound"]);
       var json = jsonDecode(response.body);
-      List jsonList = json["data"]["videos"];
+      List jsonList = json["data"];
       videoList = jsonList.map((e) => VideoModel.fromJson(e)).toList();
-      title = json["data"]["name"]??'';
+      try{
+        title = json["data"]["name"]??'';
+      } catch(e){
+        title = '';
+      }
       setState((){});
-    } catch(e){
-      showErrorToast(context, e.toString());
-      Navigator.pop(context);
-    }
+    // } catch(e){
+    //   showErrorToast(context, e.toString());
+    //   Navigator.pop(context);
+    // }
   }
 }

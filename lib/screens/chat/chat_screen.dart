@@ -2,19 +2,20 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/models/inbox_model.dart';
 import '../../common/strings.dart';
 import '../../models/user.dart';
 import 'chat_contrroller.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key, required this.senderModel}): super(key: key);
+  const ChatScreen({Key? key, required this.inboxModel}): super(key: key);
   static const String routeName = '/chatScreen';
-  final UserModel senderModel;
+  final InboxModel inboxModel;
 
-  static Route route(UserModel sendrModel) {
+  static Route route(InboxModel senderInbox) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => ChatScreen(senderModel: sendrModel,),
+      builder: (context) => ChatScreen(inboxModel: senderInbox,),
     );
   }
 
@@ -49,7 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         elevation: 0.5,
         title: Text(
-          widget.senderModel.name,
+          widget.inboxModel.name,
           style: const TextStyle(color: Colors.black),
         ),
         centerTitle: true,
@@ -67,9 +68,9 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: StreamBuilder<List<ChatMsg>>(
               stream: ChatController.getChatMsg(
-                userModel!.id > widget.senderModel.id
-                ? '${userModel!.id}_${widget.senderModel.id}'
-                    : '${widget.senderModel.id}_${userModel!.id}',
+                userModel!.id > widget.inboxModel.id
+                ? '${userModel!.id}_${widget.inboxModel.id}'
+                    : '${widget.inboxModel.id}_${userModel!.id}',
               ),
               builder: (context, snapshot) {
                 chats = snapshot.data ?? [];
@@ -130,13 +131,13 @@ class _ChatScreenState extends State<ChatScreen> {
                               msgId: '',
                               message: txtValue,
                               senderId: userModel!.id.toString(),
-                              time: DateTime.now(),
+                              time: DateTime.now().toString(),
                               seen: false,
                             );
                             ChatController.sendMsg(
-                                userModel!.id > widget.senderModel.id
-                                    ? '${userModel!.id}_${widget.senderModel.id}'
-                                    : '${widget.senderModel.id}_${userModel!.id}',
+                                userModel!.id > widget.inboxModel.id
+                                    ? '${userModel!.id}_${widget.inboxModel.id}'
+                                    : '${widget.inboxModel.id}_${userModel!.id}',
                                 message);
                             txtValue = '';
                             txtController.clear();
@@ -181,7 +182,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Padding(
                     padding: const EdgeInsets.only(top: 5),
                     child: Text(
-                        DateFormat('h:mm a').format(msg.time).toLowerCase(),
+                        DateFormat('h:mm a').format(DateTime.parse(msg.time)).toLowerCase(),
                         style: const TextStyle(
                             fontSize: 10,
                             color: Colors.white,
@@ -227,7 +228,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Padding(
                     padding: const EdgeInsets.only(top: 5),
                     child: Text(
-                        DateFormat('h:mm a').format(msg.time).toLowerCase(),
+                        DateFormat('h:mm a').format(DateTime.parse(msg.time)).toLowerCase(),
                         style: const TextStyle(
                             fontSize: 10,
                             color: Colors.black,

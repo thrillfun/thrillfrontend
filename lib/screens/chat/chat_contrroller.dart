@@ -1,5 +1,4 @@
 import 'package:firebase_database/firebase_database.dart';
-import 'package:intl/intl.dart';
 
 class ChatController {
   static String generateChatId({required String buddyId, required String userId}) {
@@ -27,7 +26,7 @@ class ChatMsg {
   String message;
   String senderId;
   bool seen;
-  DateTime time;
+  String time;
 
   ChatMsg({
     required this.msgId,
@@ -42,7 +41,7 @@ class ChatMsg {
       msgId: id,
       message: json['message'] ?? '',
       senderId: json['senderId'] ?? '',
-      time: DateTime.tryParse(json['time'] ?? '') ?? DateTime.parse('2000-01-01 00:00:00'),
+      time: json['time'] ?? '',
       seen: json['seen'] ?? true,
     );
   }
@@ -51,7 +50,7 @@ class ChatMsg {
     return {
       'message': message,
       'senderId': senderId,
-      'time': DateFormat('yyyy-MM-dd hh:mm:ss').format(time),
+      'time': time,
       'seen': seen,
     };
   }

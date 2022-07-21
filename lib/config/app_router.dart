@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/models/video_model.dart';
@@ -90,7 +91,7 @@ class AppRouter {
       case RecordDuet.routeName:
         return RecordDuet.route(settings.arguments as VideoModel);
       case ChatScreen.routeName:
-        return ChatScreen.route(settings.arguments as UserModel);
+        return ChatScreen.route(settings.arguments as InboxModel);
       case OtpVerification.routeName:
         return OtpVerification.route(settings.arguments as String);
       default:

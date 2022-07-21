@@ -891,6 +891,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
+                                      getHashTagsToShow(state.list[index].hashtags)+
                                       state.list[index].description,
                                       style: Theme.of(context)
                                           .textTheme
@@ -926,6 +927,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                 await isLogined().then((value) async {
                                   if (value) {
                                     if(state.list[index].sound.isNotEmpty){
+                                      print(state.list[index].sound);
                                       reelsPlayerController?.pause();
                                       await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
                                       reelsPlayerController?.play();
@@ -1429,6 +1431,26 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
             loadInterstitialAd();
           });
       interstitialAd!.show();
+    }
+  }
+
+  String getHashTagsToShow(List hashList){
+    String hashTags = "";
+    try{
+      if(hashList.isEmpty){
+        return hashTags;
+      } else {
+        if(hashList.length>=2){
+          hashTags += "#${hashList.first} ";
+          hashTags += "#${hashList[1]}\n";
+          return hashTags;
+        } else {
+          hashTags += "#${hashList.first}\n";
+          return hashTags;
+        }
+      }
+    } catch(e){
+      return "";
     }
   }
 }

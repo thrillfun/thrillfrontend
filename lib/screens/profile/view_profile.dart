@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../common/strings.dart';
-import '../../models/private_model.dart';
 import '../../models/user.dart';
 import '../../models/video_model.dart';
 import '../../rest/rest_url.dart';
@@ -35,8 +35,8 @@ class _ViewProfileState extends State<ViewProfile> {
   int selectedTab = 0;
   UserModel? userModel;
   List<String> followList = List.empty(growable: true);
-  List<PrivateModel> publicVideos = List.empty(growable: true);
-  List<PrivateModel> favVideos = List.empty(growable: true);
+  List<VideoModel> publicVideos = List.empty(growable: true);
+  List<VideoModel> favVideos = List.empty(growable: true);
   bool isPublicVideosLoaded = false, isFavVideosLoaded = false;
 
   @override
@@ -170,7 +170,14 @@ class _ViewProfileState extends State<ViewProfile> {
             children: [
               GestureDetector(
                 onTap: () {
-                 Navigator.pushNamed(context, '/chatScreen', arguments: userModel);
+                  InboxModel inboxModel = InboxModel(
+                      id: userModel!.id,
+                      userImage: userModel!.avatar,
+                      message: "",
+                      msgDate: "",
+                      name: userModel!.name
+                  );
+                 Navigator.pushNamed(context, '/chatScreen', arguments: inboxModel);
                 },
                 child: Material(
                   borderRadius: BorderRadius.circular(50),
@@ -390,22 +397,7 @@ class _ViewProfileState extends State<ViewProfile> {
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
               onTap: (){
-                VideoModel vModel = VideoModel(
-                    publicVideos[index].id,
-                    publicVideos[index].comments.length,
-                    publicVideos[index].video,
-                    publicVideos[index].description,
-                    publicVideos[index].likes,
-                    publicVideos[index].user,
-                    publicVideos[index].filter,
-                    publicVideos[index].gif_image,
-                    publicVideos[index].sound_name,
-                    publicVideos[index].sound_name,
-                    publicVideos[index].sound_category_name,
-                    publicVideos[index].views,
-                    publicVideos[index].speed
-                );
-                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': vModel});
+                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': publicVideos[index]});
               },
               child: Stack(
                 fit: StackFit.expand,
@@ -482,22 +474,7 @@ class _ViewProfileState extends State<ViewProfile> {
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
               onTap: (){
-                VideoModel vModel = VideoModel(
-                    favVideos[index].id,
-                    favVideos[index].comments.length,
-                    favVideos[index].video,
-                    favVideos[index].description,
-                    favVideos[index].likes,
-                    favVideos[index].user,
-                    favVideos[index].filter,
-                    favVideos[index].gif_image,
-                    favVideos[index].sound_name,
-                    favVideos[index].sound_name,
-                    favVideos[index].sound_category_name,
-                    favVideos[index].views,
-                    favVideos[index].speed
-                );
-                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': vModel});
+                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': favVideos[index]});
               },
               child: Stack(
                 fit: StackFit.expand,
@@ -870,7 +847,7 @@ class _ViewProfileState extends State<ViewProfile> {
       var json = jsonDecode(response.body);
       List jsonList = json['data'];
       setState(() {
-        publicVideos = jsonList.map((e) => PrivateModel.fromJson(e)).toList();
+        publicVideos = jsonList.map((e) => VideoModel.fromJson(e)).toList();
         isPublicVideosLoaded = true;
       });
     } catch(e){
@@ -880,17 +857,17 @@ class _ViewProfileState extends State<ViewProfile> {
   }
 
   getUserLikedVideos(int userID)async{
-    //try{
+    try{
       var response = await RestApi.getUserLikedVideo(userID: userID);
       var json = jsonDecode(response.body);
       List jsonList = json['data'];
       setState(() {
-        favVideos = jsonList.map((e) => PrivateModel.fromJson(e)).toList();
+        favVideos = jsonList.map((e) => VideoModel.fromJson(e)).toList();
         isFavVideosLoaded = true;
       });
-    // } catch(e){
-    //   showErrorToast(context, e.toString());
-    //   setState(()=>isFavVideosLoaded=true);
-    // }
+    } catch(e){
+      showErrorToast(context, e.toString());
+      setState(()=>isFavVideosLoaded=true);
+    }
   }
 }

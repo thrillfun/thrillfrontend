@@ -28,15 +28,15 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
       result = await _videoRepository.getPopularVideos();
     }
     if (result['status']) {
-      try {
+      //try {
         list = List<VideoModel>.from(
                 result['data'].map((i) => VideoModel.fromJson(i)))
             .toList(growable: true);
 
         emit(VideoLoded(list, status: true, message: 'success'));
-      } catch (e) {
-        emit(VideoLoded(const [], status: false, message: e.toString()));
-      }
+      // } catch (e) {
+      //   emit(VideoLoded(const [], status: false, message: e.toString()));
+      // }
     } else {
       emit(VideoLoded(const [], status: false, message: result['message']));
     }

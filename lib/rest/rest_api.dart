@@ -1016,4 +1016,20 @@ class RestApi {
     return response;
   }
 
+  static Future<http.Response> getInbox() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.getData(
+      RestUrl.inbox,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
 }
