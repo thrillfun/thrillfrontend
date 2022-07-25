@@ -64,10 +64,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(ValidationProcess());
     if(event.userName.isEmpty){
       emit(const ValidationStatus(message: "Username required", status: false));
-    }else if(event.firstName.isEmpty){
-      emit(const ValidationStatus(message: "FirstName required", status: false));
-    }else if(event.lastName.isEmpty){
-      emit(const ValidationStatus(message: "LastName required", status: false));
+    }else if(event.fullName.isEmpty){
+    //}else if(event.firstName.isEmpty){
+      //emit(const ValidationStatus(message: "FirstName required", status: false));
+    //}else if(event.lastName.isEmpty){
+      //emit(const ValidationStatus(message: "LastName required", status: false));
+      emit(const ValidationStatus(message: "Full Name required", status: false));
     }else if(event.gender.isEmpty || event.gender =='Gender'){
       emit(const ValidationStatus(message: "Select Gender", status: false));
     }else if(event.bio.isEmpty){

@@ -1032,4 +1032,24 @@ class RestApi {
     return response;
   }
 
+  static Future<http.Response> sendChatNotification(String otherUserId, String message) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.sendChatNotification,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'other_user_id': otherUserId,
+        'message': message
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
 }

@@ -61,13 +61,20 @@ class _InboxState extends State<Inbox> {
             ListView.builder(
                 itemCount: inboxList.length,
                 padding: const EdgeInsets.only(left: 20, right: 20),
+                physics: const BouncingScrollPhysics(),
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
                     onTap: ()async{
-                      await Navigator.pushNamed(context, '/chatScreen', arguments: inboxList[index]);
-                      setState(() {
-                        isLoading = true;
-                        getInbox();
+                      await Navigator.pushNamed(context, '/chatScreen', arguments: inboxList[index]).then((value) {
+                        if(value!=null){
+                          InboxModel _inboxModel = value as InboxModel;
+                          for(InboxModel im in inboxList){
+                            if(im.id==_inboxModel.id){
+                              setState(()=>inboxList.replaceRange(inboxList.indexOf(im), inboxList.indexOf(im)+1, [_inboxModel]));
+                              break;
+                            }
+                          }
+                        }
                       });
                     },
                     child: Padding(
@@ -134,7 +141,7 @@ class _InboxState extends State<Inbox> {
                             padding: const EdgeInsets.only(top: 10),
                             child: Text(
                               getComparedTime(inboxList[index].msgDate),
-                              style: const TextStyle(color: Colors.grey, fontSize: 12),
+                              style: const TextStyle(color: Colors.grey, fontSize: 10),
                             ),
                           ),
                         ],
@@ -148,12 +155,12 @@ class _InboxState extends State<Inbox> {
     Duration difference = DateTime.now().difference(DateTime.parse(dateTime));
     final List prefix = [
       "just now",
-      "seconds ago",
-      "minutes ago",
-      "hours ago",
-      "days ago",
-      "months ago",
-      "years ago"
+      "second(s) ago",
+      "minute(s) ago",
+      "hour(s) ago",
+      "day(s) ago",
+      "month(s) ago",
+      "year(s) ago"
     ];
     if (difference.inDays == 0) {
       if (difference.inMinutes == 0) {
@@ -186,7 +193,6 @@ class _InboxState extends State<Inbox> {
     try{
       var response = await RestApi.getInbox();
       var json = jsonDecode(response.body);
-      print(json);
       if(json['status']){
         List jsonList = json['data'] as List;
         if(jsonList.isNotEmpty)inboxList = jsonList.map((e) => InboxModel.fromJson(e)).toList();

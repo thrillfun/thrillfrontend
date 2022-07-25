@@ -61,6 +61,7 @@ class RestUrl {
   static const String verifyOTP = baseUrl + "verify-otp";
   static const String notificationList = baseUrl + "user/notification-list";
   static const String inbox = baseUrl + "user/chat-inbox";
+  static const String sendChatNotification = baseUrl + "user/send-chat-notification";
 
 
 }

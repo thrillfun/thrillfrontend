@@ -63,14 +63,14 @@ class _PaymentRequestState extends State<PaymentRequest> {
               ),
               Container(
                 width: getWidth(context) * .85,
-                padding: const EdgeInsets.all(3),
+                padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                 decoration: BoxDecoration(
-                    border: Border.all(width: 2, color: Colors.grey.shade400),
+                    border: Border.all(width: 1, color: Colors.grey.shade500),
                     borderRadius: BorderRadius.circular(8)),
                 child: DropdownButton(
                   menuMaxHeight: 180,
                   value: selectedCurrecny,
-                  style: const TextStyle(color: Colors.grey, fontSize: 17),
+                  style: TextStyle(color: Colors.grey.shade700, fontSize: 17),
                   isExpanded: true,
                   underline: const SizedBox(),
                   icon: const Icon(
@@ -117,14 +117,14 @@ class _PaymentRequestState extends State<PaymentRequest> {
               ),
               Container(
                 width: getWidth(context) * .85,
-                padding: const EdgeInsets.all(3),
+                padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                 decoration: BoxDecoration(
-                    border: Border.all(width: 2, color: Colors.grey.shade400),
+                    border: Border.all(width: 1, color: Colors.grey.shade500),
                     borderRadius: BorderRadius.circular(8)),
                 child: DropdownButton(
                   menuMaxHeight: 180,
                   value: selectedPayment,
-                  style: const TextStyle(color: Colors.grey, fontSize: 17),
+                  style: TextStyle(color: Colors.grey.shade700, fontSize: 17),
                   isExpanded: true,
                   underline: const SizedBox(),
                   icon: const Icon(
@@ -251,7 +251,7 @@ class _PaymentRequestState extends State<PaymentRequest> {
   }
 
   void loadWalletInfo() async {
-    try {
+    //try {
       var result = await RestApi.getCommissionSetting();
       var json = jsonDecode(result.body);
       var arrayList = jsonDecode(json['data'][0]['value']);
@@ -260,16 +260,18 @@ class _PaymentRequestState extends State<PaymentRequest> {
       selectedPayment = payType[0];
       adminCommission = int.parse(json['data'][1]['value']);
 
-      var arrayListCurrency = json['data'][2]['value'];
+      var arrayListCurrency = json['data'][5]['value'];
+      print("arrayListCurrency");
+      print(arrayListCurrency);
       List<String> currencyTitle = List<String>.from(arrayListCurrency);
       currencyType.addAll(currencyTitle);
       selectedCurrecny = currencyType[0];
       feeCtr.text = '${adminCommission.toString()}% fees';
       isLoading = false;
       setState(() {});
-    } catch (e) {
-      isLoading = false;
-      setState(() {});
-    }
+    // } catch (e) {
+    //   isLoading = false;
+    //   setState(() {});
+    // }
   }
 }

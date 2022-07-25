@@ -93,14 +93,12 @@ class _PostVideoState extends State<PostVideo> {
     String outputPath = '$saveDirectory$newName.mp4';
     String? audioFilePath = widget.data.addSoundModel?.sound;
     File videoFile = File(widget.data.filePath);
-    // print(outputPath);
-    // print(audioFilePath);
-    // print(videoFile.path);
 
     if(widget.data.isDuet && widget.data.downloadedDuetFilePath!=null){
       try{
         FFmpegKit.execute(
-            "-i ${widget.data.downloadedDuetFilePath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 -s 720x1280 -vcodec libx264 $outputPath"
+            //"-i ${widget.data.downloadedDuetFilePath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 -s 720x1280 -vcodec libx264 -aspect 4:3 $outputPath" //stretched
+            "-i ${widget.data.downloadedDuetFilePath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' -s 720x1280 -vcodec libx264 $outputPath" //cropped+stretched
         ).then((session) async {
           final returnCode = await session.getReturnCode();
           // final logs = await session.getLogsAsString();

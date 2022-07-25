@@ -118,47 +118,52 @@ class _SoundDetailsState extends State<SoundDetails> {
                     mainAxisSpacing: 1.8),
                 itemCount: videoList.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      CachedNetworkImage(
-                          placeholder: (a, b) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          fit: BoxFit.cover,
-                          imageUrl:videoList[index].gif_image.isEmpty
-                              ? '${RestUrl.thambUrl}thumb-not-available.png'
-                              : '${RestUrl.gifUrl}${videoList[index].gif_image}'),
-                      Positioned(
-                          bottom: 5,
-                          left: 5,
-                          right: 5,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              const Icon(
-                                Icons.visibility,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                videoList[index].views.toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                              const Icon(
-                                Icons.favorite,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                videoList[index].likes.toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                            ],
-                          ))
-                    ],
+                  return GestureDetector(
+                    onTap: (){
+                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': videoList[index]});
+                    },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CachedNetworkImage(
+                            placeholder: (a, b) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            fit: BoxFit.cover,
+                            imageUrl:videoList[index].gif_image.isEmpty
+                                ? '${RestUrl.thambUrl}thumb-not-available.png'
+                                : '${RestUrl.gifUrl}${videoList[index].gif_image}'),
+                        Positioned(
+                            bottom: 5,
+                            left: 5,
+                            right: 5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                const Icon(
+                                  Icons.visibility,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  videoList[index].views.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                                const Icon(
+                                  Icons.favorite,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  videoList[index].likes.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                              ],
+                            ))
+                      ],
+                    ),
                   );
                 }),
           ),
@@ -276,7 +281,7 @@ class _SoundDetailsState extends State<SoundDetails> {
   }
 
   getVideos()async{
-    //try{
+    try{
       var response = await RestApi.getVideosBySound(widget.map["sound"]);
       var json = jsonDecode(response.body);
       List jsonList = json["data"];
@@ -287,9 +292,9 @@ class _SoundDetailsState extends State<SoundDetails> {
         title = '';
       }
       setState((){});
-    // } catch(e){
-    //   showErrorToast(context, e.toString());
-    //   Navigator.pop(context);
-    // }
+    } catch(e){
+      showErrorToast(context, e.toString());
+      Navigator.pop(context);
+    }
   }
 }

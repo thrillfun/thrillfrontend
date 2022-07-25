@@ -9,6 +9,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../rest/rest_url.dart';
 
 VideoPlayerController? reelsPlayerController;
+bool shouldAutoPlayReel = true;
 
 class VideoPlayerItem extends StatefulWidget {
   final String videoUrl, filter;
@@ -53,7 +54,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
         ..initialize().then((value) {
           if (reelsPlayerController!.value.isInitialized) {
             reelsPlayerController!.setPlaybackSpeed(widget.speed.contains('x')?double.parse(widget.speed.replaceAll('x', '')):double.parse(widget.speed));
-            reelsPlayerController!.play();
+            if (shouldAutoPlayReel) reelsPlayerController!.play();
             reelsPlayerController!.setLooping(true);
             reelsPlayerController!.setVolume(1);
             initialized = true;
