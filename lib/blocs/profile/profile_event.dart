@@ -8,12 +8,12 @@ abstract class ProfileEvent extends Equatable {
 }
 
 class ProfileValidation extends ProfileEvent {
-  final String userName, firstName, lastName, bio, gender;
+  final String userName, firstName, lastName, fullName, bio, gender;
   final String websiteUrl;
   final List<SocialUrlModel> list;
   final String profileImage;
 
-  const ProfileValidation(this.userName, this.firstName, this.lastName, this.bio,
+  const ProfileValidation(this.userName, this.firstName, this.lastName, this.fullName, this.bio,
       this.profileImage, this.gender, this.websiteUrl, this.list);
 
   @override
@@ -21,6 +21,7 @@ class ProfileValidation extends ProfileEvent {
         userName,
         firstName,
         lastName,
+        fullName,
         bio,
         profileImage,
         gender,

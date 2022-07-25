@@ -66,10 +66,11 @@ class _BottomNavigationState extends State<BottomNavigation> {
         if(selectedIndex!=0){
           setState(() {
             selectedIndex=0;
+            shouldAutoPlayReel = true;
           });
           return false;
         }else {
-          return true;
+          return false;
         }
       },
       child: Scaffold(
@@ -90,6 +91,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
               setState(() {
                 selectedIndex = 0;
                 //reelsPlayerController?.play();
+                shouldAutoPlayReel = true;
               });
             },
             child: Container(
@@ -124,6 +126,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   setState(() {
                     selectedIndex = 1;
                     reelsPlayerController?.pause();
+                    shouldAutoPlayReel = false;
                   });
                 } else {
                   showAlertDialog(context);
@@ -157,15 +160,17 @@ class _BottomNavigationState extends State<BottomNavigation> {
           ),
           GestureDetector(
             onTap: ()async {
-              await isLogined().then((value) {
+              await isLogined().then((value) async {
                 if (value) {
-                  Navigator.pushNamed(context, '/spin');
                   reelsPlayerController?.pause();
+                  shouldAutoPlayReel = false;
+                  await Navigator.pushNamed(context, '/spin');
+                  reelsPlayerController?.play();
+                  shouldAutoPlayReel = true;
                 } else {
                   showAlertDialog(context);
                 }
               });
-
             },
             child: SizedBox(
                 width: MediaQuery.of(context).size.width * .24,
@@ -182,6 +187,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   setState(() {
                     selectedIndex = 2;
                     reelsPlayerController?.pause();
+                    shouldAutoPlayReel = false;
                   });
                 } else {
                   showAlertDialog(context);
@@ -220,6 +226,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   setState(() {
                     selectedIndex = 3;
                     reelsPlayerController?.pause();
+                    shouldAutoPlayReel = false;
                   });
                 } else {
                   showAlertDialog(context);

@@ -26,9 +26,9 @@ class ProfileLoaded extends ProfileState {
   final UserModel userModel;
   final String message;
   final bool status;
-  final List<PrivateModel> likesList;
-  final List<PrivateModel> privateList;
-  final List<PrivateModel> publicList;
+  final List<VideoModel> likesList;
+  final List<VideoModel> privateList;
+  final List<VideoModel> publicList;
 
   const ProfileLoaded({required this.userModel,required this.likesList,required this.privateList,required this.publicList,required this.status, required this.message});
 

@@ -48,6 +48,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
 
   @override
   void initState() {
+    shouldAutoPlayReel = true;
     loadInterstitialAd();
     loadLikes();
     getUserData();
@@ -581,15 +582,18 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     if (value) {
                                       if(userModel?.id==state.list[index].user.id){
                                         reelsPlayerController?.pause();
+                                        shouldAutoPlayReel = false;
                                         Navigator.pushReplacementNamed(context, '/', arguments: {'index' : 3});
                                       } else {
                                         reelsPlayerController?.pause();
+                                        shouldAutoPlayReel = false;
                                         await Navigator.pushNamed(
                                             context, "/viewProfile", arguments: {
                                           "userModel": state.list[index].user,
                                           "getProfile": false
                                         });
                                         reelsPlayerController?.play();
+                                        shouldAutoPlayReel = true;
                                       }
                                     } else {
                                       showAlertDialog(context);
@@ -718,8 +722,10 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                 await isLogined().then((value) async {
                                   if (value) {
                                     reelsPlayerController?.pause();
+                                    shouldAutoPlayReel = false;
                                     await Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
                                     reelsPlayerController?.play();
+                                    shouldAutoPlayReel = true;
                                   } else {
                                     showAlertDialog(context);
                                   }
@@ -779,15 +785,18 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                           if (value) {
                                             if(userModel?.id==state.list[index].user.id){
                                               reelsPlayerController?.pause();
+                                              shouldAutoPlayReel = false;
                                               Navigator.pushReplacementNamed(context, '/', arguments: {'index':3});
                                             } else {
                                               reelsPlayerController?.pause();
+                                              shouldAutoPlayReel = false;
                                               await Navigator.pushNamed(
                                                   context, "/viewProfile", arguments: {
                                                 "userModel": state.list[index].user,
                                                 "getProfile": false
                                               });
                                               reelsPlayerController?.play();
+                                              shouldAutoPlayReel = true;
                                             }
                                           } else {
                                             showAlertDialog(context);
@@ -891,6 +900,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
+                                      getHashTagsToShow(state.list[index].hashtags)+
                                       state.list[index].description,
                                       style: Theme.of(context)
                                           .textTheme
@@ -927,8 +937,10 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                   if (value) {
                                     if(state.list[index].sound.isNotEmpty){
                                       reelsPlayerController?.pause();
+                                      shouldAutoPlayReel = false;
                                       await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
                                       reelsPlayerController?.play();
+                                      shouldAutoPlayReel = true;
                                     }
                                   } else {
                                     showAlertDialog(context);
@@ -1025,8 +1037,10 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                           await isLogined().then((value) async {
                             if (value) {
                               reelsPlayerController?.pause();
+                              shouldAutoPlayReel = false;
                               await Navigator.pushNamed(context, "/record");
                               reelsPlayerController?.play();
+                              shouldAutoPlayReel = true;
                             } else {
                               showAlertDialog(context);
                             }
@@ -1208,17 +1222,17 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                                     ? const Icon(
                                                         Icons.favorite,
                                                         color: Colors.red,
-                                                        size: 28,
+                                                        size: 23,
                                                       )
                                                     : const Icon(
                                                         Icons
                                                             .favorite_border_outlined,
                                                         color: Colors.grey,
-                                                        size: 28,
+                                                        size: 23,
                                                       ),
                                               ),
                                               Text(
-                                                  '${commentList[index].comment_like_counter}')
+                                                  ' ${commentList[index].comment_like_counter}')
                                             ],
                                           )
                                         ],
@@ -1429,6 +1443,26 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
             loadInterstitialAd();
           });
       interstitialAd!.show();
+    }
+  }
+
+  String getHashTagsToShow(List hashList){
+    String hashTags = "";
+    try{
+      if(hashList.isEmpty){
+        return hashTags;
+      } else {
+        if(hashList.length>=2){
+          hashTags += "#${hashList.first} ";
+          hashTags += "#${hashList[1]}\n";
+          return hashTags;
+        } else {
+          hashTags += "#${hashList.first}\n";
+          return hashTags;
+        }
+      }
+    } catch(e){
+      return "";
     }
   }
 }

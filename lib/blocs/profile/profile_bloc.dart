@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/models/private_model.dart';
 import 'package:thrill/models/social_url_model.dart';
+import 'package:thrill/models/video_model.dart';
 import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
 part 'profile_event.dart';
@@ -24,9 +24,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     var currentUser = pref.getString('currentUser');
     UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
 
-    List<PrivateModel> likeList=List<PrivateModel>.empty(growable: true);
-    List<PrivateModel> privateList=List<PrivateModel>.empty(growable: true);
-    List<PrivateModel> publicList=List<PrivateModel>.empty(growable: true);
+    List<VideoModel> likeList=List<VideoModel>.empty(growable: true);
+    List<VideoModel> privateList=List<VideoModel>.empty(growable: true);
+    List<VideoModel> publicList=List<VideoModel>.empty(growable: true);
 
     var resultLikes = await _loginRepository.getLikesVideo();
     var resultPrivate = await _loginRepository.getPrivateVideo();
@@ -36,16 +36,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     if (result['status']) {
       try {
-        likeList = List<PrivateModel>.from(
-            resultLikes['data'].map((i) => PrivateModel.fromJson(i)))
+        likeList = List<VideoModel>.from(
+            resultLikes['data'].map((i) => VideoModel.fromJson(i)))
             .toList(growable: true);
 
-        privateList = List<PrivateModel>.from(
-            resultPrivate['data'].map((i) => PrivateModel.fromJson(i)))
+        privateList = List<VideoModel>.from(
+            resultPrivate['data'].map((i) => VideoModel.fromJson(i)))
             .toList(growable: true);
 
-        publicList = List<PrivateModel>.from(
-            resultPublic['data'].map((i) => PrivateModel.fromJson(i)))
+        publicList = List<VideoModel>.from(
+            resultPublic['data'].map((i) => VideoModel.fromJson(i)))
             .toList(growable: true);
 
         UserModel user = UserModel.fromJson(result['data']['user']);
@@ -64,10 +64,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(ValidationProcess());
     if(event.userName.isEmpty){
       emit(const ValidationStatus(message: "Username required", status: false));
-    }else if(event.firstName.isEmpty){
-      emit(const ValidationStatus(message: "FirstName required", status: false));
-    }else if(event.lastName.isEmpty){
-      emit(const ValidationStatus(message: "LastName required", status: false));
+    }else if(event.fullName.isEmpty){
+    //}else if(event.firstName.isEmpty){
+      //emit(const ValidationStatus(message: "FirstName required", status: false));
+    //}else if(event.lastName.isEmpty){
+      //emit(const ValidationStatus(message: "LastName required", status: false));
+      emit(const ValidationStatus(message: "Full Name required", status: false));
     }else if(event.gender.isEmpty || event.gender =='Gender'){
       emit(const ValidationStatus(message: "Select Gender", status: false));
     }else if(event.bio.isEmpty){

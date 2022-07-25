@@ -10,7 +10,6 @@ import 'package:velocity_x/velocity_x.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
-import '../../models/private_model.dart';
 import '../../models/user.dart';
 import '../../rest/rest_url.dart';
 
@@ -514,8 +513,8 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  tabview(UserModel userModel, List<PrivateModel> publicList,
-      List<PrivateModel> privateList, List<PrivateModel> likesList) {
+  tabview(UserModel userModel, List<VideoModel> publicList,
+      List<VideoModel> privateList, List<VideoModel> likesList) {
     if (selectedTab == 0) {
       return feed(publicList);
     } else if (selectedTab == 1) {
@@ -525,7 +524,7 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  feed(List<PrivateModel> publicList) {
+  feed(List<VideoModel> publicList) {
     return publicList.isEmpty
         ? RichText(
         textAlign: TextAlign.center,
@@ -554,22 +553,7 @@ class _ProfileState extends State<Profile> {
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
               onTap: (){
-                VideoModel vModel = VideoModel(
-                    publicList[index].id,
-                    publicList[index].comments.length,
-                    publicList[index].video,
-                    publicList[index].description,
-                    publicList[index].likes,
-                    publicList[index].user,
-                    publicList[index].filter,
-                    publicList[index].gif_image,
-                    publicList[index].sound_name,
-                    publicList[index].sound_name,
-                    publicList[index].sound_category_name,
-                    publicList[index].views,
-                    publicList[index].speed
-                );
-                Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': vModel});
+                Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': publicList[index]});
               },
               child: Stack(
                 fit: StackFit.expand,
@@ -619,7 +603,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  lock(List<PrivateModel> privateList) {
+  lock(List<VideoModel> privateList) {
     return privateList.isEmpty
         ? RichText(
         textAlign: TextAlign.center,
@@ -648,22 +632,7 @@ class _ProfileState extends State<Profile> {
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
               onTap: (){
-                VideoModel vModel = VideoModel(
-                    privateList[index].id,
-                    privateList[index].comments.length,
-                    privateList[index].video,
-                    privateList[index].description,
-                    privateList[index].likes,
-                    privateList[index].user,
-                    privateList[index].filter,
-                    privateList[index].gif_image,
-                    privateList[index].sound_name,
-                    privateList[index].sound_name,
-                    privateList[index].sound_category_name,
-                    privateList[index].views,
-                    privateList[index].speed
-                );
-                Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': vModel});
+                Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': privateList[index]});
               },
               child: Stack(
                 fit: StackFit.expand,
@@ -713,7 +682,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  fav(UserModel userModel, List<PrivateModel> likesList) {
+  fav(UserModel userModel, List<VideoModel> likesList) {
     return likesList.isEmpty
         ? RichText(
             textAlign: TextAlign.center,
@@ -742,22 +711,7 @@ class _ProfileState extends State<Profile> {
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
                     onTap: (){
-                      VideoModel vModel = VideoModel(
-                          likesList[index].id,
-                          likesList[index].comments.length,
-                          likesList[index].video,
-                          likesList[index].description,
-                          likesList[index].likes,
-                          likesList[index].user,
-                          likesList[index].filter,
-                          likesList[index].gif_image,
-                          likesList[index].sound_name,
-                          likesList[index].sound_name,
-                          likesList[index].sound_category_name,
-                          likesList[index].views,
-                          likesList[index].speed
-                      );
-                      Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': vModel});
+                      Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': likesList[index]});
                     },
                     child: Stack(
                       fit: StackFit.expand,

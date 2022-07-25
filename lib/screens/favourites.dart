@@ -154,47 +154,52 @@ class _FavouritesState extends State<Favourites> {
                     mainAxisSpacing: 1.8),
                 itemCount: favVideo.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      CachedNetworkImage(
-                          placeholder: (a, b) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                          fit: BoxFit.cover,
-                          imageUrl: favVideo[index].gif_image.isEmpty
-                              ? '${RestUrl.thambUrl}thumb-not-available.png'
-                              : '${RestUrl.gifUrl}${favVideo[index].gif_image}'),
-                      Positioned(
-                          bottom: 5,
-                          left: 5,
-                          right: 5,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              const Icon(
-                                Icons.visibility,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                favVideo[index].views.toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                              const Icon(
-                                Icons.favorite,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                favVideo[index].likes.toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                            ],
-                          ))
-                    ],
+                  return GestureDetector(
+                    onTap: (){
+                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': favVideo[index]});
+                    },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CachedNetworkImage(
+                            placeholder: (a, b) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                            fit: BoxFit.cover,
+                            imageUrl: favVideo[index].gif_image.isEmpty
+                                ? '${RestUrl.thambUrl}thumb-not-available.png'
+                                : '${RestUrl.gifUrl}${favVideo[index].gif_image}'),
+                        Positioned(
+                            bottom: 5,
+                            left: 5,
+                            right: 5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                const Icon(
+                                  Icons.visibility,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  favVideo[index].views.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                                const Icon(
+                                  Icons.favorite,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  favVideo[index].likes.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                              ],
+                            ))
+                      ],
+                    ),
                   );
                 }),
       ],

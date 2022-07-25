@@ -2,19 +2,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/models/inbox_model.dart';
+import 'package:thrill/rest/rest_api.dart';
 import '../../common/strings.dart';
 import '../../models/user.dart';
 import 'chat_contrroller.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key, required this.senderModel}): super(key: key);
+  const ChatScreen({Key? key, required this.inboxModel}): super(key: key);
   static const String routeName = '/chatScreen';
-  final UserModel senderModel;
+  final InboxModel inboxModel;
 
-  static Route route(UserModel sendrModel) {
+  static Route route(InboxModel senderInbox) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => ChatScreen(senderModel: sendrModel,),
+      builder: (context) => ChatScreen(inboxModel: senderInbox,),
     );
   }
 
@@ -27,6 +29,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String txtValue = '';
   List<ChatMsg> chats = List<ChatMsg>.empty(growable: true);
   UserModel? userModel;
+  late InboxModel inboxModel = widget.inboxModel;
 
   @override
   initState(){
@@ -45,113 +48,121 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0.5,
-        title: Text(
-          widget.senderModel.name,
-          style: const TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            color: Colors.black,
-            icon: const Icon(Icons.arrow_back_ios)),
-      ),
-      body: Column(
-        children: [
-          userModel==null?const SizedBox():
-          Expanded(
-            child: StreamBuilder<List<ChatMsg>>(
-              stream: ChatController.getChatMsg(
-                userModel!.id > widget.senderModel.id
-                ? '${userModel!.id}_${widget.senderModel.id}'
-                    : '${widget.senderModel.id}_${userModel!.id}',
-              ),
-              builder: (context, snapshot) {
-                chats = snapshot.data ?? [];
-                return ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  reverse: true,
-                  itemCount: chats.length,
-                  padding: const EdgeInsets.all(12),
-                  itemBuilder: (context, index) {
-                    var chat = chats[index];
-
-                    /* if (!(chat.senderId == 1) && !chat.seen) {
-                      ChatController.markMsgSeen(widget.chatId, chat);
-                    }*/
-
-                    if (chat.senderId ==  userModel?.id.toString()) {
-                      return myBubble(chat);
-                    } else {
-                      return friendBubble(chat);
-                    }
-                  },
-                );
+    return WillPopScope(
+      onWillPop: ()async{
+        Navigator.pop(context, inboxModel);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0.5,
+          title: Text(
+            widget.inboxModel.name,
+            style: const TextStyle(color: Colors.black),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context, inboxModel);
               },
+              color: Colors.black,
+              icon: const Icon(Icons.arrow_back_ios)),
+        ),
+        body: Column(
+          children: [
+            userModel==null?const SizedBox():
+            Expanded(
+              child: StreamBuilder<List<ChatMsg>>(
+                stream: ChatController.getChatMsg(
+                  userModel!.id > widget.inboxModel.id
+                  ? '${userModel!.id}_${widget.inboxModel.id}'
+                      : '${widget.inboxModel.id}_${userModel!.id}',
+                ),
+                builder: (context, snapshot) {
+                  chats = snapshot.data ?? [];
+                  return ListView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    reverse: true,
+                    itemCount: chats.length,
+                    padding: const EdgeInsets.all(12),
+                    itemBuilder: (context, index) {
+                      var chat = chats[index];
+
+                      /* if (!(chat.senderId == 1) && !chat.seen) {
+                        ChatController.markMsgSeen(widget.chatId, chat);
+                      }*/
+
+                      if (chat.senderId ==  userModel?.id.toString()) {
+                        return myBubble(chat);
+                      } else {
+                        return friendBubble(chat);
+                      }
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width,
-            color: Colors.grey.shade200,
-            padding:
-                const EdgeInsets.only(left: 10, right: 10, bottom: 20, top: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: txtController,
-                    onChanged: (txt) => setState(() => txtValue = txt),
-                    decoration: InputDecoration(
-                      hintText: type,
-                      hintStyle: const TextStyle(color: Colors.white, fontSize: 13),
-                      fillColor: Colors.grey.shade400,
-                      filled: true,
-                      constraints: const BoxConstraints(maxHeight: 40),
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        borderSide: BorderSide.none,
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              color: Colors.grey.shade200,
+              padding: const EdgeInsets.only(left: 10, right: 10, bottom: 20, top: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: txtController,
+                      onChanged: (txt) => setState(() => txtValue = txt),
+                      decoration: InputDecoration(
+                        hintText: type,
+                        hintStyle: const TextStyle(color: Colors.white, fontSize: 13),
+                        fillColor: Colors.grey.shade400,
+                        filled: true,
+                        constraints: const BoxConstraints(maxHeight: 40),
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.only(left: 15, right: 15),
                       ),
-                      contentPadding: const EdgeInsets.only(left: 15, right: 15),
                     ),
                   ),
-                ),
-                IconButton(
-                        onPressed: () {
-                          if(txtController.text.isNotEmpty){
-                            ChatMsg message = ChatMsg(
-                              msgId: '',
-                              message: txtValue,
-                              senderId: userModel!.id.toString(),
-                              time: DateTime.now(),
-                              seen: false,
-                            );
-                            ChatController.sendMsg(
-                                userModel!.id > widget.senderModel.id
-                                    ? '${userModel!.id}_${widget.senderModel.id}'
-                                    : '${widget.senderModel.id}_${userModel!.id}',
-                                message);
-                            txtValue = '';
-                            txtController.clear();
-                          }
+                  IconButton(
+                          onPressed: () async {
+                            if(txtController.text.isNotEmpty){
+                              ChatMsg message = ChatMsg(
+                                msgId: '',
+                                message: txtValue,
+                                senderId: userModel!.id.toString(),
+                                time: DateTime.now().toString(),
+                                seen: false,
+                              );
+                              ChatController.sendMsg(
+                                  userModel!.id > widget.inboxModel.id
+                                      ? '${userModel!.id}_${widget.inboxModel.id}'
+                                      : '${widget.inboxModel.id}_${userModel!.id}',
+                                  message);
+                              txtValue = '';
+                              txtController.clear();
+                              inboxModel.message = message.message;
+                              inboxModel.msgDate = message.time;
+                              await RestApi.sendChatNotification(widget.inboxModel.id.toString(), message.message);
+                            }
 
-                          /// sendMessage();
-                        },
-                        icon: const Icon(
-                          Icons.send,
-                          color: Colors.grey,
-                        ))
-              ],
-            ),
-          )
-        ],
+                            /// sendMessage();
+                          },
+                          icon: const Icon(
+                            Icons.send,
+                            color: Colors.grey,
+                          ))
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -176,14 +187,14 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Wrap(
               alignment: WrapAlignment.end,
               children: [
-                Text("${msg.message} ",
+                Text("${msg.message}  ",
                     style: const TextStyle(color: Colors.white)),
                 Padding(
                     padding: const EdgeInsets.only(top: 5),
                     child: Text(
-                        DateFormat('h:mm a').format(msg.time).toLowerCase(),
+                        DateFormat('h:mm a').format(DateTime.parse(msg.time)).toLowerCase(),
                         style: const TextStyle(
-                            fontSize: 10,
+                            fontSize: 8,
                             color: Colors.white,
                             fontWeight: FontWeight.bold))),
               ],
@@ -222,14 +233,14 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Wrap(
               alignment: WrapAlignment.end,
               children: [
-                Text("${msg.message} ",
+                Text("${msg.message}  ",
                     style: const TextStyle(color: Colors.black)),
                 Padding(
                     padding: const EdgeInsets.only(top: 5),
                     child: Text(
-                        DateFormat('h:mm a').format(msg.time).toLowerCase(),
+                        DateFormat('h:mm a').format(DateTime.parse(msg.time)).toLowerCase(),
                         style: const TextStyle(
-                            fontSize: 10,
+                            fontSize: 8,
                             color: Colors.black,
                             fontWeight: FontWeight.bold))),
               ],
