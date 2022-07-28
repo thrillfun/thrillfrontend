@@ -7,6 +7,8 @@ class RestUrl {
   static const String soundUrl = "https://9starinfosolutions.com/thrill/";
   static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
   static const String awsSoundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
+  static const String currencyUrl = "https://9starinfosolutions.com/thrill/uploads/currency/";
+
 
   static const String login = baseUrl + "login";
   static const String register = baseUrl + "register";
