@@ -17,8 +17,10 @@ class VideoPlayerItem extends StatefulWidget {
   final int currentPageIndex;
   final bool isPaused;
   final int videoId;
+  final int pagesLength;
   final VoidCallback? callback;
   final String speed;
+  final PageController pageController;
 
   const VideoPlayerItem(
       {Key? key,
@@ -29,6 +31,8 @@ class VideoPlayerItem extends StatefulWidget {
       required this.filter,
       required this.videoId,
       required this.speed,
+      required this.pageController,
+      required this.pagesLength,
         this.callback})
       : super(key: key);
 
@@ -59,7 +63,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
             reelsPlayerController!.setVolume(1);
             initialized = true;
             showGIF = true;
-            _start = reelsPlayerController!.value.duration.inSeconds~/2;
+            _start = reelsPlayerController!.value.duration.inSeconds;
             startTimer();
             if (mounted) setState(() {});
             reelsPlayerController?.addListener(() {
@@ -89,13 +93,14 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
       var loginData=instance.getString('currentUser');
       if(loginData !=null){
         _timer = Timer.periodic(
-          oneSec,
-              (Timer timer) {
-            if (_start == 0) {
+          oneSec, (Timer timer) {
+            if(reelsPlayerController?.value.isPlaying??false){
+              if (_start == 0) {
+                callViewApi();
                 timer.cancel();
-              callViewApi();
-            } else {
+              } else {
                 _start--;
+              }
             }
           },
         );
@@ -203,7 +208,18 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
         viewList.add(widget.videoId.toString());
         pref.setStringList('viewList', viewList);
         setState(() {});
+        try{
+          widget.pagesLength-1==widget.pageIndex?
+          widget.pageController.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
+          widget.pageController.animateToPage(widget.pageIndex+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
+        } catch(_){}
       }
+    } else {
+      try{
+        widget.pagesLength-1==widget.pageIndex?
+        widget.pageController.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
+        widget.pageController.animateToPage(widget.pageIndex+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
+      } catch(_){}
     }
   }
 

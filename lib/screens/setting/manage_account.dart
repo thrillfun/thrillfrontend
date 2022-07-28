@@ -70,14 +70,23 @@ class _ManageAccountState extends State<ManageAccount> {
             ),
             Text(
               "Username : ${user!.username}",
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
             const SizedBox(
               height: 20,
             ),
             Text(
-              "Phone : ${user!.phone}",
-              style: TextStyle(color: Colors.grey.shade600),
+              user!.social_login_type=='normal'?
+              "Phone : ${user!.phone}":
+              "Email : ${user!.email}",
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Text(
+              "Login Type : ${user!.social_login_type}",
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             )
           ],
         ),

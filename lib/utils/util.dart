@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../common/strings.dart';
 import '../rest/rest_url.dart';
 
 T getRandomElement<T>(List<T> list) {
@@ -19,23 +20,110 @@ double getWidth(BuildContext context) {
   return MediaQuery.of(context).size.width;
 }
 
-showErrorToast(BuildContext context,String msg) {
-  final scaffold = ScaffoldMessenger.of(context);
-  scaffold.showSnackBar(
-    SnackBar(content:  Text(msg,style: const TextStyle(color: Colors.white),),
-      backgroundColor: Colors.red,
+showErrorToast(BuildContext context,String msg)async{
+  // final scaffold = ScaffoldMessenger.of(context);
+  // scaffold.showSnackBar(
+  //   SnackBar(content:  Text(msg,style: const TextStyle(color: Colors.white),),
+  //     backgroundColor: Colors.red,
+  //   ),
+  // );
+  showDialog(context: context, builder: (_)=> Center(
+    child: Material(
+      type: MaterialType.transparency,
+      child: Container(
+        width: getWidth(context)*.80,
+        padding: const EdgeInsets.only(top: 7, bottom: 10),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10)
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(failed, style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.red),),
+            const Divider(color: Colors.red, thickness: 3, indent: 70, endIndent: 70,),
+            const SizedBox(height: 15,),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Text(msg,
+                style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 15,),
+            Align(
+              alignment: Alignment.topRight,
+              child: TextButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                    },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.only(right: 10),
+                  ),
+                  child: Text(ok, style: Theme.of(context).textTheme.headline3,)),
+            )
+          ],
+        ),
+      ),
     ),
-  );
+  ));
+  try{
+    await Future.delayed(const Duration(seconds: 7));
+    if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
+  } catch(_){}
 }
 
-
-showSuccessToast(BuildContext context,String msg) {
-  final scaffold = ScaffoldMessenger.of(context);
-  scaffold.showSnackBar(
-    SnackBar(content:  Text(msg,style: const TextStyle(color: Colors.white),),
-      backgroundColor: Colors.green,
+showSuccessToast(BuildContext context,String msg) async {
+  // final scaffold = ScaffoldMessenger.of(context);
+  // scaffold.showSnackBar(
+  //   SnackBar(content:  Text(msg,style: const TextStyle(color: Colors.white),),
+  //     backgroundColor: Colors.green,
+  //   ),
+  // );
+  showDialog(context: context, builder: (_)=> Center(
+    child: Material(
+      type: MaterialType.transparency,
+      child: Container(
+        width: getWidth(context)*.80,
+        padding: const EdgeInsets.only(top: 7, bottom: 10),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10)
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(successful, style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.green),),
+            const Divider(color: Colors.green, thickness: 3, indent: 70, endIndent: 70,),
+            const SizedBox(height: 15,),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Text(msg,
+                style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 15,),
+            Align(
+              alignment: Alignment.topRight,
+              child: TextButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.only(right: 10),
+                  ),
+                  child: Text(ok, style: Theme.of(context).textTheme.headline3,)),
+            )
+          ],
+        ),
+      ),
     ),
-  );
+  ));
+  try{
+    await Future.delayed(const Duration(seconds: 7));
+    if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
+  } catch(_){}
 }
 
 progressDialogue(BuildContext context) {

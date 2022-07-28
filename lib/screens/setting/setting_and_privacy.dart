@@ -66,80 +66,28 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                 height: 15,
               ),
               title(account),
-              const SizedBox(
-                height: 15,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                 Navigator.pushNamed(context, '/manageAccount');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/profile.svg',
-                      height: 18,
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      manageAccount,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.account_box_outlined, manageAccount)
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/inbox');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/Inbox.svg',
-                      height: 16,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      inbox,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.all_inbox, inbox)
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/privacy');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.lock_outline_rounded, color: Colors.grey, size: 20,),
-                    const SizedBox(
-                      width: 2,
-                    ),
-                    Text(
-                      privacy,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.lock_outline_rounded, privacy)
               ),
               /* const SizedBox(
                 height: 10,
               ),
-             InkWell(
+             GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/requestVerification');
                 },
@@ -157,123 +105,60 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                   ],
                 ),
               ),*/
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/wallet');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.account_balance_wallet_outlined, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      wallet,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.account_balance_wallet_outlined, wallet)
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/qrcode');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/qr_small.svg',
-                      height: 18,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      qrCode,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.qr_code, qrCode)
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   //share();
                   Share.share('Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me.');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.share, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      shareProfile,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.share, shareProfile)
               ),
               const SizedBox(
-                height: 20,
+                height: 30,
               ),
               title(contentAndActivity),
-              const SizedBox(
-                height: 15,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/pushNotification');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.notifications_none_outlined, color: Colors.grey, size: 20,),
-                    const SizedBox(
-                      width: 2,
-                    ),
-                    Text(
-                      pushNotification,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.notifications_none_outlined, pushNotification)
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {},
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.translate_outlined, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
+                child: SizedBox(
+                  height: 25,
+                  child: ListTile(
+                    title: Text(
+                      appLanguage,
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                     ),
-                    Expanded(
-                      child: Text(
-                        appLanguage,
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                      ),
-                    ),
-                    Text(
+                    leading: const Icon(Icons.translate_outlined, color: Colors.grey, size: 20,),
+                    trailing: Text(
                       english,
                       style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
                     ),
-                  ],
+                    visualDensity: VisualDensity.compact,
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    horizontalTitleGap: 0,
+                    minLeadingWidth: 30,
+                    minVerticalPadding: 0,
+                  ),
                 ),
+              ),
+              const SizedBox(
+                height: 30,
               ),
              /* const SizedBox(
                 height: 20,
@@ -282,7 +167,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
               const SizedBox(
                 height: 15,
               ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                 Navigator.pushNamed(context, '/freeSpace');
                 },
@@ -300,102 +185,36 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                   ],
                 ),
               ),*/
-              const SizedBox(
-                height: 20,
-              ),
               title(about.toUpperCase()),
-              const SizedBox(
-                height: 15,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/termsOfService');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.library_books_outlined, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      termsOfService,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.library_books_outlined, termsOfService)
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/privacyPolicy');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.library_books_outlined, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      privacyPolicy,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.library_books_outlined, privacyPolicy)
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                 Navigator.pushNamed(context, '/customerSupport');
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.chat_outlined, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 4,
-                    ),
-                    Text(
-                      technicalSupport,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.chat_outlined, technicalSupport)
               ),
               const SizedBox(
-                height: 20,
+                height: 30,
               ),
               title(login.toUpperCase()),
-              const SizedBox(
-                height: 15,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   switchAccountLayout();
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.refresh_rounded, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      switchAccount,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.refresh_rounded, switchAccount)
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
+              GestureDetector(
                 onTap: () async{
                   showDialog(context: context, builder: (_)=>Center(
                     child: Material(
@@ -416,9 +235,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                             ),
                             const SizedBox(height: 5,),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              padding: const EdgeInsets.symmetric(horizontal: 25),
                               child: Text("This will also logout all your linked account if any.",
-                                style: Theme.of(context).textTheme.headline4,
+                                style: Theme.of(context).textTheme.headline5!.copyWith(fontWeight: FontWeight.normal),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -431,7 +250,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                       Navigator.pop(context);
                                     },
                                     style: ElevatedButton.styleFrom(
-                                        primary: Colors.red
+                                        primary: Colors.red,
+                                        fixedSize: Size(getWidth(context)*.26, 40),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                                     ),
                                     child: const Text("No")
                                 ),
@@ -447,7 +268,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
                                     },
                                     style: ElevatedButton.styleFrom(
-                                        primary: Colors.green
+                                        primary: Colors.green,
+                                        fixedSize: Size(getWidth(context)*.26, 40),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                                     ),
                                     child: const Text("Yes")
                                 )
@@ -459,19 +282,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                     ),
                   ));
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.login_outlined, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      logout,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
+                child: mainTile(Icons.login_outlined, logout)
               ),
             ],
           ),
@@ -479,14 +290,30 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
       ),
     );
   }
-
+  Widget mainTile(IconData icon, String text){
+    return SizedBox(
+      height: 25,
+      child: ListTile(
+        title: Text(
+          text,
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+        ),
+        leading: Icon(icon, color: Colors.grey, size: 20,),
+        visualDensity: VisualDensity.compact,
+        dense: true,
+        contentPadding: EdgeInsets.zero,
+        horizontalTitleGap: 0,
+        minLeadingWidth: 30,
+        minVerticalPadding: 0,
+      ),
+    );
+  }
   title(String txt) {
     return Text(
       txt,
       style: const TextStyle(color: Colors.grey, fontSize: 16),
     );
   }
-
   share() {
     return showModalBottomSheet(
         context: context,
@@ -720,7 +547,6 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
           );
         });
   }
-
   switchAccountLayout()async{
     var pref = await SharedPreferences.getInstance();
     List<String> users = pref.getStringList('allUsers') ?? [];
@@ -806,7 +632,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                                     Navigator.pop(context);
                                                   },
                                                   style: ElevatedButton.styleFrom(
-                                                      primary: Colors.red
+                                                      primary: Colors.red,
+                                                      fixedSize: Size(getWidth(context)*.26, 40),
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                                                   ),
                                                   child: const Text("No")
                                               ),
@@ -843,7 +671,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                                     }
                                                   },
                                                   style: ElevatedButton.styleFrom(
-                                                      primary: Colors.green
+                                                      primary: Colors.green,
+                                                      fixedSize: Size(getWidth(context)*.26, 40),
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                                                   ),
                                                   child: const Text("Yes")
                                               )
@@ -940,7 +770,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                                             Navigator.pop(context);
                                                           },
                                                           style: ElevatedButton.styleFrom(
-                                                            primary: Colors.red
+                                                            primary: Colors.red,
+                                                              fixedSize: Size(getWidth(context)*.26, 40),
+                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                                                           ),
                                                           child: const Text("No")
                                                       ),
@@ -961,7 +793,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                                             Navigator.pop(context);
                                                           },
                                                           style: ElevatedButton.styleFrom(
-                                                              primary: Colors.green
+                                                              primary: Colors.green,
+                                                              fixedSize: Size(getWidth(context)*.26, 40),
+                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                                                           ),
                                                           child: const Text("Yes")
                                                       )

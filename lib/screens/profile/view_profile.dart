@@ -69,14 +69,14 @@ class _ViewProfileState extends State<ViewProfile> {
             },
             color: Colors.black,
             icon: const Icon(Icons.arrow_back_ios)),
-        actions: [
-          IconButton(
-              onPressed: () {
-               Navigator.pushNamed(context, '/notifications');
-              },
-              color: Colors.grey,
-              icon: const Icon(Icons.notifications)),
-        ],
+        // actions: [
+        //   IconButton(
+        //       onPressed: () {
+        //        Navigator.pushNamed(context, '/notifications');
+        //       },
+        //       color: Colors.grey,
+        //       icon: const Icon(Icons.notifications)),
+        // ],
       ),
       body: userModel==null?
       const Center(child: CircularProgressIndicator(),):

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -436,8 +435,8 @@ class _SpinTheWheelState extends State<SpinTheWheel>
         isLoading = false;
       });
     } catch (e) {
-      showErrorToast(context, e.toString());
       Navigator.pop(context);
+      showErrorToast(context, e.toString());
     }
   }
 

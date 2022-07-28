@@ -191,7 +191,7 @@ class _DiscoverState extends State<Discover> {
   }
 
   void loadAllData() async {
-    //try {
+    try {
       var bannerResult = await RestApi.getDiscoverBanner();
       var json = jsonDecode(bannerResult.body);
       bannerList.clear();
@@ -205,9 +205,9 @@ class _DiscoverState extends State<Discover> {
       setState(() {
         isLoading = false;
       });
-    // } catch (e) {
-    //   print(e.toString());
-    // }
+    } catch (e) {
+      //print(e.toString());
+    }
   }
 
   Widget listWidget(DiscoverVideo discoverVideo, int index) {

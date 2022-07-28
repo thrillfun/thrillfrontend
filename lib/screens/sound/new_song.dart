@@ -27,7 +27,6 @@ class NewSong extends StatefulWidget {
 }
 
 class _NewSongState extends State<NewSong> {
-  //int checkBoxIndex = 99999999;
   bool isLoading = true;
   List<AddSoundModel> newSongList = List<AddSoundModel>.empty(growable: true);
   List<int> bookmarkedIndexes = List.empty(growable: true);
@@ -64,7 +63,7 @@ class _NewSongState extends State<NewSong> {
                 File file = File(result.files.single.path!);
                 double size = file.lengthSync()/1000000;
                 String name = file.path.split('/').last.split('.').first;
-                if(size < 6){
+                if(size < 101){
                   if(size > 0.1){
                     AddSoundModel addSoundModel = AddSoundModel(0, 0, file.path, name, '', '');
                     Navigator.pop(context, addSoundModel);
@@ -72,7 +71,7 @@ class _NewSongState extends State<NewSong> {
                     showErrorToast(context, "File Size too Small!!");
                   }
                 } else {
-                  showErrorToast(context, "Max File Size is 5 MB");
+                  showErrorToast(context, "Max File Size is 100 MB");
                 }
               }
             },
@@ -126,6 +125,7 @@ class _NewSongState extends State<NewSong> {
                               newSongList[index].name,
                               style: const TextStyle(color: Colors.grey),
                               maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,

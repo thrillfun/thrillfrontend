@@ -1,14 +1,12 @@
 import 'dart:convert';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
 import 'package:velocity_x/velocity_x.dart';
-
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_api.dart';
@@ -34,16 +32,12 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+
   TextEditingController nameCtr = TextEditingController();
-
   TextEditingController phoneCtr = TextEditingController();
-
   TextEditingController dobCtr = TextEditingController();
-
   DateTime selectedDate = DateTime.now();
-
   String mPin="";
-
   late DateTime initDate = DateTime(
     selectedDate.year - 13,
     selectedDate.month,
@@ -59,6 +53,7 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        Navigator.pushReplacementNamed(context, '/login');
         return false;
       },
       child: BlocListener<SignupBloc, SignupState>(
@@ -214,20 +209,33 @@ class _SignUpState extends State<SignUp> {
                           ),
                           const Padding(padding: EdgeInsets.symmetric(vertical: 3),
                           child: Text("M-PIN")),
-                          VxPinView(
-                            count: 4,
+                          PinCodeTextField(
+                            appContext: context,
+                            length: 4,
                             obscureText: true,
-                            type: VxPinBorderType.round,
                             keyboardType: TextInputType.number,
-                            color: Colors.grey,
-                            contentColor: Colors.black,
-                            onChanged: (txt){
-                              mPin = txt;
-                            },
-                            radius: 7,
-                            size: 50,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            animationDuration: const Duration(milliseconds: 0),
+                            cursorColor: ColorManager.cyan,
+                            textStyle: const TextStyle(
+                                fontSize: 25,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                            pinTheme: PinTheme(
+                                borderRadius: BorderRadius.circular(7),
+                                fieldHeight: 50,
+                                fieldWidth: 50,
+                                activeColor: ColorManager.cyan,
+                                //activeFillColor: const Color(extraLightBlue),
+                                disabledColor: Colors.grey,
+                                errorBorderColor: Colors.grey,
+                                inactiveColor: Colors.grey,
+                                borderWidth: 1,
+                                shape: PinCodeFieldShape.box,
+                                fieldOuterPadding: const EdgeInsets.only(left: 4, right: 4)),
+                            onChanged: (text) =>
+                                setState(() => mPin = text),
                           ),
-
                           state is SignupError
                               ? state.isPass
                               ? Padding(

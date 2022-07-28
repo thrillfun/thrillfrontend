@@ -64,9 +64,9 @@ class _NotificationsState extends State<Notifications> {
                     child: Row(
                       children: [
                     Container(
-                      height: 70,
-                      width: 70,
-                      padding: const EdgeInsets.all(5),
+                      height: 60,
+                      width: 60,
+                      padding: const EdgeInsets.all(10),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,

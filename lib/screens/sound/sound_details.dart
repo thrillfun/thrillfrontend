@@ -293,8 +293,8 @@ class _SoundDetailsState extends State<SoundDetails> {
       }
       setState((){});
     } catch(e){
-      showErrorToast(context, e.toString());
       Navigator.pop(context);
+      showErrorToast(context, e.toString());
     }
   }
 }

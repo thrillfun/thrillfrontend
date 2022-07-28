@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import '../screens/auth/login.dart';
 import 'app_logs.dart';
 
-
 class RestClient {
   static Future getData(String url, {Map<String, String>? headers}) async {
     var result;

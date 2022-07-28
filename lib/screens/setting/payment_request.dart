@@ -251,7 +251,7 @@ class _PaymentRequestState extends State<PaymentRequest> {
   }
 
   void loadWalletInfo() async {
-    //try {
+    try {
       var result = await RestApi.getCommissionSetting();
       var json = jsonDecode(result.body);
       var arrayList = jsonDecode(json['data'][0]['value']);
@@ -269,9 +269,10 @@ class _PaymentRequestState extends State<PaymentRequest> {
       feeCtr.text = '${adminCommission.toString()}% fees';
       isLoading = false;
       setState(() {});
-    // } catch (e) {
-    //   isLoading = false;
-    //   setState(() {});
-    // }
+    } catch (e) {
+      isLoading = false;
+      showErrorToast(context, e.toString());
+      setState(() {});
+    }
   }
 }

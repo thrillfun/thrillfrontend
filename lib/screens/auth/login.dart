@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -29,15 +30,20 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailCtr = TextEditingController();
 
+  final TextEditingController emailCtr = TextEditingController();
   String mPin="";
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: ()async{
-        return widget.isMultiLogin==null?false:true;
+        if(widget.isMultiLogin==null){
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+          return false;
+        } else {
+          return true;
+        }
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -146,20 +152,32 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 const Padding(padding: EdgeInsets.symmetric(vertical: 4),
                                     child: Text("M-PIN")),
-                                VxPinView(
-                                  count: 4,
+                                PinCodeTextField(
+                                  appContext: context,
+                                  length: 4,
                                   obscureText: true,
-                                  space:28,
-                                  type: VxPinBorderType.round,
                                   keyboardType: TextInputType.number,
-                                  fill: false,
-                                  color: Colors.grey,
-                                  contentColor: Colors.black,
-                                  onChanged: (txt){
-                                    mPin = txt;
-                                  },
-                                  radius: 7,
-                                  size: 50,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  animationDuration: const Duration(milliseconds: 0),
+                                  cursorColor: ColorManager.cyan,
+                                  textStyle: const TextStyle(
+                                      fontSize: 25,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                  pinTheme: PinTheme(
+                                      borderRadius: BorderRadius.circular(7),
+                                      fieldHeight: 50,
+                                      fieldWidth: 50,
+                                      activeColor: ColorManager.cyan,
+                                      //activeFillColor: const Color(extraLightBlue),
+                                      disabledColor: Colors.grey,
+                                      errorBorderColor: Colors.grey,
+                                      inactiveColor: Colors.grey,
+                                      borderWidth: 1,
+                                      shape: PinCodeFieldShape.box,
+                                      fieldOuterPadding: const EdgeInsets.only(left: 14, right: 14)),
+                                  onChanged: (text) =>
+                                      setState(() => mPin = text),
                                 ),
                                 state is OnError
                                     ? state.isPass

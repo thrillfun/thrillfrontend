@@ -1,10 +1,11 @@
 import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/common/strings.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/discover.dart';
@@ -27,7 +28,6 @@ class BottomNavigation extends StatefulWidget {
   State<BottomNavigation> createState() => _BottomNavigationState();
 
   static const String routeName = '/';
-
   static Route route({Map? map}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
@@ -70,6 +70,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
           });
           return false;
         }else {
+          showExitDialog();
           return false;
         }
       },
@@ -304,59 +305,118 @@ class _BottomNavigationState extends State<BottomNavigation> {
   }
 
   showPromotionalPopup()async{
-    String imgPath = '';
-    var response = await RestApi.getSiteSettings();
-    var json = jsonDecode(response.body);
-    if(json['status']){
-      List jsonList = json['data'];
-      for(var el in jsonList){
-        if(el['name']=='advertisement_image'){
-          imgPath = el['value']??'';
-          break;
+    var instance = await SharedPreferences.getInstance();
+    var loginData = instance.getString('currentUser');
+    if(loginData!=null){
+      String imgPath = '';
+      var response = await RestApi.getSiteSettings();
+      var json = jsonDecode(response.body);
+      if(json['status']){
+        List jsonList = json['data'];
+        for(var el in jsonList){
+          if(el['name']=='advertisement_image'){
+            imgPath = el['value']??'';
+            break;
+          }
         }
       }
-    }
-    await Future.delayed(const Duration(seconds: 4));
-    if(imgPath.isNotEmpty){
-      showDialog(context: navigatorKey.currentContext!, builder: (_)=>Material(
-        type: MaterialType.transparency,
-        child: Center(
-          child: Container(
-            height: getHeight(navigatorKey.currentContext!)*.90,
-            width: getWidth(navigatorKey.currentContext!)*.90,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.black, width: 2)
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  left: 2, right: 2, bottom: 2, top: 2,
-                  child: CachedNetworkImage(
-                    fit: BoxFit.contain,
-                    imageUrl: "${RestUrl.profileUrl}$imgPath",
-                    placeholder: (a,b)=>const Center(child: CircularProgressIndicator(),),
-                  ),
-                ),
-                Positioned(
-                  top: -10,
-                  right: -10,
-                  child: GestureDetector(
-                    onTap: (){Navigator.pop(navigatorKey.currentContext!);},
-                    child: VxCircle(
-                      radius: 30,
-                      backgroundColor: Colors.red,
-                      child: const Icon(Icons.close, color: Colors.white,),
+      await Future.delayed(const Duration(seconds: 4));
+      if(imgPath.isNotEmpty){
+        showDialog(context: navigatorKey.currentContext!, builder: (_)=>Material(
+          type: MaterialType.transparency,
+          child: Center(
+            child: Container(
+              height: getHeight(navigatorKey.currentContext!)*.90,
+              width: getWidth(navigatorKey.currentContext!)*.90,
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.black, width: 2)
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: 2, right: 2, bottom: 2, top: 2,
+                    child: CachedNetworkImage(
+                      fit: BoxFit.contain,
+                      imageUrl: "${RestUrl.profileUrl}$imgPath",
+                      placeholder: (a,b)=>const Center(child: CircularProgressIndicator(),),
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    top: -10,
+                    right: -10,
+                    child: GestureDetector(
+                      onTap: (){Navigator.pop(navigatorKey.currentContext!);},
+                      child: VxCircle(
+                        radius: 30,
+                        backgroundColor: Colors.red,
+                        child: const Icon(Icons.close, color: Colors.white,),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ));
+        ));
+      }
     }
+  }
+
+  showExitDialog(){
+    showDialog(context: context, builder: (_)=> Center(
+      child: Material(
+        type: MaterialType.transparency,
+        child: Container(
+          width: getWidth(context)*.80,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10)
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Text(exitDialog, style: Theme.of(context).textTheme.headline3,),
+              ),
+              const SizedBox(height: 15,),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                          primary: Colors.red,
+                          fixedSize: Size(getWidth(context)*.26, 40),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                      ),
+                      child: const Text(no)
+                  ),
+                  const SizedBox(width: 15,),
+                  ElevatedButton(
+                      onPressed: (){
+                        SystemNavigator.pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                          primary: Colors.green,
+                          fixedSize: Size(getWidth(context)*.26, 40),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                      ),
+                      child: const Text(yes)
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    )
+    );
   }
 }

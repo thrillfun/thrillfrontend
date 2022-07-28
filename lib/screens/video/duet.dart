@@ -23,7 +23,6 @@ class RecordDuet extends StatefulWidget {
   State<RecordDuet> createState() => _RecordDuetState();
 
   static const String routeName = '/recordDuet';
-
   static Route route(VideoModel v) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
