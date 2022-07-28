@@ -926,8 +926,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     Flexible(
                                       child:
                                       state.list[index].sound_name.isEmpty
-                                          ? "Original Sound".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
-                                          : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
+                                          ? "Original Sound by @${state.list[index].user.username}".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
+                                          : "${state.list[index].sound_name} by @${state.list[index].user.username}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
+                                          //: "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                     ),
                                   ],
                                 ),
@@ -941,7 +942,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     if(state.list[index].sound.isNotEmpty){
                                       reelsPlayerController?.pause();
                                       shouldAutoPlayReel = false;
-                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name, "soundName": state.list[index].sound_name});
                                       reelsPlayerController?.play();
                                       shouldAutoPlayReel = true;
                                     }
@@ -1379,12 +1380,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
   }
 
   showAlertDialog(BuildContext context) {
-    reelsPlayerController?.play();
     Widget continueButton = TextButton(
       child: const Text("OK"),
       onPressed: () async {
         Navigator.pop(context);
         reelsPlayerController?.pause();
+        reelsPlayerController?.setVolume(0);
+        shouldAutoPlayReel = false;
+        reelsPlayerController?.dispose();
+        reelsPlayerController = null;
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
     );

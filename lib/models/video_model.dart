@@ -7,6 +7,8 @@ class VideoModel {
   UserModel user;
   String speed;
   List hashtags;
+  String is_duet;
+  String duet_from;
 
   VideoModel(
       this.id,
@@ -19,7 +21,7 @@ class VideoModel {
       this.gif_image,
       this.sound,
       this.sound_name,
-      this.sound_category_name,this.views,this.speed,this.hashtags);
+      this.sound_category_name,this.views,this.speed,this.hashtags,this.is_duet,this.duet_from);
 
   factory VideoModel.fromJson(dynamic json) {
     UserModel users;
@@ -37,7 +39,10 @@ class VideoModel {
         json['sound_name'] ?? '',
         json['sound_category_name'] ?? '',json['views'] ?? 0,
         json['speed'] ?? '1',
-        json['hashtags'] ?? []);
+        json['hashtags'] ?? [],
+        json['is_duet'] ?? "No",
+        json['duet_from'] ?? "",
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -56,6 +61,8 @@ class VideoModel {
     data['views'] = views;
     data['speed'] = speed;
     data['hashtags'] = hashtags;
+    data['is_duet'] = is_duet;
+    data['duet_from'] = duet_from;
     return data;
   }
 
@@ -73,7 +80,9 @@ class VideoModel {
         String? sound_category_name,
         int? views,
         String? speed,
-        List? hashtags
+        List? hashtags,
+        String? is_duet,
+        String? duet_from
       }) {
     return VideoModel(
         id ?? this.id,
@@ -89,7 +98,9 @@ class VideoModel {
         this.sound_category_name,
       views ?? this.views,
         this.speed,
-        this.hashtags
+        this.hashtags,
+      this.is_duet,
+      this.duet_from,
     );
   }
 }

@@ -230,7 +230,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text("Are you sure you want to logout?",
-                              style: Theme.of(context).textTheme.headline3,
+                              style: Theme.of(context).textTheme.headline4,
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 5,),

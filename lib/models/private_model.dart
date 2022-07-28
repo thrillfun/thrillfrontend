@@ -8,6 +8,8 @@ class PrivateModel {
   UserModel user;
   String speed;
   List<String> hashtags;
+  String is_duet;
+  String duet_from;
 
   PrivateModel(
       this.id,
@@ -19,7 +21,7 @@ class PrivateModel {
       this.filter,
       this.gif_image,
       this.sound_name,
-      this.sound_category_name,this.views, this.speed, this.hashtags);
+      this.sound_category_name,this.views, this.speed, this.hashtags, this.is_duet, this.duet_from);
 
   factory PrivateModel.fromJson(dynamic json) {
     UserModel users;
@@ -37,6 +39,8 @@ class PrivateModel {
         json['sound_category_name'] ?? '',json['views'] ?? 0,
         json['speed'] ?? '1',
         json['hashtags'] ?? [],
+        json['is_duet'] ?? "No",
+        json['duet_from'] ?? "",
     );
   }
 
@@ -55,6 +59,8 @@ class PrivateModel {
     data['views'] = views;
     data['speed'] = speed;
     data['hashtags'] = hashtags;
+    data['is_duet'] = is_duet;
+    data['duet_from'] = duet_from;
     return data;
   }
 }

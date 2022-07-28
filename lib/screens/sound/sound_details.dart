@@ -33,6 +33,7 @@ class _SoundDetailsState extends State<SoundDetails> {
 
   @override
   void initState(){
+    if(widget.map['soundName']!=null) title = widget.map['soundName'];
     super.initState();
     getVideos();
   }
@@ -286,11 +287,6 @@ class _SoundDetailsState extends State<SoundDetails> {
       var json = jsonDecode(response.body);
       List jsonList = json["data"];
       videoList = jsonList.map((e) => VideoModel.fromJson(e)).toList();
-      try{
-        title = json["data"]["name"]??'';
-      } catch(e){
-        title = '';
-      }
       setState((){});
     } catch(e){
       Navigator.pop(context);
