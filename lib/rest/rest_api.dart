@@ -520,11 +520,9 @@ class RestApi {
         'Authorization': 'Bearer $token',
       },
     );
-
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
-
     return response;
   }
 
@@ -573,11 +571,9 @@ class RestApi {
         'action': action.toString(),
       },
     );
-
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
-
     return response;
   }
 
@@ -594,9 +590,9 @@ class RestApi {
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
-
     return response;
   }
+
   static Future<http.Response> deactiveAccount() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
@@ -668,9 +664,9 @@ class RestApi {
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
-
     return response;
   }
+
   static Future<http.Response> getUserPublicVideo() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
@@ -686,20 +682,18 @@ class RestApi {
         'user_id': user.id.toString(),
       },
     );
-
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
-
     return response;
   }
+
   static Future<http.Response> getUserLikedVideo({int? userID}) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var loginData=instance.getString('currentUser');
     UserModel user=UserModel.fromJson(jsonDecode(loginData!));
-
     var result = await RestClient.postData(
       RestUrl.userLikedVideo,
       headers: {
@@ -709,13 +703,12 @@ class RestApi {
         'user_id': userID==null?user.id.toString():userID.toString(),
       }
     );
-
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
-
     return response;
   }
+
   static Future<http.Response> getUserPrivateVideo() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
@@ -734,6 +727,7 @@ class RestApi {
 
     return response;
   }
+
   static Future<http.Response> getHashtagList() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
@@ -761,7 +755,7 @@ class RestApi {
       },
     );
     response = http.Response(jsonEncode(result), 200,headers: {
-      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
     });
 
     return response;
@@ -1044,6 +1038,42 @@ class RestApi {
       body: {
         'other_user_id': otherUserId,
         'message': message
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> saveSafetyPreference(String type, String change) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.safetyPreference,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'type': type,
+        'action': change
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> getSafetyPreference() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.getData(
+      RestUrl.safetyPreference,
+      headers: {
+        'Authorization': 'Bearer $token',
       },
     );
     response = http.Response(jsonEncode(result), 200,headers: {

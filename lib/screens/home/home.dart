@@ -505,6 +505,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                   )):
               PageView.builder(
                   //controller: preloadPageController,
+                controller: _pageController,
                   onPageChanged: (int index){
                     if(adIndexes.contains(index)){
                       showAd();
@@ -525,6 +526,8 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                       pageIndex: index,
                       filter: state.list[index].filter,
                       videoId: state.list[index].id,
+                      pageController: _pageController,
+                      pagesLength: state.list.length,
                       callback: ()async{
                         await isLogined().then((value) async {
                           if (value) {
@@ -567,7 +570,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                       },
                     ),
                     Positioned(
-                      bottom: 120,
+                      bottom: 70,
                       right: 10,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -705,8 +708,8 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               },
                               child: SvgPicture.asset(
                                 'assets/comment.svg',
-                                height: 26,
-                                width: 26,
+                                height: 22,
+                                width: 22,
                               )),
                           Text(
                             state.list[index].comments.toString(),
@@ -733,11 +736,11 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               },
                               child: SvgPicture.asset(
                                 'assets/duet.svg',
-                                height: 30,
-                                width: 30,
+                                height: 25,
+                                width: 25,
                               )),
                           const SizedBox(
-                            height: 18,
+                            height: 20,
                           ),
                           GestureDetector(
                             onTap: () async {
@@ -745,8 +748,8 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                             },
                             child: SvgPicture.asset(
                               'assets/share.svg',
-                              height: 22,
-                              width: 22,
+                              height: 16,
+                              width: 16,
                             ),
                           ),
                           const SizedBox(

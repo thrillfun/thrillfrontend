@@ -1,9 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:thrill/rest/rest_api.dart';
-
 import '../../common/color.dart';
 import '../../common/strings.dart';
 
@@ -24,13 +22,13 @@ class PushNotification extends StatefulWidget {
 }
 
 class _PushNotificationState extends State<PushNotification> {
+
   bool likesSwitch = true;
   bool commentsSwitch = true;
   bool newFollowerSwitch = true;
   bool mentionSwitch = true;
   bool followerVideoSwitch = true;
   bool directMessageSwitch = true;
-
   bool isLoading = true;
 
   @override
@@ -77,6 +75,7 @@ class _PushNotificationState extends State<PushNotification> {
                     onToggle: (bool value) {
                       setState(() {
                         likesSwitch = value;
+                        changeSetting('likes', value?1:0);
                       });
                     },
                     width: 45,
@@ -107,6 +106,7 @@ class _PushNotificationState extends State<PushNotification> {
                     onToggle: (bool value) {
                       setState(() {
                         commentsSwitch = value;
+                        changeSetting('comments', value?1:0);
                       });
                     },
                     width: 45,
@@ -137,6 +137,7 @@ class _PushNotificationState extends State<PushNotification> {
                     onToggle: (bool value) {
                       setState(() {
                         newFollowerSwitch = value;
+                        changeSetting('new_followers', value?1:0);
                       });
                     },
                     width: 45,
@@ -167,6 +168,7 @@ class _PushNotificationState extends State<PushNotification> {
                     onToggle: (bool value) {
                       setState(() {
                         mentionSwitch = value;
+                        changeSetting('mentions', value?1:0);
                       });
                     },
                     width: 45,
@@ -206,6 +208,7 @@ class _PushNotificationState extends State<PushNotification> {
                     onToggle: (bool value) {
                       setState(() {
                         directMessageSwitch = value;
+                        changeSetting('direct_messages', value?1:0);
                       });
                     },
                     width: 45,
@@ -245,6 +248,7 @@ class _PushNotificationState extends State<PushNotification> {
                     onToggle: (bool value) {
                       setState(() {
                         followerVideoSwitch = value;
+                        changeSetting('video_from_accounts_you_follow', value?1:0);
                       });
                     },
                     width: 45,

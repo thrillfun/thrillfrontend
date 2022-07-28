@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../common/color.dart';
@@ -108,20 +109,32 @@ class _OtpVerificationState extends State<OtpVerification> {
                       const SizedBox(
                         height: 35,
                       ),
-                      VxPinView(
-                        count: 4,
+                      PinCodeTextField(
+                        appContext: context,
+                        length: 4,
                         obscureText: true,
-                        space:15,
-                        type: VxPinBorderType.round,
                         keyboardType: TextInputType.number,
-                        fill: false,
-                        color: Colors.grey,
-                        contentColor: Colors.black,
-                        onChanged: (txt) {
-                          setState(()=>otp = txt);
-                        },
-                        radius: 7,
-                        size: 50,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        animationDuration: const Duration(milliseconds: 0),
+                        cursorColor: ColorManager.cyan,
+                        textStyle: const TextStyle(
+                            fontSize: 25,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
+                        pinTheme: PinTheme(
+                            borderRadius: BorderRadius.circular(7),
+                            fieldHeight: 50,
+                            fieldWidth: 50,
+                            activeColor: ColorManager.cyan,
+                            //activeFillColor: const Color(extraLightBlue),
+                            disabledColor: Colors.grey,
+                            errorBorderColor: Colors.grey,
+                            inactiveColor: Colors.grey,
+                            borderWidth: 1,
+                            shape: PinCodeFieldShape.box,
+                            fieldOuterPadding: const EdgeInsets.only(left: 8, right: 8)),
+                        onChanged: (text) =>
+                            setState(() => otp = text),
                       ),
                       const SizedBox(height: 20,),
                       Row(

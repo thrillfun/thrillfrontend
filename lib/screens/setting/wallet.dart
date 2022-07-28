@@ -194,7 +194,7 @@ class _WalletState extends State<Wallet> {
                   child: Center(
                     child: Text(
                       walletBalance.symbol,
-                      style: const TextStyle(fontSize: 17),
+                      style: const TextStyle(fontSize: 15),
                     ),
                   ),
                 ),
