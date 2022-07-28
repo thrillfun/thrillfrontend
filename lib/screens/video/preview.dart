@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full/return_code.dart';
+import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_min_gpl/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/core.dart';
@@ -62,129 +62,131 @@ class _PreviewState extends State<Preview> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        shadowColor: Colors.transparent,
-        shape: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
-        centerTitle: true,
-        title: const Text(
-          "Preview",
-          style: TextStyle(color: Colors.black),
-        ),
-        leading: IconButton(
-            onPressed: () {
-              // isProcessing?
-              // showErrorToast(context, "Please wait while video processing..."):
-              Navigator.pop(context);
-            },
-            color: Colors.black,
-            icon: const Icon(Icons.arrow_back_ios)),
-      ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: VideoPlayer(videoPlayerController),
+    return WillPopScope(
+      onWillPop: ()async{
+        showCloseDialog();
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
+          centerTitle: true,
+          title: const Text(
+            "Editing",
+            style: TextStyle(color: Colors.black),
           ),
-          Positioned(
-              bottom: 10,
-              child: ElevatedButton(
-                  onPressed:
-                  rangeController.end-rangeController.start<15?
-                  null:rangeController.end-rangeController.start>60?null:continuePressed,
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: Size(getWidth(context)*.60, 45),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25)
+          leading: IconButton(
+              onPressed: () {
+                showCloseDialog();
+              },
+              color: Colors.black,
+              icon: const Icon(Icons.arrow_back_ios)),
+        ),
+        body: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: VideoPlayer(videoPlayerController),
+            ),
+            Positioned(
+              bottom: 70,
+                left: 5, right: 5,
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 1
                     )
                   ),
-                  child: const Text("Continue")
-              )),
-          Positioned(
-            bottom: 70,
-              left: 5, right: 5,
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 1
-                  )
-                ),
-                child: thumbList.isEmpty?
-                Center(child: Text("Loading Preview...", style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.white),)):
-                ListView.builder(
-                  itemCount: thumbList.length,
-                  scrollDirection: Axis.horizontal,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                        width: MediaQuery.of(context).size.width/thumbList.length,
-                        child: Image.file(File(thumbList[index].path),fit: BoxFit.fill,));
-                  },
-                ),
-              )
-          ),
-          Positioned(
-            bottom: 45,
-              left:-20,right: -20,
-              child: isVidInit?SfRangeSelector(
-                max: videoPlayerController.value.duration.inSeconds,
-                min: 0,
-                initialValues: sfRangeValues,
-                activeColor: Colors.transparent,
-                startThumbIcon: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
-                ),
-                endThumbIcon: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
-                ),
-                onChanged: (SfRangeValues val){
-                  setState(() {});
-                },
-                controller: rangeController,
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: ColorManager.cyan,
-                          width: 2.5
-                      )
+                  child: thumbList.isEmpty?
+                  Center(child: Text("Loading Preview...", style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.white),)):
+                  ListView.builder(
+                    itemCount: thumbList.length,
+                    scrollDirection: Axis.horizontal,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return SizedBox(
+                          width: MediaQuery.of(context).size.width/thumbList.length,
+                          child: Image.file(File(thumbList[index].path),fit: BoxFit.fill,));
+                    },
                   ),
-                  height: 50,
-                ),
-              ):const SizedBox()
-          ),
-          Positioned(
-            top: 100, left: 30, right: 30,
-              child: Text(
-                rangeController.end-rangeController.start<15?
-                  "Error: Minimum video duration is\n15 seconds!":
-                rangeController.end-rangeController.start>60?
-                "Error: Maximum video duration is\n60 seconds!":"",
-                style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.red),
-                textAlign: TextAlign.center,
-              )),
+                )
+            ),
+            Positioned(
+              bottom: 45,
+                left:-20,right: -20,
+                child: isVidInit?SfRangeSelector(
+                  max: videoPlayerController.value.duration.inSeconds,
+                  min: 0,
+                  initialValues: sfRangeValues,
+                  activeColor: Colors.transparent,
+                  startThumbIcon: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
+                  ),
+                  endThumbIcon: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
+                  ),
+                  onChanged: (SfRangeValues val){
+                    setState(() {});
+                  },
+                  controller: rangeController,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: ColorManager.cyan,
+                            width: 2.5
+                        )
+                    ),
+                    height: 50,
+                  ),
+                ):const SizedBox()
+            ),
+            Positioned(
+                bottom: 10,
+                child: ElevatedButton(
+                    onPressed: continuePressed,
+                    style: ElevatedButton.styleFrom(
+                        fixedSize: Size(getWidth(context)*.60, 45),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25)
+                        )
+                    ),
+                    child: const Text("Continue")
+                )),
+            // Positioned(
+            //   top: 100, left: 30, right: 30,
+            //     child: Text(
+            //       rangeController.end-rangeController.start<15?
+            //         "Error: Minimum video duration is\n15 seconds!":
+            //       rangeController.end-rangeController.start>60?
+            //       "Error: Maximum video duration is\n60 seconds!":"",
+            //       style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.red),
+            //       textAlign: TextAlign.center,
+            //     )),
 
-          Positioned(
-            bottom: 130,
-              left: 10,
-              right: 10,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(getStartDuration(), style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.white),),
-                  Text(getEndDuration(), style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.white),),
-                ],
-              )
-          )
-        ],
+            Positioned(
+              bottom: 130,
+                left: 10,
+                right: 10,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(getStartDuration(), style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.white),),
+                    Text(getEndDuration(), style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.white),),
+                  ],
+                )
+            )
+          ],
+        ),
+
       ),
-
     );
   }
 
@@ -198,23 +200,23 @@ class _PreviewState extends State<Preview> {
     }
     FFmpegKit.execute("-i ${widget.data.filePath} -r $frameRate -f image2 ${outputPath}image-%3d.png").then((session) async {
       final returnCode = await session.getReturnCode();
-      final logs = await session.getLogsAsString();
-      final logList = logs.split('\n');
-      print("============================> LOG STARTED!!!!");
-      for(var e in logList){
-        print(e);
-      }
-      print("============================> LOG ENDED!!!!");
+      // final logs = await session.getLogsAsString();
+      // final logList = logs.split('\n');
+      // print("============================> LOG STARTED!!!!");
+      // for(var e in logList){
+      //   print(e);
+      // }
+      //print("============================> LOG ENDED!!!!");
 
       if (ReturnCode.isSuccess(returnCode)) {
         //MediaInformationSession info = await FFprobeKit.getMediaInformation(outputPath);
         //Map? _gifInfo = info.getMediaInformation()?.getAllProperties()?["streams"][0];
-        print("============================> Success!!!!");
+        //print("============================> Success!!!!");
         setState((){
           thumbList.addAll(directory.listSync());
         });
       } else {
-        print("============================> Failed!!!!");
+        //print("============================> Failed!!!!");
         setState((){
         });
       }
@@ -224,12 +226,18 @@ class _PreviewState extends State<Preview> {
   continuePressed()async{
     videoPlayerController.pause();
     PostData newPostData = PostData(
+        speed: widget.data.speed,
         filePath: widget.data.filePath,
         filterName: widget.data.filterName,
         addSoundModel: widget.data.addSoundModel,
-        map: {"start": rangeController.start.toInt().toInt(), "end":rangeController.end.toInt()}
+        isDuet: false,
+        map: rangeController.end-rangeController.start<15?
+        {"start": 0, "end": 15}:
+        rangeController.end-rangeController.start>60?
+        {"start": 0, "end": 60}:
+        {"start": rangeController.start.toInt(), "end": rangeController.end.toInt()}
     );
-    await Navigator.pushNamed(context, "/postVideo",arguments: newPostData);
+    await Navigator.pushNamed(context, "/postVideo", arguments: newPostData);
     videoPlayerController.play();
   }
   String getStartDuration(){
@@ -251,5 +259,64 @@ class _PreviewState extends State<Preview> {
       string = duration.toString().substring(2, 7);
     }
     return string;
+  }
+  showCloseDialog(){
+    showDialog(context: context, builder: (_)=> Center(
+      child: Material(
+        type: MaterialType.transparency,
+        child: Container(
+          width: getWidth(context)*.80,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10)
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Text(closeDialog, style: Theme.of(context).textTheme.headline3, textAlign: TextAlign.center,),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 35),
+                child: Text(discardDialog, style: Theme.of(context).textTheme.headline4!.copyWith(fontWeight: FontWeight.normal), textAlign: TextAlign.center,),
+              ),
+              const SizedBox(height: 15,),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                          primary: Colors.red,
+                          fixedSize: Size(getWidth(context)*.26, 40),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                      ),
+                      child: const Text(no)
+                  ),
+                  const SizedBox(width: 15,),
+                  ElevatedButton(
+                      onPressed: (){
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                          primary: Colors.green,
+                          fixedSize: Size(getWidth(context)*.26, 40),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                      ),
+                      child: const Text(yes)
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    )
+    );
   }
 }

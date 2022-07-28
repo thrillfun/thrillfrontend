@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:thrill/models/banner_model.dart';
+import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
@@ -24,6 +25,7 @@ class _DiscoverState extends State<Discover> {
 
   List<BannerModel> bannerList = List<BannerModel>.empty(growable: true);
   List<DiscoverVideo> videoList = List<DiscoverVideo>.empty(growable: true);
+  List<VideoModel> videoModelList = List<VideoModel>.empty(growable: true);
 
   @override
   void initState() {
@@ -193,21 +195,19 @@ class _DiscoverState extends State<Discover> {
       var bannerResult = await RestApi.getDiscoverBanner();
       var json = jsonDecode(bannerResult.body);
       bannerList.clear();
-      bannerList =
-          List<BannerModel>.from(json.map((i) => BannerModel.fromJson(i)))
-              .toList(growable: true);
-
+      bannerList = List<BannerModel>.from(json.map((i) => BannerModel.fromJson(i))).toList(growable: true);
       var videoResult = await RestApi.getVideoWithHash();
       var jsonResult = jsonDecode(videoResult.body);
       videoList.clear();
-      videoList = List<DiscoverVideo>.from(
-              jsonResult['data'].map((i) => DiscoverVideo.fromJson(i)))
-          .toList(growable: true);
-
+      videoList = List<DiscoverVideo>.from(jsonResult['data'].map((i) => DiscoverVideo.fromJson(i))).toList(growable: true);
+      //final List vList = jsonResult['data']['videos'] as List;
+      //videoModelList = List<VideoModel>.from(jsonResult['data'].map((i) => VideoModel.fromJson(i))).toList(growable: true);
       setState(() {
         isLoading = false;
       });
-    } catch (_) {}
+    } catch (e) {
+      //print(e.toString());
+    }
   }
 
   Widget listWidget(DiscoverVideo discoverVideo, int index) {
@@ -265,15 +265,22 @@ class _DiscoverState extends State<Discover> {
             itemCount: discoverVideo.hashVideo.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (BuildContext context2, int index2) {
-              return Container(
-                margin: const EdgeInsets.all(2),
-                width: 112,
-                child: CachedNetworkImage(
-                  fit: BoxFit.cover,
-                  imageUrl:
-                  discoverVideo.hashVideo[index2].gif_image.isEmpty
-                  ? '${RestUrl.thambUrl}thumb-not-available.png'
-                  : '${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}',
+              return GestureDetector(
+                onTap: (){
+                   Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': discoverVideo.videoModel[index2]});
+                },
+                child: Container(
+                  margin: const EdgeInsets.all(2),
+                  padding: const EdgeInsets.only(left: 5),
+                  width: 120,
+                  child: imgNet('${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}'),
+                  // CachedNetworkImage(
+                  //   fit: BoxFit.cover,
+                  //   imageUrl:
+                  //   discoverVideo.hashVideo[index2].gif_image.isEmpty
+                  //   ? '${RestUrl.thambUrl}thumb-not-available.png'
+                  //   : '${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}',
+                  // ),
                 ),
               );
             },

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +11,6 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
 import '../../utils/util.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class QrCode extends StatefulWidget {
   const QrCode({Key? key}) : super(key: key);
@@ -30,10 +30,7 @@ class QrCode extends StatefulWidget {
 class _QrCodeState extends State<QrCode> {
 
   String qrData = "";
-  bool isScanning = false;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? qrViewController;
-  Barcode? barcode;
   UserModel? userModel;
 
   @override
@@ -44,17 +41,7 @@ class _QrCodeState extends State<QrCode> {
 
   @override
   void dispose() {
-    qrViewController?.dispose();
     super.dispose();
-  }
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      qrViewController?.pauseCamera();
-    }
-    qrViewController?.resumeCamera();
   }
 
   @override
@@ -72,46 +59,12 @@ class _QrCodeState extends State<QrCode> {
         backgroundColor: ColorManager.deepPurple,
         leading: IconButton(
             onPressed: () {
-              isScanning?
-              setState(() {
-                isScanning = false;
-                qrViewController?.pauseCamera();
-              }):
               Navigator.pop(context);
             },
             color: Colors.white,
             icon: const Icon(Icons.arrow_back_ios)),
       ),
-      body: isScanning?
-          scanningView():
-          qrView(),
-    );
-  }
-  Widget scanningView(){
-    return SizedBox(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: QRView(
-          key: qrKey,
-          overlay: QrScannerOverlayShape(),
-          onQRViewCreated: (QRViewController controller) {
-            qrViewController = controller;
-            controller.scannedDataStream.listen((scanData) {
-              if(scanData.code!=null){
-                setState(() {
-                  barcode = scanData;
-                  isScanning = false;
-                  qrViewController?.pauseCamera();
-                  if(scanData.code!.contains("Thrill")){
-                    Navigator.pushNamed(context, "/viewProfile",
-                        arguments: {"id":scanData.code!.split(':').last.split('\n').first, "getProfile":true});
-                  } else {
-                    popUpDialog();
-                  }
-                });
-              }
-            });
-          }),
+      body: qrView(),
     );
   }
   Widget qrView(){
@@ -201,11 +154,20 @@ class _QrCodeState extends State<QrCode> {
                   ),
                 )),
             InkWell(
-                onTap: () {
-                  setState(() {
-                    isScanning = true;
-                    qrViewController?.resumeCamera();
-                  });
+                onTap: () async {
+                  String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode("#ff6666", "Cancel", true, ScanMode.QR);
+                  if(barcodeScanRes.isNotEmpty && barcodeScanRes!='-1'){
+                    try{
+                      if(barcodeScanRes.contains("Thrill")){
+                        Navigator.pushNamed(context, "/viewProfile",
+                            arguments: {"id":int.parse(barcodeScanRes.split(':')[1].split('\n').first), "getProfile":true});
+                      } else {
+                        popUpDialog(barcodeScanRes);
+                      }
+                    } catch(e){
+                      popUpDialog(barcodeScanRes);
+                    }
+                  }
                 },
                 borderRadius: BorderRadius.circular(10),
                 splashColor: Colors.white.withOpacity(0.50),
@@ -264,7 +226,7 @@ class _QrCodeState extends State<QrCode> {
       showErrorToast(context, "Failed to Save QR Code");
     }
   }
-  popUpDialog(){
+  popUpDialog(String txt){
     showDialog(context: context, builder: (_)=> Center(
       child: Container(
         width: MediaQuery.of(context).size.width*.75,
@@ -284,7 +246,7 @@ class _QrCodeState extends State<QrCode> {
                 ),
               ),
               const Spacer(flex: 1,),
-              Text("${barcode?.code}", textAlign: TextAlign.center,),
+              Text(txt, textAlign: TextAlign.center,),
               const Spacer(flex: 3,),
             ],
           ),
@@ -298,7 +260,20 @@ class _QrCodeState extends State<QrCode> {
     UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
     setState(() {
       userModel = current;
-      qrData = "Thrill User ID :${userModel?.id}\nProfile: www.thrill.com/user";
+      qrData = "Thrill User ID :${userModel?.id}\nProfile: www.google.com";
     });
+  }
+  Widget qr(){
+    return Center(
+      child: ElevatedButton(
+        onPressed: () async {
+          String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode("#ff6666", "Cancel", true, ScanMode.QR);
+          showDialog(context: context, builder: (_)=>Material(
+            child: Center(child: Text(barcodeScanRes)),
+          ));
+        },
+        child: const Text("scan"),
+      ),
+    );
   }
 }

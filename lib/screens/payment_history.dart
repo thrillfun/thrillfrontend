@@ -53,7 +53,7 @@ class _PaymentHistoryState extends State<PaymentHistory> {
       body: isLoading?
       const Center(child: CircularProgressIndicator(),):
       paymentHistoryList.isEmpty?
-      Center(child: Text("Payment History Not Found!", style: Theme.of(context).textTheme.headline3,),):
+      Center(child: Text("Withdraw History Not Found!", style: Theme.of(context).textTheme.headline3,),):
       ListView.builder(
           shrinkWrap: true,
           itemCount: paymentHistoryList.length,
@@ -150,7 +150,6 @@ class _PaymentHistoryState extends State<PaymentHistory> {
       isLoading = false;
       setState((){});
     } catch(e){
-      print(e.toString());
       setState(()=>isLoading = false);
     }
   }

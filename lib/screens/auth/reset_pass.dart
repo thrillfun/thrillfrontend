@@ -4,11 +4,10 @@ import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../common/color.dart';
-import '../../common/strings.dart';
 import '../../utils/util.dart';
 
-class ResetPasswordScreen extends StatelessWidget {
-  ResetPasswordScreen({Key? key, required this.phone}) : super(key: key);
+class ResetPasswordScreen extends StatefulWidget {
+  const ResetPasswordScreen({Key? key, required this.phone}) : super(key: key);
 
   static const String routeName = '/resetPass';
   final String phone;
@@ -22,6 +21,11 @@ class ResetPasswordScreen extends StatelessWidget {
     );
   }
 
+  @override
+  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+}
+
+class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   String mPin = "", cPin = "";
 
   @override
@@ -44,7 +48,6 @@ class ResetPasswordScreen extends StatelessWidget {
           }
         },
         child: BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
-          print(state);
           return SafeArea(
             child: Container(
               height: getHeight(context),
@@ -174,7 +177,7 @@ class ResetPasswordScreen extends StatelessWidget {
                               FocusScope.of(context).requestFocus(FocusNode());
                               BlocProvider.of<LoginBloc>(context).add(
                                   PassValidation(
-                                      phone: phone, confirm: cPin, pass: mPin));
+                                      phone: widget.phone, confirm: cPin, pass: mPin));
                             },
                             style: ElevatedButton.styleFrom(
                                 fixedSize: Size(getWidth(context) - 80, 55),

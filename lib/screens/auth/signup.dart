@@ -1,42 +1,59 @@
+import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
 import 'package:velocity_x/velocity_x.dart';
-
 import '../../common/color.dart';
 import '../../common/strings.dart';
+import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
-class SignUp extends StatelessWidget {
+class SignUp extends StatefulWidget {
   static const String routeName = '/Signup';
 
-  SignUp({Key? key}) : super(key: key);
+  const SignUp({Key? key}) : super(key: key);
 
   static Route route() {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
       builder: (context) => BlocProvider(
         create: (context) => SignupBloc(loginRepository: LoginRepository()),
-        child: SignUp(),
+        child: const SignUp(),
       ),
     );
   }
+
+  @override
+  State<SignUp> createState() => _SignUpState();
+}
+
+class _SignUpState extends State<SignUp> {
 
   TextEditingController nameCtr = TextEditingController();
   TextEditingController phoneCtr = TextEditingController();
   TextEditingController dobCtr = TextEditingController();
   DateTime selectedDate = DateTime.now();
-
   String mPin="";
+  late DateTime initDate = DateTime(
+    selectedDate.year - 13,
+    selectedDate.month,
+    selectedDate.day,
+    selectedDate.hour,
+    selectedDate.minute,
+    selectedDate.second,
+    selectedDate.millisecond,
+    selectedDate.microsecond,
+  );
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        Navigator.pushReplacementNamed(context, '/login');
         return false;
       },
       child: BlocListener<SignupBloc, SignupState>(
@@ -131,7 +148,7 @@ class SignUp extends StatelessWidget {
                           TextFormField(
                             controller: phoneCtr,
                             maxLength: 10,
-                            keyboardType: TextInputType.name,
+                            keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                                 counterText: '',
@@ -163,7 +180,9 @@ class SignUp extends StatelessWidget {
                             onTap: () async {
                               String? bday = await _selectDate(context);
                               if (bday != null) {
-                                dobCtr.text = bday.split(' ').first;
+                                if(bday.isNotEmpty && bday!='null'){
+                                  dobCtr.text = bday.split(' ').first;
+                                }
                               }
                             },
                             decoration: InputDecoration(
@@ -190,21 +209,33 @@ class SignUp extends StatelessWidget {
                           ),
                           const Padding(padding: EdgeInsets.symmetric(vertical: 3),
                           child: Text("M-PIN")),
-                          VxPinView(
-                            count: 4,
+                          PinCodeTextField(
+                            appContext: context,
+                            length: 4,
                             obscureText: true,
-                            type: VxPinBorderType.round,
                             keyboardType: TextInputType.number,
-                            fill: false,
-                            color: Colors.grey,
-                            contentColor: Colors.black,
-                            onChanged: (txt){
-                              mPin = txt;
-                            },
-                            radius: 7,
-                            size: 50,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            animationDuration: const Duration(milliseconds: 0),
+                            cursorColor: ColorManager.cyan,
+                            textStyle: const TextStyle(
+                                fontSize: 25,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                            pinTheme: PinTheme(
+                                borderRadius: BorderRadius.circular(7),
+                                fieldHeight: 50,
+                                fieldWidth: 50,
+                                activeColor: ColorManager.cyan,
+                                //activeFillColor: const Color(extraLightBlue),
+                                disabledColor: Colors.grey,
+                                errorBorderColor: Colors.grey,
+                                inactiveColor: Colors.grey,
+                                borderWidth: 1,
+                                shape: PinCodeFieldShape.box,
+                                fieldOuterPadding: const EdgeInsets.only(left: 4, right: 4)),
+                            onChanged: (text) =>
+                                setState(() => mPin = text),
                           ),
-
                           state is SignupError
                               ? state.isPass
                               ? Padding(
@@ -217,14 +248,25 @@ class SignUp extends StatelessWidget {
                             height: 40,
                           ),
                           ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               FocusScope.of(context).requestFocus(FocusNode());
-                              BlocProvider.of<SignupBloc>(context).add(
-                                  SignupValidation(
-                                      dob: dobCtr.text,
-                                      password: mPin,
-                                      fullName: nameCtr.text,
-                                      mobile: phoneCtr.text));
+                              if(nameCtr.text.isNotEmpty){
+                                if(phoneCtr.text.isNotEmpty && phoneCtr.text.length==10){
+                                  if(dobCtr.text.isNotEmpty){
+                                    if(mPin.isNotEmpty && mPin.length==4){
+                                      sendOTP();
+                                    } else {
+                                      showErrorToast(context, "M-PIN must be 4 digit");
+                                    }
+                                  } else {
+                                    showErrorToast(context, "DOB Required");
+                                  }
+                                } else {
+                                  showErrorToast(context, "Invalid or Empty Mobile Number");
+                                }
+                              } else {
+                                showErrorToast(context, "Full Name Required");
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                                 fixedSize: Size(getWidth(context) * .80, 55),
@@ -337,10 +379,44 @@ class SignUp extends StatelessWidget {
   Future<String?> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: selectedDate,
+        initialDate: initDate,
         firstDate: DateTime(1922, 8),
         helpText: "Choose Your Birthday",
-        lastDate: selectedDate);
+        lastDate: initDate);
     return picked.toString();
+  }
+
+  sendOTP()async{
+    try{
+      progressDialogue(context);
+      var response = await RestApi.sendOTP(phoneCtr.text);
+      var json = jsonDecode(response.body);
+      closeDialogue(context);
+      if(json['status']){
+        await Navigator.pushNamed(context, '/otpVerification', arguments: phoneCtr.text).then((value){
+          if(value!=null){
+            bool isSuccess = value as bool;
+            if(isSuccess){
+              BlocProvider.of<SignupBloc>(context).add(
+                  SignupValidation(
+                      dob: dobCtr.text,
+                      password: mPin,
+                      fullName: nameCtr.text,
+                      mobile: phoneCtr.text));
+            } else {
+              showErrorToast(context, "OTP Verification Failed!");
+            }
+          } else {
+            showErrorToast(context, "OTP Verification Canceled!");
+          }
+        });
+        showSuccessToast(context, "OTP Sent Successfully");
+      } else {
+        showErrorToast(context, json['message'].toString());
+      }
+    } catch(e){
+      closeDialogue(context);
+      showErrorToast(context, e.toString());
+    }
   }
 }

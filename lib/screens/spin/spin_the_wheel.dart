@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -436,8 +435,8 @@ class _SpinTheWheelState extends State<SpinTheWheel>
         isLoading = false;
       });
     } catch (e) {
-      showErrorToast(context, e.toString());
       Navigator.pop(context);
+      showErrorToast(context, e.toString());
     }
   }
 
@@ -535,7 +534,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                         thumbShape: SliderComponentShape.noThumb,
                         trackHeight: 3),
                     child: Slider(
-                        max: 100,
+                        max: 110,
                         min: 0,
                         value: double.parse(earnModel.current_level) * 10,
                         activeColor: ColorManager.cyan,

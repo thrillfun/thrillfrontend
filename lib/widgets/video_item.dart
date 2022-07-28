@@ -9,6 +9,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../rest/rest_url.dart';
 
 VideoPlayerController? reelsPlayerController;
+bool shouldAutoPlayReel = true;
 
 class VideoPlayerItem extends StatefulWidget {
   final String videoUrl, filter;
@@ -16,7 +17,10 @@ class VideoPlayerItem extends StatefulWidget {
   final int currentPageIndex;
   final bool isPaused;
   final int videoId;
+  final int pagesLength;
   final VoidCallback? callback;
+  final String speed;
+  final PageController pageController;
 
   const VideoPlayerItem(
       {Key? key,
@@ -26,6 +30,9 @@ class VideoPlayerItem extends StatefulWidget {
       required this.isPaused,
       required this.filter,
       required this.videoId,
+      required this.speed,
+      required this.pageController,
+      required this.pagesLength,
         this.callback})
       : super(key: key);
 
@@ -40,22 +47,32 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   bool isDispose= false;
   Timer? _timer;
   int _start = 40;
+  bool isBuffering = false;
 
   @override
   void initState() {
     super.initState();
+    reelsPlayerController?.pause();
       reelsPlayerController = VideoPlayerController.network(
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
           if (reelsPlayerController!.value.isInitialized) {
-            if (!showGIF) reelsPlayerController!.play();
+            reelsPlayerController!.setPlaybackSpeed(widget.speed.contains('x')?double.parse(widget.speed.replaceAll('x', '')):double.parse(widget.speed));
+            if (shouldAutoPlayReel) reelsPlayerController!.play();
             reelsPlayerController!.setLooping(true);
             reelsPlayerController!.setVolume(1);
             initialized = true;
             showGIF = true;
-            _start = reelsPlayerController!.value.duration.inSeconds~/2;
+            _start = reelsPlayerController!.value.duration.inSeconds;
             startTimer();
             if (mounted) setState(() {});
+            reelsPlayerController?.addListener(() {
+              if(reelsPlayerController!.value.isBuffering){
+                if (mounted) setState(()=>isBuffering = true);
+              } else {
+                if (mounted && isBuffering && !reelsPlayerController!.value.isBuffering) setState(()=>isBuffering = false);
+              }
+            });
           }
         });
 
@@ -76,13 +93,14 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
       var loginData=instance.getString('currentUser');
       if(loginData !=null){
         _timer = Timer.periodic(
-          oneSec,
-              (Timer timer) {
-            if (_start == 0) {
+          oneSec, (Timer timer) {
+            if(reelsPlayerController?.value.isPlaying??false){
+              if (_start == 0) {
+                callViewApi();
                 timer.cancel();
-              callViewApi();
-            } else {
+              } else {
                 _start--;
+              }
             }
           },
         );
@@ -92,13 +110,13 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.pageIndex == widget.currentPageIndex &&
-        !widget.isPaused &&
-        initialized) {
-      reelsPlayerController!.play();
-    } else {
-      reelsPlayerController!.pause();
-    }
+    // if (widget.pageIndex == widget.currentPageIndex &&
+    //     !widget.isPaused &&
+    //     initialized) {
+    //   if (!reelsPlayerController!.value.isPlaying) reelsPlayerController!.play();
+    // } else {
+    //   reelsPlayerController!.pause();
+    // }
     return VisibilityDetector(
       onVisibilityChanged: _handleVisibilityDetector,
       key: Key('my-widget-${widget.pageIndex}'),
@@ -139,7 +157,21 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       icon: const Icon(Icons.volume_off,color: Colors.white,size: 40,),
                       onPressed: ()=> reelsPlayerController!.setVolume(1).then((value) => setState((){})),
                     ),
-                  ))
+                  )),
+              Visibility(
+                visible: isBuffering,
+                child: Center(
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                        text: TextSpan(children: [
+                          const WidgetSpan(child: CircularProgressIndicator()),
+                          TextSpan(text: '\n\nBuffering', style: Theme.of(context).textTheme.headline3!.copyWith(
+                            shadows: [const Shadow(color: Colors.white, offset: Offset(0,0), blurRadius: 30)]
+                          ))
+                        ])
+                    )
+                ),
+              ),
             ],
           ),
         ),
@@ -151,17 +183,17 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     double d=info.visibleFraction*100;
     print(d);
     if(mounted){
-      reelsPlayerController!.pause();
-      if (d < 60) {
-        reelsPlayerController!.pause();
-        if (initialized &&
-            widget.pageIndex == widget.currentPageIndex &&
-            !widget.isPaused) {
-          reelsPlayerController!.pause();
-        }
-      } else {
-        reelsPlayerController!.play();
-      }
+      // reelsPlayerController!.pause();
+      // if (d < 60) {
+      //   reelsPlayerController!.pause();
+      //   if (initialized &&
+      //       widget.pageIndex == widget.currentPageIndex &&
+      //       !widget.isPaused) {
+      //     reelsPlayerController!.pause();
+      //   }
+      // } else {
+      //   reelsPlayerController!.play();
+      // }
     }
   }
 
@@ -176,18 +208,29 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
         viewList.add(widget.videoId.toString());
         pref.setStringList('viewList', viewList);
         setState(() {});
+        try{
+          widget.pagesLength-1==widget.pageIndex?
+          widget.pageController.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
+          widget.pageController.animateToPage(widget.pageIndex+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
+        } catch(_){}
       }
+    } else {
+      try{
+        widget.pagesLength-1==widget.pageIndex?
+        widget.pageController.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
+        widget.pageController.animateToPage(widget.pageIndex+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
+      } catch(_){}
     }
   }
 
   onLongPressStart(LongPressStartDetails d)async{
     setState((){showGIF = false;});
-    await Future.delayed(const Duration(milliseconds: 250));
-    reelsPlayerController!.pause();
+    reelsPlayerController?.pause();
   }
 
   onLongPressEnd(LongPressEndDetails d){
     setState((){showGIF = true;});
+    reelsPlayerController?.play();
   }
 
   onTap(){

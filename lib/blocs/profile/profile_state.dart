@@ -23,14 +23,14 @@ class ValidationStatus extends ProfileState {
 }
 
 class ProfileLoaded extends ProfileState {
-  UserModel userModel;
-  String message;
-  bool status;
-  List<PrivateModel> likesList;
-  List<PrivateModel> privateList;
-  List<PrivateModel> publicList;
+  final UserModel userModel;
+  final String message;
+  final bool status;
+  final List<VideoModel> likesList;
+  final List<VideoModel> privateList;
+  final List<VideoModel> publicList;
 
-  ProfileLoaded({required this.userModel,required this.likesList,required this.privateList,required this.publicList,required this.status, required this.message});
+  const ProfileLoaded({required this.userModel,required this.likesList,required this.privateList,required this.publicList,required this.status, required this.message});
 
 
   @override

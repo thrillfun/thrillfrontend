@@ -1,10 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
@@ -83,7 +81,7 @@ class SplashScreenState extends State<SplashScreen> {
       } else {
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       }
-    } on Exception catch (e) {
+    } on Exception {
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
   }

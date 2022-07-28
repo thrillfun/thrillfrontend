@@ -41,7 +41,9 @@ class LoginRepository extends BaseLoginRepository {
       var result = await RestApi.updateProfile(fname, lname, imageFile, username, gender, webUrl, bio,list);
       var json = jsonDecode(result.body);
       return json;
-    } catch (_) {}
+    } catch (e) {
+      print(e.toString());
+    }
     return null;
   }
 

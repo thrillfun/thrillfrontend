@@ -8,6 +8,7 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
+import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import '../../common/strings.dart';
 import '../../models/comment_model.dart';
@@ -18,16 +19,17 @@ import '../../widgets/image_rotate.dart';
 import '../../widgets/video_item.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+int selectedTopIndex = 1;
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({Key? key, this.vModel}) : super(key: key);
+  final VideoModel? vModel;
 
   @override
   State<Home> createState() => HomeState();
 }
 
-class HomeState extends State<Home> {
+class HomeState extends State<Home> with WidgetsBindingObserver{
 
-  int selectedTopIndex = 0;
   List<String> likeList = List<String>.empty(growable: true);
   List<Comments> commentList = List<Comments>.empty(growable: true);
   List<String> likeComment = List<String>.empty(growable: true);
@@ -46,14 +48,20 @@ class HomeState extends State<Home> {
 
   @override
   void initState() {
+    shouldAutoPlayReel = true;
     loadInterstitialAd();
     loadLikes();
     getUserData();
     _pageController.addListener(_scrollListener);
     preloadPageController = PreloadPageController();
     preloadPageController!.addListener(scrollListener);
-    interstitialAd?.dispose();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    interstitialAd?.dispose();
+    super.dispose();
   }
 
   @override
@@ -65,19 +73,11 @@ class HomeState extends State<Home> {
           child: CircularProgressIndicator(color: Colors.lightBlueAccent),
         );
       } else if (state is VideoLoded) {
-        if (state.list.isEmpty) {
-          return Container(
-              decoration: const BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage('assets/splash.png'))),
-              child:  Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                ),
-              ));
-        } else {
+        if(widget.vModel!=null){
+          if(state.list[0].id!=widget.vModel!.id){
+            state.list.insert(0, widget.vModel!);
+          }
+        }
           return Stack(
             children:[
              /* PageView.builder(
@@ -493,17 +493,26 @@ class HomeState extends State<Home> {
                     ],
                   );
                 }),*/
-
-              PreloadPageView.builder(
-                  controller: preloadPageController,
+              state.list.isEmpty?
+              Container(
+                  decoration: const BoxDecoration(
+                      image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: AssetImage('assets/splash.png'))),
+                  child:  Center(
+                    child:  Text("No ${selectedTopIndex==0?"Following":selectedTopIndex==1?"Related":"Popular"} Videos Found!",
+                      style: const TextStyle(color: Colors.white, fontSize: 14),),
+                  )):
+              PageView.builder(
+                  //controller: preloadPageController,
+                controller: _pageController,
                   onPageChanged: (int index){
                     if(adIndexes.contains(index)){
-                      print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                       showAd();
                     }
-                    },
+                  },
                   scrollDirection: Axis.vertical,
-                  preloadPagesCount: 3,
+                  //preloadPagesCount: 3,
                   itemCount: state.list.length, //Notice this
               itemBuilder: (BuildContext context, int index) {
                 return Stack(
@@ -511,11 +520,14 @@ class HomeState extends State<Home> {
                   children: [
                     VideoPlayerItem(
                       videoUrl: state.list[index].video,
+                      speed: state.list[index].speed,
                       isPaused: _isOnPageTurning,
                       currentPageIndex: current,
                       pageIndex: index,
                       filter: state.list[index].filter,
                       videoId: state.list[index].id,
+                      pageController: _pageController,
+                      pagesLength: state.list.length,
                       callback: ()async{
                         await isLogined().then((value) async {
                           if (value) {
@@ -558,7 +570,7 @@ class HomeState extends State<Home> {
                       },
                     ),
                     Positioned(
-                      bottom: 120,
+                      bottom: 70,
                       right: 10,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -569,13 +581,23 @@ class HomeState extends State<Home> {
                             children: [
                               GestureDetector(
                                 onTap: () async {
-                                  await isLogined().then((value) {
+                                  await isLogined().then((value) async {
                                     if (value) {
-                                      Navigator.pushNamed(
-                                          context, "/viewProfile", arguments: {
-                                        "userModel": state.list[index].user,
-                                        "getProfile": false
-                                      });
+                                      if(userModel?.id==state.list[index].user.id){
+                                        reelsPlayerController?.pause();
+                                        shouldAutoPlayReel = false;
+                                        Navigator.pushReplacementNamed(context, '/', arguments: {'index' : 3});
+                                      } else {
+                                        reelsPlayerController?.pause();
+                                        shouldAutoPlayReel = false;
+                                        await Navigator.pushNamed(
+                                            context, "/viewProfile", arguments: {
+                                          "userModel": state.list[index].user,
+                                          "getProfile": false
+                                        });
+                                        reelsPlayerController?.play();
+                                        shouldAutoPlayReel = true;
+                                      }
                                     } else {
                                       showAlertDialog(context);
                                     }
@@ -686,8 +708,8 @@ class HomeState extends State<Home> {
                               },
                               child: SvgPicture.asset(
                                 'assets/comment.svg',
-                                height: 26,
-                                width: 26,
+                                height: 22,
+                                width: 22,
                               )),
                           Text(
                             state.list[index].comments.toString(),
@@ -699,14 +721,26 @@ class HomeState extends State<Home> {
                             height: 18,
                           ),
                           GestureDetector(
-                              onTap: () async {},
+                              onTap: () async {
+                                await isLogined().then((value) async {
+                                  if (value) {
+                                    reelsPlayerController?.pause();
+                                    shouldAutoPlayReel = false;
+                                    await Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
+                                    reelsPlayerController?.play();
+                                    shouldAutoPlayReel = true;
+                                  } else {
+                                    showAlertDialog(context);
+                                  }
+                                });
+                              },
                               child: SvgPicture.asset(
                                 'assets/duet.svg',
-                                height: 30,
-                                width: 30,
+                                height: 25,
+                                width: 25,
                               )),
                           const SizedBox(
-                            height: 18,
+                            height: 20,
                           ),
                           GestureDetector(
                             onTap: () async {
@@ -714,8 +748,8 @@ class HomeState extends State<Home> {
                             },
                             child: SvgPicture.asset(
                               'assets/share.svg',
-                              height: 22,
-                              width: 22,
+                              height: 16,
+                              width: 16,
                             ),
                           ),
                           const SizedBox(
@@ -750,13 +784,23 @@ class HomeState extends State<Home> {
                                   children: [
                                     GestureDetector(
                                       onTap: () async {
-                                        await isLogined().then((value) {
+                                        await isLogined().then((value) async {
                                           if (value) {
-                                            Navigator.pushNamed(
-                                                context, "/viewProfile", arguments: {
-                                              "userModel": state.list[index].user,
-                                              "getProfile": false
-                                            });
+                                            if(userModel?.id==state.list[index].user.id){
+                                              reelsPlayerController?.pause();
+                                              shouldAutoPlayReel = false;
+                                              Navigator.pushReplacementNamed(context, '/', arguments: {'index':3});
+                                            } else {
+                                              reelsPlayerController?.pause();
+                                              shouldAutoPlayReel = false;
+                                              await Navigator.pushNamed(
+                                                  context, "/viewProfile", arguments: {
+                                                "userModel": state.list[index].user,
+                                                "getProfile": false
+                                              });
+                                              reelsPlayerController?.play();
+                                              shouldAutoPlayReel = true;
+                                            }
                                           } else {
                                             showAlertDialog(context);
                                           }
@@ -859,13 +903,13 @@ class HomeState extends State<Home> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
+                                      getHashTagsToShow(state.list[index].hashtags)+
                                       state.list[index].description,
                                       style: Theme.of(context)
                                           .textTheme
                                           .headline6!
                                           .copyWith(color: Colors.white),
                                     ),
-
                                   ],
                                 ),
                                 const SizedBox(
@@ -892,10 +936,14 @@ class HomeState extends State<Home> {
                           ),
                           GestureDetector(
                               onTap:() async {
-                                await isLogined().then((value) {
+                                await isLogined().then((value) async {
                                   if (value) {
                                     if(state.list[index].sound.isNotEmpty){
-                                      Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                      reelsPlayerController?.pause();
+                                      shouldAutoPlayReel = false;
+                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                      reelsPlayerController?.play();
+                                      shouldAutoPlayReel = true;
                                     }
                                   } else {
                                     showAlertDialog(context);
@@ -911,10 +959,6 @@ class HomeState extends State<Home> {
               }
               ),
 
-
-
-
-
               Positioned(
                 top: 30,
                 left: 0,
@@ -926,7 +970,10 @@ class HomeState extends State<Home> {
                     TextButton(
                         onPressed: () {
                           setState(() {
+                            reelsPlayerController?.pause();
                             selectedTopIndex = 0;
+                            BlocProvider.of<VideoBloc>(context).add(
+                                VideoLoading(selectedTabIndex: selectedTopIndex));
                           });
                         },
                         child: Text(
@@ -948,7 +995,10 @@ class HomeState extends State<Home> {
                     TextButton(
                         onPressed: () {
                           setState(() {
+                            reelsPlayerController?.pause();
                             selectedTopIndex = 1;
+                            BlocProvider.of<VideoBloc>(context).add(
+                                VideoLoading(selectedTabIndex: selectedTopIndex));
                           });
                         },
                         child: Text(
@@ -970,7 +1020,10 @@ class HomeState extends State<Home> {
                     TextButton(
                         onPressed: () {
                           setState(() {
+                            reelsPlayerController?.pause();
                             selectedTopIndex = 2;
+                            BlocProvider.of<VideoBloc>(context).add(
+                                VideoLoading(selectedTabIndex: selectedTopIndex));
                           });
                         },
                         child: Text(
@@ -987,8 +1040,10 @@ class HomeState extends State<Home> {
                           await isLogined().then((value) async {
                             if (value) {
                               reelsPlayerController?.pause();
+                              shouldAutoPlayReel = false;
                               await Navigator.pushNamed(context, "/record");
                               reelsPlayerController?.play();
+                              shouldAutoPlayReel = true;
                             } else {
                               showAlertDialog(context);
                             }
@@ -1004,7 +1059,7 @@ class HomeState extends State<Home> {
               ),
             ]
           );
-        }
+        //}
       }
       return Container();
     }));
@@ -1170,17 +1225,17 @@ class HomeState extends State<Home> {
                                                     ? const Icon(
                                                         Icons.favorite,
                                                         color: Colors.red,
-                                                        size: 28,
+                                                        size: 23,
                                                       )
                                                     : const Icon(
                                                         Icons
                                                             .favorite_border_outlined,
                                                         color: Colors.grey,
-                                                        size: 28,
+                                                        size: 23,
                                                       ),
                                               ),
                                               Text(
-                                                  '${commentList[index].comment_like_counter}')
+                                                  ' ${commentList[index].comment_like_counter}')
                                             ],
                                           )
                                         ],
@@ -1324,10 +1379,12 @@ class HomeState extends State<Home> {
   }
 
   showAlertDialog(BuildContext context) {
+    reelsPlayerController?.play();
     Widget continueButton = TextButton(
       child: const Text("OK"),
       onPressed: () async {
         Navigator.pop(context);
+        reelsPlayerController?.pause();
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
     );
@@ -1389,6 +1446,26 @@ class HomeState extends State<Home> {
             loadInterstitialAd();
           });
       interstitialAd!.show();
+    }
+  }
+
+  String getHashTagsToShow(List hashList){
+    String hashTags = "";
+    try{
+      if(hashList.isEmpty){
+        return hashTags;
+      } else {
+        if(hashList.length>=2){
+          hashTags += "#${hashList.first} ";
+          hashTags += "#${hashList[1]}\n";
+          return hashTags;
+        } else {
+          hashTags += "#${hashList.first}\n";
+          return hashTags;
+        }
+      }
+    } catch(e){
+      return "";
     }
   }
 }

@@ -6,6 +6,8 @@ class PrivateModel {
   String video, description, filter, gif_image, sound_name, sound_category_name;
   int likes,views;
   UserModel user;
+  String speed;
+  List<String> hashtags;
 
   PrivateModel(
       this.id,
@@ -17,7 +19,7 @@ class PrivateModel {
       this.filter,
       this.gif_image,
       this.sound_name,
-      this.sound_category_name,this.views);
+      this.sound_category_name,this.views, this.speed, this.hashtags);
 
   factory PrivateModel.fromJson(dynamic json) {
     UserModel users;
@@ -32,7 +34,10 @@ class PrivateModel {
         json['filter'] ?? '',
         json['gif_image'] ?? '',
         json['sound_name'] ?? '',
-        json['sound_category_name'] ?? '',json['views'] ?? 0);
+        json['sound_category_name'] ?? '',json['views'] ?? 0,
+        json['speed'] ?? '1',
+        json['hashtags'] ?? [],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -48,6 +53,8 @@ class PrivateModel {
     data['sound_name'] = sound_name;
     data['sound_category_name'] = sound_category_name;
     data['views'] = views;
+    data['speed'] = speed;
+    data['hashtags'] = hashtags;
     return data;
   }
 }

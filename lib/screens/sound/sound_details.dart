@@ -7,9 +7,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
-import '../common/color.dart';
-import '../common/strings.dart';
-import '../rest/rest_url.dart';
+import '../../common/color.dart';
+import '../../common/strings.dart';
+import '../../rest/rest_url.dart';
 
 class SoundDetails extends StatefulWidget {
   const SoundDetails({Key? key, required this.map}) : super(key: key);
@@ -118,47 +118,52 @@ class _SoundDetailsState extends State<SoundDetails> {
                     mainAxisSpacing: 1.8),
                 itemCount: videoList.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      CachedNetworkImage(
-                          placeholder: (a, b) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          fit: BoxFit.cover,
-                          imageUrl:videoList[index].gif_image.isEmpty
-                              ? '${RestUrl.thambUrl}thumb-not-available.png'
-                              : '${RestUrl.gifUrl}${videoList[index].gif_image}'),
-                      Positioned(
-                          bottom: 5,
-                          left: 5,
-                          right: 5,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              const Icon(
-                                Icons.visibility,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                videoList[index].views.toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                              const Icon(
-                                Icons.favorite,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                videoList[index].likes.toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                            ],
-                          ))
-                    ],
+                  return GestureDetector(
+                    onTap: (){
+                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': videoList[index]});
+                    },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CachedNetworkImage(
+                            placeholder: (a, b) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            fit: BoxFit.cover,
+                            imageUrl:videoList[index].gif_image.isEmpty
+                                ? '${RestUrl.thambUrl}thumb-not-available.png'
+                                : '${RestUrl.gifUrl}${videoList[index].gif_image}'),
+                        Positioned(
+                            bottom: 5,
+                            left: 5,
+                            right: 5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                const Icon(
+                                  Icons.visibility,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  videoList[index].views.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                                const Icon(
+                                  Icons.favorite,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  videoList[index].likes.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                              ],
+                            ))
+                      ],
+                    ),
                   );
                 }),
           ),
@@ -229,11 +234,10 @@ class _SoundDetailsState extends State<SoundDetails> {
           ElevatedButton(
               onPressed: () async {
                 String sound = widget.map["sound"];
-                print("$saveCacheDirectory$sound");
                 File file = File('$saveCacheDirectory$sound');
                     try{
                       if(await file.exists()){
-                        Navigator.pushReplacementNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
+                        Navigator.pushNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
                       } else {
                         progressDialogue(context);
                         await FileSupport().downloadCustomLocation(
@@ -244,7 +248,7 @@ class _SoundDetailsState extends State<SoundDetails> {
                           progress: (progress) async {},
                         );
                         closeDialogue(context);
-                        Navigator.pushReplacementNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
+                        Navigator.pushNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
                       }
                     } catch(e){
                       closeDialogue(context);
@@ -280,13 +284,17 @@ class _SoundDetailsState extends State<SoundDetails> {
     try{
       var response = await RestApi.getVideosBySound(widget.map["sound"]);
       var json = jsonDecode(response.body);
-      List jsonList = json["data"]["videos"];
+      List jsonList = json["data"];
       videoList = jsonList.map((e) => VideoModel.fromJson(e)).toList();
-      title = json["data"]["name"]??'';
+      try{
+        title = json["data"]["name"]??'';
+      } catch(e){
+        title = '';
+      }
       setState((){});
     } catch(e){
-      showErrorToast(context, e.toString());
       Navigator.pop(context);
+      showErrorToast(context, e.toString());
     }
   }
 }

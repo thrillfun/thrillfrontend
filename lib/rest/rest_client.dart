@@ -1,12 +1,8 @@
-
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:thrill/utils/util.dart';
 import '../screens/auth/login.dart';
 import 'app_logs.dart';
-
 
 class RestClient {
   static Future getData(String url, {Map<String, String>? headers}) async {
@@ -73,7 +69,7 @@ class RestClient {
                  const String routeName = '/login';
                 MaterialPageRoute(
                   settings: const RouteSettings(name: routeName),
-                  builder: (context) => LoginScreen(),
+                  builder: (context) => const LoginScreen(),
                 );
               });
             }

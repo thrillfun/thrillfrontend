@@ -38,28 +38,29 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+
   String dropDownGender = '';
   TextEditingController controller = TextEditingController();
+  TextEditingController nameCtr = TextEditingController();
   TextEditingController userNameCtr = TextEditingController();
   TextEditingController firstNameCtr = TextEditingController();
   TextEditingController lastNameCtr = TextEditingController();
   TextEditingController websiteCtr = TextEditingController();
   TextEditingController bioCtr = TextEditingController();
-
   File? image;
-
   List<SocialUrlModel> socialList = List<SocialUrlModel>.empty(growable: true);
   List<String> genderList = List<String>.empty(growable: true);
 
   @override
   void initState() {
     setState(() {
+      nameCtr.text = widget.user.name;
       userNameCtr.text = widget.user.username;
       firstNameCtr.text = widget.user.first_name;
       lastNameCtr.text = widget.user.last_name;
       websiteCtr.text = widget.user.website_url;
       bioCtr.text = widget.user.bio;
-      dropDownGender=widget.user.gender;
+      dropDownGender=widget.user.gender.isEmpty?"Male":widget.user.gender;
 
       socialList.add(SocialUrlModel('youtube', widget.user.youtube));
       socialList.add(SocialUrlModel('facebook', widget.user.facebook));
@@ -88,28 +89,6 @@ class _EditProfileState extends State<EditProfile> {
             },
             color: Colors.black,
             icon: const Icon(Icons.arrow_back_ios)),
-        actions: [
-          TextButton(
-              onPressed: () {
-                FocusScope.of(context).requestFocus(FocusNode());
-                BlocProvider.of<ProfileBloc>(context).add(
-                  ProfileValidation(
-                      userNameCtr.text,
-                      firstNameCtr.text,
-                      lastNameCtr.text,
-                      bioCtr.text,
-                      image != null ? image!.path : "",
-                      dropDownGender,
-                      websiteCtr.text,
-                      socialList),
-                );
-              },
-              style: TextButton.styleFrom(primary: ColorManager.cyan),
-              child: const Text(
-                save,
-                style: TextStyle(fontSize: 16),
-              ))
-        ],
       ),
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
@@ -119,7 +98,7 @@ class _EditProfileState extends State<EditProfile> {
             closeDialogue(context);
             if (state.status) {
               showSuccessToast(context, state.message);
-              BlocProvider.of<ProfileBloc>(context).add(ProfileLoading());
+              BlocProvider.of<ProfileBloc>(context).add(const ProfileLoading());
               Future.delayed(const Duration(milliseconds: 150)).then((value) {
                 Navigator.pop(context, "/profile");
               });
@@ -131,210 +110,239 @@ class _EditProfileState extends State<EditProfile> {
         child: BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, state) {
             return SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        pickImage(context);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        height: 111,
-                        width: 111,
-                        decoration:  BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: ColorManager.spinColorDivider),
-                        ),
-                        child: image != null
-                            ? ClipOval(
-                              child: Image.file(
-                                  image!,
-                                  fit: BoxFit.cover,
-                                height: 100,width: 100,
-                                ),
-                            )
-                            : widget.user.avatar.isEmptyOrNull
-                                ? Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: SvgPicture.asset('assets/profile.svg'),
-                                )
-                                : ClipOval(
-                                  child: CachedNetworkImage(
-                                      fit: BoxFit.cover,
-                                      height: 100,width: 100,
-                                      imageUrl:
-                                          '${RestUrl.profileUrl}${widget.user.avatar}',
-                                      placeholder: (a, b) => const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      pickImage(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      height: 111,
+                      width: 111,
+                      decoration:  BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: ColorManager.spinColorDivider),
+                      ),
+                      child: image != null
+                          ? ClipOval(
+                            child: Image.file(
+                                image!,
+                                fit: BoxFit.cover,
+                              height: 100,width: 100,
+                              ),
+                          )
+                          : widget.user.avatar.isEmptyOrNull
+                              ? Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: SvgPicture.asset('assets/profile.svg'),
+                              )
+                              : ClipOval(
+                                child: CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    height: 100,width: 100,
+                                    imageUrl:
+                                        '${RestUrl.profileUrl}${widget.user.avatar}',
+                                    placeholder: (a, b) => const Center(
+                                      child: CircularProgressIndicator(),
                                     ),
-                                ),
-                      ),
+                                  ),
+                              ),
                     ),
-                    const SizedBox(
-                      height: 20,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    maxLength: 30,
+                    controller: userNameCtr,
+                    decoration: InputDecoration(
+                        isDense: true,
+                        constraints:
+                            BoxConstraints(maxWidth: getWidth(context) * .90),
+                        label: const Text(username)),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  TextFormField(
+                    controller: nameCtr,
+                    decoration: InputDecoration(
+                        isDense: true,
+                        constraints:
+                        BoxConstraints(maxWidth: getWidth(context) * .90),
+                        label: const Text(fullName)),
+                  ),
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       child: TextFormField(
+                  //         controller: firstNameCtr,
+                  //         decoration: const InputDecoration(
+                  //             isDense: true, label: Text(firstName)),
+                  //       ),
+                  //     ),
+                  //     const SizedBox(
+                  //       width: 20,
+                  //     ),
+                  //     Expanded(
+                  //       child: TextFormField(
+                  //         controller: lastNameCtr,
+                  //         decoration: const InputDecoration(
+                  //             isDense: true, label: Text(lastName)),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ).w(getWidth(context) * .90),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  DropdownButton(
+                    value:dropDownGender,
+                    style: TextStyle(color: Colors.grey.shade800, fontSize: 17),
+                    isExpanded: true,
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.grey,
+                      size: 35,
                     ),
-                    TextFormField(
-                      maxLength: 30,
-                      controller: userNameCtr,
-                      decoration: InputDecoration(
-                          isDense: true,
-                          constraints:
-                              BoxConstraints(maxWidth: getWidth(context) * .90),
-                          label: const Text(username)),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: firstNameCtr,
-                            decoration: const InputDecoration(
-                                isDense: true, label: Text(firstName)),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        Expanded(
-                          child: TextFormField(
-                            controller: lastNameCtr,
-                            decoration: const InputDecoration(
-                                isDense: true, label: Text(lastName)),
-                          ),
-                        ),
-                      ],
-                    ).w(getWidth(context) * .90),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    DropdownButton(
-                      value:dropDownGender,
-                      style: const TextStyle(color: Colors.grey, fontSize: 17),
-                      isExpanded: true,
-                      icon: const Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.grey,
-                        size: 35,
-                      ),
-                      onChanged: (String? value) {
+                    onChanged: (String? value) {
+                      setState(() {
                         setState(() {
-                          setState(() {
-                            dropDownGender = value!;
-                          });
+                          dropDownGender = value!;
                         });
-                      },
-                      items: genderList.map((String item) {
-                        return DropdownMenuItem(
-                          value: item,
-                          child: Text(item),
-                        );
-                      }).toList(),
-                    ).w(getWidth(context) * .90),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    TextFormField(
-                      controller: websiteCtr,
-                      decoration: InputDecoration(
-                          isDense: true,
-                          constraints:
-                              BoxConstraints(maxWidth: getWidth(context) * .90),
-                          label: const Text(websiteURL)),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    TextFormField(
-                      controller: bioCtr,
-                      minLines: 3,
-                      maxLines: 3,
-                      maxLength: 100,
-                      decoration: InputDecoration(
-                          alignLabelWithHint: true,
-                          constraints:
-                              BoxConstraints(maxWidth: getWidth(context) * .90),
-                          label: const Text(yourBio)),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 25),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          linkSocialAccounts,
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
-                        ),
+                      });
+                    },
+                    items: genderList.map((String item) {
+                      return DropdownMenuItem(
+                        value: item,
+                        child: Text(item),
+                      );
+                    }).toList(),
+                  ).w(getWidth(context) * .90),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  TextFormField(
+                    controller: websiteCtr,
+                    decoration: InputDecoration(
+                        isDense: true,
+                        constraints:
+                            BoxConstraints(maxWidth: getWidth(context) * .90),
+                        label: const Text(websiteURL)),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  TextFormField(
+                    controller: bioCtr,
+                    minLines: 3,
+                    maxLines: 3,
+                    maxLength: 100,
+                    decoration: InputDecoration(
+                        alignLabelWithHint: true,
+                        constraints:
+                            BoxConstraints(maxWidth: getWidth(context) * .90),
+                        label: const Text(yourBio)),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 25),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        linkSocialAccounts,
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      children: [
-                        const SizedBox(
-                          width: 25,
-                        ),
-                        IconButton(
-                          onPressed: () {
-                             linkDialog(linkYouTube, youtubeURL,widget.user.youtube,"youtube");
-                          },
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.only(),
-                          iconSize: 20,
-                          icon: SvgPicture.asset('assets/youtube.svg'),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        IconButton(
-                          onPressed: (){
-                            linkDialog(linkFacebook, facebookURL,widget.user.facebook,"facebook");
-                          },
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.only(),
-                          iconSize: 20,
-                          icon: SvgPicture.asset('assets/facebook.svg'),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        IconButton(
-                          onPressed: (){
-                            linkDialog(linkInstagram, instagramURL,widget.user.instagram,"instagram");
-                          },
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.only(),
-                          iconSize: 20,
-                          icon: SvgPicture.asset('assets/insta.svg'),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        IconButton(
-                          onPressed: (){
-                             linkDialog(linkTwitter, twitterURL,widget.user.twitter,"twitter");
-                          },
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.only(),
-                          iconSize: 20,
-                          icon: SvgPicture.asset('assets/twitter.svg'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 50,
-                    )
-                  ],
-                ),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    children: [
+                      const SizedBox(
+                        width: 25,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                           linkDialog(linkYouTube, youtubeURL,widget.user.youtube,"youtube");
+                        },
+                        constraints: const BoxConstraints(),
+                        padding: const EdgeInsets.only(),
+                        iconSize: 20,
+                        icon: SvgPicture.asset('assets/youtube.svg'),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      IconButton(
+                        onPressed: (){
+                          linkDialog(linkFacebook, facebookURL,widget.user.facebook,"facebook");
+                        },
+                        constraints: const BoxConstraints(),
+                        padding: const EdgeInsets.only(),
+                        iconSize: 20,
+                        icon: SvgPicture.asset('assets/facebook.svg'),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      IconButton(
+                        onPressed: (){
+                          linkDialog(linkInstagram, instagramURL,widget.user.instagram,"instagram");
+                        },
+                        constraints: const BoxConstraints(),
+                        padding: const EdgeInsets.only(),
+                        iconSize: 20,
+                        icon: SvgPicture.asset('assets/insta.svg'),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      IconButton(
+                        onPressed: (){
+                           linkDialog(linkTwitter, twitterURL,widget.user.twitter,"twitter");
+                        },
+                        constraints: const BoxConstraints(),
+                        padding: const EdgeInsets.only(),
+                        iconSize: 20,
+                        icon: SvgPicture.asset('assets/twitter.svg'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 25,),
+                  ElevatedButton(
+                      onPressed: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        BlocProvider.of<ProfileBloc>(context).add(
+                          ProfileValidation(
+                              userNameCtr.text,
+                              firstNameCtr.text,
+                              lastNameCtr.text,
+                              nameCtr.text,
+                              bioCtr.text,
+                              image != null ? image!.path : "",
+                              dropDownGender,
+                              websiteCtr.text,
+                              socialList),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                          primary: ColorManager.cyan,
+                        fixedSize: Size(getWidth(context)*.80, 50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25))
+                      ),
+                      child: Text(
+                        save,
+                        style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.white),
+                      )),
+                  const SizedBox(
+                    height: 50,
+                  )
+                ],
               ),
             );
           },
@@ -409,6 +417,7 @@ class _EditProfileState extends State<EditProfile> {
                                     userNameCtr.text,
                                     firstNameCtr.text,
                                     lastNameCtr.text,
+                                    nameCtr.text,
                                     bioCtr.text,
                                     "",
                                     dropDownGender,
@@ -448,7 +457,8 @@ class _EditProfileState extends State<EditProfile> {
               ).w(getWidth(context) * .90),
             ));
   }
-void setData(String name) {
+
+  void setData(String name) {
   switch (name) {
     case "youtube":
       final tile = socialList.firstWhere(

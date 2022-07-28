@@ -1,13 +1,9 @@
-
 import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
-
 part 'signup_event.dart';
 part 'signup_state.dart';
 
@@ -56,9 +52,9 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       emit( const SignupError(message: "M-PIN must be 4 digit", isPass: true, isDob: false, isName: false, isMobile: false));
     } else {
       emit(SignupValidated());
-      var result = await _loginRepository.registerUser(event.fullName, event.mobile, event.dob, event.password);
-      if(result['status']){
-        try {
+      try {
+        var result = await _loginRepository.registerUser(event.fullName, event.mobile, event.dob, event.password);
+        if(result['status']){
           UserModel user = UserModel.fromJson(result['data']['user']);
           var pref = await SharedPreferences.getInstance();
           await pref.setString('currentUser', jsonEncode(user.toJson()),);
@@ -70,13 +66,12 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
           await pref.setStringList('favSound', favSound);
           await pref.setStringList('favTag', favHastag);
           emit(const SignupSuccess(message: 'success', status: true));
-        }catch(e){
-          emit(SignupSuccess(message: e.toString(), status: false));
+        }else{
+          emit( SignupSuccess(message:result['message'].toString() ,status: false));
         }
-      }else{
-        emit( SignupSuccess(message:result['message'].toString() ,status: false));
+      }catch(e){
+        emit(SignupSuccess(message: e.toString(), status: false));
       }
-
     }
   }
 }

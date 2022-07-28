@@ -1,13 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
+import 'package:thrill/rest/rest_api.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../utils/util.dart';
 
-class ForgotPasswordScreen extends StatelessWidget {
-  ForgotPasswordScreen({Key? key}) : super(key: key);
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({Key? key}) : super(key: key);
 
   static const String routeName = '/forgotPass';
 
@@ -16,11 +19,16 @@ class ForgotPasswordScreen extends StatelessWidget {
       settings: const RouteSettings(name: routeName),
       builder: (context) => BlocProvider(
         create: (context) => LoginBloc(loginRepository: LoginRepository()),
-        child: ForgotPasswordScreen(),
+        child: const ForgotPasswordScreen(),
       ),
     );
   }
 
+  @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   TextEditingController phoneCtr = TextEditingController();
 
   @override
@@ -117,10 +125,15 @@ class ForgotPasswordScreen extends StatelessWidget {
                           ElevatedButton(
                             onPressed: () {
                               FocusScope.of(context).requestFocus(FocusNode());
-                              BlocProvider.of<LoginBloc>(context)
-                                  .add(PhoneValidation(
-                                phone: phoneCtr.text,
-                              ));
+                              if(phoneCtr.text.isNotEmpty){
+                                if(phoneCtr.text.length==10){
+                                  checkAndSendOTP();
+                                } else {
+                                  showErrorToast(context, "Invalid Phone Number");
+                                }
+                              } else {
+                                showErrorToast(context, "Phone Number Required!");
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                                 fixedSize: Size(getWidth(context) - 80, 55),
@@ -147,5 +160,36 @@ class ForgotPasswordScreen extends StatelessWidget {
         }),
       ),
     );
+  }
+
+  checkAndSendOTP()async{
+    try{
+      progressDialogue(context);
+      var response = await RestApi.checkPhone(phoneCtr.text);
+      var json = jsonDecode(response.body);
+      closeDialogue(context);
+      if(json['status']){
+        await Navigator.pushNamed(context, '/otpVerification', arguments: phoneCtr.text).then((value){
+          if(value!=null){
+            bool isSuccess = value as bool;
+            if(isSuccess){
+              BlocProvider.of<LoginBloc>(context)
+                  .add(PhoneValidation(
+                phone: phoneCtr.text,
+              ));
+            } else {
+              showErrorToast(context, "OTP Verification Failed!");
+            }
+          } else {
+            showErrorToast(context, "OTP Verification Canceled!");
+          }
+        });
+      } else {
+        showErrorToast(context, json['message']);
+      }
+    } catch(e){
+      closeDialogue(context);
+      showErrorToast(context, e.toString());
+    }
   }
 }

@@ -1,21 +1,17 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/rest/rest_api.dart';
-import 'package:thrill/rest/rest_client.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
-
 import '../common/strings.dart';
 import '../models/hashtags_model.dart';
 import '../models/vidio_discover_model.dart';
 
 class TagDetails extends StatefulWidget {
-  TagDetails({Key? key, required this.tag}) : super(key: key);
-  DiscoverVideo tag;
+  const TagDetails({Key? key, required this.tag}) : super(key: key);
+  final DiscoverVideo tag;
 
   @override
   State<TagDetails> createState() => _TagDetailsState();
@@ -182,48 +178,53 @@ class _TagDetailsState extends State<TagDetails> {
                               mainAxisSpacing: 1.8),
                       itemCount: widget.tag.hashVideo.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                                placeholder: (a, b) => const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                fit: BoxFit.cover,
-                                imageUrl: widget.tag.hashVideo[index].gif_image.isEmpty
-                                    ? '${RestUrl.thambUrl}thumb-not-available.png'
-                                    : '${RestUrl.gifUrl}${widget.tag.hashVideo[index].gif_image}'),
-                            Positioned(
-                                bottom: 5,
-                                left: 5,
-                                right: 5,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    const Icon(
-                                      Icons.visibility,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    Text(
-                                      widget.tag.hashVideo[index].views.toString(),
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 13),
-                                    ),
-                                    const Icon(
-                                      Icons.favorite,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    Text(
-                                      widget.tag.hashVideo[index].likes.toString(),
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 13),
-                                    ),
-                                  ],
-                                ))
-                          ],
+                        return GestureDetector(
+                          onTap: (){
+                            Navigator.pushNamedAndRemoveUntil(context, '/', (route)=>true, arguments: {'videoModel': widget.tag.videoModel[index]});
+                          },
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CachedNetworkImage(
+                                  placeholder: (a, b) => const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                  fit: BoxFit.cover,
+                                  imageUrl: widget.tag.hashVideo[index].gif_image.isEmpty
+                                      ? '${RestUrl.thambUrl}thumb-not-available.png'
+                                      : '${RestUrl.gifUrl}${widget.tag.hashVideo[index].gif_image}'),
+                              Positioned(
+                                  bottom: 5,
+                                  left: 5,
+                                  right: 5,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      const Icon(
+                                        Icons.visibility,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      Text(
+                                        widget.tag.hashVideo[index].views.toString(),
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 13),
+                                      ),
+                                      const Icon(
+                                        Icons.favorite,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      Text(
+                                        widget.tag.hashVideo[index].likes.toString(),
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 13),
+                                      ),
+                                    ],
+                                  ))
+                            ],
+                          ),
                         );
                       }),
                 )

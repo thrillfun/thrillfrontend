@@ -6,9 +6,9 @@ import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/sound_category_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
-import '../common/color.dart';
-import '../common/strings.dart';
-import '../rest/rest_url.dart';
+import '../../common/color.dart';
+import '../../common/strings.dart';
+import '../../rest/rest_url.dart';
 
 class AddSound extends StatefulWidget {
   const AddSound({Key? key}) : super(key: key);
