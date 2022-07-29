@@ -570,6 +570,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                       },
                     ),
                     Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: SvgPicture.asset(
+                          'assets/shadow.svg',
+                          fit: BoxFit.fill,
+                          width: MediaQuery.of(context).size.width,
+                        )),
+                    Positioned(
                       bottom: 70,
                       right: 10,
                       child: Column(
@@ -700,7 +709,11 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               onTap: () async {
                                 await isLogined().then((value) {
                                   if (value) {
-                                    showComments(context, state.list[index].id);
+                                    if(state.list[index].is_commentable=="Yes"){
+                                      showComments(context, state.list[index].id);
+                                    } else {
+                                      showErrorToast(context, "This user has disabled comments on the video!");
+                                    }
                                   } else {
                                     showAlertDialog(context);
                                   }
@@ -724,11 +737,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               onTap: () async {
                                 await isLogined().then((value) async {
                                   if (value) {
-                                    reelsPlayerController?.pause();
-                                    shouldAutoPlayReel = false;
-                                    await Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
-                                    reelsPlayerController?.play();
-                                    shouldAutoPlayReel = true;
+                                    if(state.list[index].is_duetable=="Yes"){
+                                      reelsPlayerController?.pause();
+                                      shouldAutoPlayReel = false;
+                                      await Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
+                                      reelsPlayerController?.play();
+                                      shouldAutoPlayReel = true;
+                                    } else {
+                                      showErrorToast(context, "This user has disabled duet on the video!");
+                                    }
                                   } else {
                                     showAlertDialog(context);
                                   }
@@ -758,15 +775,6 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                         ],
                       ),
                     ),
-                    Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: SvgPicture.asset(
-                          'assets/shadow.svg',
-                          fit: BoxFit.fill,
-                          width: MediaQuery.of(context).size.width,
-                        )),
                     Positioned(
                       bottom: 10,
                       left: 10,

@@ -697,12 +697,12 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                   Container(
                                     clipBehavior: Clip.antiAliasWithSaveLayer,
                                     height: 90,
+                                    padding: const EdgeInsets.all(2),
                                     width: 90,
                                     decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                            color: ColorManager.spinColorDivider)
-                                    ),
+                                            color: ColorManager.spinColorDivider)),
                                     child: usersModel[index].avatar.isEmpty?
                                     Padding(
                                       padding: const EdgeInsets.all(10.0),
@@ -713,13 +713,16 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         fit: BoxFit.contain,
                                       ),
                                     ):
-                                    CachedNetworkImage(
-                                      fit: BoxFit.cover,
-                                      imageUrl: '${RestUrl.profileUrl}${usersModel[index].avatar}',
-                                      placeholder: (a, b) => const Center(
-                                        child: CircularProgressIndicator(),
+                                    ClipOval(
+                                      child: CachedNetworkImage(
+                                        fit: BoxFit.cover,
+                                        imageUrl:
+                                        '${RestUrl.profileUrl}${usersModel[index].avatar}',
+                                        placeholder: (a, b) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
                                       ),
-                                    ),
+                                    )
                                   ),
                                   const SizedBox(
                                     width: 10,
@@ -814,7 +817,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         Icons.check,
                                         size: 30,
                                         color: ColorManager.cyan,
-                                      ):const Text("Logout", style: TextStyle(fontSize: 15, color: Colors.red, fontWeight: FontWeight.bold),))
+                                      ):const Text("Logout", style: TextStyle(fontSize: 13.5, color: Colors.red, fontWeight: FontWeight.bold),))
                                 ],
                               ),
                             ),

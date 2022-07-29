@@ -192,7 +192,7 @@ class RestApi {
 
   static Future<http.Response> postVideo(String videoUrl,
       String sound,String soundName,String category,String hashtags,String visibility,
-      int isCommentAllowed,String description,String filterImg,String language, String gifName, String speed) async {
+      int isCommentAllowed,String description,String filterImg,String language, String gifName, String speed, bool isDuetable, bool isCommentable) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
@@ -218,7 +218,9 @@ class RestApi {
         'is_comment_allowed':isCommentAllowed.toString(),
         'description':description,
         'gif_image':gifName,
-        'speed': speed
+        'speed': speed,
+        'is_duetable': isDuetable?"Yes":"No",
+        'is_commentable': isCommentable?"Yes":"No",
       },
     );
     response = http.Response(jsonEncode(result), 200,headers: {
@@ -1074,6 +1076,84 @@ class RestApi {
       RestUrl.safetyPreference,
       headers: {
         'Authorization': 'Bearer $token',
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> getFollowerList(int? userId) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.followerList,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'user_id': userId.toString()
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> reportUser(int userId, String reason) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.reportUser,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'reported_user': userId.toString(),
+        'report_reason': reason,
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> checkBlock(int userId) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.checkBlock,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'blocked_user': userId.toString(),
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> blockUnblockUser(int userId, bool block) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.blockUnblockUser,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'blocked_user': userId.toString(),
+        'action': block?"Unblock":"Block"
       },
     );
     response = http.Response(jsonEncode(result), 200,headers: {

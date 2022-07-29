@@ -118,7 +118,7 @@ class _RecordDuetState extends State<RecordDuet> {
                   children: [
                     SizedBox(
                       width: getWidth(context),
-                      height: getHeight(context)*.80,
+                      height: getHeight(context)*.40,
                       child: videoController != null &&
                           videoController!.value.isInitialized
                           ? ClipRRect(
@@ -131,14 +131,16 @@ class _RecordDuetState extends State<RecordDuet> {
                           : Container(),
                     ),
                     isCameraInitialized && _videoFile == null
-                        ? Positioned(
-                      bottom: 0, right: 0,
-                          child: SizedBox(
+                        ? Positioned.fill(
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: SizedBox(
                       //width: getWidth(context),
-                          height: getHeight(context)*.40,
-                          child: AspectRatio(
-                              aspectRatio: 1/controller!.value.aspectRatio,
-                              child: controller!.buildPreview())),
+                            height: getHeight(context)*.40,
+                            child: AspectRatio(
+                                aspectRatio: 1/controller!.value.aspectRatio,
+                                child: controller!.buildPreview())),
+                          ),
                         )
                         : const SizedBox(),
                     Visibility(

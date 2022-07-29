@@ -8,7 +8,7 @@ class VideoModel {
   String speed;
   List hashtags;
   String is_duet;
-  String duet_from;
+  String duet_from, is_duetable, is_commentable;
 
   VideoModel(
       this.id,
@@ -21,7 +21,7 @@ class VideoModel {
       this.gif_image,
       this.sound,
       this.sound_name,
-      this.sound_category_name,this.views,this.speed,this.hashtags,this.is_duet,this.duet_from);
+      this.sound_category_name,this.views,this.speed,this.hashtags,this.is_duet,this.duet_from,this.is_duetable,this.is_commentable);
 
   factory VideoModel.fromJson(dynamic json) {
     UserModel users;
@@ -42,6 +42,8 @@ class VideoModel {
         json['hashtags'] ?? [],
         json['is_duet'] ?? "No",
         json['duet_from'] ?? "",
+        json['is_duetable'] ?? "",
+        json['is_commentable'] ?? "",
     );
   }
 
@@ -63,6 +65,8 @@ class VideoModel {
     data['hashtags'] = hashtags;
     data['is_duet'] = is_duet;
     data['duet_from'] = duet_from;
+    data['is_duetable'] = is_duetable;
+    data['is_commentable'] = is_commentable;
     return data;
   }
 
@@ -82,7 +86,9 @@ class VideoModel {
         String? speed,
         List? hashtags,
         String? is_duet,
-        String? duet_from
+        String? duet_from,
+        String? is_duetable,
+        String? is_commentable,
       }) {
     return VideoModel(
         id ?? this.id,
@@ -101,6 +107,8 @@ class VideoModel {
         this.hashtags,
       this.is_duet,
       this.duet_from,
+      this.is_duetable,
+      this.is_commentable,
     );
   }
 }

@@ -65,6 +65,7 @@ const String hashtags = "#Hashtags";
 const String friends = "@Friends";
 const String whoCanViewThisVideo = "Who can view this video";
 const String public = "Public";
+const String private = "Private";
 const String allowComments = "Allow Comments";
 const String allowDuets = "Allow Duets";
 const String draft = "Draft";

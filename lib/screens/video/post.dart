@@ -51,6 +51,7 @@ class _PostVideoState extends State<PostVideo> {
   List<HashtagModel> hashtagsList = List<HashtagModel>.empty(growable: true);
   List<String> selectedHashtags = List<String>.empty(growable: true);
   TextEditingController hashtagTextFieldController = TextEditingController();
+  bool isPublic = true;
 
   @override
   void initState() {
@@ -505,12 +506,17 @@ class _PostVideoState extends State<PostVideo> {
                           ),
                         ),
                         TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                isPublic =  !isPublic;
+                              });
+                            },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  public,
+                                  isPublic?
+                                  public:private,
                                   style: TextStyle(
                                       color: Colors.grey.shade700, fontSize: 18),
                                 ),
@@ -604,9 +610,55 @@ class _PostVideoState extends State<PostVideo> {
                     const SizedBox(
                       height: 25,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     ElevatedButton(
+                    //         onPressed: () async {
+                    //           try {
+                    //             FocusScope.of(context).requestFocus(FocusNode());
+                    //             videoPlayerController.pause();
+                    //             if (desCtr.text.isEmpty) {
+                    //               showErrorToast(context, "Describe your video");
+                    //             } else {
+                    //               if (dropDownCategoryValue.isEmpty) {
+                    //                 showErrorToast(context, "Select Category");
+                    //               } else {
+                    //                 if (dropDownLanguageValue.isEmpty) {
+                    //                   showErrorToast(context, "Select Language");
+                    //                 } else {
+                    //                   progressDialogue(context);
+                    //                   startProcessing('draft');
+                    //                 }
+                    //               }
+                    //             }
+                    //           } catch (e) {
+                    //             closeDialogue(context);
+                    //             showErrorToast(context, e.toString());
+                    //           }
+                    //         },
+                    //         style: ElevatedButton.styleFrom(
+                    //             primary: ColorManager.deepPurple,
+                    //             fixedSize: Size(
+                    //                 MediaQuery.of(context).size.width * .40, 50),
+                    //             shape: RoundedRectangleBorder(
+                    //                 borderRadius: BorderRadius.circular(50))),
+                    //         child: Row(
+                    //           mainAxisSize: MainAxisSize.min,
+                    //           children: [
+                    //             Image.asset('assets/draft.png'),
+                    //             const SizedBox(
+                    //               width: 10,
+                    //             ),
+                    //             const Text(
+                    //               draft,
+                    //               style: TextStyle(fontSize: 15),
+                    //             )
+                    //           ],
+                    //         )),
+                    //     const SizedBox(
+                    //       width: 15,
+                    //     ),
                         ElevatedButton(
                             onPressed: () async {
                               try {
@@ -622,53 +674,9 @@ class _PostVideoState extends State<PostVideo> {
                                       showErrorToast(context, "Select Language");
                                     } else {
                                       progressDialogue(context);
+                                      isPublic?
+                                      startProcessing('post'):
                                       startProcessing('draft');
-                                    }
-                                  }
-                                }
-                              } catch (e) {
-                                closeDialogue(context);
-                                showErrorToast(context, e.toString());
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                                primary: ColorManager.deepPurple,
-                                fixedSize: Size(
-                                    MediaQuery.of(context).size.width * .40, 50),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50))),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Image.asset('assets/draft.png'),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                const Text(
-                                  draft,
-                                  style: TextStyle(fontSize: 15),
-                                )
-                              ],
-                            )),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        ElevatedButton(
-                            onPressed: () async {
-                              try {
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                videoPlayerController.pause();
-                                if (desCtr.text.isEmpty) {
-                                  showErrorToast(context, "Describe your video");
-                                } else {
-                                  if (dropDownCategoryValue.isEmpty) {
-                                    showErrorToast(context, "Select Category");
-                                  } else {
-                                    if (dropDownLanguageValue.isEmpty) {
-                                      showErrorToast(context, "Select Language");
-                                    } else {
-                                      progressDialogue(context);
-                                      startProcessing('post');
                                     }
                                   }
                                 }
@@ -696,8 +704,8 @@ class _PostVideoState extends State<PostVideo> {
                               ],
                             ))
                       ],
-                    ),
-                  ],
+                  //   ),
+                  // ],
                 ).h(getHeight(context) - kToolbarHeight),
         ),
       ),
@@ -785,7 +793,10 @@ class _PostVideoState extends State<PostVideo> {
                   : widget.data.filterName,
               dropDownLanguageValue,
               '$currentUnix.gif',
-              widget.data.speed);
+              widget.data.speed,
+            duetSwitch,
+            commentsSwitch,
+          );
           var json = jsonDecode(result.body);
           closeDialogue(context);
           if (json['status']) {
@@ -833,7 +844,10 @@ class _PostVideoState extends State<PostVideo> {
                     : widget.data.filterName,
                 dropDownLanguageValue,
                 '$currentUnix.gif',
-                widget.data.speed);
+                widget.data.speed,
+              duetSwitch,
+              commentsSwitch,
+            );
             var json = jsonDecode(result.body);
             closeDialogue(context);
             if (json['status']) {
@@ -905,7 +919,10 @@ class _PostVideoState extends State<PostVideo> {
                   : widget.data.filterName,
               dropDownLanguageValue,
               '$currentUnix.gif',
-              widget.data.speed);
+              widget.data.speed,
+            duetSwitch,
+            commentsSwitch,
+          );
           var json = jsonDecode(result.body);
           closeDialogue(context);
           if (json['status']) {
@@ -953,7 +970,10 @@ class _PostVideoState extends State<PostVideo> {
                     : widget.data.filterName,
                 dropDownLanguageValue,
                 '$currentUnix.gif',
-                widget.data.speed);
+                widget.data.speed,
+              duetSwitch,
+              commentsSwitch,
+            );
             var json = jsonDecode(result.body);
             closeDialogue(context);
             if (json['status']) {

@@ -42,150 +42,155 @@ class _DiscoverState extends State<Discover> {
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          maxLength: 10,
-                          textInputAction: TextInputAction.next,
-                          onChanged: (txt) {
-                            setState(() {
-                              query = txt;
-                            });
-                          },
-                          decoration: InputDecoration(
-                              hintText: search,
-                              counterText: '',
-                              isDense: true,
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(50)),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.grey.shade300, width: 2),
-                                  borderRadius: BorderRadius.circular(50)),
-                              constraints: BoxConstraints(
-                                  maxHeight: 45,
-                                  maxWidth:
-                                      MediaQuery.of(context).size.width * .90),
-                              prefixIcon: const Icon(Icons.search, size: 30,)),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        CarouselSlider.builder(
-                          options: CarouselOptions(
-                            autoPlayAnimationDuration:
-                                const Duration(seconds: 7),
-                            autoPlayCurve: Curves.easeIn,
-                            viewportFraction: 1,
-                            height: 200,
-                            enlargeCenterPage: true,
-                            enableInfiniteScroll: false,
-                            autoPlay: false,
-                          ),
-                          itemCount: bannerList.length,
-                          itemBuilder: (context, index, realIndex) {
-                            return Stack(
-                              children: [
-                                Container(
-                                    height: 200,
-                                    width: MediaQuery.of(context).size.width,
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: CachedNetworkImage(
-                                      fit: BoxFit.fill,
-                                      imageUrl:
-                                          '${RestUrl.bannerUrl}${bannerList[index].image}',
-                                    )),
-                                Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        for (int i = 0;
-                                            i < bannerList.length;
-                                            i++)
-                                          Container(
-                                              margin: const EdgeInsets.only(
-                                                  left: 8, bottom: 8),
-                                              height: 13,
-                                              width: 13,
-                                              decoration: BoxDecoration(
-                                                  color: i == index
-                                                      ? Colors.white
-                                                      : Colors.grey,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          5))),
-                                      ]),
-                                )
-                              ],
-                            );
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SliverFillRemaining(
-                    child: Builder(builder: (context) {
-                      if (query.trim().isNotEmpty) {
-                        List<DiscoverVideo> searchList = [];
-
-                        for (DiscoverVideo discover in videoList) {
-                          if (discover.hashtag_name
-                              .toLowerCase()
-                              .contains(query.toLowerCase())) {
-                            searchList.add(discover);
-                          }
-                        }
-
-                        if (searchList.isEmpty) {
-                          return Container(
-                            height: 180,
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            alignment: Alignment.center,
-                            child: const Text(
-                              'No Hashtag Found',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white),
-                            ),
-                          );
-                        }
-                        return ListView.builder(
-                          itemCount: searchList.length,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            return listWidget(searchList[index], index);
-                          },
-                        );
-                      }
-
-                      return ListView.builder(
-                          itemCount: videoList.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (BuildContext context, int index) {
-                            return listWidget(videoList[index], index);
-                          });
-                    }),
-                  )
-                ],
+            : SingleChildScrollView(
+              child: Column(
+          children: [
+              const SizedBox(
+                height: 20,
               ),
+              TextFormField(
+                maxLength: 30,
+                textInputAction: TextInputAction.next,
+                onChanged: (txt) {
+                  setState(() {
+                    query = txt;
+                  });
+                },
+                decoration: InputDecoration(
+                    hintText: search,
+                    counterText: '',
+                    isDense: true,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Colors.grey.shade300, width: 2),
+                        borderRadius: BorderRadius.circular(50)),
+                    contentPadding: const EdgeInsets.only(top: 5),
+                    constraints: BoxConstraints(
+                        maxHeight: 45,
+                        maxWidth:
+                        MediaQuery.of(context).size.width * .90),
+                    prefixIcon: const Icon(Icons.search, size: 30,)),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              CarouselSlider.builder(
+                options: CarouselOptions(
+                  autoPlayAnimationDuration:
+                  const Duration(seconds: 7),
+                  autoPlayCurve: Curves.easeIn,
+                  viewportFraction: 1,
+                  height: 200,
+                  enlargeCenterPage: true,
+                  enableInfiniteScroll: false,
+                  autoPlay: false,
+                ),
+                itemCount: bannerList.length,
+                itemBuilder: (context, index, realIndex) {
+                  return Stack(
+                    children: [
+                      Container(
+                          height: 200,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                              borderRadius:
+                              BorderRadius.circular(10)),
+                          child: CachedNetworkImage(
+                            fit: BoxFit.fill,
+                            imageUrl:
+                            '${RestUrl.bannerUrl}${bannerList[index].image}',
+                          )),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.center,
+                            crossAxisAlignment:
+                            CrossAxisAlignment.center,
+                            children: [
+                              for (int i = 0;
+                              i < bannerList.length;
+                              i++)
+                                Container(
+                                    margin: const EdgeInsets.only(
+                                        left: 8, bottom: 8),
+                                    height: 13,
+                                    width: 13,
+                                    decoration: BoxDecoration(
+                                        color: i == index
+                                            ? Colors.white
+                                            : Colors.grey,
+                                        borderRadius:
+                                        BorderRadius.circular(
+                                            5))),
+                            ]),
+                      )
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Builder(builder: (context) {
+                if (query.trim().isNotEmpty) {
+                  List<DiscoverVideo> searchList = [];
+                  for (DiscoverVideo discover in videoList) {
+                    if (discover.hashtag_name
+                        .toLowerCase()
+                        .contains(query.toLowerCase())) {
+                      searchList.add(discover);
+                    } else {
+                      for(VideoModel vm in discover.videoModel){
+                        if(vm.user.name.toLowerCase().contains(query.toLowerCase())){
+                          searchList.add(discover);
+                          break;
+                        }
+                      }
+                    }
+                  }
+
+                  if (searchList.isEmpty) {
+                    return Container(
+                      height: 180,
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'No Hashtag Found',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    itemCount: searchList.length,
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.only(bottom: 25),
+                    itemBuilder: (context, index) {
+                      return listWidget(searchList[index], index);
+                    },
+                  );
+                }
+
+                return ListView.builder(
+                    itemCount: videoList.length,
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return listWidget(videoList[index], index);
+                    });
+
+              }),
+          ],
+        ),
+            ),
       ),
     );
   }

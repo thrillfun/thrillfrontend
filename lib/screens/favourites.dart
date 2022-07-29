@@ -61,61 +61,63 @@ class _FavouritesState extends State<Favourites> {
             color: Colors.black,
             icon: const Icon(Icons.arrow_back_ios)),
       ),
-      body: Column(
-        children: [
-          DefaultTabController(
-            length: 3,
-            initialIndex: selectedTab,
-            child: TabBar(
-                onTap: (int index) {
-                  setState(() {
-                    selectedTab = index;
-                  });
-                },
-                indicatorColor: ColorManager.cyan,
-                tabs: [
-                  Tab(
-                    child: Text(
-                      videos,
-                      style: TextStyle(
-                          fontSize: 17,
-                          color: selectedTab == 0
-                              ? ColorManager.cyan
-                              : Colors.grey),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            DefaultTabController(
+              length: 3,
+              initialIndex: selectedTab,
+              child: TabBar(
+                  onTap: (int index) {
+                    setState(() {
+                      selectedTab = index;
+                    });
+                  },
+                  indicatorColor: ColorManager.cyan,
+                  tabs: [
+                    Tab(
+                      child: Text(
+                        videos,
+                        style: TextStyle(
+                            fontSize: 17,
+                            color: selectedTab == 0
+                                ? ColorManager.cyan
+                                : Colors.grey),
+                      ),
                     ),
-                  ),
-                  Tab(
-                    child: Text(
-                      sounds,
-                      style: TextStyle(
-                          fontSize: 17,
-                          color: selectedTab == 1
-                              ? ColorManager.cyan
-                              : Colors.grey),
+                    Tab(
+                      child: Text(
+                        sounds,
+                        style: TextStyle(
+                            fontSize: 17,
+                            color: selectedTab == 1
+                                ? ColorManager.cyan
+                                : Colors.grey),
+                      ),
                     ),
-                  ),
-                  Tab(
-                    child: Text(
-                      hashTag,
-                      style: TextStyle(
-                          fontSize: 17,
-                          color: selectedTab == 2
-                              ? ColorManager.cyan
-                              : Colors.grey),
-                    ),
+                    Tab(
+                      child: Text(
+                        hashTag,
+                        style: TextStyle(
+                            fontSize: 17,
+                            color: selectedTab == 2
+                                ? ColorManager.cyan
+                                : Colors.grey),
+                      ),
+                    )
+                  ]),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            isLoading
+                ? const Center(
+                    child:
+                        CircularProgressIndicator(color: Colors.lightBlueAccent),
                   )
-                ]),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          isLoading
-              ? const Center(
-                  child:
-                      CircularProgressIndicator(color: Colors.lightBlueAccent),
-                )
-              : tabview()
-        ],
+                : tabview()
+          ],
+        ),
       ),
     );
   }
@@ -166,6 +168,7 @@ class _FavouritesState extends State<Favourites> {
                                   child: CircularProgressIndicator(),
                                 ),
                             fit: BoxFit.cover,
+                            errorWidget: (a,b,c)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
                             imageUrl: favVideo[index].gif_image.isEmpty
                                 ? '${RestUrl.thambUrl}thumb-not-available.png'
                                 : '${RestUrl.gifUrl}${favVideo[index].gif_image}'),
@@ -262,7 +265,7 @@ class _FavouritesState extends State<Favourites> {
                                         var json = jsonDecode(result.body);
                                         if (json['status']) {
                                           favSound.removeAt(index);
-                                          showErrorToast(context, json['message']);
+                                          showSuccessToast(context, json['message']);
                                         } else {
                                           showErrorToast(context, json['message']);
                                         }

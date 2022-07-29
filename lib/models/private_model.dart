@@ -9,7 +9,7 @@ class PrivateModel {
   String speed;
   List<String> hashtags;
   String is_duet;
-  String duet_from;
+  String duet_from, is_duetable, is_commentable;
 
   PrivateModel(
       this.id,
@@ -21,7 +21,7 @@ class PrivateModel {
       this.filter,
       this.gif_image,
       this.sound_name,
-      this.sound_category_name,this.views, this.speed, this.hashtags, this.is_duet, this.duet_from);
+      this.sound_category_name,this.views, this.speed, this.hashtags, this.is_duet, this.duet_from,this.is_duetable,this.is_commentable);
 
   factory PrivateModel.fromJson(dynamic json) {
     UserModel users;
@@ -41,6 +41,8 @@ class PrivateModel {
         json['hashtags'] ?? [],
         json['is_duet'] ?? "No",
         json['duet_from'] ?? "",
+      json['is_duetable'] ?? "",
+      json['is_commentable'] ?? "",
     );
   }
 
@@ -61,6 +63,8 @@ class PrivateModel {
     data['hashtags'] = hashtags;
     data['is_duet'] = is_duet;
     data['duet_from'] = duet_from;
+    data['is_duetable'] = is_duetable;
+    data['is_commentable'] = is_commentable;
     return data;
   }
 }

@@ -131,6 +131,7 @@ class _SoundDetailsState extends State<SoundDetails> {
                               child: CircularProgressIndicator(),
                             ),
                             fit: BoxFit.cover,
+                            errorWidget: (a,b,c)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
                             imageUrl:videoList[index].gif_image.isEmpty
                                 ? '${RestUrl.thambUrl}thumb-not-available.png'
                                 : '${RestUrl.gifUrl}${videoList[index].gif_image}'),
