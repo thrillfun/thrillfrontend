@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thrill/models/wallet_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
@@ -25,10 +23,9 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
+
   bool isLoading = true;
-
   List<WalletBalance> balanceList = List<WalletBalance>.empty(growable: true);
-
   WalletBalance? walBalance;
 
   @override

@@ -1162,4 +1162,42 @@ class RestApi {
     return response;
   }
 
+  static Future<http.Response> deleteVideo(int videoId) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.deleteVideo,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'video_id': videoId.toString()
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
+  static Future<http.Response> publishPrivateVideo(int videoId) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.publishPrivateVideo,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'video_id': videoId.toString()
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
+    return response;
+  }
+
 }

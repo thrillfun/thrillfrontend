@@ -18,7 +18,8 @@ class NotificationModel{
 
   factory NotificationModel.fromJson(dynamic json) {
     VideoModel? vModel = json['redirect_type'].toString()=="video"
-        || json['redirect_type'].toString()=="comment"?VideoModel.fromJson(json['video_details']):null;
+        || json['redirect_type'].toString()=="comment"?
+    json['video_details']!=null?VideoModel.fromJson(json['video_details']):null:null;
     return NotificationModel(
         json['id'] ?? 0,
         json['user_details']['id'] ?? 0,

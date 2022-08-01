@@ -606,6 +606,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                         });
                                         reelsPlayerController?.play();
                                         shouldAutoPlayReel = true;
+                                        loadLikes();
                                       }
                                     } else {
                                       showAlertDialog(context);
@@ -808,6 +809,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                               });
                                               reelsPlayerController?.play();
                                               shouldAutoPlayReel = true;
+                                              loadLikes();
                                             }
                                           } else {
                                             showAlertDialog(context);
@@ -837,39 +839,23 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                         onTap: () async {
                                           await isLogined().then((value) async {
                                             if (value) {
-                                              if (followList.contains(state
-                                                  .list[index].id
-                                                  .toString())) {
-                                                followList.remove(state
-                                                    .list[index].id
-                                                    .toString());
-                                                int followers = int.parse(state
-                                                    .list[index].user.followers);
+                                              if (followList.contains(state.list[index].id.toString())) {
+                                                followList.remove(state.list[index].id.toString());
+                                                int followers = int.parse(state.list[index].user.followers);
                                                 followers--;
-                                                state.list[index].user.followers =
-                                                    followers.toString();
-                                                state.list[index].copyWith(
-                                                    user: state.list[index].user);
+                                                state.list[index].user.followers = followers.toString();
+                                                state.list[index].copyWith(user: state.list[index].user);
                                               } else {
-                                                followList.add(state
-                                                    .list[index].id
-                                                    .toString());
-                                                int followers = int.parse(state
-                                                    .list[index].user.followers);
+                                                followList.add(state.list[index].id.toString());
+                                                int followers = int.parse(state.list[index].user.followers);
                                                 followers++;
-                                                state.list[index].user.followers =
-                                                    followers.toString();
-                                                state.list[index].copyWith(
-                                                    user: state.list[index].user);
+                                                state.list[index].user.followers = followers.toString();
+                                                state.list[index].copyWith(user: state.list[index].user);
                                               }
-                                              SharedPreferences pref =
-                                              await SharedPreferences
-                                                  .getInstance();
-                                              pref.setStringList(
-                                                  'followList', followList);
+                                              SharedPreferences pref = await SharedPreferences.getInstance();
+                                              pref.setStringList('followList', followList);
 
-                                              BlocProvider.of<VideoBloc>(context)
-                                                  .add(FollowUnfollow(
+                                              BlocProvider.of<VideoBloc>(context).add(FollowUnfollow(
                                                   action: followList.contains(
                                                       state.list[index].id
                                                           .toString())
@@ -907,18 +893,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                 const SizedBox(
                                   height: 5,
                                 ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      getHashTagsToShow(state.list[index].hashtags)+
-                                      state.list[index].description,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headline6!
-                                          .copyWith(color: Colors.white),
-                                    ),
-                                  ],
+                                Text(
+                                  getHashTagsToShow(state.list[index].hashtags)+
+                                  state.list[index].description,
+                                  maxLines: 3,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headline6!
+                                      .copyWith(color: Colors.white),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(
                                   height: 5,
@@ -991,7 +974,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               color: selectedTopIndex == 0
                                   ? Colors.white
                                   : Colors.white60,
-                              fontSize: 18),
+                              fontSize: 16),
                         )),
                     Container(
                       height: 15,
@@ -1016,7 +999,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               color: selectedTopIndex == 1
                                   ? Colors.white
                                   : Colors.white60,
-                              fontSize: 18),
+                              fontSize: 16),
                         )),
                     Container(
                       height: 15,
@@ -1041,9 +1024,8 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               color: selectedTopIndex == 2
                                   ? Colors.white
                                   : Colors.white60,
-                              fontSize: 18),
+                              fontSize: 16),
                         )),
-                    const SizedBox(width: 10),
                     IconButton(
                         onPressed: ()async {
                           await isLogined().then((value) async {
@@ -1058,7 +1040,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                             }
                           });
                         },
-                        iconSize: 28,
+                        iconSize: 22,
+                        padding: const EdgeInsets.only(),
+                        constraints: const BoxConstraints(),
                         icon: const Icon(
                           Icons.camera_alt_rounded,
                           color: Colors.white,
@@ -1340,6 +1324,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     likeComment = likeData.getStringList('commentList') ?? [];
     followList = likeData.getStringList('followList') ?? [];
     setState(() {});
+    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
   }
 
   void _scrollListener() {

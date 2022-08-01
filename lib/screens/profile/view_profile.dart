@@ -174,7 +174,7 @@ class _ViewProfileState extends State<ViewProfile> {
                       textAlign: TextAlign.center,
                       text:  TextSpan(children: [
                         TextSpan(
-                            text: '${userModel?.likes}' '\n',
+                            text: '${userModel!.likes.isEmpty?0:userModel!.likes}' '\n',
                             style: const TextStyle(color: Colors.black, fontSize: 17)),
                         const TextSpan(text: likes, style: TextStyle(color: Colors.grey)),
                       ])),
@@ -321,42 +321,47 @@ class _ViewProfileState extends State<ViewProfile> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     itemBuilder: (BuildContext context, int index) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                              padding: const EdgeInsets.all(2),
-                              margin: const EdgeInsets.only(right: 5, left: 5),
-                              height: 70,
-                              width: 70,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: ColorManager.spinColorDivider)),
-                              child: ClipOval(
-                                child: CachedNetworkImage(
-                                  fit: BoxFit.cover,
-                                  errorWidget: (a,b,c)=> Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: SvgPicture.asset(
-                                      'assets/profile.svg',
-                                      width: 10,
-                                      height: 10,
-                                      fit: BoxFit.contain,
+                      return GestureDetector(
+                        onTap: (){
+                          //Navigator.pushNamed(context, "/viewProfile", arguments: {"id":followerModelList[index].id, "getProfile":true});
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                                padding: const EdgeInsets.all(2),
+                                margin: const EdgeInsets.only(right: 5, left: 5),
+                                height: 70,
+                                width: 70,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: ColorManager.spinColorDivider)),
+                                child: ClipOval(
+                                  child: CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    errorWidget: (a,b,c)=> Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: SvgPicture.asset(
+                                        'assets/profile.svg',
+                                        width: 10,
+                                        height: 10,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                    imageUrl: '${RestUrl.profileUrl}${followerModelList[index].image}',
+                                    placeholder: (a, b) => const Center(
+                                      child: CircularProgressIndicator(),
                                     ),
                                   ),
-                                  imageUrl: '${RestUrl.profileUrl}${followerModelList[index].image}',
-                                  placeholder: (a, b) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                              )),
-                          const SizedBox(height: 5,),
-                          SizedBox(
-                              width: 70,
-                              child: Text(followerModelList[index].name,overflow: TextOverflow.ellipsis,maxLines: 1,textAlign: TextAlign.center,)
-                          )
-                        ],
+                                )),
+                            const SizedBox(height: 5,),
+                            SizedBox(
+                                width: 70,
+                                child: Text(followerModelList[index].name,overflow: TextOverflow.ellipsis,maxLines: 1,textAlign: TextAlign.center,)
+                            )
+                          ],
+                        ),
                       );
                     },
                   ),

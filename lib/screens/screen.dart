@@ -27,5 +27,5 @@ export 'sound/add_sound.dart';
 export 'payment_history.dart';
 export 'tag_details.dart';
 export 'setting/request_verification.dart';
-export 'video/preview.dart';
+export 'video/trim.dart';
 export 'setting/payment_request.dart';

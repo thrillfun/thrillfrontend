@@ -91,17 +91,17 @@ class _EditProfileState extends State<EditProfile> {
             icon: const Icon(Icons.arrow_back_ios)),
       ),
       body: BlocListener<ProfileBloc, ProfileState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is ValidationProcess) {
             progressDialogue(context);
           } else if (state is ValidationStatus) {
             closeDialogue(context);
             if (state.status) {
-              showSuccessToast(context, state.message);
               BlocProvider.of<ProfileBloc>(context).add(const ProfileLoading());
-              Future.delayed(const Duration(milliseconds: 150)).then((value) {
+              await Future.delayed(const Duration(milliseconds: 150)).then((value) {
                 Navigator.pop(context, "/profile");
               });
+              showSuccessToast(context, state.message);
             } else {
               showErrorToast(context, state.message);
             }

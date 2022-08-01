@@ -69,6 +69,8 @@ class RestUrl {
   static const String reportUser = baseUrl + "user/report-user";
   static const String checkBlock = baseUrl + "user/is-user-blocked";
   static const String blockUnblockUser = baseUrl + "user/block-unblock-user";
+  static const String deleteVideo = baseUrl + "video/delete";
+  static const String publishPrivateVideo = baseUrl + "video/publish-private";
 
 
 }

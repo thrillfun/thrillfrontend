@@ -468,7 +468,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                         },
                         child: Row(
                           children: [
-                            SvgPicture.asset('assets/music.svg'),
+                            SvgPicture.asset('assets/music.svg', height: 16.5,),
                             const SizedBox(
                               width: 5,
                             ),
@@ -528,14 +528,11 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                           iconSize: 40,
                           padding: const EdgeInsets.only(left: 5),
                           icon: SvgPicture.asset(controller?.value.flashMode==FlashMode.torch?'assets/flash_on.svg':'assets/flash_of.svg')),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 500),
-                        child: IconButton(
-                          key: UniqueKey(),
-                            onPressed: () {speedHandler();},
-                            iconSize: 40,
-                            icon: Text("${speed}x".padLeft(3, ' '),style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.white),),),
-                      )
+                      IconButton(
+                        key: UniqueKey(),
+                          onPressed: () {speedHandler();},
+                          iconSize: 40,
+                          icon: Text("${speed}x".padLeft(3, ' '),style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.white),),)
                       // IconButton(
                       //     onPressed: () {},
                       //     iconSize: 45,
@@ -692,8 +689,17 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                               if (_isPlayPause) {
                                 videoController?.pause();
                               }
-                              PostData m = PostData(speed: speed, filePath: file.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
-                              Navigator.pushNamed(context, "/preview",arguments: m);
+                              PostData m = PostData(
+                                  speed: speed,
+                                  filePath: file.path,
+                                  filterName: filterImage,
+                                  addSoundModel: addSoundModel,
+                                  isDuet: false,
+                                  isDefaultSound: true,
+                                isUploadedFromGallery: true,
+                                  trimStart: 0, trimEnd: 0,
+                              );
+                              Navigator.pushNamed(context, "/trim",arguments: m);
                             } else {
                               showErrorToast(context, "Max File Size is 500 MB");
                             }
@@ -797,8 +803,17 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                               if (_isPlayPause) {
                                 videoController!.pause();
                               }
-                              PostData m = PostData(speed: speed, filePath: mainPath, filterName: filterImage, addSoundModel: addSoundModel, isDuet: false);
-                              Navigator.pushNamed(context, "/preview",arguments: m);
+                              PostData m = PostData(
+                                  speed: speed,
+                                  filePath: mainPath,
+                                  filterName: filterImage,
+                                  addSoundModel: addSoundModel,
+                                  isDuet: false,
+                                isDefaultSound: true,
+                                isUploadedFromGallery: false,
+                                trimStart: 0, trimEnd: 0,
+                              );
+                              Navigator.pushNamed(context, "/trim",arguments: m);
                             },
                             child: VxCircle(
                               radius: 50,

@@ -329,46 +329,45 @@ class _BottomNavigationState extends State<BottomNavigation> {
         showDialog(context: navigatorKey.currentContext!, builder: (_)=>Material(
           type: MaterialType.transparency,
           child: Center(
-            child: GestureDetector(
-              onTap: (){
-                if(redirectPath.isNotEmpty){
-                  Uri openInBrowser = Uri(scheme: 'https', path: redirectPath,);
-                  launchUrl(openInBrowser);
-                }
-              },
-              child: Container(
-                height: getHeight(navigatorKey.currentContext!)*.90,
-                width: getWidth(navigatorKey.currentContext!)*.90,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.black, width: 2)
-                ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      left: 2, right: 2, bottom: 2, top: 2,
+            child: Container(
+              height: getHeight(navigatorKey.currentContext!)*.90,
+              width: getWidth(navigatorKey.currentContext!)*.90,
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: 0, right: 0, bottom: 0, top: 0,
+                    child: GestureDetector(
+                      onTap: (){
+                        if(redirectPath.isNotEmpty){
+                          Uri openInBrowser = Uri(scheme: 'https', path: redirectPath,);
+                          launchUrl(openInBrowser);
+                        }
+                      },
                       child: CachedNetworkImage(
                         fit: BoxFit.contain,
                         imageUrl: "${RestUrl.profileUrl}$imgPath",
                         placeholder: (a,b)=>const Center(child: CircularProgressIndicator(),),
                       ),
                     ),
-                    Positioned(
-                      top: -10,
-                      right: -10,
-                      child: GestureDetector(
-                        onTap: (){Navigator.pop(navigatorKey.currentContext!);},
-                        child: VxCircle(
-                          radius: 30,
-                          backgroundColor: Colors.red,
-                          child: const Icon(Icons.close, color: Colors.white,),
-                        ),
+                  ),
+                  Positioned(
+                    top: -10,
+                    right: -10,
+                    child: GestureDetector(
+                      onTap: (){Navigator.pop(navigatorKey.currentContext!);},
+                      child: VxCircle(
+                        radius: 30,
+                        backgroundColor: Colors.red,
+                        child: const Icon(Icons.close, color: Colors.white,),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

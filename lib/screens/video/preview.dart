@@ -1,19 +1,21 @@
 import 'dart:io';
 import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter_min_gpl/return_code.dart';
+import 'package:ffmpeg_kit_flutter_min_gpl/statistics.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_sliders/sliders.dart';
-import 'package:syncfusion_flutter_core/core.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/common/strings.dart';
-import 'package:thrill/utils/util.dart';
 import 'package:video_player/video_player.dart';
+import '../../common/strings.dart';
 import '../../models/post_data.dart';
+import '../../utils/util.dart';
 
 class Preview extends StatefulWidget {
   const Preview({Key? key, required this.data}) : super(key: key);
   final PostData data;
 
+  @override
+  State<Preview> createState() => _PreviewState();
   static const String routeName = '/preview';
   static Route route({required PostData videoData}) {
     return MaterialPageRoute(
@@ -21,42 +23,35 @@ class Preview extends StatefulWidget {
       builder: (context) => Preview(data: videoData),
     );
   }
-
-  @override
-  State<Preview> createState() => _PreviewState();
 }
 
 class _PreviewState extends State<Preview> {
 
-  late VideoPlayerController videoPlayerController;
-  List<FileSystemEntity> thumbList = List.empty(growable: true);
-  RangeController rangeController = RangeController(start: 0, end: 100);
-  SfRangeValues sfRangeValues = const SfRangeValues(0,100);
-  bool isVidInit = false;
-  Directory directory = Directory('');
+  bool isProcessing = true, wasSuccess = false;
+  String percentage = "50%", newName = '';
+  VideoPlayerController? videoPlayerController;
+  bool isVControllerInitialized = false;
 
   @override
   void initState() {
-    videoPlayerController =
-    VideoPlayerController.file(
-        File(widget.data.filePath))
-      ..initialize().then((value) {
-        createThumbs();
-        videoPlayerController.play();
-        videoPlayerController.setLooping(true);
-        videoPlayerController.setVolume(1);
-        sfRangeValues = SfRangeValues(0,videoPlayerController.value.duration.inSeconds);
-        rangeController= RangeController(start: 0, end: videoPlayerController.value.duration.inSeconds);
-        isVidInit = true;
-        setState(() {});
-      });
+    startVideoProcessing();
+    FFmpegKitConfig.enableStatisticsCallback(statisticsCallback);
     super.initState();
+  }
+
+  statisticsCallback(Statistics statistics){
+    final int time = statistics.getTime();
+    //final int seconds = videoPlayerController.value.duration.inMilliseconds;
+    //final double percent = (time/seconds)*100;
+    //print("Progress ====>>> ${percent.toStringAsFixed(0)}%");
+    print("Progress ====>>> $time");
+    // percentage = percent;
+    // if (mounted) setState((){});
   }
 
   @override
   void dispose() {
-    videoPlayerController.dispose();
-    directory.deleteSync(recursive: true);
+    videoPlayerController?.dispose();
     super.dispose();
   }
 
@@ -74,7 +69,7 @@ class _PreviewState extends State<Preview> {
           shape: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
           centerTitle: true,
           title: const Text(
-            "Editing",
+            "Preview",
             style: TextStyle(color: Colors.black),
           ),
           leading: IconButton(
@@ -82,183 +77,121 @@ class _PreviewState extends State<Preview> {
                 showCloseDialog();
               },
               color: Colors.black,
-              icon: const Icon(Icons.arrow_back_ios)),
+              icon: const Icon(Icons.arrow_back_ios)
+          ),
         ),
-        body: Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: VideoPlayer(videoPlayerController),
-            ),
-            Positioned(
-              bottom: 70,
-                left: 5, right: 5,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 1
-                    )
-                  ),
-                  child: thumbList.isEmpty?
-                  Center(child: Text("Loading Preview...", style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.white),)):
-                  ListView.builder(
-                    itemCount: thumbList.length,
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (BuildContext context, int index) {
-                      return SizedBox(
-                          width: MediaQuery.of(context).size.width/thumbList.length,
-                          child: Image.file(File(thumbList[index].path),fit: BoxFit.fill,));
-                    },
-                  ),
-                )
-            ),
-            Positioned(
-              bottom: 45,
-                left:-20,right: -20,
-                child: isVidInit?SfRangeSelector(
-                  max: videoPlayerController.value.duration.inSeconds,
-                  min: 0,
-                  initialValues: sfRangeValues,
-                  activeColor: Colors.transparent,
-                  startThumbIcon: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
-                  ),
-                  endThumbIcon: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Container(decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle),),
-                  ),
-                  onChanged: (SfRangeValues val){
-                    setState(() {});
-                  },
-                  controller: rangeController,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: ColorManager.cyan,
-                            width: 2.5
-                        )
-                    ),
-                    height: 50,
-                  ),
-                ):const SizedBox()
-            ),
-            Positioned(
-                bottom: 10,
-                child: ElevatedButton(
-                    onPressed: continuePressed,
-                    style: ElevatedButton.styleFrom(
-                        fixedSize: Size(getWidth(context)*.60, 45),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25)
-                        )
-                    ),
-                    child: const Text("Continue")
-                )),
-            // Positioned(
-            //   top: 100, left: 30, right: 30,
-            //     child: Text(
-            //       rangeController.end-rangeController.start<15?
-            //         "Error: Minimum video duration is\n15 seconds!":
-            //       rangeController.end-rangeController.start>60?
-            //       "Error: Maximum video duration is\n60 seconds!":"",
-            //       style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.red),
-            //       textAlign: TextAlign.center,
-            //     )),
-
-            Positioned(
-              bottom: 130,
-                left: 10,
-                right: 10,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(getStartDuration(), style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.white),),
-                    Text(getEndDuration(), style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.white),),
-                  ],
-                )
-            )
-          ],
-        ),
-
+        body: isProcessing && !isVControllerInitialized?
+        processingLayout(): processedLayout()
       ),
     );
   }
-
-  createThumbs()async{
-    double frameRate = 5/videoPlayerController.value.duration.inSeconds;
-    DateTime dateTime = DateTime.now();
-    String outputPath = "$saveCacheDirectory${dateTime.day}${dateTime.month}${dateTime.year}${dateTime.hour}${dateTime.minute}${dateTime.second}/";
-    directory = Directory(outputPath);
-    if(!directory.existsSync()){
-      directory.createSync();
-    }
-    FFmpegKit.execute("-i ${widget.data.filePath} -r $frameRate -f image2 ${outputPath}image-%3d.png").then((session) async {
-      final returnCode = await session.getReturnCode();
-      // final logs = await session.getLogsAsString();
-      // final logList = logs.split('\n');
-      // print("============================> LOG STARTED!!!!");
-      // for(var e in logList){
-      //   print(e);
-      // }
-      //print("============================> LOG ENDED!!!!");
-
-      if (ReturnCode.isSuccess(returnCode)) {
-        //MediaInformationSession info = await FFprobeKit.getMediaInformation(outputPath);
-        //Map? _gifInfo = info.getMediaInformation()?.getAllProperties()?["streams"][0];
-        //print("============================> Success!!!!");
-        setState((){
-          thumbList.addAll(directory.listSync());
-        });
-      } else {
-        //print("============================> Failed!!!!");
-        setState((){
-        });
-      }
-    });
-
-  }
-  continuePressed()async{
-    videoPlayerController.pause();
-    PostData newPostData = PostData(
-        speed: widget.data.speed,
-        filePath: widget.data.filePath,
-        filterName: widget.data.filterName,
-        addSoundModel: widget.data.addSoundModel,
-        isDuet: false,
-        map: rangeController.end-rangeController.start<15?
-        {"start": 0, "end": 15}:
-        rangeController.end-rangeController.start>60?
-        {"start": 0, "end": 60}:
-        {"start": rangeController.start.toInt(), "end": rangeController.end.toInt()}
+  Widget processingLayout(){
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text("Processing Video", style: Theme.of(context).textTheme.headline3!.copyWith(color: ColorManager.cyan),),
+          Text("Please Wait...", style: Theme.of(context).textTheme.headline5,),
+          const SizedBox(height: 10,),
+          //Text(percentage, style: Theme.of(context).textTheme.headline2!.copyWith(color: ColorManager.cyan),),
+          const CircularProgressIndicator(color: ColorManager.cyan,)
+        ],
+      ),
     );
-    await Navigator.pushNamed(context, "/postVideo", arguments: newPostData);
-    videoPlayerController.play();
   }
-  String getStartDuration(){
-    Duration duration = Duration(seconds: rangeController.start.toInt());
-    String string = '';
-    if(duration.inHours!=0){
-      string = duration.toString().split('.').first;
-    } else {
-      string = duration.toString().substring(2, 7);
-    }
-    return string;
-  }
-  String getEndDuration(){
-    Duration duration = Duration(seconds: rangeController.end.toInt());
-    String string = '';
-    if(duration.inHours!=0){
-      string = duration.toString().split('.').first;
-    } else {
-      string = duration.toString().substring(2, 7);
-    }
-    return string;
+  Widget processedLayout(){
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned(
+          left: 0, right: 0, bottom: 0, top: 0,
+            child: isVControllerInitialized?
+            AspectRatio(
+              aspectRatio: videoPlayerController!.value.aspectRatio,
+              child: VideoPlayer(videoPlayerController!),
+            ): Container()
+        ),
+        Positioned(
+          bottom: 140,
+          child: isVControllerInitialized?
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.55),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+                onPressed: (){
+                  videoPlayerController!.value.isPlaying?
+                  videoPlayerController!.pause():
+                  videoPlayerController!.play();
+                  setState((){});
+                },
+                constraints: const BoxConstraints(),
+                padding: EdgeInsets.zero,
+                iconSize: 50,
+                color: Theme.of(context).primaryColor,
+                icon: Icon(videoPlayerController!.value.isPlaying?Icons.pause_circle_filled_rounded:Icons.play_circle_fill_rounded)),
+          ): Container(),
+        ),
+        Positioned(
+            bottom: 70,
+            left: 10,
+            right: 10,
+            child: isVControllerInitialized?
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.55),
+                  borderRadius: BorderRadius.circular(30)
+              ),
+              child: Row(
+                children: [
+                  Text(getDurationString(videoPlayerController!.value.position), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                  Expanded(
+                    child: Slider(
+                      min: 0,
+                      max: videoPlayerController!.value.duration.inSeconds.toDouble(),
+                      value: videoPlayerController!.value.position.inSeconds.toDouble(),
+                      onChanged: (double val) => videoPlayerController!.seekTo(Duration(seconds: val.toInt())),
+                      thumbColor: ColorManager.cyan,
+                    ),
+                  ),
+                  Text(getDurationString(videoPlayerController!.value.duration), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                ],
+              ),
+            ): Container(),
+        ),
+        Positioned(
+            bottom: 10,
+            child: ElevatedButton(
+                onPressed: () async {
+                  videoPlayerController!.pause();
+                  PostData postDate = PostData(
+                      speed: widget.data.speed,
+                      filePath: widget.data.filePath,
+                      filterName: widget.data.filterName,
+                      trimStart: widget.data.trimStart,
+                      trimEnd: widget.data.trimEnd,
+                      isDuet: widget.data.isDuet,
+                      isDefaultSound: widget.data.isDefaultSound,
+                      isUploadedFromGallery: widget.data.isUploadedFromGallery,
+                      newPath: '$saveDirectory$newName.mp4',
+                      newName: newName
+                  );
+                  await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
+                  videoPlayerController!.play();
+                },
+                style: ElevatedButton.styleFrom(
+                    fixedSize: Size(getWidth(context)*.60, 45),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25)
+                    )
+                ),
+                child: const Text("Continue")
+            )),
+      ],
+    );
   }
   showCloseDialog(){
     showDialog(context: context, builder: (_)=> Center(
@@ -271,7 +204,31 @@ class _PreviewState extends State<Preview> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(10)
           ),
-          child: Column(
+          child: isProcessing?
+          Column(
+            mainAxisSize: MainAxisSize.min,
+               children: [
+                 const Icon(Icons.warning_amber, size: 40, color: Colors.red,),
+                 const SizedBox(height: 10,),
+                 Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 30),
+                   child: Text("Please wait until processing finishes!", style: Theme.of(context).textTheme.headline3, textAlign: TextAlign.center,),
+                 ),
+                 const SizedBox(height: 15,),
+                 ElevatedButton(
+                     onPressed: (){
+                       Navigator.pop(context);
+                     },
+                     style: ElevatedButton.styleFrom(
+                       primary: ColorManager.cyan,
+                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                       fixedSize: Size(getWidth(context)*.50, 45)
+                     ),
+                     child: const Text("OK")
+                 )
+               ],
+             ):
+          Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
@@ -280,7 +237,7 @@ class _PreviewState extends State<Preview> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 35),
-                child: Text(discardDialog, style: Theme.of(context).textTheme.headline4!.copyWith(fontWeight: FontWeight.normal), textAlign: TextAlign.center,),
+                child: Text("The processed video will be discarded!", style: Theme.of(context).textTheme.headline4!.copyWith(fontWeight: FontWeight.normal), textAlign: TextAlign.center,),
               ),
               const SizedBox(height: 15,),
               Row(
@@ -318,5 +275,154 @@ class _PreviewState extends State<Preview> {
       ),
     )
     );
+  }
+  startVideoProcessing()async{
+    final dateTime = DateTime.now();
+    newName = "Thrill-${dateTime.day}-${dateTime.month}-${dateTime.year}-${dateTime.hour}-${dateTime.minute}";
+    String outputPath = '$saveDirectory$newName.mp4';
+    String? audioFilePath = widget.data.addSoundModel?.sound;
+    File videoFile = File(widget.data.filePath);
+
+    if(widget.data.isDuet && widget.data.duetPath!=null){
+      try{
+        print(widget.data.duetPath);
+        print(widget.data.filePath);
+        FFmpegKit.execute(
+            //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 -s 720X1280 -vcodec libx264 $outputPath" //stretched
+            "-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' -s 720X1280 -vcodec libx264 $outputPath" //cropped+stretched
+        ).then((session) async {
+          final returnCode = await session.getReturnCode();
+          final logs = await session.getLogsAsString();
+          final logList = logs.split('\n');
+          print("============================> LOG STARTED!!!!");
+          for(var e in logList){
+            print(e);
+          }
+          print("============================> LOG ENDED!!!!");
+
+          if (ReturnCode.isSuccess(returnCode)) {
+            // print("============================> Success!!!!");
+            setState(() {
+              wasSuccess = true;
+              isProcessing = false;
+              initPreview();
+            });
+          } else {
+            // print("============================> Failed!!!!");
+            Navigator.pop(context);
+            closeDialogue(context);
+            showErrorToast(context, "Video processing failed!");
+            //setState(()=>isProcessing = false);
+          }
+        });
+      } catch(e){
+        closeDialogue(context);
+        Navigator.pop(context);
+        //print(e.toString());
+        showErrorToast(context, "Video Processing Failed");
+      }
+    } else {
+      if(widget.data.addSoundModel==null || widget.data.isDefaultSound){
+        try{
+          FFmpegKit.execute(
+              "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.trimStart).toString().split('.').first} -to ${widget.data.trimEnd} -s 720X1280 -vcodec libx264 $outputPath"
+            //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
+          ).then((session) async {
+            final returnCode = await session.getReturnCode();
+            // final logs = await session.getLogsAsString();
+            // final logList = logs.split('\n');
+            // print("============================> LOG STARTED!!!!");
+            // for(var e in logList){
+            //   print(e);
+            // }
+            // print("============================> LOG ENDED!!!!");
+
+            if (ReturnCode.isSuccess(returnCode)) {
+              // print("============================> Success!!!!");
+              setState(() {
+                isProcessing = false;
+                wasSuccess = true;
+                initPreview();
+              });
+            } else {
+              // print("============================> Failed!!!!");
+              closeDialogue(context);
+              Navigator.pop(context);
+              showErrorToast(context, "Video processing failed!");
+              //setState(()=>isProcessing = false);
+            }
+          });
+        } catch(e){
+          closeDialogue(context);
+          //print(e.toString());
+          Navigator.pop(context);
+          showErrorToast(context, "Video Processing Failed");
+        }
+      } else {
+        try{
+          String start = Duration(seconds: widget.data.trimStart).toString().split('.').first;
+          String end = Duration(seconds: widget.data.trimEnd).toString().split('.').first;
+          String time = (int.parse(widget.data.trimEnd.toString())-int.parse(widget.data.trimStart.toString())).toString();
+          FFmpegKit.execute(
+            //"-y -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a $outputPath"
+            //"-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -qscale 5 -c:a aac $outputPath"
+            //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
+            //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
+            //"-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 -vcodec libx264 $outputPath"
+              "-y -ss $start -to $end -i ${videoFile.path} -i $audioFilePath -map 0:v -s 720X1280 -qscale 5 -t $time -map 1:a $outputPath"
+          ).then((session) async {
+            final returnCode = await session.getReturnCode();
+            // final logs = await session.getLogsAsString();
+            // final logList = logs.split('\n');
+            // print("============================> LOG STARTED!!!!");
+            // for(var e in logList){
+            // print(e);
+            // }
+            // print("============================> LOG ENDED!!!!");
+            if (ReturnCode.isSuccess(returnCode)) {
+              //print("============================> Success!!!!");
+              setState(() {
+                wasSuccess = true;
+                isProcessing = false;
+                initPreview();
+              });
+            } else {
+              //print("============================> Failed!!!!");
+              closeDialogue(context);
+              Navigator.pop(context);
+              showErrorToast(context, "Video processing failed!");
+              //setState(()=>isProcessing = false);
+            }
+          });
+        } catch(e){
+          closeDialogue(context);
+          //print(e.toString());
+          showErrorToast(context, "Video Processing Failed");
+        }
+      }
+    }
+  }
+  initPreview()async{
+    videoPlayerController = VideoPlayerController.file(File('$saveDirectory$newName.mp4'));
+    await videoPlayerController!.initialize().then((_) {
+      videoPlayerController!.setPlaybackSpeed(double.parse(widget.data.speed));
+      isVControllerInitialized = true;
+      videoPlayerController!.setPlaybackSpeed(double.parse(widget.data.speed));
+      setState(() {});
+      videoPlayerController!.addListener(() {
+        setState((){});
+      });
+    });
+    await videoPlayerController!.setLooping(true);
+    await videoPlayerController!.play();
+  }
+  String getDurationString(Duration duration){
+    String string = '';
+    if(duration.inHours!=0){
+      string = duration.toString().split('.').first;
+    } else {
+      string = duration.toString().substring(2, 7);
+    }
+    return string;
   }
 }

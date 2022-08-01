@@ -735,8 +735,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         Text(
                                           usersModel[index].username,
                                           style: const TextStyle(fontSize: 18),
+                                          maxLines: 1,
                                         ),
-                                        Text(usersModel[index].name),
+                                        Text(usersModel[index].name,maxLines: 1,),
                                         const SizedBox(height: 5,),
                                       ],
                                     ),
@@ -812,7 +813,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         }
                                       },
                                       padding: const EdgeInsets.only(right: 25),
-                                      constraints: const BoxConstraints(minWidth: 80),
+                                      constraints: const BoxConstraints(minWidth: 90),
                                       icon: index==0?const Icon(
                                         Icons.check,
                                         size: 30,

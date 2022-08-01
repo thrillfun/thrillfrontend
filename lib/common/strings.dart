@@ -57,6 +57,7 @@ const String eventClosingIn = "Event closing in";
 const String availableChange = "Available Chance";
 const String grabExtensiveRewards = "Grab Extensive Rewards";
 const String usedChance = "Used Chance";
+const String lastReward = "Last Reward";
 const String addSound = "Add Sound";
 const String upload = "Upload";
 const String post = "Post";
