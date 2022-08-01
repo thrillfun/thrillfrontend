@@ -118,7 +118,7 @@ class _RecordDuetState extends State<RecordDuet> {
                   children: [
                     SizedBox(
                       width: getWidth(context),
-                      height: getHeight(context)*.80,
+                      height: getHeight(context)*.40,
                       child: videoController != null &&
                           videoController!.value.isInitialized
                           ? ClipRRect(
@@ -131,14 +131,16 @@ class _RecordDuetState extends State<RecordDuet> {
                           : Container(),
                     ),
                     isCameraInitialized && _videoFile == null
-                        ? Positioned(
-                      bottom: 0, right: 0,
-                          child: SizedBox(
+                        ? Positioned.fill(
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: SizedBox(
                       //width: getWidth(context),
-                          height: getHeight(context)*.40,
-                          child: AspectRatio(
-                              aspectRatio: 1/controller!.value.aspectRatio,
-                              child: controller!.buildPreview())),
+                            height: getHeight(context)*.40,
+                            child: AspectRatio(
+                                aspectRatio: 1/controller!.value.aspectRatio,
+                                child: controller!.buildPreview())),
+                          ),
                         )
                         : const SizedBox(),
                     Visibility(
@@ -432,8 +434,17 @@ class _RecordDuetState extends State<RecordDuet> {
 
   navigateOrWait()async{
     if(downloadProgress=='100'){
-      PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
-      await Navigator.pushNamed(context, "/postVideo",arguments: m);
+      PostData m = PostData(
+          speed: '1',
+          filePath: _videoFile!.path,
+          filterName: filterImage,
+          addSoundModel: addSoundModel,
+          isDuet: true,
+          duetPath: duetFile?.path,
+        isDefaultSound: true, isUploadedFromGallery: false,
+        trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
+      );
+      await Navigator.pushNamed(context, "/preview",arguments: m);
       Navigator.pop(context);
     } else {
       progressDialogue(context);
@@ -441,8 +452,16 @@ class _RecordDuetState extends State<RecordDuet> {
         if(downloadProgress=='100'){
           closeDialogue(context);
           timer.cancel();
-          PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
-          await Navigator.pushNamed(context, "/postVideo",arguments: m);
+          PostData m = PostData(
+              speed: '1',
+              filePath: _videoFile!.path,
+              filterName: filterImage,
+              addSoundModel: addSoundModel,
+              isDuet: true,
+              duetPath: duetFile?.path,
+            isDefaultSound: true, isUploadedFromGallery: false,
+            trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,);
+          await Navigator.pushNamed(context, "/preview",arguments: m);
           Navigator.pop(context);
         }
       });

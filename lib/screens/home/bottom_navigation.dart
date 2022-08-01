@@ -11,6 +11,7 @@ import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/discover.dart';
 import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/widgets/video_item.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../main.dart';
@@ -168,6 +169,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   await Navigator.pushNamed(context, '/spin');
                   reelsPlayerController?.play();
                   shouldAutoPlayReel = true;
+                  setState(()=>selectedIndex = 0);
                 } else {
                   showAlertDialog(context);
                 }
@@ -309,6 +311,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     var loginData = instance.getString('currentUser');
     if(loginData!=null){
       String imgPath = '';
+      String redirectPath = '';
       var response = await RestApi.getSiteSettings();
       var json = jsonDecode(response.body);
       if(json['status']){
@@ -316,7 +319,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
         for(var el in jsonList){
           if(el['name']=='advertisement_image'){
             imgPath = el['value']??'';
-            break;
+          } else if(el['name']=='advertisement_link'){
+            redirectPath = el['value']??'';
           }
         }
       }
@@ -331,17 +335,24 @@ class _BottomNavigationState extends State<BottomNavigation> {
               decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.black, width: 2)
               ),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Positioned(
-                    left: 2, right: 2, bottom: 2, top: 2,
-                    child: CachedNetworkImage(
-                      fit: BoxFit.contain,
-                      imageUrl: "${RestUrl.profileUrl}$imgPath",
-                      placeholder: (a,b)=>const Center(child: CircularProgressIndicator(),),
+                    left: 0, right: 0, bottom: 0, top: 0,
+                    child: GestureDetector(
+                      onTap: (){
+                        if(redirectPath.isNotEmpty){
+                          Uri openInBrowser = Uri(scheme: 'https', path: redirectPath,);
+                          launchUrl(openInBrowser);
+                        }
+                      },
+                      child: CachedNetworkImage(
+                        fit: BoxFit.contain,
+                        imageUrl: "${RestUrl.profileUrl}$imgPath",
+                        placeholder: (a,b)=>const Center(child: CircularProgressIndicator(),),
+                      ),
                     ),
                   ),
                   Positioned(

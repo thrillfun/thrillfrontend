@@ -52,7 +52,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   void initState() {
     super.initState();
-    reelsPlayerController?.pause();
+    if (reelsPlayerController!=null) reelsPlayerController?.pause();
       reelsPlayerController = VideoPlayerController.network(
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {

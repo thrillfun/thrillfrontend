@@ -33,6 +33,7 @@ class _SoundDetailsState extends State<SoundDetails> {
 
   @override
   void initState(){
+    if(widget.map['soundName']!=null) title = widget.map['soundName'];
     super.initState();
     getVideos();
   }
@@ -130,6 +131,7 @@ class _SoundDetailsState extends State<SoundDetails> {
                               child: CircularProgressIndicator(),
                             ),
                             fit: BoxFit.cover,
+                            errorWidget: (a,b,c)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
                             imageUrl:videoList[index].gif_image.isEmpty
                                 ? '${RestUrl.thambUrl}thumb-not-available.png'
                                 : '${RestUrl.gifUrl}${videoList[index].gif_image}'),
@@ -286,11 +288,6 @@ class _SoundDetailsState extends State<SoundDetails> {
       var json = jsonDecode(response.body);
       List jsonList = json["data"];
       videoList = jsonList.map((e) => VideoModel.fromJson(e)).toList();
-      try{
-        title = json["data"]["name"]??'';
-      } catch(e){
-        title = '';
-      }
       setState((){});
     } catch(e){
       Navigator.pop(context);

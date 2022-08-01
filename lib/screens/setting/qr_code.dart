@@ -199,6 +199,8 @@ class _QrCodeState extends State<QrCode> {
   saveQrCode()async{
     progressDialogue(context);
     try{
+      DateTime dateTime = DateTime.now();
+      File qrFile = File('${saveDirectory}ThrillProfileQR-${dateTime.hour}${dateTime.minute}${dateTime.second}${dateTime.millisecond}.png');
       final qrValidationResult = QrValidator.validate(
         data: qrData,
         version: QrVersions.auto,
@@ -213,17 +215,17 @@ class _QrCodeState extends State<QrCode> {
           embeddedImageStyle: null,
           embeddedImage: null
       );
-      String outputPath = '${saveDirectory}ThrillProfileQR.png';
+
       final picData = await painter.toImageData(2048);
       final buffer = picData!.buffer;
-      await File(outputPath).writeAsBytes(
+      await File(qrFile.path).writeAsBytes(
           buffer.asUint8List(picData.offsetInBytes, picData.lengthInBytes)
       );
       closeDialogue(context);
       showSuccessToast(context, "Successfully Saved QR Code!!");
     } catch(e){
       closeDialogue(context);
-      showErrorToast(context, "Failed to Save QR Code");
+      showErrorToast(context, "Failed to Save QR Code\n$e}");
     }
   }
   popUpDialog(String txt){

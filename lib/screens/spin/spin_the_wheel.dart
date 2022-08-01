@@ -161,7 +161,8 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              usedChanceValue.toString(),
+                              //usedChanceValue.toString(),
+                              wheelDetails?.last_reward??'',
                               style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -171,7 +172,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                               height: 5,
                             ),
                             const Text(
-                              usedChance,
+                              lastReward,
                               style: TextStyle(color: Colors.white),
                             )
                           ],
@@ -447,6 +448,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
       var json = jsonDecode(result.body);
       closeDialogue(context);
       if (json['status']) {
+        loadWheelDetails();
         isSpin = false;
         remainingChance = int.parse(json['data']['available_chance']);
         usedChanceValue = int.parse(json['data']['used_chance']);

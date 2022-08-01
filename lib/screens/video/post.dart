@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter_min_gpl/return_code.dart';
-import 'package:ffmpeg_kit_flutter_min_gpl/statistics.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
@@ -44,27 +42,23 @@ class _PostVideoState extends State<PostVideo> {
   final SimpleS3 _simpleS3 = SimpleS3();
   List<CategoryModel> videoCategory = List<CategoryModel>.empty(growable: true);
   List<LanguagesModel> videoLanguage = List<LanguagesModel>.empty(growable: true);
-  bool isLoading = true, isProcessing = false, wasSuccess = false;
-  String newName = '';
+  bool isLoading = true;
   double percentage = 0;
-  int radioGroupValue = 0;
   List<HashtagModel> hashtagsList = List<HashtagModel>.empty(growable: true);
   List<String> selectedHashtags = List<String>.empty(growable: true);
   TextEditingController hashtagTextFieldController = TextEditingController();
+  bool isPublic = true;
 
   @override
   void initState() {
     super.initState();
-    FFmpegKitConfig.enableStatisticsCallback(statisticsCallback);
-    if(widget.data.addSoundModel!=null){
-      radioGroupValue = 1;
-    }
+    //FFmpegKitConfig.enableStatisticsCallback(statisticsCallback);
     createGIF();
     loadVideoFields();
     getHashtags();
     videoPlayerController =
     VideoPlayerController.file(
-        File(widget.data.filePath))
+        File(widget.data.newPath!))
           ..initialize().then((value) {
             videoPlayerController.play();
             videoPlayerController.setLooping(true);
@@ -80,135 +74,14 @@ class _PostVideoState extends State<PostVideo> {
     super.dispose();
   }
 
-  statisticsCallback(Statistics statistics){
-    final int time = statistics.getTime();
-    final int seconds = videoPlayerController.value.duration.inMilliseconds;
-    final double percent = (time/seconds)*100;
-    //print("Progress ====>>> ${percent.toStringAsFixed(0)}%");
-    percentage = percent;
-    if (mounted) setState((){});
-  }
-
-  startProcessing(String draftORpost)async{
-    String outputPath = '$saveDirectory$newName.mp4';
-    String? audioFilePath = widget.data.addSoundModel?.sound;
-    File videoFile = File(widget.data.filePath);
-
-    if(widget.data.isDuet && widget.data.downloadedDuetFilePath!=null){
-      try{
-        FFmpegKit.execute(
-            //"-i ${widget.data.downloadedDuetFilePath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 -s 720x1280 -vcodec libx264 -aspect 4:3 $outputPath" //stretched
-            "-i ${widget.data.downloadedDuetFilePath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' -s 720x1280 -vcodec libx264 $outputPath" //cropped+stretched
-        ).then((session) async {
-          final returnCode = await session.getReturnCode();
-          // final logs = await session.getLogsAsString();
-          // final logList = logs.split('\n');
-          // print("============================> LOG STARTED!!!!");
-          // for(var e in logList){
-          //   print(e);
-          // }
-          //print("============================> LOG ENDED!!!!");
-
-          if (ReturnCode.isSuccess(returnCode)) {
-            // print("============================> Success!!!!");
-            setState(() {
-              isProcessing = false;
-              wasSuccess = true;
-              draftORpost=='draft'?draftUpload():postUpload();
-            });
-          } else {
-            // print("============================> Failed!!!!");
-            closeDialogue(context);
-            showErrorToast(context, "Video processing failed!");
-            setState(()=>isProcessing = false);
-            //Navigator.pop(context);
-          }
-        });
-      } catch(e){
-        closeDialogue(context);
-        //print(e.toString());
-        showErrorToast(context, "Video Processing Failed");
-      }
-    } else {
-      if(widget.data.addSoundModel==null || radioGroupValue==0){
-        try{
-          FFmpegKit.execute(
-              "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -s 720x1280 -vcodec libx264 $outputPath"
-            //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
-          ).then((session) async {
-            final returnCode = await session.getReturnCode();
-            // final logs = await session.getLogsAsString();
-            // final logList = logs.split('\n');
-            // print("============================> LOG STARTED!!!!");
-            // for(var e in logList){
-            //   print(e);
-            // }
-            // print("============================> LOG ENDED!!!!");
-
-            if (ReturnCode.isSuccess(returnCode)) {
-              // print("============================> Success!!!!");
-              setState(() {
-                isProcessing = false;
-                wasSuccess = true;
-                draftORpost=='draft'?draftUpload():postUpload();
-              });
-            } else {
-              // print("============================> Failed!!!!");
-              closeDialogue(context);
-              showErrorToast(context, "Video processing failed!");
-              setState(()=>isProcessing = false);
-              //Navigator.pop(context);
-            }
-          });
-        } catch(e){
-          closeDialogue(context);
-          //print(e.toString());
-          showErrorToast(context, "Video Processing Failed");
-        }
-      } else {
-        try{
-          String start = Duration(seconds: widget.data.map!["start"]).toString().split('.').first;
-          String end = Duration(seconds: widget.data.map!["end"]).toString().split('.').first;
-          String time = (int.parse(widget.data.map!["end"].toString())-int.parse(widget.data.map!["start"].toString())).toString();
-          FFmpegKit.execute(
-            //"-y -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a $outputPath"
-            //"-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -qscale 5 -c:a aac $outputPath"
-            //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
-            //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
-            //"-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 -vcodec libx264 $outputPath"
-              "-y -ss $start -to $end -i ${videoFile.path} -i $audioFilePath -map 0:v -s 720x1280 -qscale 5 -t $time -map 1:a $outputPath"
-          ).then((session) async {
-            final returnCode = await session.getReturnCode();
-            // final logs = await session.getLogsAsString();
-            // final logList = logs.split('\n');
-            // print("============================> LOG STARTED!!!!");
-            // for(var e in logList){
-            // print(e);
-            // }
-            // print("============================> LOG ENDED!!!!");
-            if (ReturnCode.isSuccess(returnCode)) {
-              //print("============================> Success!!!!");
-              setState(() {
-                isProcessing = false;
-                wasSuccess = true;
-                draftORpost=='draft'?draftUpload():postUpload();
-              });
-            } else {
-              //print("============================> Failed!!!!");
-              closeDialogue(context);
-              showErrorToast(context, "Video processing failed!");
-              setState(()=>isProcessing = false);
-              //Navigator.pop(context);
-            }
-          });
-        } catch(e){
-          closeDialogue(context);
-          //print(e.toString());
-          showErrorToast(context, "Video Processing Failed");
-        }
-      }
-    }
-  }
+  // statisticsCallback(Statistics statistics){
+  //   final int time = statistics.getTime();
+  //   final int seconds = videoPlayerController.value.duration.inMilliseconds;
+  //   final double percent = (time/seconds)*100;
+  //   //print("Progress ====>>> ${percent.toStringAsFixed(0)}%");
+  //   percentage = percent;
+  //   if (mounted) setState((){});
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -465,29 +338,7 @@ class _PostVideoState extends State<PostVideo> {
                     const SizedBox(
                       height: 20,
                     ),
-                    Row(
-                      children: [
-                        Radio(
-                            value: 0,
-                            groupValue: radioGroupValue,
-                            onChanged: (int? val)=>setState(()=>radioGroupValue=val??0),
-                        ),
-                        Text("Default Sound", style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.grey),),
-                        const Spacer(),
-                        Radio(
-                          value: 1,
-                          groupValue: radioGroupValue,
-                          onChanged: (int? val) {
-                            if(widget.data.addSoundModel==null){
-                              showErrorToast(context, "You did not chosen any sound!!");
-                            } else {
-                              setState(() => radioGroupValue = val ?? 1);
-                            }
-                          },
-                        ),
-                        Text("Chosen Sound", style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.grey),),
-                      ],
-                    ).w(MediaQuery.of(context).size.width*.90),
+
                     Row(
                       children: [
                         const SizedBox(
@@ -505,12 +356,17 @@ class _PostVideoState extends State<PostVideo> {
                           ),
                         ),
                         TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                isPublic =  !isPublic;
+                              });
+                            },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  public,
+                                  isPublic?
+                                  public:private,
                                   style: TextStyle(
                                       color: Colors.grey.shade700, fontSize: 18),
                                 ),
@@ -604,9 +460,55 @@ class _PostVideoState extends State<PostVideo> {
                     const SizedBox(
                       height: 25,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     ElevatedButton(
+                    //         onPressed: () async {
+                    //           try {
+                    //             FocusScope.of(context).requestFocus(FocusNode());
+                    //             videoPlayerController.pause();
+                    //             if (desCtr.text.isEmpty) {
+                    //               showErrorToast(context, "Describe your video");
+                    //             } else {
+                    //               if (dropDownCategoryValue.isEmpty) {
+                    //                 showErrorToast(context, "Select Category");
+                    //               } else {
+                    //                 if (dropDownLanguageValue.isEmpty) {
+                    //                   showErrorToast(context, "Select Language");
+                    //                 } else {
+                    //                   progressDialogue(context);
+                    //                   startProcessing('draft');
+                    //                 }
+                    //               }
+                    //             }
+                    //           } catch (e) {
+                    //             closeDialogue(context);
+                    //             showErrorToast(context, e.toString());
+                    //           }
+                    //         },
+                    //         style: ElevatedButton.styleFrom(
+                    //             primary: ColorManager.deepPurple,
+                    //             fixedSize: Size(
+                    //                 MediaQuery.of(context).size.width * .40, 50),
+                    //             shape: RoundedRectangleBorder(
+                    //                 borderRadius: BorderRadius.circular(50))),
+                    //         child: Row(
+                    //           mainAxisSize: MainAxisSize.min,
+                    //           children: [
+                    //             Image.asset('assets/draft.png'),
+                    //             const SizedBox(
+                    //               width: 10,
+                    //             ),
+                    //             const Text(
+                    //               draft,
+                    //               style: TextStyle(fontSize: 15),
+                    //             )
+                    //           ],
+                    //         )),
+                    //     const SizedBox(
+                    //       width: 15,
+                    //     ),
                         ElevatedButton(
                             onPressed: () async {
                               try {
@@ -622,53 +524,7 @@ class _PostVideoState extends State<PostVideo> {
                                       showErrorToast(context, "Select Language");
                                     } else {
                                       progressDialogue(context);
-                                      startProcessing('draft');
-                                    }
-                                  }
-                                }
-                              } catch (e) {
-                                closeDialogue(context);
-                                showErrorToast(context, e.toString());
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                                primary: ColorManager.deepPurple,
-                                fixedSize: Size(
-                                    MediaQuery.of(context).size.width * .40, 50),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50))),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Image.asset('assets/draft.png'),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                const Text(
-                                  draft,
-                                  style: TextStyle(fontSize: 15),
-                                )
-                              ],
-                            )),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        ElevatedButton(
-                            onPressed: () async {
-                              try {
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                videoPlayerController.pause();
-                                if (desCtr.text.isEmpty) {
-                                  showErrorToast(context, "Describe your video");
-                                } else {
-                                  if (dropDownCategoryValue.isEmpty) {
-                                    showErrorToast(context, "Select Category");
-                                  } else {
-                                    if (dropDownLanguageValue.isEmpty) {
-                                      showErrorToast(context, "Select Language");
-                                    } else {
-                                      progressDialogue(context);
-                                      startProcessing('post');
+                                      isPublic? postUpload():draftUpload();
                                     }
                                   }
                                 }
@@ -696,8 +552,8 @@ class _PostVideoState extends State<PostVideo> {
                               ],
                             ))
                       ],
-                    ),
-                  ],
+                  //   ),
+                  // ],
                 ).h(getHeight(context) - kToolbarHeight),
         ),
       ),
@@ -725,9 +581,7 @@ class _PostVideoState extends State<PostVideo> {
   }
 
   createGIF() async {
-    final dateTime = DateTime.now();
-    newName = "Thrill-${dateTime.day}-${dateTime.month}-${dateTime.year}-${dateTime.hour}-${dateTime.minute}";
-    String outputPath = '$saveCacheDirectory$newName.gif';
+    String outputPath = '$saveCacheDirectory${widget.data.newName}.gif';
     FFmpegKit.execute("-i ${widget.data.filePath} -r 3 -filter:v scale=280:480 -t 5 $outputPath").then((session) async {
       final returnCode = await session.getReturnCode();
 
@@ -744,11 +598,8 @@ class _PostVideoState extends State<PostVideo> {
         DateTime.now().millisecondsSinceEpoch;
     String videoId = '$currentUnix.mp4';
 
-    await _simpleS3
-        .uploadFile(
-      wasSuccess?
-      File('$saveDirectory$newName.mp4'):
-      File(widget.data.filePath),
+    await _simpleS3.uploadFile(
+      File(widget.data.newPath!),
       "thrillvideo",
       "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
       AWSRegions.usEast1,
@@ -759,7 +610,7 @@ class _PostVideoState extends State<PostVideo> {
     )
         .then((value) async {
       await _simpleS3.uploadFile(
-        File('$saveCacheDirectory$newName.gif'),
+        File('$saveCacheDirectory${widget.data.newName}.gif'),
         "thrillvideo",
         "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
         AWSRegions.usEast1,
@@ -785,7 +636,10 @@ class _PostVideoState extends State<PostVideo> {
                   : widget.data.filterName,
               dropDownLanguageValue,
               '$currentUnix.gif',
-              widget.data.speed);
+              widget.data.speed,
+            duetSwitch,
+            commentsSwitch,
+          );
           var json = jsonDecode(result.body);
           closeDialogue(context);
           if (json['status']) {
@@ -793,10 +647,9 @@ class _PostVideoState extends State<PostVideo> {
                 .add(const VideoLoading(selectedTabIndex: 1));
             showSuccessToast(context,
                 "Video has been saved successfully");
-            await Future.delayed(
-                const Duration(milliseconds: 200));
+            await Future.delayed(const Duration(milliseconds: 200));
             File recordedVideoFile = File(widget.data.filePath);
-            File processedVideoFile = File('$saveDirectory$newName.mp4');
+            File processedVideoFile = File(widget.data.newPath!);
             recordedVideoFile.delete();
             processedVideoFile.delete();
             Navigator.pushNamedAndRemoveUntil(
@@ -833,7 +686,10 @@ class _PostVideoState extends State<PostVideo> {
                     : widget.data.filterName,
                 dropDownLanguageValue,
                 '$currentUnix.gif',
-                widget.data.speed);
+                widget.data.speed,
+              duetSwitch,
+              commentsSwitch,
+            );
             var json = jsonDecode(result.body);
             closeDialogue(context);
             if (json['status']) {
@@ -844,7 +700,7 @@ class _PostVideoState extends State<PostVideo> {
               await Future.delayed(
                   const Duration(milliseconds: 200));
               File recordedVideoFile = File(widget.data.filePath);
-              File processedVideoFile = File('$saveDirectory$newName.mp4');
+              File processedVideoFile = File(widget.data.newPath!);
               recordedVideoFile.delete();
               processedVideoFile.delete();
               Navigator.pushNamedAndRemoveUntil(
@@ -866,9 +722,7 @@ class _PostVideoState extends State<PostVideo> {
 
     await _simpleS3
         .uploadFile(
-      wasSuccess?
-      File('$saveDirectory$newName.mp4'):
-      File(widget.data.filePath),
+      File(widget.data.newPath!),
       "thrillvideo",
       "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
       AWSRegions.usEast1,
@@ -879,7 +733,7 @@ class _PostVideoState extends State<PostVideo> {
     )
         .then((value) async {
       await _simpleS3.uploadFile(
-        File('$saveCacheDirectory$newName.gif'),
+        File('$saveCacheDirectory${widget.data.newName}.gif'),
         "thrillvideo",
         "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
         AWSRegions.usEast1,
@@ -905,18 +759,19 @@ class _PostVideoState extends State<PostVideo> {
                   : widget.data.filterName,
               dropDownLanguageValue,
               '$currentUnix.gif',
-              widget.data.speed);
+              widget.data.speed,
+            duetSwitch,
+            commentsSwitch,
+          );
           var json = jsonDecode(result.body);
           closeDialogue(context);
           if (json['status']) {
-            BlocProvider.of<VideoBloc>(context)
-                .add( const VideoLoading(selectedTabIndex: 1));
+            BlocProvider.of<VideoBloc>(context).add( const VideoLoading(selectedTabIndex: 1));
             showSuccessToast(context,
                 "Video has been posted successfully");
-            await Future.delayed(
-                const Duration(milliseconds: 200));
+            await Future.delayed(const Duration(milliseconds: 200));
             File recordedVideoFile = File(widget.data.filePath);
-            File processedVideoFile = File('$saveDirectory$newName.mp4');
+            File processedVideoFile = File(widget.data.newPath!);
             recordedVideoFile.delete();
             processedVideoFile.delete();
             Navigator.pushNamedAndRemoveUntil(
@@ -953,22 +808,21 @@ class _PostVideoState extends State<PostVideo> {
                     : widget.data.filterName,
                 dropDownLanguageValue,
                 '$currentUnix.gif',
-                widget.data.speed);
+                widget.data.speed,
+              duetSwitch,
+              commentsSwitch,
+            );
             var json = jsonDecode(result.body);
             closeDialogue(context);
             if (json['status']) {
-              BlocProvider.of<VideoBloc>(context)
-                  .add( const VideoLoading(selectedTabIndex: 1));
-              showSuccessToast(context,
-                  "Video has been posted successfully");
-              await Future.delayed(
-                  const Duration(milliseconds: 200));
+              BlocProvider.of<VideoBloc>(context).add( const VideoLoading(selectedTabIndex: 1));
+              showSuccessToast(context, "Video has been posted successfully");
+              await Future.delayed(const Duration(milliseconds: 200));
               File recordedVideoFile = File(widget.data.filePath);
-              File processedVideoFile = File('$saveDirectory$newName.mp4');
+              File processedVideoFile = File(widget.data.newPath!);
               recordedVideoFile.delete();
               processedVideoFile.delete();
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/', (route) => false);
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
             } else {
               showErrorToast(
                   context, json['message']);
