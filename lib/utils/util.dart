@@ -2,6 +2,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:thrill/main.dart';
 
 import '../common/strings.dart';
 import '../rest/rest_url.dart';
@@ -55,7 +56,7 @@ showErrorToast(BuildContext context,String msg)async{
               alignment: Alignment.topRight,
               child: TextButton(
                   onPressed: (){
-                    Navigator.pop(context);
+                    Navigator.pop(navigatorKey.currentContext!);
                     },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.only(right: 10),
@@ -67,10 +68,10 @@ showErrorToast(BuildContext context,String msg)async{
       ),
     ),
   ));
-  try{
-    await Future.delayed(const Duration(seconds: 7));
-    if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
-  } catch(_){}
+  // try{
+  //   await Future.delayed(const Duration(seconds: 7));
+  //   if (!ModalRoute.of(context)!.isCurrent) Navigator.of(context, rootNavigator: true).pop();
+  // } catch(_){}
 }
 
 showSuccessToast(BuildContext context,String msg) async {
@@ -108,7 +109,7 @@ showSuccessToast(BuildContext context,String msg) async {
               alignment: Alignment.topRight,
               child: TextButton(
                   onPressed: (){
-                    Navigator.pop(context);
+                    Navigator.pop(navigatorKey.currentContext!);
                   },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.only(right: 10),
@@ -120,10 +121,10 @@ showSuccessToast(BuildContext context,String msg) async {
       ),
     ),
   ));
-  try{
-    await Future.delayed(const Duration(seconds: 7));
-    if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
-  } catch(_){}
+  // try{
+  //   await Future.delayed(const Duration(seconds: 7));
+  //   if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
+  // } catch(_){}
 }
 
 progressDialogue(BuildContext context) {

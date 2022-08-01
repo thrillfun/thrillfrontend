@@ -5,8 +5,9 @@ class WheelDetails{
 String available_chance,used_chance;
 List<WheelRewards> wheelRewards;
 List<RecentRewards> recentRewards;
+String last_reward;
 
-WheelDetails(this.used_chance,this.available_chance,this.wheelRewards,this.recentRewards);
+WheelDetails(this.used_chance,this.available_chance,this.wheelRewards,this.recentRewards,this.last_reward);
 
 factory WheelDetails.fromJson(dynamic json) {
   List<WheelRewards> rewards=List<WheelRewards>.empty(growable: true);
@@ -21,6 +22,8 @@ factory WheelDetails.fromJson(dynamic json) {
       json['used_chance'] ?? '',
       json['available_chance'] ?? '',
       rewards,
-      recentRewards);
+      recentRewards,
+      json['last_reward'] ?? ''
+  );
 }
 }

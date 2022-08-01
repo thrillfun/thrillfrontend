@@ -2,12 +2,25 @@
 import 'package:thrill/models/add_sound_model.dart';
 
 class PostData{
-  String filePath,filterName;
+  String filePath, filterName;
   AddSoundModel? addSoundModel;
-  Map? map;
-  bool isDuet;
-  String? downloadedDuetFilePath;
+  bool isDuet, isDefaultSound, isUploadedFromGallery;
+  String? duetPath, newPath, newName;
   String speed;
+  int trimStart, trimEnd;
 
-  PostData({required this.speed, required this.filePath, required this.filterName, this.addSoundModel, this.map, required this.isDuet, this.downloadedDuetFilePath});
+  PostData({
+    required this.speed,
+    required this.filePath,
+    required this.filterName,
+    this.addSoundModel,
+    required this.trimStart,
+    required this.isDuet,
+    this.duetPath,
+    required this.isDefaultSound,
+    required this.trimEnd,
+    required this.isUploadedFromGallery,
+    this.newPath,
+    this.newName
+  });
 }

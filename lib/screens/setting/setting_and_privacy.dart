@@ -230,7 +230,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text("Are you sure you want to logout?",
-                              style: Theme.of(context).textTheme.headline3,
+                              style: Theme.of(context).textTheme.headline4,
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 5,),
@@ -697,12 +697,12 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                   Container(
                                     clipBehavior: Clip.antiAliasWithSaveLayer,
                                     height: 90,
+                                    padding: const EdgeInsets.all(2),
                                     width: 90,
                                     decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                            color: ColorManager.spinColorDivider)
-                                    ),
+                                            color: ColorManager.spinColorDivider)),
                                     child: usersModel[index].avatar.isEmpty?
                                     Padding(
                                       padding: const EdgeInsets.all(10.0),
@@ -713,13 +713,16 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         fit: BoxFit.contain,
                                       ),
                                     ):
-                                    CachedNetworkImage(
-                                      fit: BoxFit.cover,
-                                      imageUrl: '${RestUrl.profileUrl}${usersModel[index].avatar}',
-                                      placeholder: (a, b) => const Center(
-                                        child: CircularProgressIndicator(),
+                                    ClipOval(
+                                      child: CachedNetworkImage(
+                                        fit: BoxFit.cover,
+                                        imageUrl:
+                                        '${RestUrl.profileUrl}${usersModel[index].avatar}',
+                                        placeholder: (a, b) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
                                       ),
-                                    ),
+                                    )
                                   ),
                                   const SizedBox(
                                     width: 10,
@@ -732,8 +735,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         Text(
                                           usersModel[index].username,
                                           style: const TextStyle(fontSize: 18),
+                                          maxLines: 1,
                                         ),
-                                        Text(usersModel[index].name),
+                                        Text(usersModel[index].name,maxLines: 1,),
                                         const SizedBox(height: 5,),
                                       ],
                                     ),
@@ -809,12 +813,12 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         }
                                       },
                                       padding: const EdgeInsets.only(right: 25),
-                                      constraints: const BoxConstraints(minWidth: 80),
+                                      constraints: const BoxConstraints(minWidth: 90),
                                       icon: index==0?const Icon(
                                         Icons.check,
                                         size: 30,
                                         color: ColorManager.cyan,
-                                      ):const Text("Logout", style: TextStyle(fontSize: 15, color: Colors.red, fontWeight: FontWeight.bold),))
+                                      ):const Text("Logout", style: TextStyle(fontSize: 13.5, color: Colors.red, fontWeight: FontWeight.bold),))
                                 ],
                               ),
                             ),

@@ -98,8 +98,32 @@ class _TagDetailsState extends State<TagDetails> {
                           height: 7,
                         ),
                         GestureDetector(
-                          onTap: (){
-                            Navigator.pushNamed(context, '/favourites');
+                          onTap: ()async{
+                            if (favTagList.contains(widget.tag.hashtag_id.toString())) {
+                              var result = await RestApi.addAndRemoveFavariteSoundHastag(widget.tag.hashtag_id, "hashtag", 0);
+                              var json = jsonDecode(result.body);
+                              if (json['status']) {
+                                favTagList.remove(widget.tag.hashtag_id.toString());
+                                showSuccessToast(context, json['message']);
+                              } else {
+                                showErrorToast(context, json['message']);
+                              }
+                            } else {
+                              var result =
+                              await RestApi.addAndRemoveFavariteSoundHastag(
+                                  widget.tag.hashtag_id, "hashtag", 1);
+                              var json = jsonDecode(result.body);
+                              if (json['status']) {
+                                favTagList.add(widget.tag.hashtag_id.toString());
+                                showSuccessToast(context, json['message']);
+                              } else {
+                                showErrorToast(context, json['message']);
+                              }
+                            }
+                            setState(() {});
+                            SharedPreferences pref =
+                            await SharedPreferences.getInstance();
+                            pref.setStringList('favTag', favTagList);
                           },
                           child: Container(
                               padding: const EdgeInsets.symmetric(
@@ -111,49 +135,16 @@ class _TagDetailsState extends State<TagDetails> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  InkWell(
-                                    onTap: ()async{
-
-                                      if (favTagList.contains(widget.tag.hashtag_id.toString())) {
-                                        var result =
-                                        await RestApi.addAndRemoveFavariteSoundHastag(
-                                            widget.tag.hashtag_id, "hashtag", 0);
-                                        var json = jsonDecode(result.body);
-                                        if (json['status']) {
-                                          favTagList.remove(widget.tag.hashtag_id.toString());
-                                          showErrorToast(context, json['message']);
-                                        } else {
-                                          showErrorToast(context, json['message']);
-                                        }
-                                      } else {
-                                        var result =
-                                        await RestApi.addAndRemoveFavariteSoundHastag(
-                                            widget.tag.hashtag_id, "hashtag", 1);
-                                        var json = jsonDecode(result.body);
-                                        if (json['status']) {
-                                          favTagList.add(widget.tag.hashtag_id.toString());
-                                          showSuccessToast(context, json['message']);
-                                        } else {
-                                          showErrorToast(context, json['message']);
-                                        }
-                                      }
-                                      setState(() {});
-                                      SharedPreferences pref =
-                                      await SharedPreferences.getInstance();
-                                      pref.setStringList('favTag', favTagList);
-
-                                    },
-                                    child: Icon(
-                                      Icons.bookmark,
-                                      color: favTagList.contains(
-                                              widget.tag.hashtag_id.toString())
-                                          ? Colors.deepOrange
-                                          : Colors.grey.shade700,
-                                      size: 15,
-                                    ),
+                                  Icon(
+                                    Icons.bookmark,
+                                    color: favTagList.contains(
+                                            widget.tag.hashtag_id.toString())
+                                        ? Colors.deepOrange
+                                        : Colors.grey.shade700,
+                                    size: 15,
                                   ),
-                                  Text(
-                                    addedToFavourite,
+                                  Text(favTagList.contains(widget.tag.hashtag_id.toString())?
+                                    addedToFavourite:"Add to Favourite",
                                     style: TextStyle(
                                         color: Colors.grey.shade700,
                                         fontSize: 13),
@@ -190,6 +181,7 @@ class _TagDetailsState extends State<TagDetails> {
                                         child: CircularProgressIndicator(),
                                       ),
                                   fit: BoxFit.cover,
+                                  errorWidget: (a,b,c)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
                                   imageUrl: widget.tag.hashVideo[index].gif_image.isEmpty
                                       ? '${RestUrl.thambUrl}thumb-not-available.png'
                                       : '${RestUrl.gifUrl}${widget.tag.hashVideo[index].gif_image}'),

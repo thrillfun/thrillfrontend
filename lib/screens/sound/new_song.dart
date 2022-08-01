@@ -29,6 +29,7 @@ class NewSong extends StatefulWidget {
 class _NewSongState extends State<NewSong> {
   bool isLoading = true;
   List<AddSoundModel> newSongList = List<AddSoundModel>.empty(growable: true);
+  List<AddSoundModel> favSound = List<AddSoundModel>.empty(growable: true);
   List<int> bookmarkedIndexes = List.empty(growable: true);
 
   @override
@@ -131,14 +132,15 @@ class _NewSongState extends State<NewSong> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 GestureDetector(
-                                  onTap: (){
-                                    setState(() {
-                                      if(bookmarkedIndexes.contains(index)){
-                                        bookmarkedIndexes.remove(index);
+                                  onTap: () async {
+                                      if(favSound.contains(newSongList[index])){
+                                        setState(()=>favSound.remove(newSongList[index]));
+                                        await RestApi.addAndRemoveFavariteSoundHastag(newSongList[index].id, "sound", 0);
                                       } else {
-                                        bookmarkedIndexes.add(index);
+                                        setState(()=>favSound.add(newSongList[index]));
+                                        await RestApi.addAndRemoveFavariteSoundHastag(newSongList[index].id, "sound", 1);
                                       }
-                                    });
+                                      setState(() {});
                                   },
                                   child: Material(
                                     borderRadius: BorderRadius.circular(50),
@@ -152,7 +154,7 @@ class _NewSongState extends State<NewSong> {
                                                 color: Colors.grey.shade300,
                                                 width: 1)),
                                         child: Icon(
-                                          bookmarkedIndexes.contains(index)?
+                                            isFav(index)?
                                               Icons.bookmark_outlined:
                                             Icons.bookmark_outline_sharp)),
                                   ),
@@ -207,9 +209,13 @@ class _NewSongState extends State<NewSong> {
   getSounds() async {
     try{
       var response = await RestApi.getSoundList();
+      var result = await RestApi.getFavriteItems();
       var json = jsonDecode(response.body);
+      var jsonSound = jsonDecode(result.body);
       var jsonList = json['data'] as List;
+      List jsonSoundList = jsonSound['data']['sounds'] as List;
       newSongList = jsonList.map((e) => AddSoundModel.fromJson(e)).toList();
+      favSound = jsonSoundList.map((e) => AddSoundModel.fromJson(e)).toList();
       isLoading = false;
       setState(() {});
     } catch(e){
@@ -242,5 +248,16 @@ class _NewSongState extends State<NewSong> {
       closeDialogue(context);
       showErrorToast(context, e.toString());
     }
+  }
+
+  bool isFav(int index){
+    bool fav = false;
+    for(AddSoundModel aSM in favSound){
+      if(aSM.id==newSongList[index].id){
+        fav = true;
+        break;
+      }
+    }
+    return fav;
   }
 }

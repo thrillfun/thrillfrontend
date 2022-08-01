@@ -11,7 +11,7 @@ import 'package:thrill/screens/screen.dart';
 import 'package:thrill/screens/sound/sound_details.dart';
 import 'package:thrill/screens/terms_of_service.dart';
 import 'package:thrill/screens/video/duet.dart';
-
+import 'package:thrill/screens/video/preview.dart';
 import '../models/vidio_discover_model.dart';
 import '../screens/sound/new_song.dart';
 
@@ -80,6 +80,8 @@ class AppRouter {
         return RequestVerification.route();
       case PaymentRequest.routeName:
         return PaymentRequest.route();
+      case Trim.routeName:
+        return Trim.route(videoData: settings.arguments as PostData);
       case Preview.routeName:
         return Preview.route(videoData: settings.arguments as PostData);
       case SoundDetails.routeName:

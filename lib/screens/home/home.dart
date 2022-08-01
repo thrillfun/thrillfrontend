@@ -570,6 +570,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                       },
                     ),
                     Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: SvgPicture.asset(
+                          'assets/shadow.svg',
+                          fit: BoxFit.fill,
+                          width: MediaQuery.of(context).size.width,
+                        )),
+                    Positioned(
                       bottom: 70,
                       right: 10,
                       child: Column(
@@ -597,6 +606,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                         });
                                         reelsPlayerController?.play();
                                         shouldAutoPlayReel = true;
+                                        loadLikes();
                                       }
                                     } else {
                                       showAlertDialog(context);
@@ -700,7 +710,11 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               onTap: () async {
                                 await isLogined().then((value) {
                                   if (value) {
-                                    showComments(context, state.list[index].id);
+                                    if(state.list[index].is_commentable=="Yes"){
+                                      showComments(context, state.list[index].id);
+                                    } else {
+                                      showErrorToast(context, "This user has disabled comments on the video!");
+                                    }
                                   } else {
                                     showAlertDialog(context);
                                   }
@@ -724,11 +738,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               onTap: () async {
                                 await isLogined().then((value) async {
                                   if (value) {
-                                    reelsPlayerController?.pause();
-                                    shouldAutoPlayReel = false;
-                                    await Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
-                                    reelsPlayerController?.play();
-                                    shouldAutoPlayReel = true;
+                                    if(state.list[index].is_duetable=="Yes"){
+                                      reelsPlayerController?.pause();
+                                      shouldAutoPlayReel = false;
+                                      await Navigator.pushNamed(context, '/recordDuet', arguments: state.list[index]);
+                                      reelsPlayerController?.play();
+                                      shouldAutoPlayReel = true;
+                                    } else {
+                                      showErrorToast(context, "This user has disabled duet on the video!");
+                                    }
                                   } else {
                                     showAlertDialog(context);
                                   }
@@ -758,15 +776,6 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                         ],
                       ),
                     ),
-                    Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: SvgPicture.asset(
-                          'assets/shadow.svg',
-                          fit: BoxFit.fill,
-                          width: MediaQuery.of(context).size.width,
-                        )),
                     Positioned(
                       bottom: 10,
                       left: 10,
@@ -800,6 +809,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                               });
                                               reelsPlayerController?.play();
                                               shouldAutoPlayReel = true;
+                                              loadLikes();
                                             }
                                           } else {
                                             showAlertDialog(context);
@@ -829,39 +839,23 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                         onTap: () async {
                                           await isLogined().then((value) async {
                                             if (value) {
-                                              if (followList.contains(state
-                                                  .list[index].id
-                                                  .toString())) {
-                                                followList.remove(state
-                                                    .list[index].id
-                                                    .toString());
-                                                int followers = int.parse(state
-                                                    .list[index].user.followers);
+                                              if (followList.contains(state.list[index].id.toString())) {
+                                                followList.remove(state.list[index].id.toString());
+                                                int followers = int.parse(state.list[index].user.followers);
                                                 followers--;
-                                                state.list[index].user.followers =
-                                                    followers.toString();
-                                                state.list[index].copyWith(
-                                                    user: state.list[index].user);
+                                                state.list[index].user.followers = followers.toString();
+                                                state.list[index].copyWith(user: state.list[index].user);
                                               } else {
-                                                followList.add(state
-                                                    .list[index].id
-                                                    .toString());
-                                                int followers = int.parse(state
-                                                    .list[index].user.followers);
+                                                followList.add(state.list[index].id.toString());
+                                                int followers = int.parse(state.list[index].user.followers);
                                                 followers++;
-                                                state.list[index].user.followers =
-                                                    followers.toString();
-                                                state.list[index].copyWith(
-                                                    user: state.list[index].user);
+                                                state.list[index].user.followers = followers.toString();
+                                                state.list[index].copyWith(user: state.list[index].user);
                                               }
-                                              SharedPreferences pref =
-                                              await SharedPreferences
-                                                  .getInstance();
-                                              pref.setStringList(
-                                                  'followList', followList);
+                                              SharedPreferences pref = await SharedPreferences.getInstance();
+                                              pref.setStringList('followList', followList);
 
-                                              BlocProvider.of<VideoBloc>(context)
-                                                  .add(FollowUnfollow(
+                                              BlocProvider.of<VideoBloc>(context).add(FollowUnfollow(
                                                   action: followList.contains(
                                                       state.list[index].id
                                                           .toString())
@@ -899,18 +893,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                 const SizedBox(
                                   height: 5,
                                 ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      getHashTagsToShow(state.list[index].hashtags)+
-                                      state.list[index].description,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headline6!
-                                          .copyWith(color: Colors.white),
-                                    ),
-                                  ],
+                                Text(
+                                  getHashTagsToShow(state.list[index].hashtags)+
+                                  state.list[index].description,
+                                  maxLines: 3,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headline6!
+                                      .copyWith(color: Colors.white),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(
                                   height: 5,
@@ -926,8 +917,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     Flexible(
                                       child:
                                       state.list[index].sound_name.isEmpty
-                                          ? "Original Sound".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
-                                          : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
+                                          ? "Original Sound by @${state.list[index].user.username}".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
+                                          : "${state.list[index].sound_name} by @${state.list[index].user.username}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
+                                          //: "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                     ),
                                   ],
                                 ),
@@ -941,7 +933,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     if(state.list[index].sound.isNotEmpty){
                                       reelsPlayerController?.pause();
                                       shouldAutoPlayReel = false;
-                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
+                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name, "soundName": state.list[index].sound_name});
                                       reelsPlayerController?.play();
                                       shouldAutoPlayReel = true;
                                     }
@@ -982,7 +974,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               color: selectedTopIndex == 0
                                   ? Colors.white
                                   : Colors.white60,
-                              fontSize: 18),
+                              fontSize: 16),
                         )),
                     Container(
                       height: 15,
@@ -1007,7 +999,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               color: selectedTopIndex == 1
                                   ? Colors.white
                                   : Colors.white60,
-                              fontSize: 18),
+                              fontSize: 16),
                         )),
                     Container(
                       height: 15,
@@ -1032,9 +1024,8 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               color: selectedTopIndex == 2
                                   ? Colors.white
                                   : Colors.white60,
-                              fontSize: 18),
+                              fontSize: 16),
                         )),
-                    const SizedBox(width: 10),
                     IconButton(
                         onPressed: ()async {
                           await isLogined().then((value) async {
@@ -1049,7 +1040,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                             }
                           });
                         },
-                        iconSize: 28,
+                        iconSize: 22,
+                        padding: const EdgeInsets.only(),
+                        constraints: const BoxConstraints(),
                         icon: const Icon(
                           Icons.camera_alt_rounded,
                           color: Colors.white,
@@ -1331,6 +1324,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     likeComment = likeData.getStringList('commentList') ?? [];
     followList = likeData.getStringList('followList') ?? [];
     setState(() {});
+    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
   }
 
   void _scrollListener() {
@@ -1379,12 +1373,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
   }
 
   showAlertDialog(BuildContext context) {
-    reelsPlayerController?.play();
     Widget continueButton = TextButton(
       child: const Text("OK"),
       onPressed: () async {
         Navigator.pop(context);
         reelsPlayerController?.pause();
+        reelsPlayerController?.setVolume(0);
+        shouldAutoPlayReel = false;
+        reelsPlayerController?.dispose();
+        reelsPlayerController = null;
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
     );

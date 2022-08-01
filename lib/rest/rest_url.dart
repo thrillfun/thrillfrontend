@@ -7,6 +7,8 @@ class RestUrl {
   static const String soundUrl = "https://9starinfosolutions.com/thrill/";
   static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
   static const String awsSoundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
+  static const String currencyUrl = "https://9starinfosolutions.com/thrill/uploads/currency/";
+
 
   static const String login = baseUrl + "login";
   static const String register = baseUrl + "register";
@@ -63,6 +65,12 @@ class RestUrl {
   static const String inbox = baseUrl + "user/chat-inbox";
   static const String sendChatNotification = baseUrl + "user/send-chat-notification";
   static const String safetyPreference = baseUrl + "user/safety-preference";
+  static const String followerList = baseUrl + "user/get-followers";
+  static const String reportUser = baseUrl + "user/report-user";
+  static const String checkBlock = baseUrl + "user/is-user-blocked";
+  static const String blockUnblockUser = baseUrl + "user/block-unblock-user";
+  static const String deleteVideo = baseUrl + "video/delete";
+  static const String publishPrivateVideo = baseUrl + "video/publish-private";
 
 
 }
