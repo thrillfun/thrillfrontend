@@ -433,6 +433,7 @@ class _RecordDuetState extends State<RecordDuet> {
   }
 
   navigateOrWait()async{
+    videoController?.pause();
     if(downloadProgress=='100'){
       PostData m = PostData(
           speed: '1',

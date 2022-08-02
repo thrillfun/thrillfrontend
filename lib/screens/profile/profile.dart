@@ -465,7 +465,7 @@ class _ProfileState extends State<Profile> {
                             elevation: 10,
                             child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
+                                    horizontal: 10, vertical: 2),
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(50),
                                     border:

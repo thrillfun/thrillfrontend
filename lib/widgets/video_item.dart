@@ -117,63 +117,61 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     // } else {
     //   reelsPlayerController!.pause();
     // }
-    return VisibilityDetector(
-      onVisibilityChanged: _handleVisibilityDetector,
-      key: Key('my-widget-${widget.pageIndex}'),
-      child: Container(
-        width: getWidth(context),
-        height: getHeight(context),
-        decoration: const BoxDecoration(
-          color: Colors.black,
-        ),
-        child: GestureDetector(
-          onLongPressStart: onLongPressStart,
-          onLongPressEnd: onLongPressEnd,
-          onDoubleTap: widget.callback,
-          onTap: onTap,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              !initialized
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : VideoPlayer(reelsPlayerController!),
-              widget.filter.isEmpty
-                  ? const SizedBox(width: 10)
-                  : !showGIF
-                      ? const SizedBox(width: 10)
-                      : Image.asset(
-                          widget.filter,
-                          fit: BoxFit.cover,
-                          width: getWidth(context),
-                          height: getHeight(context),
-                        ),
-              Positioned(
-                top: 70,
-                  child: Visibility(
-                    visible: reelsPlayerController!.value.volume==0?true:false,
-                    child: IconButton(
-                      icon: const Icon(Icons.volume_off,color: Colors.white,size: 40,),
-                      onPressed: ()=> reelsPlayerController!.setVolume(1).then((value) => setState((){})),
-                    ),
-                  )),
-              Visibility(
-                visible: isBuffering,
-                child: Center(
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                        text: TextSpan(children: [
-                          const WidgetSpan(child: CircularProgressIndicator()),
-                          TextSpan(text: '\n\nBuffering', style: Theme.of(context).textTheme.headline3!.copyWith(
-                            shadows: [const Shadow(color: Colors.white, offset: Offset(0,0), blurRadius: 30)]
-                          ))
-                        ])
-                    )
-                ),
+    return Container(
+      width: getWidth(context),
+      height: getHeight(context),
+      decoration: const BoxDecoration(
+        color: Colors.black,
+      ),
+      child: GestureDetector(
+        onLongPressStart: onLongPressStart,
+        onLongPressEnd: onLongPressEnd,
+        onDoubleTap: widget.callback,
+        onTap: onTap,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            !initialized
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : AspectRatio(
+                aspectRatio: reelsPlayerController!.value.aspectRatio,
+                child: VideoPlayer(reelsPlayerController!)),
+            widget.filter.isEmpty
+                ? const SizedBox(width: 10)
+                : !showGIF
+                    ? const SizedBox(width: 10)
+                    : Image.asset(
+                        widget.filter,
+                        fit: BoxFit.cover,
+                        width: getWidth(context),
+                        height: getHeight(context),
+                      ),
+            Positioned(
+              top: 70,
+                child: Visibility(
+                  visible: reelsPlayerController!.value.volume==0?true:false,
+                  child: IconButton(
+                    icon: const Icon(Icons.volume_off,color: Colors.white,size: 40,),
+                    onPressed: ()=> reelsPlayerController!.setVolume(1).then((value) => setState((){})),
+                  ),
+                )),
+            Visibility(
+              visible: isBuffering,
+              child: Center(
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                      text: TextSpan(children: [
+                        const WidgetSpan(child: CircularProgressIndicator()),
+                        TextSpan(text: '\n\nBuffering', style: Theme.of(context).textTheme.headline3!.copyWith(
+                          shadows: [const Shadow(color: Colors.white, offset: Offset(0,0), blurRadius: 30)]
+                        ))
+                      ])
+                  )
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -207,7 +205,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
       if (json['status']) {
         viewList.add(widget.videoId.toString());
         pref.setStringList('viewList', viewList);
-        setState(() {});
+        if (mounted) setState(() {});
         try{
           widget.pagesLength-1==widget.pageIndex?
           widget.pageController.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
