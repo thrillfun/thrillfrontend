@@ -52,9 +52,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     loadInterstitialAd();
     loadLikes();
     getUserData();
-    _pageController.addListener(_scrollListener);
+    //_pageController.addListener(_scrollListener);
     preloadPageController = PreloadPageController();
-    preloadPageController!.addListener(scrollListener);
+    //preloadPageController!.addListener(scrollListener);
     super.initState();
   }
 
@@ -507,6 +507,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                   //controller: preloadPageController,
                 controller: _pageController,
                   onPageChanged: (int index){
+                  print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                     if(adIndexes.contains(index)){
                       showAd();
                     }
@@ -839,14 +840,14 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                         onTap: () async {
                                           await isLogined().then((value) async {
                                             if (value) {
-                                              if (followList.contains(state.list[index].id.toString())) {
-                                                followList.remove(state.list[index].id.toString());
+                                              if (followList.contains(state.list[index].user.id.toString())) {
+                                                followList.remove(state.list[index].user.id.toString());
                                                 int followers = int.parse(state.list[index].user.followers);
                                                 followers--;
                                                 state.list[index].user.followers = followers.toString();
                                                 state.list[index].copyWith(user: state.list[index].user);
                                               } else {
-                                                followList.add(state.list[index].id.toString());
+                                                followList.add(state.list[index].user.id.toString());
                                                 int followers = int.parse(state.list[index].user.followers);
                                                 followers++;
                                                 state.list[index].user.followers = followers.toString();
@@ -857,7 +858,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
 
                                               BlocProvider.of<VideoBloc>(context).add(FollowUnfollow(
                                                   action: followList.contains(
-                                                      state.list[index].id
+                                                      state.list[index].user.id
                                                           .toString())
                                                       ? "follow"
                                                       : "unfollow",
@@ -879,7 +880,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                                   color: Colors.white, width: 1)),
                                           child:  Center(
                                             child: Text(
-                                              followList.contains(state.list[index].id.toString())
+                                              followList.contains(state.list[index].user.id.toString())
                                                   ? "Following" : "Follow",
                                               style:
                                               const TextStyle(color: Colors.white),
@@ -950,7 +951,6 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                 );
               }
               ),
-
               Positioned(
                 top: 30,
                 left: 0,
@@ -1324,42 +1324,41 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     likeComment = likeData.getStringList('commentList') ?? [];
     followList = likeData.getStringList('followList') ?? [];
     setState(() {});
-    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
   }
 
   void _scrollListener() {
-    if (_isOnPageTurning &&
-        _pageController.page == _pageController.page!.roundToDouble()) {
-      setState(() {
-        _currentPage = _pageController.page!.toInt();
-        _isOnPageTurning = false;
-      });
-    } else if (!_isOnPageTurning &&
-        _currentPage.toDouble() != _pageController.page) {
-      if ((_currentPage.toDouble() - _pageController.page!).abs() > 0.7) {
-        setState(() {
-          _isOnPageTurning = true;
-        });
-      }
-    }
+    // if (_isOnPageTurning &&
+    //     _pageController.page == _pageController.page!.roundToDouble()) {
+    //   setState(() {
+    //     _currentPage = _pageController.page!.toInt();
+    //     _isOnPageTurning = false;
+    //   });
+    // } else if (!_isOnPageTurning &&
+    //     _currentPage.toDouble() != _pageController.page) {
+    //   if ((_currentPage.toDouble() - _pageController.page!).abs() > 0.7) {
+    //     setState(() {
+    //       _isOnPageTurning = true;
+    //     });
+    //   }
+    // }
   }
 
   void scrollListener() {
-    if (isOnPageTurning &&
-        preloadPageController!.page ==
-            preloadPageController!.page!.roundToDouble()) {
-      setState(() {
-        current = preloadPageController!.page!.toInt();
-        isOnPageTurning = false;
-      });
-    } else if (!isOnPageTurning &&
-        current.toDouble() != preloadPageController!.page) {
-      if ((current.toDouble() - preloadPageController!.page!).abs() > 0.1) {
-        setState(() {
-          isOnPageTurning = true;
-        });
-      }
-    }
+    // if (isOnPageTurning &&
+    //     preloadPageController!.page ==
+    //         preloadPageController!.page!.roundToDouble()) {
+    //   setState(() {
+    //     current = preloadPageController!.page!.toInt();
+    //     isOnPageTurning = false;
+    //   });
+    // } else if (!isOnPageTurning &&
+    //     current.toDouble() != preloadPageController!.page) {
+    //   if ((current.toDouble() - preloadPageController!.page!).abs() > 0.1) {
+    //     setState(() {
+    //       isOnPageTurning = true;
+    //     });
+    //   }
+    // }
   }
 
   Future<bool> isLogined() async {

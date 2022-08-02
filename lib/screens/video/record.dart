@@ -690,16 +690,16 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                                 videoController?.pause();
                               }
                               PostData m = PostData(
-                                  speed: speed,
+                                  speed: '1',
                                   filePath: file.path,
                                   filterName: filterImage,
                                   addSoundModel: addSoundModel,
                                   isDuet: false,
                                   isDefaultSound: true,
-                                isUploadedFromGallery: true,
+                                  isUploadedFromGallery: true,
                                   trimStart: 0, trimEnd: 0,
                               );
-                              Navigator.pushNamed(context, "/trim",arguments: m);
+                              Navigator.pushNamed(context, "/trim", arguments: m);
                             } else {
                               showErrorToast(context, "Max File Size is 500 MB");
                             }
