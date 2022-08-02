@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../common/color.dart';
+import '../../models/currency_model.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
@@ -27,10 +28,10 @@ class _PaymentRequestState extends State<PaymentRequest> {
   TextEditingController feeCtr = TextEditingController();
   TextEditingController upiCtr = TextEditingController();
   TextEditingController amtCtr = TextEditingController();
-  String selectedCurrecny = "", selectedPayment = "";
-  List<String> payType = List<String>.empty(growable: true);
-  List<String> currencyType = List<String>.empty(growable: true);
-
+  List<CurrencyModel> curList = List<CurrencyModel>.empty(growable: true);
+  CurrencyModel? model;
+  List<Networks>? netList;
+  Networks? networks;
   @override
   void initState() {
     loadWalletInfo();
@@ -67,9 +68,9 @@ class _PaymentRequestState extends State<PaymentRequest> {
                 decoration: BoxDecoration(
                     border: Border.all(width: 1, color: Colors.grey.shade500),
                     borderRadius: BorderRadius.circular(8)),
-                child: DropdownButton(
+                child: DropdownButton<CurrencyModel>(
                   menuMaxHeight: 180,
-                  value: selectedCurrecny,
+                  value: model,
                   style: TextStyle(color: Colors.grey.shade700, fontSize: 17),
                   isExpanded: true,
                   underline: const SizedBox(),
@@ -78,15 +79,19 @@ class _PaymentRequestState extends State<PaymentRequest> {
                     color: Colors.grey,
                     size: 35,
                   ),
-                  onChanged: (String? value) {
+                  onChanged: (CurrencyModel? value) {
                     setState(() {
-                      selectedCurrecny = value!;
+                      model = value!;
+                      netList=value.networks;
+                      networks=netList!.first;
+                      feeCtr.text=netList!.first.feeDigit.toString();
                     });
+
                   },
-                  items: currencyType.map((String item) {
+                  items: curList.map((CurrencyModel item) {
                     return DropdownMenuItem(
                       value: item,
-                      child: Text(item),
+                      child: Text(item.code),
                     );
                   }).toList(),
                 ),
@@ -121,9 +126,9 @@ class _PaymentRequestState extends State<PaymentRequest> {
                 decoration: BoxDecoration(
                     border: Border.all(width: 1, color: Colors.grey.shade500),
                     borderRadius: BorderRadius.circular(8)),
-                child: DropdownButton(
+                child: DropdownButton<Networks>(
                   menuMaxHeight: 180,
-                  value: selectedPayment,
+                  value: networks,
                   style: TextStyle(color: Colors.grey.shade700, fontSize: 17),
                   isExpanded: true,
                   underline: const SizedBox(),
@@ -132,15 +137,16 @@ class _PaymentRequestState extends State<PaymentRequest> {
                     color: Colors.grey,
                     size: 35,
                   ),
-                  onChanged: (String? value) {
+                  onChanged: (Networks? value) {
                     setState(() {
-                      selectedPayment = value!;
+                      networks = value!;
+                      feeCtr.text=value.feeDigit.toString();
                     });
                   },
-                  items: payType.map((String item) {
+                  items: netList!.map((Networks item) {
                     return DropdownMenuItem(
                       value: item,
-                      child: Text(item),
+                      child: Text(item.networkName),
                     );
                   }).toList(),
                 ),
@@ -201,17 +207,25 @@ class _PaymentRequestState extends State<PaymentRequest> {
                   onPressed: () async {
                     FocusScope.of(context).requestFocus(FocusNode());
                     if (upiCtr.text.isEmpty) {
-                      showErrorToast(context, "Enter Upi");
+                      showErrorToast(context, "Enter Upi or address");
                     } else {
                       if (amtCtr.text.isEmpty) {
                         showErrorToast(context, "Enter Amount");
                       } else {
-                        progressDialogue(context);
-                        try {
+                        if(double.parse(amtCtr.text) < networks!.minAmount){
+                          showErrorToast(context, "Enter Min Amount ${networks!.minAmount} ");
+                        }else{
+                          if(double.parse(amtCtr.text) > networks!.maxAmount){
+                            showErrorToast(context, "Enter Max Amount ${networks!.maxAmount} ");
+                          }else{
+                            showPinDialog();
+                             progressDialogue(context);
+                            try {
                           var result = await RestApi.sendWithdrawlRequest(
-                              selectedCurrecny,
+                              model!.code,
                               upiCtr.text,
-                              selectedPayment,
+                              networks!.networkName,
+                              networks!.feeDigit.toString(),
                               amtCtr.text);
                           var json = jsonDecode(result.body);
                           if (json['status']) {
@@ -227,6 +241,8 @@ class _PaymentRequestState extends State<PaymentRequest> {
                         } catch (e) {
                           closeDialogue(context);
                           showErrorToast(context, e.toString());
+                        }
+                          }
                         }
                       }
                     }
@@ -252,21 +268,13 @@ class _PaymentRequestState extends State<PaymentRequest> {
 
   void loadWalletInfo() async {
     try {
-      var result = await RestApi.getCommissionSetting();
+      var result = await RestApi.getCurrencyDeatils();
       var json = jsonDecode(result.body);
-      var arrayList = jsonDecode(json['data'][0]['value']);
-      List<String> payTitle = List<String>.from(arrayList);
-      payType.addAll(payTitle);
-      selectedPayment = payType[0];
-      adminCommission = int.parse(json['data'][1]['value']);
-
-      var arrayListCurrency = json['data'][5]['value'];
-      print("arrayListCurrency");
-      print(arrayListCurrency);
-      List<String> currencyTitle = List<String>.from(arrayListCurrency);
-      currencyType.addAll(currencyTitle);
-      selectedCurrecny = currencyType[0];
-      feeCtr.text = '${adminCommission.toString()}% fees';
+      curList = List<CurrencyModel>.from(json['data'].map((i) => CurrencyModel.fromJson(i))).toList(growable: true);
+      model=curList[0];
+      netList=curList[0].networks;
+      networks=curList[0].networks[0];
+      feeCtr.text=curList[0].networks[0].feeDigit.toString();
       isLoading = false;
       setState(() {});
     } catch (e) {
@@ -274,5 +282,63 @@ class _PaymentRequestState extends State<PaymentRequest> {
       showErrorToast(context, e.toString());
       setState(() {});
     }
+  }
+
+  showPinDialog() async {
+    showDialog(context: context,barrierDismissible: false, builder: (_)=> Center(
+      child: Material(
+        type: MaterialType.transparency,
+        child: Container(
+          width: getWidth(context)*.80,
+          padding: const EdgeInsets.only(top: 7, bottom: 10),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10)
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("M-PIN", style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.green),),
+              const Divider(color: Colors.green, thickness: 3, indent: 70, endIndent: 70,),
+              const SizedBox(height: 15,),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Text("msg",
+                  style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 15,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  TextButton(
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.only(right: 10),
+                      ),
+                      child: Text("Ok", style: Theme.of(context).textTheme.headline3,)),
+                  const SizedBox(width: 20),
+                  TextButton(
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.only(right: 10),
+                      ),
+                      child: Text("Cancel", style: Theme.of(context).textTheme.headline3,)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+    // try{
+    //   await Future.delayed(const Duration(seconds: 7));
+    //   if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
+    // } catch(_){}
   }
 }

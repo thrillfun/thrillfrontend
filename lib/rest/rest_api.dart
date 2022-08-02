@@ -779,7 +779,7 @@ class RestApi {
     return response;
   }
 
-  static Future<http.Response> sendWithdrawlRequest(String currency,String upiId,String payMethod,String amount) async {
+  static Future<http.Response> sendWithdrawlRequest(String currency,String upiId,String network,String fee,String amount) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
@@ -790,8 +790,9 @@ class RestApi {
       },
       body: {
         'currency': currency,
-        'payment_address_user': upiId,
-        'payment_network_user': payMethod,
+        'address_upi': upiId,
+        'network_name': network,
+        'network_fee': fee,
         'amount': amount
       },
     );
@@ -1197,6 +1198,23 @@ class RestApi {
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
     });
+    return response;
+  }
+
+  static Future<http.Response> getCurrencyDeatils() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.getData(
+      RestUrl.currencyDetails,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+    });
+
     return response;
   }
 

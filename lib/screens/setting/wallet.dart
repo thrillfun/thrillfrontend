@@ -72,7 +72,9 @@ class _WalletState extends State<Wallet> {
                     children: [
                       InkWell(
                         onTap: () {
-                          Navigator.pushNamed(context, '/paymentRequest');
+                          Navigator.pushNamed(context, '/paymentRequest').then((value) => {
+                            loadWalletInfo()
+                          });
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(left: 12.0),
@@ -137,7 +139,9 @@ class _WalletState extends State<Wallet> {
                           ]),
                       InkWell(
                         onTap: () {
-                          Navigator.pushNamed(context, '/paymentHistory');
+                          Navigator.pushNamed(context, '/paymentHistory').then((value)=>{
+                            loadWalletInfo()
+                          });
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(right: 12.0),
