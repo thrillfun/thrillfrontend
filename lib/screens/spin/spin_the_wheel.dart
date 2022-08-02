@@ -61,6 +61,8 @@ class _SpinTheWheelState extends State<SpinTheWheel>
 
   @override
   void initState() {
+    player.play(RestUrl.spinSound);
+    player.pause();
     loadWheelDetails();
     super.initState();
   }
@@ -361,7 +363,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   spinTheWheelTap() async {
     try {
        if (remainingChance > 0) {
-         player.play(RestUrl.spinSound);
+         player.resume();
          setState(() {
           isSpin = true;
          });
@@ -501,18 +503,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                       style: const TextStyle(color: Colors.black))
                 ]),
               )),
-              /* ElevatedButton(
-                  onPressed: () {
-                   // Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: ColorManager.deepPurple,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50))),
-                  child: const Text(
-                    spinWheel,
-                    style: TextStyle(fontSize: 16),
-                  )),*/
+
             ],
           ),
           const SizedBox(
@@ -548,7 +539,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                         thumbShape: SliderComponentShape.noThumb,
                         trackHeight: 3),
                     child: Slider(
-                        max: 110,
+                        max: int.parse(earnModel.max_level)*10,
                         min: 0,
                         value: double.parse(earnModel.current_level) * 10,
                         activeColor: ColorManager.cyan,
