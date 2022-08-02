@@ -218,7 +218,6 @@ class _PaymentRequestState extends State<PaymentRequest> {
                           if(double.parse(amtCtr.text) > networks!.maxAmount){
                             showErrorToast(context, "Enter Max Amount ${networks!.maxAmount} ");
                           }else{
-                            showPinDialog();
                              progressDialogue(context);
                             try {
                           var result = await RestApi.sendWithdrawlRequest(
@@ -282,63 +281,5 @@ class _PaymentRequestState extends State<PaymentRequest> {
       showErrorToast(context, e.toString());
       setState(() {});
     }
-  }
-
-  showPinDialog() async {
-    showDialog(context: context,barrierDismissible: false, builder: (_)=> Center(
-      child: Material(
-        type: MaterialType.transparency,
-        child: Container(
-          width: getWidth(context)*.80,
-          padding: const EdgeInsets.only(top: 7, bottom: 10),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10)
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("M-PIN", style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.green),),
-              const Divider(color: Colors.green, thickness: 3, indent: 70, endIndent: 70,),
-              const SizedBox(height: 15,),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Text("msg",
-                  style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 15,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  TextButton(
-                      onPressed: (){
-                        Navigator.pop(context);
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.only(right: 10),
-                      ),
-                      child: Text("Ok", style: Theme.of(context).textTheme.headline3,)),
-                  const SizedBox(width: 20),
-                  TextButton(
-                      onPressed: (){
-                        Navigator.pop(context);
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.only(right: 10),
-                      ),
-                      child: Text("Cancel", style: Theme.of(context).textTheme.headline3,)),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    ));
-    // try{
-    //   await Future.delayed(const Duration(seconds: 7));
-    //   if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
-    // } catch(_){}
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_min_gpl/return_code.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +66,6 @@ class _PostVideoState extends State<PostVideo> {
             setState(() {});
           });
   }
-
 
   @override
   void dispose() {
