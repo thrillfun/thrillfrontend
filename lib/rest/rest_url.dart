@@ -8,6 +8,7 @@ class RestUrl {
   static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
   static const String awsSoundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
   static const String currencyUrl = "https://9starinfosolutions.com/thrill/uploads/currency/";
+  static const String spinSound = "https://9starinfosolutions.com/thrill/public/uploads/spins.wav";
 
 
   static const String login = baseUrl + "login";
@@ -71,6 +72,6 @@ class RestUrl {
   static const String blockUnblockUser = baseUrl + "user/block-unblock-user";
   static const String deleteVideo = baseUrl + "video/delete";
   static const String publishPrivateVideo = baseUrl + "video/publish-private";
-
+  static const String currencyDetails = baseUrl + "currencies/data";
 
 }

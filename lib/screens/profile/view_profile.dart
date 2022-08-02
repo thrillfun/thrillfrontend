@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
+import '../../blocs/video/video_bloc.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../models/follower_model.dart';
@@ -222,11 +224,11 @@ class _ViewProfileState extends State<ViewProfile> {
                       String action = '';
                       if (followList.contains(userModel?.id.toString())) {
                         followList.remove(userModel?.id.toString());
-                        //int followers = int.parse(userModel!.followers)-1;
+                        userModel?.followers = "${int.parse(userModel!.followers)-1}";
                         action = "unfollow";
                       } else {
                         followList.add(userModel!.id.toString());
-                        //int followers = int.parse(userModel!.followers)+1;
+                        userModel?.followers = "${int.parse(userModel!.followers)+1}";
                         action = "follow";
                       }
                       SharedPreferences pref = await SharedPreferences.getInstance();

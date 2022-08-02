@@ -159,8 +159,12 @@ class _QrCodeState extends State<QrCode> {
                   if(barcodeScanRes.isNotEmpty && barcodeScanRes!='-1'){
                     try{
                       if(barcodeScanRes.contains("Thrill")){
-                        Navigator.pushNamed(context, "/viewProfile",
-                            arguments: {"id":int.parse(barcodeScanRes.split(':')[1].split('\n').first), "getProfile":true});
+                        int _id = int.parse(barcodeScanRes.split(':')[1].split('\n').first);
+                        if(_id==userModel!.id){
+                          Navigator.pushNamedAndRemoveUntil(context, '/', (route)=>false, arguments: {'index':3});
+                        } else {
+                          Navigator.pushNamed(context, "/viewProfile", arguments: {"id":_id, "getProfile":true});
+                        }
                       } else {
                         popUpDialog(barcodeScanRes);
                       }

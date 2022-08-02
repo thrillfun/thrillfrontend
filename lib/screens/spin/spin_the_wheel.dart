@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -12,6 +13,8 @@ import '../../models/earnSpin_model.dart';
 import '../../models/probility_counter.dart';
 import '../../models/wheelDetails_model.dart';
 import '../../rest/rest_url.dart';
+import 'dart:typed_data';
+import 'package:flutter/services.dart';
 
 class SpinTheWheel extends StatefulWidget {
   const SpinTheWheel({Key? key}) : super(key: key);
@@ -45,12 +48,16 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   WheelDetails? wheelDetails;
   var listForReward = [];
   int rewardId=0;
+  AudioPlayer player = AudioPlayer();
+
+  String audioasset = "assets/spins.wav";
 
   @override
   void dispose() {
     controller.close();
     super.dispose();
   }
+
 
   @override
   void initState() {
@@ -217,6 +224,8 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                                   ),
                                 ),
                                 child: FortuneWheel(
+                                  duration:
+                                  const Duration(seconds: 20),
                                   animateFirst: false,
                                   selected: controller.stream,
                                   indicators: <FortuneIndicator>[
@@ -287,7 +296,8 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                             height: 12,
                           ),
                           ElevatedButton(
-                              onPressed: isSpin ? null : spinTheWheelTap,
+                            //isSpin ? null :
+                              onPressed:  spinTheWheelTap,
                               style: ElevatedButton.styleFrom(
                                   primary: isSpin
                                       ? Colors.grey[400]
@@ -347,9 +357,11 @@ class _SpinTheWheelState extends State<SpinTheWheel>
     );
   }
 
+
   spinTheWheelTap() async {
     try {
        if (remainingChance > 0) {
+         player.play(RestUrl.spinSound);
          setState(() {
           isSpin = true;
          });
