@@ -140,9 +140,7 @@ class _ProfileState extends State<Profile> {
                               const SizedBox(
                                 height: 5,
                               ),
-                              Text(
-                                userReferralCount +
-                                    state.userModel.referral_count,
+                              Text("$userReferralCount ${state.userModel.referral_count.isEmpty ? "0" : state.userModel.referral_count}",
                                 style: const TextStyle(
                                     color: ColorManager.cyan, fontSize: 15),
                               ),
