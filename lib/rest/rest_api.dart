@@ -192,7 +192,7 @@ class RestApi {
 
   static Future<http.Response> postVideo(String videoUrl,
       String sound,String soundName,String category,String hashtags,String visibility,
-      int isCommentAllowed,String description,String filterImg,String language, String gifName, String speed, bool isDuetable, bool isCommentable) async {
+      int isCommentAllowed,String description,String filterImg,String language, String gifName, String speed, bool isDuetable, bool isCommentable, String? duetFrom, bool isDuet) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
@@ -221,6 +221,8 @@ class RestApi {
         'speed': speed,
         'is_duetable': isDuetable?"Yes":"No",
         'is_commentable': isCommentable?"Yes":"No",
+        'is_duet': isDuet?"Yes":"No",
+        'duet_from': duetFrom,
       },
     );
     response = http.Response(jsonEncode(result), 200,headers: {

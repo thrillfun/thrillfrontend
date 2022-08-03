@@ -381,7 +381,11 @@ class _RecordDuetState extends State<RecordDuet> {
   }
 
   downloadVideo()async{
-    duetFile = File('$saveCacheDirectory${widget.videoModel.video}');
+    if(widget.videoModel.duet_from.isNotEmpty){
+      duetFile = File('$saveCacheDirectory${widget.videoModel.duet_from}');
+    } else {
+      duetFile = File('$saveCacheDirectory${widget.videoModel.video}');
+    }
     try{
       // if(duetFile!.existsSync()){
       //   setState(()=>videoDownloaded = true);
@@ -443,6 +447,7 @@ class _RecordDuetState extends State<RecordDuet> {
           addSoundModel: addSoundModel,
           isDuet: true,
           duetPath: duetFile?.path,
+        duetFrom: widget.videoModel.duet_from.isEmpty?null:widget.videoModel.duet_from,
         isDefaultSound: true, isUploadedFromGallery: false,
         trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
       );
@@ -461,6 +466,7 @@ class _RecordDuetState extends State<RecordDuet> {
               addSoundModel: addSoundModel,
               isDuet: true,
               duetPath: duetFile?.path,
+            duetFrom: widget.videoModel.duet_from.isEmpty?null:widget.videoModel.duet_from,
             isDefaultSound: true, isUploadedFromGallery: false,
             trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,);
           await Navigator.pushNamed(context, "/preview",arguments: m);

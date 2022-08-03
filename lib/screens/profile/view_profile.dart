@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,7 +8,6 @@ import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
-import '../../blocs/video/video_bloc.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../models/follower_model.dart';
@@ -25,7 +23,6 @@ class ViewProfile extends StatefulWidget {
   State<ViewProfile> createState() => _ViewProfileState();
 
   static const String routeName = '/viewProfile';
-
   static Route route({required Map map}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
@@ -75,7 +72,8 @@ class _ViewProfileState extends State<ViewProfile> {
               Navigator.pop(context);
             },
             color: Colors.black,
-            icon: const Icon(Icons.arrow_back_ios)),
+            icon: const Icon(Icons.arrow_back_ios)
+        ),
         actions: [
           IconButton(
               onPressed: ()async{
@@ -91,7 +89,8 @@ class _ViewProfileState extends State<ViewProfile> {
                 }
               },
               color: Colors.grey,
-              icon: const Icon(Icons.report_gmailerrorred_outlined)),
+              icon: const Icon(Icons.report_gmailerrorred_outlined),
+          ),
         ],
       ),
       body: userModel==null?
@@ -225,6 +224,7 @@ class _ViewProfileState extends State<ViewProfile> {
                       if (followList.contains(userModel?.id.toString())) {
                         followList.remove(userModel?.id.toString());
                         userModel?.followers = "${int.parse(userModel!.followers)-1}";
+                        if(int.parse(userModel!.followers)<0) userModel?.followers = '0';
                         action = "unfollow";
                       } else {
                         followList.add(userModel!.id.toString());
@@ -253,7 +253,7 @@ class _ViewProfileState extends State<ViewProfile> {
                                 Border.all(color: Colors.grey.shade300, width: 1)),
                         child: SizedBox(height: 10,
                         child: followList.contains(userModel?.id.toString())?
-                        SvgPicture.asset('assets/person-check.svg',):
+                        const Icon(Icons.person_remove_alt_1_sharp, size: 20,)://SvgPicture.asset('assets/person-check.svg',):
                         const Icon(Icons.person_add_alt_sharp, size: 20,),)
                       ),
                     ),
