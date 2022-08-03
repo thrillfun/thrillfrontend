@@ -262,7 +262,6 @@ class _PaymentRequestState extends State<PaymentRequest> {
             ],
           ),
     );
-
   }
 
   void loadWalletInfo() async {

@@ -339,10 +339,10 @@ class _ProfileState extends State<Profile> {
                                   thumbShape: SliderComponentShape.noThumb,
                                   trackHeight: 3),
                               child: Slider(
-                                  max: 100,
+                                  max: int.parse(state.userModel.levels.max_level)*10,
                                   min: 0,
                                   value: double.parse(
-                                      state.userModel.levels.progress),
+                                      state.userModel.levels.current)*10,
                                   activeColor: ColorManager.cyan,
                                   onChanged: (val) {}),
                             ),
@@ -554,7 +554,6 @@ class _ProfileState extends State<Profile> {
       return fav(userModel, likesList);
     }
   }
-
   feed(List<VideoModel> publicList) {
     return publicList.isEmpty
         ? RichText(
@@ -643,7 +642,6 @@ class _ProfileState extends State<Profile> {
               );
             });
   }
-
   lock(List<VideoModel> privateList) {
     return privateList.isEmpty
         ? RichText(
@@ -744,7 +742,6 @@ class _ProfileState extends State<Profile> {
               );
             });
   }
-
   fav(UserModel userModel, List<VideoModel> likesList) {
     return likesList.isEmpty
         ? RichText(
@@ -822,7 +819,6 @@ class _ProfileState extends State<Profile> {
               );
             });
   }
-
   showDeleteVideoDialog(int videoID,List list, int index){
     showDialog(context: context, builder: (_)=>Center(
       child: Material(
