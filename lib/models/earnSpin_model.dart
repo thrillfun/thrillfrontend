@@ -1,9 +1,9 @@
 class EarnSpin {
   String name, current_level, next_level, conditions;
-  String earned_spins, total_spin;
+  String earned_spins, total_spin,max_level;
 
   EarnSpin(this.name, this.current_level, this.next_level, this.conditions,
-      this.earned_spins, this.total_spin);
+      this.earned_spins, this.total_spin,this.max_level);
 
   factory EarnSpin.fromJson(dynamic json) {
     return EarnSpin(
@@ -12,7 +12,7 @@ class EarnSpin {
         json['next_level'] ?? '',
         json['conditions'] ?? '',
         json['earned_spins'] ?? '',
-        json['total_spin'] ?? '');
+        json['total_spin'] ?? '', json['max_level'] ?? '');
   }
 
   Map<String, dynamic> toJson() {
@@ -23,7 +23,7 @@ class EarnSpin {
     data['conditions'] = conditions;
     data['earned_spins'] = earned_spins;
     data['total_spin'] = earned_spins;
-
+    data['max_level'] = max_level;
     return data;
   }
 }

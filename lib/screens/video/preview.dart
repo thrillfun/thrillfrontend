@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit_config.dart';
-import 'package:ffmpeg_kit_flutter_min_gpl/return_code.dart';
-import 'package:ffmpeg_kit_flutter_min_gpl/statistics.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit_config.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:thrill/common/color.dart';
 import 'package:video_player/video_player.dart';
@@ -31,6 +31,7 @@ class _PreviewState extends State<Preview> {
   String percentage = "50%", newName = '';
   VideoPlayerController? videoPlayerController;
   bool isVControllerInitialized = false;
+  int completed = 0;
 
   @override
   void initState() {
@@ -320,46 +321,40 @@ class _PreviewState extends State<Preview> {
     File videoFile = File(widget.data.filePath);
 
     if(widget.data.isDuet && widget.data.duetPath!=null){
-      try{
-        print(widget.data.duetPath);
-        print(widget.data.filePath);
-        FFmpegKit.execute(
-          "-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 -s 720X1280 -vcodec libx264 $outputPath" //stretched
-            //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=200:200:[v0];[1:v]crop=200:200:[v1];[v0][v1]vstack=inputs=2' -s 720X1280 -vcodec libx264 -preset veryfast $outputPath" //cropped+stretched
-          //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[1][0]scale2ref=iw:ow/mdar[2nd][ref];[ref][2nd]vstack[vid]' -map [vid] $outputPath"
-        ).then((session) async {
-          final returnCode = await session.getReturnCode();
-          final logs = await session.getLogsAsString();
-          final logList = logs.split('\n');
-          print("============================> LOG STARTED!!!!");
-          for(var e in logList){
-            print(e);
-          }
-          print("============================> LOG ENDED!!!!");
-          if (ReturnCode.isSuccess(returnCode)) {
-            // print("============================> Success!!!!");
-            setState(() {
-              wasSuccess = true;
-              isProcessing = false;
-              initPreview();
+            FFmpegKit.execute(
+                "-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
+                //" -n -i $zero -i $one -filter_complex: [0:v][1:v]vstack=inputs=2[v] $op" //stretched
+              //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
+              //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' -s 720X1280 -vcodec libx264 -preset veryfast $outputPath" //cropped+stretched
+              //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' $outputPath" //cropped+stretched
+              //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[1][0]scale2ref=iw:ow/mdar[2nd][ref];[ref][2nd]vstack[vid]' -map [vid] $outputPath"
+            ).then((session) async {
+              final returnCode = await session.getReturnCode();
+              final logs = await session.getLogsAsString();
+              final logList = logs.split('\n');
+              print("============================> LOG STARTED!!!!");
+              for(var e in logList){
+                print(e);
+              }
+              print("============================> LOG ENDED!!!!");
+              if (ReturnCode.isSuccess(returnCode)) {
+                // print("============================> Success!!!!");
+                setState(() {
+                  wasSuccess = true;
+                  isProcessing = false;
+                  initPreview();
+                });
+              } else {
+                print("============================> Failed!!!!");
+                //Navigator.pop(context);
+                setState(() {
+                  wasSuccess = false;
+                  isProcessing = false;
+                });
+                //showErrorToast(context, "Video processing failed!");
+                //setState(()=>isProcessing = false);
+              }
             });
-          } else {
-            print("============================> Failed!!!!");
-            //Navigator.pop(context);
-            setState(() {
-              wasSuccess = false;
-              isProcessing = false;
-            });
-            //showErrorToast(context, "Video processing failed!");
-            //setState(()=>isProcessing = false);
-          }
-        });
-      } catch(e){
-        closeDialogue(context);
-        Navigator.pop(context);
-        //print(e.toString());
-        showErrorToast(context, "Video Processing Failed");
-      }
     } else {
       if(widget.data.addSoundModel==null || widget.data.isDefaultSound){
         if(widget.data.isUploadedFromGallery){
@@ -400,8 +395,9 @@ class _PreviewState extends State<Preview> {
           }
         } else {
           try{
+            print("-s 720X1280 -vcodec libx264");
             FFmpegKit.execute(
-                "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.trimStart).toString().split('.').first} -to ${widget.data.trimEnd} -s 720X1280 -vcodec libx264 $outputPath"
+                "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.trimStart).toString().split('.').first} -to ${widget.data.trimEnd} $outputPath"
               //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
             ).then((session) async {
               final returnCode = await session.getReturnCode();

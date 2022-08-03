@@ -233,7 +233,15 @@ class _WalletState extends State<Wallet> {
                     width: 5,
                   ),
                   Expanded(
-                      child: Text("Available Balance in ${walletBalance.code}")),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                      Text("Available Balance in ${walletBalance.code}"),
+                      const SizedBox(height: 2),
+                      Text("Status : ${walletBalance.isActive==1 ? "active" :"suspended"}"),
+                        ],
+                      ),),
                   Text(
                     walletBalance.code + ' ${walletBalance.amount.toString()}',
                     style: const TextStyle(
