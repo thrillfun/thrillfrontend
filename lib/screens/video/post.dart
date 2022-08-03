@@ -638,6 +638,8 @@ class _PostVideoState extends State<PostVideo> {
               widget.data.speed,
             duetSwitch,
             commentsSwitch,
+            widget.data.duetFrom,
+            widget.data.isDuet,
           );
           var json = jsonDecode(result.body);
           closeDialogue(context);
@@ -688,6 +690,8 @@ class _PostVideoState extends State<PostVideo> {
                 widget.data.speed,
               duetSwitch,
               commentsSwitch,
+                widget.data.duetFrom,
+              widget.data.isDuet,
             );
             var json = jsonDecode(result.body);
             closeDialogue(context);
@@ -761,6 +765,8 @@ class _PostVideoState extends State<PostVideo> {
               widget.data.speed,
             duetSwitch,
             commentsSwitch,
+              widget.data.duetFrom,
+            widget.data.isDuet,
           );
           var json = jsonDecode(result.body);
           closeDialogue(context);
@@ -810,6 +816,8 @@ class _PostVideoState extends State<PostVideo> {
                 widget.data.speed,
               duetSwitch,
               commentsSwitch,
+                widget.data.duetFrom,
+              widget.data.isDuet,
             );
             var json = jsonDecode(result.body);
             closeDialogue(context);

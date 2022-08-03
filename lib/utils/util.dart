@@ -177,7 +177,7 @@ getTempDirectory()async{
     saveCacheDirectory = directoryIOS.path;
   } else {
     saveDirectory = "/storage/emulated/0/Download/";
-    saveCacheDirectory = directoryANDROID.path;
+    saveCacheDirectory = "${directoryANDROID.path}/";
   }
 }
 

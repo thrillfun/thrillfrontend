@@ -190,6 +190,7 @@ class _PreviewState extends State<Preview> {
                       isDefaultSound: widget.data.isDefaultSound,
                       isUploadedFromGallery: widget.data.isUploadedFromGallery,
                       newPath: '$saveDirectory$newName.mp4',
+                      duetFrom: widget.data.duetFrom,
                       newName: newName
                   );
                   await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
@@ -322,11 +323,11 @@ class _PreviewState extends State<Preview> {
 
     if(widget.data.isDuet && widget.data.duetPath!=null){
             FFmpegKit.execute(
-                "-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
+                //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
                 //" -n -i $zero -i $one -filter_complex: [0:v][1:v]vstack=inputs=2[v] $op" //stretched
               //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
               //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' -s 720X1280 -vcodec libx264 -preset veryfast $outputPath" //cropped+stretched
-              //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' $outputPath" //cropped+stretched
+              "-r 30 -i ${widget.data.duetPath} -r 30 -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' $outputPath" //cropped+stretched
               //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[1][0]scale2ref=iw:ow/mdar[2nd][ref];[ref][2nd]vstack[vid]' -map [vid] $outputPath"
             ).then((session) async {
               final returnCode = await session.getReturnCode();
