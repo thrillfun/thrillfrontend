@@ -507,7 +507,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                   //controller: preloadPageController,
                 controller: _pageController,
                   onPageChanged: (int index){
-                  print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+                //  print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                     if(adIndexes.contains(index)){
                       showAd();
                     }
