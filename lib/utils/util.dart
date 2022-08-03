@@ -1,7 +1,9 @@
 
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:thrill/main.dart';
 
 import '../common/strings.dart';
@@ -165,5 +167,17 @@ Widget imgNet(String imgPath){
     errorBuilder: (context, error, stackTrace) => Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
     fit: BoxFit.cover,
   );
+}
+
+getTempDirectory()async{
+  var directoryIOS = await getApplicationDocumentsDirectory();
+  var directoryANDROID = await getTemporaryDirectory();
+  if (Platform.isIOS) {
+    saveDirectory = directoryIOS.path;
+    saveCacheDirectory = directoryIOS.path;
+  } else {
+    saveDirectory = "/storage/emulated/0/Download/";
+    saveCacheDirectory = directoryANDROID.path;
+  }
 }
 

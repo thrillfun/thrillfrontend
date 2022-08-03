@@ -345,7 +345,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                       onTap: (){
                         if(redirectPath.isNotEmpty){
                           Uri openInBrowser = Uri(scheme: 'https', path: redirectPath,);
-                          launchUrl(openInBrowser);
+                          launchUrl(openInBrowser, mode: LaunchMode.externalApplication);
                         }
                       },
                       child: CachedNetworkImage(

@@ -223,7 +223,7 @@ class _ProfileState extends State<Profile> {
                                     scheme: 'https',
                                     path: "www.youtube.com/${state.userModel.youtube}",
                                   );
-                                  launchUrl(openInBrowser);
+                                  launchUrl(openInBrowser, mode: LaunchMode.externalApplication);
                                 },
                                 iconSize: 25,
                                 padding: const EdgeInsets.only(),
@@ -243,7 +243,7 @@ class _ProfileState extends State<Profile> {
                                     scheme: 'https',
                                     path: "www.facebook.com/${state.userModel.facebook}",
                                   );
-                                  launchUrl(openInBrowser);
+                                  launchUrl(openInBrowser, mode: LaunchMode.externalApplication);
                                 },
                                 iconSize: 25,
                                 padding: const EdgeInsets.only(),
@@ -263,7 +263,7 @@ class _ProfileState extends State<Profile> {
                                     scheme: 'https',
                                     path: "www.instagram.com/${state.userModel.instagram}",
                                   );
-                                  launchUrl(openInBrowser);
+                                  launchUrl(openInBrowser, mode: LaunchMode.externalApplication);
                                 },
                                 iconSize: 25,
                                 padding: const EdgeInsets.only(),
@@ -283,7 +283,7 @@ class _ProfileState extends State<Profile> {
                                     scheme: 'https',
                                     path: "www.twitter.com/${state.userModel.twitter}",
                                   );
-                                  launchUrl(openInBrowser);
+                                  launchUrl(openInBrowser, mode: LaunchMode.externalApplication);
                                 },
                                 iconSize: 25,
                                 padding: const EdgeInsets.only(),

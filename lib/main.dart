@@ -8,6 +8,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/repository/video/video_repository.dart';
 import 'package:thrill/utils/notification.dart';
+import 'package:thrill/utils/util.dart';
 import 'config/app_router.dart';
 import 'config/theme.dart';
 import 'screens/screen.dart';
@@ -34,6 +35,7 @@ void main() async {
         body: event.notification?.body??""
     );
   });
+  getTempDirectory();
   runApp(const MyApp());
 }
 

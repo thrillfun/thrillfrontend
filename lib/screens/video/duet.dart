@@ -279,6 +279,7 @@ class _RecordDuetState extends State<RecordDuet> {
       cameraDescription,
       ResolutionPreset.high,
       imageFormatGroup: ImageFormatGroup.jpeg,
+      enableAudio: false
     );
 
     // Dispose the previous controller
