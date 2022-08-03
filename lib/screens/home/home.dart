@@ -712,7 +712,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                 await isLogined().then((value) {
                                   if (value) {
                                     if(state.list[index].is_commentable=="Yes"){
-                                      showComments(context, state.list[index].id);
+                                      showComments(context, state.list[index].id, state.list[index]);
                                     } else {
                                       showErrorToast(context, "This user has disabled comments on the video!");
                                     }
@@ -1058,7 +1058,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     }));
   }
 
-  showComments(BuildContext context, int videoId) async {
+  showComments(BuildContext context, int videoId, VideoModel vModel) async {
     try {
       progressDialogue(context);
       var result = await RestApi.getCommentListOnVideo(videoId);
@@ -1269,34 +1269,36 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                   FocusScope.of(context)
                                       .requestFocus(FocusNode());
                                   progressDialogue(context);
-                                  var pref =
-                                      await SharedPreferences.getInstance();
-                                  var currentUser =
-                                      pref.getString('currentUser');
-                                  UserModel current = UserModel.fromJson(
-                                      jsonDecode(currentUser!));
-                                  var resultComment = await RestApi.postComment(
-                                      videoId, current.id, msgCtr.text);
-                                  try {
-                                    var jsonComment =
-                                        jsonDecode(resultComment.body);
-                                    if (jsonComment['status']) {
-                                      Comments c = Comments(
-                                          jsonComment['data']['id'],
-                                          0,
-                                          current.avatar,
-                                          current.name,
-                                          msgCtr.text.toString(),
-                                          current.id);
-                                      commentList.add(c);
-                                      msgCtr.text = "";
-                                      setState(() {});
-                                      closeDialogue(context);
-                                    } else {
+                                  var pref = await SharedPreferences.getInstance();
+                                  var currentUser = pref.getString('currentUser');
+                                  UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
+                                  var resultComment = await RestApi.postComment(videoId, current.id, msgCtr.text);
+                                  var json = jsonDecode(resultComment.body);
+                                  if(json['status']){
+                                    try {
+                                      var jsonComment = jsonDecode(resultComment.body);
+                                      if (jsonComment['status']) {
+                                        Comments c = Comments(
+                                            jsonComment['data']['id'],
+                                            0,
+                                            current.avatar,
+                                            current.name,
+                                            msgCtr.text.toString(),
+                                            current.id);
+                                        commentList.add(c);
+                                        msgCtr.text = "";
+
+                                        setState(() {vModel.comments+=1;});
+                                        closeDialogue(context);
+                                      } else {
+                                        closeDialogue(context);
+                                      }
+                                    } catch (_) {
                                       closeDialogue(context);
                                     }
-                                  } catch (_) {
+                                  } else {
                                     closeDialogue(context);
+                                    showErrorToast(context, json['message'].toString());
                                   }
                                 }
                               },
@@ -1308,7 +1310,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                   ),
                 );
               });
-            });
+            }).then((value) => setState((){}));
       } else {
         showErrorToast(context, json['message']);
       }

@@ -281,5 +281,4 @@ class _PaymentRequestState extends State<PaymentRequest> {
       setState(() {});
     }
   }
-
 }
