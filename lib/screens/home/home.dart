@@ -1381,8 +1381,6 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
         reelsPlayerController?.pause();
         reelsPlayerController?.setVolume(0);
         shouldAutoPlayReel = false;
-        reelsPlayerController?.dispose();
-        reelsPlayerController = null;
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
     );

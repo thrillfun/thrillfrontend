@@ -222,7 +222,7 @@ class RestApi {
         'is_duetable': isDuetable?"Yes":"No",
         'is_commentable': isCommentable?"Yes":"No",
         'is_duet': isDuet?"Yes":"No",
-        'duet_from': duetFrom,
+        'duet_from': duetFrom??''
       },
     );
     response = http.Response(jsonEncode(result), 200,headers: {

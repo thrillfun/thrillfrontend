@@ -115,40 +115,39 @@ class _RecordDuetState extends State<RecordDuet> {
                 height: getHeight(context)*.80,
                 width: getWidth(context),
                 child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    SizedBox(
-                      width: getWidth(context),
-                      height: getHeight(context)*.40,
-                      child: videoController != null &&
-                          videoController!.value.isInitialized
-                          ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: AspectRatio(
-                          aspectRatio: 1/videoController!.value.aspectRatio,
-                          child: VideoPlayer(videoController!),
-                        ),
-                      )
-                          : Container(),
+                    Row(
+                      children: [
+                        videoController != null &&
+                            videoController!.value.isInitialized
+                            ? SizedBox(
+                          width: getWidth(context)/2,
+                              child: AspectRatio(
+                                aspectRatio: videoController!.value.aspectRatio,
+                                child: VideoPlayer(videoController!),
+                              ),
+                            )
+                            : const Center(child: CircularProgressIndicator()),
+                        isCameraInitialized && _videoFile == null
+                            ? SizedBox(
+                              width: getWidth(context)/2,
+                              child: AspectRatio(
+                              aspectRatio: 1/controller!.value.aspectRatio,
+                              child: controller!.buildPreview()),
+                            )
+                            : const Center(child: CircularProgressIndicator()),
+                      ],
                     ),
-                    isCameraInitialized && _videoFile == null
-                        ? Positioned.fill(
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: SizedBox(
-                      //width: getWidth(context),
-                            height: getHeight(context)*.40,
-                            child: AspectRatio(
-                                aspectRatio: 1/controller!.value.aspectRatio,
-                                child: controller!.buildPreview())),
-                          ),
-                        )
-                        : const SizedBox(),
                     Visibility(
                       visible: !_isRecordingInProgress,
-                      child: IconButton(
-                          onPressed: (){Navigator.pop(context);},
-                          color: Colors.red,
-                          icon: const Icon(Icons.close)
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: IconButton(
+                            onPressed: (){Navigator.pop(context);},
+                            color: Colors.white,
+                            icon: const Icon(Icons.close)
+                        ),
                       ),
                     )
                   ],

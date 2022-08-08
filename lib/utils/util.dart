@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thrill/main.dart';
@@ -179,5 +180,17 @@ getTempDirectory()async{
     saveDirectory = "/storage/emulated/0/Download/";
     saveCacheDirectory = "${directoryANDROID.path}/";
   }
-}
+
+  ///download spin sound spinWheel
+  File file = File('${saveCacheDirectory}spin.mp3');
+  if(!file.existsSync()) {
+    await FileSupport().downloadCustomLocation(
+      url: RestUrl.spinSound,
+      path: saveCacheDirectory,
+      filename: "spin",
+      extension: ".mp3",
+      progress: (progress) async {},
+    );
+  }
+  }
 

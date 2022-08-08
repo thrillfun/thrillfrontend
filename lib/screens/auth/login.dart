@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
+import 'package:thrill/widgets/video_item.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
@@ -33,6 +34,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController emailCtr = TextEditingController();
   String mPin="";
+
+  @override
+  void initState() {
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

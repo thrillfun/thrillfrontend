@@ -66,6 +66,7 @@ class _ProfileState extends State<Profile> {
                           state.userModel.name.isNotEmpty
                               ? state.userModel.name
                               : 'anonymous',
+                          maxLines: 1,
                           style: const TextStyle(fontSize: 20),
                         )),
                         IconButton(
@@ -123,9 +124,12 @@ class _ProfileState extends State<Profile> {
                             children: [
                               Row(
                                 children: [
-                                  Text(
-                                    '@${state.userModel.username.isNotEmpty ? state.userModel.username : 'anonymous'}',
-                                    style: const TextStyle(fontSize: 20),
+                                  Flexible(
+                                    child: Text(
+                                      '@${state.userModel.username.isNotEmpty ? state.userModel.username : 'anonymous'}',
+                                      style: const TextStyle(fontSize: 20),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                   const SizedBox(
                                     width: 5,
