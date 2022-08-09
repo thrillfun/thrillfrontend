@@ -585,6 +585,44 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                              onPressed: () async {
+                                try{
+                                  progressDialogue(context);
+                                  var response = await RestApi.checkVideoReport(state.list[index].id,userModel!.id);
+                                  var json = jsonDecode(response.body);
+                                  print(json);
+                                  closeDialogue(context);
+                                  if(json['status']){
+                                    showErrorToast(context, "You have already reported this video!");
+                                  } else {
+                                    showReportDialog(state.list[index].id);
+                                  }
+                                } catch(e){
+                                  closeDialogue(context);
+                                  showErrorToast(context, e.toString());
+                                }
+                              },
+                              iconSize: 28,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              color: Colors.white,
+                              icon: const Icon(Icons.report)
+                          ),
+                          const SizedBox(
+                            height: 18,
+                          ),
+                          IconButton(
+                              onPressed: (){},
+                              iconSize: 28,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              color: Colors.white,
+                              icon: const Icon(Icons.bookmark_outline)
+                          ),
+                          const SizedBox(
+                            height: 18,
+                          ),
                           Stack(
                             clipBehavior: Clip.none,
                             alignment: Alignment.center,
@@ -1266,8 +1304,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                 } else {
                                   isError = "";
                                   setState(() {});
-                                  FocusScope.of(context)
-                                      .requestFocus(FocusNode());
+                                  FocusScope.of(context).requestFocus(FocusNode());
                                   progressDialogue(context);
                                   var pref = await SharedPreferences.getInstance();
                                   var currentUser = pref.getString('currentUser');
@@ -1453,6 +1490,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
       } else {
         if(hashList.length>=2){
           hashTags += "#${hashList.first} ";
+          hashTags += "#${hashList.first} ";
           hashTags += "#${hashList[1]}\n";
           return hashTags;
         } else {
@@ -1463,5 +1501,119 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     } catch(e){
       return "";
     }
+  }
+
+  showReportDialog(int videoId)async{
+    String dropDownValue = "Reason";
+    List<String> dropDownValues = ["Reason",];
+    try{
+      progressDialogue(context);
+      var response = await RestApi.getSiteSettings();
+      var json = jsonDecode(response.body);
+      closeDialogue(context);
+      if(json['status']){
+        List jsonList = json['data'] as List;
+        for(var element in jsonList){
+          if(element['name']=='report_reason'){
+            List reasonList = element['value'].toString().split(',');
+            for(String reason in reasonList){
+              dropDownValues.add(reason);
+            }
+            break;
+          }
+        }
+      } else {
+        showErrorToast(context, json['message'].toString());
+        return;
+      }
+    }catch(e){
+      closeDialogue(context);
+      showErrorToast(context, e.toString());
+      return;
+    }
+    showDialog(context: context, builder: (_)=>
+        StatefulBuilder(
+          builder: (BuildContext context, void Function(void Function()) setState) {
+            return Center(
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  width: getWidth(context)*.80,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10)
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: Text("Report ${userModel?.username}'s Video ?",
+                          style: Theme.of(context).textTheme.headline3!.copyWith(fontSize: 16), textAlign: TextAlign.center,),
+                      ),
+                      const SizedBox(height: 15,),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                        margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                        decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(5)),
+                        child: DropdownButton(
+                          value: dropDownValue,
+                          underline: Container(),
+                          isExpanded: true,
+                          style: const TextStyle(color: Colors.grey, fontSize: 14),
+                          icon: const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.grey,
+                            size: 35,
+                          ),
+                          onChanged: (String? value) {
+                            setState(() {
+                              dropDownValue = value??dropDownValues.first;
+                            });
+                          },
+                          items: dropDownValues.map((String item) {
+                            return DropdownMenuItem(
+                              value: item,
+                              child: Text(item),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 15,),
+                      ElevatedButton(
+                          onPressed: dropDownValue=="Reason"?null:()async{
+                            try{
+                              var response = await RestApi.reportVideo(videoId,userModel!.id, dropDownValue);
+                              var json = jsonDecode(response.body);
+                              closeDialogue(context);
+                              if(json['status']){
+                                //Navigator.pop(context);
+                                showSuccessToast(context, json['message'].toString());
+                              } else {
+                                //Navigator.pop(context);
+                                showErrorToast(context, json['message'].toString());
+                              }
+                            }catch(e){
+                              closeDialogue(context);
+                              showErrorToast(context, e.toString());
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.red,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5)
+                          ),
+                          child: const Text("Report")
+                      )
+                    ],
+                  )
+                ),
+              ),
+            );
+          },)
+    );
   }
 }

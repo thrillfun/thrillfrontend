@@ -1106,6 +1106,25 @@ class RestApi {
     return response;
   }
 
+  static Future<http.Response> getFollowingList(int userId) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.followingList,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'user_id': userId.toString()
+      },
+    );
+    print(result);
+    response = http.Response(jsonEncode(result), 200);
+    print(response.body);
+    return response;
+  }
+
   static Future<http.Response> reportUser(int userId, String reason) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
@@ -1212,6 +1231,49 @@ class RestApi {
       headers: {
         'Authorization': 'Bearer $token',
       },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+    });
+
+    return response;
+  }
+
+  static Future<http.Response> checkVideoReport(int videoId, int userId) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+      RestUrl.checkReport,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'video_id':videoId.toString(),
+        'reported_by':userId.toString()
+      }
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+    });
+
+    return response;
+  }
+
+  static Future<http.Response> reportVideo(int videoId, int userId, String reason) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+        RestUrl.reportVideo,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+        body: {
+          'video_id':videoId.toString(),
+          'reported_by':userId.toString(),
+          'reason':reason
+        }
     );
     response = http.Response(jsonEncode(result), 200,headers: {
       HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
