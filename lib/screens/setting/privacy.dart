@@ -65,19 +65,53 @@ class _PrivacyState extends State<Privacy> {
               safety,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            // const SizedBox(
-            //   height: 20,
-            // ),
-            // Row(
-            //   children: const [
-            //     Expanded(child: Text(allowYourVideosToBeDownloaded)),
-            //     Text(on)
-            //   ],
-            // ),
-            // const Text(
-            //   allowYourVideosToBeDownloadedDialog,
-            //   style: TextStyle(color: Colors.grey),
-            // ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              children: [
+                const Expanded(child: Text(allowYourVideosToBeDownloaded, style: TextStyle(fontSize: 13),)),
+                DropdownButton(
+                    value: safetyPreference!.allowVideoToBeDownloaded.toUpperCase(),
+                    isDense: true,
+                    icon: const SizedBox(),
+                    underline: const SizedBox(),
+                    alignment: Alignment.topRight,
+                    style: const TextStyle(fontSize: 12, color: Colors.black),
+                    items: ["OFF", "ON"]
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem(
+                          value: value,
+                          child: Text(value)
+                      );
+                    }).toList(),
+                    onChanged: (String? newVal)async{
+                      if(newVal != safetyPreference!.allowVideoToBeDownloaded.toUpperCase()){
+                        try{
+                          progressDialogue(context);
+                          var response = await RestApi.saveSafetyPreference("safety_pref_allow_video_download", "$newVal");
+                          var json = jsonDecode(response.body);
+                          closeDialogue(context);
+                          if(json['status']){
+                            showSuccessToast(context, json['message'].toString());
+                            safetyPreference!.allowVideoToBeDownloaded = newVal!;
+                            setState(() {});
+                          } else {
+                            showErrorToast(context, json['message'].toString());
+                          }
+                        } catch(e){
+                          closeDialogue(context);
+                          showErrorToast(context,e.toString());
+                        }
+                      }
+                    }
+                )
+              ],
+            ),
+            const Text(
+              allowYourVideosToBeDownloadedDialog,
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
             const SizedBox(
               height: 20,
             ),

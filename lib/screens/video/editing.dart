@@ -2,31 +2,33 @@ import 'dart:io';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/core.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:video_player/video_player.dart';
+import '../../models/add_sound_model.dart';
 import '../../models/post_data.dart';
 
-class Trim extends StatefulWidget {
-  const Trim({Key? key, required this.data}) : super(key: key);
+class Editing extends StatefulWidget {
+  const Editing({Key? key, required this.data}) : super(key: key);
   final PostData data;
 
   static const String routeName = '/trim';
   static Route route({required PostData videoData}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => Trim(data: videoData),
+      builder: (context) => Editing(data: videoData),
     );
   }
 
   @override
-  State<Trim> createState() => _TrimState();
+  State<Editing> createState() => _EditingState();
 }
 
-class _TrimState extends State<Trim> {
+class _EditingState extends State<Editing> {
 
   late VideoPlayerController videoPlayerController;
   List<FileSystemEntity> thumbList = List.empty(growable: true);
@@ -221,7 +223,39 @@ class _TrimState extends State<Trim> {
                     Text(getEndDuration(), style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.white),),
                   ],
                 )
-            )
+            ),
+            Positioned(
+              top: 10,
+              left: 0, right: 0,
+              child: TextButton(
+                  onPressed: () async {
+                    await Navigator.pushNamed(context, "/newSong").then((value) {
+                      if(value!=null){
+                        AddSoundModel? addSoundModelTemp = value as AddSoundModel?;
+                        setState((){
+                          widget.data.addSoundModel = addSoundModelTemp;
+                        });
+                      }
+                    });
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset('assets/music.svg', height: 16.5,),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      Flexible(
+                        child: Text(
+                          widget.data.addSoundModel==null?addSound:widget.data.addSoundModel!.name,
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  )),
+            ),
           ],
         ),
 

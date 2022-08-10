@@ -3,8 +3,10 @@ import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/models/video_model.dart';
+import 'package:thrill/models/wallet_model.dart';
 import 'package:thrill/screens/auth/otp_verification.dart';
 import 'package:thrill/screens/chat/chat_screen.dart';
+import 'package:thrill/screens/following_and_followers.dart';
 import 'package:thrill/screens/privacy_policy.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/screen.dart';
@@ -79,9 +81,9 @@ class AppRouter {
       case RequestVerification.routeName:
         return RequestVerification.route();
       case PaymentRequest.routeName:
-        return PaymentRequest.route();
-      case Trim.routeName:
-        return Trim.route(videoData: settings.arguments as PostData);
+        return PaymentRequest.route(settings.arguments as List<WalletBalance>);
+      case Editing.routeName:
+        return Editing.route(videoData: settings.arguments as PostData);
       case Preview.routeName:
         return Preview.route(videoData: settings.arguments as PostData);
       case SoundDetails.routeName:
@@ -96,6 +98,8 @@ class AppRouter {
         return ChatScreen.route(settings.arguments as InboxModel);
       case OtpVerification.routeName:
         return OtpVerification.route(settings.arguments as String);
+      case FollowingAndFollowers.routeName:
+        return FollowingAndFollowers.route(settings.arguments as Map);
       default:
         return _errorRoute();
     }

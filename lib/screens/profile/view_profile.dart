@@ -143,29 +143,39 @@ class _ViewProfileState extends State<ViewProfile> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  RichText(
-                      textAlign: TextAlign.center,
-                      text:  TextSpan(children: [
-                        TextSpan(
-                            text: '${userModel?.following}' '\n',
-                            style: const TextStyle(color: Colors.black, fontSize: 17)),
-                        const TextSpan(
-                            text: following, style: TextStyle(color: Colors.grey)),
-                      ])),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':1});
+                    },
+                    child: RichText(
+                        textAlign: TextAlign.center,
+                        text:  TextSpan(children: [
+                          TextSpan(
+                              text: '${userModel?.following}' '\n',
+                              style: const TextStyle(color: Colors.black, fontSize: 17)),
+                          const TextSpan(
+                              text: following, style: TextStyle(color: Colors.grey)),
+                        ])),
+                  ),
                   Container(
                     height: 20,
                     width: 1,
                     color: Colors.grey.shade300,
                   ),
-                  RichText(
-                      textAlign: TextAlign.center,
-                      text:  TextSpan(children: [
-                        TextSpan(
-                            text: '${userModel?.followers}' '\n',
-                            style: const TextStyle(color: Colors.black, fontSize: 17)),
-                        const TextSpan(
-                            text: followers, style: TextStyle(color: Colors.grey)),
-                      ])),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
+                    },
+                    child: RichText(
+                        textAlign: TextAlign.center,
+                        text:  TextSpan(children: [
+                          TextSpan(
+                              text: '${userModel?.followers}' '\n',
+                              style: const TextStyle(color: Colors.black, fontSize: 17)),
+                          const TextSpan(
+                              text: followers, style: TextStyle(color: Colors.grey)),
+                        ])),
+                  ),
                   Container(
                     height: 20,
                     width: 1,

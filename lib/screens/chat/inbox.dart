@@ -83,31 +83,37 @@ class _InboxState extends State<Inbox> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            clipBehavior: Clip.antiAliasWithSaveLayer,
-                            height: 65,
-                            width: 65,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: ColorManager.spinColorDivider
-                                )
-                            ),
-                            child: CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              errorWidget: (a,b,c)=> Padding(
-                                padding: const EdgeInsets.all(15.0),
-                                child: SvgPicture.asset(
+                              padding: const EdgeInsets.all(2),
+                              height: 65,
+                              width: 65,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: ColorManager.spinColorDivider)),
+                              child: ClipOval(
+                                child: inboxList[index].userImage.isEmpty?
+                                SvgPicture.asset(
                                   'assets/profile.svg',
                                   width: 10,
                                   height: 10,
+                                ):
+                                CachedNetworkImage(
+                                  fit: BoxFit.cover,
+                                  errorWidget: (a,b,c)=> Padding(
+                                    padding: const EdgeInsets.all(15.0),
+                                    child: SvgPicture.asset(
+                                      'assets/profile.svg',
+                                      width: 10,
+                                      height: 10,
+                                    ),
+                                  ),
+                                  imageUrl:
+                                  '${RestUrl.profileUrl}${inboxList[index].userImage}',
+                                  placeholder: (a, b) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
                                 ),
                               ),
-                              imageUrl:
-                              '${RestUrl.profileUrl}${inboxList[index].userImage}',
-                              placeholder: (a, b) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
                           ),
                           const SizedBox(
                             width: 10,
