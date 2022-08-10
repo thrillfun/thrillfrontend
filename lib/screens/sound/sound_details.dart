@@ -10,6 +10,7 @@ import 'package:thrill/utils/util.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
+import '../../widgets/video_item.dart';
 
 class SoundDetails extends StatefulWidget {
   const SoundDetails({Key? key, required this.map}) : super(key: key);
@@ -36,6 +37,9 @@ class _SoundDetailsState extends State<SoundDetails> {
     if(widget.map['soundName']!=null) title = widget.map['soundName'];
     super.initState();
     getVideos();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
   }
   @override
   Widget build(BuildContext context) {

@@ -15,6 +15,7 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../models/user.dart';
 import '../../rest/rest_url.dart';
+import '../../widgets/video_item.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -33,6 +34,14 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   int selectedTab = 2;
+
+  @override
+  void initState() {
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

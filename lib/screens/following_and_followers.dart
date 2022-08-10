@@ -9,6 +9,7 @@ import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 import '../models/follower_model.dart';
+import '../widgets/video_item.dart';
 
 class FollowingAndFollowers extends StatefulWidget {
   const FollowingAndFollowers({Key? key, required this.map}) : super(key: key);
@@ -36,6 +37,9 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
   @override
   void initState() {
     getData();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 

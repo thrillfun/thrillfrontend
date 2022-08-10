@@ -9,8 +9,7 @@ class RotatedImage extends StatefulWidget {
   @override
   _RotatedImageState createState() => _RotatedImageState();
 }
-class _RotatedImageState extends State<RotatedImage>
-    with SingleTickerProviderStateMixin {
+class _RotatedImageState extends State<RotatedImage> with SingleTickerProviderStateMixin {
   late AnimationController animationController;
   late Animation<double> animation;
 

@@ -10,6 +10,7 @@ import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/rest/rest_url.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
+import '../../widgets/video_item.dart';
 
 class NewSong extends StatefulWidget {
   const NewSong({Key? key}) : super(key: key);
@@ -36,6 +37,9 @@ class _NewSongState extends State<NewSong> {
   void initState(){
     super.initState();
     getSounds();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
   }
 
   @override

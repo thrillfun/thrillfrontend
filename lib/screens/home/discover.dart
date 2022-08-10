@@ -10,6 +10,7 @@ import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 import '../../common/strings.dart';
 import '../../models/vidio_discover_model.dart';
+import '../../widgets/video_item.dart';
 
 class Discover extends StatefulWidget {
   const Discover({Key? key}) : super(key: key);
@@ -30,6 +31,9 @@ class _DiscoverState extends State<Discover> {
   @override
   void initState() {
     loadAllData();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 
