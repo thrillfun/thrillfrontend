@@ -44,7 +44,7 @@ class _NewSongState extends State<NewSong> {
         appBar: AppBar(
           elevation: 0.5,
           title: const Text(
-            "Choose Music",
+            chooseMusic,
             style: TextStyle(color: Colors.black),
           ),
           centerTitle: true,
@@ -85,14 +85,14 @@ class _NewSongState extends State<NewSong> {
               children: const [
                 Icon(Icons.music_note),
                 Text(
-                  "Choose From Device",
+                  chooseFromDevice,
                   style: TextStyle(fontSize: 16),
                 )
               ],
             )),
         body: isLoading?
             const Center(child: CircularProgressIndicator(),): newSongList.isEmpty?
-            const Center(child: Text("No Songs Found!"),):
+            Center(child: Text(noSoundFound, style: Theme.of(context).textTheme.headline3,),):
         ListView.builder(
             itemCount: newSongList.length,
             itemBuilder: (BuildContext context, int index) {
