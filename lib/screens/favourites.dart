@@ -348,22 +348,27 @@ class _FavouritesState extends State<Favourites> {
 
   void loadData() async {
     var result = await RestApi.getFavriteItems();
+    var response = await RestApi.getFavVideos();
     var json = jsonDecode(result.body);
+    var jsonV = jsonDecode(response.body);
     if (json['status']) {
       List jsonList = json['data']['hash_tags'] as List;
       favHastag = jsonList.map((e) => HashtagModel.fromJson(e)).toList();
 
-      favId =
-          jsonList.map((e) => HashtagModel.fromJson(e).id.toString()).toList();
+      favId = jsonList.map((e) => HashtagModel.fromJson(e).id.toString()).toList();
 
       SharedPreferences pref = await SharedPreferences.getInstance();
       pref.setStringList('favTag', favId);
 
-      List jsonVideoList = json['data']['videos'] as List;
-      favVideo = jsonVideoList.map((e) => VideoModel.fromJson(e)).toList();
+      // List jsonVideoList = json['data']['videos'] as List;
+      // favVideo = jsonVideoList.map((e) => VideoModel.fromJson(e)).toList();
 
       List jsonSoundList = json['data']['sounds'] as List;
       favSound = jsonSoundList.map((e) => AddSoundModel.fromJson(e)).toList();
+    }
+    if(jsonV['status']){
+      List jsonVideoList = jsonV['data'] as List;
+      favVideo = jsonVideoList.map((e) => VideoModel.fromJson(e)).toList();
     }
     isLoading = false;
     setState(() {});

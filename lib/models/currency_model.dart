@@ -40,9 +40,9 @@ class Networks {
        json['id'] ?? 0,
        json['currency_id'] ?? 0.toDouble(),
        json['network_name'] ?? "",
-       json['min_amount'].toDouble(),
-       json['max_amount'].toDouble(),
-      json['fee_digit'].toDouble(),
+       double.tryParse(json['min_amount'].toString())??0.0,
+       double.tryParse(json['max_amount'].toString())??0.0,
+        double.tryParse(json['fee_digit'].toString())??0.0,
     );
   }
 }

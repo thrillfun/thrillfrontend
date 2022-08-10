@@ -988,7 +988,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
           if(videoDuration.inSeconds>=selectedDuration){
             autoStopRecordingTimer?.cancel();
             XFile? rawVideo = await stopVideoRecording();
-            await audioPlayer.stop();
+            if(addSoundModel!=null) await audioPlayer.stop();
             File videoFile = File(rawVideo!.path);
 
             int currentUnix =
@@ -1054,7 +1054,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.pauseVideoRecording();
-      await audioPlayer.pause();
+      if(addSoundModel!=null) await audioPlayer.pause();
       setState(()=>_isRecordingInProgress=false);
     } on CameraException {
       //ss
@@ -1068,7 +1068,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     }
     try {
       await controller!.resumeVideoRecording();
-      await audioPlayer.resume();
+      if(addSoundModel!=null) await audioPlayer.resume();
       setState(()=>_isRecordingInProgress=true);
     } on CameraException {
       // print('Error resuming video recording: $e');

@@ -72,7 +72,7 @@ class _WalletState extends State<Wallet> {
                     children: [
                       InkWell(
                         onTap: () {
-                          Navigator.pushNamed(context, '/paymentRequest').then((value) => {
+                          Navigator.pushNamed(context, '/paymentRequest', arguments: balanceList).then((value) => {
                             loadWalletInfo()
                           });
                         },

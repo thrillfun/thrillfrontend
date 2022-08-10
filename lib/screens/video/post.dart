@@ -638,7 +638,7 @@ class _PostVideoState extends State<PostVideo> {
               widget.data.speed,
             duetSwitch,
             commentsSwitch,
-            widget.data.duetFrom,
+            widget.data.duetFrom??'',
             widget.data.isDuet,
           );
           var json = jsonDecode(result.body);
@@ -674,23 +674,21 @@ class _PostVideoState extends State<PostVideo> {
             String tagList =
             jsonEncode(selectedHashtags);
             var result = await RestApi.postVideo(
-                videoId,
-                widget.data.addSoundModel==null?"":"$currentUnix.mp3",
-                widget.data.addSoundModel?.name??"",
-                dropDownCategoryValue,
-                tagList,
-                "Private",
-                commentsSwitch ? 1 : 0,
-                desCtr.text,
-                widget.data.filterName.isEmpty
-                    ? ''
-                    : widget.data.filterName,
-                dropDownLanguageValue,
-                '$currentUnix.gif',
-                widget.data.speed,
+              videoId,
+              widget.data.addSoundModel==null?"":"$currentUnix.mp3",
+              widget.data.addSoundModel?.name??"",
+              dropDownCategoryValue,
+              tagList,
+              "Private",
+              commentsSwitch ? 1 : 0,
+              desCtr.text,
+              widget.data.filterName.isEmpty ? '' : widget.data.filterName,
+              dropDownLanguageValue,
+              '$currentUnix.gif',
+              widget.data.speed,
               duetSwitch,
               commentsSwitch,
-                widget.data.duetFrom,
+              widget.data.duetFrom??'',
               widget.data.isDuet,
             );
             var json = jsonDecode(result.body);
@@ -765,7 +763,7 @@ class _PostVideoState extends State<PostVideo> {
               widget.data.speed,
             duetSwitch,
             commentsSwitch,
-              widget.data.duetFrom,
+              widget.data.duetFrom??'',
             widget.data.isDuet,
           );
           var json = jsonDecode(result.body);
@@ -816,7 +814,7 @@ class _PostVideoState extends State<PostVideo> {
                 widget.data.speed,
               duetSwitch,
               commentsSwitch,
-                widget.data.duetFrom,
+                widget.data.duetFrom??'',
               widget.data.isDuet,
             );
             var json = jsonDecode(result.body);

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +8,6 @@ import 'package:thrill/blocs/profile/profile_bloc.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
-
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../models/social_url_model.dart';
@@ -61,12 +59,10 @@ class _EditProfileState extends State<EditProfile> {
       websiteCtr.text = widget.user.website_url;
       bioCtr.text = widget.user.bio;
       dropDownGender=widget.user.gender.isEmpty?"Male":widget.user.gender;
-
       socialList.add(SocialUrlModel('youtube', widget.user.youtube));
       socialList.add(SocialUrlModel('facebook', widget.user.facebook));
       socialList.add(SocialUrlModel('instagram', widget.user.instagram));
       socialList.add(SocialUrlModel('twitter', widget.user.twitter));
-
       genderList.addAll({"Male","Female","Other"});
     });
     super.initState();

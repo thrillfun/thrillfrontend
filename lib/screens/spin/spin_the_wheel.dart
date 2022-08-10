@@ -13,8 +13,6 @@ import '../../models/earnSpin_model.dart';
 import '../../models/probility_counter.dart';
 import '../../models/wheelDetails_model.dart';
 import '../../rest/rest_url.dart';
-import 'dart:typed_data';
-import 'package:flutter/services.dart';
 
 class SpinTheWheel extends StatefulWidget {
   const SpinTheWheel({Key? key}) : super(key: key);
@@ -50,19 +48,21 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   int rewardId=0;
   AudioPlayer player = AudioPlayer();
 
-  String audioasset = "assets/spins.wav";
-
   @override
   void dispose() {
     controller.close();
+    player.stop();
+    player.dispose();
     super.dispose();
   }
 
 
   @override
   void initState() {
-    player.play(RestUrl.spinSound);
-    player.pause();
+    try{
+      player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
+      player.pause();
+    }catch(_){}
     loadWheelDetails();
     super.initState();
   }
@@ -226,8 +226,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                                   ),
                                 ),
                                 child: FortuneWheel(
-                                  duration:
-                                  const Duration(seconds: 20),
+                                  duration: const Duration(seconds: 20),
                                   animateFirst: false,
                                   selected: controller.stream,
                                   indicators: <FortuneIndicator>[
@@ -363,7 +362,6 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   spinTheWheelTap() async {
     try {
        if (remainingChance > 0) {
-         player.resume();
          setState(() {
           isSpin = true;
          });
@@ -376,6 +374,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
           ProbilityCounter element = getRandomElement(listForReward) as ProbilityCounter;
           int id=element.id-1;
           rewardId=element.id;
+          await player.resume();
           setState(() {
             selectedInt = id;
             controller.add(selectedInt);
@@ -463,6 +462,10 @@ class _SpinTheWheelState extends State<SpinTheWheel>
       closeDialogue(context);
       if (json['status']) {
         loadWheelDetails();
+        player.stop();
+        await player.stop();
+        await player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
+        await player.pause();
         isSpin = false;
         remainingChance = int.parse(json['data']['available_chance']);
         usedChanceValue = int.parse(json['data']['used_chance']);

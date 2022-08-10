@@ -177,7 +177,6 @@ class _DiscoverState extends State<Discover> {
                     },
                   );
                 }
-
                 return ListView.builder(
                     itemCount: videoList.length,
                     scrollDirection: Axis.vertical,
@@ -211,7 +210,10 @@ class _DiscoverState extends State<Discover> {
         isLoading = false;
       });
     } catch (e) {
-      //print(e.toString());
+      showErrorToast(context, e.toString());
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 

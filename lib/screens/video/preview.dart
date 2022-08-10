@@ -322,6 +322,7 @@ class _PreviewState extends State<Preview> {
     File videoFile = File(widget.data.filePath);
 
     if(widget.data.isDuet && widget.data.duetPath!=null){
+
             FFmpegKit.execute(
                 //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
                 //" -n -i $zero -i $one -filter_complex: [0:v][1:v]vstack=inputs=2[v] $op" //stretched

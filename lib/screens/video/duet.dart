@@ -53,6 +53,7 @@ class _RecordDuetState extends State<RecordDuet> {
   bool videoDownloaded = false;
   File? duetFile;
   String downloadProgress = '0';
+  String duetFileName = '';
 
   @override
   initState(){
@@ -69,7 +70,9 @@ class _RecordDuetState extends State<RecordDuet> {
       'assets/filter7.gif'
     });
     videoController = VideoPlayerController.network(
-        '${RestUrl.videoUrl}${widget.videoModel.video}'
+        widget.videoModel.duet_from.isEmpty?
+        '${RestUrl.videoUrl}${widget.videoModel.video}':
+        '${RestUrl.videoUrl}${widget.videoModel.duet_from}'
     )
       ..initialize().then((value) {
         if (videoController!.value.isInitialized) {
@@ -115,40 +118,39 @@ class _RecordDuetState extends State<RecordDuet> {
                 height: getHeight(context)*.80,
                 width: getWidth(context),
                 child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    SizedBox(
-                      width: getWidth(context),
-                      height: getHeight(context)*.40,
-                      child: videoController != null &&
-                          videoController!.value.isInitialized
-                          ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: AspectRatio(
-                          aspectRatio: 1/videoController!.value.aspectRatio,
-                          child: VideoPlayer(videoController!),
-                        ),
-                      )
-                          : Container(),
+                    Row(
+                      children: [
+                        videoController != null &&
+                            videoController!.value.isInitialized
+                            ? SizedBox(
+                          width: getWidth(context)/2,
+                              child: AspectRatio(
+                                aspectRatio: videoController!.value.aspectRatio,
+                                child: VideoPlayer(videoController!),
+                              ),
+                            )
+                            : const Center(child: CircularProgressIndicator()),
+                        isCameraInitialized && _videoFile == null
+                            ? SizedBox(
+                              width: getWidth(context)/2,
+                              child: AspectRatio(
+                              aspectRatio: 1/controller!.value.aspectRatio,
+                              child: controller!.buildPreview()),
+                            )
+                            : const Center(child: CircularProgressIndicator()),
+                      ],
                     ),
-                    isCameraInitialized && _videoFile == null
-                        ? Positioned.fill(
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: SizedBox(
-                      //width: getWidth(context),
-                            height: getHeight(context)*.40,
-                            child: AspectRatio(
-                                aspectRatio: 1/controller!.value.aspectRatio,
-                                child: controller!.buildPreview())),
-                          ),
-                        )
-                        : const SizedBox(),
                     Visibility(
                       visible: !_isRecordingInProgress,
-                      child: IconButton(
-                          onPressed: (){Navigator.pop(context);},
-                          color: Colors.red,
-                          icon: const Icon(Icons.close)
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: IconButton(
+                            onPressed: (){Navigator.pop(context);},
+                            color: Colors.white,
+                            icon: const Icon(Icons.close)
+                        ),
                       ),
                     )
                   ],
@@ -383,8 +385,10 @@ class _RecordDuetState extends State<RecordDuet> {
   downloadVideo()async{
     if(widget.videoModel.duet_from.isNotEmpty){
       duetFile = File('$saveCacheDirectory${widget.videoModel.duet_from}');
+      duetFileName = widget.videoModel.duet_from.split('.').first;
     } else {
       duetFile = File('$saveCacheDirectory${widget.videoModel.video}');
+      duetFileName = widget.videoModel.video.split('.').first;
     }
     try{
       // if(duetFile!.existsSync()){
@@ -392,9 +396,9 @@ class _RecordDuetState extends State<RecordDuet> {
       // } else {
       if(duetFile!.existsSync()) duetFile!.deleteSync();
         await FileSupport().downloadCustomLocation(
-          url: '${RestUrl.videoUrl}${widget.videoModel.video}',
+          url: '${RestUrl.videoUrl}${widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from}',
           path: saveCacheDirectory,
-          filename: widget.videoModel.video.split('.').first,
+          filename: duetFileName,
           extension: ".mp4",
           progress: (progress) async {
             downloadProgress=progress;
@@ -447,7 +451,7 @@ class _RecordDuetState extends State<RecordDuet> {
           addSoundModel: addSoundModel,
           isDuet: true,
           duetPath: duetFile?.path,
-        duetFrom: widget.videoModel.duet_from.isEmpty?null:widget.videoModel.duet_from,
+        duetFrom: widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from,
         isDefaultSound: true, isUploadedFromGallery: false,
         trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
       );
@@ -455,7 +459,7 @@ class _RecordDuetState extends State<RecordDuet> {
       Navigator.pop(context);
     } else {
       progressDialogue(context);
-      Timer.periodic(const Duration(), (timer) async {
+      Timer.periodic(const Duration(seconds: 1), (timer) async {
         if(downloadProgress=='100'){
           closeDialogue(context);
           timer.cancel();
@@ -466,7 +470,7 @@ class _RecordDuetState extends State<RecordDuet> {
               addSoundModel: addSoundModel,
               isDuet: true,
               duetPath: duetFile?.path,
-            duetFrom: widget.videoModel.duet_from.isEmpty?null:widget.videoModel.duet_from,
+            duetFrom: widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from,
             isDefaultSound: true, isUploadedFromGallery: false,
             trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,);
           await Navigator.pushNamed(context, "/preview",arguments: m);

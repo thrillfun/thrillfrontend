@@ -1,8 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:thrill/main.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/repository/video/video_repository.dart';
 import 'package:thrill/screens/home/home.dart';
+import 'package:thrill/utils/util.dart';
 part 'video_event.dart';
 part 'video_state.dart';
 
@@ -35,6 +37,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
 
         emit(VideoLoded(list, status: true, message: 'success'));
       } catch (e) {
+        showErrorToast(navigatorKey.currentContext!, e.toString());
         emit(VideoLoded(const [], status: false, message: e.toString()));
       }
     } else {
