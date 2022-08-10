@@ -30,6 +30,7 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> with WidgetsBindingObserver{
 
+  List<int> favList = List<int>.empty(growable: true);
   List<String> likeList = List<String>.empty(growable: true);
   List<Comments> commentList = List<Comments>.empty(growable: true);
   List<String> likeComment = List<String>.empty(growable: true);
@@ -69,13 +70,24 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     return Scaffold(
         body: BlocBuilder<VideoBloc, VideoState>(builder: (context, state) {
       if (state is VideoInitial) {
-        return const Center(
-          child: CircularProgressIndicator(color: Colors.lightBlueAccent),
+        return Container(
+          height: getHeight(context),
+          width: getWidth(context),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: Image.asset('assets/splash.png').image,
+              fit: BoxFit.cover
+            )
+          ),
+          child: const CircularProgressIndicator(color: Colors.lightBlueAccent),
         );
       } else if (state is VideoLoded) {
         if(widget.vModel!=null){
-          if(state.list[0].id!=widget.vModel!.id){
-            state.list.insert(0, widget.vModel!);
+          if(state.list.isNotEmpty){
+            if(state.list[0].id!=widget.vModel!.id){
+              state.list.insert(0, widget.vModel!);
+            }
           }
         }
           return Stack(
@@ -507,7 +519,6 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                   //controller: preloadPageController,
                 controller: _pageController,
                   onPageChanged: (int index){
-                //  print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                     if(adIndexes.contains(index)){
                       showAd();
                     }
@@ -587,21 +598,26 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                         children: [
                           IconButton(
                               onPressed: () async {
-                                try{
-                                  progressDialogue(context);
-                                  var response = await RestApi.checkVideoReport(state.list[index].id,userModel!.id);
-                                  var json = jsonDecode(response.body);
-                                  print(json);
-                                  closeDialogue(context);
-                                  if(json['status']){
-                                    showErrorToast(context, "You have already reported this video!");
+                                await isLogined().then((value) async {
+                                  if (value) {
+                                    try{
+                                      progressDialogue(context);
+                                      var response = await RestApi.checkVideoReport(state.list[index].id,userModel!.id);
+                                      var json = jsonDecode(response.body);
+                                      closeDialogue(context);
+                                      if(json['status']){
+                                        showErrorToast(context, "You have already reported this video!");
+                                      } else {
+                                        showReportDialog(state.list[index].id);
+                                      }
+                                    } catch(e){
+                                      closeDialogue(context);
+                                      showErrorToast(context, e.toString());
+                                    }
                                   } else {
-                                    showReportDialog(state.list[index].id);
+                                    showAlertDialog(context);
                                   }
-                                } catch(e){
-                                  closeDialogue(context);
-                                  showErrorToast(context, e.toString());
-                                }
+                                });
                               },
                               iconSize: 28,
                               padding: EdgeInsets.zero,
@@ -613,12 +629,34 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                             height: 18,
                           ),
                           IconButton(
-                              onPressed: (){},
+                              onPressed: ()async{
+                                await isLogined().then((value) async {
+                                  if (value) {
+                                    try{RestApi.favUnFavVideo(
+                                        state.list[index].id,
+                                        favList.contains(state.list[index].id)?
+                                        "unfav":"fav"
+                                    );
+                                    }catch(e){
+                                      showErrorToast(context, e.toString());
+                                    }
+                                    setState(() {
+                                      if(favList.contains(state.list[index].id)){
+                                        favList.remove(state.list[index].id);
+                                      } else {
+                                        favList.add(state.list[index].id);
+                                      }
+                                    });
+                                  } else {
+                                    showAlertDialog(context);
+                                  }
+                                });
+                              },
                               iconSize: 28,
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                               color: Colors.white,
-                              icon: const Icon(Icons.bookmark_outline)
+                              icon: Icon(favList.contains(state.list[index].id)? Icons.bookmark_outlined : Icons.bookmark_outline)
                           ),
                           const SizedBox(
                             height: 18,
@@ -1363,6 +1401,24 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     likeComment = likeData.getStringList('commentList') ?? [];
     followList = likeData.getStringList('followList') ?? [];
     setState(() {});
+    getFavVideos();
+  }
+
+  getFavVideos()async{
+    try{
+      var response = await RestApi.getFavVideos();
+      var json = jsonDecode(response.body);
+      if(json['status']){
+        List jsonList = json['data'] as List;
+        if(jsonList.isNotEmpty){
+          favList.clear();
+          for(var element in jsonList){
+            favList.add(element['id']);
+          }
+          setState(() {});
+        }
+      }
+    }catch(_){}
   }
 
   void _scrollListener() {
@@ -1490,8 +1546,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
       } else {
         if(hashList.length>=2){
           hashTags += "#${hashList.first} ";
-          hashTags += "#${hashList.first} ";
-          hashTags += "#${hashList[1]}\n";
+          hashTags += "#${hashList.last}\n";
           return hashTags;
         } else {
           hashTags += "#${hashList.first}\n";

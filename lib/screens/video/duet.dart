@@ -53,6 +53,7 @@ class _RecordDuetState extends State<RecordDuet> {
   bool videoDownloaded = false;
   File? duetFile;
   String downloadProgress = '0';
+  String duetFileName = '';
 
   @override
   initState(){
@@ -69,7 +70,9 @@ class _RecordDuetState extends State<RecordDuet> {
       'assets/filter7.gif'
     });
     videoController = VideoPlayerController.network(
-        '${RestUrl.videoUrl}${widget.videoModel.video}'
+        widget.videoModel.duet_from.isEmpty?
+        '${RestUrl.videoUrl}${widget.videoModel.video}':
+        '${RestUrl.videoUrl}${widget.videoModel.duet_from}'
     )
       ..initialize().then((value) {
         if (videoController!.value.isInitialized) {
@@ -382,8 +385,10 @@ class _RecordDuetState extends State<RecordDuet> {
   downloadVideo()async{
     if(widget.videoModel.duet_from.isNotEmpty){
       duetFile = File('$saveCacheDirectory${widget.videoModel.duet_from}');
+      duetFileName = widget.videoModel.duet_from.split('.').first;
     } else {
       duetFile = File('$saveCacheDirectory${widget.videoModel.video}');
+      duetFileName = widget.videoModel.video.split('.').first;
     }
     try{
       // if(duetFile!.existsSync()){
@@ -391,9 +396,9 @@ class _RecordDuetState extends State<RecordDuet> {
       // } else {
       if(duetFile!.existsSync()) duetFile!.deleteSync();
         await FileSupport().downloadCustomLocation(
-          url: '${RestUrl.videoUrl}${widget.videoModel.video}',
+          url: '${RestUrl.videoUrl}${widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from}',
           path: saveCacheDirectory,
-          filename: widget.videoModel.video.split('.').first,
+          filename: duetFileName,
           extension: ".mp4",
           progress: (progress) async {
             downloadProgress=progress;
@@ -446,7 +451,7 @@ class _RecordDuetState extends State<RecordDuet> {
           addSoundModel: addSoundModel,
           isDuet: true,
           duetPath: duetFile?.path,
-        duetFrom: widget.videoModel.duet_from.isEmpty?null:widget.videoModel.duet_from,
+        duetFrom: widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from,
         isDefaultSound: true, isUploadedFromGallery: false,
         trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
       );
@@ -454,7 +459,7 @@ class _RecordDuetState extends State<RecordDuet> {
       Navigator.pop(context);
     } else {
       progressDialogue(context);
-      Timer.periodic(const Duration(), (timer) async {
+      Timer.periodic(const Duration(seconds: 1), (timer) async {
         if(downloadProgress=='100'){
           closeDialogue(context);
           timer.cancel();
@@ -465,7 +470,7 @@ class _RecordDuetState extends State<RecordDuet> {
               addSoundModel: addSoundModel,
               isDuet: true,
               duetPath: duetFile?.path,
-            duetFrom: widget.videoModel.duet_from.isEmpty?null:widget.videoModel.duet_from,
+            duetFrom: widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from,
             isDefaultSound: true, isUploadedFromGallery: false,
             trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,);
           await Navigator.pushNamed(context, "/preview",arguments: m);

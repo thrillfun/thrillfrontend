@@ -1282,4 +1282,42 @@ class RestApi {
     return response;
   }
 
+  static Future<http.Response> favUnFavVideo(int videoId, String action) async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.postData(
+        RestUrl.favUnfavVideo,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+        body: {
+          'video_id':videoId.toString(),
+          'action':action
+        }
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+    });
+
+    return response;
+  }
+
+  static Future<http.Response> getFavVideos() async {
+    http.Response response;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var result = await RestClient.getData(
+        RestUrl.favVideos,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+    );
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+    });
+
+    return response;
+  }
+
 }

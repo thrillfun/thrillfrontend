@@ -87,5 +87,7 @@ class RestUrl {
   static const String currencyDetails = baseUrl + "currencies/data";
   static const String checkReport = baseUrl + "video/is-video-report";
   static const String reportVideo = baseUrl + "video/report";
+  static const String favUnfavVideo = baseUrl + "video/do-fav-unfav";
+  static const String favVideos = baseUrl + "video/favorite-videos";
 
 }
