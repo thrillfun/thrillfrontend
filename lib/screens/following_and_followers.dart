@@ -16,10 +16,10 @@ class FollowingAndFollowers extends StatefulWidget {
   static const String routeName = '/followingAndFollowers';
   final Map map;
 
-  static Route route(Map mapp) {
+  static Route route(Map _map) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => FollowingAndFollowers(map: mapp,),
+      builder: (context) => FollowingAndFollowers(map: _map,),
     );
   }
 
