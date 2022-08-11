@@ -200,3 +200,6 @@ const String no = 'No';
 const String ok = 'OK';
 const String failed = 'Failed!';
 const String successful = 'Successful!';
+const String chooseFromDevice = "Choose From Device";
+const String noSoundFound = "No Sound Found!";
+const String chooseMusic = "Choose Music";

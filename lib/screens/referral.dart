@@ -10,6 +10,7 @@ import 'package:velocity_x/velocity_x.dart';
 import '../common/color.dart';
 import '../common/strings.dart';
 import '../models/user.dart';
+import '../widgets/video_item.dart';
 
 class Referral extends StatefulWidget {
   const Referral({Key? key}) : super(key: key);
@@ -36,6 +37,9 @@ class _ReferralState extends State<Referral> {
   initState(){
     super.initState();
     getUserData();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
   }
 
   @override

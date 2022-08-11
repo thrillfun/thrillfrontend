@@ -16,6 +16,7 @@ import '../../blocs/video/video_bloc.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_api.dart';
+import '../../widgets/video_item.dart';
 
 class PostVideo extends StatefulWidget {
   const PostVideo({Key? key, required this.data}) : super(key: key);
@@ -65,6 +66,9 @@ class _PostVideoState extends State<PostVideo> {
             videoPlayerController.setVolume(1);
             setState(() {});
           });
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
   }
 
   @override
@@ -125,14 +129,23 @@ class _PostVideoState extends State<PostVideo> {
                         const SizedBox(
                           width: 10,
                         ),
-                        SizedBox(
-                          height: 160,
-                          width: 120,
-                          child: !videoPlayerController.value.isInitialized
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
-                              : VideoPlayer(videoPlayerController),
+                        GestureDetector(
+                          onTap: (){
+                            try{
+                              videoPlayerController.value.isPlaying?
+                              videoPlayerController.pause():
+                              videoPlayerController.play();
+                            }catch(_){}
+                          },
+                          child: SizedBox(
+                            height: 160,
+                            width: 120,
+                            child: !videoPlayerController.value.isInitialized
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : VideoPlayer(videoPlayerController),
+                          ),
                         ),
                         const SizedBox(
                           width: 5,

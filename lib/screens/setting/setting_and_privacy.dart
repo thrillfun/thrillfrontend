@@ -13,6 +13,7 @@ import 'package:velocity_x/velocity_x.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
+import '../../widgets/video_item.dart';
 
 class SettingAndPrivacy extends StatefulWidget {
   const SettingAndPrivacy({Key? key}) : super(key: key);
@@ -35,6 +36,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
 
   @override
   void initState() {
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 

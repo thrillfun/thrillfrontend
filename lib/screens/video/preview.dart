@@ -9,6 +9,7 @@ import 'package:video_player/video_player.dart';
 import '../../common/strings.dart';
 import '../../models/post_data.dart';
 import '../../utils/util.dart';
+import '../../widgets/video_item.dart';
 
 class Preview extends StatefulWidget {
   const Preview({Key? key, required this.data}) : super(key: key);
@@ -37,6 +38,9 @@ class _PreviewState extends State<Preview> {
   void initState() {
     startVideoProcessing();
     FFmpegKitConfig.enableStatisticsCallback(statisticsCallback);
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 

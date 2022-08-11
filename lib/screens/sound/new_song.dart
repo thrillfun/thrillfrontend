@@ -10,6 +10,7 @@ import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/rest/rest_url.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
+import '../../widgets/video_item.dart';
 
 class NewSong extends StatefulWidget {
   const NewSong({Key? key}) : super(key: key);
@@ -36,6 +37,9 @@ class _NewSongState extends State<NewSong> {
   void initState(){
     super.initState();
     getSounds();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
   }
 
   @override
@@ -44,7 +48,7 @@ class _NewSongState extends State<NewSong> {
         appBar: AppBar(
           elevation: 0.5,
           title: const Text(
-            "Choose Music",
+            chooseMusic,
             style: TextStyle(color: Colors.black),
           ),
           centerTitle: true,
@@ -85,14 +89,14 @@ class _NewSongState extends State<NewSong> {
               children: const [
                 Icon(Icons.music_note),
                 Text(
-                  "Choose From Device",
+                  chooseFromDevice,
                   style: TextStyle(fontSize: 16),
                 )
               ],
             )),
         body: isLoading?
             const Center(child: CircularProgressIndicator(),): newSongList.isEmpty?
-            const Center(child: Text("No Songs Found!"),):
+            Center(child: Text(noSoundFound, style: Theme.of(context).textTheme.headline3,),):
         ListView.builder(
             itemCount: newSongList.length,
             itemBuilder: (BuildContext context, int index) {

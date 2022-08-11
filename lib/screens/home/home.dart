@@ -608,7 +608,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                       if(json['status']){
                                         showErrorToast(context, "You have already reported this video!");
                                       } else {
-                                        showReportDialog(state.list[index].id);
+                                        showReportDialog(state.list[index].id, state.list[index].user.username);
                                       }
                                     } catch(e){
                                       closeDialogue(context);
@@ -1558,7 +1558,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     }
   }
 
-  showReportDialog(int videoId)async{
+  showReportDialog(int videoId, String name)async{
     String dropDownValue = "Reason";
     List<String> dropDownValues = ["Reason",];
     try{
@@ -1604,7 +1604,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30),
-                        child: Text("Report ${userModel?.username}'s Video ?",
+                        child: Text("Report $name's Video ?",
                           style: Theme.of(context).textTheme.headline3!.copyWith(fontSize: 16), textAlign: TextAlign.center,),
                       ),
                       const SizedBox(height: 15,),

@@ -13,6 +13,7 @@ import '../../models/earnSpin_model.dart';
 import '../../models/probility_counter.dart';
 import '../../models/wheelDetails_model.dart';
 import '../../rest/rest_url.dart';
+import '../../widgets/video_item.dart';
 
 class SpinTheWheel extends StatefulWidget {
   const SpinTheWheel({Key? key}) : super(key: key);
@@ -64,6 +65,9 @@ class _SpinTheWheelState extends State<SpinTheWheel>
       player.pause();
     }catch(_){}
     loadWheelDetails();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 
