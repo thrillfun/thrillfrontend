@@ -15,6 +15,7 @@ import '../../common/strings.dart';
 import '../../main.dart';
 import '../../models/add_sound_model.dart';
 import '../../utils/util.dart';
+import '../../widgets/video_item.dart';
 
 class Record extends StatefulWidget {
   const Record({Key? key, required this.soundMap}) : super(key: key);
@@ -122,6 +123,9 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
       addSoundModel = AddSoundModel(0, 0, widget.soundMap?["soundPath"], widget.soundMap?["soundName"], '', '');
     }
     onNewCameraSelected(cameras[0]);
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
 
    // CameraDeepArController.checkPermissions();

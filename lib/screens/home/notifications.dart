@@ -4,6 +4,7 @@ import 'package:thrill/models/notification_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 import '../../common/strings.dart';
+import '../../widgets/video_item.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({Key? key}) : super(key: key);
@@ -28,6 +29,9 @@ class _NotificationsState extends State<Notifications> {
   @override
   void initState() {
     getNotifications();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 

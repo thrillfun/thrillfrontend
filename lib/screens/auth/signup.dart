@@ -11,6 +11,7 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
+import '../../widgets/video_item.dart';
 
 class SignUp extends StatefulWidget {
   static const String routeName = '/Signup';
@@ -48,6 +49,14 @@ class _SignUpState extends State<SignUp> {
     selectedDate.millisecond,
     selectedDate.microsecond,
   );
+
+  @override
+  void initState() {
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

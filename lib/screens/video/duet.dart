@@ -14,6 +14,7 @@ import '../../models/post_data.dart';
 import '../../models/video_model.dart';
 import '../../rest/rest_url.dart';
 import '../../utils/util.dart';
+import '../../widgets/video_item.dart';
 
 class RecordDuet extends StatefulWidget {
   const RecordDuet({Key? key, required this.videoModel}) : super(key: key);
@@ -30,7 +31,6 @@ class RecordDuet extends StatefulWidget {
     );
   }
 }
-
 
 class _RecordDuetState extends State<RecordDuet> {
 
@@ -83,6 +83,9 @@ class _RecordDuetState extends State<RecordDuet> {
           if (mounted) setState(() {});
         }
       });
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
   }
 
   @override
@@ -402,7 +405,7 @@ class _RecordDuetState extends State<RecordDuet> {
           extension: ".mp4",
           progress: (progress) async {
             downloadProgress=progress;
-            print(progress);
+            debugPrint(progress);
           },
         );
         setState(()=>videoDownloaded = true);
@@ -410,7 +413,7 @@ class _RecordDuetState extends State<RecordDuet> {
     } catch(e){
       Navigator.pop(context);
       showErrorToast(context, e.toString());
-      setState(()=>videoDownloaded = false);
+      //setState(()=>videoDownloaded = false);
     }
   }
 
@@ -455,7 +458,7 @@ class _RecordDuetState extends State<RecordDuet> {
         isDefaultSound: true, isUploadedFromGallery: false,
         trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
       );
-      await Navigator.pushNamed(context, "/preview",arguments: m);
+      await Navigator.pushNamed(context, "/preview", arguments: m);
       Navigator.pop(context);
     } else {
       progressDialogue(context);

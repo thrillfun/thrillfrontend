@@ -9,16 +9,17 @@ import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 import '../models/follower_model.dart';
+import '../widgets/video_item.dart';
 
 class FollowingAndFollowers extends StatefulWidget {
   const FollowingAndFollowers({Key? key, required this.map}) : super(key: key);
   static const String routeName = '/followingAndFollowers';
   final Map map;
 
-  static Route route(Map mapp) {
+  static Route route(Map _map) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => FollowingAndFollowers(map: mapp,),
+      builder: (context) => FollowingAndFollowers(map: _map,),
     );
   }
 
@@ -36,13 +37,16 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
   @override
   void initState() {
     getData();
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade400,
+      backgroundColor: Colors.grey.shade300,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -171,32 +175,39 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
                 ),
                 const SizedBox(width: 10,),
                 Expanded(
-                  child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: followerList[index].name+'\n',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold
-                            )
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(followerList[index].name,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13
                           ),
-                          const WidgetSpan(child: SizedBox(height: 5,)),
-                          TextSpan(
-                              text: '\n'+getStarredEmail(followerList[index].email),
-                              style: const TextStyle(
-                                  color: Colors.black,
-                              ),
-                          ),
-                          TextSpan(
-                            text: '\n'+getFormattedDate(followerList[index].date),
-                            style: const TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ]
-                      )
-                  ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 4,),
+                      Text(getStarredEmail(followerList[index].email),
+                        style: const TextStyle(
+                          color: Colors.black,
+                            fontSize: 12
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 2,),
+                      Text(getFormattedDate(followerList[index].date),
+                        style: const TextStyle(
+                          color: Colors.black,
+                            fontSize: 12
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  )
                 )
 
               ],
@@ -248,32 +259,39 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
                 ),
                 const SizedBox(width: 10,),
                 Expanded(
-                  child: RichText(
-                      text: TextSpan(
-                          children: [
-                            TextSpan(
-                                text: followingList[index].name+'\n',
-                                style: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold
-                                )
-                            ),
-                            const WidgetSpan(child: SizedBox(height: 5,)),
-                            TextSpan(
-                                text: '\n'+getStarredEmail(followingList[index].email),
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                )
-                            ),
-                            TextSpan(
-                              text: '\n'+getFormattedDate(followingList[index].date),
-                              style: const TextStyle(
-                                color: Colors.black,
-                              ),
-                            ),
-                          ]
-                      )
-                  ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(followingList[index].name,
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        const SizedBox(height: 4,),
+                        Text(getStarredEmail(followingList[index].email),
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 12
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        const SizedBox(height: 2,),
+                        Text(getFormattedDate(followingList[index].date),
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 12
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    )
                 )
 
               ],

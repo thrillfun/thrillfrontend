@@ -177,10 +177,13 @@ class _BottomNavigationState extends State<BottomNavigation> {
             },
             child: SizedBox(
                 width: MediaQuery.of(context).size.width * .24,
-                child: Image.asset(
-                  'assets/spin.png',
-                  scale: 1.4,
-                  width: 20,
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Image.asset(
+                    'assets/spin.png',
+                    //scale: 1.4,
+                    width: 20,
+                  ),
                 )),
           ),
           GestureDetector(

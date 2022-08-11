@@ -13,6 +13,7 @@ import '../../common/strings.dart';
 import '../../models/social_url_model.dart';
 import '../../repository/login/login_repository.dart';
 import '../../rest/rest_url.dart';
+import '../../widgets/video_item.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({Key? key, required this.user}) : super(key: key);
@@ -65,6 +66,9 @@ class _EditProfileState extends State<EditProfile> {
       socialList.add(SocialUrlModel('twitter', widget.user.twitter));
       genderList.addAll({"Male","Female","Other"});
     });
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 

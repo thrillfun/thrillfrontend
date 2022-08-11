@@ -11,6 +11,7 @@ import 'package:thrill/utils/util.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/add_sound_model.dart';
 import '../../models/post_data.dart';
+import '../../widgets/video_item.dart';
 
 class Editing extends StatefulWidget {
   const Editing({Key? key, required this.data}) : super(key: key);
@@ -56,6 +57,9 @@ class _EditingState extends State<Editing> {
         isVidInit = true;
         setState(() {});
       });
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 

@@ -14,6 +14,7 @@ import '../../models/follower_model.dart';
 import '../../models/user.dart';
 import '../../models/video_model.dart';
 import '../../rest/rest_url.dart';
+import '../../widgets/video_item.dart';
 
 class ViewProfile extends StatefulWidget {
   const ViewProfile({Key? key, required this.mapData}) : super(key: key);
@@ -53,6 +54,9 @@ class _ViewProfileState extends State<ViewProfile> {
       }
     getUserPublicVideos(widget.mapData["getProfile"]?widget.mapData["id"]:userModel?.id);
     getUserLikedVideos(widget.mapData["getProfile"]?widget.mapData["id"]:userModel?.id);
+    try{
+      reelsPlayerController?.pause();
+    }catch(_){}
     super.initState();
   }
 
