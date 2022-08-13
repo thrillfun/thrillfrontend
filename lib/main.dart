@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -23,7 +25,17 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
   MobileAds.instance.initialize();
-  await Firebase.initializeApp();
+  if(Platform.isIOS){
+    await Firebase.initializeApp(
+        options: const FirebaseOptions(
+            projectId: 'algebraic-envoy-350105',
+            apiKey: 'AIzaSyCn2oXiqua7pqQ1mVz6HRubs7MQOzlBev0',
+            messagingSenderId: '882291140458',
+            appId: '1:882291140458:ios:876fc96cea6013bf3e6713'
+        ));
+  } else {
+    await Firebase.initializeApp();
+  }
   await FirebaseMessaging.instance.getToken();
   CustomNotification.initialize();
   try {

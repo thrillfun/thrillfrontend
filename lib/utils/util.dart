@@ -174,8 +174,8 @@ getTempDirectory()async{
   var directoryIOS = await getApplicationDocumentsDirectory();
   var directoryANDROID = await getTemporaryDirectory();
   if (Platform.isIOS) {
-    saveDirectory = directoryIOS.path;
-    saveCacheDirectory = directoryIOS.path;
+    saveDirectory = "${directoryIOS.path}/";
+    saveCacheDirectory = "${directoryIOS.path}/";
   } else {
     saveDirectory = "/storage/emulated/0/Download/";
     saveCacheDirectory = "${directoryANDROID.path}/";
