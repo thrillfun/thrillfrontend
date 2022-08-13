@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
@@ -60,15 +61,23 @@ class _SpinTheWheelState extends State<SpinTheWheel>
 
   @override
   void initState() {
-    try{
-      player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
-      player.pause();
-    }catch(_){}
+    setSpinSound();
     loadWheelDetails();
     try{
       reelsPlayerController?.pause();
     }catch(_){}
     super.initState();
+  }
+
+  setSpinSound()async{
+    try{
+      if(Platform.isIOS){
+        player.setUrl('${saveCacheDirectory}spin.mp3', isLocal: true);
+      } else {
+        player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
+        player.pause();
+      }
+    }catch(_){}
   }
 
   @override

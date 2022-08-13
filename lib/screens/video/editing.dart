@@ -171,14 +171,19 @@ class _EditingState extends State<Editing> {
                       Radio(
                         value: 0,
                         groupValue: radioGroupValue,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         onChanged: (int? val)=>setState(()=>radioGroupValue=val??0),
                         activeColor: ColorManager.cyan,
                       ),
-                      Text("Default Sound", style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.grey),),
+                      Text("Default Sound",
+                        style: Theme.of(context).textTheme.headline4!.copyWith(
+                          fontSize: 13,
+                            color: Colors.grey),),
                       const Spacer(),
                       Radio(
                         value: 1,
                         groupValue: radioGroupValue,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         activeColor: ColorManager.cyan,
                         onChanged: (int? val) {
                           if(widget.data.addSoundModel==null){
@@ -188,7 +193,10 @@ class _EditingState extends State<Editing> {
                           }
                         },
                       ),
-                      Text("Chosen Sound", style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.grey),),
+                      Text("Chosen Sound",
+                        style: Theme.of(context).textTheme.headline4!.copyWith(
+                            fontSize: 13,
+                            color: Colors.grey),),
                     ],
                   ),
                 )
