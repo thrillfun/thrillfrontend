@@ -209,12 +209,10 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
                     ],
                   )
                 )
-
               ],
             ),
           );
         },
-
       ),
     );
   }
