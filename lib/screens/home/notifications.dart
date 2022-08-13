@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/notification_model.dart';
+import 'package:thrill/models/user.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 import '../../common/strings.dart';
@@ -25,9 +27,11 @@ class _NotificationsState extends State<Notifications> {
 
   List<NotificationModel> notificationList = List<NotificationModel>.empty(growable: true);
   bool isLoading = true;
+  late UserModel userModel;
 
   @override
   void initState() {
+    loadUserModel();
     getNotifications();
     try{
       reelsPlayerController?.pause();
@@ -64,13 +68,19 @@ class _NotificationsState extends State<Notifications> {
                 itemBuilder: (BuildContext context, int index) {
                   return InkWell(
                     onTap: (){
-                      String redirectType = notificationList[index].redirectType;
-                      if(redirectType=='video' && notificationList[index].videoModel!=null){
-                        Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': notificationList[index].videoModel});
-                      } else if(redirectType=='comment' && notificationList[index].videoModel!=null){
-                        Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': notificationList[index].videoModel});
-                      } else if(redirectType=='user' && notificationList[index].userId!=0){
-                        Navigator.pushNamed(context, "/viewProfile", arguments: {"id":notificationList[index].userId, "getProfile":true});
+                      try{
+                        String redirectType = notificationList[index].redirectType;
+                        if(redirectType=='video' && notificationList[index].videoModel!=null){
+                          Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': notificationList[index].videoModel});
+                        } else if(redirectType=='comment' && notificationList[index].videoModel!=null){
+                          Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': notificationList[index].videoModel});
+                        } else if(redirectType=='user' && notificationList[index].userId!=0 && notificationList[index].userId!=userModel.id){
+                          Navigator.pushNamed(context, "/viewProfile", arguments: {"id":notificationList[index].userId, "getProfile":true});
+                        } else {
+                          showErrorToast(context, "Something's not right!");
+                        }
+                      } catch(e){
+                        showErrorToast(context, e.toString());
                       }
                     },
                     child: Padding(
@@ -144,5 +154,12 @@ class _NotificationsState extends State<Notifications> {
       setState(()=>isLoading = false);
       showErrorToast(context, "Notification Fetch Ended with Error:\n$e");
     }
+  }
+
+  loadUserModel() async {
+    var pref = await SharedPreferences.getInstance();
+    var currentUser = pref.getString('currentUser');
+    userModel = UserModel.fromJson(jsonDecode(currentUser!));
+    setState(() {});
   }
 }

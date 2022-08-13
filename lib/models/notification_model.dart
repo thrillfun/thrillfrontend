@@ -22,7 +22,7 @@ class NotificationModel{
     json['video_details']!=null?VideoModel.fromJson(json['video_details']):null:null;
     return NotificationModel(
         json['id'] ?? 0,
-        json['user_details']['id'] ?? 0,
+        json['other_user_details']['id'] ?? 0,
         json['title'] ?? '',
         json['body'] ?? '',
         json['created_at'] ?? '',
