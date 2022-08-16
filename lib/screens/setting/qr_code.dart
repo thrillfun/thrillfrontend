@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/user.dart';
@@ -201,6 +202,11 @@ class _QrCodeState extends State<QrCode> {
 
     }}
   saveQrCode()async{
+    var status = await Permission.storage.isGranted;
+    if (!status) {
+      Permission.storage.request();
+      return;
+    }
     progressDialogue(context);
     try{
       DateTime dateTime = DateTime.now();

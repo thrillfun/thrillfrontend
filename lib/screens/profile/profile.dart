@@ -58,7 +58,6 @@ class _ProfileState extends State<Profile> {
                 child: CircularProgressIndicator(),
               );
             } else if (state is ProfileLoaded) {
-
               return SingleChildScrollView(
                 child: Column(
                   children: [

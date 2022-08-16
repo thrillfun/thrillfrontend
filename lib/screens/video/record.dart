@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +17,7 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../main.dart';
 import '../../models/add_sound_model.dart';
+import '../../models/user.dart';
 import '../../utils/util.dart';
 import '../../widgets/video_item.dart';
 
@@ -55,6 +59,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
   Timer? autoStopRecordingTimer;
   Duration videoDuration = const Duration();
   String speed = '1';
+  late UserModel userModel;
 
   /*final deepArController = CameraDeepArController(config);
   String _platformVersion = 'Unknown';
@@ -118,10 +123,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    if(widget.soundMap!=null){
-      selectedSound = widget.soundMap?["soundName"];
-      addSoundModel = AddSoundModel(0, 0, widget.soundMap?["soundPath"], widget.soundMap?["soundName"], '', '');
-    }
+    loadUserModel();
     onNewCameraSelected(cameras[0]);
     try{
       reelsPlayerController?.pause();
@@ -163,6 +165,21 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
     autoStopRecordingTimer?.cancel();
   //  deepArController.dispose();
     super.dispose();
+  }
+
+  loadUserModel() async {
+    var pref = await SharedPreferences.getInstance();
+    var currentUser = pref.getString('currentUser');
+    userModel = UserModel.fromJson(jsonDecode(currentUser!));
+    if(widget.soundMap!=null){
+      selectedSound = widget.soundMap?["soundName"];
+      addSoundModel = AddSoundModel(0, userModel.id, 0, widget.soundMap?["soundPath"], widget.soundMap?["soundName"], '', '',false);
+    }
+    setState(() {});
+    var status = await Permission.storage.isGranted;
+    if (!status) {
+      Permission.storage.request();
+    }
   }
 
   @override
@@ -457,7 +474,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                       icon: const Icon(Icons.close)),
                   const Spacer(flex: 1,),
                   Expanded(
-                    flex: 2,
+                    flex: 100,
                     child: TextButton(
                         onPressed: () async {
                           await Navigator.pushNamed(context, "/newSong").then((value) {
@@ -471,12 +488,14 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                           });
                         },
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SvgPicture.asset('assets/music.svg', height: 16.5,),
                             const SizedBox(
                               width: 5,
                             ),
-                            Expanded(
+                            Flexible(
+                              flex: 10,
                               child: Text(
                                 selectedSound==null?addSound:selectedSound!,
                                 style: const TextStyle(color: Colors.white, fontSize: 16),
@@ -991,6 +1010,10 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
         if(_isRecordingInProgress){
           if(videoDuration.inSeconds>=selectedDuration){
             autoStopRecordingTimer?.cancel();
+            var status = await Permission.storage.isGranted;
+            if (!status) {
+              Permission.storage.request();
+            }
             XFile? rawVideo = await stopVideoRecording();
             if(addSoundModel!=null) await audioPlayer.stop();
             File videoFile = File(rawVideo!.path);

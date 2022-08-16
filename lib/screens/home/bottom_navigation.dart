@@ -233,6 +233,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                     selectedIndex = 3;
                     reelsPlayerController?.pause();
                     shouldAutoPlayReel = false;
+                    //BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
                   });
                 } else {
                   showAlertDialog(context);

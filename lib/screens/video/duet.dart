@@ -457,6 +457,8 @@ class _RecordDuetState extends State<RecordDuet> {
         duetFrom: widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from,
         isDefaultSound: true, isUploadedFromGallery: false,
         trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
+          duetSoundName: widget.videoModel.sound_name.isEmpty?null:widget.videoModel.sound_name,
+        duetSound: widget.videoModel.sound.isEmpty?null:widget.videoModel.sound
       );
       await Navigator.pushNamed(context, "/preview", arguments: m);
       Navigator.pop(context);
@@ -475,7 +477,10 @@ class _RecordDuetState extends State<RecordDuet> {
               duetPath: duetFile?.path,
             duetFrom: widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from,
             isDefaultSound: true, isUploadedFromGallery: false,
-            trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,);
+            trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
+              duetSoundName: widget.videoModel.sound_name.isEmpty?null:widget.videoModel.sound_name,
+              duetSound: widget.videoModel.sound.isEmpty?null:widget.videoModel.sound
+          );
           await Navigator.pushNamed(context, "/preview",arguments: m);
           Navigator.pop(context);
         }

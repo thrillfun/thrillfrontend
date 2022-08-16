@@ -5,7 +5,7 @@ class PostData{
   String filePath, filterName;
   AddSoundModel? addSoundModel;
   bool isDuet, isDefaultSound, isUploadedFromGallery;
-  String? duetPath, newPath, newName, duetFrom;
+  String? duetPath, newPath, newName, duetFrom, duetSoundName, duetSound;
   String speed;
   int trimStart, trimEnd;
 
@@ -22,6 +22,8 @@ class PostData{
     required this.isUploadedFromGallery,
     this.newPath,
     this.newName,
-    this.duetFrom
+    this.duetFrom,
+    this.duetSoundName,
+    this.duetSound
   });
 }
