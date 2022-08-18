@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -27,6 +28,11 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    AwesomeNotifications().isNotificationAllowed().then((bool isAllowed) {
+      if(!isAllowed){
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
     _navigator();
   }
 

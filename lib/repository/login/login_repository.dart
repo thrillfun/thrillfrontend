@@ -36,9 +36,9 @@ class LoginRepository extends BaseLoginRepository {
   }
 
   @override
-  Future<dynamic> updateProfile(String username, String fname,String lname,String imageFile,String gender,String webUrl,String bio,List<SocialUrlModel> list)async {
+  Future<dynamic> updateProfile(String fullName, String username, String fname,String lname,String imageFile,String gender,String webUrl,String bio,List<SocialUrlModel> list)async {
     try {
-      var result = await RestApi.updateProfile(fname, lname, imageFile, username, gender, webUrl, bio,list);
+      var result = await RestApi.updateProfile(fullName, fname, lname, imageFile, username, gender, webUrl, bio,list);
       var json = jsonDecode(result.body);
       return json;
     } catch (e) {

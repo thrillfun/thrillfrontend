@@ -63,6 +63,7 @@ class RestApi {
   }
 
   static Future<http.Response> updateProfile(
+      String fullName,
       String firstName,
       String lastName,
       String profileImg,
@@ -81,6 +82,7 @@ class RestApi {
       request.headers.addAll({
         'Authorization': 'Bearer $token',
       });
+      request.fields['name'] = fullName;
       request.fields['username'] = username;
       request.fields['first_name'] = firstName;
       request.fields['last_name'] = lastName;

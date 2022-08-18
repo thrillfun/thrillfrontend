@@ -97,8 +97,8 @@ class _EditProfileState extends State<EditProfile> {
           } else if (state is ValidationStatus) {
             closeDialogue(context);
             if (state.status) {
-              BlocProvider.of<ProfileBloc>(context).add(const ProfileLoading());
-              await Future.delayed(const Duration(milliseconds: 150)).then((value) {
+              BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
+              await Future.delayed(const Duration(milliseconds: 50)).then((value) {
                 Navigator.pop(context, "/profile");
               });
               showSuccessToast(context, state.message);
