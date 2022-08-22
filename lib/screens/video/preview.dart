@@ -200,8 +200,10 @@ class _PreviewState extends State<Preview> {
                     duetSoundName: widget.data.duetSoundName,
                     duetSound: widget.data.duetSound
                   );
+                  setState(()=>isVControllerInitialized=false);
+                  videoPlayerController?.dispose();
                   await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
-                  videoPlayerController!.play();
+                  initPreview();
                 },
                 style: ElevatedButton.styleFrom(
                     fixedSize: Size(getWidth(context)*.60, 45),

@@ -54,7 +54,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
       SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(data),
+            child: Text(data, style: const TextStyle(fontSize: 13),),
           )),
     );
   }

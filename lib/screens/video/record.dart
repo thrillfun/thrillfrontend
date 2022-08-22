@@ -876,7 +876,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
             height: 90,
             child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount:effectsfirst.length
+                itemCount:effectsfirst.length,
                 itemBuilder: (context,index){
                   return InkWell(
                   onTap: () {

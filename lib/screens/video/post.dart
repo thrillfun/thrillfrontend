@@ -636,7 +636,7 @@ class _PostVideoState extends State<PostVideo> {
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":"$currentUnix.mp3",
+              widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
               widget.data.isDuet?widget.data.duetSoundName??"":widget.data.addSoundModel?.name??"Original Sound",
               dropDownCategoryValue,
               tagList,
@@ -689,7 +689,7 @@ class _PostVideoState extends State<PostVideo> {
             jsonEncode(selectedHashtags);
             var result = await RestApi.postVideo(
                 videoId,
-                widget.data.addSoundModel==null?"":"$currentUnix.mp3",
+                widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
                 widget.data.addSoundModel?.name??"",
                 dropDownCategoryValue,
                 tagList,
@@ -763,7 +763,7 @@ class _PostVideoState extends State<PostVideo> {
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":"$currentUnix.mp3",
+              widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
               widget.data.isDuet?widget.data.duetSoundName??"":widget.data.addSoundModel?.name??"Original Sound",
               dropDownCategoryValue,
               tagList,
@@ -815,7 +815,7 @@ class _PostVideoState extends State<PostVideo> {
             jsonEncode(selectedHashtags);
             var result = await RestApi.postVideo(
                 videoId,
-                widget.data.addSoundModel==null?"":"$currentUnix.mp3",
+                widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
                 widget.data.addSoundModel?.name??"",
                 dropDownCategoryValue,
                 tagList,
