@@ -350,7 +350,6 @@ class _PostVideoState extends State<PostVideo> {
                     const SizedBox(
                       height: 20,
                     ),
-
                     Row(
                       children: [
                         const SizedBox(
@@ -594,7 +593,8 @@ class _PostVideoState extends State<PostVideo> {
 
   createGIF() async {
     String outputPath = '$saveCacheDirectory${widget.data.newName}.gif';
-    FFmpegKit.execute("-i ${widget.data.filePath} -r 3 -filter:v scale=280:480 -t 5 $outputPath").then((session) async {
+    String filePath = widget.data.isDuet?widget.data.newPath!:widget.data.filePath;
+    FFmpegKit.execute("-i $filePath -r 3 -filter:v scale=280:480 -t 5 $outputPath").then((session) async {
       final returnCode = await session.getReturnCode();
 
       if (ReturnCode.isSuccess(returnCode)) {
@@ -631,13 +631,13 @@ class _PostVideoState extends State<PostVideo> {
         fileName: '$currentUnix.gif',
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
-        if(widget.data.addSoundModel==null){
+        if(widget.data.addSoundModel==null || !widget.data.addSoundModel!.isSoundFromGallery){
           String tagList =
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              "",
-              "Original Sound",
+              widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
+              widget.data.isDuet?widget.data.duetSoundName??"":widget.data.addSoundModel?.name??"Original Sound",
               dropDownCategoryValue,
               tagList,
               "Private",
@@ -653,6 +653,7 @@ class _PostVideoState extends State<PostVideo> {
             commentsSwitch,
             widget.data.duetFrom??'',
             widget.data.isDuet,
+            widget.data.addSoundModel?.userId??0
           );
           var json = jsonDecode(result.body);
           closeDialogue(context);
@@ -687,22 +688,23 @@ class _PostVideoState extends State<PostVideo> {
             String tagList =
             jsonEncode(selectedHashtags);
             var result = await RestApi.postVideo(
-              videoId,
-              widget.data.addSoundModel==null?"":"$currentUnix.mp3",
-              widget.data.addSoundModel?.name??"",
-              dropDownCategoryValue,
-              tagList,
-              "Private",
-              commentsSwitch ? 1 : 0,
-              desCtr.text,
-              widget.data.filterName.isEmpty ? '' : widget.data.filterName,
-              dropDownLanguageValue,
-              '$currentUnix.gif',
-              widget.data.speed,
-              duetSwitch,
-              commentsSwitch,
-              widget.data.duetFrom??'',
-              widget.data.isDuet,
+                videoId,
+                widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
+                widget.data.addSoundModel?.name??"",
+                dropDownCategoryValue,
+                tagList,
+                "Private",
+                commentsSwitch ? 1 : 0,
+                desCtr.text,
+                widget.data.filterName.isEmpty ? '' : widget.data.filterName,
+                dropDownLanguageValue,
+                '$currentUnix.gif',
+                widget.data.speed,
+                duetSwitch,
+                commentsSwitch,
+                widget.data.duetFrom??'',
+                widget.data.isDuet,
+                widget.data.addSoundModel?.userId??0
             );
             var json = jsonDecode(result.body);
             closeDialogue(context);
@@ -756,13 +758,13 @@ class _PostVideoState extends State<PostVideo> {
         fileName: '$currentUnix.gif',
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
-        if(widget.data.addSoundModel==null){
+        if(widget.data.addSoundModel==null || !widget.data.addSoundModel!.isSoundFromGallery){
           String tagList =
           jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              "",
-              "Original Sound",
+              widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
+              widget.data.isDuet?widget.data.duetSoundName??"":widget.data.addSoundModel?.name??"Original Sound",
               dropDownCategoryValue,
               tagList,
               "Public",
@@ -778,6 +780,7 @@ class _PostVideoState extends State<PostVideo> {
             commentsSwitch,
               widget.data.duetFrom??'',
             widget.data.isDuet,
+              widget.data.addSoundModel?.userId??0
           );
           var json = jsonDecode(result.body);
           closeDialogue(context);
@@ -812,7 +815,7 @@ class _PostVideoState extends State<PostVideo> {
             jsonEncode(selectedHashtags);
             var result = await RestApi.postVideo(
                 videoId,
-                widget.data.addSoundModel==null?"":"$currentUnix.mp3",
+                widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
                 widget.data.addSoundModel?.name??"",
                 dropDownCategoryValue,
                 tagList,
@@ -829,6 +832,7 @@ class _PostVideoState extends State<PostVideo> {
               commentsSwitch,
                 widget.data.duetFrom??'',
               widget.data.isDuet,
+                widget.data.addSoundModel?.userId??0
             );
             var json = jsonDecode(result.body);
             closeDialogue(context);

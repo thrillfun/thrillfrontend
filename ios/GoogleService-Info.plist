@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>882291140458-380scge8ae1r24jfji50av2153rqv5md.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.882291140458-380scge8ae1r24jfji50av2153rqv5md</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>882291140458-6rhfu1lbokehkq4ajpe9kkh1oi8bngso.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCn2oXiqua7pqQ1mVz6HRubs7MQOzlBev0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>882291140458</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.thrilltj</string>
+	<key>PROJECT_ID</key>
+	<string>algebraic-envoy-350105</string>
+	<key>STORAGE_BUCKET</key>
+	<string>algebraic-envoy-350105.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:882291140458:ios:876fc96cea6013bf3e6713</string>
+	<key>DATABASE_URL</key>
+	<string>https://algebraic-envoy-350105-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

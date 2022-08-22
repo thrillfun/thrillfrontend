@@ -1,12 +1,8 @@
-
 import 'dart:io';
 import 'dart:math';
-
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:thrill/main.dart';
-
 import '../common/strings.dart';
 import '../rest/rest_url.dart';
 
@@ -174,8 +170,8 @@ getTempDirectory()async{
   var directoryIOS = await getApplicationDocumentsDirectory();
   var directoryANDROID = await getTemporaryDirectory();
   if (Platform.isIOS) {
-    saveDirectory = directoryIOS.path;
-    saveCacheDirectory = directoryIOS.path;
+    saveDirectory = "${directoryIOS.path}/";
+    saveCacheDirectory = "${directoryIOS.path}/";
   } else {
     saveDirectory = "/storage/emulated/0/Download/";
     saveCacheDirectory = "${directoryANDROID.path}/";

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
+import '../../blocs/profile/profile_bloc.dart';
 import '../../common/strings.dart';
 import '../../models/comment_model.dart';
 import '../../models/user.dart';
@@ -941,6 +942,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                                   publisherId: state
                                                       .list[index].user.id));
                                               setState(() {});
+                                              BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
                                             } else {
                                               showAlertDialog(context);
                                             }
@@ -993,9 +995,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     ),
                                     Flexible(
                                       child:
-                                      state.list[index].sound_name.isEmpty
+                                      state.list[index].sound_owner.isEmpty
                                           ? "Original Sound by @${state.list[index].user.username}".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
-                                          : "${state.list[index].sound_name} by @${state.list[index].user.username}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
+                                          : "${state.list[index].sound_name.isEmpty?"Original Sound":state.list[index].sound_name} by @${state.list[index].sound_owner}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                           //: "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                     ),
                                   ],
@@ -1010,7 +1012,12 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     if(state.list[index].sound.isNotEmpty){
                                       reelsPlayerController?.pause();
                                       shouldAutoPlayReel = false;
-                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name, "soundName": state.list[index].sound_name});
+                                      await Navigator.pushNamed(context, "/soundDetails",
+                                          arguments: {
+                                        "sound": state.list[index].sound,
+                                          "user": state.list[index].sound_owner.isEmpty?state.list[index].user.name :state.list[index].sound_owner,
+                                          "soundName": state.list[index].sound_name,
+                                          "title":state.list[index].sound_owner});
                                       reelsPlayerController?.play();
                                       shouldAutoPlayReel = true;
                                     }

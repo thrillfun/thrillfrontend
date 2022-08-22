@@ -30,7 +30,7 @@ class SoundDetails extends StatefulWidget {
 class _SoundDetailsState extends State<SoundDetails> {
 
   List<VideoModel> videoList = List.empty(growable: true);
-  String title = '';
+  String title = "";
 
   @override
   void initState(){
@@ -98,6 +98,8 @@ class _SoundDetailsState extends State<SoundDetails> {
                     Text(
                       title,
                       style: const TextStyle(color: Colors.grey, fontSize: 18),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(
                       height: 7,
@@ -105,6 +107,8 @@ class _SoundDetailsState extends State<SoundDetails> {
                     Text(
                       widget.map["user"],
                       style: const TextStyle(color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

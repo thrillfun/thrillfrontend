@@ -20,9 +20,10 @@ class NotificationModel{
     VideoModel? vModel = json['redirect_type'].toString()=="video"
         || json['redirect_type'].toString()=="comment"?
     json['video_details']!=null?VideoModel.fromJson(json['video_details']):null:null;
+    int _id = json['other_user_details']!=null?json['other_user_details']['id']:0;
     return NotificationModel(
         json['id'] ?? 0,
-        json['user_details']['id'] ?? 0,
+        _id,
         json['title'] ?? '',
         json['body'] ?? '',
         json['created_at'] ?? '',

@@ -48,7 +48,8 @@ class _ProfileState extends State<Profile> {
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (state is ProfileLoading) {
-          } else if (state is ProfileLoaded) {}
+          } else if (state is ProfileLoaded) {
+          }
         },
         child: SafeArea(
           child:
@@ -58,7 +59,6 @@ class _ProfileState extends State<Profile> {
                 child: CircularProgressIndicator(),
               );
             } else if (state is ProfileLoaded) {
-
               return SingleChildScrollView(
                 child: Column(
                   children: [
@@ -434,6 +434,9 @@ class _ProfileState extends State<Profile> {
                               state.userModel.copyWith(
                                   avatar: state.userModel.avatar =
                                       current.avatar);
+                              state.userModel.copyWith(
+                                  name: state.userModel.name =
+                                      current.name);
                               setState(() {});
                             });
                           },

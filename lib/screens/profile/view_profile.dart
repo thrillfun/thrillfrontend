@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
+import '../../blocs/profile/profile_bloc.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../models/follower_model.dart';
@@ -252,6 +254,7 @@ class _ViewProfileState extends State<ViewProfile> {
                         //var result =
                         await RestApi.followUserAndUnfollow(userModel!.id,action);
                         //var json = jsonDecode(result.body);
+                        BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
                       } catch (_) {}
                       setState(() {});
                     },
