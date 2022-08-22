@@ -76,7 +76,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(const ValidationStatus(message: "Bio required", status: false));
     }else{
          try{
-          var result=await _loginRepository.updateProfile(event.userName, event.firstName, event.lastName, event.profileImage, event.gender, event.websiteUrl, event.bio, event.list);
+          var result=await _loginRepository.updateProfile(event.fullName, event.userName, event.firstName, event.lastName, event.profileImage, event.gender, event.websiteUrl, event.bio, event.list);
           var json = jsonDecode(result);
           if(json['status']){
             UserModel user = UserModel.fromJson(json['data']['user']);

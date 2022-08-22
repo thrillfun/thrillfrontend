@@ -76,7 +76,7 @@ class UserModel {
         json['first_name'] ?? '',
         json['last_name'] ?? '',
         json['username'] ?? '',
-        json['referral_count'] ?? '',
+        json['referral_count'] ?? '0',
         json['following'] ?? '0',
         json['followers'] ?? '0',
         json['likes'] ?? '0',

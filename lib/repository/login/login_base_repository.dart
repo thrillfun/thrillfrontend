@@ -8,7 +8,7 @@ abstract class BaseLoginRepository {
 
   Future<void> socialLoginRegister(String id, String type, String email,String name);
 
-  Future<void> updateProfile(String username, String fname,String lname,String imageFile,String gender,String webUrl,
+  Future<void> updateProfile(String fullName, String username, String fname,String lname,String imageFile,String gender,String webUrl,
       String bio,List<SocialUrlModel> list);
 
   Future<void> isPhoneExist(String phone);

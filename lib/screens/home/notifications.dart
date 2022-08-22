@@ -70,6 +70,7 @@ class _NotificationsState extends State<Notifications> {
                     onTap: (){
                       try{
                         String redirectType = notificationList[index].redirectType;
+                        print(redirectType);
                         if(redirectType=='video' && notificationList[index].videoModel!=null){
                           Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': notificationList[index].videoModel});
                         } else if(redirectType=='comment' && notificationList[index].videoModel!=null){
@@ -84,7 +85,7 @@ class _NotificationsState extends State<Notifications> {
                       }
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                       child: Row(
                         children: [
                       Container(

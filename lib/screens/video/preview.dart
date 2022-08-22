@@ -186,6 +186,7 @@ class _PreviewState extends State<Preview> {
                   videoPlayerController!.pause();
                   PostData postDate = PostData(
                       speed: widget.data.speed,
+                      addSoundModel: widget.data.addSoundModel,
                       filePath: widget.data.filePath,
                       filterName: widget.data.filterName,
                       trimStart: widget.data.trimStart,
@@ -195,10 +196,14 @@ class _PreviewState extends State<Preview> {
                       isUploadedFromGallery: widget.data.isUploadedFromGallery,
                       newPath: '$saveDirectory$newName.mp4',
                       duetFrom: widget.data.duetFrom,
-                      newName: newName
+                      newName: newName,
+                    duetSoundName: widget.data.duetSoundName,
+                    duetSound: widget.data.duetSound
                   );
+                  setState(()=>isVControllerInitialized=false);
+                  videoPlayerController?.dispose();
                   await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
-                  videoPlayerController!.play();
+                  initPreview();
                 },
                 style: ElevatedButton.styleFrom(
                     fixedSize: Size(getWidth(context)*.60, 45),
@@ -490,7 +495,7 @@ class _PreviewState extends State<Preview> {
               //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
               //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
               //"-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 -vcodec libx264 $outputPath"
-                "-y -ss $start -to $end -i ${videoFile.path} -i \"$audioFilePath\" -map 0:v -s 720X1280 -qscale 5 -t $time -map 1:a $outputPath"
+                "-y -ss $start -to $end -i ${videoFile.path} -i \"$audioFilePath\" -map 0:v -s 720X1280 -qscale 5 -t $time -map 1:a -vcodec libx264 $outputPath"
             ).then((session) async {
               final returnCode = await session.getReturnCode();
               // final logs = await session.getLogsAsString();

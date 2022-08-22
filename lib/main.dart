@@ -11,6 +11,7 @@ import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/repository/video/video_repository.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:thrill/widgets/video_item.dart';
 import 'config/app_router.dart';
 import 'config/theme.dart';
 import 'screens/screen.dart';
@@ -51,8 +52,43 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget{
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch(state){
+      case AppLifecycleState.resumed:
+        break;
+      case AppLifecycleState.inactive:
+        break;
+      case AppLifecycleState.paused:
+        try{
+          reelsPlayerController?.pause();
+        }catch(_){}
+        break;
+      case AppLifecycleState.detached:
+        break;
+  }
+}
 
   @override
   Widget build(BuildContext context) {

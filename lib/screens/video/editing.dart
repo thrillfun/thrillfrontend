@@ -94,7 +94,8 @@ class _EditingState extends State<Editing> {
               color: Colors.black,
               icon: const Icon(Icons.arrow_back_ios)),
         ),
-        body: Stack(
+        body: isVidInit?
+        Stack(
           alignment: Alignment.center,
           children: [
             SizedBox(
@@ -269,7 +270,8 @@ class _EditingState extends State<Editing> {
                   )),
             ),
           ],
-        ),
+        ):
+        const Center(child: CircularProgressIndicator(),),
 
       ),
     );
@@ -321,8 +323,21 @@ class _EditingState extends State<Editing> {
         isDefaultSound: radioGroupValue==0?true:false,
         isUploadedFromGallery: widget.data.isUploadedFromGallery,
     );
+    videoPlayerController.dispose();
+    setState(()=>isVidInit=false);
     await Navigator.pushNamed(context, "/preview", arguments: newPostData);
-    videoPlayerController.play();
+    videoPlayerController =
+    VideoPlayerController.file(
+        File(widget.data.filePath))
+      ..initialize().then((value) {
+        videoPlayerController.play();
+        videoPlayerController.setLooping(true);
+        videoPlayerController.setVolume(1);
+        sfRangeValues = SfRangeValues(0,videoPlayerController.value.duration.inSeconds);
+        rangeController= RangeController(start: 0, end: videoPlayerController.value.duration.inSeconds);
+        isVidInit = true;
+        setState(() {});
+      });
   }
   String getStartDuration(){
     Duration duration = Duration(seconds: rangeController.start.toInt());

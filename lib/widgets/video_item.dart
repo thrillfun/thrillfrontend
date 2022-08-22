@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import '../rest/rest_url.dart';
 
 VideoPlayerController? reelsPlayerController;
@@ -53,6 +52,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   void initState() {
     super.initState();
     if (reelsPlayerController!=null) reelsPlayerController?.pause();
+    reelsPlayerController?.dispose();
       reelsPlayerController = VideoPlayerController.network(
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
@@ -177,23 +177,23 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     );
   }
 
-  void _handleVisibilityDetector(VisibilityInfo info) {
-    double d=info.visibleFraction*100;
-    print(d);
-    if(mounted){
-      // reelsPlayerController!.pause();
-      // if (d < 60) {
-      //   reelsPlayerController!.pause();
-      //   if (initialized &&
-      //       widget.pageIndex == widget.currentPageIndex &&
-      //       !widget.isPaused) {
-      //     reelsPlayerController!.pause();
-      //   }
-      // } else {
-      //   reelsPlayerController!.play();
-      // }
-    }
-  }
+  // void _handleVisibilityDetector(VisibilityInfo info) {
+  //   double d=info.visibleFraction*100;
+  //   print(d);
+  //   if(mounted){
+  //     // reelsPlayerController!.pause();
+  //     // if (d < 60) {
+  //     //   reelsPlayerController!.pause();
+  //     //   if (initialized &&
+  //     //       widget.pageIndex == widget.currentPageIndex &&
+  //     //       !widget.isPaused) {
+  //     //     reelsPlayerController!.pause();
+  //     //   }
+  //     // } else {
+  //     //   reelsPlayerController!.play();
+  //     // }
+  //   }
+  // }
 
   void callViewApi() async {
     var pref = await SharedPreferences.getInstance();

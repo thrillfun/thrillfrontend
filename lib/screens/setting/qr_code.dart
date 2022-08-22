@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/user.dart';
@@ -201,6 +202,11 @@ class _QrCodeState extends State<QrCode> {
 
     }}
   saveQrCode()async{
+    var status = await Permission.storage.isGranted;
+    if (!status) {
+      Permission.storage.request();
+      return;
+    }
     progressDialogue(context);
     try{
       DateTime dateTime = DateTime.now();
@@ -236,7 +242,6 @@ class _QrCodeState extends State<QrCode> {
     showDialog(context: context, builder: (_)=> Center(
       child: Container(
         width: MediaQuery.of(context).size.width*.75,
-        height: 200,
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Material(
           borderRadius: BorderRadius.circular(20),
@@ -251,9 +256,17 @@ class _QrCodeState extends State<QrCode> {
                     }, icon: const Icon(Icons.close)
                 ),
               ),
-              const Spacer(flex: 1,),
-              Text(txt, textAlign: TextAlign.center,),
-              const Spacer(flex: 3,),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: SelectableText(
+                    txt,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20,)
             ],
           ),
         ),
