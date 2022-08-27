@@ -519,7 +519,6 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                       style: const TextStyle(color: Colors.black))
                 ]),
               )),
-
             ],
           ),
           const SizedBox(

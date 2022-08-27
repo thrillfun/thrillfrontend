@@ -1412,20 +1412,24 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
   }
 
   getFavVideos()async{
-    try{
-      var response = await RestApi.getFavVideos();
-      var json = jsonDecode(response.body);
-      if(json['status']){
-        List jsonList = json['data'] as List;
-        if(jsonList.isNotEmpty){
-          favList.clear();
-          for(var element in jsonList){
-            favList.add(element['id']);
+    await isLogined().then((value) async {
+      if (value) {
+        try{
+          var response = await RestApi.getFavVideos();
+          var json = jsonDecode(response.body);
+          if(json['status']){
+            List jsonList = json['data'] as List;
+            if(jsonList.isNotEmpty){
+              favList.clear();
+              for(var element in jsonList){
+                favList.add(element['id']);
+              }
+              setState(() {});
+            }
           }
-          setState(() {});
-        }
+        }catch(_){}
       }
-    }catch(_){}
+    });
   }
 
   void _scrollListener() {
