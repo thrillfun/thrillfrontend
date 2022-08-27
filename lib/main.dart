@@ -77,11 +77,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch(state){
       case AppLifecycleState.resumed:
+        shouldAutoPlayReel = true;
         break;
       case AppLifecycleState.inactive:
         break;
       case AppLifecycleState.paused:
         try{
+          shouldAutoPlayReel = false;
           reelsPlayerController?.pause();
         }catch(_){}
         break;

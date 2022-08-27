@@ -80,7 +80,7 @@ class RestApi {
       http.MultipartRequest request =
           http.MultipartRequest('POST', Uri.parse(RestUrl.updateProfile));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer $token'
       });
       request.fields['name'] = fullName;
       request.fields['username'] = username;
@@ -188,7 +188,9 @@ class RestApi {
         'id': userid.toString(),
       },
     );
-    response = http.Response(jsonEncode(result), 200);
+    response = http.Response(jsonEncode(result), 200,headers: {
+      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+    });
     return response;
   }
 
@@ -1122,9 +1124,7 @@ class RestApi {
         'user_id': userId.toString()
       },
     );
-    print(result);
     response = http.Response(jsonEncode(result), 200);
-    print(response.body);
     return response;
   }
 
