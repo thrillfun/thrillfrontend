@@ -58,7 +58,6 @@ class _SpinTheWheelState extends State<SpinTheWheel>
     super.dispose();
   }
 
-
   @override
   void initState() {
     setSpinSound();
@@ -371,7 +370,6 @@ class _SpinTheWheelState extends State<SpinTheWheel>
     );
   }
 
-
   spinTheWheelTap() async {
     try {
        if (remainingChance > 0) {
@@ -556,7 +554,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                     child: Slider(
                         max: int.parse(earnModel.max_level)*10,
                         min: 0,
-                        value: double.parse(earnModel.current_level) * 10,
+                        value: double.parse(earnModel.progress.toString()) * 10,
                         activeColor: ColorManager.cyan,
                         onChanged: (val) {}),
                   ),
