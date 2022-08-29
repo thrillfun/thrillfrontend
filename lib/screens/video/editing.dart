@@ -3,6 +3,7 @@ import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/core.dart';
 import 'package:thrill/common/color.dart';
@@ -387,7 +388,7 @@ class _EditingState extends State<Editing> {
                 children: [
                   ElevatedButton(
                       onPressed: (){
-                        Navigator.pop(context);
+                        Get.back();
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.red,
@@ -399,8 +400,8 @@ class _EditingState extends State<Editing> {
                   const SizedBox(width: 15,),
                   ElevatedButton(
                       onPressed: (){
-                        Navigator.pop(context);
-                        Navigator.pop(context);
+                        Get.back();
+                        Get.back();
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.green,

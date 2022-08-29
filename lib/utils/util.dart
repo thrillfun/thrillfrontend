@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/utils.dart';
 import 'package:thrill/main.dart';
 import '../common/strings.dart';
 import '../rest/rest_url.dart';
@@ -55,7 +58,8 @@ showErrorToast(BuildContext context,String msg)async{
               alignment: Alignment.topRight,
               child: TextButton(
                   onPressed: (){
-                    Navigator.pop(navigatorKey.currentContext!);
+                    Get.back();
+                //    Navigator.pop(navigatorKey.currentContext!);
                     },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.only(right: 10),
@@ -108,7 +112,8 @@ showSuccessToast(BuildContext context,String msg) async {
               alignment: Alignment.topRight,
               child: TextButton(
                   onPressed: (){
-                    Navigator.pop(navigatorKey.currentContext!);
+                    Get.back();
+              //      Navigator.pop(navigatorKey.currentContext!);
                   },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.only(right: 10),
@@ -153,17 +158,29 @@ progressDialogue(BuildContext context) {
 }
 
 closeDialogue(BuildContext context) {
-  Navigator.pop(context);
+  Get.back();
+ // Navigator.pop(context);
 }
 
 Widget imgNet(String imgPath){
-  return Image.network(
-    imgPath,
-    loadingBuilder: (context, child, loadingProgress) =>
-    (loadingProgress == null) ? child : const Center(child: CircularProgressIndicator()),
-    errorBuilder: (context, error, stackTrace) => Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
-    fit: BoxFit.cover,
-  );
+
+  return Container(
+    child: CachedNetworkImage(
+        placeholder: (a, b) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        fit: BoxFit.cover,
+        imageBuilder: (context, imageProvider) => Container(
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(3),
+            shape: BoxShape.rectangle,
+            image: DecorationImage(
+                image: imageProvider, fit: BoxFit.cover),
+          ),
+        ),
+        errorWidget: (context, string, dynamic)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
+        imageUrl:imgPath),);
 }
 
 getTempDirectory()async{
@@ -189,4 +206,9 @@ getTempDirectory()async{
     );
   }
   }
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
+  }
+}
 

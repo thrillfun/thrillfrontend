@@ -45,50 +45,63 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0.5,
-        title: const Text(
-          settingAndPrivacy,
-          style: TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-            onPressed: () {
-             Navigator.pop(context);
-            },
-            color: Colors.black,
-            icon: const Icon(Icons.arrow_back_ios)),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 15,
-              ),
-              title(account),
-              GestureDetector(
-                onTap: () {
-                Navigator.pushNamed(context, '/manageAccount');
-                },
-                child: mainTile(Icons.account_box_outlined, manageAccount)
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/inbox');
-                },
-                child: mainTile(Icons.all_inbox, inbox)
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/privacy');
-                },
-                child: mainTile(Icons.lock_outline_rounded, privacy)
-              ),
-              /* const SizedBox(
+
+      body: Stack(children: [
+        Container(
+          padding: EdgeInsets.only(top: 50,left: 20,),
+          alignment: Alignment.topLeft,
+          width: MediaQuery.of(context).size.width,
+          height: 250,
+          child: Text("Settings",style: TextStyle(color: Colors.white,fontSize: 25),),
+          decoration: const BoxDecoration(
+
+            borderRadius:BorderRadius.only(bottomLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: <Color>[Color(0xFF2F8897),
+                  Color(0xff1F2A52),
+                  Color(0xff1F244E)],
+              )
+          ),),
+        Container(
+        margin:const EdgeInsets.only(top: 150,left: 5,right: 5),
+        height: MediaQuery.of(context).size.height,
+        child: Card(
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10))),
+          elevation: 5,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  title(account),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/manageAccount');
+                      },
+                      child: mainTile(Icons.account_box_outlined, manageAccount)
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/inbox');
+                      },
+                      child: mainTile(Icons.all_inbox, inbox)
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/privacy');
+                      },
+                      child: mainTile(Icons.lock_outline_rounded, privacy)
+                  ),
+                  /* const SizedBox(
                 height: 10,
               ),
              GestureDetector(
@@ -109,62 +122,65 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                   ],
                 ),
               ),*/
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/wallet');
-                },
-                child: mainTile(Icons.account_balance_wallet_outlined, wallet)
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/qrcode');
-                },
-                child: mainTile(Icons.qr_code, qrCode)
-              ),
-              GestureDetector(
-                onTap: () {
-                  //share();
-                  Share.share('Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me.');
-                },
-                child: mainTile(Icons.share, shareProfile)
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              title(contentAndActivity),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/pushNotification');
-                },
-                child: mainTile(Icons.notifications_none_outlined, pushNotification)
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: SizedBox(
-                  height: 25,
-                  child: ListTile(
-                    title: Text(
-                      appLanguage,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    ),
-                    leading: const Icon(Icons.translate_outlined, color: Colors.grey, size: 20,),
-                    trailing: Text(
-                      english,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    horizontalTitleGap: 0,
-                    minLeadingWidth: 30,
-                    minVerticalPadding: 0,
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/wallet');
+                      },
+                      child: mainTile(Icons.account_balance_wallet_outlined, wallet)
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-             /* const SizedBox(
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/qrcode');
+                      },
+                      child: mainTile(Icons.qr_code, qrCode)
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        //share();
+                        Share.share('Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me.');
+                      },
+                      child: mainTile(Icons.share, shareProfile)
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  title(contentAndActivity),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/pushNotification');
+                      },
+                      child: mainTile(Icons.notifications_none_outlined, pushNotification)
+                  ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: const SizedBox(
+                      height: 25,
+                      child: ListTile(
+                        title: Text(
+                          appLanguage,
+                          style: TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        leading: Icon(Icons.translate_outlined, color: Colors.black, size: 22,),
+                        trailing: Text(
+                          english,
+                          style: TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        visualDensity: VisualDensity.compact,
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        horizontalTitleGap: 0,
+                        minLeadingWidth: 30,
+                        minVerticalPadding: 0,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  /* const SizedBox(
                 height: 20,
               ),
               title(cacheAndCellularData),
@@ -189,120 +205,126 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                   ],
                 ),
               ),*/
-              title(about.toUpperCase()),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/termsOfService');
-                },
-                child: mainTile(Icons.library_books_outlined, termsOfService)
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/privacyPolicy');
-                },
-                child: mainTile(Icons.library_books_outlined, privacyPolicy)
-              ),
-              GestureDetector(
-                onTap: () {
-                Navigator.pushNamed(context, '/customerSupport');
-                },
-                child: mainTile(Icons.chat_outlined, technicalSupport)
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              title(login.toUpperCase()),
-              GestureDetector(
-                onTap: () {
-                  switchAccountLayout();
-                },
-                child: mainTile(Icons.refresh_rounded, switchAccount)
-              ),
-              GestureDetector(
-                onTap: () async{
-                  showDialog(context: context, builder: (_)=>Center(
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: Container(
-                        width: getWidth(context)*.80,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10)
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text("Are you sure you want to logout?",
-                              style: Theme.of(context).textTheme.headline4,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 5,),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 25),
-                              child: Text("This will also logout all your linked account if any.",
-                                style: Theme.of(context).textTheme.headline5!.copyWith(fontWeight: FontWeight.normal),
-                                textAlign: TextAlign.center,
+                  title(about.toUpperCase()),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/termsOfService');
+                      },
+                      child: mainTile(Icons.library_books_outlined, termsOfService)
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/privacyPolicy');
+                      },
+                      child: mainTile(Icons.library_books_outlined, privacyPolicy)
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/customerSupport');
+                      },
+                      child: mainTile(Icons.chat_outlined, technicalSupport)
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  title(login.toUpperCase()),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        switchAccountLayout();
+                      },
+                      child: mainTile(Icons.refresh_rounded, switchAccount)
+                  ),
+                  GestureDetector(
+                      onTap: () async{
+                        showDialog(context: context, builder: (_)=>Center(
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: Container(
+                              width: getWidth(context)*.80,
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10)
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text("Are you sure you want to logout?",
+                                    style: Theme.of(context).textTheme.headline4,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 5,),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                                    child: Text("This will also logout all your linked account if any.",
+                                      style: Theme.of(context).textTheme.headline5!.copyWith(fontWeight: FontWeight.normal),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 25,),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ElevatedButton(
+                                          onPressed: (){
+                                            Navigator.pop(context);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                              primary: Colors.red,
+                                              fixedSize: Size(getWidth(context)*.26, 40),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                                          ),
+                                          child: const Text("No")
+                                      ),
+                                      const SizedBox(width: 15,),
+                                      ElevatedButton(
+                                          onPressed: () async {
+                                            SharedPreferences preferences =
+                                            await SharedPreferences.getInstance();
+                                            await preferences.clear();
+                                            GoogleSignIn googleSignIn = GoogleSignIn();
+                                            await googleSignIn.signOut();
+                                            await FacebookAuth.instance.logOut();
+                                            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                              primary: Colors.green,
+                                              fixedSize: Size(getWidth(context)*.26, 40),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                                          ),
+                                          child: const Text("Yes")
+                                      )
+                                    ],
+                                  )
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 25,),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ElevatedButton(
-                                    onPressed: (){
-                                      Navigator.pop(context);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        primary: Colors.red,
-                                        fixedSize: Size(getWidth(context)*.26, 40),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                                    ),
-                                    child: const Text("No")
-                                ),
-                                const SizedBox(width: 15,),
-                                ElevatedButton(
-                                    onPressed: () async {
-                                      SharedPreferences preferences =
-                                      await SharedPreferences.getInstance();
-                                      await preferences.clear();
-                                      GoogleSignIn googleSignIn = GoogleSignIn();
-                                      await googleSignIn.signOut();
-                                      await FacebookAuth.instance.logOut();
-                                      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        primary: Colors.green,
-                                        fixedSize: Size(getWidth(context)*.26, 40),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                                    ),
-                                    child: const Text("Yes")
-                                )
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ));
-                },
-                child: mainTile(Icons.login_outlined, logout)
+                          ),
+                        ));
+                      },
+                      child: mainTile(Icons.login_outlined, logout)
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          ),),)],),
     );
   }
   Widget mainTile(IconData icon, String text){
     return SizedBox(
-      height: 25,
+      height: 30,
       child: ListTile(
         title: Text(
           text,
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          style: TextStyle(color: Colors.black, fontSize: 16),
         ),
-        leading: Icon(icon, color: Colors.grey, size: 20,),
+        leading: Icon(icon, color: Colors.black, size: 22,),
         visualDensity: VisualDensity.compact,
         dense: true,
         contentPadding: EdgeInsets.zero,
@@ -315,7 +337,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
   title(String txt) {
     return Text(
       txt,
-      style: const TextStyle(color: Colors.grey, fontSize: 16),
+      style: const TextStyle(color: Colors.black, fontSize: 16,fontWeight: FontWeight.bold),
     );
   }
   share() {
@@ -559,18 +581,21 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
       usersModel.add(UserModel.fromJson(jsonDecode(element)));
     }
     return showModalBottomSheet(
+        isScrollControlled: true,
         context: context,
         backgroundColor: Colors.white,
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30), topRight: Radius.circular(30))),
+                topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         builder: (BuildContext context) {
-          return StatefulBuilder(
+          return Container(
+            height: 300,
+            child: StatefulBuilder(
             builder: (BuildContext context, void Function(void Function()) setState) {
               return Column(
                 children: [
                   const SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -598,7 +623,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                     thickness: 1,
                   ),
                   const SizedBox(
-                    height: 15,
+                    height: 10,
                   ),
                   Expanded(
                       child: ListView.builder(
@@ -691,42 +716,43 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                               }
                             },
                             child: Container(
-                              padding: const EdgeInsets.only(bottom: 10),
+                              alignment: Alignment.center,
+                              margin: EdgeInsets.only(left: 10),
                               color: Colors.white,
                               child: Row(
                                 children: [
-                                  const SizedBox(
-                                    width: 30,
-                                  ),
+
                                   Container(
-                                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                                    height: 90,
-                                    padding: const EdgeInsets.all(2),
-                                    width: 90,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                            color: ColorManager.spinColorDivider)),
-                                    child: usersModel[index].avatar.isEmpty?
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: SvgPicture.asset(
-                                        'assets/profile.svg',
-                                        width: 10,
-                                        height: 10,
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ):
-                                    ClipOval(
-                                      child: CachedNetworkImage(
-                                        fit: BoxFit.cover,
-                                        imageUrl:
-                                        '${RestUrl.profileUrl}${usersModel[index].avatar}',
-                                        placeholder: (a, b) => const Center(
-                                          child: CircularProgressIndicator(),
+                                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                                      height: 60,
+                                      padding: const EdgeInsets.all(2),
+                                      width: 60,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: ColorManager.spinColorDivider)),
+                                      child: usersModel[index].avatar.isEmpty?
+                                      Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: SvgPicture.asset(
+                                          'assets/profile.svg',
+                                          width: 10,
+                                          height: 10,
+                                          fit: BoxFit.fill,
                                         ),
-                                      ),
-                                    )
+                                      ):
+                                      ClipOval(
+                                        child: CachedNetworkImage(
+                                          height: 60,
+                                          width: 60,
+                                          fit: BoxFit.fill,
+                                          imageUrl:
+                                          '${RestUrl.profileUrl}${usersModel[index].avatar}',
+                                          placeholder: (a, b) => const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        ),
+                                      )
                                   ),
                                   const SizedBox(
                                     width: 10,
@@ -735,10 +761,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const SizedBox(height: 5,),
                                         Text(
                                           usersModel[index].username,
-                                          style: const TextStyle(fontSize: 18),
+                                          style: const TextStyle(fontSize: 16),
                                           maxLines: 1,
                                         ),
                                         Text(usersModel[index].name,maxLines: 1,),
@@ -749,78 +774,78 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                   IconButton(
                                       onPressed: ()async{
                                         if(index!=0){
-                                        showDialog(context: context, builder: (_)=>Center(
-                                          child: Material(
-                                            type: MaterialType.transparency,
-                                            child: Container(
-                                              width: getWidth(context)*.80,
-                                              padding: const EdgeInsets.symmetric(vertical: 15),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(10)
-                                              ),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                                                    child: Text("Are you sure you want to logout ${usersModel[index].name} ?",
-                                                    style: Theme.of(context).textTheme.headline3,
-                                                    textAlign: TextAlign.center,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 25,),
-                                                  Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      ElevatedButton(
-                                                          onPressed: (){
-                                                            Navigator.pop(context);
-                                                          },
-                                                          style: ElevatedButton.styleFrom(
-                                                            primary: Colors.red,
-                                                              fixedSize: Size(getWidth(context)*.26, 40),
-                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                                                          ),
-                                                          child: const Text("No")
+                                          showDialog(context: context, builder: (_)=>Center(
+                                            child: Material(
+                                              type: MaterialType.transparency,
+                                              child: Container(
+                                                width: getWidth(context)*.80,
+                                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(10)
+                                                ),
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                                                      child: Text("Are you sure you want to logout ${usersModel[index].name} ?",
+                                                        style: Theme.of(context).textTheme.headline3,
+                                                        textAlign: TextAlign.center,
                                                       ),
-                                                      const SizedBox(width: 15,),
-                                                      ElevatedButton(
-                                                          onPressed: () async {
-                                                            await pref.remove('${usersModel[index].id}currentToken');
-                                                            await pref.remove('${usersModel[index].id}likeList');
-                                                            await pref.remove('${usersModel[index].id}commentList');
-                                                            await pref.remove('${usersModel[index].id}viewList');
-                                                            await pref.remove('${usersModel[index].id}followList');
-                                                            await pref.remove('${usersModel[index].id}favSound');
-                                                            await pref.remove('${usersModel[index].id}favTag');
-                                                            users.removeAt(index);
-                                                            usersModel.removeAt(index);
-                                                            await pref.setStringList('allUsers', users);
-                                                            setState(() {});
-                                                            Navigator.pop(context);
-                                                          },
-                                                          style: ElevatedButton.styleFrom(
-                                                              primary: Colors.green,
-                                                              fixedSize: Size(getWidth(context)*.26, 40),
-                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                                                          ),
-                                                          child: const Text("Yes")
-                                                      )
-                                                    ],
-                                                  )
-                                                ],
+                                                    ),
+                                                    const SizedBox(height: 25,),
+                                                    Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        ElevatedButton(
+                                                            onPressed: (){
+                                                              Navigator.pop(context);
+                                                            },
+                                                            style: ElevatedButton.styleFrom(
+                                                                primary: Colors.red,
+                                                                fixedSize: Size(getWidth(context)*.26, 40),
+                                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                                                            ),
+                                                            child: const Text("No")
+                                                        ),
+                                                        const SizedBox(width: 15,),
+                                                        ElevatedButton(
+                                                            onPressed: () async {
+                                                              await pref.remove('${usersModel[index].id}currentToken');
+                                                              await pref.remove('${usersModel[index].id}likeList');
+                                                              await pref.remove('${usersModel[index].id}commentList');
+                                                              await pref.remove('${usersModel[index].id}viewList');
+                                                              await pref.remove('${usersModel[index].id}followList');
+                                                              await pref.remove('${usersModel[index].id}favSound');
+                                                              await pref.remove('${usersModel[index].id}favTag');
+                                                              users.removeAt(index);
+                                                              usersModel.removeAt(index);
+                                                              await pref.setStringList('allUsers', users);
+                                                              setState(() {});
+                                                              Navigator.pop(context);
+                                                            },
+                                                            style: ElevatedButton.styleFrom(
+                                                                primary: Colors.green,
+                                                                fixedSize: Size(getWidth(context)*.26, 40),
+                                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                                                            ),
+                                                            child: const Text("Yes")
+                                                        )
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ));
+                                          ));
                                         }
                                       },
                                       padding: const EdgeInsets.only(right: 25),
                                       constraints: const BoxConstraints(minWidth: 90),
                                       icon: index==0?const Icon(
                                         Icons.check,
-                                        size: 30,
+                                        size: 20,
                                         color: ColorManager.cyan,
                                       ):const Text("Logout", style: TextStyle(fontSize: 13.5, color: Colors.red, fontWeight: FontWeight.bold),))
                                 ],
@@ -843,9 +868,9 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                           width: 20,
                         ),
                         VxCircle(
-                          radius: 50,
+                          radius: 30,
                           backgroundColor: Colors.grey.shade200,
-                          child: const Icon(Icons.add),
+                          child: const Icon(Icons.add,size: 15),
                         ),
                         const SizedBox(
                           width: 15,
@@ -853,7 +878,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                         const Text(
                           addAccount,
                           style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                         )
                       ],
                     ),
@@ -863,7 +888,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                   ),
                 ],
               );
-            },);
+            },),);
         });
   }
 }

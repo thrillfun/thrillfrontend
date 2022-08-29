@@ -40,19 +40,24 @@ class _InboxState extends State<Inbox> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Color(0xFF2F8897),
+                    Color(0xff1F2A52),
+                    Color(0xff1F244E)]),
+            ),
+          ),
           elevation: 0.5,
           title: const Text(
             inbox,
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.white),
           ),
           centerTitle: true,
           backgroundColor: Colors.white,
-          leading: IconButton(
-              onPressed: () {
-               Navigator.pop(context);
-              },
-              color: Colors.black,
-              icon: const Icon(Icons.arrow_back_ios)),
+
         ),
         body: isLoading?
             const Center(child: CircularProgressIndicator(),):
@@ -78,14 +83,15 @@ class _InboxState extends State<Inbox> {
                       });
                     },
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5, top: 5),
+                      padding: const EdgeInsets.only(bottom: 5, top: 10),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
+                            margin: EdgeInsets.only(top: 10,bottom: 10),
                               padding: const EdgeInsets.all(2),
-                              height: 65,
-                              width: 65,
+                              height: 40,
+                              width: 40,
                               decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
@@ -121,30 +127,18 @@ class _InboxState extends State<Inbox> {
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(top: 10),
-                              child: RichText(
-                                maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                  text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                            text: inboxList[index].name,
-                                            style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold)),
-                                        TextSpan(
-                                            text: '\n${inboxList[index].message}',
-                                            style: TextStyle(
-                                                fontSize: 16, color: Colors.grey.shade700
-                                            ),
-                                        ),
-                                      ]
-                                  ),
-                              ),
+                              child:Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 5,),
+                                  Text(inboxList[index].name.capitalize(),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14),),
+                                  Text(inboxList[index].message,style: TextStyle(fontWeight: FontWeight.w200,fontSize: 12),maxLines: 1,overflow: TextOverflow.ellipsis,)
+                              ],)
+
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 10),
+                            padding: const EdgeInsets.only(top: 15),
                             child: Text(
                               getComparedTime(inboxList[index].msgDate),
                               style: const TextStyle(color: Colors.grey, fontSize: 10),

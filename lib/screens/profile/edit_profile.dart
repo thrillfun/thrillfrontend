@@ -117,9 +117,10 @@ class _EditProfileState extends State<EditProfile> {
                       pickImage(context);
                     },
                     child: Container(
+                      margin: EdgeInsets.only(top: 20),
                       padding: const EdgeInsets.all(2),
-                      height: 111,
-                      width: 111,
+                      height: 120,
+                      width: 120,
                       decoration:  BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: ColorManager.spinColorDivider),
@@ -140,7 +141,7 @@ class _EditProfileState extends State<EditProfile> {
                               : ClipOval(
                                 child: CachedNetworkImage(
                                     fit: BoxFit.cover,
-                                    height: 100,width: 100,
+                                    height: 120,width: 120,
                                     imageUrl:
                                         '${RestUrl.profileUrl}${widget.user.avatar}',
                                     placeholder: (a, b) => const Center(
@@ -163,7 +164,7 @@ class _EditProfileState extends State<EditProfile> {
                         label: const Text(username)),
                   ),
                   const SizedBox(
-                    height: 15,
+                    height: 20,
                   ),
                   TextFormField(
                     controller: nameCtr,
@@ -195,7 +196,7 @@ class _EditProfileState extends State<EditProfile> {
                   //   ],
                   // ).w(getWidth(context) * .90),
                   const SizedBox(
-                    height: 15,
+                    height: 20,
                   ),
                   DropdownButton(
                     value:dropDownGender,
@@ -221,7 +222,7 @@ class _EditProfileState extends State<EditProfile> {
                     }).toList(),
                   ).w(getWidth(context) * .90),
                   const SizedBox(
-                    height: 15,
+                    height: 20,
                   ),
                   TextFormField(
                     controller: websiteCtr,
@@ -232,7 +233,7 @@ class _EditProfileState extends State<EditProfile> {
                         label: const Text(websiteURL)),
                   ),
                   const SizedBox(
-                    height: 15,
+                    height: 20,
                   ),
                   TextFormField(
                     controller: bioCtr,
@@ -246,7 +247,7 @@ class _EditProfileState extends State<EditProfile> {
                         label: const Text(yourBio)),
                   ),
                   const SizedBox(
-                    height: 15,
+                    height: 20,
                   ),
                   const Padding(
                     padding: EdgeInsets.only(left: 25),
@@ -259,7 +260,7 @@ class _EditProfileState extends State<EditProfile> {
                     ),
                   ),
                   const SizedBox(
-                    height: 15,
+                    height: 20,
                   ),
                   Row(
                     children: [
@@ -313,7 +314,7 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 25,),
+                  const SizedBox(height: 20,),
                   ElevatedButton(
                       onPressed: () {
                         FocusScope.of(context).requestFocus(FocusNode());
@@ -333,7 +334,7 @@ class _EditProfileState extends State<EditProfile> {
                       style: ElevatedButton.styleFrom(
                           primary: ColorManager.cyan,
                         fixedSize: Size(getWidth(context)*.80, 50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25))
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                       ),
                       child: Text(
                         save,

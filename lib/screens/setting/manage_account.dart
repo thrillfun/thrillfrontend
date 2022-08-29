@@ -42,51 +42,62 @@ class _ManageAccountState extends State<ManageAccount> {
         elevation: 0.5,
         title: const Text(
           manageAccount,
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            color: Colors.black,
-            icon: const Icon(Icons.arrow_back_ios)),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[Color(0xFF2F8897),
+                  Color(0xff1F2A52),
+                  Color(0xff1F244E)]),
+          ),
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: isLoading ? const Center(child: CircularProgressIndicator(color: Colors.lightBlue),): Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
               height: 15,
             ),
-            const Text(
-              accountControl,
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+             Text(
+              accountDetails.toUpperCase(),
+              style: TextStyle(color: Colors.black, fontSize: 16,fontWeight: FontWeight.bold),
             ),
             const SizedBox(
-              height: 20,
+              height: 15,
             ),
             Text(
               "Username : ${user!.username}",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              style: TextStyle(color: Colors.black, fontSize: 14,fontWeight: FontWeight.bold),
             ),
             const SizedBox(
-              height: 20,
+              height: 15,
+            ),
+            Text(
+              "Name : ${user!.name}",
+              style: TextStyle(color: Colors.black, fontSize: 14,fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 15,
             ),
             Text(
               user!.social_login_type=='normal'?
               "Phone : ${user!.phone}":
               "Email : ${user!.email}",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              style: TextStyle(color: Colors.black, fontSize: 14,fontWeight: FontWeight.bold),
             ),
             const SizedBox(
-              height: 20,
+              height: 15,
             ),
             Text(
               "Login Type : ${user!.social_login_type}",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              style: TextStyle(color: Colors.black, fontSize: 14,fontWeight: FontWeight.bold),
             )
           ],
         ),

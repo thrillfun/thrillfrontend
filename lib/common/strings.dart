@@ -104,6 +104,7 @@ const String technicalSupport = "Technical Support";
 const String switchAccount = "Switch Account";
 const String logout = "Logout";
 const String accountControl = "ACCOUNT CONTROL";
+const String accountDetails = "personal information";
 const String deactivateAccount = "Deactivate Account";
 const String applyForVerification = "Apply for Sr Shorts Verification";
 const String username = "Username";

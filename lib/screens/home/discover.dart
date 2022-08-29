@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:thrill/models/banner_model.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
@@ -40,47 +41,61 @@ class _DiscoverState extends State<Discover> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Discover"),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[Color(0xFF2F8897),
+                  Color(0xff1F2A52),
+                  Color(0xff1F244E)]),
+          ),
+        ),
+      ),
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : SingleChildScrollView(
-              child: Column(
-          children: [
+      body:
+      SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
               const SizedBox(
                 height: 20,
               ),
-              TextFormField(
-                maxLength: 30,
-                textInputAction: TextInputAction.next,
-                onChanged: (txt) {
-                  setState(() {
-                    query = txt;
-                  });
-                },
-                decoration: InputDecoration(
-                    hintText: search,
-                    counterText: '',
-                    isDense: true,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(50)),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Colors.grey.shade300, width: 2),
-                        borderRadius: BorderRadius.circular(50)),
-                    contentPadding: const EdgeInsets.only(top: 5),
-                    constraints: BoxConstraints(
-                        maxHeight: 45,
-                        maxWidth:
-                        MediaQuery.of(context).size.width * .90),
-                    prefixIcon: const Icon(Icons.search, size: 30,)),
-              ),
+              Container(
+                margin: EdgeInsets.only(left: 10,right: 10),
+                child: TextFormField(
+                  maxLength: 30,
+                  textInputAction: TextInputAction.next,
+                  onChanged: (txt) {
+                    setState(() {
+                      query = txt;
+                    });
+                  },
+                  decoration: InputDecoration(
+                      hintText: search,
+                      counterText: '',
+                      isDense: true,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.grey.shade300, width: 2),
+                          borderRadius: BorderRadius.circular(10)),
+                      contentPadding: const EdgeInsets.only(top: 5),
+                      constraints: BoxConstraints(
+                          maxHeight: 45,
+                          maxWidth:
+                          MediaQuery.of(context).size.width ),
+                      prefixIcon: const Icon(Icons.search, size: 30,)),
+                ),),
               const SizedBox(
                 height: 20,
               ),
-              CarouselSlider.builder(
+              isLoading? Container(
+                  height: 200,
+                  child:Center(child: CircularProgressIndicator(),)): CarouselSlider.builder(
                 options: CarouselOptions(
                   autoPlayAnimationDuration:
                   const Duration(seconds: 7),
@@ -95,17 +110,36 @@ class _DiscoverState extends State<Discover> {
                 itemBuilder: (context, index, realIndex) {
                   return Stack(
                     children: [
-                      Container(
-                          height: 200,
-                          width: MediaQuery.of(context).size.width,
-                          decoration: BoxDecoration(
-                              borderRadius:
-                              BorderRadius.circular(10)),
-                          child: CachedNetworkImage(
-                            fit: BoxFit.fill,
-                            imageUrl:
-                            '${RestUrl.bannerUrl}${bannerList[index].image}',
-                          )),
+                      Card(
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10), // if you need this
+                          side: BorderSide(
+                            color: Colors.transparent,
+                            width: 1,
+                          ),
+                        ),
+                        child: Container(
+                            height: 250,
+                            width: MediaQuery.of(context).size.width,
+                            decoration: BoxDecoration(
+                                borderRadius:
+                                BorderRadius.circular(20)),
+                            child: CachedNetworkImage(
+                              imageBuilder: (context, imageProvider) => Container(
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  shape: BoxShape.rectangle,
+                                  image: DecorationImage(
+                                      image: imageProvider, fit: BoxFit.fill),
+                                ),
+                              ),
+                              fit: BoxFit.fill,
+                              imageUrl:
+                              '${RestUrl.bannerUrl}${bannerList[index].image}',
+                            )),
+                      ),
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: Row(
@@ -171,7 +205,7 @@ class _DiscoverState extends State<Discover> {
                       ),
                     );
                   }
-                  return ListView.builder(
+                  return isLoading?CircularProgressIndicator():ListView.builder(
                     itemCount: searchList.length,
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
@@ -181,7 +215,7 @@ class _DiscoverState extends State<Discover> {
                     },
                   );
                 }
-                return ListView.builder(
+                return isLoading?CircularProgressIndicator(): ListView.builder(
                     itemCount: videoList.length,
                     scrollDirection: Axis.vertical,
                     shrinkWrap: true,
@@ -191,10 +225,10 @@ class _DiscoverState extends State<Discover> {
                     });
 
               }),
-          ],
+            ],
+          ),
         ),
-            ),
-      ),
+      )
     );
   }
 
@@ -222,82 +256,85 @@ class _DiscoverState extends State<Discover> {
   }
 
   Widget listWidget(DiscoverVideo discoverVideo, int index) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(context, '/tagDetails',arguments: discoverVideo);
-          },
-          child: Row(
-            children: [
-              Container(
-                height: 20,
-                width: 20,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
+    return Column( children: [
+      GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, '/tagDetails',arguments: discoverVideo);
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(width: 10,),
+            Container(
+              margin: EdgeInsets.only(top: 10,bottom: 10),
+              height: 20,
+              width: 20,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey, width: 1),
+              ),
+              child: const Text('#',style: TextStyle(fontWeight: FontWeight.bold),),
+            ),
+            const SizedBox(
+              width: 5,
+            ),
+            Expanded(
+              child: RichText(
+                  text: TextSpan(children: [
+                TextSpan(
+                    text: '${discoverVideo.hashtag_name}'
+                        .allWordsCapitilize(),
+                    style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                // const TextSpan(
+                //     text: 'Trending HashTag',
+                //     style: TextStyle(color: Colors.grey))
+              ])),
+            ),
+            Container(
+              height: 20,
+              width: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey, width: 1),
-                ),
-                child: const Text('#'),
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Expanded(
-                child: RichText(
-                    text: TextSpan(children: [
-                  TextSpan(
-                      text: '${discoverVideo.hashtag_name}\n'
-                          .allWordsCapitilize(),
-                      style: const TextStyle(color: Colors.black)),
-                  const TextSpan(
-                      text: 'Trending HashTag',
-                      style: TextStyle(color: Colors.grey))
-                ])),
-              ),
-              Container(
-                height: 20,
-                width: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1),
-                    borderRadius: BorderRadius.circular(5)),
-                child: Text("${discoverVideo.video_count}"),
-              )
-            ],
-          ).w(getWidth(context) * .90),
+                  borderRadius: BorderRadius.circular(5)),
+              child: Text("${discoverVideo.video_count}"),
+            )
+            , const SizedBox(
+              width: 5,
+            ),
+          ],
         ),
-        SizedBox(
-          height: 140,
-          width: getWidth(context),
-          child: ListView.builder(
-            itemCount: discoverVideo.hashVideo.length,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (BuildContext context2, int index2) {
-              return GestureDetector(
-                onTap: (){
-                   Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': discoverVideo.videoModel[index2]});
-                },
-                child: Container(
-                  margin: const EdgeInsets.all(2),
-                  padding: const EdgeInsets.only(left: 5),
-                  width: 120,
-                  child: imgNet('${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}'),
-                  // CachedNetworkImage(
-                  //   fit: BoxFit.cover,
-                  //   imageUrl:
-                  //   discoverVideo.hashVideo[index2].gif_image.isEmpty
-                  //   ? '${RestUrl.thambUrl}thumb-not-available.png'
-                  //   : '${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}',
-                  // ),
-                ),
-              );
-            },
-          ),
+      ),
+      SizedBox(
+        height: 140,
+        width: getWidth(context),
+        child: ListView.builder(
+          itemCount: discoverVideo.hashVideo.length,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (BuildContext context2, int index2) {
+            return GestureDetector(
+              onTap: (){
+                 Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': discoverVideo.videoModel[index2]});
+              },
+              child: Container(
+                margin: const EdgeInsets.all(2),
+                padding: const EdgeInsets.only(left: 5),
+                width: 120,
+                child: imgNet('${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}'),
+                // CachedNetworkImage(
+                //   fit: BoxFit.cover,
+                //   imageUrl:
+                //   discoverVideo.hashVideo[index2].gif_image.isEmpty
+                //   ? '${RestUrl.thambUrl}thumb-not-available.png'
+                //   : '${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}',
+                // ),
+              ),
+            );
+          },
         ),
-      ]),
-    );
+      ),
+    ]);
   }
 }

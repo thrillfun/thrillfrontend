@@ -35,19 +35,26 @@ class _PrivacyState extends State<Privacy> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  Color(0xFF2F8897),
+                  Color(0xff1F2A52),
+                  Color(0xff1F244E)
+                ]),
+          ),
+        ),
         elevation: 0.5,
         title: const Text(
           privacy,
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            color: Colors.black,
-            icon: const Icon(Icons.arrow_back_ios)),
+
       ),
       body: isLoading?
       const Center(child: CircularProgressIndicator(),):
@@ -70,7 +77,7 @@ class _PrivacyState extends State<Privacy> {
             ),
             Row(
               children: [
-                const Expanded(child: Text(allowYourVideosToBeDownloaded, style: TextStyle(fontSize: 13),)),
+                const Expanded(child: Text(allowYourVideosToBeDownloaded, style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: Colors.black),)),
                 DropdownButton(
                     value: safetyPreference!.allowVideoToBeDownloaded.toUpperCase(),
                     isDense: true,
@@ -110,14 +117,14 @@ class _PrivacyState extends State<Privacy> {
             ),
             const Text(
               allowYourVideosToBeDownloadedDialog,
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+              style: TextStyle(color: Colors.black38, fontSize: 12),
             ),
             const SizedBox(
               height: 20,
             ),
             Row(
               children: [
-                const Expanded(child: Text(whoCanSendYouDirectMessage, style: TextStyle(fontSize: 13),)),
+                const Expanded(child: Text(whoCanSendYouDirectMessage, style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: Colors.black),)),
                 DropdownButton(
                     value: safetyPreference!.whoCanSendDirectMessages.toUpperCase(),
                     isDense: true,
@@ -164,7 +171,7 @@ class _PrivacyState extends State<Privacy> {
             ),
             Row(
               children: [
-                const Expanded(child: Text(whoCanDuetWithYourVideo, style: TextStyle(fontSize: 13),)),
+                const Expanded(child: Text(whoCanDuetWithYourVideo, style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: Colors.black),)),
                 DropdownButton(
                     value: safetyPreference!.whoCanDuet.toUpperCase(),
                     isDense: true,
@@ -211,7 +218,7 @@ class _PrivacyState extends State<Privacy> {
             ),
             Row(
               children: [
-                const Expanded(child: Text(whoCanViewYourLikedVideos, style: TextStyle(fontSize: 13),)),
+                const Expanded(child: Text(whoCanViewYourLikedVideos, style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: Colors.black),)),
                 DropdownButton(
                     value: safetyPreference!.whoCanViewLikeVideos.toUpperCase(),
                     isDense: true,
@@ -258,7 +265,7 @@ class _PrivacyState extends State<Privacy> {
             ),
             Row(
               children: [
-                const Expanded(child: Text(whoCanCommentOnYourVideos, style: TextStyle(fontSize: 13),)),
+                const Expanded(child: Text(whoCanCommentOnYourVideos, style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: Colors.black),)),
                 DropdownButton(
                     value: safetyPreference!.whoCanCommentOnYourVideos.toUpperCase(),
                     isDense: true,

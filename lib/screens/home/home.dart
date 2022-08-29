@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:get/utils.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:share_plus/share_plus.dart';
@@ -10,11 +12,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
+import 'package:thrill/screens/auth/login.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../common/strings.dart';
 import '../../models/comment_model.dart';
 import '../../models/user.dart';
 import '../../rest/rest_url.dart';
+import '../../utils/home_bottomsheet_layout.dart';
 import '../../utils/util.dart';
 import '../../widgets/image_rotate.dart';
 import '../../widgets/video_item.dart';
@@ -840,7 +844,10 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                           ),
                           GestureDetector(
                             onTap: () async {
-                              Share.share('You need to watch this awesome video only on Thrill!!!');
+                              // showModalBottomSheet(context: context, builder: (context)=>
+                              //   const BottomSheetHome();
+                              // ;
+                             Share.share('You need to watch this awesome video only on Thrill!!!');
                             },
                             child: SvgPicture.asset(
                               'assets/share.svg',
@@ -1109,27 +1116,29 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                   : Colors.white60,
                               fontSize: 16),
                         )),
-                    IconButton(
-                        onPressed: ()async {
-                          await isLogined().then((value) async {
-                            if (value) {
-                              reelsPlayerController?.pause();
-                              shouldAutoPlayReel = false;
-                              await Navigator.pushNamed(context, "/record");
-                              reelsPlayerController?.play();
-                              shouldAutoPlayReel = true;
-                            } else {
-                              showAlertDialog(context);
-                            }
-                          });
-                        },
-                        iconSize: 22,
-                        padding: const EdgeInsets.only(),
-                        constraints: const BoxConstraints(),
-                        icon: const Icon(
-                          Icons.camera_alt_rounded,
-                          color: Colors.white,
-                        ))
+                    Container(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                          onPressed: ()async {
+                            await isLogined().then((value) async {
+                              if (value) {
+                                reelsPlayerController?.pause();
+                                shouldAutoPlayReel = false;
+                                await Navigator.pushNamed(context, "/record");
+                                reelsPlayerController?.play();
+                                shouldAutoPlayReel = true;
+                              } else {
+                                showAlertDialog(context);
+                              }
+                            });
+                          },
+                          iconSize: 22,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(
+                            Icons.camera_alt_rounded,
+                            color: Colors.white,
+                          )),
+                    )
                   ],
                 ),
               ),
@@ -1412,24 +1421,20 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
   }
 
   getFavVideos()async{
-    await isLogined().then((value) async {
-      if (value) {
-        try{
-          var response = await RestApi.getFavVideos();
-          var json = jsonDecode(response.body);
-          if(json['status']){
-            List jsonList = json['data'] as List;
-            if(jsonList.isNotEmpty){
-              favList.clear();
-              for(var element in jsonList){
-                favList.add(element['id']);
-              }
-              setState(() {});
-            }
+    try{
+      var response = await RestApi.getFavVideos();
+      var json = jsonDecode(response.body);
+      if(json['status']){
+        List jsonList = json['data'] as List;
+        if(jsonList.isNotEmpty){
+          favList.clear();
+          for(var element in jsonList){
+            favList.add(element['id']);
           }
-        }catch(_){}
+          setState(() {});
+        }
       }
-    });
+    }catch(_){}
   }
 
   void _scrollListener() {
@@ -1481,17 +1486,22 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
     Widget continueButton = TextButton(
       child: const Text("OK"),
       onPressed: () async {
-        Navigator.pop(context);
+   //     Navigator.pop(context);
+        Get.back();
         reelsPlayerController?.pause();
         reelsPlayerController?.setVolume(0);
         shouldAutoPlayReel = false;
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+        // Get.to(LoginScreen());
+        // Get.to(LoginScreen(isMultiLogin:"false"));
+     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
     );
     Widget cancelButton = TextButton(
       child: const Text("CANCEL"),
       onPressed: () async {
-        Navigator.pop(context);
+        Get.back();
+
+        //    Navigator.pop(context);
       },
     );
     AlertDialog alert = AlertDialog(
@@ -1507,7 +1517,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
       },
     );
   }
-  
+
   getUserData() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');

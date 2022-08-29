@@ -6,8 +6,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
+import 'package:thrill/controller/bindings.dart';
 import 'package:thrill/repository/video/video_repository.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
@@ -49,7 +51,9 @@ void main() async {
     );
   });
   getTempDirectory();
-  runApp(const MyApp());
+  runApp(GetMaterialApp(
+    initialBinding: DataBindings(),
+    home: const MyApp(),));
 }
 
 class MyApp extends StatefulWidget{
@@ -64,12 +68,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -77,13 +81,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch(state){
       case AppLifecycleState.resumed:
-        shouldAutoPlayReel = true;
         break;
       case AppLifecycleState.inactive:
         break;
       case AppLifecycleState.paused:
         try{
-          shouldAutoPlayReel = false;
           reelsPlayerController?.pause();
         }catch(_){}
         break;

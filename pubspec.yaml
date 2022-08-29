@@ -72,6 +72,10 @@ dependencies:
   flutter_barcode_scanner: ^2.0.0
   pin_code_fields: ^7.4.0
   permission_handler: ^10.0.0
+  glassmorphism_ui: ^0.3.0
+  get: ^4.6.5
+  better_player: ^0.0.83
+  persistent_bottom_nav_bar: ^4.0.2
 
 dev_dependencies:
   flutter_test:

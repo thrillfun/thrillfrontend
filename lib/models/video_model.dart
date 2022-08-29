@@ -27,7 +27,7 @@ class VideoModel {
     UserModel users;
     users = UserModel.fromJson(json['user'] ?? {});
     return VideoModel(
-        json['id'],
+        json['id']??0,
         json['comments'] ?? 0,
         json['video'] ?? '',
         json['description'] ?? '',

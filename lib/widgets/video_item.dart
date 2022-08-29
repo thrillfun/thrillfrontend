@@ -11,27 +11,27 @@ VideoPlayerController? reelsPlayerController;
 bool shouldAutoPlayReel = true;
 
 class VideoPlayerItem extends StatefulWidget {
-  final String videoUrl, filter;
-  final int pageIndex;
-  final int currentPageIndex;
-  final bool isPaused;
-  final int videoId;
-  final int pagesLength;
-  final VoidCallback? callback;
-  final String speed;
-  final PageController pageController;
+   String? videoUrl, filter;
+   int? pageIndex;
+   int? currentPageIndex;
+   bool? isPaused;
+   int? videoId;
+   int? pagesLength;
+   VoidCallback? callback;
+   String? speed;
+   PageController? pageController;
 
-  const VideoPlayerItem(
+   VideoPlayerItem(
       {Key? key,
-      required this.videoUrl,
-      required this.pageIndex,
-      required this.currentPageIndex,
-      required this.isPaused,
-      required this.filter,
-      required this.videoId,
-      required this.speed,
-      required this.pageController,
-      required this.pagesLength,
+       this.videoUrl,
+       this.pageIndex,
+       this.currentPageIndex,
+       this.isPaused,
+       this.filter,
+       this.videoId,
+       this.speed,
+       this.pageController,
+       this.pagesLength,
         this.callback})
       : super(key: key);
 
@@ -57,7 +57,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
           '${RestUrl.videoUrl}${widget.videoUrl}')
         ..initialize().then((value) {
           if (reelsPlayerController!.value.isInitialized) {
-            reelsPlayerController!.setPlaybackSpeed(widget.speed.contains('x')?double.parse(widget.speed.replaceAll('x', '')):double.parse(widget.speed));
+            reelsPlayerController!.setPlaybackSpeed(widget.speed!.contains('x')?double.parse(widget.speed!.replaceAll('x', '')):double.parse(widget.speed!));
             if (shouldAutoPlayReel) reelsPlayerController!.play();
             reelsPlayerController!.setLooping(true);
             reelsPlayerController!.setVolume(1);
@@ -138,12 +138,12 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                 : AspectRatio(
                 aspectRatio: reelsPlayerController!.value.aspectRatio,
                 child: VideoPlayer(reelsPlayerController!)),
-            widget.filter.isEmpty
+            widget.filter!.isEmpty
                 ? const SizedBox(width: 10)
                 : !showGIF
                     ? const SizedBox(width: 10)
                     : Image.asset(
-                        widget.filter,
+                        widget.filter!,
                         fit: BoxFit.cover,
                         width: getWidth(context),
                         height: getHeight(context),
@@ -200,23 +200,23 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     List<String> viewList = List<String>.empty(growable: true);
     viewList = pref.getStringList('likeList') ?? [];
     if (!viewList.contains(widget.videoId.toString())) {
-      var result = await RestApi.countViewVideo(widget.videoId);
+      var result = await RestApi.countViewVideo(widget.videoId!);
       var json = jsonDecode(result.body);
       if (json['status']) {
         viewList.add(widget.videoId.toString());
         pref.setStringList('viewList', viewList);
         if (mounted) setState(() {});
         try{
-          widget.pagesLength-1==widget.pageIndex?
-          widget.pageController.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
-          widget.pageController.animateToPage(widget.pageIndex+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
+          widget.pagesLength!-1==widget.pageIndex?
+          widget.pageController!.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
+          widget.pageController!.animateToPage(widget.pageIndex!+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
         } catch(_){}
       }
     } else {
       try{
-        widget.pagesLength-1==widget.pageIndex?
-        widget.pageController.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
-        widget.pageController.animateToPage(widget.pageIndex+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
+        widget.pagesLength!-1==widget.pageIndex?
+        widget.pageController!.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
+        widget.pageController!.animateToPage(widget.pageIndex!+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
       } catch(_){}
     }
   }
