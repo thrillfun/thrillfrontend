@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
+import 'package:thrill/screens/following_and_followers.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../blocs/profile/profile_bloc.dart';
@@ -145,12 +146,16 @@ class _ProfileState extends State<Profile> {
                       children: [
                         GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(
-                                  context, "/followingAndFollowers",
-                                  arguments: {
-                                    'id': state.userModel.id,
-                                    'index': 1
-                                  });
+                              Get.to(FollowingAndFollowers(map: {
+                                'id': state.userModel.id,
+                                'index': 1
+                              }, isMyProfile: true));
+                              // Navigator.pushNamed(
+                              //     context, "/followingAndFollowers",
+                              //     arguments: {
+                              //       'id': state.userModel.id,
+                              //       'index': 1
+                              //     });
                             },
                             child: Column(
                               children: [
@@ -176,12 +181,10 @@ class _ProfileState extends State<Profile> {
                         ),
                         GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(
-                                  context, "/followingAndFollowers",
-                                  arguments: {
-                                    'id': state.userModel.id,
-                                    'index': 0
-                                  });
+                              Get.to(FollowingAndFollowers(map: {
+                                'id': state.userModel.id,
+                                'index': 1
+                              }, isMyProfile: true));
                             },
                             child: Column(
                               children: [

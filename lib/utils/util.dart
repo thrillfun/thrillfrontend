@@ -58,8 +58,8 @@ showErrorToast(BuildContext context,String msg)async{
               alignment: Alignment.topRight,
               child: TextButton(
                   onPressed: (){
-                    Get.back();
-                //    Navigator.pop(navigatorKey.currentContext!);
+                    Get.back(closeOverlays: true);
+                   // Navigator.pop(navigatorKey.currentContext!);
                     },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.only(right: 10),
@@ -112,7 +112,7 @@ showSuccessToast(BuildContext context,String msg) async {
               alignment: Alignment.topRight,
               child: TextButton(
                   onPressed: (){
-                    Get.back();
+                    Get.back(closeOverlays: true);
               //      Navigator.pop(navigatorKey.currentContext!);
                   },
                   style: TextButton.styleFrom(
@@ -158,7 +158,7 @@ progressDialogue(BuildContext context) {
 }
 
 closeDialogue(BuildContext context) {
-  Get.back();
+  Get.back(closeOverlays: true);
  // Navigator.pop(context);
 }
 

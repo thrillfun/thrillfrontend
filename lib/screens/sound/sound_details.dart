@@ -4,9 +4,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
+import 'package:thrill/screens/screen.dart';
+import 'package:thrill/screens/video/record.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:thrill/widgets/gradient_elevated_button.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
@@ -45,20 +49,30 @@ class _SoundDetailsState extends State<SoundDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[Color(0xFF2F8897),
+                  Color(0xff1F2A52),
+                  Color(0xff1F244E)]),
+          ),
+        ),
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
-        shape: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
         centerTitle: true,
         title: Text(
           title,
-          style: const TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.white),
         ),
         leading: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              Get.back(closeOverlays: true);
+              // Navigator.pop(context);
             },
-            color: Colors.black,
-            icon: const Icon(Icons.arrow_back_ios)),
+            color: Colors.white,
+            icon: const Icon(Icons.arrow_back)),
       ),
       body: videoList.isEmpty?
           const Center(child: CircularProgressIndicator(),):
@@ -74,38 +88,37 @@ class _SoundDetailsState extends State<SoundDetails> {
                 width: 15,
               ),
               Container(
-                height: 120,
-                width: 100,
-                padding: const EdgeInsets.all(35),
+                alignment: Alignment.center,
+                height: 50,
+                width: 50,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
+                  gradient:const LinearGradient(colors: [Color(0xFF2F8897),
+                    Color(0xff1F2A52),
+                    Color(0xff1F244E)]),
+                    borderRadius: BorderRadius.circular(50),
                     color: ColorManager.cyan),
-                child: SvgPicture.asset(
-                  'assets/play.svg',
-                ),
+                child:const Icon(Icons.play_circle,size: 20,color: Colors.white,),
               ),
               const SizedBox(
-                width: 15,
+                width: 10,
               ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(
-                      height: 15,
-                    ),
+
                     Text(
                       title,
-                      style: const TextStyle(color: Colors.grey, fontSize: 18),
+                      style: const TextStyle(color: Colors.black, fontSize: 16,fontWeight: FontWeight.bold),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(
-                      height: 7,
+                      height: 5,
                     ),
                     Text(
-                      widget.map["user"],
+                      '@'+widget.map["user"],
                       style: const TextStyle(color: Colors.grey),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -114,6 +127,10 @@ class _SoundDetailsState extends State<SoundDetails> {
                 ),
               )
             ],
+          ),
+          SizedBox(height: 5,),
+          Divider(
+            thickness: 2,
           ),
           const SizedBox(
             height: 20,
@@ -129,7 +146,7 @@ class _SoundDetailsState extends State<SoundDetails> {
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
                     onTap: (){
-                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': videoList[index]});
+                     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': videoList[index]});
                     },
                     child: Stack(
                       fit: StackFit.expand,
@@ -241,13 +258,14 @@ class _SoundDetailsState extends State<SoundDetails> {
           //         ))
           //   ],
           // ),
-          ElevatedButton(
+          GradientElevatedButton(
               onPressed: () async {
                 String sound = widget.map["sound"];
                 File file = File('$saveCacheDirectory$sound');
                     try{
                       if(await file.exists()){
-                        Navigator.pushNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
+                        // Get.to(Record(soundMap: {"soundName":title,"soundPath":file.path}));
+                       Navigator.pushNamed(context, "/record", arguments: {"soundName":title,"soundPath":file.path});
                       } else {
                         progressDialogue(context);
                         await FileSupport().downloadCustomLocation(
@@ -265,14 +283,11 @@ class _SoundDetailsState extends State<SoundDetails> {
                       showErrorToast(context, e.toString());
                     }
               },
-              style: ElevatedButton.styleFrom(
-                  primary: ColorManager.cyan,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50))),
+
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
-                  Icon(Icons.camera_alt_outlined),
+                  Icon(Icons.music_note),
                   SizedBox(
                     width: 10,
                   ),

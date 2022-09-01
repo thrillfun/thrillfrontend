@@ -4,7 +4,7 @@ class VideoModel {
   int id, comments;
   String video, description, filter, gif_image, sound, sound_name, sound_category_name;
   int likes,views;
-  UserModel user;
+  UserModel? user;
   String speed;
   List hashtags;
   String is_duet;
@@ -55,7 +55,7 @@ class VideoModel {
     data['video'] = video;
     data['description'] = description;
     data['likes'] = likes;
-    data['user'] = user.toJson();
+    data['user'] = user?.toJson();
     data['filter'] = filter;
     data['gif_image'] = gif_image;
     data['sound'] = sound;

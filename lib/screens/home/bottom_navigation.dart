@@ -295,10 +295,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
     Widget continueButton = TextButton(
       child: const Text("OK"),
       onPressed: () async {
-        Get.back();
-        Get.to(LoginScreen());
-        // Navigator.pop(context);
-        // Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+        // Get.back();
+        // Get.to(LoginScreen());
+        Navigator.pop(context);
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
     );
     Widget cancelButton = TextButton(

@@ -1,5 +1,5 @@
 class LevelModel {
-  String current, next, progress, max_level;
+  String? current, next, progress, max_level;
 
   LevelModel(this.current, this.next, this.progress, this.max_level);
 

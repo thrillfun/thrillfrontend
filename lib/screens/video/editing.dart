@@ -9,6 +9,8 @@ import 'package:syncfusion_flutter_core/core.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:thrill/widgets/gradient_elevated_button.dart';
+import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/add_sound_model.dart';
 import '../../models/post_data.dart';
@@ -86,14 +88,24 @@ class _EditingState extends State<Editing> {
           centerTitle: true,
           title: const Text(
             "Editing",
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.white),
+          ),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Color(0xFF2F8897),
+                    Color(0xff1F2A52),
+                    Color(0xff1F244E)]),
+            ),
           ),
           leading: IconButton(
               onPressed: () {
                 showCloseDialog();
               },
-              color: Colors.black,
-              icon: const Icon(Icons.arrow_back_ios)),
+              color: Colors.white,
+              icon: const Icon(Icons.arrow_back)),
         ),
         body: isVidInit?
         Stack(
@@ -124,7 +136,7 @@ class _EditingState extends State<Editing> {
                     itemBuilder: (BuildContext context, int index) {
                       return SizedBox(
                           width: MediaQuery.of(context).size.width/thumbList.length,
-                          child: Image.file(File(thumbList[index].path),fit: BoxFit.fill,));
+                          child: Image.file(File(thumbList[index].path),fit: BoxFit.cover,));
                     },
                   ),
                 )
@@ -163,10 +175,11 @@ class _EditingState extends State<Editing> {
             Positioned(
               left: 15, right: 15, bottom: 61,
                 child: Container(
+                  margin: EdgeInsets.only(top: 5,bottom: 5),
                   padding: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10)
+                    borderRadius: BorderRadius.circular(5)
                   ),
                   child: Row(
                     children: [
@@ -180,7 +193,7 @@ class _EditingState extends State<Editing> {
                       Text("Default Sound",
                         style: Theme.of(context).textTheme.headline4!.copyWith(
                           fontSize: 13,
-                            color: Colors.grey),),
+                            color: Colors.black),),
                       const Spacer(),
                       Radio(
                         value: 1,
@@ -198,21 +211,15 @@ class _EditingState extends State<Editing> {
                       Text("Chosen Sound",
                         style: Theme.of(context).textTheme.headline4!.copyWith(
                             fontSize: 13,
-                            color: Colors.grey),),
+                            color: Colors.black),),
                     ],
                   ),
                 )
             ),
             Positioned(
                 bottom: 10,
-                child: ElevatedButton(
+                child: GradientElevatedButton(
                     onPressed: continuePressed,
-                    style: ElevatedButton.styleFrom(
-                        fixedSize: Size(getWidth(context)*.60, 45),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25)
-                        )
-                    ),
                     child: const Text("Continue")
                 )),
             // Positioned(
@@ -313,20 +320,24 @@ class _EditingState extends State<Editing> {
   }
   continuePressed()async{
     videoPlayerController.pause();
-    PostData newPostData = PostData(
+
+    videoPlayerController.dispose();
+    setState(()=>isVidInit=false);
+    await VESDK.openEditor(Video(widget.data.filePath)).then((value) async {
+      PostData newPostData = PostData(
         speed: widget.data.speed,
-        filePath: widget.data.filePath,
-        filterName: widget.data.filterName,
+        filePath: value!.video,
+        filterName: value!.video,
         addSoundModel: widget.data.addSoundModel,
         isDuet: false,
         trimStart: rangeController.end-rangeController.start<15?0:rangeController.end-rangeController.start>60?0:rangeController.start.toInt(),
         trimEnd: rangeController.end-rangeController.start<15?15:rangeController.end-rangeController.start>60?60:rangeController.end.toInt(),
         isDefaultSound: radioGroupValue==0?true:false,
         isUploadedFromGallery: widget.data.isUploadedFromGallery,
-    );
-    videoPlayerController.dispose();
-    setState(()=>isVidInit=false);
-    await Navigator.pushNamed(context, "/preview", arguments: newPostData);
+      );
+      await Navigator.pushNamed(context, "/preview", arguments: newPostData);
+
+    });
     videoPlayerController =
     VideoPlayerController.file(
         File(widget.data.filePath))

@@ -4,7 +4,9 @@ import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/statistics.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/widgets/gradient_elevated_button.dart';
 import 'package:video_player/video_player.dart';
 import '../../common/strings.dart';
 import '../../models/post_data.dart';
@@ -69,20 +71,29 @@ class _PreviewState extends State<Preview> {
       },
       child: Scaffold(
         appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Color(0xFF2F8897),
+                    Color(0xff1F2A52),
+                    Color(0xff1F244E)]),
+            ),
+          ),
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
           centerTitle: true,
           title: const Text(
             "Preview",
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.white),
           ),
           leading: IconButton(
               onPressed: () {
                 showCloseDialog();
               },
-              color: Colors.black,
-              icon: const Icon(Icons.arrow_back_ios)
+              color: Colors.white,
+              icon: const Icon(Icons.arrow_back)
           ),
         ),
         body: getLayout()
@@ -157,14 +168,17 @@ class _PreviewState extends State<Preview> {
             right: 10,
             child: isVControllerInitialized?
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF2F8897),
+                  Color(0xff1F2A52),
+                  Color(0xff1F244E)]),
                   color: Colors.white.withOpacity(0.55),
-                  borderRadius: BorderRadius.circular(30)
+                  borderRadius: BorderRadius.circular(8)
               ),
               child: Row(
                 children: [
-                  Text(getDurationString(videoPlayerController!.value.position), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                  Text(getDurationString(videoPlayerController!.value.position), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
                   Expanded(
                     child: Slider(
                       min: 0,
@@ -174,14 +188,17 @@ class _PreviewState extends State<Preview> {
                       thumbColor: ColorManager.cyan,
                     ),
                   ),
-                  Text(getDurationString(videoPlayerController!.value.duration), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                  Text(getDurationString(videoPlayerController!.value.duration), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
                 ],
               ),
             ): Container(),
         ),
         Positioned(
             bottom: 10,
-            child: ElevatedButton(
+            child: Container(
+              margin:EdgeInsets.only(bottom: 10,top: 10),
+              padding: EdgeInsets.only(left: 10,right: 10),
+              child: GradientElevatedButton(
                 onPressed: () async {
                   videoPlayerController!.pause();
                   PostData postDate = PostData(
@@ -197,22 +214,17 @@ class _PreviewState extends State<Preview> {
                       newPath: '$saveDirectory$newName.mp4',
                       duetFrom: widget.data.duetFrom,
                       newName: newName,
-                    duetSoundName: widget.data.duetSoundName,
-                    duetSound: widget.data.duetSound
+                      duetSoundName: widget.data.duetSoundName,
+                      duetSound: widget.data.duetSound
                   );
                   setState(()=>isVControllerInitialized=false);
                   videoPlayerController?.dispose();
                   await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
                   initPreview();
                 },
-                style: ElevatedButton.styleFrom(
-                    fixedSize: Size(getWidth(context)*.60, 45),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25)
-                    )
-                ),
+
                 child: const Text("Continue")
-            )),
+            ),)),
       ],
     );
   }
@@ -264,7 +276,7 @@ class _PreviewState extends State<Preview> {
                  const SizedBox(height: 15,),
                  ElevatedButton(
                      onPressed: (){
-                       Navigator.pop(context);
+                       Get.back();
                      },
                      style: ElevatedButton.styleFrom(
                        primary: ColorManager.cyan,
@@ -292,7 +304,8 @@ class _PreviewState extends State<Preview> {
                 children: [
                   ElevatedButton(
                       onPressed: (){
-                        Navigator.pop(context);
+
+                        Get.back(closeOverlays: true);
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.red,

@@ -182,7 +182,7 @@ class _DiscoverState extends State<Discover> {
                       searchList.add(discover);
                     } else {
                       for(VideoModel vm in discover.videoModel){
-                        if(vm.user.name.toLowerCase().contains(query.toLowerCase())){
+                        if(vm.user!.name.toLowerCase().contains(query.toLowerCase())){
                           searchList.add(discover);
                           break;
                         }

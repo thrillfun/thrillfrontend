@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:thrill/blocs/profile/profile_bloc.dart';
 import 'package:thrill/models/user.dart';
@@ -53,17 +54,17 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void initState() {
     setState(() {
-      nameCtr.text = widget.user.name;
-      userNameCtr.text = widget.user.username;
-      firstNameCtr.text = widget.user.first_name;
-      lastNameCtr.text = widget.user.last_name;
-      websiteCtr.text = widget.user.website_url;
-      bioCtr.text = widget.user.bio;
-      dropDownGender=widget.user.gender.isEmpty?"Male":widget.user.gender;
-      socialList.add(SocialUrlModel('youtube', widget.user.youtube));
-      socialList.add(SocialUrlModel('facebook', widget.user.facebook));
-      socialList.add(SocialUrlModel('instagram', widget.user.instagram));
-      socialList.add(SocialUrlModel('twitter', widget.user.twitter));
+      nameCtr.text = widget.user.name!;
+      userNameCtr.text = widget.user.username!;
+      firstNameCtr.text = widget.user.first_name!;
+      lastNameCtr.text = widget.user.last_name!;
+      websiteCtr.text = widget.user.website_url!;
+      bioCtr.text = widget.user.bio!;
+      dropDownGender=widget.user.gender!.isEmpty?"Male":widget.user.gender!;
+      socialList.add(SocialUrlModel('youtube', widget.user.youtube!));
+      socialList.add(SocialUrlModel('facebook', widget.user.facebook!));
+      socialList.add(SocialUrlModel('instagram', widget.user.instagram!));
+      socialList.add(SocialUrlModel('twitter', widget.user.twitter!));
       genderList.addAll({"Male","Female","Other"});
     });
     try{
@@ -85,7 +86,8 @@ class _EditProfileState extends State<EditProfile> {
         backgroundColor: Colors.white,
         leading: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              // Navigator.pop(context);
+              Get.back();
             },
             color: Colors.black,
             icon: const Icon(Icons.arrow_back_ios)),
@@ -269,7 +271,7 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                       IconButton(
                         onPressed: () {
-                           linkDialog(linkYouTube, youtubeURL,widget.user.youtube,"youtube");
+                           linkDialog(linkYouTube, youtubeURL,widget.user.youtube!,"youtube");
                         },
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.only(),
@@ -281,7 +283,7 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                       IconButton(
                         onPressed: (){
-                          linkDialog(linkFacebook, facebookURL,widget.user.facebook,"facebook");
+                          linkDialog(linkFacebook, facebookURL,widget.user.facebook!,"facebook");
                         },
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.only(),
@@ -293,7 +295,7 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                       IconButton(
                         onPressed: (){
-                          linkDialog(linkInstagram, instagramURL,widget.user.instagram,"instagram");
+                          linkDialog(linkInstagram, instagramURL,widget.user.instagram!,"instagram");
                         },
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.only(),

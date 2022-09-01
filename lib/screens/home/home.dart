@@ -10,9 +10,12 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
+import 'package:thrill/controller/model/comments_model.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/screens/auth/login.dart';
+import 'package:thrill/screens/following_and_followers.dart';
+import 'package:thrill/screens/sound/sound_details.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../common/strings.dart';
 import '../../models/comment_model.dart';
@@ -37,7 +40,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
 
   List<int> favList = List<int>.empty(growable: true);
   List<String> likeList = List<String>.empty(growable: true);
-  List<Comments> commentList = List<Comments>.empty(growable: true);
+  List<CommentData> commentList = List<CommentData>.empty(growable: true);
   List<String> likeComment = List<String>.empty(growable: true);
   TextEditingController msgCtr = TextEditingController();
   List<String> followList = List<String>.empty(growable: true);
@@ -97,419 +100,6 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
         }
           return Stack(
             children:[
-             /* PageView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: state.list.length,
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                itemBuilder: (BuildContext context, int index) {
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      VideoPlayerItem(
-                        videoUrl: state.list[index].video,
-                        isPaused: _isOnPageTurning,
-                        currentPageIndex: _currentPage,
-                        pageIndex: index,
-                        filter: state.list[index].filter,
-                        videoId: state.list[index].id,
-                        callback: ()async{
-                          await isLogined().then((value) async {
-                            if (value) {
-                              if (likeList.isEmpty) {
-                                likeList
-                                    .add(state.list[index].id.toString());
-                                state.list[index].copyWith(
-                                    likes: state.list[index].likes++);
-                              } else {
-                                if (likeList.contains(
-                                    state.list[index].id.toString())) {
-                                  likeList.remove(
-                                      state.list[index].id.toString());
-                                  state.list[index].copyWith(
-                                      likes: state.list[index].likes--);
-                                } else {
-                                  likeList
-                                      .add(state.list[index].id.toString());
-                                  state.list[index].copyWith(
-                                      likes: state.list[index].likes++);
-                                }
-                              }
-                              SharedPreferences pref =
-                              await SharedPreferences.getInstance();
-                              pref.setStringList('likeList', likeList);
-
-                              BlocProvider.of<VideoBloc>(context).add(
-                                  AddRemoveLike(
-                                      isAdded: likeList.contains(state
-                                          .list[index].id
-                                          .toString())
-                                          ? 1
-                                          : 0,
-                                      videoId: state.list[index].id));
-                              setState(() {});
-                            } else {
-                              showAlertDialog(context);
-                            }
-                          });
-                        },
-                      ),
-                      Positioned(
-                        bottom: 120,
-                        right: 10,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Stack(
-                              clipBehavior: Clip.none,
-                              alignment: Alignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    await isLogined().then((value) async {
-                                      if (value) {
-                                        reelsPlayerController?.pause();
-                                        await Navigator.pushNamed(
-                                            context, "/viewProfile", arguments: {
-                                          "userModel": state.list[index].user,
-                                          "getProfile": false
-                                        });
-                                        reelsPlayerController?.play();
-                                      } else {
-                                        showAlertDialog(context);
-                                      }
-                                    });
-                                  },
-                                  child: Container(
-                                    height: 45,
-                                    width: 45,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(50)),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(50),
-                                      child: CachedNetworkImage(
-                                        imageUrl: state
-                                                .list[index].user.avatar.isEmpty
-                                            ? 'https://cdn2.iconfinder.com/data/icons/circle-avatars-1/128/050_girl_avatar_profile_woman_suit_student_officer-512.png'
-                                            : '${RestUrl.profileUrl}${state.list[index].user.avatar}',
-                                        fit: BoxFit.cover,
-                                        placeholder: (a, b) => const Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 28,
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                await isLogined().then((value) async {
-                                  if (value) {
-                                    if (likeList.isEmpty) {
-                                      likeList
-                                          .add(state.list[index].id.toString());
-                                      state.list[index].copyWith(
-                                          likes: state.list[index].likes++);
-                                    } else {
-                                      if (likeList.contains(
-                                          state.list[index].id.toString())) {
-                                        likeList.remove(
-                                            state.list[index].id.toString());
-                                        state.list[index].copyWith(
-                                            likes: state.list[index].likes--);
-                                      } else {
-                                        likeList
-                                            .add(state.list[index].id.toString());
-                                        state.list[index].copyWith(
-                                            likes: state.list[index].likes++);
-                                      }
-                                    }
-                                    SharedPreferences pref =
-                                        await SharedPreferences.getInstance();
-                                    pref.setStringList('likeList', likeList);
-
-                                    BlocProvider.of<VideoBloc>(context).add(
-                                        AddRemoveLike(
-                                            isAdded: likeList.contains(state
-                                                    .list[index].id
-                                                    .toString())
-                                                ? 1
-                                                : 0,
-                                            videoId: state.list[index].id));
-                                    setState(() {});
-                                  } else {
-                                    showAlertDialog(context);
-                                  }
-                                });
-                              },
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 500),
-                                child: likeList
-                                    .contains(state.list[index].id.toString())
-                                    ? const Icon(
-                                  Icons.favorite,
-                                  key: ValueKey("like"),
-                                  color: Colors.red,
-                                  size: 28,
-                                )
-                                    : const Icon(
-                                  Icons.favorite_border,
-                                  key: ValueKey("unlike"),
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              state.list[index].likes.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(
-                              height: 18,
-                            ),
-                            GestureDetector(
-                                onTap: () async {
-                                  await isLogined().then((value) {
-                                    if (value) {
-                                      showComments(context, state.list[index].id);
-                                    } else {
-                                      showAlertDialog(context);
-                                    }
-                                  });
-                                },
-                                child: SvgPicture.asset(
-                                  'assets/comment.svg',
-                                  height: 26,
-                                  width: 26,
-                                )),
-                            Text(
-                              state.list[index].comments.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(
-                              height: 18,
-                            ),
-                            GestureDetector(
-                                onTap: () async {},
-                                child: SvgPicture.asset(
-                                  'assets/duet.svg',
-                                  height: 30,
-                                  width: 30,
-                                )),
-                            const SizedBox(
-                              height: 18,
-                            ),
-                            GestureDetector(
-                                onTap: () async {
-                                  Share.share('You need to watch this awesome video only on Thrill!!!');
-                                },
-                                child: SvgPicture.asset(
-                                  'assets/share.svg',
-                                  height: 22,
-                                  width: 22,
-                                ),
-                            ),
-                            const SizedBox(
-                              height: 25,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: SvgPicture.asset(
-                            'assets/shadow.svg',
-                            fit: BoxFit.fill,
-                            width: MediaQuery.of(context).size.width,
-                          )),
-                      Positioned(
-                        bottom: 10,
-                        left: 10,
-                        right: 10,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () async {
-                                          await isLogined().then((value) async {
-                                            if (value) {
-                                              reelsPlayerController?.pause();
-                                              await Navigator.pushNamed(context, "/viewProfile", arguments: {
-                                                "userModel": state.list[index].user, "getProfile": false
-                                              });
-                                              reelsPlayerController?.play();
-                                            } else {
-                                              showAlertDialog(context);
-                                            }
-                                          });
-                                        },
-                                        child: Text(
-                                          '@${state.list[index].user.username}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headline6!
-                                              .copyWith(color: Colors.white),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 5,
-                                      ),
-                                      state.list[index].user.is_verified
-                                              .contains('1')
-                                          ? SvgPicture.asset(
-                                              'assets/verified.svg',
-                                            )
-                                          : const SizedBox(width: 2),
-                                      Visibility(
-                                        visible: userModel?.id==state.list[index].user.id?false:true,
-                                        child: InkWell(
-                                          onTap: () async {
-                                            await isLogined().then((value) async {
-                                              if (value) {
-                                                if (followList.contains(state
-                                                    .list[index].id
-                                                    .toString())) {
-                                                  followList.remove(state
-                                                      .list[index].id
-                                                      .toString());
-                                                  int followers = int.parse(state
-                                                      .list[index].user.followers);
-                                                  followers--;
-                                                  state.list[index].user.followers =
-                                                      followers.toString();
-                                                  state.list[index].copyWith(
-                                                      user: state.list[index].user);
-                                                } else {
-                                                  followList.add(state
-                                                      .list[index].id
-                                                      .toString());
-                                                  int followers = int.parse(state
-                                                      .list[index].user.followers);
-                                                  followers++;
-                                                  state.list[index].user.followers =
-                                                      followers.toString();
-                                                  state.list[index].copyWith(
-                                                      user: state.list[index].user);
-                                                }
-                                                SharedPreferences pref =
-                                                await SharedPreferences
-                                                    .getInstance();
-                                                pref.setStringList(
-                                                    'followList', followList);
-
-                                                BlocProvider.of<VideoBloc>(context)
-                                                    .add(FollowUnfollow(
-                                                    action: followList.contains(
-                                                        state.list[index].id
-                                                            .toString())
-                                                        ? "follow"
-                                                        : "unfollow",
-                                                    publisherId: state
-                                                        .list[index].user.id));
-                                                setState(() {});
-                                              } else {
-                                                showAlertDialog(context);
-                                              }
-                                            });
-                                          },
-                                          child: Container(
-                                            margin: const EdgeInsets.only(left: 8),
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                BorderRadius.circular(5),
-                                                border: Border.all(
-                                                    color: Colors.white, width: 1)),
-                                            child:  Center(
-                                              child: Text(
-                                                followList.contains(state.list[index].id.toString())
-                                                    ? "Following" : "Follow",
-                                                style:
-                                                const TextStyle(color: Colors.white),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        state.list[index].description,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline6!
-                                            .copyWith(color: Colors.white),
-                                      ),
-
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-
-                                  Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      SvgPicture.asset('assets/music.svg'),
-                                      const SizedBox(
-                                        width: 5,
-                                      ),
-                                      Flexible(
-                                        child:
-                                          state.list[index].sound_name.isEmpty
-                                              ? "Original Sound".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
-                                              : "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap:() async {
-                                await isLogined().then((value) async {
-                                  if (value) {
-                                    if(state.list[index].sound.isNotEmpty){
-                                      reelsPlayerController?.pause();
-                                      await Navigator.pushNamed(context, "/soundDetails", arguments: {"sound": state.list[index].sound, "user": state.list[index].user.name});
-                                      reelsPlayerController?.play();
-                                    }
-                                  } else {
-                                    showAlertDialog(context);
-                                  }
-                                });
-                              },
-                                child: const RotatedImage("test.png")),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }),*/
               state.list.isEmpty?
               Container(
                   decoration: const BoxDecoration(
@@ -607,13 +197,13 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                   if (value) {
                                     try{
                                       progressDialogue(context);
-                                      var response = await RestApi.checkVideoReport(state.list[index].id,userModel!.id);
+                                      var response = await RestApi.checkVideoReport(state.list[index].id,userModel!.id!);
                                       var json = jsonDecode(response.body);
                                       closeDialogue(context);
                                       if(json['status']){
                                         showErrorToast(context, "You have already reported this video!");
                                       } else {
-                                        showReportDialog(state.list[index].id, state.list[index].user.username);
+                                        showReportDialog(state.list[index].id, state.list[index]!.user!.username!);
                                       }
                                     } catch(e){
                                       closeDialogue(context);
@@ -674,7 +264,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                 onTap: () async {
                                   await isLogined().then((value) async {
                                     if (value) {
-                                      if(userModel?.id==state.list[index].user.id){
+                                      if(userModel?.id==state.list[index].user!.id){
                                         reelsPlayerController?.pause();
                                         shouldAutoPlayReel = false;
                                         Navigator.pushReplacementNamed(context, '/', arguments: {'index' : 3});
@@ -704,9 +294,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     borderRadius: BorderRadius.circular(50),
                                     child: CachedNetworkImage(
                                       imageUrl: state
-                                          .list[index].user.avatar.isEmpty
+                                          .list[index].user!.avatar!.isEmpty
                                           ? 'https://cdn2.iconfinder.com/data/icons/circle-avatars-1/128/050_girl_avatar_profile_woman_suit_student_officer-512.png'
-                                          : '${RestUrl.profileUrl}${state.list[index].user.avatar}',
+                                          : '${RestUrl.profileUrl}${state.list[index].user!.avatar}',
                                       fit: BoxFit.cover,
                                       placeholder: (a, b) => const Center(
                                         child: CircularProgressIndicator(),
@@ -880,7 +470,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                       onTap: () async {
                                         await isLogined().then((value) async {
                                           if (value) {
-                                            if(userModel?.id==state.list[index].user.id){
+                                            if(userModel?.id==state.list[index].user!.id){
                                               reelsPlayerController?.pause();
                                               shouldAutoPlayReel = false;
                                               Navigator.pushReplacementNamed(context, '/', arguments: {'index':3});
@@ -902,7 +492,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                         });
                                       },
                                       child: Text(
-                                        '@${state.list[index].user.username}',
+                                        '@${state.list[index].user!.username}',
                                         style: Theme.of(context)
                                             .textTheme
                                             .headline6!
@@ -912,29 +502,29 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     const SizedBox(
                                       width: 5,
                                     ),
-                                    state.list[index].user.is_verified
+                                    state.list[index].user!.is_verified!
                                         .contains('1')
                                         ? SvgPicture.asset(
                                       'assets/verified.svg',
                                     )
                                         : const SizedBox(width: 2),
                                     Visibility(
-                                      visible: userModel?.id==state.list[index].user.id?false:true,
+                                      visible: userModel?.id==state.list[index].user!.id?false:true,
                                       child: InkWell(
                                         onTap: () async {
                                           await isLogined().then((value) async {
                                             if (value) {
-                                              if (followList.contains(state.list[index].user.id.toString())) {
-                                                followList.remove(state.list[index].user.id.toString());
-                                                int followers = int.parse(state.list[index].user.followers);
+                                              if (followList.contains(state.list[index].user!.id.toString())) {
+                                                followList.remove(state.list[index].user!.id.toString());
+                                                int followers = int.parse(state.list[index].user!.followers!);
                                                 followers--;
-                                                state.list[index].user.followers = followers.toString();
+                                                state.list[index].user!.followers = followers.toString();
                                                 state.list[index].copyWith(user: state.list[index].user);
                                               } else {
-                                                followList.add(state.list[index].user.id.toString());
-                                                int followers = int.parse(state.list[index].user.followers);
+                                                followList.add(state.list[index].user!.id.toString());
+                                                int followers = int.parse(state.list[index].user!.followers!);
                                                 followers++;
-                                                state.list[index].user.followers = followers.toString();
+                                                state.list[index].user!.followers = followers.toString();
                                                 state.list[index].copyWith(user: state.list[index].user);
                                               }
                                               SharedPreferences pref = await SharedPreferences.getInstance();
@@ -942,12 +532,12 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
 
                                               BlocProvider.of<VideoBloc>(context).add(FollowUnfollow(
                                                   action: followList.contains(
-                                                      state.list[index].user.id
+                                                      state.list[index].user!.id
                                                           .toString())
                                                       ? "follow"
                                                       : "unfollow",
                                                   publisherId: state
-                                                      .list[index].user.id));
+                                                      .list[index].user!.id!));
                                               setState(() {});
                                               BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
                                             } else {
@@ -965,7 +555,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                                   color: Colors.white, width: 1)),
                                           child:  Center(
                                             child: Text(
-                                              followList.contains(state.list[index].user.id.toString())
+                                              followList.contains(state.list[index].user!.id.toString())
                                                   ? "Following" : "Follow",
                                               style:
                                               const TextStyle(color: Colors.white),
@@ -1003,7 +593,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     Flexible(
                                       child:
                                       state.list[index].sound_owner.isEmpty
-                                          ? "Original Sound by @${state.list[index].user.username}".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
+                                          ? "Original Sound by @${state.list[index]!.user!.username}".marquee(textStyle:const TextStyle(color: Colors.white)).h2(context)
                                           : "${state.list[index].sound_name.isEmpty?"Original Sound":state.list[index].sound_name} by @${state.list[index].sound_owner}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                           //: "${state.list[index].sound_name} - @${state.list[index].sound_category_name}".marquee(textStyle: const TextStyle(color: Colors.white)).h2(context),
                                     ),
@@ -1019,12 +609,18 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     if(state.list[index].sound.isNotEmpty){
                                       reelsPlayerController?.pause();
                                       shouldAutoPlayReel = false;
-                                      await Navigator.pushNamed(context, "/soundDetails",
-                                          arguments: {
+                                      Get.to(SoundDetails(map: {
                                         "sound": state.list[index].sound,
-                                          "user": state.list[index].sound_owner.isEmpty?state.list[index].user.name :state.list[index].sound_owner,
-                                          "soundName": state.list[index].sound_name,
-                                          "title":state.list[index].sound_owner});
+                                        "user": state.list[index].sound_owner.isEmpty?state.list[index].user!.name :state.list[index].sound_owner,
+                                        "soundName": state.list[index].sound_name,
+                                        "title":state.list[index].sound_owner
+                                      },));
+                                      // await Navigator.pushNamed(context, "/soundDetails",
+                                      //     arguments: {
+                                      //   "sound": state.list[index].sound,
+                                      //     "user": state.list[index].sound_owner.isEmpty?state.list[index].user.name :state.list[index].sound_owner,
+                                      //     "soundName": state.list[index].sound_name,
+                                      //     "title":state.list[index].sound_owner});
                                       reelsPlayerController?.play();
                                       shouldAutoPlayReel = true;
                                     }
@@ -1151,28 +747,26 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
   }
 
   showComments(BuildContext context, int videoId, VideoModel vModel) async {
-    try {
-      progressDialogue(context);
-      var result = await RestApi.getCommentListOnVideo(videoId);
-      var json = jsonDecode(utf8.decode(result.bodyBytes));
-      closeDialogue(context);
-      if (json['status']) {
-        commentList.clear();
-        commentList =
-            List<Comments>.from(json['data'].map((i) => Comments.fromJson(i)))
-                .toList(growable: true);
-        showModalBottomSheet(
-            isScrollControlled: true,
-            context: context,
-            backgroundColor: Colors.white,
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30))),
-            builder: (BuildContext context) {
-              return StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                return Container(
+    var result = await controller.getComments(videoId);
+    // var json = jsonDecode(utf8.decode(result.bodyBytes));
+    //closeDialogue(context);
+    // commentList.clear();
+    // commentList = result.commentsData!;
+    showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30))),
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Obx(() => controller.isLoading.value?Container(
+                  height: 580,
+                  child: CircularProgressIndicator(),):
+                Container(
                   padding: MediaQuery.of(context).viewInsets,
                   height: 580,
                   child: Column(
@@ -1186,148 +780,151 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                             padding: const EdgeInsets.only(right: 30),
                             icon: Image.asset('assets/x.png')),
                       ),
-                      commentList.isEmpty
+                      controller.commentsModel!.commentsData!.isEmpty
                           ? const Flexible(
-                              child: Center(
-                              child: Text("No comments"),
-                            ))
+                          child: Center(
+                            child: Text("No comments"),
+                          ))
                           : Flexible(
-                              child: ListView.builder(
-                                  itemCount: commentList.length,
-                                  padding: const EdgeInsets.only(
-                                      left: 20, right: 20),
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 10),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            clipBehavior:
-                                                Clip.antiAliasWithSaveLayer,
-                                            height: 60,
-                                            width: 60,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: CachedNetworkImage(
-                                              fit: BoxFit.cover,
-                                              imageUrl: commentList[index]
-                                                      .avatar
-                                                      .isEmpty
-                                                  ? 'https://mir-s3-cdn-cf.behance.net/project_modules/disp/b3053232163929.567197ac6e6f5.png'
-                                                  : '${RestUrl.profileUrl}${commentList[index].avatar}',
-                                              placeholder: (a, b) =>
-                                                  const Center(
-                                                child:
-                                                    CircularProgressIndicator(),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Expanded(
-                                            child: RichText(
-                                                text: TextSpan(children: [
-                                              TextSpan(
-                                                  text:
-                                                      '${commentList[index].name}\n',
-                                                  style: const TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 17,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                              TextSpan(
-                                                  text: commentList[index]
-                                                      .comment,
-                                                  style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: Colors.grey.shade700))
-                                            ])),
-                                          ),
-                                          Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                onPressed: () async {
-                                                  if (likeComment.isEmpty) {
-                                                    likeComment.add(
-                                                        commentList[index]
-                                                            .id
-                                                            .toString());
-                                                    commentList[index]
-                                                        .comment_like_counter++;
-                                                  } else {
-                                                    if (likeComment.contains(
-                                                        commentList[index]
-                                                            .id
-                                                            .toString())) {
-                                                      likeComment.remove(
-                                                          commentList[index]
-                                                              .id
-                                                              .toString());
-                                                      if (commentList[index]
-                                                              .comment_like_counter >
-                                                          0) {
-                                                        commentList[index]
-                                                            .comment_like_counter--;
-                                                      }
-                                                    } else {
-                                                      likeComment.add(
-                                                          commentList[index]
-                                                              .id
-                                                              .toString());
-                                                      commentList[index]
-                                                          .comment_like_counter++;
-                                                    }
-                                                  }
-                                                  SharedPreferences pref =
-                                                      await SharedPreferences
-                                                          .getInstance();
-                                                  pref.setStringList(
-                                                      'commentList',
-                                                      likeComment);
-                                                  RestApi.commentLikeAndDislike(
-                                                      commentList[index].id,
-                                                      likeComment.contains(
-                                                              commentList[index]
-                                                                  .id
-                                                                  .toString())
-                                                          ? 1
-                                                          : 0);
-                                                  setState(() {});
-                                                },
-                                                constraints:
-                                                    const BoxConstraints(),
-                                                padding: EdgeInsets.zero,
-                                                color: Colors.grey,
-                                                icon: likeComment.contains(
-                                                        commentList[index]
-                                                            .id
-                                                            .toString())
-                                                    ? const Icon(
-                                                        Icons.favorite,
-                                                        color: Colors.red,
-                                                        size: 23,
-                                                      )
-                                                    : const Icon(
-                                                        Icons
-                                                            .favorite_border_outlined,
-                                                        color: Colors.grey,
-                                                        size: 23,
-                                                      ),
-                                              ),
-                                              Text(
-                                                  ' ${commentList[index].comment_like_counter}')
-                                            ],
-                                          )
-                                        ],
+                        child: ListView.builder(
+                            itemCount: controller.commentsModel!.commentsData!.length,
+                            padding: const EdgeInsets.only(
+                                left: 20, right: 20),
+                            itemBuilder:
+                                (BuildContext context, int index) {
+                              return Padding(
+                                padding:
+                                const EdgeInsets.only(bottom: 10),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      clipBehavior:
+                                      Clip.antiAliasWithSaveLayer,
+                                      height: 60,
+                                      width: 60,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
                                       ),
-                                    );
-                                  }),
-                            ),
+                                      child: CachedNetworkImage(
+                                        fit: BoxFit.cover,
+                                        imageUrl: controller.commentsModel!.commentsData![index]
+                                            .avatar!
+                                            .isEmpty
+                                            ? 'https://mir-s3-cdn-cf.behance.net/project_modules/disp/b3053232163929.567197ac6e6f5.png'
+                                            : '${RestUrl.profileUrl}${controller.commentsModel!.commentsData![index].avatar}',
+                                        placeholder: (a, b) =>
+                                        const Center(
+                                          child:
+                                          CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Expanded(
+                                      child: RichText(
+                                          text: TextSpan(children: [
+                                            TextSpan(
+                                                text:
+                                                '${controller.commentsModel!.commentsData![index].name}\n',
+                                                style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 17,
+                                                    fontWeight:
+                                                    FontWeight.bold)),
+                                            TextSpan(
+                                                text: controller.commentsModel!.commentsData![index]
+                                                    .comment,
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.grey.shade700))
+                                          ])),
+                                    ),
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () async {
+                                            if (likeComment.isEmpty) {
+                                              likeComment.add(
+                                                  controller.commentsModel!.commentsData![index]
+                                                      .id
+                                                      .toString());
+                                              controller.commentsModel!.commentsData![index]
+                                                  .commentLikeCounter =  controller.commentsModel!.commentsData![index]
+                                                  .commentLikeCounter! +1;
+                                            } else {
+                                              if (likeComment.contains(
+                                                  controller.commentsModel!.commentsData![index]
+                                                      .id
+                                                      .toString())) {
+                                                likeComment.remove(
+                                                    controller.commentsModel!.commentsData![index]
+                                                        .id
+                                                        .toString());
+                                                if (controller.commentsModel!.commentsData![index]
+                                                    .commentLikeCounter! >
+                                                    0) {
+                                                  controller.commentsModel!.commentsData![index]!
+                                                      .commentLikeCounter = controller.commentsModel!.commentsData![index]!
+                                                      .commentLikeCounter! -1;
+                                                }
+                                              } else {
+                                                likeComment.add(
+                                                    controller.commentsModel!.commentsData![index]
+                                                        .id
+                                                        .toString());
+                                                controller.commentsModel!.commentsData![index]
+                                                    .commentLikeCounter =   controller.commentsModel!.commentsData![index]
+                                                    .commentLikeCounter! + 1;
+                                              }
+                                            }
+                                            SharedPreferences pref =
+                                            await SharedPreferences
+                                                .getInstance();
+                                            pref.setStringList(
+                                                'commentList',
+                                                likeComment);
+                                            RestApi.commentLikeAndDislike(
+                                                controller.commentsModel!.commentsData![index].id!,
+                                                likeComment.contains(
+                                                    controller.commentsModel!.commentsData![index]
+                                                        .id
+                                                        .toString())
+                                                    ? 1
+                                                    : 0);
+                                            setState(() {});
+                                          },
+                                          constraints:
+                                          const BoxConstraints(),
+                                          padding: EdgeInsets.zero,
+                                          color: Colors.grey,
+                                          icon: likeComment.contains(
+                                              controller.commentsModel!.commentsData![index]
+                                                  .id
+                                                  .toString())
+                                              ? const Icon(
+                                            Icons.favorite,
+                                            color: Colors.red,
+                                            size: 23,
+                                          )
+                                              : const Icon(
+                                            Icons
+                                                .favorite_border_outlined,
+                                            color: Colors.grey,
+                                            size: 23,
+                                          ),
+                                        ),
+                                        Text(
+                                            ' ${controller.commentsModel!.commentsData![index].commentLikeCounter!}')
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              );
+                            }),
+                      ),
                       const SizedBox(
                         height: 50,
                       ),
@@ -1343,9 +940,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                               controller: msgCtr,
                               decoration: InputDecoration(
                                   contentPadding:
-                                      const EdgeInsets.only(left: 20),
+                                  const EdgeInsets.only(left: 20),
                                   hintStyle:
-                                      const TextStyle(color: Colors.grey),
+                                  const TextStyle(color: Colors.grey),
                                   hintText: leaveAComment,
                                   errorText: isError.isNotEmpty ? isError : ""),
                             ),
@@ -1359,24 +956,30 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                   isError = "";
                                   setState(() {});
                                   FocusScope.of(context).requestFocus(FocusNode());
-                                  progressDialogue(context);
+                                  //progressDialogue(context);
                                   var pref = await SharedPreferences.getInstance();
                                   var currentUser = pref.getString('currentUser');
                                   UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
-                                  var resultComment = await RestApi.postComment(videoId, current.id, msgCtr.text);
-                                  var json = jsonDecode(resultComment.body);
-                                  if(json['status']){
+                                  var resultComment = await controller.postComment(videoId, current.id.toString(), msgCtr.text.toString());
+                                  controller.getComments(videoId);
+                                  if(result.status!){
                                     try {
-                                      var jsonComment = jsonDecode(resultComment.body);
-                                      if (jsonComment['status']) {
-                                        Comments c = Comments(
-                                            jsonComment['data']['id'],
-                                            0,
-                                            current.avatar,
-                                            current.name,
-                                            msgCtr.text.toString(),
-                                            current.id);
-                                        commentList.add(c);
+                                      if (result.status!) {
+                                        CommentData? commentsData ;
+                                        commentsData!.id=  resultComment.data!.id;
+                                        commentsData!.comment = resultComment.data!.comment;
+                                        commentsData.userId = resultComment.data!.id!;
+                                        commentsData.avatar = "";
+                                        commentsData.commentLikeCounter = 0;
+                                        controller.commentsCounter.value = controller.commentsModel!.commentsData!.length;
+                                        // Comments c = Comments(
+                                        //     jsonComment['data']['id'],
+                                        //     0,
+                                        //     current.avatar,
+                                        //     current.name,
+                                        //     msgCtr.text.toString(),
+                                        //     current.id);
+                                        commentList.add(commentsData!);
                                         msgCtr.text = "";
 
                                         setState(() {vModel.comments+=1;});
@@ -1389,7 +992,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                                     }
                                   } else {
                                     closeDialogue(context);
-                                    showErrorToast(context, json['message'].toString());
+                                    showErrorToast(context, result.message.toString());
                                   }
                                 }
                               },
@@ -1399,16 +1002,11 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                       )
                     ],
                   ),
-                );
+                ));
+
               });
-            }).then((value) => setState((){}));
-      } else {
-        showErrorToast(context, json['message']);
-      }
-    } catch (e) {
-      closeDialogue(context);
-      showErrorToast(context, e.toString());
-    }
+        });
+
   }
 
   void loadLikes() async {
@@ -1662,7 +1260,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
                       ElevatedButton(
                           onPressed: dropDownValue=="Reason"?null:()async{
                             try{
-                              var response = await RestApi.reportVideo(videoId,userModel!.id, dropDownValue);
+                              var response = await RestApi.reportVideo(videoId,userModel!.id!, dropDownValue);
                               var json = jsonDecode(response.body);
                               closeDialogue(context);
                               if(json['status']){

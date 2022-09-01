@@ -76,7 +76,7 @@ dependencies:
   get: ^4.6.5
   better_player: ^0.0.83
   persistent_bottom_nav_bar: ^4.0.2
-
+  video_editor_sdk: ^2.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

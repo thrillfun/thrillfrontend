@@ -36,8 +36,6 @@ class AppRouter {
         return ResetPasswordScreen.route(phone: settings.arguments as String);
       case SettingAndPrivacy.routeName:
         return SettingAndPrivacy.route();
-      case ViewProfile.routeName:
-        return ViewProfile.route(map: settings.arguments as Map);
       case Profile.routeName:
         return Profile.route();
       case Record.routeName:
@@ -98,8 +96,8 @@ class AppRouter {
         return ChatScreen.route(settings.arguments as InboxModel);
       case OtpVerification.routeName:
         return OtpVerification.route(settings.arguments as String);
-      case FollowingAndFollowers.routeName:
-        return FollowingAndFollowers.route(settings.arguments as Map);
+      // case FollowingAndFollowers.routeName:
+      //   return FollowingAndFollowers.route(settings.arguments as Map,false);
       default:
         return _errorRoute();
     }

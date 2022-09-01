@@ -41,6 +41,7 @@ class _AddSoundState extends State<AddSound> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0.5,
+
         title: const Text(
           addSound,
           style: TextStyle(color: Colors.black),

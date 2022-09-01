@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:thrill/widgets/gradient_elevated_button.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -95,13 +97,22 @@ class _PostVideoState extends State<PostVideo> {
       },
       child: Scaffold(
         appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Color(0xFF2F8897),
+                    Color(0xff1F2A52),
+                    Color(0xff1F244E)]),
+            ),
+          ),
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
           centerTitle: true,
           title: const Text(
             post,
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.white),
           ),
           leading: IconButton(
               onPressed: () {
@@ -110,8 +121,8 @@ class _PostVideoState extends State<PostVideo> {
                 // Navigator.pop(context);
                 showCloseDialog();
               },
-              color: Colors.black,
-              icon: const Icon(Icons.arrow_back_ios)),
+              color: Colors.white,
+              icon: const Icon(Icons.arrow_back)),
         ),
         body: SingleChildScrollView(
           child: isLoading
@@ -520,7 +531,7 @@ class _PostVideoState extends State<PostVideo> {
                     //     const SizedBox(
                     //       width: 15,
                     //     ),
-                        ElevatedButton(
+                        GradientElevatedButton(
                             onPressed: () async {
                               try {
                                 FocusScope.of(context).requestFocus(FocusNode());
@@ -544,11 +555,7 @@ class _PostVideoState extends State<PostVideo> {
                                 showErrorToast(context, e.toString());
                               }
                             },
-                            style: ElevatedButton.styleFrom(
-                                primary: ColorManager.cyan,
-                                fixedSize: Size(getWidth(context) * .40, 50),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50))),
+
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -982,7 +989,7 @@ class _PostVideoState extends State<PostVideo> {
                 children: [
                   ElevatedButton(
                       onPressed: (){
-                        Navigator.pop(context);
+                        Get.back(closeOverlays: true);
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.red,
@@ -994,8 +1001,8 @@ class _PostVideoState extends State<PostVideo> {
                   const SizedBox(width: 15,),
                   ElevatedButton(
                       onPressed: (){
-                        Navigator.pop(context);
-                        Navigator.pop(context);
+                        Get.back();
+                        context.pop();
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.green,

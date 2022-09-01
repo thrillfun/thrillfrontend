@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_player/video_player.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -186,7 +188,12 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: ()async{
-        showCloseDialog();
+        if(_isRecordingInProgress){
+          showCloseDialog();
+        }
+        else{
+          Navigator.pop(context);
+        }
         return false;
       },
       child: Scaffold(
@@ -1029,6 +1036,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
               } else {
                 directory =
                     Directory('/storage/emulated/0/Download');
+
               }
             } catch (_) {}
             String fileFormat =
@@ -1154,7 +1162,9 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 children: [
                   ElevatedButton(
                       onPressed: (){
+                        Get.back(closeOverlays: true);
                         Navigator.pop(context);
+
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.red,
@@ -1169,7 +1179,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                         if(_videoFile?.existsSync()??false){
                           _videoFile?.deleteSync();
                         }
-                        Navigator.pop(context);
+                      Get.back(closeOverlays: true);
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(

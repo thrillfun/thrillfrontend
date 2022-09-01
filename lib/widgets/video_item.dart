@@ -54,7 +54,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     if (reelsPlayerController!=null) reelsPlayerController?.pause();
     reelsPlayerController?.dispose();
       reelsPlayerController = VideoPlayerController.network(
-          '${RestUrl.videoUrl}${widget.videoUrl}')
+          RestUrl.videoUrl+widget.videoUrl!)
         ..initialize().then((value) {
           if (reelsPlayerController!.value.isInitialized) {
             reelsPlayerController!.setPlaybackSpeed(widget.speed!.contains('x')?double.parse(widget.speed!.replaceAll('x', '')):double.parse(widget.speed!));
@@ -162,11 +162,8 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
               child: Center(
                   child: RichText(
                     textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        const WidgetSpan(child: CircularProgressIndicator()),
-                        TextSpan(text: '\n\nBuffering', style: Theme.of(context).textTheme.headline3!.copyWith(
-                          shadows: [const Shadow(color: Colors.white, offset: Offset(0,0), blurRadius: 30)]
-                        ))
+                      text: const TextSpan(children: [
+                        WidgetSpan(child: CircularProgressIndicator()),
                       ])
                   )
               ),

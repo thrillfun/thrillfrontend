@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:thrill/controller/data_controller.dart';
+import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:video_player/video_player.dart';
 
@@ -15,13 +16,13 @@ var isFollowing = '+ Follow'.obs;
 var checkNumber = '';
 
 class VideoApp extends StatefulWidget {
-  final String url, description, songName, songDescription, profileImage;
-  final int likes, comments, id;
-  final int pageIndex;
-  final int currentPageIndex;
-  final bool isPaused;
+  final String? url, description, songName, songDescription, profileImage;
+  final int? likes, comments, id;
+  final int?  pageIndex;
+  final int? currentPageIndex;
+  final bool? isPaused;
 
-  VideoApp(
+  VideoApp({
     this.url,
     this.description,
     this.songName,
@@ -33,6 +34,7 @@ class VideoApp extends StatefulWidget {
     this.pageIndex,
     this.currentPageIndex,
     this.isPaused,
+  }
   );
 
   @override
@@ -51,7 +53,7 @@ class _VideoItemState extends State<VideoApp> {
     textEditingController = TextEditingController();
     print(widget.url);
 
-    _controller = VideoPlayerController.network(RestUrl.videoUrl+widget.url)
+    _controller = VideoPlayerController.network(RestUrl.videoUrl+widget.url!)
       ..initialize
       ..setLooping(true).then((value) => initialized = true);
 
@@ -69,7 +71,7 @@ class _VideoItemState extends State<VideoApp> {
   @override
   Widget build(BuildContext context) {
     if (widget.pageIndex == widget.currentPageIndex &&
-        !widget.isPaused &&
+        !widget.isPaused! ==true &&
         initialized) {
       _controller?.play();
     } else {
@@ -155,8 +157,8 @@ class _VideoItemState extends State<VideoApp> {
                       Row(
                         children: [
                           Text(
-                            widget.description == 'null' ? '' : widget
-                                .description,
+                            widget.description! == 'null' ? '' : widget
+                                .description!,
                             style: const TextStyle(
                                 fontSize: 10,
                                 color: Colors.white,
@@ -184,7 +186,7 @@ class _VideoItemState extends State<VideoApp> {
                         height: 5,
                       ),
                       Text(
-                        widget.songName == 'null' ? '' : widget.songName,
+                        widget.songName! == 'null' ? '' : widget.songName!,
                         style: const TextStyle(
                             fontSize: 20,
                             color: Colors.white,
@@ -194,9 +196,9 @@ class _VideoItemState extends State<VideoApp> {
                         height: 5,
                       ),
                       Text(
-                        widget.songDescription == 'null'
+                        widget.songDescription! == 'null'
                             ? ''
-                            : widget.songDescription,
+                            : widget.songDescription!,
                         style: const TextStyle(
                             fontSize: 10,
                             color: Colors.white,
