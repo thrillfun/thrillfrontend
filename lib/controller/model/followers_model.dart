@@ -2,7 +2,7 @@ class FollowersModel {
   bool? status;
   bool? error;
   String? message;
-  List<Data>? data;
+  List<Followers>? data;
 
   FollowersModel({this.status, this.error, this.message, this.data});
 
@@ -11,9 +11,9 @@ class FollowersModel {
     error = json['error'];
     message = json['message'];
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <Followers>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(new Followers.fromJson(v));
       });
     }
   }
@@ -30,7 +30,7 @@ class FollowersModel {
   }
 }
 
-class Data {
+class Followers {
   int? id;
   String? name;
   String? username;
@@ -52,7 +52,7 @@ class Data {
   String? updatedAt;
   int? isVerified;
 
-  Data(
+  Followers(
       {this.id,
         this.name,
         this.username,
@@ -74,7 +74,7 @@ class Data {
         this.updatedAt,
         this.isVerified});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  Followers.fromJson(Map<String, dynamic> json) {
     id = json['id']??"";
     name = json['name']??"";
     username = json['username']??"";

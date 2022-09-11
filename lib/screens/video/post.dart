@@ -4,6 +4,7 @@ import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:thrill/screens/screen.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
@@ -27,13 +28,6 @@ class PostVideo extends StatefulWidget {
   State<PostVideo> createState() => _PostVideoState();
   final PostData data;
 
-  static const String routeName = '/postVideo';
-  static Route route({required PostData videoData}) {
-    return MaterialPageRoute(
-      settings: const RouteSettings(name: routeName),
-      builder: (context) => PostVideo(data: videoData),
-    );
-  }
 }
 
 class _PostVideoState extends State<PostVideo> {
@@ -792,7 +786,7 @@ class _PostVideoState extends State<PostVideo> {
           var json = jsonDecode(result.body);
           closeDialogue(context);
           if (json['status']) {
-            BlocProvider.of<VideoBloc>(context).add( const VideoLoading(selectedTabIndex: 1));
+          //  BlocProvider.of<VideoBloc>(context).add( const VideoLoading(selectedTabIndex: 1));
             showSuccessToast(context,
                 "Video has been posted successfully");
             await Future.delayed(const Duration(milliseconds: 200));
@@ -933,7 +927,9 @@ class _PostVideoState extends State<PostVideo> {
                             if(hashtagTextFieldController.text.trim().isNotEmpty){
                               selectedHashtags.add(hashtagTextFieldController.text);
                             }
-                            Navigator.pop(context);
+
+                    //        Navigator.pop(context);
+                            Get.back(closeOverlays: true);
                           }, icon: Icon(hashtagTextFieldController.text.isEmpty?Icons.close:Icons.check))
                     ],
                   ),
@@ -946,7 +942,8 @@ class _PostVideoState extends State<PostVideo> {
                             title: Text(suggestedHashtags[index].name),
                             trailing: IconButton(onPressed: (){
                               selectedHashtags.add(suggestedHashtags[index].name);
-                              Navigator.pop(context);
+                              Get.back(closeOverlays: true);
+                        //      Navigator.pop(context);
                             }, icon: const Icon(Icons.check)),
                           );
                         }
@@ -1001,9 +998,8 @@ class _PostVideoState extends State<PostVideo> {
                   const SizedBox(width: 15,),
                   ElevatedButton(
                       onPressed: (){
-                        Get.back();
-                        context.pop();
-                      },
+                        Navigator.pop(context);
+                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.green,
                           fixedSize: Size(getWidth(context)*.26, 40),

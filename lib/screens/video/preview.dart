@@ -6,6 +6,7 @@ import 'package:ffmpeg_kit_flutter_full_gpl/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/screens/screen.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
 import 'package:video_player/video_player.dart';
 import '../../common/strings.dart';
@@ -19,13 +20,7 @@ class Preview extends StatefulWidget {
 
   @override
   State<Preview> createState() => _PreviewState();
-  static const String routeName = '/preview';
-  static Route route({required PostData videoData}) {
-    return MaterialPageRoute(
-      settings: const RouteSettings(name: routeName),
-      builder: (context) => Preview(data: videoData),
-    );
-  }
+
 }
 
 class _PreviewState extends State<Preview> {
@@ -219,7 +214,8 @@ class _PreviewState extends State<Preview> {
                   );
                   setState(()=>isVControllerInitialized=false);
                   videoPlayerController?.dispose();
-                  await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
+                   Get.to(PostVideo(data: postDate));
+                  //await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
                   initPreview();
                 },
 

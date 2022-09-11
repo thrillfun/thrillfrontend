@@ -1,6 +1,6 @@
 class CommentsPostResponse {
   bool? status;
-  Data? data;
+  CommentsResponse? data;
   String? message;
   bool? error;
 
@@ -8,7 +8,7 @@ class CommentsPostResponse {
 
   CommentsPostResponse.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? new CommentsResponse.fromJson(json['data']) : null;
     message = json['message'];
     error = json['error'];
   }
@@ -25,7 +25,7 @@ class CommentsPostResponse {
   }
 }
 
-class Data {
+class CommentsResponse {
   String? videoId;
   String? commentBy;
   String? comment;
@@ -33,7 +33,7 @@ class Data {
   String? createdAt;
   int? id;
 
-  Data(
+  CommentsResponse(
       {this.videoId,
         this.commentBy,
         this.comment,
@@ -41,7 +41,7 @@ class Data {
         this.createdAt,
         this.id});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  CommentsResponse.fromJson(Map<String, dynamic> json) {
     videoId = json['video_id'];
     commentBy = json['comment_by'];
     comment = json['comment'];

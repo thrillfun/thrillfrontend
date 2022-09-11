@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/screens/screen.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_player/video_player.dart';
 import 'package:camera/camera.dart';
@@ -190,9 +191,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
       onWillPop: ()async{
         if(_isRecordingInProgress){
           showCloseDialog();
-        }
-        else{
-          Navigator.pop(context);
         }
         return false;
       },
@@ -729,7 +727,8 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                                   isUploadedFromGallery: true,
                                   trimStart: 0, trimEnd: 0,
                               );
-                              Navigator.pushNamed(context, "/trim", arguments: m);
+                              Get.to(Editing(data: m));
+                              //Navigator.pushNamed(context, "/trim", arguments: m);
                             } else {
                               showErrorToast(context, "Max File Size is 500 MB");
                             }
@@ -1162,8 +1161,8 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                 children: [
                   ElevatedButton(
                       onPressed: (){
-                        Get.back(closeOverlays: true);
-                        Navigator.pop(context);
+                       Get.back(closeOverlays: true);
+                       Navigator.pop(context);
 
                       },
                       style: ElevatedButton.styleFrom(
@@ -1180,7 +1179,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                           _videoFile?.deleteSync();
                         }
                       Get.back(closeOverlays: true);
-                        Navigator.pop(context);
+                       Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                           primary: Colors.green,

@@ -7,13 +7,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/utils.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:iconly/iconly.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/strings.dart';
+import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login.dart';
 import 'package:thrill/screens/home/discover.dart';
+import 'package:thrill/screens/home/discover_getx.dart';
+import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
+import 'package:thrill/screens/spin/spin_the_wheel.dart';
+import 'package:thrill/widgets/fab_items.dart';
 import 'package:thrill/widgets/video_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -50,10 +56,12 @@ class BottomNavigation extends StatefulWidget {
 }
 
 class _BottomNavigationState extends State<BottomNavigation> {
+  var discoverController = Get.find<DiscoverController>();
+
   int selectedIndex = 0;
   late List screens = [
-    Home(vModel: widget.mapData?['videoModel']),
-    const Discover(),
+    const HomeGetx(),
+    DiscoverGetx(),
     const Notifications(),
     const Profile(),
   ];
@@ -85,32 +93,60 @@ class _BottomNavigationState extends State<BottomNavigation> {
         }
       },
       child: Scaffold(
-          bottomNavigationBar: GlassContainer(
-            color: Colors.white,
-            blur: 15,
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2F8897),
-                Color(0xff1F2A52),
-                Color(0xff1F244E)
-              ],
+          extendBody: true,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: FloatingActionButton(
+            child: Image.asset(
+              'assets/spin.png',
+              //scale: 1.4,
+              fit: BoxFit.cover,
             ),
-            //--code to remove border
-            border: Border.fromBorderSide(BorderSide.none),
-            shadowStrength: 15,
-            shape: BoxShape.rectangle,
-            borderRadius: BorderRadius.circular(0),
-            shadowColor: Colors.white.withOpacity(0.2),
-            child: myDrawer(),), body: screens[selectedIndex]),
+            onPressed: () => Get.to(SpinTheWheel()),
+          ),
+          bottomNavigationBar: myDrawer2(),
+          body: screens[selectedIndex]),
     );
+  }
+
+  myDrawer2() {
+    return FABBottomAppBar(
+      backgroundColor: Colors.black.withOpacity(0.4),
+      color: Colors.white,
+      selectedColor: Colors.red,
+      notchedShape: const CircularNotchedRectangle(),
+      onTabSelected: _selectedTab,
+      items: [
+        FABBottomAppBarItem(iconData: IconlyLight.home, text: 'Home'),
+        FABBottomAppBarItem(iconData: IconlyLight.discovery, text: 'Discover'),
+        FABBottomAppBarItem(
+            iconData: IconlyLight.notification, text: 'Notification'),
+        FABBottomAppBarItem(iconData: IconlyLight.profile, text: 'Profile'),
+      ],
+    );
+  }
+
+  void _selectedTab(int index) async {
+    if (index == 1) {
+      discoverController.getTopHashTags();
+    }
+    if (index >= 0) {
+      await isLogined().then((value) {
+        if (value) {
+          setState(() {
+            selectedIndex = index;
+          });
+        } else {
+          showAlertDialog(context);
+        }
+      });
+    }
   }
 
   myDrawer() {
     return Container(
+      color: Colors.black,
       height: 65,
-      padding: const EdgeInsets.only(top: 7),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -292,33 +328,48 @@ class _BottomNavigationState extends State<BottomNavigation> {
   }
 
   showAlertDialog(BuildContext context) {
-    Widget continueButton = TextButton(
-      child: const Text("OK"),
-      onPressed: () async {
-        // Get.back();
-        // Get.to(LoginScreen());
-        Navigator.pop(context);
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-      },
-    );
-    Widget cancelButton = TextButton(
-      child: const Text("CANCEL"),
-      onPressed: () async {
-        Get.back();
+    Get.defaultDialog(
+        title: 'Login',
+        middleText: 'Please Login to your account',
+        confirm: TextButton(
+            onPressed: () {
+              Get.back(closeOverlays: true);
             },
-    );
-    AlertDialog alert = AlertDialog(
-      title: const Text("Login"),
-      content: const Text("Please login your account."),
-      actions: [continueButton, cancelButton],
-    );
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
+            child: Text('Cancel')),
+        cancel: TextButton(
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/login', (route) => false);
+              Get.back(closeOverlays: true);
+            },
+            child: Text('Ok')));
+    // Widget continueButton = TextButton(
+    //   child: const Text("OK"),
+    //   onPressed: () async {
+    //     // Get.back();
+    //     // Get.to(LoginScreen());
+    //     Navigator.pop(context);
+    //     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    //   },
+    // );
+    // Widget cancelButton = TextButton(
+    //   child: const Text("CANCEL"),
+    //   onPressed: () async {
+    //     Get.back();
+    //         },
+    // );
+    // AlertDialog alert = AlertDialog(
+    //   title: const Text("Login"),
+    //   content: const Text("Please login your account."),
+    //   actions: [continueButton, cancelButton],
+    // );
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (BuildContext context) {
+    //     return alert;
+    //   },
+    // );
   }
 
   Future<bool> isLogined() async {
@@ -396,7 +447,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                             right: -10,
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.pop(navigatorKey.currentContext!);
+                                Get.back(closeOverlays: true);
                               },
                               child: VxCircle(
                                 radius: 30,
@@ -447,7 +498,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                         children: [
                           ElevatedButton(
                               onPressed: () {
-                                Navigator.pop(context);
+                                Get.back(closeOverlays: true);
                               },
                               style: ElevatedButton.styleFrom(
                                   primary: Colors.red,

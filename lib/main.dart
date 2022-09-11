@@ -28,14 +28,13 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
   MobileAds.instance.initialize();
-  if(Platform.isIOS){
+  if (Platform.isIOS) {
     await Firebase.initializeApp(
         options: const FirebaseOptions(
             projectId: 'algebraic-envoy-350105',
             apiKey: 'AIzaSyCn2oXiqua7pqQ1mVz6HRubs7MQOzlBev0',
             messagingSenderId: '882291140458',
-            appId: '1:882291140458:ios:876fc96cea6013bf3e6713'
-        ));
+            appId: '1:882291140458:ios:876fc96cea6013bf3e6713'));
   } else {
     await Firebase.initializeApp();
   }
@@ -46,25 +45,24 @@ void main() async {
   } on CameraException catch (_) {}
   FirebaseMessaging.onMessage.listen((event) {
     CustomNotification.showNormal(
-        title: event.notification?.title??"",
-        body: event.notification?.body??""
-    );
+        title: event.notification?.title ?? "",
+        body: event.notification?.body ?? "");
   });
   getTempDirectory();
   runApp(GetMaterialApp(
     initialBinding: DataBindings(),
-    home: const MyApp(),));
+    home: const MyApp(),
+  ));
 }
 
-class MyApp extends StatefulWidget{
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
-
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -79,20 +77,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch(state){
+    switch (state) {
       case AppLifecycleState.resumed:
         break;
       case AppLifecycleState.inactive:
         break;
       case AppLifecycleState.paused:
-        try{
+        try {
           reelsPlayerController?.pause();
-        }catch(_){}
+        } catch (_) {}
         break;
       case AppLifecycleState.detached:
         break;
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +106,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
           if (!currentFocus.hasPrimaryFocus &&
               currentFocus.focusedChild != null) {
             FocusManager.instance.primaryFocus?.unfocus();
-          }},
+          }
+        },
         child: MaterialApp(
           title: 'Thrill',
           navigatorKey: navigatorKey,

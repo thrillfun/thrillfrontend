@@ -53,5 +53,7 @@
 	<false/>
 	<key>aps-environment</key>
 	<string>development</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 </dict>
 </plist>

@@ -8,9 +8,13 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/core.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
+import 'package:thrill/screens/sound/new_song.dart';
+import 'package:thrill/screens/video/preview.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
+import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
+
 import 'package:video_player/video_player.dart';
 import '../../models/add_sound_model.dart';
 import '../../models/post_data.dart';
@@ -20,13 +24,6 @@ class Editing extends StatefulWidget {
   const Editing({Key? key, required this.data}) : super(key: key);
   final PostData data;
 
-  static const String routeName = '/trim';
-  static Route route({required PostData videoData}) {
-    return MaterialPageRoute(
-      settings: const RouteSettings(name: routeName),
-      builder: (context) => Editing(data: videoData),
-    );
-  }
 
   @override
   State<Editing> createState() => _EditingState();
@@ -250,7 +247,7 @@ class _EditingState extends State<Editing> {
               left: 0, right: 0,
               child: TextButton(
                   onPressed: () async {
-                    await Navigator.pushNamed(context, "/newSong").then((value) {
+                    await Get.to(NewSong())!.then((value){
                       if(value!=null){
                         AddSoundModel? addSoundModelTemp = value as AddSoundModel?;
                         setState((){
@@ -258,6 +255,9 @@ class _EditingState extends State<Editing> {
                         });
                       }
                     });
+                    // await Navigator.pushNamed(context, "/newSong").then((value) {
+                    //
+                    // });
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -323,7 +323,9 @@ class _EditingState extends State<Editing> {
 
     videoPlayerController.dispose();
     setState(()=>isVidInit=false);
-    await VESDK.openEditor(Video(widget.data.filePath)).then((value) async {
+    
+    await VESDK.openEditor(
+      Video(widget.data.filePath),configuration: setConfig()).then((value) async {
       PostData newPostData = PostData(
         speed: widget.data.speed,
         filePath: value!.video,
@@ -335,7 +337,8 @@ class _EditingState extends State<Editing> {
         isDefaultSound: radioGroupValue==0?true:false,
         isUploadedFromGallery: widget.data.isUploadedFromGallery,
       );
-      await Navigator.pushNamed(context, "/preview", arguments: newPostData);
+      await Get.to(Preview(data: newPostData));
+      //await Navigator.pushNamed(context, "/preview", arguments: newPostData);
 
     });
     videoPlayerController =
@@ -351,6 +354,7 @@ class _EditingState extends State<Editing> {
         setState(() {});
       });
   }
+
   String getStartDuration(){
     Duration duration = Duration(seconds: rangeController.start.toInt());
     String string = '';
@@ -429,5 +433,21 @@ class _EditingState extends State<Editing> {
       ),
     )
     );
+  }
+
+  imgly.Configuration setConfig(
+      ) {
+   
+
+
+    var stickerList = [
+      imgly.StickerCategory.giphy(
+          imgly.GiphyStickerProvider("Q1ltQCCxdfmLcaL6SpUhEo5OW6cBP6p0"))
+    ];
+    final configuration = imgly.Configuration(
+        sticker: imgly.StickerOptions(
+            personalStickers: true, categories: stickerList),
+       );
+    return configuration;
   }
 }

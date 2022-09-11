@@ -7,7 +7,7 @@ export 'setting/setting_and_privacy.dart';
 export 'auth/reset_pass.dart';
 export 'auth/forgot_pass.dart';
 export 'profile/edit_profile.dart';
-export 'profile/profile.dart';
+// export 'profile/profile.dart';
 export 'video/record.dart';
 export 'video/post.dart';
 export 'spin/spin_the_wheel.dart';

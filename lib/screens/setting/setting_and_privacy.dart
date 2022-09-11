@@ -4,10 +4,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/models/user.dart';
+import 'package:thrill/screens/privacy_policy.dart';
+import 'package:thrill/screens/screen.dart';
+import 'package:thrill/screens/terms_of_service.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:share_plus/share_plus.dart';
@@ -20,16 +24,6 @@ class SettingAndPrivacy extends StatefulWidget {
 
   @override
   State<SettingAndPrivacy> createState() => _SettingAndPrivacyState();
-
-  static const String routeName = '/setting';
-
-  static Route route() {
-    return MaterialPageRoute(
-      settings: const RouteSettings(name: routeName),
-      builder: (context) =>  const SettingAndPrivacy(),
-    );
-  }
-
 }
 
 class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
@@ -85,19 +79,22 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                   ),
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/manageAccount');
+                        Get.to(ManageAccount());
+                //        Navigator.pushNamed(context, '/manageAccount');
                       },
                       child: mainTile(Icons.account_box_outlined, manageAccount)
                   ),
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/inbox');
+                        Get.to(Inbox());
+                      //  Navigator.pushNamed(context, '/inbox');
                       },
                       child: mainTile(Icons.all_inbox, inbox)
                   ),
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/privacy');
+                        Get.to(Privacy());
+                      //  Navigator.pushNamed(context, '/privacy');
                       },
                       child: mainTile(Icons.lock_outline_rounded, privacy)
                   ),
@@ -124,13 +121,15 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
               ),*/
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/wallet');
+                        Get.to(Wallet());
+                      //  Navigator.pushNamed(context, '/wallet');
                       },
                       child: mainTile(Icons.account_balance_wallet_outlined, wallet)
                   ),
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/qrcode');
+                        Get.to(QrCode());
+                      //  Navigator.pushNamed(context, '/qrcode');
                       },
                       child: mainTile(Icons.qr_code, qrCode)
                   ),
@@ -150,7 +149,8 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                   ),
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/pushNotification');
+                        Get.to(PushNotification());
+                      //  Navigator.pushNamed(context, '/pushNotification');
                       },
                       child: mainTile(Icons.notifications_none_outlined, pushNotification)
                   ),
@@ -211,19 +211,22 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                   ),
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/termsOfService');
+                        Get.to(TermsOfService());
+                        //Navigator.pushNamed(context, '/termsOfService');
                       },
                       child: mainTile(Icons.library_books_outlined, termsOfService)
                   ),
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/privacyPolicy');
+                        Get.to(PrivacyPolicy());
+                        //Navigator.pushNamed(context, '/privacyPolicy');
                       },
                       child: mainTile(Icons.library_books_outlined, privacyPolicy)
                   ),
                   GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/customerSupport');
+                        Get.to(CustomerSupport());
+                        //Navigator.pushNamed(context, '/customerSupport');
                       },
                       child: mainTile(Icons.chat_outlined, technicalSupport)
                   ),
@@ -273,7 +276,8 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                     children: [
                                       ElevatedButton(
                                           onPressed: (){
-                                            Navigator.pop(context);
+                                            Get.back(closeOverlays: true);
+                                       //     Navigator.pop(context);
                                           },
                                           style: ElevatedButton.styleFrom(
                                               primary: Colors.red,
@@ -291,7 +295,8 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                             GoogleSignIn googleSignIn = GoogleSignIn();
                                             await googleSignIn.signOut();
                                             await FacebookAuth.instance.logOut();
-                                            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
+                                            Get.off(LoginScreen());
+                                           // Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
                                           },
                                           style: ElevatedButton.styleFrom(
                                               primary: Colors.green,

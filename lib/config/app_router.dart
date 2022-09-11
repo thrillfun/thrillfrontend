@@ -34,14 +34,9 @@ class AppRouter {
         return ForgotPasswordScreen.route();
       case ResetPasswordScreen.routeName:
         return ResetPasswordScreen.route(phone: settings.arguments as String);
-      case SettingAndPrivacy.routeName:
-        return SettingAndPrivacy.route();
-      case Profile.routeName:
-        return Profile.route();
+
       case Record.routeName:
         return Record.route(soundMap_: settings.arguments as Map?);
-      case PostVideo.routeName:
-        return PostVideo.route(videoData: settings.arguments as PostData);
       case SpinTheWheel.routeName:
         return SpinTheWheel.route();
       case EarnSpins.routeName:
@@ -80,10 +75,6 @@ class AppRouter {
         return RequestVerification.route();
       case PaymentRequest.routeName:
         return PaymentRequest.route(settings.arguments as List<WalletBalance>);
-      case Editing.routeName:
-        return Editing.route(videoData: settings.arguments as PostData);
-      case Preview.routeName:
-        return Preview.route(videoData: settings.arguments as PostData);
       case SoundDetails.routeName:
         return SoundDetails.route(map_: settings.arguments as Map);
       case TermsOfService.routeName:

@@ -3,11 +3,21 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/carbon.dart';
+import 'package:iconify_flutter/icons/octicon.dart';
+import 'package:iconify_flutter/icons/zondicons.dart';
+import 'package:iconly/iconly.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/controller/model/own_videos_model.dart';
+import 'package:thrill/controller/model/user_video_model.dart';
+import 'package:thrill/controller/model/video_model_controller.dart';
+import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/screens/following_and_followers.dart';
+import 'package:thrill/screens/screen.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../blocs/profile/profile_bloc.dart';
@@ -19,22 +29,13 @@ import '../../rest/rest_url.dart';
 import '../../widgets/video_item.dart';
 import 'package:get/get.dart';
 
-
+var videosController = Get.find<VideosController>();
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
 
   @override
   State<Profile> createState() => _ProfileState();
-
-  static const String routeName = '/profile';
-
-  static Route route() {
-    return MaterialPageRoute(
-      settings: const RouteSettings(name: routeName),
-      builder: (context) => const Profile(),
-    );
-  }
 }
 
 class _ProfileState extends State<Profile> {
@@ -51,12 +52,14 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (state is ProfileLoading) {
           } else if (state is ProfileLoaded) {}
         },
-        child: SafeArea(
+        child: Container(
+          padding: EdgeInsets.only(top: 30),
           child:
               BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
             if (state is ProfileLoaded) {
@@ -67,50 +70,55 @@ class _ProfileState extends State<Profile> {
                       alignment: Alignment.centerRight,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children:
-                      [IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.arrow_back)),IconButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, "/setting");
-                          },
-                          icon: const Icon(Icons.settings))],),),
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                Get.back(closeOverlays: true);
+                              },
+                              icon: const Icon(Icons.arrow_back)),
+                          IconButton(
+                              onPressed: () {
+                                Get.to(SettingAndPrivacy());
+                                //       Navigator.pushNamed(context, "/setting");
+                              },
+                              icon: const Iconify(Carbon.settings))
+                        ],
+                      ),
+                    ),
                     const SizedBox(
                       height: 10,
                     ),
                     Column(
                       children: [
                         Container(
-                          margin: const EdgeInsets.only(bottom: 10),
+                            margin: const EdgeInsets.only(bottom: 10),
                             padding: const EdgeInsets.all(2),
-                            height: 130,
-                            width: 130,
+                            height: 100,
+                            width: 100,
                             decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                     color: ColorManager.spinColorDivider)),
                             child: state.userModel.avatar.isNotEmpty
                                 ? ClipOval(
-                              child: CachedNetworkImage(
-                                fit: BoxFit.cover,
-                                imageUrl:
-                                '${RestUrl.profileUrl}${state.userModel.avatar}',
-                                placeholder: (a, b) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                            )
+                                    child: CachedNetworkImage(
+                                      fit: BoxFit.cover,
+                                      imageUrl:
+                                          '${RestUrl.profileUrl}${state.userModel.avatar}',
+                                      placeholder: (a, b) => const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  )
                                 : Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: SvgPicture.asset(
-                                'assets/profile.svg',
-                                width: 10,
-                                height: 10,
-                                fit: BoxFit.contain,
-                              ),
-                            )),
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: SvgPicture.asset(
+                                      'assets/profile.svg',
+                                      width: 10,
+                                      height: 10,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  )),
                         // Expanded(
                         //   child: Column(
                         //     mainAxisSize: MainAxisSize.min,
@@ -137,25 +145,24 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                     Container(
-                      margin: EdgeInsets.only(bottom: 20,top: 5),
-                      child:   Text(state.userModel.username,style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),),
+                      margin: const EdgeInsets.only(bottom: 20, top: 5),
+                      child: Text(
+                        "@" + state.userModel.username,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment:
-                      MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
                             onTap: () {
-                              Get.to(FollowingAndFollowers(map: {
-                                'id': state.userModel.id,
-                                'index': 1
-                              }, isMyProfile: true));
-                              // Navigator.pushNamed(
-                              //     context, "/followingAndFollowers",
-                              //     arguments: {
-                              //       'id': state.userModel.id,
-                              //       'index': 1
-                              //     });
+                              usersController.userId.value = state.userModel.id;
+
+                              usersController.isMyProfile.value = true;
+                              selectedTabIndex.value = 1;
+                              Get.to(FollowingAndFollowers());
                             },
                             child: Column(
                               children: [
@@ -164,27 +171,26 @@ class _ProfileState extends State<Profile> {
                                     style: const TextStyle(
                                         color: Colors.black,
                                         fontSize: 16,
-                                        fontWeight:
-                                        FontWeight.bold)),
+                                        fontWeight: FontWeight.bold)),
                                 const Text(following,
                                     style: TextStyle(
                                         color: Colors.grey,
                                         fontSize: 12,
-                                        fontWeight:
-                                        FontWeight.bold))
+                                        fontWeight: FontWeight.bold))
                               ],
                             )),
                         Container(
-                          height: 20,
+                          margin: EdgeInsets.only(left: 15, right: 15),
+                          height: 40,
                           width: 1,
                           color: Colors.grey.shade300,
                         ),
                         GestureDetector(
                             onTap: () {
-                              Get.to(FollowingAndFollowers(map: {
-                                'id': state.userModel.id,
-                                'index': 1
-                              }, isMyProfile: true));
+                              usersController.userId.value = state.userModel.id;
+                              usersController.isMyProfile.value = true;
+                              selectedTabIndex.value = 0;
+                              Get.to(FollowingAndFollowers());
                             },
                             child: Column(
                               children: [
@@ -193,18 +199,17 @@ class _ProfileState extends State<Profile> {
                                     style: const TextStyle(
                                         color: Colors.black,
                                         fontSize: 16,
-                                        fontWeight:
-                                        FontWeight.bold)),
+                                        fontWeight: FontWeight.bold)),
                                 const Text(followers,
                                     style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey,
-                                        fontWeight:
-                                        FontWeight.bold))
+                                        fontWeight: FontWeight.bold))
                               ],
                             )),
                         Container(
-                          height: 20,
+                          margin: EdgeInsets.only(left: 15, right: 15),
+                          height: 40,
                           width: 1,
                           color: Colors.grey.shade300,
                         ),
@@ -256,31 +261,37 @@ class _ProfileState extends State<Profile> {
                       height: 10,
                     ),
 
-                   Container(
-                     margin: EdgeInsets.only(left: 10),
-                     alignment: Alignment.centerLeft,
-                     width: MediaQuery.of(context).size.width,
-                       child:  Row(children: [
-                         Icon(Icons.link),
-                         SizedBox(width: 5,),
-                         InkWell(
-                         onTap: (){
-                           Uri openInBrowser = Uri(
-                             scheme: 'https',
-                             path:
-                             "${state.userModel.website_url}",
-                           );
-                           launchUrl(openInBrowser,
-                               mode: LaunchMode.externalApplication);
-                         },
-                         child: Text(
-                           state.userModel.website_url,
-                           maxLines: 3,
-                           textAlign: TextAlign.start,
-                           overflow: TextOverflow.ellipsis,
-                           style: TextStyle(fontSize: 15,color: Colors.blue.shade300),
-                         ),
-                       )],),),
+                    Container(
+                      margin: EdgeInsets.only(left: 10),
+                      alignment: Alignment.centerLeft,
+                      width: MediaQuery.of(context).size.width,
+                      child: Row(
+                        children: [
+                          Icon(Icons.link),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Uri openInBrowser = Uri(
+                                scheme: 'https',
+                                path: "${state.userModel.website_url}",
+                              );
+                              launchUrl(openInBrowser,
+                                  mode: LaunchMode.externalApplication);
+                            },
+                            child: Text(
+                              state.userModel.website_url,
+                              maxLines: 3,
+                              textAlign: TextAlign.start,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 15, color: Colors.blue.shade300),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
 
                     // Container(
                     //   width: MediaQuery.of(context).size.width,
@@ -450,139 +461,140 @@ class _ProfileState extends State<Profile> {
                       height: 10,
                     ),
                     Container(
-                      margin: EdgeInsets.only(left: 10, right: 10),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.pushNamed(context, '/editProfile',
-                                        arguments: state.userModel)
-                                    .then((value) async {
-                                  var pref =
-                                      await SharedPreferences.getInstance();
-                                  var currentUser =
-                                      pref.getString('currentUser');
-                                  UserModel current = UserModel.fromJson(
-                                      jsonDecode(currentUser!));
-                                  state.userModel.copyWith(
-                                      username: state.userModel.username =
-                                          current.username);
-                                  state.userModel.copyWith(
-                                      first_name: state.userModel.first_name =
-                                          current.first_name);
-                                  state.userModel.copyWith(
-                                      last_name: state.userModel.last_name =
-                                          current.last_name);
-                                  state.userModel.copyWith(
-                                      gender: state.userModel.gender =
-                                          current.gender);
-                                  state.userModel.copyWith(
-                                      website_url: state.userModel.website_url =
-                                          current.website_url);
-                                  state.userModel.copyWith(
-                                      bio: state.userModel.bio = current.bio);
-                                  state.userModel.copyWith(
-                                      youtube: state.userModel.youtube =
-                                          current.youtube);
-                                  state.userModel.copyWith(
-                                      facebook: state.userModel.facebook =
-                                          current.facebook);
-                                  state.userModel.copyWith(
-                                      instagram: state.userModel.instagram =
-                                          current.instagram);
-                                  state.userModel.copyWith(
-                                      twitter: state.userModel.twitter =
-                                          current.twitter);
-                                  state.userModel.copyWith(
-                                      avatar: state.userModel.avatar =
-                                          current.avatar);
-                                  state.userModel.copyWith(
-                                      name: state.userModel.name =
-                                          current.name);
-                                  setState(() {});
-                                });
-                              },
-                              child: Material(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(5),
-                                elevation: 10,
+                          Column(
+                            children: [
+                              ClipOval(
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pushNamed(context, '/editProfile',
+                                            arguments: state.userModel)
+                                        .then((value) async {
+                                      var pref =
+                                          await SharedPreferences.getInstance();
+                                      var currentUser =
+                                          pref.getString('currentUser');
+                                      UserModel current = UserModel.fromJson(
+                                          jsonDecode(currentUser!));
+                                      state.userModel.copyWith(
+                                          username: state.userModel.username =
+                                              current.username);
+                                      state.userModel.copyWith(
+                                          first_name: state.userModel
+                                              .first_name = current.first_name);
+                                      state.userModel.copyWith(
+                                          last_name: state.userModel.last_name =
+                                              current.last_name);
+                                      state.userModel.copyWith(
+                                          gender: state.userModel.gender =
+                                              current.gender);
+                                      state.userModel.copyWith(
+                                          website_url:
+                                              state.userModel.website_url =
+                                                  current.website_url);
+                                      state.userModel.copyWith(
+                                          bio: state.userModel.bio =
+                                              current.bio);
+                                      state.userModel.copyWith(
+                                          youtube: state.userModel.youtube =
+                                              current.youtube);
+                                      state.userModel.copyWith(
+                                          facebook: state.userModel.facebook =
+                                              current.facebook);
+                                      state.userModel.copyWith(
+                                          instagram: state.userModel.instagram =
+                                              current.instagram);
+                                      state.userModel.copyWith(
+                                          twitter: state.userModel.twitter =
+                                              current.twitter);
+                                      state.userModel.copyWith(
+                                          avatar: state.userModel.avatar =
+                                              current.avatar);
+                                      state.userModel.copyWith(
+                                          name: state.userModel.name =
+                                              current.name);
+                                      setState(() {});
+                                    });
+                                  },
+                                  child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15, vertical: 15),
+                                      height: 50,
+                                      width: 50,
+                                      color: Colors.blue.shade400,
+                                      child: const Iconify(
+                                        Carbon.edit,
+                                        color: Colors.white,
+                                        size: 10,
+                                      )),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              const Text("Edit Profile",
+                                  style: TextStyle(fontSize: 12))
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              ClipOval(
+                                child: InkWell(
+                                    onTap: () {
+                                      Navigator.pushNamed(context, '/referral');
+                                    },
+                                    child: Container(
+                                        height: 50,
+                                        width: 50,
+                                        color: Colors.purple.shade300,
+                                        padding: const EdgeInsets.all(15),
+                                        child: const Iconify(
+                                          Carbon.share,
+                                          color: Colors.white,
+                                          size: 15,
+                                        ))),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              const Text("Invite User",
+                                  style: TextStyle(fontSize: 12))
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              ClipOval(
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 10),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
-                                          color: Colors.transparent, width: 1)),
-                                  child: const Text(
-                                    editProfile,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
+                                  width: 50,
+                                  height: 50,
+                                  color: Colors.pink,
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                          context, '/favourites');
+                                    },
+                                    child: Container(
+                                        padding: const EdgeInsets.all(15),
+                                        child: const Iconify(
+                                          Carbon.star,
+                                          color: Colors.white,
+                                          size: 15,
+                                        )),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.pushNamed(context, '/referral');
-                              },
-                              child: Material(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(5),
-                                elevation: 10,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 10),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
-                                          color: Colors.transparent, width: 1)),
-                                  child: const Text(
-                                    inviteUser,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
+                              const SizedBox(
+                                height: 10,
                               ),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.pushNamed(context, '/favourites');
-                              },
-                              child: Material(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(5),
-                                elevation: 10,
-                                child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                            color: Colors.transparent,
-                                            width: 1)),
-                                    child: const Icon(
-                                        Icons.bookmark_outline_sharp)),
-                              ),
-                            ),
-                            flex: 0,
-                          ),
+                              const Text(
+                                "Favourite",
+                                style: TextStyle(fontSize: 12),
+                              )
+                            ],
+                          )
                         ],
                       ),
                     ),
@@ -599,7 +611,7 @@ class _ProfileState extends State<Profile> {
                               });
                             },
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 110, vertical: 10),
+                                horizontal: 0, vertical: 0),
                             indicatorColor: Colors.black26,
                             indicatorPadding:
                                 const EdgeInsets.symmetric(horizontal: 10),
@@ -650,7 +662,7 @@ class _ProfileState extends State<Profile> {
   tabview(UserModel userModel, List<VideoModel> publicList,
       List<VideoModel> privateList, List<VideoModel> likesList) {
     if (selectedTab == 0) {
-      return feed(publicList);
+      return feed();
     } else if (selectedTab == 1) {
       return lock(privateList);
     } else {
@@ -658,93 +670,106 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  feed(List<VideoModel> publicList) {
-    return publicList.isEmpty
-        ? RichText(
-            textAlign: TextAlign.center,
-            text: const TextSpan(children: [
-              TextSpan(
-                  text: '\n\n\n' "User's Public Video",
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: '\n\n'
-                      "Public Videos are currently not available",
-                  style: TextStyle(fontSize: 17, color: Colors.grey))
-            ]))
-        : GridView.builder(
-            padding: const EdgeInsets.all(2),
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, crossAxisSpacing: 2, mainAxisSpacing: 2),
-            itemCount: publicList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, '/',
-                      arguments: {'videoModel': publicList[index]});
-                },
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // CachedNetworkImage(
-                    //     placeholder: (a, b) => const Center(
-                    //       child: CircularProgressIndicator(),
-                    //     ),
-                    //     fit: BoxFit.cover,
-                    //     imageUrl:publicList[index].gif_image.isEmpty
-                    //         ? '${RestUrl.thambUrl}thumb-not-available.png'
-                    //         : '${RestUrl.gifUrl}${publicList[index].gif_image}'),
-                    imgNet('${RestUrl.gifUrl}${publicList[index].gif_image}'),
-                    Positioned(
-                        bottom: 5,
-                        left: 5,
-                        right: 5,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            const Icon(
-                              Icons.visibility,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            Text(
-                              publicList[index].views.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 13),
-                            ),
-                            const Icon(
-                              Icons.favorite,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            Text(
-                              publicList[index].likes.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 13),
-                            ),
-                          ],
-                        )),
-                    Positioned(
-                      top: 5,
-                      right: 5,
-                      child: IconButton(
-                          onPressed: () {
-                            showDeleteVideoDialog(
-                                publicList[index].id, publicList, index);
-                          },
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          color: Colors.red,
-                          icon: const Icon(Icons.delete_forever_outlined)),
-                    )
-                  ],
-                ),
-              );
-            });
+  feed() {
+    return GetX<VideosController>(
+        builder: ((videoModelsController) => videoModelsController
+                    .isLoading.value ||
+                videoModelsController.videoModelsController.isEmpty
+            ? RichText(
+                textAlign: TextAlign.center,
+                text: const TextSpan(children: [
+                  TextSpan(
+                      text: '\n\n\n' "User's Public Video",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold)),
+                  TextSpan(
+                      text: '\n\n'
+                          "Public Videos are currently not available",
+                      style: TextStyle(fontSize: 17, color: Colors.grey))
+                ]))
+            : GridView.builder(
+                padding: const EdgeInsets.all(2),
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3, crossAxisSpacing: 2, mainAxisSpacing: 2),
+                itemCount: videoModelsController.videoModelsController.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, '/', arguments: {
+                        'videoModel':
+                            videoModelsController.videoModelsController[index]
+                      });
+                    },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // CachedNetworkImage(
+                        //     placeholder: (a, b) => const Center(
+                        //       child: CircularProgressIndicator(),
+                        //     ),
+                        //     fit: BoxFit.cover,
+                        //     imageUrl:publicList[index].gif_image.isEmpty
+                        //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                        //         : '${RestUrl.gifUrl}${publicList[index].gif_image}'),
+                        imgNet(
+                            '${RestUrl.gifUrl}${videoModelsController.videoModelsController[index].gifImage}'),
+                        Positioned(
+                            bottom: 5,
+                            left: 5,
+                            right: 5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                const Iconify(
+                                  Octicon.eye,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  videoModelsController
+                                      .videoModelsController[index].views
+                                      .toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                                const Icon(
+                                  IconlyBold.heart,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                Text(
+                                  videoModelsController
+                                      .videoModelsController[index].likes
+                                      .toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                              ],
+                            )),
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: IconButton(
+                              onPressed: () {
+                                showDeleteVideoDialog(
+                                    videoModelsController
+                                        .videoModelsController[index].id!,
+                                    videoModelsController.videoModelsController,
+                                    index);
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              color: Colors.red,
+                              icon: const Icon(Icons.delete_forever_outlined)),
+                        )
+                      ],
+                    ),
+                  );
+                })));
   }
 
   lock(List<VideoModel> privateList) {
@@ -775,7 +800,6 @@ class _ProfileState extends State<Profile> {
                 onTap: () {
                   Navigator.pushReplacementNamed(context, '/',
                       arguments: {'videoModel': privateList[index]});
-
                 },
                 child: Stack(
                   fit: StackFit.expand,
@@ -807,7 +831,7 @@ class _ProfileState extends State<Profile> {
                                   color: Colors.white, fontSize: 13),
                             ),
                             const Icon(
-                              Icons.favorite,
+                              IconlyBold.heart,
                               color: Colors.white,
                               size: 20,
                             ),
@@ -877,13 +901,10 @@ class _ProfileState extends State<Profile> {
               return GestureDetector(
                 onTap: () {
                   // Get.to(VideoPlaybackScreen());
-
-
                 },
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-
                     imgNet('${RestUrl.gifUrl}${likesList[index].gif_image}'),
                     Positioned(
                         bottom: 5,
@@ -892,8 +913,8 @@ class _ProfileState extends State<Profile> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            const Icon(
-                              Icons.visibility,
+                            const Iconify(
+                              Octicon.eye,
                               color: Colors.white,
                               size: 20,
                             ),
@@ -903,7 +924,7 @@ class _ProfileState extends State<Profile> {
                                   color: Colors.white, fontSize: 13),
                             ),
                             const Icon(
-                              Icons.favorite,
+                              IconlyBold.heart,
                               color: Colors.white,
                               size: 20,
                             ),
@@ -979,12 +1000,12 @@ class _ProfileState extends State<Profile> {
                           ElevatedButton(
                               onPressed: () async {
                                 try {
-                                  Navigator.pop(context);
-                                  progressDialogue(context);
+                                  Get.back();
+                                  //       progressDialogue(context);
                                   var response =
                                       await RestApi.deleteVideo(videoID);
                                   var json = jsonDecode(response.body);
-                                  closeDialogue(context);
+                                  //  closeDialogue(context);
                                   if (json['status']) {
                                     list.removeAt(index);
                                     showSuccessToast(
@@ -993,7 +1014,8 @@ class _ProfileState extends State<Profile> {
                                     BlocProvider.of<VideoBloc>(context).add(
                                         const VideoLoading(
                                             selectedTabIndex: 1));
-                                    //Navigator.pushNamedAndRemoveUntil(context, '/', (route)=>true);
+                                    Navigator.pushNamedAndRemoveUntil(
+                                        context, '/', (route) => true);
                                   } else {
                                     showErrorToast(
                                         context, json['message'].toString());

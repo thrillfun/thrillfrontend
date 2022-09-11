@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
+import 'package:thrill/controller/model/followers_model.dart';
 import 'package:thrill/controller/model/profile_model_pojo.dart';
+import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/models/level_model.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/rest/rest_api.dart';
@@ -20,65 +22,26 @@ import '../models/follower_model.dart';
 import '../widgets/video_item.dart';
 
 var controller = Get.find<DataController>();
+  var selectedTabIndex = 0.obs;
 
-class FollowingAndFollowers extends StatefulWidget {
-   FollowingAndFollowers({Key? key, required this.map,required this.isMyProfile}) : super(key: key);
-  static const String routeName = '/followingAndFollowers';
-  final Map map;
-  bool? isMyProfile =true;
+class FollowingAndFollowers extends StatelessWidget {
+  var usersController = Get.find<UserController>();
 
-  // static Route route(Map _map,bool _isMyProfile) {
-  //   return MaterialPageRoute(
-  //     settings: const RouteSettings(name: routeName),
-  //     builder: (context) => FollowingAndFollowers(
-  //       map: _map,
-  //       isMyProfile: _isMyProfile,
-  //     ),
-  //   );
-  // }
-
-  @override
-  State<FollowingAndFollowers> createState() => _FollowingAndFollowersState();
-}
-
-class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
-  bool isLoading = true;
-  List<FollowerModel> followerList = List<FollowerModel>.empty(growable: true);
-  List<FollowerModel> followingList = List<FollowerModel>.empty(growable: true);
-  late int selectedTabIndex = widget.map['index'];
-
-  @override
-  void initState() {
-    getData();
-    try {
-      reelsPlayerController?.pause();
-    } catch (_) {}
-    super.initState();
-  }
+  FollowingAndFollowers({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.grey.shade300,
-        // appBar: AppBar(
-        //   elevation: 0,
-        //   backgroundColor: Colors.white,
-        //   leading: IconButton(
-        //       onPressed: () {
-        //         Navigator.pop(context);
-        //       },
-        //       color: Colors.black,
-        //       icon: const Icon(Icons.arrow_back_ios)),
-        // ),
-        body: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : SafeArea(
+    usersController.getUserFollowers(usersController.userId.value);
+    usersController.getUserFollowing(usersController.userId.value);
+
+    return GetX<UserController>(
+        builder: ((userController) => Scaffold(
+            backgroundColor: Colors.grey.shade300,
+            body: SafeArea(
                 child: Column(
               children: [
                 Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       gradient: LinearGradient(colors: [
                     Color(0xFF2F8897),
                     Color(0xff1F2A52),
@@ -96,12 +59,11 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
-                              onTap: () =>
-                                  setState(() => selectedTabIndex = 0),
+                              onTap: () => selectedTabIndex.value = 0,
                               child: Text(
                                 followers,
                                 style: TextStyle(
-                                  color: selectedTabIndex == 0
+                                  color: selectedTabIndex.value == 0
                                       ? Colors.white
                                       : Colors.grey,
                                   fontWeight: FontWeight.bold,
@@ -110,12 +72,11 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () =>
-                                  setState(() => selectedTabIndex = 1),
+                              onTap: () => selectedTabIndex.value = 1,
                               child: Text(
                                 following,
                                 style: TextStyle(
-                                  color: selectedTabIndex == 1
+                                  color: selectedTabIndex.value == 1
                                       ? Colors.white
                                       : Colors.grey,
                                   fontWeight: FontWeight.bold,
@@ -127,7 +88,7 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
                         ),
                       ),
                       AnimatedAlign(
-                          alignment: selectedTabIndex == 0
+                          alignment: selectedTabIndex.value == 0
                               ? Alignment.topLeft
                               : Alignment.topRight,
                           duration: const Duration(milliseconds: 300),
@@ -140,317 +101,325 @@ class _FollowingAndFollowersState extends State<FollowingAndFollowers> {
                     ],
                   ),
                 ),
-                myTabView()
-              ],
-            )));
-  }
-
-  Widget myTabView() {
-    if (selectedTabIndex == 0) {
-      if (followerList.isEmpty) {
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: getHeight(context) / 2.5),
-            child:const  Text(
-              "Followers Not Found!",
-              style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),
-            ),
-          ),
-        );
-      } else {
-        return followersTabLayout();
-      }
-    } else {
-      if (followingList.isEmpty) {
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: getHeight(context) / 2.5),
-            child: Text(
-              "Nothings Here!",
-              style: Theme.of(context).textTheme.headline3,
-            ),
-          ),
-        );
-      } else {
-        return followingTabLayout();
-      }
-    }
-  }
-
-  followersTabLayout() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: followerList.length,
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        itemBuilder: (BuildContext context, int index) {
-          return Column(
-            children: [
-              InkWell(
-                onTap: () {
-                  controller.getUserProfile(followerList[index].id);
-                  Get.to(ViewProfile(
-                      mapData: {"userModel": controller.model, "getProfile": false}));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    children: [
-                      Container(
-                          padding: const EdgeInsets.all(2),
-                          height: 75,
-                          width: 75,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white60)),
-                          child: ClipOval(
-                            child: CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              errorWidget: (a, b, c) => Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: SvgPicture.asset(
-                                  'assets/profile.svg',
-                                  width: 10,
-                                  height: 10,
-                                  fit: BoxFit.contain,
-                                  color: Colors.white60,
-                                ),
-                              ),
-                              imageUrl:
-                                  '${RestUrl.profileUrl}${followerList[index].image}',
-                              placeholder: (a, b) => const Center(
-                                child: CircularProgressIndicator(),
+                selectedTabIndex.value == 1
+                    ? usersController.followingModel.value.isEmpty
+                        ? const Flexible(
+                            child: Center(
+                              child: Text(
+                                "You are not following anyone",
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
                               ),
                             ),
-                          )),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                          child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            followerList[index].name,
-                            style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          const SizedBox(
-                            height: 4,
-                          ),
-                          Text(
-                            getStarredEmail(followerList[index].email),
-                            style: const TextStyle(
-                                color: Colors.black, fontSize: 12),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          const SizedBox(
-                            height: 2,
-                          ),
-                          Text(
-                            getFormattedDate(followerList[index].date),
-                            style: const TextStyle(
-                                color: Colors.black, fontSize: 12),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
-                      ))
-
-                    ],
-                  ),
-                ),
-              ),
-              Divider(
-                thickness: 2,
-              )
-            ],
-          );
-        },
-      ),
-    );
+                          )
+                        : followingTabLayout()
+                    : usersController.followersModel.value.isEmpty
+                        ? const Flexible(
+                            child: Center(
+                            child: Text("No Followers Yet",
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold)),
+                          ))
+                        : followersTabLayout()
+              ],
+            )))));
   }
 
   followingTabLayout() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: followingList.length,
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        itemBuilder: (BuildContext context, int index) {
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    Container(
-                        padding: const EdgeInsets.all(2),
-                        height: 75,
-                        width: 75,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white60)),
-                        child: ClipOval(
-                          child: CachedNetworkImage(
-                            fit: BoxFit.cover,
-                            errorWidget: (a, b, c) => Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: SvgPicture.asset(
-                                'assets/profile.svg',
+    return GetX<UserController>(
+        init: UserController(),
+        builder: (controller) => controller.isFollowingLoading.value
+            ? const Flexible(
+                child: Center(
+                child: CircularProgressIndicator(),
+              ))
+            : Expanded(
+                child: ListView.builder(
+                  itemCount: controller.followingModel.value.length,
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  itemBuilder: (BuildContext context, int index) {
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          child: Row(
+                            children: [
+                              Container(
+                                  padding: const EdgeInsets.all(2),
+                                  height: 35,
+                                  width: 35,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border:
+                                          Border.all(color: Colors.white60)),
+                                  child: ClipOval(
+                                    child: CachedNetworkImage(
+                                      fit: BoxFit.cover,
+                                      errorWidget: (a, b, c) => Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: SvgPicture.asset(
+                                          'assets/profile.svg',
+                                          width: 10,
+                                          height: 10,
+                                          fit: BoxFit.contain,
+                                          color: Colors.white60,
+                                        ),
+                                      ),
+                                      imageUrl: controller.followingModel!
+                                              .value[index].avtars!.isEmpty
+                                          ? "https://www.pngmart.com/files/21/Account-Avatar-Profile-PNG-Photo.png"
+                                          : '${RestUrl.profileUrl}${controller.followingModel.value[index].avtars}',
+                                      placeholder: (a, b) => const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  )),
+                              const SizedBox(
                                 width: 10,
-                                height: 10,
-                                fit: BoxFit.contain,
-                                color: Colors.white60,
                               ),
-                            ),
-                            imageUrl:
-                                '${RestUrl.profileUrl}${followingList[index].image}',
-                            placeholder: (a, b) => const Center(
-                              child: CircularProgressIndicator(),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () async {
+                                    usersController.userId.value =
+                                        controller.followingModel[index].id!;
+                                    Get.to(ViewProfile(
+                                      mapData: {},
+                                      userId: controller
+                                          .followingModel[index].id!
+                                          .toString(),
+                                    ));
+                                  },
+                                  child: Expanded(
+                                      child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        controller.followingModel!.value![index]
+                                            .username!,
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                      const SizedBox(
+                                        height: 4,
+                                      ),
+                                      Text(
+                                        controller.followingModel!.value![index]
+                                            .name!,
+                                        style: const TextStyle(
+                                            color: Colors.black, fontSize: 13),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                      // Text(
+                                      //   getStarredEmail(followingList[index].email),
+                                      //   style: const TextStyle(
+                                      //       color: Colors.black, fontSize: 12),
+                                      //   overflow: TextOverflow.ellipsis,
+                                      //   maxLines: 1,
+                                      // ),
+                                      // const SizedBox(
+                                      //   height: 2,
+                                      // ),
+                                      // Text(
+                                      //   getFormattedDate(followingList[index].date),
+                                      //   style: const TextStyle(
+                                      //       color: Colors.black, fontSize: 12),
+                                      //   overflow: TextOverflow.ellipsis,
+                                      //   maxLines: 1,
+                                      // ),
+                                    ],
+                                  )),
+                                ),
+                              ),
+                              GetX<DataController>(
+                                  builder: (dataController) => Visibility(
+                                      visible: dataController.isMyProfile.value,
+                                      child: IconButton(
+                                          onPressed: () async {
+                                            var response = await dataController
+                                                .followUnfollowUser(controller
+                                                    .followingModel!
+                                                    .value![index]
+                                                    .id!);
+                                            GetSnackBar(
+                                              message: "${response.message}",
+                                              title: "Unfollowed",
+                                              duration: Duration(seconds: 3),
+                                              backgroundGradient:
+                                                  LinearGradient(colors: [
+                                                Color(0xFF2F8897),
+                                                Color(0xff1F2A52),
+                                                Color(0xff1F244E)
+                                              ]),
+                                              isDismissible: true,
+                                            ).show();
+                                          },
+                                          icon: Icon(Icons.person_remove))))
+                            ],
+                          ),
+                        ),
+                        Divider(
+                          thickness: 2,
+                        )
+                      ],
+                    );
+                  },
+                ),
+              ));
+  }
+
+  followersTabLayout() {
+    return GetX<UserController>(
+        init: UserController(),
+        builder: ((controller) => controller.isFollowersLoading.value
+            ? const Flexible(
+                child: Center(
+                child: CircularProgressIndicator(),
+              ))
+            : Expanded(
+                child: ListView.builder(
+                  itemCount: controller.followersModel.value.length,
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  itemBuilder: (BuildContext context, int index) {
+                    return Column(
+                      children: [
+                        InkWell(
+                          onTap: () async {
+                            controller.userId.value =
+                                controller.followersModel[index].id!;
+                            Get.off(ViewProfile(
+                              mapData: {},
+                              userId: controller.userId.value.toString(),
+                            ));
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 10),
+                            child: Row(
+                              children: [
+                                Container(
+                                    padding: const EdgeInsets.all(2),
+                                    height: 35,
+                                    width: 35,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border:
+                                            Border.all(color: Colors.white60)),
+                                    child: ClipOval(
+                                      child: CachedNetworkImage(
+                                        fit: BoxFit.cover,
+                                        errorWidget: (a, b, c) => Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: SvgPicture.asset(
+                                            'assets/profile.svg',
+                                            width: 10,
+                                            height: 10,
+                                            fit: BoxFit.contain,
+                                            color: Colors.white60,
+                                          ),
+                                        ),
+                                        imageUrl: controller.followersModel
+                                                .value[index].avtars!.isEmpty
+                                            ? "https://www.pngmart.com/files/21/Account-Avatar-Profile-PNG-Photo.png"
+                                            : '${RestUrl.profileUrl}${controller.followersModel.value![index].avtars!}',
+                                        placeholder: (a, b) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                    )),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Expanded(
+                                    child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      controller.followersModel.value![index]
+                                          .username!,
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                    const SizedBox(
+                                      height: 4,
+                                    ),
+                                    Text(
+                                      controller
+                                          .followersModel.value[index].name!,
+                                      style: const TextStyle(
+                                          color: Colors.black, fontSize: 13),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                    // Text(
+                                    //   getStarredEmail(followerList[index].email),
+                                    //   style: const TextStyle(
+                                    //       color: Colors.black, fontSize: 12),
+                                    //   overflow: TextOverflow.ellipsis,
+                                    //   maxLines: 1,
+                                    // ),
+                                    // const SizedBox(
+                                    //   height: 2,
+                                    // ),
+                                    // Text(
+                                    //   getFormattedDate(followerList[index].date),
+                                    //   style: const TextStyle(
+                                    //       color: Colors.black, fontSize: 12),
+                                    //   overflow: TextOverflow.ellipsis,
+                                    //   maxLines: 1,
+                                    // ),
+                                  ],
+                                )),
+                                GetX<DataController>(
+                                    builder: (dataController) => Visibility(
+                                        visible:
+                                            dataController.isMyProfile.value,
+                                        child: InkWell(
+                                          child: Text('follow'),
+                                          onTap: () async {
+                                            var response = await dataController
+                                                .followUnfollowUser(
+                                                    usersController
+                                                        .userId.value);
+                                            GetSnackBar(
+                                              message: "${response.message}",
+                                              title: "Unfollowed",
+                                              duration: Duration(seconds: 3),
+                                              backgroundGradient:
+                                                  const LinearGradient(colors: [
+                                                Color(0xFF2F8897),
+                                                Color(0xff1F2A52),
+                                                Color(0xff1F244E)
+                                              ]),
+                                              isDismissible: true,
+                                            ).show();
+                                          },
+                                        )))
+                              ],
                             ),
                           ),
-                        )),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () async {
-                          controller.getUserProfile(followingList[index].id);
-
-
-                          // await Navigator.pushNamed(context, "/viewProfile",
-                          //     arguments: {
-                          //       "userModel": model,
-                          //       "getProfile": false
-                          //     });
-                        },
-                        child: Expanded(
-                            child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              followingList[index].name,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                            const SizedBox(
-                              height: 4,
-                            ),
-                            Text(
-                              getStarredEmail(followingList[index].email),
-                              style: const TextStyle(
-                                  color: Colors.black, fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                            const SizedBox(
-                              height: 2,
-                            ),
-                            Text(
-                              getFormattedDate(followingList[index].date),
-                              style: const TextStyle(
-                                  color: Colors.black, fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ],
-                        )),
-                      ),
-                    ),
-                   Visibility(
-                     visible: widget.isMyProfile??false,
-                       child:  IconButton(onPressed: ()async {
-                     var response=  await controller.followUnfollowUser(followingList[index].id);
-                     GetSnackBar(
-                       message: "${response.message}",
-                       title: "Unfollowed",
-                       duration: Duration(seconds: 3),
-                       backgroundGradient: LinearGradient(
-                           colors: [Color(0xFF2F8897), Color(0xff1F2A52), Color(0xff1F244E)]),
-                       isDismissible: true,).show();
-                   }, icon:Icon(Icons.person_remove) ))
-                  ],
+                        ),
+                        const Divider(
+                          thickness: 2,
+                        )
+                      ],
+                    );
+                  },
                 ),
-              ),
-              Divider(
-                thickness: 2,
-              )
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void getUserDetails(int userId) async {
-     await controller.getUserProfile(userId);
-
-  }
-
-  String getStarredEmail(String email) {
-    List _email = email.split('');
-    String string = '';
-    if (email.isEmpty) {
-      string = "unknown";
-    } else {
-      if (_email.length >= 3) {
-        string += _email[0];
-        string += _email[1];
-        string += _email[2];
-        string += "****@";
-        string += email.split('@').last;
-      } else {
-        string += _email[0];
-        string += "****@";
-        string += email.split('@').last;
-      }
-    }
-    return string;
-  }
-
-  getData() async {
-    try {
-      var followersResponse = await RestApi.getFollowerList(widget.map['id']);
-      var followingResponse = await RestApi.getFollowingList(widget.map['id']);
-      var followersJson = jsonDecode(followersResponse.body);
-      var followingJson = jsonDecode(followingResponse.body);
-      if (followersJson['status']) {
-        List _followersList = followersJson['data'] as List;
-        followerList =
-            _followersList.map((e) => FollowerModel.fromJson(e)).toList();
-      } else {
-        showErrorToast(context, followersJson['message']);
-      }
-      if (followingJson['status']) {
-        List _followingList = followingJson['data'] as List;
-        followingList =
-            _followingList.map((e) => FollowerModel.fromJson(e)).toList();
-      } else {
-        showErrorToast(context, followingJson['message']);
-      }
-      setState(() => isLoading = false);
-    } catch (e) {
-      isLoading = false;
-      showErrorToast(context, e.toString());
-      setState(() {});
-    }
-  }
-
-  String getFormattedDate(String date) {
-    DateTime dateTime = DateTime.parse(date);
-    return DateFormat('dd/MM/yy').format(dateTime);
+              )));
   }
 }
