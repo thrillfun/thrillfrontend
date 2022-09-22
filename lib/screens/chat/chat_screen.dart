@@ -65,13 +65,14 @@ class _ChatScreenState extends State<ChatScreen> {
           flexibleSpace: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[
-                    Color(0xFF2F8897),
-                    Color(0xff1F2A52),
-                    Color(0xff1F244E)
-                  ]),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF171D22),
+                  Color(0xff143035),
+                  Color(0xff171D23)
+                ],
+              ),
             ),
           ),
           elevation: 0.5,
@@ -87,38 +88,35 @@ class _ChatScreenState extends State<ChatScreen> {
                       fontSize: 14,
                       fontWeight: FontWeight.bold),
                 ),
-
               ),
               ClipRRect(
                 borderRadius: BorderRadius.circular(20.0),
-                child:
-                widget.inboxModel.userImage == "null" ||
-                    widget.inboxModel.userImage.isEmpty
+                child: widget.inboxModel.userImage == "null" ||
+                        widget.inboxModel.userImage.isEmpty
                     ? Container(
-                  padding: EdgeInsets.all(2),
-                  width: 35,
-                  height: 35,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                          color: ColorManager.spinColorDivider)),
-                  child: ClipOval(
-                    child:
-                    SvgPicture.asset(
-                      'assets/profile.svg',
-                      width: 25,
-                      height: 25,
-                    )
-                ),)
-                    :    CachedNetworkImage(
-                  imageUrl: widget.inboxModel.userImage == "null" ||
-                      widget.inboxModel.userImage.isEmpty
-                      ? "https://www.worldpeacecouncil.net/images/photos/home/thumbnails/thumb_Gandhi1.jpg"
-                      : widget.inboxModel.userImage,
-                  fit: BoxFit.contain,
-                  width: 35,
-                  height: 35,
-                ),
+                        padding: EdgeInsets.all(2),
+                        width: 35,
+                        height: 35,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: ColorManager.spinColorDivider)),
+                        child: ClipOval(
+                            child: SvgPicture.asset(
+                          'assets/profile.svg',
+                          width: 25,
+                          height: 25,
+                        )),
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: widget.inboxModel.userImage == "null" ||
+                                widget.inboxModel.userImage.isEmpty
+                            ? "https://www.worldpeacecouncil.net/images/photos/home/thumbnails/thumb_Gandhi1.jpg"
+                            : widget.inboxModel.userImage,
+                        fit: BoxFit.contain,
+                        width: 35,
+                        height: 35,
+                      ),
               ),
             ],
           ),
@@ -126,139 +124,154 @@ class _ChatScreenState extends State<ChatScreen> {
           backgroundColor: Colors.white,
         ),
         body: GlassContainer(
-          color: Colors.white.withOpacity(0.8),
-          blur: 15,
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF2F8897), Color(0xff1F2A52), Color(0xff1F244E)],
-          ),
-          //--code to remove border
-          border: Border.fromBorderSide(BorderSide.none),
-          shadowStrength: 15,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(0),
-          shadowColor: Colors.white.withOpacity(0.2),
-          child: Column(
-            children: [
-              userModel == null
-                  ? const SizedBox()
-                  : Expanded(
-                      child: StreamBuilder<List<ChatMsg>>(
-                        stream: ChatController.getChatMsg(
-                          userModel!.id > widget.inboxModel.id
-                              ? '${userModel!.id}_${widget.inboxModel.id}'
-                              : '${widget.inboxModel.id}_${userModel!.id}',
-                        ),
-                        builder: (context, snapshot) {
-                          chats = snapshot.data ?? [];
-                          return ListView.builder(
-                            physics: const BouncingScrollPhysics(),
-                            reverse: true,
-                            itemCount: chats.length,
-                            padding: const EdgeInsets.all(12),
-                            itemBuilder: (context, index) {
-                              var chat = chats[index];
+            color: Colors.white.withOpacity(0.8),
+            blur: 15,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF171D22), Color(0xff143035), Color(0xff171D23)],
+            ),
+            //--code to remove border
+            border: Border.fromBorderSide(BorderSide.none),
+            shadowStrength: 15,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(0),
+            shadowColor: Colors.white.withOpacity(0.2),
+            child: Stack(
+              children: [
+                Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  child: Image.asset(
+                    "assets/background.png",
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Column(
+                  children: [
+                    userModel == null
+                        ? const SizedBox()
+                        : Expanded(
+                            child: StreamBuilder<List<ChatMsg>>(
+                              stream: ChatController.getChatMsg(
+                                userModel!.id > widget.inboxModel.id
+                                    ? '${userModel!.id}_${widget.inboxModel.id}'
+                                    : '${widget.inboxModel.id}_${userModel!.id}',
+                              ),
+                              builder: (context, snapshot) {
+                                chats = snapshot.data ?? [];
+                                return ListView.builder(
+                                  physics: const BouncingScrollPhysics(),
+                                  reverse: true,
+                                  itemCount: chats.length,
+                                  padding: const EdgeInsets.all(12),
+                                  itemBuilder: (context, index) {
+                                    var chat = chats[index];
 
-                              /* if (!(chat.senderId == 1) && !chat.seen) {
+                                    /* if (!(chat.senderId == 1) && !chat.seen) {
                         ChatController.markMsgSeen(widget.chatId, chat);
                       }*/
 
-                              if (chat.senderId == userModel?.id.toString()) {
-                                return myBubble(chat);
-                              } else {
-                                return friendBubble(chat);
-                              }
-                            },
-                          );
-                        },
-                      ),
-                    ),
-              const SizedBox(
-                height: 20,
-              ),
-              GlassContainer(
-                blur: 10,
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF2F8897),
-                    Color(0xff1F2A52),
-                    Color(0xff1F244E)
-                  ],
-                ),
-                //--code to remove border
-                border: Border.fromBorderSide(BorderSide.none),
-                shadowStrength: 3,
-                color: Colors.red.withOpacity(0.5),
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(0),
-                shadowColor: Colors.white,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  padding: const EdgeInsets.only(
-                      left: 10, right: 10, bottom: 20, top: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: txtController,
-                          onChanged: (txt) => setState(() => txtValue = txt),
-                          decoration: InputDecoration(
-                            suffixIcon: IconButton(
-                                onPressed: () async {
-                                  if (txtController.text.isNotEmpty) {
-                                    ChatMsg message = ChatMsg(
-                                      msgId: '',
-                                      message: txtValue,
-                                      senderId: userModel!.id.toString(),
-                                      time: DateTime.now().toString(),
-                                      seen: false,
-                                    );
-                                    ChatController.sendMsg(
-                                        userModel!.id > widget.inboxModel.id
-                                            ? '${userModel!.id}_${widget.inboxModel.id}'
-                                            : '${widget.inboxModel.id}_${userModel!.id}',
-                                        message);
-                                    txtValue = '';
-                                    txtController.clear();
-                                    inboxModel.message = message.message;
-                                    inboxModel.msgDate = message.time;
-                                    await RestApi.sendChatNotification(
-                                        widget.inboxModel.id.toString(),
-                                        message.message);
-                                  }
-
-                                  /// sendMessage();
-                                },
-                                icon: const Icon(
-                                  Icons.send,
-                                  color: Colors.grey,
-                                )),
-                            hintText: type,
-                            hintStyle: const TextStyle(
-                                color: Colors.black26, fontSize: 13),
-                            fillColor: Colors.white,
-                            filled: true,
-                            constraints: const BoxConstraints(maxHeight: 40),
-                            border: const OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                              borderSide: BorderSide.none,
+                                    if (chat.senderId ==
+                                        userModel?.id.toString()) {
+                                      return myBubble(chat);
+                                    } else {
+                                      return friendBubble(chat);
+                                    }
+                                  },
+                                );
+                              },
                             ),
-                            contentPadding:
-                                const EdgeInsets.only(left: 15, right: 15),
                           ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    GlassContainer(
+                      blur: 10,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF171D22),
+                          Color(0xff143035),
+                          Color(0xff171D23)
+                        ],
+                      ),
+                      //--code to remove border
+                      border: Border.fromBorderSide(BorderSide.none),
+                      shadowStrength: 3,
+                      color: Colors.red.withOpacity(0.5),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(0),
+                      shadowColor: Colors.white,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: const EdgeInsets.only(
+                            left: 10, right: 10, bottom: 20, top: 10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: txtController,
+                                onChanged: (txt) =>
+                                    setState(() => txtValue = txt),
+                                decoration: InputDecoration(
+                                  suffixIcon: IconButton(
+                                      onPressed: () async {
+                                        if (txtController.text.isNotEmpty) {
+                                          ChatMsg message = ChatMsg(
+                                            msgId: '',
+                                            message: txtValue,
+                                            senderId: userModel!.id.toString(),
+                                            time: DateTime.now().toString(),
+                                            seen: false,
+                                          );
+                                          ChatController.sendMsg(
+                                              userModel!.id >
+                                                      widget.inboxModel.id
+                                                  ? '${userModel!.id}_${widget.inboxModel.id}'
+                                                  : '${widget.inboxModel.id}_${userModel!.id}',
+                                              message);
+                                          txtValue = '';
+                                          txtController.clear();
+                                          inboxModel.message = message.message;
+                                          inboxModel.msgDate = message.time;
+                                          await RestApi.sendChatNotification(
+                                              widget.inboxModel.id.toString(),
+                                              message.message);
+                                        }
+
+                                        /// sendMessage();
+                                      },
+                                      icon: const Icon(
+                                        Icons.send,
+                                        color: Colors.grey,
+                                      )),
+                                  hintText: type,
+                                  hintStyle: const TextStyle(
+                                      color: Colors.black26, fontSize: 13),
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  constraints:
+                                      const BoxConstraints(maxHeight: 40),
+                                  border: const OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10.0)),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.only(
+                                      left: 15, right: 15),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    )
+                  ],
                 ),
-              )
-            ],
-          ),
-        ),
+              ],
+            )),
       ),
     );
   }

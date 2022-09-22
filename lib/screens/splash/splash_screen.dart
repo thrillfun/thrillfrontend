@@ -9,7 +9,6 @@ import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
 class SplashScreen extends StatefulWidget {
-
   const SplashScreen({Key? key}) : super(key: key);
   static const String routeName = '/splash';
 
@@ -25,12 +24,11 @@ class SplashScreen extends StatefulWidget {
 }
 
 class SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
     AwesomeNotifications().isNotificationAllowed().then((bool isAllowed) {
-      if(!isAllowed){
+      if (!isAllowed) {
         AwesomeNotifications().requestPermissionToSendNotifications();
       }
     });
@@ -46,7 +44,7 @@ class SplashScreenState extends State<SplashScreen> {
           decoration: const BoxDecoration(
               image: DecorationImage(
                   image: AssetImage(
-                    'assets/splash.png',
+                    'assets/splash_animation.gif',
                   ),
                   fit: BoxFit.cover)),
           child: Center(
@@ -67,7 +65,7 @@ class SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 2));
     var instance = await SharedPreferences.getInstance();
     try {
-      var loginData=instance.getString('currentUser');
+      var loginData = instance.getString('currentUser');
       if (loginData != null) {
         var result = await RestApi.checkAccountStatus();
         var json = jsonDecode(result.body);
@@ -91,6 +89,7 @@ class SplashScreenState extends State<SplashScreen> {
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
   }
+
   showAlertDialog(BuildContext context) {
     Widget continueButton = TextButton(
       child: const Text("OK"),

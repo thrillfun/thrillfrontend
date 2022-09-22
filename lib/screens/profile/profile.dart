@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/icons/octicon.dart';
@@ -54,608 +55,795 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       extendBody: true,
       body: BlocListener<ProfileBloc, ProfileState>(
-        listener: (context, state) {
-          if (state is ProfileLoading) {
-          } else if (state is ProfileLoaded) {}
-        },
-        child: Container(
-          padding: EdgeInsets.only(top: 30),
-          child:
+          listener: (context, state) {
+            if (state is ProfileLoading) {
+            } else if (state is ProfileLoaded) {}
+          },
+          child: Stack(
+            children: [
+              Container(
+                width: Get.width,
+                height: Get.height,
+                decoration: BoxDecoration(gradient: profile_gradient),
+              ),
               BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
-            if (state is ProfileLoaded) {
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Container(
-                      alignment: Alignment.centerRight,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                Get.back(closeOverlays: true);
-                              },
-                              icon: const Icon(Icons.arrow_back)),
-                          IconButton(
-                              onPressed: () {
-                                Get.to(SettingAndPrivacy());
-                                //       Navigator.pushNamed(context, "/setting");
-                              },
-                              icon: const Iconify(Carbon.settings))
-                        ],
+                if (state is ProfileLoaded) {
+                  return SingleChildScrollView(
+                      child: Stack(
+                    children: [
+                      Container(
+                        margin:
+                            const EdgeInsets.only(top: 50, left: 10, right: 10),
+                        child: SvgPicture.asset(
+                          "assets/background_profile_1.svg",
+                          fit: BoxFit.fill,
+                          width: MediaQuery.of(context).size.width,
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Column(
-                      children: [
-                        Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(2),
-                            height: 100,
-                            width: 100,
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: ColorManager.spinColorDivider)),
-                            child: state.userModel.avatar.isNotEmpty
-                                ? ClipOval(
-                                    child: CachedNetworkImage(
-                                      fit: BoxFit.cover,
-                                      imageUrl:
-                                          '${RestUrl.profileUrl}${state.userModel.avatar}',
-                                      placeholder: (a, b) => const Center(
-                                        child: CircularProgressIndicator(),
+                      Column(
+                        children: [
+                          Container(
+                            alignment: Alignment.centerRight,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(
+                                    onPressed: () {
+                                      Get.back(closeOverlays: true);
+                                    },
+                                    icon: const Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.white,
+                                    )),
+                                IconButton(
+                                    onPressed: () {
+                                      Get.to(SettingAndPrivacy());
+                                      //       Navigator.pushNamed(context, "/setting");
+                                    },
+                                    icon: const Iconify(
+                                      Carbon.settings,
+                                      color: Colors.white,
+                                    ))
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Column(
+                            children: [
+                              Container(
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                        begin: Alignment.topRight,
+                                        end: Alignment.centerLeft,
+                                        colors: [
+                                          Color.fromARGB(25, 0, 204, 201),
+                                          Color.fromARGB(10, 31, 33, 40)
+                                        ]),
+                                    border: Border.all(
+                                      color: Colors.transparent,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(200))),
+                                width: 180,
+                                height: 180,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                        height: 120,
+                                        width: 120,
+                                        child: state.userModel.avatar.isNotEmpty
+                                            ? ClipOval(
+                                                child: CachedNetworkImage(
+                                                  fit: BoxFit.cover,
+                                                  imageUrl:
+                                                      '${RestUrl.profileUrl}${state.userModel.avatar}',
+                                                  placeholder: (a, b) =>
+                                                      const Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  ),
+                                                ),
+                                              )
+                                            : Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10.0),
+                                                child: SvgPicture.asset(
+                                                  'assets/profile.svg',
+                                                  width: 10,
+                                                  height: 10,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              )),
+                                    Container(
+                                      height: 120,
+                                      width: 120,
+                                      child: CircularProgressIndicator(
+                                        value: double.parse(state
+                                            .userModel.levels.current
+                                            .toString()),
+                                        backgroundColor: Colors.transparent,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.purple),
+                                        color: Colors.green,
                                       ),
                                     ),
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: SvgPicture.asset(
-                                      'assets/profile.svg',
-                                      width: 10,
-                                      height: 10,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  )),
-                        // Expanded(
-                        //   child: Column(
-                        //     mainAxisSize: MainAxisSize.min,
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: [
-                        //       Row(
-                        //         children: [
-                        //           state.userModel.is_verified.contains('1')
-                        //               ? SvgPicture.asset(
-                        //             'assets/verified.svg',
-                        //           )
-                        //               : const SizedBox(width: 2),
-                        //         ],
-                        //       ),
-                        //       // Text("$userReferralCount ${state.userModel.referral_count.isEmpty ? "0" : state.userModel.referral_count}",
-                        //       //   style: const TextStyle(
-                        //       //       color: ColorManager.cyan, fontSize: 15),
-                        //       // ),
-                        //
-                        //
-                        //     ],
-                        //   ),
-                        // )
-                      ],
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 20, top: 5),
-                      child: Text(
-                        "@" + state.userModel.username,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                            onTap: () {
-                              usersController.userId.value = state.userModel.id;
-
-                              usersController.isMyProfile.value = true;
-                              selectedTabIndex.value = 1;
-                              Get.to(FollowingAndFollowers());
-                            },
-                            child: Column(
-                              children: [
-                                Text(
-                                    '${state.userModel.following.isEmpty ? 0 : state.userModel.following}',
-                                    style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                                const Text(following,
-                                    style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold))
-                              ],
-                            )),
-                        Container(
-                          margin: EdgeInsets.only(left: 15, right: 15),
-                          height: 40,
-                          width: 1,
-                          color: Colors.grey.shade300,
-                        ),
-                        GestureDetector(
-                            onTap: () {
-                              usersController.userId.value = state.userModel.id;
-                              usersController.isMyProfile.value = true;
-                              selectedTabIndex.value = 0;
-                              Get.to(FollowingAndFollowers());
-                            },
-                            child: Column(
-                              children: [
-                                Text(
-                                    '${state.userModel.followers.isEmpty ? 0 : state.userModel.followers}',
-                                    style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                                const Text(followers,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.bold))
-                              ],
-                            )),
-                        Container(
-                          margin: EdgeInsets.only(left: 15, right: 15),
-                          height: 40,
-                          width: 1,
-                          color: Colors.grey.shade300,
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                                '${state.userModel.likes.isEmpty ? 0 : state.userModel.likes}',
-                                style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold)),
-                            const Text(likes,
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold))
-                          ],
-                        )
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 10, top: 10),
-                      width: MediaQuery.of(context).size.width,
-                      child: Text(
-                        '${state.userModel.name.isNotEmpty ? state.userModel.name : 'anonymous'}',
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.start,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 10, right: 20),
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        state.userModel.bio,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-
-                    Container(
-                      margin: EdgeInsets.only(left: 10),
-                      alignment: Alignment.centerLeft,
-                      width: MediaQuery.of(context).size.width,
-                      child: Row(
-                        children: [
-                          Icon(Icons.link),
-                          SizedBox(
-                            width: 5,
+                                  ],
+                                ),
+                              )
+                              // Expanded(
+                              //   child:
+                              // )
+                            ],
                           ),
-                          InkWell(
-                            onTap: () {
-                              Uri openInBrowser = Uri(
-                                scheme: 'https',
-                                path: "${state.userModel.website_url}",
-                              );
-                              launchUrl(openInBrowser,
-                                  mode: LaunchMode.externalApplication);
-                            },
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin:
+                                    const EdgeInsets.only(bottom: 5, top: 5),
+                                child: Text(
+                                  "@" + state.userModel.username,
+                                  style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                ),
+                              ),
+                              state.userModel.is_verified.contains('1')
+                                  ? SvgPicture.asset(
+                                      'assets/verified.svg',
+                                    )
+                                  : const SizedBox(width: 2),
+                            ],
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            margin: EdgeInsets.only(left: 10, bottom: 20),
+                            width: MediaQuery.of(context).size.width,
                             child: Text(
-                              state.userModel.website_url,
-                              maxLines: 3,
+                              '${state.userModel.name.isNotEmpty ? state.userModel.name : 'anonymous'}',
+                              style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xffB2B2B2)),
                               textAlign: TextAlign.start,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontSize: 15, color: Colors.blue.shade300),
                             ),
-                          )
-                        ],
-                      ),
-                    ),
-
-                    // Container(
-                    //   width: MediaQuery.of(context).size.width,
-                    //   alignment: Alignment.centerLeft,
-                    //   margin: EdgeInsets.only(left: 10, bottom: 10),
-                    //   child: Row(
-                    //     crossAxisAlignment: CrossAxisAlignment.start,
-                    //     mainAxisAlignment: MainAxisAlignment.start,
-                    //     children: [
-                    //       Visibility(
-                    //         visible: state.userModel.youtube.isNotEmpty,
-                    //         child: IconButton(
-                    //           onPressed: () {
-                    //             Uri openInBrowser = Uri(
-                    //               scheme: 'https',
-                    //               path:
-                    //                   "www.youtube.com/${state.userModel.youtube}",
-                    //             );
-                    //             launchUrl(openInBrowser,
-                    //                 mode: LaunchMode.externalApplication);
-                    //           },
-                    //           iconSize: 25,
-                    //           padding: const EdgeInsets.only(),
-                    //           constraints: const BoxConstraints(),
-                    //           icon: SvgPicture.asset('assets/youtube.svg'),
-                    //         ),
-                    //       ),
-                    //       const SizedBox(
-                    //         width: 5,
-                    //       ),
-                    //       Visibility(
-                    //         visible: state.userModel.facebook.isNotEmpty,
-                    //         child: IconButton(
-                    //           onPressed: () {
-                    //             Uri openInBrowser = Uri(
-                    //               scheme: 'https',
-                    //               path:
-                    //                   "www.facebook.com/${state.userModel.facebook}",
-                    //             );
-                    //             launchUrl(openInBrowser,
-                    //                 mode: LaunchMode.externalApplication);
-                    //           },
-                    //           iconSize: 25,
-                    //           padding: const EdgeInsets.only(),
-                    //           constraints: const BoxConstraints(),
-                    //           icon: SvgPicture.asset('assets/facebook.svg'),
-                    //         ),
-                    //       ),
-                    //       const SizedBox(
-                    //         width: 5,
-                    //       ),
-                    //       Visibility(
-                    //         visible: state.userModel.instagram.isNotEmpty,
-                    //         child: IconButton(
-                    //           onPressed: () {
-                    //             Uri openInBrowser = Uri(
-                    //               scheme: 'https',
-                    //               path:
-                    //                   "www.instagram.com/${state.userModel.instagram}",
-                    //             );
-                    //             launchUrl(openInBrowser,
-                    //                 mode: LaunchMode.externalApplication);
-                    //           },
-                    //           iconSize: 25,
-                    //           padding: const EdgeInsets.only(),
-                    //           constraints: const BoxConstraints(),
-                    //           icon: SvgPicture.asset('assets/insta.svg'),
-                    //         ),
-                    //       ),
-                    //       const SizedBox(
-                    //         width: 10,
-                    //       ),
-                    //       Visibility(
-                    //         visible: state.userModel.twitter.isNotEmpty,
-                    //         child: IconButton(
-                    //           onPressed: () {
-                    //             Uri openInBrowser = Uri(
-                    //               scheme: 'https',
-                    //               path:
-                    //                   "www.twitter.com/${state.userModel.twitter}",
-                    //             );
-                    //             launchUrl(openInBrowser,
-                    //                 mode: LaunchMode.externalApplication);
-                    //           },
-                    //           iconSize: 25,
-                    //           padding: const EdgeInsets.only(),
-                    //           constraints: const BoxConstraints(),
-                    //           icon: SvgPicture.asset('assets/twitter.svg'),
-                    //         ),
-                    //       )
-                    //     ],
-                    //   ),
-                    // ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    // const Text(
-                    //   level,
-                    //   style: TextStyle(
-                    //       fontSize: 22,
-                    //       color: Colors.grey,
-                    //       fontWeight: FontWeight.bold),
-                    // ),
-                    // const SizedBox(
-                    //   height: 2,
-                    // ),
-                    // Container(
-                    //   width: getWidth(context) * .85,
-                    //   height: 40,
-                    //   decoration: BoxDecoration(
-                    //       borderRadius: BorderRadius.circular(25),
-                    //       border:
-                    //           Border.all(color: Colors.grey.shade300, width: 1)),
-                    //   child: Row(
-                    //     children: [
-                    //       Container(
-                    //         height: 25,
-                    //         width: 25,
-                    //         margin: const EdgeInsets.only(left: 10),
-                    //         alignment: Alignment.center,
-                    //         decoration: BoxDecoration(
-                    //             color: Colors.blue.shade900,
-                    //             shape: BoxShape.circle),
-                    //         child: Text(
-                    //           state.userModel.levels.current,
-                    //           style: const TextStyle(
-                    //               color: Colors.white,
-                    //               fontWeight: FontWeight.bold,
-                    //               fontSize: 12),
-                    //         ),
-                    //       ),
-                    //       Expanded(
-                    //         child: SliderTheme(
-                    //           data: SliderThemeData(
-                    //               overlayShape: SliderComponentShape.noOverlay,
-                    //               thumbShape: SliderComponentShape.noThumb,
-                    //               trackHeight: 3),
-                    //           child: Slider(
-                    //               max: int.parse(state.userModel.levels.max_level)*10,
-                    //               min: 0,
-                    //               value: double.parse(
-                    //                   state.userModel.levels.current)*10,
-                    //               activeColor: ColorManager.cyan,
-                    //               onChanged: (val) {}),
-                    //         ),
-                    //       ),
-                    //       Container(
-                    //         height: 25,
-                    //         width: 25,
-                    //         alignment: Alignment.center,
-                    //         margin: const EdgeInsets.only(right: 10),
-                    //         decoration: BoxDecoration(
-                    //             shape: BoxShape.circle,
-                    //             border: Border.all(color: Colors.grey, width: 1)),
-                    //         child: Text(
-                    //           state.userModel.levels.next,
-                    //           style: const TextStyle(
-                    //               color: Colors.grey,
-                    //               fontWeight: FontWeight.bold,
-                    //               fontSize: 12),
-                    //         ),
-                    //       )
-                    //     ],
-                    //   ),
-                    // ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              ClipOval(
-                                child: InkWell(
+                              GestureDetector(
                                   onTap: () {
-                                    Navigator.pushNamed(context, '/editProfile',
-                                            arguments: state.userModel)
-                                        .then((value) async {
-                                      var pref =
-                                          await SharedPreferences.getInstance();
-                                      var currentUser =
-                                          pref.getString('currentUser');
-                                      UserModel current = UserModel.fromJson(
-                                          jsonDecode(currentUser!));
-                                      state.userModel.copyWith(
-                                          username: state.userModel.username =
-                                              current.username);
-                                      state.userModel.copyWith(
-                                          first_name: state.userModel
-                                              .first_name = current.first_name);
-                                      state.userModel.copyWith(
-                                          last_name: state.userModel.last_name =
-                                              current.last_name);
-                                      state.userModel.copyWith(
-                                          gender: state.userModel.gender =
-                                              current.gender);
-                                      state.userModel.copyWith(
-                                          website_url:
-                                              state.userModel.website_url =
-                                                  current.website_url);
-                                      state.userModel.copyWith(
-                                          bio: state.userModel.bio =
-                                              current.bio);
-                                      state.userModel.copyWith(
-                                          youtube: state.userModel.youtube =
-                                              current.youtube);
-                                      state.userModel.copyWith(
-                                          facebook: state.userModel.facebook =
-                                              current.facebook);
-                                      state.userModel.copyWith(
-                                          instagram: state.userModel.instagram =
-                                              current.instagram);
-                                      state.userModel.copyWith(
-                                          twitter: state.userModel.twitter =
-                                              current.twitter);
-                                      state.userModel.copyWith(
-                                          avatar: state.userModel.avatar =
-                                              current.avatar);
-                                      state.userModel.copyWith(
-                                          name: state.userModel.name =
-                                              current.name);
-                                      setState(() {});
-                                    });
+                                    usersController.userId.value =
+                                        state.userModel.id;
+
+                                    usersController.isMyProfile.value = true;
+                                    selectedTabIndex.value = 1;
+                                    Get.to(FollowingAndFollowers());
                                   },
-                                  child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 15, vertical: 15),
-                                      height: 50,
-                                      width: 50,
-                                      color: Colors.blue.shade400,
-                                      child: const Iconify(
-                                        Carbon.edit,
-                                        color: Colors.white,
-                                        size: 10,
-                                      )),
-                                ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                          '${state.userModel.following.isEmpty ? 0 : state.userModel.following}',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold)),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      const Text(following,
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold))
+                                    ],
+                                  )),
+                              Container(
+                                margin: EdgeInsets.only(left: 15, right: 15),
+                                height: 40,
+                                width: 1,
+                                color: Colors.white.withOpacity(0.2),
                               ),
-                              const SizedBox(
-                                height: 10,
+                              GestureDetector(
+                                  onTap: () {
+                                    usersController.userId.value =
+                                        state.userModel.id;
+                                    usersController.isMyProfile.value = true;
+                                    selectedTabIndex.value = 0;
+                                    Get.to(FollowingAndFollowers());
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                          '${state.userModel.followers.isEmpty ? 0 : state.userModel.followers}',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold)),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      const Text(followers,
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.bold))
+                                    ],
+                                  )),
+                              Container(
+                                margin: EdgeInsets.only(left: 15, right: 15),
+                                height: 40,
+                                width: 1,
+                                color: Colors.white.withOpacity(0.2),
                               ),
-                              const Text("Edit Profile",
-                                  style: TextStyle(fontSize: 12))
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              ClipOval(
-                                child: InkWell(
-                                    onTap: () {
-                                      Navigator.pushNamed(context, '/referral');
-                                    },
-                                    child: Container(
-                                        height: 50,
-                                        width: 50,
-                                        color: Colors.purple.shade300,
-                                        padding: const EdgeInsets.all(15),
-                                        child: const Iconify(
-                                          Carbon.share,
+                              Column(
+                                children: [
+                                  Text(
+                                      '${state.userModel.likes.isEmpty ? 0 : state.userModel.likes}',
+                                      style: const TextStyle(
                                           color: Colors.white,
-                                          size: 15,
-                                        ))),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              const Text("Invite User",
-                                  style: TextStyle(fontSize: 12))
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold)),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  const Text(likes,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold))
+                                ],
+                              )
                             ],
                           ),
-                          Column(
-                            children: [
-                              ClipOval(
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          // Container(
+                          //   width: MediaQuery.of(context).size.width,
+                          //   alignment: Alignment.centerLeft,
+                          //   margin:
+                          //       EdgeInsets.only(left: 10, bottom: 10, top: 10),
+                          //   child: Row(
+                          //     crossAxisAlignment: CrossAxisAlignment.start,
+                          //     mainAxisAlignment: MainAxisAlignment.start,
+                          //     children: [
+                          //       Visibility(
+                          //         visible: state.userModel.youtube.isNotEmpty,
+                          //         child: IconButton(
+                          //           onPressed: () {
+                          //             Uri openInBrowser = Uri(
+                          //               scheme: 'https',
+                          //               path:
+                          //                   "www.youtube.com/${state.userModel.youtube}",
+                          //             );
+                          //             launchUrl(openInBrowser,
+                          //                 mode: LaunchMode.externalApplication);
+                          //           },
+                          //           iconSize: 25,
+                          //           padding: const EdgeInsets.only(),
+                          //           constraints: const BoxConstraints(),
+                          //           icon:
+                          //               SvgPicture.asset('assets/youtube.svg'),
+                          //         ),
+                          //       ),
+                          //       const SizedBox(
+                          //         width: 5,
+                          //       ),
+                          //       Visibility(
+                          //         visible: state.userModel.facebook.isNotEmpty,
+                          //         child: IconButton(
+                          //           onPressed: () {
+                          //             Uri openInBrowser = Uri(
+                          //               scheme: 'https',
+                          //               path:
+                          //                   "www.facebook.com/${state.userModel.facebook}",
+                          //             );
+                          //             launchUrl(openInBrowser,
+                          //                 mode: LaunchMode.externalApplication);
+                          //           },
+                          //           iconSize: 25,
+                          //           padding: const EdgeInsets.only(),
+                          //           constraints: const BoxConstraints(),
+                          //           icon:
+                          //               SvgPicture.asset('assets/facebook.svg'),
+                          //         ),
+                          //       ),
+                          //       const SizedBox(
+                          //         width: 5,
+                          //       ),
+                          //       Visibility(
+                          //         visible: state.userModel.instagram.isNotEmpty,
+                          //         child: IconButton(
+                          //           onPressed: () {
+                          //             Uri openInBrowser = Uri(
+                          //               scheme: 'https',
+                          //               path:
+                          //                   "www.instagram.com/${state.userModel.instagram}",
+                          //             );
+                          //             launchUrl(openInBrowser,
+                          //                 mode: LaunchMode.externalApplication);
+                          //           },
+                          //           iconSize: 25,
+                          //           padding: const EdgeInsets.only(),
+                          //           constraints: const BoxConstraints(),
+                          //           icon: SvgPicture.asset('assets/insta.svg'),
+                          //         ),
+                          //       ),
+                          //       const SizedBox(
+                          //         width: 10,
+                          //       ),
+                          //       Visibility(
+                          //         visible: state.userModel.twitter.isNotEmpty,
+                          //         child: IconButton(
+                          //           onPressed: () {
+                          //             Uri openInBrowser = Uri(
+                          //               scheme: 'https',
+                          //               path:
+                          //                   "www.twitter.com/${state.userModel.twitter}",
+                          //             );
+                          //             launchUrl(openInBrowser,
+                          //                 mode: LaunchMode.externalApplication);
+                          //           },
+                          //           iconSize: 25,
+                          //           padding: const EdgeInsets.only(),
+                          //           constraints: const BoxConstraints(),
+                          //           icon:
+                          //               SvgPicture.asset('assets/twitter.svg'),
+                          //         ),
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
+                          // const SizedBox(
+                          //   height: 10,
+                          // ),
+                          // const Text(
+                          //   level,
+                          //   style: TextStyle(
+                          //       fontSize: 22,
+                          //       color: Colors.grey,
+                          //       fontWeight: FontWeight.bold),
+                          // ),
+                          // const SizedBox(
+                          //   height: 2,
+                          // ),
+                          // Container(
+                          //   margin: EdgeInsets.symmetric(horizontal: 10),
+                          //   height: 40,
+                          //   child: Row(
+                          //     children: [
+                          //       Container(
+                          //           height: 25,
+                          //           width: 25,
+                          //           margin: const EdgeInsets.only(left: 10),
+                          //           alignment: Alignment.center,
+                          //           decoration: const BoxDecoration(
+                          //               gradient: LinearGradient(colors: [
+                          //                 Color(0xff00CCC9),
+                          //                 Color(0xff00CCC9)
+                          //               ]),
+                          //               shape: BoxShape.circle),
+                          //           child: ClipOval(
+                          //               child: Container(
+                          //             alignment: Alignment.center,
+                          //             width: 20,
+                          //             height: 20,
+                          //             color: Colors.white,
+                          //             child: Text(
+                          //               state.userModel.levels.current
+                          //                   .toString(),
+                          //               style: const TextStyle(
+                          //                   color: Colors.black,
+                          //                   fontWeight: FontWeight.bold,
+                          //                   fontSize: 12),
+                          //             ),
+                          //           ))),
+                          //       Expanded(
+                          //         child: SliderTheme(
+                          //           data: SliderThemeData(
+                          //               overlayShape:
+                          //                   SliderComponentShape.noOverlay,
+                          //               thumbShape:
+                          //                   SliderComponentShape.noThumb,
+                          //               trackHeight: 3),
+                          //           child: Slider(
+                          //               max: int.parse(state
+                          //                       .userModel.levels.max_level
+                          //                       .toString()) *
+                          //                   10,
+                          //               min: 0,
+                          //               value: double.parse(state
+                          //                       .userModel.levels.current
+                          //                       .toString()) *
+                          //                   10,
+                          //               activeColor: ColorManager.cyan,
+                          //               inactiveColor: Color(0xff333642),
+                          //               onChanged: (val) {}),
+                          //         ),
+                          //       ),
+                          //       Container(
+                          //         height: 25,
+                          //         width: 25,
+                          //         alignment: Alignment.center,
+                          //         margin: const EdgeInsets.only(right: 10),
+                          //         decoration: BoxDecoration(
+                          //           shape: BoxShape.circle,
+                          //         ),
+                          //         child: ClipOval(
+                          //             child: Container(
+                          //           alignment: Alignment.center,
+                          //           width: 25,
+                          //           height: 25,
+                          //           color: Color(0xff333642),
+                          //           child: Text(
+                          //             state.userModel.levels.next.toString(),
+                          //             style: const TextStyle(
+                          //                 color: Colors.white,
+                          //                 fontWeight: FontWeight.bold,
+                          //                 fontSize: 12),
+                          //           ),
+                          //         )),
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
+                          // const SizedBox(
+                          //   height: 30,
+                          // ),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            child: GlassContainer(
+                                border: Border.fromBorderSide(BorderSide.none),
+                                shape: BoxShape.rectangle,
+                                borderRadius: BorderRadius.circular(20),
+                                color: Color(0xff1F2128),
+                                blur: 20,
                                 child: Container(
-                                  width: 50,
-                                  height: 50,
-                                  color: Colors.pink,
-                                  child: InkWell(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                          context, '/favourites');
-                                    },
-                                    child: Container(
-                                        padding: const EdgeInsets.all(15),
-                                        child: const Iconify(
-                                          Carbon.star,
-                                          color: Colors.white,
-                                          size: 15,
-                                        )),
+                                  margin: EdgeInsets.all(10),
+                                  child: Column(
+                                    children: [
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                            left: 10, right: 20),
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          state.userModel.bio,
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(left: 10),
+                                        alignment: Alignment.centerLeft,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.link,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            InkWell(
+                                              onTap: () {
+                                                Uri openInBrowser = Uri(
+                                                  scheme: 'https',
+                                                  path:
+                                                      "${state.userModel.website_url}",
+                                                );
+                                                launchUrl(openInBrowser,
+                                                    mode: LaunchMode
+                                                        .externalApplication);
+                                              },
+                                              child: Text(
+                                                state.userModel.website_url,
+                                                maxLines: 3,
+                                                textAlign: TextAlign.start,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    color:
+                                                        Colors.blue.shade300),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Container(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 25, horizontal: 20),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      gradient: profile_options_gradient,
+                                      border: Border.all(
+                                        color: Colors.transparent,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(200))),
+                                  child: Column(
+                                    children: [
+                                      ClipOval(
+                                        child: InkWell(
+                                          onTap: () {
+                                            Navigator.pushNamed(
+                                                    context, '/editProfile',
+                                                    arguments: state.userModel)
+                                                .then((value) async {
+                                              var pref = await SharedPreferences
+                                                  .getInstance();
+                                              var currentUser =
+                                                  pref.getString('currentUser');
+                                              UserModel current =
+                                                  UserModel.fromJson(
+                                                      jsonDecode(currentUser!));
+                                              state.userModel.copyWith(
+                                                  username:
+                                                      state.userModel.username =
+                                                          current.username);
+                                              state.userModel.copyWith(
+                                                  first_name: state.userModel
+                                                          .first_name =
+                                                      current.first_name);
+                                              state.userModel.copyWith(
+                                                  last_name: state
+                                                          .userModel.last_name =
+                                                      current.last_name);
+                                              state.userModel.copyWith(
+                                                  gender: state.userModel
+                                                      .gender = current.gender);
+                                              state.userModel.copyWith(
+                                                  website_url: state.userModel
+                                                          .website_url =
+                                                      current.website_url);
+                                              state.userModel.copyWith(
+                                                  bio: state.userModel.bio =
+                                                      current.bio);
+                                              state.userModel.copyWith(
+                                                  youtube:
+                                                      state.userModel.youtube =
+                                                          current.youtube);
+                                              state.userModel.copyWith(
+                                                  facebook:
+                                                      state.userModel.facebook =
+                                                          current.facebook);
+                                              state.userModel.copyWith(
+                                                  instagram: state
+                                                          .userModel.instagram =
+                                                      current.instagram);
+                                              state.userModel.copyWith(
+                                                  twitter:
+                                                      state.userModel.twitter =
+                                                          current.twitter);
+                                              state.userModel.copyWith(
+                                                  avatar: state.userModel
+                                                      .avatar = current.avatar);
+                                              state.userModel.copyWith(
+                                                  name: state.userModel.name =
+                                                      current.name);
+                                              setState(() {});
+                                            });
+                                          },
+                                          child: Container(
+                                              decoration: const BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                      colors: [
+                                                    Color(0xff5FAFFC),
+                                                    Color(0xff2464D2)
+                                                  ])),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 15,
+                                                      vertical: 15),
+                                              height: 60,
+                                              width: 60,
+                                              child: const Iconify(
+                                                Carbon.edit,
+                                                color: Colors.white,
+                                                size: 10,
+                                              )),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
+                                      const Text("Edit Profile",
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white))
+                                    ],
                                   ),
                                 ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              const Text(
-                                "Favourite",
-                                style: TextStyle(fontSize: 12),
-                              )
-                            ],
-                          )
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 25, horizontal: 20),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      gradient: profile_options_gradient,
+                                      border: Border.all(
+                                        color: Colors.transparent,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(200))),
+                                  child: Column(
+                                    children: [
+                                      ClipOval(
+                                        child: InkWell(
+                                            onTap: () {
+                                              Navigator.pushNamed(
+                                                  context, '/referral');
+                                            },
+                                            child: Container(
+                                                decoration: const BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                        colors: [
+                                                      Color(0xff9B67FB),
+                                                      Color(0xff6E1DE9)
+                                                    ])),
+                                                height: 60,
+                                                width: 60,
+                                                padding:
+                                                    const EdgeInsets.all(15),
+                                                child: const Iconify(
+                                                  Carbon.share,
+                                                  color: Colors.white,
+                                                  size: 15,
+                                                ))),
+                                      ),
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
+                                      const Text("Invite User",
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white))
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 25, horizontal: 20),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      gradient: profile_options_gradient,
+                                      border: Border.all(
+                                        color: Colors.transparent,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(200))),
+                                  child: Column(
+                                    children: [
+                                      ClipOval(
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                              gradient: LinearGradient(colors: [
+                                            Color(0xffFF87CF),
+                                            Color(0xffE968D9)
+                                          ])),
+                                          width: 60,
+                                          height: 60,
+                                          child: InkWell(
+                                            onTap: () {
+                                              Navigator.pushNamed(
+                                                  context, '/favourites');
+                                            },
+                                            child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(15),
+                                                child: const Iconify(
+                                                  Carbon.star,
+                                                  color: Colors.white,
+                                                  size: 15,
+                                                )),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
+                                      const Text(
+                                        "Favourite",
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.white),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          DefaultTabController(
+                              length: 3,
+                              initialIndex: selectedTab,
+                              child: TabBar(
+                                  onTap: (int index) {
+                                    setState(() {
+                                      selectedTab = index;
+                                    });
+                                  },
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 0, vertical: 0),
+                                  indicatorColor: Color(0XffB2E3E3),
+                                  indicatorPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  tabs: [
+                                    Tab(
+                                      icon: SvgPicture.asset(
+                                        'assets/feedTab.svg',
+                                        color: selectedTab == 0
+                                            ? Colors.white
+                                            : const Color(0XffB2E3E3),
+                                      ),
+                                    ),
+                                    Tab(
+                                      icon: Icon(Icons.lock,
+                                          color: selectedTab == 1
+                                              ? Colors.white
+                                              : const Color(0XffB2E3E3)),
+                                    ),
+                                    Tab(
+                                      icon: Icon(Icons.favorite,
+                                          color: selectedTab == 2
+                                              ? Colors.white
+                                              : const Color(0XffB2E3E3)),
+                                    )
+                                  ])),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          tabview(
+                              state.userModel,
+                              state.publicList.isEmpty ? [] : state.publicList,
+                              state.privateList.isEmpty
+                                  ? []
+                                  : state.privateList,
+                              state.likesList.isEmpty ? [] : state.likesList)
                         ],
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    DefaultTabController(
-                        length: 3,
-                        initialIndex: selectedTab,
-                        child: TabBar(
-                            onTap: (int index) {
-                              setState(() {
-                                selectedTab = index;
-                              });
-                            },
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 0, vertical: 0),
-                            indicatorColor: Colors.black26,
-                            indicatorPadding:
-                                const EdgeInsets.symmetric(horizontal: 10),
-                            tabs: [
-                              Tab(
-                                icon: SvgPicture.asset(
-                                  'assets/feedTab.svg',
-                                  color: selectedTab == 0
-                                      ? Colors.black
-                                      : Colors.grey,
-                                ),
-                              ),
-                              Tab(
-                                icon: Icon(Icons.lock,
-                                    color: selectedTab == 1
-                                        ? Colors.black
-                                        : Colors.grey),
-                              ),
-                              Tab(
-                                icon: Icon(Icons.favorite,
-                                    color: selectedTab == 2
-                                        ? Colors.black
-                                        : Colors.grey),
-                              )
-                            ])),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    tabview(
-                        state.userModel,
-                        state.publicList.isEmpty ? [] : state.publicList,
-                        state.privateList.isEmpty ? [] : state.privateList,
-                        state.likesList.isEmpty ? [] : state.likesList)
-                  ],
-                ),
-              );
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          }),
-        ),
-      ),
+                    ],
+                  ));
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              }),
+            ],
+          )),
     );
   }
 
@@ -690,11 +878,13 @@ class _ProfileState extends State<Profile> {
                       style: TextStyle(fontSize: 17, color: Colors.grey))
                 ]))
             : GridView.builder(
-                padding: const EdgeInsets.all(2),
-                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(10),
+                physics: const BouncingScrollPhysics(),
                 shrinkWrap: true,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, crossAxisSpacing: 2, mainAxisSpacing: 2),
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10),
                 itemCount: videoModelsController.videoModelsController.length,
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
@@ -781,19 +971,19 @@ class _ProfileState extends State<Profile> {
                   text: '\n\n\n' "User's Private Video",
                   style: TextStyle(
                       fontSize: 18,
-                      color: Colors.black,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold)),
               TextSpan(
                   text: '\n\n'
                       "Private Videos are currently not available",
-                  style: TextStyle(fontSize: 17, color: Colors.grey))
+                  style: TextStyle(fontSize: 17, color: Colors.white))
             ]))
         : GridView.builder(
-            padding: const EdgeInsets.all(2),
-            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(10),
+            physics: const BouncingScrollPhysics(),
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, crossAxisSpacing: 2, mainAxisSpacing: 2),
+                crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10),
             itemCount: privateList.length,
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
@@ -891,11 +1081,11 @@ class _ProfileState extends State<Profile> {
                   style: TextStyle(fontSize: 17, color: Colors.grey))
             ]))
         : GridView.builder(
-            padding: const EdgeInsets.all(2),
-            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(10),
+            physics: const BouncingScrollPhysics(),
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, crossAxisSpacing: 2.5, mainAxisSpacing: 2.5),
+                crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10),
             itemCount: likesList.length,
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(

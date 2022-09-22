@@ -324,12 +324,11 @@ class _EditingState extends State<Editing> {
     videoPlayerController.dispose();
     setState(()=>isVidInit=false);
     
-    await VESDK.openEditor(
-      Video(widget.data.filePath),configuration: setConfig()).then((value) async {
-      PostData newPostData = PostData(
+
+     PostData newPostData = PostData(
         speed: widget.data.speed,
-        filePath: value!.video,
-        filterName: value!.video,
+        filePath: widget.data.filePath,
+        filterName: "",
         addSoundModel: widget.data.addSoundModel,
         isDuet: false,
         trimStart: rangeController.end-rangeController.start<15?0:rangeController.end-rangeController.start>60?0:rangeController.start.toInt(),
@@ -338,9 +337,6 @@ class _EditingState extends State<Editing> {
         isUploadedFromGallery: widget.data.isUploadedFromGallery,
       );
       await Get.to(Preview(data: newPostData));
-      //await Navigator.pushNamed(context, "/preview", arguments: newPostData);
-
-    });
     videoPlayerController =
     VideoPlayerController.file(
         File(widget.data.filePath))

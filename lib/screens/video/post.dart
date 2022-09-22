@@ -593,9 +593,9 @@ class _PostVideoState extends State<PostVideo> {
   }
 
   createGIF() async {
-    String outputPath = '$saveCacheDirectory${widget.data.newName}.gif';
+    String outputPath = '$saveCacheDirectory${widget.data.newName}.png';
     String filePath = widget.data.isDuet?widget.data.newPath!:widget.data.filePath;
-    FFmpegKit.execute("-i $filePath -r 3 -filter:v scale=280:480 -t 5 $outputPath").then((session) async {
+    FFmpegKit.execute("-i $filePath -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath").then((session) async {
       final returnCode = await session.getReturnCode();
 
       if (ReturnCode.isSuccess(returnCode)) {
@@ -623,13 +623,13 @@ class _PostVideoState extends State<PostVideo> {
     )
         .then((value) async {
       await _simpleS3.uploadFile(
-        File('$saveCacheDirectory${widget.data.newName}.gif'),
+        File('$saveCacheDirectory${widget.data.newName}.png'),
         "thrillvideo",
         "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
         AWSRegions.usEast1,
         debugLog: true,
         s3FolderPath: "gif",
-        fileName: '$currentUnix.gif',
+        fileName: '$currentUnix.png',
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
         if(widget.data.addSoundModel==null || !widget.data.addSoundModel!.isSoundFromGallery){
@@ -648,7 +648,7 @@ class _PostVideoState extends State<PostVideo> {
                   ? ''
                   : widget.data.filterName,
               dropDownLanguageValue,
-              '$currentUnix.gif',
+              '$currentUnix.png',
               widget.data.speed,
             duetSwitch,
             commentsSwitch,
@@ -699,7 +699,7 @@ class _PostVideoState extends State<PostVideo> {
                 desCtr.text,
                 widget.data.filterName.isEmpty ? '' : widget.data.filterName,
                 dropDownLanguageValue,
-                '$currentUnix.gif',
+                '$currentUnix.png',
                 widget.data.speed,
                 duetSwitch,
                 commentsSwitch,
@@ -750,13 +750,13 @@ class _PostVideoState extends State<PostVideo> {
     )
         .then((value) async {
       await _simpleS3.uploadFile(
-        File('$saveCacheDirectory${widget.data.newName}.gif'),
+        File('$saveCacheDirectory${widget.data.newName}.png'),
         "thrillvideo",
         "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
         AWSRegions.usEast1,
         debugLog: true,
         s3FolderPath: "gif",
-        fileName: '$currentUnix.gif',
+        fileName: '$currentUnix.png',
         accessControl: S3AccessControl.publicRead,
       ).then((value) async {
         if(widget.data.addSoundModel==null || !widget.data.addSoundModel!.isSoundFromGallery){
@@ -775,7 +775,7 @@ class _PostVideoState extends State<PostVideo> {
                   ? ''
                   : widget.data.filterName,
               dropDownLanguageValue,
-              '$currentUnix.gif',
+              '$currentUnix.png',
               widget.data.speed,
             duetSwitch,
             commentsSwitch,
@@ -827,7 +827,7 @@ class _PostVideoState extends State<PostVideo> {
                     ? ''
                     : widget.data.filterName,
                 dropDownLanguageValue,
-                '$currentUnix.gif',
+                '$currentUnix.png',
                 widget.data.speed,
               duetSwitch,
               commentsSwitch,

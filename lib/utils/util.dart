@@ -9,7 +9,27 @@ import 'package:thrill/main.dart';
 import '../common/strings.dart';
 import '../rest/rest_url.dart';
 
+const LinearGradient gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF162C31), Color(0xff181A20), Color(0xff1F2128)]);
 
+const LinearGradient profile_gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color.fromRGBO(22, 44, 49, 1),
+      Color.fromRGBO(24, 26, 32, 1),
+      Color.fromRGBO(31, 33, 40, 1)
+    ]);
+const LinearGradient profile_options_gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF1F2128),
+      Color(0xFF1F2128),
+      Color(0xFF1F2128),
+    ]);
 T getRandomElement<T>(List<T> list) {
   final random = Random();
   var i = random.nextInt(list.length);
@@ -17,17 +37,11 @@ T getRandomElement<T>(List<T> list) {
 }
 
 double getHeight(BuildContext context) {
-  return MediaQuery
-      .of(context)
-      .size
-      .height;
+  return MediaQuery.of(context).size.height;
 }
 
 double getWidth(BuildContext context) {
-  return MediaQuery
-      .of(context)
-      .size
-      .width;
+  return MediaQuery.of(context).size.width;
 }
 
 showErrorToast(BuildContext context, String msg) async {
@@ -77,20 +91,28 @@ showErrorToast(BuildContext context, String msg) async {
   //   ),
   // )
   Get.showSnackbar(GetSnackBar(
-
     duration: Duration(seconds: 3),
     barBlur: 10,
     borderColor: Colors.red,
     borderWidth: 1.5,
-    margin: EdgeInsets.only(left: 10,right: 10,bottom: 10,),
+    margin: EdgeInsets.only(
+      left: 10,
+      right: 10,
+      bottom: 10,
+    ),
     borderRadius: 10,
     backgroundColor: Colors.red.shade50,
-    messageText:Text(msg,style: TextStyle(fontWeight: FontWeight.bold),) ,
+    messageText: Text(
+      msg,
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ),
     isDismissible: true,
     mainButton: IconButton(
-      onPressed: (){
+      onPressed: () {
         Get.back(closeOverlays: true);
-      },icon: Icon(Icons.close),),
+      },
+      icon: Icon(Icons.close),
+    ),
     icon: Icon(
       Icons.error,
       color: Colors.red,
@@ -104,45 +126,59 @@ showErrorToast(BuildContext context, String msg) async {
 
 errorToast(String message) async {
   Get.showSnackbar(GetSnackBar(
-
     duration: Duration(seconds: 3),
     barBlur: 10,
     borderColor: Colors.red,
     borderWidth: 1.5,
-    margin: EdgeInsets.only(left: 10,right: 10,bottom: 10,),
+    margin: EdgeInsets.only(
+      left: 10,
+      right: 10,
+      bottom: 10,
+    ),
     borderRadius: 10,
     backgroundColor: Colors.red.shade50,
-    messageText:Text(message,style: TextStyle(fontWeight: FontWeight.bold),) ,
+    messageText: Text(
+      message,
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ),
     isDismissible: true,
     mainButton: IconButton(
-      onPressed: (){
+      onPressed: () {
         Get.back(closeOverlays: true);
-      },icon: const Icon(Icons.close),),
-    icon:const  Icon(
+      },
+      icon: const Icon(Icons.close),
+    ),
+    icon: const Icon(
       Icons.error,
       color: Colors.red,
     ),
   ));
-
 }
 
 showSuccessToast(BuildContext context, String msg) async {
-
   Get.showSnackbar(GetSnackBar(
-
     duration: Duration(seconds: 3),
     barBlur: 10,
     borderColor: Colors.green,
     borderWidth: 1.5,
-    margin: EdgeInsets.only(left: 10,right: 10,bottom: 10,),
+    margin: EdgeInsets.only(
+      left: 10,
+      right: 10,
+      bottom: 10,
+    ),
     borderRadius: 10,
     backgroundColor: Colors.green.shade50,
-    messageText:Text(msg,style: TextStyle(fontWeight: FontWeight.bold),) ,
+    messageText: Text(
+      msg,
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ),
     isDismissible: true,
     mainButton: IconButton(
-      onPressed: (){
+      onPressed: () {
         Get.back(closeOverlays: true);
-      },icon: Icon(Icons.close),),
+      },
+      icon: Icon(Icons.close),
+    ),
     icon: Icon(
       Icons.error,
       color: Colors.green,
@@ -217,22 +253,29 @@ showSuccessToast(BuildContext context, String msg) async {
 }
 
 successToast(String msg) async {
-
   Get.showSnackbar(GetSnackBar(
-
     duration: Duration(seconds: 3),
     barBlur: 10,
     borderColor: Colors.green,
     borderWidth: 1.5,
-    margin: EdgeInsets.only(left: 10,right: 10,bottom: 10,),
+    margin: EdgeInsets.only(
+      left: 10,
+      right: 10,
+      bottom: 10,
+    ),
     borderRadius: 10,
     backgroundColor: Colors.green.shade50,
-    messageText:Text(msg,style: TextStyle(fontWeight: FontWeight.bold),) ,
+    messageText: Text(
+      msg,
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ),
     isDismissible: true,
     mainButton: IconButton(
-      onPressed: (){
+      onPressed: () {
         Get.back(closeOverlays: true);
-      },icon: Icon(Icons.close),),
+      },
+      icon: Icon(Icons.close),
+    ),
     icon: Icon(
       Icons.error,
       color: Colors.green,
@@ -339,27 +382,22 @@ closeDialogue(BuildContext context) {
 Widget imgNet(String imgPath) {
   return Container(
     child: CachedNetworkImage(
-        placeholder: (a, b) =>
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
+        placeholder: (a, b) => const Center(
+              child: CircularProgressIndicator(),
+            ),
         fit: BoxFit.cover,
-        imageBuilder: (context, imageProvider) =>
-            Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
+        imageBuilder: (context, imageProvider) => Container(
+              width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
                 shape: BoxShape.rectangle,
-                image: DecorationImage(
-                    image: imageProvider, fit: BoxFit.cover),
+                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
               ),
             ),
         errorWidget: (context, string, dynamic) =>
             Image.network('${RestUrl.thambUrl}thumb-not-available.png'),
-        imageUrl: imgPath),);
+        imageUrl: imgPath),
+  );
 }
 
 getTempDirectory() async {
@@ -385,9 +423,9 @@ getTempDirectory() async {
     );
   }
 }
+
 extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
   }
 }
-

@@ -13,6 +13,7 @@ import 'package:iconify_flutter/icons/icon_park_outline.dart';
 import 'package:iconly/iconly.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/controller/comments_controller.dart';
 import 'package:thrill/controller/model/comments_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
@@ -42,7 +43,9 @@ class BetterReelsPlayer extends StatefulWidget {
       this.publicVideos,
       this.UserId,
       this.userName,
-      this.description);
+      this.description,
+      this.isHome,
+      this.hashtagsList);
 
   String gifImage;
   String videoUrl;
@@ -58,6 +61,8 @@ class BetterReelsPlayer extends StatefulWidget {
   int UserId;
   String userName;
   String description;
+  bool isHome = false;
+  List hashtagsList;
   @override
   State<BetterReelsPlayer> createState() => _VideoAppState();
 }
@@ -130,15 +135,23 @@ class _VideoAppState extends State<BetterReelsPlayer> {
             child: Stack(
               children: [
                 Container(
-                  alignment: Alignment.center,
-                  color: Colors.black,
-                  child: AspectRatio(
-                    aspectRatio: _betterPlayerController.value.aspectRatio,
-                    child: VideoPlayer(_betterPlayerController),
-                  ),
-                ),
+                    alignment: Alignment.center,
+                    color: Colors.black,
+                    child: Obx(() => initialized.value
+                        ? AspectRatio(
+                            aspectRatio:
+                                _betterPlayerController.value.aspectRatio,
+                            child: VideoPlayer(_betterPlayerController),
+                          )
+                        : CachedNetworkImage(
+                            height: Get.height,
+                            width: Get.width,
+                            fit: BoxFit.fill,
+                            imageUrl: RestUrl.gifUrl + widget.gifImage))),
                 Container(
-                  margin: EdgeInsets.only(right: 10, bottom: 60),
+                  margin: widget.isHome
+                      ? const EdgeInsets.only(right: 10, bottom: 60)
+                      : const EdgeInsets.only(right: 10),
                   alignment: Alignment.centerRight,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -158,6 +171,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                             const Text(
                               "Like",
                               style: TextStyle(
+                                  fontSize: 12,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
                             )
@@ -256,10 +270,9 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                                                   children: [
                                                                                     InkWell(
                                                                                       onTap: () {
-                                                                                        userController.userId.value = widget.UserId;
                                                                                         Get.to(ViewProfile(
                                                                                           mapData: {},
-                                                                                          userId: widget.UserId.toString(),
+                                                                                          userId: userId.value.toString(),
                                                                                         ));
                                                                                       },
                                                                                       child: ClipOval(
@@ -445,6 +458,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                             const Text(
                               "Comments",
                               style: TextStyle(
+                                  fontSize: 12,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
                             )
@@ -467,6 +481,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                             const Text(
                               "Share",
                               style: TextStyle(
+                                  fontSize: 12,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
                             )
@@ -704,6 +719,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                             const Text(
                               "More",
                               style: TextStyle(
+                                  fontSize: 12,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
                             )
@@ -714,18 +730,36 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(bottom: 60, left: 10),
+                  margin: widget.isHome
+                      ? const EdgeInsets.only(bottom: 60, left: 10)
+                      : const EdgeInsets.only(left: 10, bottom: 10),
                   alignment: Alignment.bottomLeft,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        height: 25,
+                        child: ListView.builder(
+                            itemCount: widget.hashtagsList.length,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) => Padding(
+                                  padding: EdgeInsets.only(right: 10),
+                                  child: Text(
+                                    "#" + widget.hashtagsList[index].toString(),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12),
+                                  ),
+                                )),
+                      ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           InkWell(
                             onTap: () {
-                              userController.userId.value = widget.UserId;
+                              usersController.userId.value = widget.UserId;
+
                               Get.to(ViewProfile(
                                 mapData: {},
                                 userId: widget.UserId.toString(),
@@ -735,15 +769,24 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                               alignment: Alignment.bottomLeft,
                               width: 25,
                               height: 25,
-                              child: ClipOval(
-                                child: CachedNetworkImage(
-                                  imageUrl: widget.publicUser!.avatar == null ||
-                                          widget.publicUser!.avatar!.isEmpty
-                                      ? "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png"
-                                      : RestUrl.profileUrl +
-                                          widget.publicUser!.avatar.toString(),
-                                  fit: BoxFit.fill,
+                              child: CachedNetworkImage(
+                                imageBuilder: (context, imageProvider) =>
+                                    Container(
+                                  width: 25,
+                                  height: 25,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover),
+                                  ),
                                 ),
+                                imageUrl: widget.publicUser!.avatar == null ||
+                                        widget.publicUser!.avatar!.isEmpty
+                                    ? "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png"
+                                    : RestUrl.profileUrl +
+                                        widget.publicUser!.avatar.toString(),
+                                fit: BoxFit.fill,
                               ),
                             ),
                           ),
@@ -787,7 +830,9 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                             width: 10,
                           ),
                           Text(
-                            widget.soundName,
+                            widget.soundName.isEmpty
+                                ? "Original Sound"
+                                : widget.soundName,
                             style: TextStyle(color: Colors.white),
                           )
                         ],

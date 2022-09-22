@@ -43,7 +43,7 @@ class HashTagsDetails {
   String? gifImage;
   String? speed;
   int? comments;
-  List<dynamic>? hashtags;
+  List? hashtags;
   String? soundOwner;
   User? user;
 

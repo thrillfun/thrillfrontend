@@ -89,7 +89,6 @@ class DiscoverController extends GetxController {
     if (response.statusCode == 200) {
       var result = jsonDecode(response.body);
       try {
-
         hashTagsDetailsList = HashTagVideosModel.fromJson(result).data!.obs;
 
         isHashTagsLoading.value = false;

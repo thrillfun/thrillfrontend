@@ -43,8 +43,7 @@ class _NotificationsState extends State<Notifications> {
   Widget build(BuildContext context) {
     return Container(
         decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage(''), fit: BoxFit.cover)),
+            image: DecorationImage(image: AssetImage(''), fit: BoxFit.cover)),
         child: Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
@@ -54,9 +53,11 @@ class _NotificationsState extends State<Notifications> {
                   gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: <Color>[Color(0xFF2F8897),
-                        Color(0xff1F2A52),
-                        Color(0xff1F244E)]),
+                      colors: <Color>[
+                        Color(0xFF171D22),
+                        Color(0xff143035),
+                        Color(0xff171D23)
+                      ]),
                 ),
               ),
             ),

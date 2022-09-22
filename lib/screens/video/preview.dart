@@ -97,13 +97,13 @@ class _PreviewState extends State<Preview> {
   }
   Widget getLayout(){
     if(isProcessing){
-      return processingLayout();
+      return processedLayout();
     } else {
       if(wasSuccess){
         if(isVControllerInitialized){
           return processedLayout();
         } else {
-          return processingLayout();
+          return processedLayout();
         }
       } else {
         return failedLayout();
@@ -201,8 +201,8 @@ class _PreviewState extends State<Preview> {
                       addSoundModel: widget.data.addSoundModel,
                       filePath: widget.data.filePath,
                       filterName: widget.data.filterName,
-                      trimStart: widget.data.trimStart,
-                      trimEnd: widget.data.trimEnd,
+                      trimStart: 0,
+                      trimEnd: 0,
                       isDuet: widget.data.isDuet,
                       isDefaultSound: widget.data.isDefaultSound,
                       isUploadedFromGallery: widget.data.isUploadedFromGallery,
@@ -338,205 +338,208 @@ class _PreviewState extends State<Preview> {
     String outputPath = '$saveDirectory$newName.mp4';
     String? audioFilePath = widget.data.addSoundModel?.sound;
     File videoFile = File(widget.data.filePath);
+                    isProcessing = false;
+                  wasSuccess = true;
+                  initPreview();
 
-    if(widget.data.isDuet && widget.data.duetPath!=null){
+    // if(widget.data.isDuet && widget.data.duetPath!=null){
 
-            FFmpegKit.execute(
-                //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
-                //" -n -i $zero -i $one -filter_complex: [0:v][1:v]vstack=inputs=2[v] $op" //stretched
-              //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
-              //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' -s 720X1280 -vcodec libx264 -preset veryfast $outputPath" //cropped+stretched
-              "-r 30 -i ${widget.data.duetPath} -r 30 -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' $outputPath" //cropped+stretched
-              //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[1][0]scale2ref=iw:ow/mdar[2nd][ref];[ref][2nd]vstack[vid]' -map [vid] $outputPath"
-            ).then((session) async {
-              final returnCode = await session.getReturnCode();
-              final logs = await session.getLogsAsString();
-              final logList = logs.split('\n');
-              print("============================> LOG STARTED!!!!");
-              for(var e in logList){
-                print(e);
-              }
-              print("============================> LOG ENDED!!!!");
-              if (ReturnCode.isSuccess(returnCode)) {
-                // print("============================> Success!!!!");
-                setState(() {
-                  wasSuccess = true;
-                  isProcessing = false;
-                  initPreview();
-                });
-              } else {
-                print("============================> Failed!!!!");
-                //Navigator.pop(context);
-                setState(() {
-                  wasSuccess = false;
-                  isProcessing = false;
-                });
-                //showErrorToast(context, "Video processing failed!");
-                //setState(()=>isProcessing = false);
-              }
-            });
-    } else {
-      if(widget.data.addSoundModel==null || widget.data.isDefaultSound){
-        if(widget.data.isUploadedFromGallery){
-          try{
-            FFmpegKit.execute(
-                "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.trimStart).toString().split('.').first} -to ${widget.data.trimEnd} -vcodec libx264 $outputPath"
-              //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
-            ).then((session) async {
-              final returnCode = await session.getReturnCode();
-              // final logs = await session.getLogsAsString();
-              // final logList = logs.split('\n');
-              // print("============================> LOG STARTED!!!!");
-              // for(var e in logList){
-              //   print(e);
-              // }
-              // print("============================> LOG ENDED!!!!");
+    //         FFmpegKit.execute(
+    //             //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
+    //             //" -n -i $zero -i $one -filter_complex: [0:v][1:v]vstack=inputs=2[v] $op" //stretched
+    //           //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex: vstack=inputs=2 $outputPath" //stretched
+    //           //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' -s 720X1280 -vcodec libx264 -preset veryfast $outputPath" //cropped+stretched
+    //           "-r 30 -i ${widget.data.duetPath} -r 30 -i ${widget.data.filePath} -filter_complex '[0:v]crop=720:840:[v0];[1:v]crop=720:840:[v1];[v0][v1]vstack=inputs=2' $outputPath" //cropped+stretched
+    //           //"-i ${widget.data.duetPath} -i ${widget.data.filePath} -filter_complex '[1][0]scale2ref=iw:ow/mdar[2nd][ref];[ref][2nd]vstack[vid]' -map [vid] $outputPath"
+    //         ).then((session) async {
+    //           final returnCode = await session.getReturnCode();
+    //           final logs = await session.getLogsAsString();
+    //           final logList = logs.split('\n');
+    //           print("============================> LOG STARTED!!!!");
+    //           for(var e in logList){
+    //             print(e);
+    //           }
+    //           print("============================> LOG ENDED!!!!");
+    //           if (ReturnCode.isSuccess(returnCode)) {
+    //             // print("============================> Success!!!!");
+    //             setState(() {
+    //               wasSuccess = true;
+    //               isProcessing = false;
+    //               initPreview();
+    //             });
+    //           } else {
+    //             print("============================> Failed!!!!");
+    //             //Navigator.pop(context);
+    //             setState(() {
+    //               wasSuccess = false;
+    //               isProcessing = false;
+    //             });
+    //             //showErrorToast(context, "Video processing failed!");
+    //             //setState(()=>isProcessing = false);
+    //           }
+    //         });
+    // } else {
+    //   if(widget.data.addSoundModel==null || widget.data.isDefaultSound){
+    //     if(widget.data.isUploadedFromGallery){
+    //       try{
+    //         FFmpegKit.execute(
+    //             "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.trimStart).toString().split('.').first} -to ${widget.data.trimEnd} -vcodec libx264 $outputPath"
+    //           //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
+    //         ).then((session) async {
+    //           final returnCode = await session.getReturnCode();
+    //           // final logs = await session.getLogsAsString();
+    //           // final logList = logs.split('\n');
+    //           // print("============================> LOG STARTED!!!!");
+    //           // for(var e in logList){
+    //           //   print(e);
+    //           // }
+    //           // print("============================> LOG ENDED!!!!");
 
-              if (ReturnCode.isSuccess(returnCode)) {
-                // print("============================> Success!!!!");
-                setState(() {
-                  isProcessing = false;
-                  wasSuccess = true;
-                  initPreview();
-                });
-              } else {
-                // print("============================> Failed!!!!");
-                closeDialogue(context);
-                Navigator.pop(context);
-                showErrorToast(context, "Video processing failed!");
-                //setState(()=>isProcessing = false);
-              }
-            });
-          } catch(e){
-            closeDialogue(context);
-            //print(e.toString());
-            Navigator.pop(context);
-            showErrorToast(context, "Video Processing Failed");
-          }
-        } else {
-          try{
-            print("-s 720X1280 -vcodec libx264");
-            FFmpegKit.execute(
-                "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.trimStart).toString().split('.').first} -to ${widget.data.trimEnd} $outputPath"
-              //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
-            ).then((session) async {
-              final returnCode = await session.getReturnCode();
-              // final logs = await session.getLogsAsString();
-              // final logList = logs.split('\n');
-              // print("============================> LOG STARTED!!!!");
-              // for(var e in logList){
-              //   print(e);
-              // }
-              // print("============================> LOG ENDED!!!!");
+    //           if (ReturnCode.isSuccess(returnCode)) {
+    //             // print("============================> Success!!!!");
+    //             setState(() {
+    //               isProcessing = false;
+    //               wasSuccess = true;
+    //               initPreview();
+    //             });
+    //           } else {
+    //             // print("============================> Failed!!!!");
+    //             closeDialogue(context);
+    //             Navigator.pop(context);
+    //             showErrorToast(context, "Video processing failed!");
+    //             //setState(()=>isProcessing = false);
+    //           }
+    //         });
+    //       } catch(e){
+    //         closeDialogue(context);
+    //         //print(e.toString());
+    //         Navigator.pop(context);
+    //         showErrorToast(context, "Video Processing Failed");
+    //       }
+    //     } else {
+    //       try{
+    //         print("-s 720X1280 -vcodec libx264");
+    //         FFmpegKit.execute(
+    //             "-y -i ${videoFile.path} -ss ${Duration(seconds: widget.data.trimStart).toString().split('.').first} -to ${widget.data.trimEnd} $outputPath"
+    //           //"-y -i ${videoFile.path} -qscale 5 -shortest -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${widget.data.map!["end"]} -c copy -c:a aac $outputPath"
+    //         ).then((session) async {
+    //           final returnCode = await session.getReturnCode();
+    //           // final logs = await session.getLogsAsString();
+    //           // final logList = logs.split('\n');
+    //           // print("============================> LOG STARTED!!!!");
+    //           // for(var e in logList){
+    //           //   print(e);
+    //           // }
+    //           // print("============================> LOG ENDED!!!!");
 
-              if (ReturnCode.isSuccess(returnCode)) {
-                // print("============================> Success!!!!");
-                setState(() {
-                  isProcessing = false;
-                  wasSuccess = true;
-                  initPreview();
-                });
-              } else {
-                // print("============================> Failed!!!!");
-                closeDialogue(context);
-                Navigator.pop(context);
-                showErrorToast(context, "Video processing failed!");
-                //setState(()=>isProcessing = false);
-              }
-            });
-          } catch(e){
-            closeDialogue(context);
-            //print(e.toString());
-            Navigator.pop(context);
-            showErrorToast(context, "Video Processing Failed");
-          }
-        }
-      } else {
-        if(widget.data.isUploadedFromGallery){
-          try{
-            String start = Duration(seconds: widget.data.trimStart).toString().split('.').first;
-            String end = Duration(seconds: widget.data.trimEnd).toString().split('.').first;
-            String time = (int.parse(widget.data.trimEnd.toString())-int.parse(widget.data.trimStart.toString())).toString();
-            FFmpegKit.execute(
-              //"-y -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a $outputPath"
-              //"-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -qscale 5 -c:a aac $outputPath"
-              //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
-              //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
-              //"-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 -vcodec libx264 $outputPath"
-                "-y -ss $start -to $end -i ${videoFile.path} -i \"$audioFilePath\" -map 0:v -qscale 5 -t $time -map 1:a $outputPath"
-            ).then((session) async {
-              final returnCode = await session.getReturnCode();
-              // final logs = await session.getLogsAsString();
-              // final logList = logs.split('\n');
-              // print("============================> LOG STARTED!!!!");
-              // for(var e in logList){
-              // print(e);
-              // }
-              // print("============================> LOG ENDED!!!!");
-              if (ReturnCode.isSuccess(returnCode)) {
-                //print("============================> Success!!!!");
-                setState(() {
-                  wasSuccess = true;
-                  isProcessing = false;
-                  initPreview();
-                });
-              } else {
-                //print("============================> Failed!!!!");
-                closeDialogue(context);
-                Navigator.pop(context);
-                showErrorToast(context, "Video processing failed!");
-                //setState(()=>isProcessing = false);
-              }
-            });
-          } catch(e){
-            closeDialogue(context);
-            //print(e.toString());
-            showErrorToast(context, "Video Processing Failed");
-          }
-        } else {
-          try{
-            String start = Duration(seconds: widget.data.trimStart).toString().split('.').first;
-            String end = Duration(seconds: widget.data.trimEnd).toString().split('.').first;
-            String time = (int.parse(widget.data.trimEnd.toString())-int.parse(widget.data.trimStart.toString())).toString();
-            FFmpegKit.execute(
-              //"-y -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a $outputPath"
-              //"-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -qscale 5 -c:a aac $outputPath"
-              //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
-              //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
-              //"-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 -vcodec libx264 $outputPath"
-                "-y -ss $start -to $end -i ${videoFile.path} -i \"$audioFilePath\" -map 0:v -s 720X1280 -qscale 5 -t $time -map 1:a -vcodec libx264 $outputPath"
-            ).then((session) async {
-              final returnCode = await session.getReturnCode();
-              // final logs = await session.getLogsAsString();
-              // final logList = logs.split('\n');
-              // print("============================> LOG STARTED!!!!");
-              // for(var e in logList){
-              // print(e);
-              // }
-              // print("============================> LOG ENDED!!!!");
-              if (ReturnCode.isSuccess(returnCode)) {
-                //print("============================> Success!!!!");
-                setState(() {
-                  wasSuccess = true;
-                  isProcessing = false;
-                  initPreview();
-                });
-              } else {
-                //print("============================> Failed!!!!");
-                closeDialogue(context);
-                Navigator.pop(context);
-                showErrorToast(context, "Video processing failed!");
-                //setState(()=>isProcessing = false);
-              }
-            });
-          } catch(e){
-            closeDialogue(context);
-            //print(e.toString());
-            showErrorToast(context, "Video Processing Failed");
-          }
-        }
-      }
-    }
+    //           if (ReturnCode.isSuccess(returnCode)) {
+    //             // print("============================> Success!!!!");
+    //             setState(() {
+    //               isProcessing = false;
+    //               wasSuccess = true;
+    //               initPreview();
+    //             });
+    //           } else {
+    //             // print("============================> Failed!!!!");
+    //             closeDialogue(context);
+    //             Navigator.pop(context);
+    //             showErrorToast(context, "Video processing failed!");
+    //             //setState(()=>isProcessing = false);
+    //           }
+    //         });
+    //       } catch(e){
+    //         closeDialogue(context);
+    //         //print(e.toString());
+    //         Navigator.pop(context);
+    //         showErrorToast(context, "Video Processing Failed");
+    //       }
+    //     }
+    //   } else {
+    //     if(widget.data.isUploadedFromGallery){
+    //       try{
+    //         String start = Duration(seconds: widget.data.trimStart).toString().split('.').first;
+    //         String end = Duration(seconds: widget.data.trimEnd).toString().split('.').first;
+    //         String time = (int.parse(widget.data.trimEnd.toString())-int.parse(widget.data.trimStart.toString())).toString();
+    //         FFmpegKit.execute(
+    //           //"-y -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a $outputPath"
+    //           //"-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -qscale 5 -c:a aac $outputPath"
+    //           //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
+    //           //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
+    //           //"-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 -vcodec libx264 $outputPath"
+    //             "-y -ss $start -to $end -i ${videoFile.path} -i \"$audioFilePath\" -map 0:v -qscale 5 -t $time -map 1:a $outputPath"
+    //         ).then((session) async {
+    //           final returnCode = await session.getReturnCode();
+    //           // final logs = await session.getLogsAsString();
+    //           // final logList = logs.split('\n');
+    //           // print("============================> LOG STARTED!!!!");
+    //           // for(var e in logList){
+    //           // print(e);
+    //           // }
+    //           // print("============================> LOG ENDED!!!!");
+    //           if (ReturnCode.isSuccess(returnCode)) {
+    //             //print("============================> Success!!!!");
+    //             setState(() {
+    //               wasSuccess = true;
+    //               isProcessing = false;
+    //               initPreview();
+    //             });
+    //           } else {
+    //             //print("============================> Failed!!!!");
+    //             closeDialogue(context);
+    //             Navigator.pop(context);
+    //             showErrorToast(context, "Video processing failed!");
+    //             //setState(()=>isProcessing = false);
+    //           }
+    //         });
+    //       } catch(e){
+    //         closeDialogue(context);
+    //         //print(e.toString());
+    //         showErrorToast(context, "Video Processing Failed");
+    //       }
+    //     } else {
+    //       try{
+    //         String start = Duration(seconds: widget.data.trimStart).toString().split('.').first;
+    //         String end = Duration(seconds: widget.data.trimEnd).toString().split('.').first;
+    //         String time = (int.parse(widget.data.trimEnd.toString())-int.parse(widget.data.trimStart.toString())).toString();
+    //         FFmpegKit.execute(
+    //           //"-y -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a $outputPath"
+    //           //"-ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i ${videoFile.path} -i $audioFilePath -qscale 5 -c:a aac $outputPath"
+    //           //"-y -i ${videoFile.path} -i $audioFilePath -map 0:v -qscale 5 -map 1:a -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -t ${widget.data.map!["end"]} -shortest $outputPath"
+    //           //"-i ${videoFile.path} -ss ${Duration(seconds: widget.data.map!["start"]).toString().split('.').first} -to ${Duration(seconds: widget.data.map!["end"]).toString().split('.').first} -i $audioFilePath -c:v copy -c:a aac $outputPath"
+    //           //"-ss $start -to $end -i ${videoFile.path} -i $audioFilePath -t $time -c:a aac -qscale 5 -vcodec libx264 $outputPath"
+    //             "-y -ss $start -to $end -i ${videoFile.path} -i \"$audioFilePath\" -map 0:v -s 720X1280 -qscale 5 -t $time -map 1:a -vcodec libx264 $outputPath"
+    //         ).then((session) async {
+    //           final returnCode = await session.getReturnCode();
+    //           // final logs = await session.getLogsAsString();
+    //           // final logList = logs.split('\n');
+    //           // print("============================> LOG STARTED!!!!");
+    //           // for(var e in logList){
+    //           // print(e);
+    //           // }
+    //           // print("============================> LOG ENDED!!!!");
+    //           if (ReturnCode.isSuccess(returnCode)) {
+    //             //print("============================> Success!!!!");
+    //             setState(() {
+    //               wasSuccess = true;
+    //               isProcessing = false;
+    //               initPreview();
+    //             });
+    //           } else {
+    //             //print("============================> Failed!!!!");
+    //             closeDialogue(context);
+    //             Navigator.pop(context);
+    //             showErrorToast(context, "Video processing failed!");
+    //             //setState(()=>isProcessing = false);
+    //           }
+    //         });
+    //       } catch(e){
+    //         closeDialogue(context);
+    //         //print(e.toString());
+    //         showErrorToast(context, "Video Processing Failed");
+    //       }
+    //     }
+    //   }
+    // }
   }
   initPreview()async{
     videoPlayerController = VideoPlayerController.file(File('$saveDirectory$newName.mp4'));

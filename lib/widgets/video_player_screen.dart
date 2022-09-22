@@ -14,6 +14,7 @@ import 'package:iconly/iconly.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/controller/comments_controller.dart';
 import 'package:thrill/controller/model/comments_model.dart';
 import 'package:thrill/controller/model/hashtag_videos_model.dart';
@@ -31,16 +32,18 @@ import 'package:thrill/widgets/better_video_player.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayerScreen extends StatelessWidget {
-  VideoPlayerScreen(this.hashTagVideos);
+  VideoPlayerScreen(this.hashTagVideos, this.position);
 
   List<HashTagsDetails> hashTagVideos;
-  var current = 0.obs;
+  int position;
 
   var isOnPageTurning = false.obs;
 
   @override
   Widget build(BuildContext context) {
-    PreloadPageController preloadPageController = PreloadPageController();
+    PreloadPageController preloadPageController =
+        PreloadPageController(initialPage: position);
+    var current = position.obs;
 
     void scrollListener() {
       if (isOnPageTurning.value &&
@@ -77,6 +80,7 @@ class VideoPlayerScreen extends StatelessWidget {
     });
 
     PublicVideos publicVideos = PublicVideos();
+
     return Scaffold(
         body: PreloadPageView.builder(
       controller: preloadPageController,
@@ -98,9 +102,11 @@ class VideoPlayerScreen extends StatelessWidget {
             hashTagVideos[index].soundName.toString(),
             true,
             publicVideos,
-            hashTagVideos[index].user!.id!.toInt(),
+            hashTagVideos[index].user!.id!,
             hashTagVideos[index].user!.username.toString(),
-            hashTagVideos[index].description.toString())),
+            hashTagVideos[index].description.toString(),
+            false,
+            hashTagVideos[index].hashtags!)),
       ),
     ));
   }

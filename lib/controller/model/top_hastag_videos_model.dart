@@ -36,9 +36,9 @@ class HashTags {
   HashTags({this.hashtagId, this.hashtagName, this.videoCount, this.videos});
 
   HashTags.fromJson(Map<String, dynamic> json) {
-    hashtagId = json['hashtag_id']??"";
-    hashtagName = json['hashtag_name']??"";
-    videoCount = json['video_count']??"";
+    hashtagId = json['hashtag_id'] ?? "";
+    hashtagName = json['hashtag_name'] ?? "";
+    videoCount = json['video_count'] ?? "";
     if (json['videos'] != null) {
       videos = <HashTagVideos>[];
       json['videos'].forEach((v) {
@@ -102,24 +102,24 @@ class HashTagVideos {
       this.user});
 
   HashTagVideos.fromJson(Map<String, dynamic> json) {
-    id = json['id']??"";
-    video = json['video']??"";
-    description = json['description']??"";
-    sound = json['sound']??"";
-    soundName = json['sound_name']??"";
-    soundCategoryName = json['sound_category_name']??"";
-    filter = json['filter']??"";
-    likes = json['likes']??"";
-    views = json['views']??"";
-    gifImage = json['gif_image']??"";
-    speed = json['speed']??"";
-    comments = json['comments']??"";
+    id = json['id'] ?? "";
+    video = json['video'] ?? "";
+    description = json['description'] ?? "";
+    sound = json['sound'] ?? "";
+    soundName = json['sound_name'] ?? "";
+    soundCategoryName = json['sound_category_name'] ?? "";
+    filter = json['filter'] ?? "";
+    likes = json['likes'] ?? "";
+    views = json['views'] ?? "";
+    gifImage = json['gif_image'] ?? "";
+    speed = json['speed'] ?? "";
+    comments = json['comments'] ?? "";
     hashtags = json['hashtags'];
-    isDuet = json['is_duet']??"";
-    duetFrom = json['duet_from']??"";
-    isDuetable = json['is_duetable']??"";
-    isCommentable = json['is_commentable']??"";
-    soundOwner = json['sound_owner']??"";
+    isDuet = json['is_duet'] ?? "";
+    duetFrom = json['duet_from'] ?? "";
+    isDuetable = json['is_duetable'] ?? "";
+    isCommentable = json['is_commentable'] ?? "";
+    soundOwner = json['sound_owner'] ?? "";
     user = json['user'] != null ? new HashTagUser.fromJson(json['user']) : null;
   }
 
@@ -209,34 +209,34 @@ class HashTagUser {
       this.boxThree});
 
   HashTagUser.fromJson(Map<String, dynamic> json) {
-    id = json['id']??"";
-    name = json['name']??"";
-    username = json['username']??"";
-    email = json['email']??"";
-    dob = json['dob']??"";
-    phone = json['phone']??"";
-    avatar = json['avatar']??"";
-    socialLoginId = json['social_login_id']??"";
-    socialLoginType = json['social_login_type']??"";
-    firstName = json['first_name']??"";
-    lastName = json['last_name']??"";
-    gender = json['gender']??"";
-    websiteUrl = json['website_url']??"";
-    bio = json['bio']??"";
-    youtube = json['youtube']??"";
-    facebook = json['facebook']??"";
-    instagram = json['instagram']??"";
-    twitter = json['twitter']??"";
-    firebaseToken = json['firebase_token']??"";
-    referralCount = json['referral_count']??"";
-    following = json['following']??"";
-    followers = json['followers']??"";
-    likes = json['likes']??"";
+    id = json['id'] ?? "";
+    name = json['name'] ?? "";
+    username = json['username'] ?? "";
+    email = json['email'] ?? "";
+    dob = json['dob'] ?? "";
+    phone = json['phone'] ?? "";
+    avatar = json['avatar'] ?? "";
+    socialLoginId = json['social_login_id'] ?? "";
+    socialLoginType = json['social_login_type'] ?? "";
+    firstName = json['first_name'] ?? "";
+    lastName = json['last_name'] ?? "";
+    gender = json['gender'] ?? "";
+    websiteUrl = json['website_url'] ?? "";
+    bio = json['bio'] ?? "";
+    youtube = json['youtube'] ?? "";
+    facebook = json['facebook'] ?? "";
+    instagram = json['instagram'] ?? "";
+    twitter = json['twitter'] ?? "";
+    firebaseToken = json['firebase_token'] ?? "";
+    referralCount = json['referral_count'] ?? "";
+    following = json['following'] ?? "";
+    followers = json['followers'] ?? "";
+    likes = json['likes'] ?? "";
     levels =
         json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
-    totalVideos = json['total_videos']??"";
-    boxTwo = json['box_two']??"";
-    boxThree = json['box_three']??"";
+    totalVideos = json['total_videos'] ?? "";
+    boxTwo = json['box_two'] ?? "";
+    boxThree = json['box_three'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
@@ -282,9 +282,9 @@ class Levels {
   Levels({this.current, this.next, this.progress});
 
   Levels.fromJson(Map<String, dynamic> json) {
-    current = json['current']??"";
-    next = json['next']??"";
-    progress = json['progress']??"";
+    current = json['current'] ?? "";
+    next = json['next'] ?? "";
+    progress = json['progress'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
@@ -295,4 +295,3 @@ class Levels {
     return data;
   }
 }
-

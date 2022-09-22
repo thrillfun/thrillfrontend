@@ -111,9 +111,9 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   myDrawer2() {
     return FABBottomAppBar(
-      backgroundColor: Colors.black.withOpacity(0.4),
-      color: Colors.white,
-      selectedColor: Colors.red,
+      backgroundColor: Colors.green,
+      color: Color(0xffB2E3E3),
+      selectedColor: Colors.white,
       notchedShape: const CircularNotchedRectangle(),
       onTabSelected: _selectedTab,
       items: [
