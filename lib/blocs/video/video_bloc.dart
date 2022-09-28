@@ -5,12 +5,14 @@ import 'package:thrill/models/video_model.dart';
 import 'package:thrill/repository/video/video_repository.dart';
 import 'package:thrill/screens/home/home.dart';
 import 'package:thrill/utils/util.dart';
+
 part 'video_event.dart';
 part 'video_state.dart';
 
 class VideoBloc extends Bloc<VideoEvent, VideoState> {
   final VideoRepository _videoRepository;
   List<VideoModel> list = List<VideoModel>.empty(growable: true);
+
   VideoBloc({required VideoRepository videoRepository})
       : _videoRepository = videoRepository,
         super(VideoInitial()) {
@@ -22,9 +24,9 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
   void _onVideoLoading(VideoLoading event, Emitter<VideoState> emit) async {
     emit(VideoInitial());
     var result;
-    if(selectedTopIndex == 0){
+    if (selectedTopIndex == 0) {
       result = await _videoRepository.getFollowingVideos();
-    } else if (selectedTopIndex == 1){
+    } else if (selectedTopIndex == 1) {
       result = await _videoRepository.getVideo();
     } else {
       result = await _videoRepository.getPopularVideos();
@@ -49,8 +51,9 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     var result =
         await _videoRepository.likeDislike(event.videoId, event.isAdded);
   }
+
   void _onFollowUnfollow(FollowUnfollow event, Emitter<VideoState> emit) async {
     var result =
-    await _videoRepository.followUnfollow(event.publisherId, event.action);
+        await _videoRepository.followUnfollow(event.publisherId, event.action);
   }
 }

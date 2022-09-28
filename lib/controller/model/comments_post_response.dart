@@ -8,7 +8,9 @@ class CommentsPostResponse {
 
   CommentsPostResponse.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    data = json['data'] != null ? new CommentsResponse.fromJson(json['data']) : null;
+    data = json['data'] != null
+        ? new CommentsResponse.fromJson(json['data'])
+        : null;
     message = json['message'];
     error = json['error'];
   }
@@ -35,11 +37,11 @@ class CommentsResponse {
 
   CommentsResponse(
       {this.videoId,
-        this.commentBy,
-        this.comment,
-        this.updatedAt,
-        this.createdAt,
-        this.id});
+      this.commentBy,
+      this.comment,
+      this.updatedAt,
+      this.createdAt,
+      this.id});
 
   CommentsResponse.fromJson(Map<String, dynamic> json) {
     videoId = json['video_id'];
@@ -61,4 +63,3 @@ class CommentsResponse {
     return data;
   }
 }
-

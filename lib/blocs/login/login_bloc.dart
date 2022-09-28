@@ -1,15 +1,18 @@
 import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
+
 import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
-import 'package:get/get.dart';
+
 part 'login_event.dart';
 part 'login_state.dart';
 
@@ -18,6 +21,7 @@ var isLoggedIn = false.obs;
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginRepository _loginRepository;
+
   LoginBloc({required LoginRepository loginRepository})
       : _loginRepository = loginRepository,
         super(LoginInitial()) {
@@ -64,18 +68,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             var pref = await SharedPreferences.getInstance();
             UserModel user = UserModel.fromJson(result['data']['user']);
             userId.value = user.id;
+
             isLoggedIn.value = true;
 
-            UserController().getFollowers();
-            UserController().getFollowings();
-
-            VideosController().getAllVideos();
-            VideosController().getFollowingVideos();
-            VideosController().getUserVideos();
-
-            DiscoverController().getBanners();
-            DiscoverController().getTopHashTags();
-
+        
             await pref.setString(
               'currentUser',
               jsonEncode(user.toJson()),
@@ -121,18 +117,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             try {
               UserModel user = UserModel.fromJson(result['data']['user']);
               userId.value = user.id;
+             
               isLoggedIn.value = true;
 
-              UserController().getFollowers();
-              UserController().getFollowings();
-
-              VideosController().getAllVideos();
-              VideosController().getFollowingVideos();
-              VideosController().getUserVideos();
-
-              DiscoverController().getBanners();
-              DiscoverController().getTopHashTags();
-
+             
+           
               await pref.setString(
                 'currentUser',
                 jsonEncode(user.toJson()),
@@ -187,15 +176,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             userId.value = user.id;
             isLoggedIn.value = true;
 
-            UserController().getFollowers();
-            UserController().getFollowings();
-
-            VideosController().getAllVideos();
-            VideosController().getFollowingVideos();
-            VideosController().getUserVideos();
-
-            DiscoverController().getBanners();
-            DiscoverController().getTopHashTags();
 
             var pref = await SharedPreferences.getInstance();
             await pref.setString(

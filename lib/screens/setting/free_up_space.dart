@@ -13,7 +13,7 @@ class FreeUpSpace extends StatefulWidget {
   static Route route() {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) =>  const FreeUpSpace(),
+      builder: (context) => const FreeUpSpace(),
     );
   }
 }

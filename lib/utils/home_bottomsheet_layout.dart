@@ -18,33 +18,35 @@ class BottomSheetHome extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.only(top: 10, bottom: 10),
-            child:  Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-               IconButton(onPressed: (){}, icon: const Icon(
-                 Icons.whatsapp_rounded,
-                 color: Colors.green,
-                 size: 50,
-               )),
                 IconButton(
-                  onPressed: (){},
-                  icon:const Icon(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.whatsapp_rounded,
+                      color: Colors.green,
+                      size: 50,
+                    )),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(
                     Icons.facebook,
                     color: Colors.blue,
                     size: 50,
                   ),
                 ),
                 IconButton(
-                  onPressed: (){},
-                  icon:const Icon(
+                  onPressed: () {},
+                  icon: const Icon(
                     Icons.install_mobile,
                     color: Colors.green,
                     size: 50,
                   ),
                 ),
                 IconButton(
-                  onPressed: (){},
-                  icon:const Icon(
+                  onPressed: () {},
+                  icon: const Icon(
                     Icons.message,
                     color: Colors.green,
                     size: 50,
@@ -53,13 +55,17 @@ class BottomSheetHome extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           const Text(
             "Duet",
             style: TextStyle(
                 fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           const Text(
             "Report",
             style: TextStyle(

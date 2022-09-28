@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
 import 'package:thrill/rest/rest_api.dart';
+
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../utils/util.dart';
@@ -37,14 +38,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       resizeToAvoidBottomInset: false,
       body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
-          if(state is LoginValidated){
+          if (state is LoginValidated) {
             progressDialogue(context);
-          }else if (state is LoginStatus) {
+          } else if (state is LoginStatus) {
             closeDialogue(context);
             if (state.status) {
-              Navigator.pushNamed(context, '/resetPass',arguments: phoneCtr.text);
+              Navigator.pushNamed(context, '/resetPass',
+                  arguments: phoneCtr.text);
             } else {
-              showErrorToast(context,state.message);
+              showErrorToast(context, state.message);
             }
           }
         },
@@ -56,7 +58,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 width: getWidth(context),
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage('assets/splash.png'), fit: BoxFit.cover),
+                      image: AssetImage('assets/splash.png'),
+                      fit: BoxFit.cover),
                 ),
                 child: Column(
                   children: [
@@ -111,29 +114,36 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                       borderRadius: BorderRadius.circular(10)),
                                   focusedBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                          color: Colors.grey.shade300, width: 2),
+                                          color: Colors.grey.shade300,
+                                          width: 2),
                                       borderRadius: BorderRadius.circular(10)),
                                   constraints: BoxConstraints(
                                       maxWidth: getWidth(context) * .80),
-                                  prefixIcon: const Icon(Icons.phone_android_outlined, color: ColorManager.deepPurple,),
+                                  prefixIcon: const Icon(
+                                    Icons.phone_android_outlined,
+                                    color: ColorManager.deepPurple,
+                                  ),
                                   errorText: state is OnValidation
-                                  ? state.message
-                                  : null),
+                                      ? state.message
+                                      : null),
                             ),
                             const SizedBox(
                               height: 35,
                             ),
                             ElevatedButton(
                               onPressed: () {
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                if(phoneCtr.text.isNotEmpty){
-                                  if(phoneCtr.text.length==10){
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                                if (phoneCtr.text.isNotEmpty) {
+                                  if (phoneCtr.text.length == 10) {
                                     checkAndSendOTP();
                                   } else {
-                                    showErrorToast(context, "Invalid Phone Number");
+                                    showErrorToast(
+                                        context, "Invalid Phone Number");
                                   }
                                 } else {
-                                  showErrorToast(context, "Phone Number Required!");
+                                  showErrorToast(
+                                      context, "Phone Number Required!");
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -164,19 +174,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  checkAndSendOTP()async{
-    try{
+  checkAndSendOTP() async {
+    try {
       progressDialogue(context);
       var response = await RestApi.checkPhone(phoneCtr.text);
       var json = jsonDecode(response.body);
       closeDialogue(context);
-      if(json['status']){
-        await Navigator.pushNamed(context, '/otpVerification', arguments: phoneCtr.text).then((value){
-          if(value!=null){
+      if (json['status']) {
+        await Navigator.pushNamed(context, '/otpVerification',
+                arguments: phoneCtr.text)
+            .then((value) {
+          if (value != null) {
             bool isSuccess = value as bool;
-            if(isSuccess){
-              BlocProvider.of<LoginBloc>(context)
-                  .add(PhoneValidation(
+            if (isSuccess) {
+              BlocProvider.of<LoginBloc>(context).add(PhoneValidation(
                 phone: phoneCtr.text,
               ));
             } else {
@@ -189,7 +200,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       } else {
         showErrorToast(context, json['message']);
       }
-    } catch(e){
+    } catch (e) {
       closeDialogue(context);
       showErrorToast(context, e.toString());
     }

@@ -1,8 +1,9 @@
 class FollowerModel {
   int id;
-  String image, name, email, date,userName;
+  String image, name, email, date, userName;
 
-  FollowerModel(this.id, this.image, this.name, this.email, this.date,this.userName);
+  FollowerModel(
+      this.id, this.image, this.name, this.email, this.date, this.userName);
 
   factory FollowerModel.fromJson(dynamic json) {
     return FollowerModel(
@@ -11,7 +12,7 @@ class FollowerModel {
       json['name'] ?? '',
       json['email'] ?? '',
       json['created_at'] ?? '',
-      json['username']??'',
+      json['username'] ?? '',
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import '../screens/auth/login.dart';
 import 'app_logs.dart';
 
@@ -26,8 +28,10 @@ class RestClient {
     return result;
   }
 
-  static Future postData(String url, {Map<String,
-      String>? headers, Object? body, bool skip401 = false}) async {
+  static Future postData(String url,
+      {Map<String, String>? headers,
+      Object? body,
+      bool skip401 = false}) async {
     var result;
     Log.console('Http.Post Url: $url');
     if (headers != null) {
@@ -66,7 +70,7 @@ class RestClient {
           if (response.statusCode == 401) {
             if (!skip401) {
               Future.delayed(const Duration(milliseconds: 400), () async {
-                 const String routeName = '/login';
+                const String routeName = '/login';
                 MaterialPageRoute(
                   settings: const RouteSettings(name: routeName),
                   builder: (context) => const LoginScreen(),

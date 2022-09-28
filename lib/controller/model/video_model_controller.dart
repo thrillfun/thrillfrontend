@@ -53,44 +53,44 @@ class Data {
 
   Data(
       {this.id,
-        this.video,
-        this.description,
-        this.sound,
-        this.soundName,
-        this.soundCategoryName,
-        this.filter,
-        this.likes,
-        this.views,
-        this.gifImage,
-        this.speed,
-        this.comments,
-        this.hashtags,
-        this.isDuet,
-        this.duetFrom,
-        this.isDuetable,
-        this.isCommentable,
-        this.soundOwner,
-        this.user});
+      this.video,
+      this.description,
+      this.sound,
+      this.soundName,
+      this.soundCategoryName,
+      this.filter,
+      this.likes,
+      this.views,
+      this.gifImage,
+      this.speed,
+      this.comments,
+      this.hashtags,
+      this.isDuet,
+      this.duetFrom,
+      this.isDuetable,
+      this.isCommentable,
+      this.soundOwner,
+      this.user});
 
   Data.fromJson(Map<String, dynamic> json) {
-    id = json['id']??0;
-    video = json['video']??"";
-    description = json['description']??"";
-    sound = json['sound']??"";
-    soundName = json['sound_name']??'';
-    soundCategoryName = json['sound_category_name']??'';
-    filter = json['filter']??"";
-    likes = json['likes']??0;
-    views = json['views']??0;
-    gifImage = json['gif_image']??[];
-    speed = json['speed']??'0';
-    comments = json['comments']??[];
+    id = json['id'] ?? 0;
+    video = json['video'] ?? "";
+    description = json['description'] ?? "";
+    sound = json['sound'] ?? "";
+    soundName = json['sound_name'] ?? '';
+    soundCategoryName = json['sound_category_name'] ?? '';
+    filter = json['filter'] ?? "";
+    likes = json['likes'] ?? 0;
+    views = json['views'] ?? 0;
+    gifImage = json['gif_image'] ?? [];
+    speed = json['speed'] ?? '0';
+    comments = json['comments'] ?? [];
     hashtags = json['hashtags'] ?? [];
-    isDuet = json['is_duet']??'no';
-    duetFrom = json['duet_from']??'';
-    isDuetable = json['is_duetable']??'yes';
-    isCommentable = json['is_commentable']??"yes";
-    soundOwner = json['sound_owner']??'';
+    isDuet = json['is_duet'] ?? 'no';
+    duetFrom = json['duet_from'] ?? '';
+    isDuetable = json['is_duetable'] ?? 'yes';
+    isCommentable = json['is_commentable'] ?? "yes";
+    soundOwner = json['sound_owner'] ?? '';
     user = json['user'] != null ? User.fromJson(json['user']) : null;
   }
 
@@ -152,32 +152,32 @@ class User {
 
   User(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.phone,
-        this.avatar,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.firstName,
-        this.lastName,
-        this.gender,
-        this.websiteUrl,
-        this.bio,
-        this.youtube,
-        this.facebook,
-        this.instagram,
-        this.twitter,
-        this.firebaseToken,
-        this.referralCount,
-        this.following,
-        this.followers,
-        this.likes,
-        this.levels,
-        this.totalVideos,
-        this.boxTwo,
-        this.boxThree});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.phone,
+      this.avatar,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.firstName,
+      this.lastName,
+      this.gender,
+      this.websiteUrl,
+      this.bio,
+      this.youtube,
+      this.facebook,
+      this.instagram,
+      this.twitter,
+      this.firebaseToken,
+      this.referralCount,
+      this.following,
+      this.followers,
+      this.likes,
+      this.levels,
+      this.totalVideos,
+      this.boxTwo,
+      this.boxThree});
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -204,7 +204,7 @@ class User {
     followers = json['followers'];
     likes = json['likes'];
     levels =
-    json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
+        json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
     totalVideos = json['total_videos'];
     boxTwo = json['box_two'];
     boxThree = json['box_three'];
@@ -266,4 +266,3 @@ class Levels {
     return data;
   }
 }
-

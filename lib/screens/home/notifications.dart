@@ -1,10 +1,12 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/notification_model.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
+
 import '../../common/strings.dart';
 import '../../widgets/video_item.dart';
 

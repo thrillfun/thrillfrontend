@@ -22,4 +22,3 @@ class DiscoverModel {
     return data;
   }
 }
-

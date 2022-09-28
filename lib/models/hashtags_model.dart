@@ -1,5 +1,5 @@
 class HashtagModel {
-  int id,is_active;
+  int id, is_active;
   String name;
 
   HashtagModel(this.id, this.is_active, this.name);

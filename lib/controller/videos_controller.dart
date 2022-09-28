@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -7,14 +8,11 @@ import 'package:thrill/controller/data_controller.dart';
 import 'package:thrill/controller/model/liked_videos_model.dart';
 import 'package:thrill/controller/model/own_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
-import 'package:thrill/controller/model/user_video_model.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/models/user.dart';
-import 'package:thrill/screens/following_and_followers.dart';
-import 'package:thrill/screens/profile/view_profile.dart';
+import 'package:thrill/models/videos_post_response.dart';
+import 'package:thrill/screens/home/home.dart';
 import 'package:thrill/utils/util.dart';
-
-import 'model/video_model_controller.dart';
 
 class VideosController extends GetxController {
   var usersController = Get.find<UserController>();
@@ -23,12 +21,15 @@ class VideosController extends GetxController {
   var isLoading = false.obs;
   var videosLoading = false.obs;
   var isFollowingLoading = false.obs;
+  var isError = false.obs;
+
   RxList<Videos> videoModelsController = RxList();
   RxList<PublicVideos> publicVideosList = RxList();
   RxList<PublicVideos> followingVideosList = RxList();
 
   var otherUserVideos = RxList<Videos>();
   var likedVideos = RxList<LikedVideos>();
+
   VideosController() {
     getUserVideos();
     getAllVideos();
@@ -103,10 +104,7 @@ class VideosController extends GetxController {
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var currentUser = instance.getString('currentUser');
-    UserModel? current;
-    if (currentUser != null) {
-      current = UserModel.fromJson(jsonDecode(currentUser));
-    }
+
     var response = await http.get(
       Uri.parse('http://3.129.172.46/dev/api/video/following'),
       headers: {"Authorization": "Bearer $token"},
@@ -175,13 +173,12 @@ class VideosController extends GetxController {
           OwnVideosModel.fromJson(json.decode(response.body)).data!.obs;
 
       videosLoading.value = false;
-      update();
     } on Exception catch (e) {
+      log(e.toString());
       errorToast(OwnVideosModel.fromJson(json.decode(response.body))
           .message
           .toString());
       videosLoading.value = false;
-      update();
     }
   }
 
@@ -239,6 +236,79 @@ class VideosController extends GetxController {
           .toString());
       isLoading.value = false;
       update();
+    }
+  }
+
+  postVideo(
+      String videoUrl,
+      String sound,
+      String soundName,
+      String category,
+      String hashtags,
+      String visibility,
+      int isCommentAllowed,
+      String description,
+      String filterImg,
+      String language,
+      String gifName,
+      String speed,
+      bool isDuetable,
+      bool isCommentable,
+      String? duetFrom,
+      bool isDuet,
+      int soundOwnerId) async {
+    isLoading.value = true;
+    var instance = await SharedPreferences.getInstance();
+    var token = instance.getString('currentToken');
+    var currentUser = instance.getString('currentUser');
+    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
+
+    var response = await http.post(
+      Uri.parse('http://3.129.172.46/dev/api/video/post'),
+      headers: {"Authorization": "Bearer $token"},
+      body: {
+        'user_id': current.id.toString(),
+        'video': videoUrl,
+        'sound': sound,
+        'sound_name': soundName,
+        'filter': filterImg,
+        'language': language,
+        'category': category,
+        'hashtags': hashtags,
+        'visibility': visibility,
+        'is_comment_allowed': isCommentAllowed.toString(),
+        'description': description,
+        'gif_image': gifName,
+        'speed': speed,
+        'is_duetable': isDuetable ? "Yes" : "No",
+        'is_commentable': isCommentable ? "Yes" : "No",
+        'is_duet': isDuet ? "Yes" : "No",
+        'duet_from': duetFrom ?? '',
+        'sound_owner': soundOwnerId.toString()
+      },
+    ).timeout(const Duration(seconds: 60));
+
+    if (response.statusCode == 200) {
+      try {
+        // likedVideos =
+        //     VideoPostResponse.fromJson(json.decode(response.body)).data!.obs;
+        successToast(VideoPostResponse.fromJson(json.decode(response.body))
+            .message
+            .toString());
+        isLoading.value = false;
+        update();
+
+        videosController.getAllVideos();
+      } catch (e) {
+        errorToast(VideoPostResponse.fromJson(json.decode(response.body))
+            .message
+            .toString());
+        isLoading.value = false;
+        update();
+      }
+    } else {
+      print(response.body);
+      errorToast("${response.body}");
     }
   }
 }

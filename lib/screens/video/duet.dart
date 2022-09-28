@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:video_player/video_player.dart';
+
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../main.dart';
@@ -24,16 +26,18 @@ class RecordDuet extends StatefulWidget {
   State<RecordDuet> createState() => _RecordDuetState();
 
   static const String routeName = '/recordDuet';
+
   static Route route(VideoModel v) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) => RecordDuet(videoModel: v,),
+      builder: (context) => RecordDuet(
+        videoModel: v,
+      ),
     );
   }
 }
 
 class _RecordDuetState extends State<RecordDuet> {
-
   CameraController? controller;
   File? _videoFile;
   VideoPlayerController? videoController;
@@ -56,7 +60,7 @@ class _RecordDuetState extends State<RecordDuet> {
   String duetFileName = '';
 
   @override
-  initState(){
+  initState() {
     super.initState();
     onNewCameraSelected(cameras[0]);
     downloadVideo();
@@ -70,10 +74,9 @@ class _RecordDuetState extends State<RecordDuet> {
       'assets/filter7.gif'
     });
     videoController = VideoPlayerController.network(
-        widget.videoModel.duet_from.isEmpty?
-        '${RestUrl.videoUrl}${widget.videoModel.video}':
-        '${RestUrl.videoUrl}${widget.videoModel.duet_from}'
-    )
+        widget.videoModel.duet_from.isEmpty
+            ? '${RestUrl.videoUrl}${widget.videoModel.video}'
+            : '${RestUrl.videoUrl}${widget.videoModel.duet_from}')
       ..initialize().then((value) {
         if (videoController!.value.isInitialized) {
           videoController!.play();
@@ -83,9 +86,9 @@ class _RecordDuetState extends State<RecordDuet> {
           if (mounted) setState(() {});
         }
       });
-    try{
+    try {
       reelsPlayerController?.pause();
-    }catch(_){}
+    } catch (_) {}
   }
 
   @override
@@ -98,194 +101,205 @@ class _RecordDuetState extends State<RecordDuet> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white54,
-      body: videoController?.value.isInitialized??false?
-      SafeArea(
-          child: Column(
-            children: [
-              SliderTheme(
-                data: SliderThemeData(
-                  thumbShape: SliderComponentShape.noThumb,
-                  overlayShape: SliderComponentShape.noThumb,
-                  trackHeight: 2,
-                ),
-                child: Slider(
-                    value:sliderValue,
-                    max: sliderMaxValue,
-                    activeColor: ColorManager.cyan,
-                    inactiveColor: Colors.transparent,
-                    onChanged: (double val){}
-                ),
-              ),
-              SizedBox(
-                height: getHeight(context)*.80,
-                width: getWidth(context),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Row(
+        backgroundColor: Colors.white54,
+        body: videoController?.value.isInitialized ?? false
+            ? SafeArea(
+                child: Column(
+                children: [
+                  SliderTheme(
+                    data: SliderThemeData(
+                      thumbShape: SliderComponentShape.noThumb,
+                      overlayShape: SliderComponentShape.noThumb,
+                      trackHeight: 2,
+                    ),
+                    child: Slider(
+                        value: sliderValue,
+                        max: sliderMaxValue,
+                        activeColor: ColorManager.cyan,
+                        inactiveColor: Colors.transparent,
+                        onChanged: (double val) {}),
+                  ),
+                  SizedBox(
+                    height: getHeight(context) * .80,
+                    width: getWidth(context),
+                    child: Stack(
+                      alignment: Alignment.center,
                       children: [
-                        videoController != null &&
-                            videoController!.value.isInitialized
-                            ? SizedBox(
-                          width: getWidth(context)/2,
-                              child: AspectRatio(
-                                aspectRatio: videoController!.value.aspectRatio,
-                                child: VideoPlayer(videoController!),
-                              ),
-                            )
-                            : const Center(child: CircularProgressIndicator()),
-                        isCameraInitialized && _videoFile == null
-                            ? SizedBox(
-                              width: getWidth(context)/2,
-                              child: AspectRatio(
-                              aspectRatio: 1/controller!.value.aspectRatio,
-                              child: controller!.buildPreview()),
-                            )
-                            : const Center(child: CircularProgressIndicator()),
+                        Row(
+                          children: [
+                            videoController != null &&
+                                    videoController!.value.isInitialized
+                                ? SizedBox(
+                                    width: getWidth(context) / 2,
+                                    child: AspectRatio(
+                                      aspectRatio:
+                                          videoController!.value.aspectRatio,
+                                      child: VideoPlayer(videoController!),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: CircularProgressIndicator()),
+                            isCameraInitialized && _videoFile == null
+                                ? SizedBox(
+                                    width: getWidth(context) / 2,
+                                    child: AspectRatio(
+                                        aspectRatio:
+                                            1 / controller!.value.aspectRatio,
+                                        child: controller!.buildPreview()),
+                                  )
+                                : const Center(
+                                    child: CircularProgressIndicator()),
+                          ],
+                        ),
+                        Visibility(
+                          visible: !_isRecordingInProgress,
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                color: Colors.white,
+                                icon: const Icon(Icons.close)),
+                          ),
+                        )
                       ],
                     ),
-                    Visibility(
-                      visible: !_isRecordingInProgress,
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                            onPressed: (){Navigator.pop(context);},
-                            color: Colors.white,
-                            icon: const Icon(Icons.close)
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            if (controller?.value.flashMode ==
+                                FlashMode.torch) {
+                              controller
+                                  ?.setFlashMode(FlashMode.off)
+                                  .then((value) => setState(() {}));
+                            } else {
+                              controller
+                                  ?.setFlashMode(FlashMode.torch)
+                                  .then((value) => setState(() {}));
+                            }
+                          },
+                          iconSize: 40,
+                          padding: const EdgeInsets.only(left: 20),
+                          icon: SvgPicture.asset(
+                              controller?.value.flashMode == FlashMode.torch
+                                  ? 'assets/flash_on.svg'
+                                  : 'assets/flash_of.svg')),
+                      _videoFile == null
+                          ? GestureDetector(
+                              onTap: () async {
+                                if (_isRecordingInProgress) {
+                                  pauseVideoRecording();
+                                  // XFile? rawVideo = await stopVideoRecording();
+                                  // //await audioPlayer.stop();
+                                  // autoStopRecordingTimer?.cancel();
+                                  // File videoFile = File(rawVideo!.path);
+                                  // int currentUnix = DateTime.now().millisecondsSinceEpoch;
+                                  // Directory? directory;
+                                  // try {
+                                  //   if (Platform.isIOS) {
+                                  //     directory = await getApplicationDocumentsDirectory();
+                                  //   } else {
+                                  //     directory = Directory('/storage/emulated/0/Download');
+                                  //   }
+                                  // } catch (_) {}
+                                  // String fileFormat =
+                                  //     videoFile.path.split('.').last;
+                                  //
+                                  // _videoFile = await videoFile.copy(
+                                  //     '${directory!.path}/$currentUnix.$fileFormat');
+                                  // setState(() {
+                                  //   sliderValue=0;
+                                  //   mainNameFirst = '$currentUnix.$fileFormat';
+                                  // });
+                                  // //_startVideoPlayer(_videoFile!.path);
+                                  // PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
+                                  // Navigator.pushReplacementNamed(context, "/postVideo", arguments: m);
+                                } else {
+                                  if (sliderValue <= 0) {
+                                    await startVideoRecording();
+                                  } else {
+                                    resumeVideoRecording();
+                                  }
+                                }
+                              },
+                              child: VxCircle(
+                                radius: 70,
+                                backgroundColor: _isRecordingInProgress
+                                    ? Colors.red
+                                    : Colors.white,
+                                border: Border.all(
+                                    color: _isRecordingInProgress
+                                        ? Colors.white
+                                        : Colors.black,
+                                    width: 5),
+                              ),
+                            )
+                          : GestureDetector(
+                              onTap: () async {
+                                if (_isPlayPause) {
+                                  videoController!.pause();
+                                } else {
+                                  videoController!.play();
+                                }
+                                setState(() {
+                                  _isPlayPause = !_isPlayPause;
+                                });
+                              },
+                              child: VxCircle(
+                                radius: 70,
+                                backgroundColor: Colors.white,
+                                child: Icon(_isPlayPause
+                                    ? Icons.pause
+                                    : Icons.play_arrow),
+                                border:
+                                    Border.all(color: Colors.black, width: 5),
+                              ),
+                            ),
+                      IconButton(
+                        onPressed: () {
+                          if (!_isRecordingInProgress) {
+                            setState(() {
+                              isCameraInitialized = false;
+                            });
+                            onNewCameraSelected(
+                              cameras[_isRearCameraSelected ? 0 : 1],
+                            );
+                            setState(() {
+                              _isRearCameraSelected = !_isRearCameraSelected;
+                            });
+                          }
+                        },
+                        iconSize: 40,
+                        padding: const EdgeInsets.only(right: 20),
+                        icon: Icon(
+                          _isRearCameraSelected
+                              ? Icons.camera_front
+                              : Icons.camera_rear,
+                          color: Colors.white,
                         ),
                       ),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        if(controller?.value.flashMode==FlashMode.torch){
-                          controller?.setFlashMode(FlashMode.off).then((value) => setState((){}));
-                        } else {
-                          controller?.setFlashMode(FlashMode.torch).then((value) => setState((){}));
-                        }
-                      },
-                      iconSize: 40,
-                      padding: const EdgeInsets.only(left: 20),
-                      icon: SvgPicture.asset(controller?.value.flashMode==FlashMode.torch?'assets/flash_on.svg':'assets/flash_of.svg')),
-                        _videoFile == null
-                      ? GestureDetector(
-                    onTap: () async {
-                      if (_isRecordingInProgress) {
-                        pauseVideoRecording();
-                        // XFile? rawVideo = await stopVideoRecording();
-                        // //await audioPlayer.stop();
-                        // autoStopRecordingTimer?.cancel();
-                        // File videoFile = File(rawVideo!.path);
-                        // int currentUnix = DateTime.now().millisecondsSinceEpoch;
-                        // Directory? directory;
-                        // try {
-                        //   if (Platform.isIOS) {
-                        //     directory = await getApplicationDocumentsDirectory();
-                        //   } else {
-                        //     directory = Directory('/storage/emulated/0/Download');
-                        //   }
-                        // } catch (_) {}
-                        // String fileFormat =
-                        //     videoFile.path.split('.').last;
-                        //
-                        // _videoFile = await videoFile.copy(
-                        //     '${directory!.path}/$currentUnix.$fileFormat');
-                        // setState(() {
-                        //   sliderValue=0;
-                        //   mainNameFirst = '$currentUnix.$fileFormat';
-                        // });
-                        // //_startVideoPlayer(_videoFile!.path);
-                        // PostData m = PostData(speed: '1', filePath: _videoFile!.path, filterName: filterImage, addSoundModel: addSoundModel, isDuet: true, downloadedDuetFilePath: duetFile?.path);
-                        // Navigator.pushReplacementNamed(context, "/postVideo", arguments: m);
-                      } else {
-                        if(sliderValue<=0){
-                          await startVideoRecording();
-                        } else {
-                          resumeVideoRecording();
-                        }
-                      }
-                    },
-                    child: VxCircle(
-                      radius: 70,
-                      backgroundColor: _isRecordingInProgress
-                          ? Colors.red
-                          : Colors.white,
-                      border: Border.all(
-                          color: _isRecordingInProgress
-                              ? Colors.white
-                              : Colors.black,
-                          width: 5),
-                    ),
+                    ],
                   )
-                      : GestureDetector(
-                    onTap: () async {
-                      if (_isPlayPause) {
-                        videoController!.pause();
-                      } else {
-                        videoController!.play();
-                      }
-                      setState(() {
-                        _isPlayPause = !_isPlayPause;
-                      });
-                    },
-                    child: VxCircle(
-                      radius: 70,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                          _isPlayPause ? Icons.pause : Icons.play_arrow),
-                      border: Border.all(color: Colors.black, width: 5),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      if (!_isRecordingInProgress) {
-                        setState(() {
-                          isCameraInitialized = false;
-                        });
-                        onNewCameraSelected(
-                          cameras[_isRearCameraSelected ? 0 : 1],
-                        );
-                        setState(() {
-                          _isRearCameraSelected = !_isRearCameraSelected;
-                        });
-                      }
-                    },
-                    iconSize: 40,
-                    padding: const EdgeInsets.only(right: 20),
-                    icon: Icon(
-                      _isRearCameraSelected
-                          ? Icons.camera_front
-                          : Icons.camera_rear,
-                      color: Colors.white,
-                    ),
-                  ),
                 ],
-              )
-            ],
-          )
-      ):
-          const Center(
-            child: CircularProgressIndicator(),
-          )
-    );
+              ))
+            : const Center(
+                child: CircularProgressIndicator(),
+              ));
   }
 
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     final previousCameraController = controller;
     // Instantiating the camera controller
     final CameraController cameraController = CameraController(
-      cameraDescription,
-      ResolutionPreset.high,
-      imageFormatGroup: ImageFormatGroup.jpeg,
-      enableAudio: false
-    );
+        cameraDescription, ResolutionPreset.high,
+        imageFormatGroup: ImageFormatGroup.jpeg, enableAudio: false);
 
     // Dispose the previous controller
     await previousCameraController?.dispose();
@@ -326,9 +340,10 @@ class _RecordDuetState extends State<RecordDuet> {
       videoController!.seekTo(const Duration(seconds: 0));
       videoController!.play();
       await cameraController!.startVideoRecording();
-      autoStopRecordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-        if(_isRecordingInProgress){
-          if(sliderValue>=videoController!.value.duration.inSeconds){
+      autoStopRecordingTimer =
+          Timer.periodic(const Duration(seconds: 1), (timer) async {
+        if (_isRecordingInProgress) {
+          if (sliderValue >= videoController!.value.duration.inSeconds) {
             autoStopRecordingTimer?.cancel();
             XFile? rawVideo = await stopVideoRecording();
             File videoFile = File(rawVideo!.path);
@@ -336,17 +351,16 @@ class _RecordDuetState extends State<RecordDuet> {
             Directory? directory;
             try {
               if (Platform.isIOS) {
-                directory =
-                await getApplicationDocumentsDirectory();
+                directory = await getApplicationDocumentsDirectory();
               } else {
                 directory = Directory('/storage/emulated/0/Download');
               }
             } catch (_) {}
             String fileFormat = videoFile.path.split('.').last;
-            _videoFile = await videoFile.copy(
-                '${directory!.path}/$currentUnix.$fileFormat');
+            _videoFile = await videoFile
+                .copy('${directory!.path}/$currentUnix.$fileFormat');
             setState(() {
-              mainNameFirst='$currentUnix.$fileFormat';
+              mainNameFirst = '$currentUnix.$fileFormat';
               //sliderValue=0;
             });
             //_startVideoPlayer(_videoFile!.path);
@@ -354,7 +368,7 @@ class _RecordDuetState extends State<RecordDuet> {
           } else {
             //videoDuration+=const Duration(seconds: 1);
             setState(() {
-              sliderValue+=1;
+              sliderValue += 1;
             });
           }
         }
@@ -385,32 +399,33 @@ class _RecordDuetState extends State<RecordDuet> {
     }
   }
 
-  downloadVideo()async{
-    if(widget.videoModel.duet_from.isNotEmpty){
+  downloadVideo() async {
+    if (widget.videoModel.duet_from.isNotEmpty) {
       duetFile = File('$saveCacheDirectory${widget.videoModel.duet_from}');
       duetFileName = widget.videoModel.duet_from.split('.').first;
     } else {
       duetFile = File('$saveCacheDirectory${widget.videoModel.video}');
       duetFileName = widget.videoModel.video.split('.').first;
     }
-    try{
+    try {
       // if(duetFile!.existsSync()){
       //   setState(()=>videoDownloaded = true);
       // } else {
-      if(duetFile!.existsSync()) duetFile!.deleteSync();
-        await FileSupport().downloadCustomLocation(
-          url: '${RestUrl.videoUrl}${widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from}',
-          path: saveCacheDirectory,
-          filename: duetFileName,
-          extension: ".mp4",
-          progress: (progress) async {
-            downloadProgress=progress;
-            debugPrint(progress);
-          },
-        );
-        setState(()=>videoDownloaded = true);
+      if (duetFile!.existsSync()) duetFile!.deleteSync();
+      await FileSupport().downloadCustomLocation(
+        url:
+            '${RestUrl.videoUrl}${widget.videoModel.duet_from.isEmpty ? widget.videoModel.video : widget.videoModel.duet_from}',
+        path: saveCacheDirectory,
+        filename: duetFileName,
+        extension: ".mp4",
+        progress: (progress) async {
+          downloadProgress = progress;
+          debugPrint(progress);
+        },
+      );
+      setState(() => videoDownloaded = true);
       //}
-    } catch(e){
+    } catch (e) {
       Navigator.pop(context);
       showErrorToast(context, e.toString());
       //setState(()=>videoDownloaded = false);
@@ -424,7 +439,7 @@ class _RecordDuetState extends State<RecordDuet> {
     try {
       await controller!.pauseVideoRecording();
       await videoController!.pause();
-      setState(()=>_isRecordingInProgress=false);
+      setState(() => _isRecordingInProgress = false);
     } on CameraException {
       //ss
     }
@@ -438,15 +453,15 @@ class _RecordDuetState extends State<RecordDuet> {
     try {
       await controller!.resumeVideoRecording();
       await videoController!.play();
-      setState(()=>_isRecordingInProgress=true);
+      setState(() => _isRecordingInProgress = true);
     } on CameraException {
       // print('Error resuming video recording: $e');
     }
   }
 
-  navigateOrWait()async{
+  navigateOrWait() async {
     videoController?.pause();
-    if(downloadProgress=='100'){
+    if (downloadProgress == '100') {
       PostData m = PostData(
           speed: '1',
           filePath: _videoFile!.path,
@@ -454,18 +469,24 @@ class _RecordDuetState extends State<RecordDuet> {
           addSoundModel: addSoundModel,
           isDuet: true,
           duetPath: duetFile?.path,
-        duetFrom: widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from,
-        isDefaultSound: true, isUploadedFromGallery: false,
-        trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
-          duetSoundName: widget.videoModel.sound_name.isEmpty?null:widget.videoModel.sound_name,
-        duetSound: widget.videoModel.sound.isEmpty?null:widget.videoModel.sound
-      );
+          duetFrom: widget.videoModel.duet_from.isEmpty
+              ? widget.videoModel.video
+              : widget.videoModel.duet_from,
+          isDefaultSound: true,
+          isUploadedFromGallery: false,
+          trimStart: 0,
+          trimEnd: videoController!.value.duration.inSeconds,
+          duetSoundName: widget.videoModel.sound_name.isEmpty
+              ? null
+              : widget.videoModel.sound_name,
+          duetSound:
+              widget.videoModel.sound.isEmpty ? null : widget.videoModel.sound);
       await Navigator.pushNamed(context, "/preview", arguments: m);
       Navigator.pop(context);
     } else {
       progressDialogue(context);
       Timer.periodic(const Duration(seconds: 1), (timer) async {
-        if(downloadProgress=='100'){
+        if (downloadProgress == '100') {
           closeDialogue(context);
           timer.cancel();
           PostData m = PostData(
@@ -475,13 +496,20 @@ class _RecordDuetState extends State<RecordDuet> {
               addSoundModel: addSoundModel,
               isDuet: true,
               duetPath: duetFile?.path,
-            duetFrom: widget.videoModel.duet_from.isEmpty?widget.videoModel.video:widget.videoModel.duet_from,
-            isDefaultSound: true, isUploadedFromGallery: false,
-            trimStart: 0, trimEnd: videoController!.value.duration.inSeconds,
-              duetSoundName: widget.videoModel.sound_name.isEmpty?null:widget.videoModel.sound_name,
-              duetSound: widget.videoModel.sound.isEmpty?null:widget.videoModel.sound
-          );
-          await Navigator.pushNamed(context, "/preview",arguments: m);
+              duetFrom: widget.videoModel.duet_from.isEmpty
+                  ? widget.videoModel.video
+                  : widget.videoModel.duet_from,
+              isDefaultSound: true,
+              isUploadedFromGallery: false,
+              trimStart: 0,
+              trimEnd: videoController!.value.duration.inSeconds,
+              duetSoundName: widget.videoModel.sound_name.isEmpty
+                  ? null
+                  : widget.videoModel.sound_name,
+              duetSound: widget.videoModel.sound.isEmpty
+                  ? null
+                  : widget.videoModel.sound);
+          await Navigator.pushNamed(context, "/preview", arguments: m);
           Navigator.pop(context);
         }
       });

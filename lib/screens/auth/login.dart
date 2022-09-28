@@ -2,12 +2,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
 import 'package:thrill/widgets/video_item.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../utils/util.dart';
@@ -68,8 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushNamedAndRemoveUntil(
                       context, '/', (route) => false);
                 } else {
-
-                   showErrorToast(context,state.message);
+                  showErrorToast(context, state.message);
                 }
               }
             },

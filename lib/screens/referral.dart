@@ -1,12 +1,14 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 import '../common/color.dart';
 import '../common/strings.dart';
 import '../models/user.dart';
@@ -34,12 +36,12 @@ class _ReferralState extends State<Referral> {
   String referralCode = '';
 
   @override
-  initState(){
+  initState() {
     super.initState();
     getUserData();
-    try{
+    try {
       reelsPlayerController?.pause();
-    }catch(_){}
+    } catch (_) {}
   }
 
   @override
@@ -84,8 +86,8 @@ class _ReferralState extends State<Referral> {
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
                   TextSpan(
                       text: "$referralCount",
-                      style:
-                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 25)),
                 ])),
             const Spacer(),
             Container(
@@ -146,14 +148,18 @@ class _ReferralState extends State<Referral> {
                         )),
                         IconButton(
                             onPressed: () {
-                              try{
-                                Clipboard.setData(ClipboardData(text: userModel?.referral_code)).then((_){
-                                  showSuccessToast(context, "Referral Code Copied to Clipboard!");
+                              try {
+                                Clipboard.setData(ClipboardData(
+                                        text: userModel?.referral_code))
+                                    .then((_) {
+                                  showSuccessToast(context,
+                                      "Referral Code Copied to Clipboard!");
                                 });
-                              } catch(e){
+                              } catch (e) {
                                 showErrorToast(context, e.toString());
                               }
-                            }, icon: const Icon(Icons.copy))
+                            },
+                            icon: const Icon(Icons.copy))
                       ],
                     ),
                   ),
@@ -194,10 +200,12 @@ class _ReferralState extends State<Referral> {
                   ElevatedButton(
                       onPressed: () {
                         //share();
-                        if(checkBoxValue){
-                          Share.share("Hi, I am inviting you to Thrill a great short video app. Use my referral code: ${userModel?.referral_code} to earn rewards.");
+                        if (checkBoxValue) {
+                          Share.share(
+                              "Hi, I am inviting you to Thrill a great short video app. Use my referral code: ${userModel?.referral_code} to earn rewards.");
                         } else {
-                          showErrorToast(context, "You must agree to Privacy Policy!");
+                          showErrorToast(
+                              context, "You must agree to Privacy Policy!");
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -463,6 +471,6 @@ class _ReferralState extends State<Referral> {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
     UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
-    setState(()=> userModel = current);
+    setState(() => userModel = current);
   }
 }

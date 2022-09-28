@@ -6,20 +6,23 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' as transition;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/controller/bindings.dart';
 import 'package:thrill/repository/video/video_repository.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/video_item.dart';
+
 import 'config/app_router.dart';
 import 'config/theme.dart';
 import 'screens/screen.dart';
 
 List<CameraDescription> cameras = [];
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+GlobalKey key = GlobalKey();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,9 +52,12 @@ void main() async {
         body: event.notification?.body ?? "");
   });
   getTempDirectory();
-  runApp(GetMaterialApp(
+  SystemChrome.setEnabledSystemUIOverlays([]);
+
+  runApp(transition.GetMaterialApp(
+    defaultTransition: transition.Transition.cupertino,
     initialBinding: DataBindings(),
-    home: const MyApp(),
+    home: ShowCaseWidget(builder: Builder(builder: (context) => const MyApp())),
   ));
 }
 

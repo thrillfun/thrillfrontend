@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +10,7 @@ import 'package:thrill/blocs/profile/profile_bloc.dart';
 import 'package:thrill/models/user.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../models/social_url_model.dart';
@@ -38,7 +40,6 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-
   String dropDownGender = '';
   TextEditingController controller = TextEditingController();
   TextEditingController nameCtr = TextEditingController();
@@ -60,16 +61,17 @@ class _EditProfileState extends State<EditProfile> {
       lastNameCtr.text = widget.user.last_name!;
       websiteCtr.text = widget.user.website_url!;
       bioCtr.text = widget.user.bio!;
-      dropDownGender=widget.user.gender!.isEmpty?"Male":widget.user.gender!;
+      dropDownGender =
+          widget.user.gender!.isEmpty ? "Male" : widget.user.gender!;
       socialList.add(SocialUrlModel('youtube', widget.user.youtube!));
       socialList.add(SocialUrlModel('facebook', widget.user.facebook!));
       socialList.add(SocialUrlModel('instagram', widget.user.instagram!));
       socialList.add(SocialUrlModel('twitter', widget.user.twitter!));
-      genderList.addAll({"Male","Female","Other"});
+      genderList.addAll({"Male", "Female", "Other"});
     });
-    try{
+    try {
       reelsPlayerController?.pause();
-    }catch(_){}
+    } catch (_) {}
     super.initState();
   }
 
@@ -99,8 +101,9 @@ class _EditProfileState extends State<EditProfile> {
           } else if (state is ValidationStatus) {
             closeDialogue(context);
             if (state.status) {
-              BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
-              await Future.delayed(const Duration(milliseconds: 50)).then((value) {
+              BlocProvider.of<ProfileBloc>(context).add(const ProfileLoading());
+              await Future.delayed(const Duration(milliseconds: 50))
+                  .then((value) {
                 Navigator.pop(context, "/profile");
               });
               showSuccessToast(context, state.message);
@@ -123,34 +126,37 @@ class _EditProfileState extends State<EditProfile> {
                       padding: const EdgeInsets.all(2),
                       height: 120,
                       width: 120,
-                      decoration:  BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: ColorManager.spinColorDivider),
+                        border:
+                            Border.all(color: ColorManager.spinColorDivider),
                       ),
                       child: image != null
                           ? ClipOval(
-                            child: Image.file(
+                              child: Image.file(
                                 image!,
                                 fit: BoxFit.cover,
-                              height: 100,width: 100,
+                                height: 100,
+                                width: 100,
                               ),
-                          )
+                            )
                           : widget.user.avatar.isEmptyOrNull
                               ? Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: SvgPicture.asset('assets/profile.svg'),
-                              )
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: SvgPicture.asset('assets/profile.svg'),
+                                )
                               : ClipOval(
-                                child: CachedNetworkImage(
+                                  child: CachedNetworkImage(
                                     fit: BoxFit.cover,
-                                    height: 120,width: 120,
+                                    height: 120,
+                                    width: 120,
                                     imageUrl:
                                         '${RestUrl.profileUrl}${widget.user.avatar}',
                                     placeholder: (a, b) => const Center(
                                       child: CircularProgressIndicator(),
                                     ),
                                   ),
-                              ),
+                                ),
                     ),
                   ),
                   const SizedBox(
@@ -173,7 +179,7 @@ class _EditProfileState extends State<EditProfile> {
                     decoration: InputDecoration(
                         isDense: true,
                         constraints:
-                        BoxConstraints(maxWidth: getWidth(context) * .90),
+                            BoxConstraints(maxWidth: getWidth(context) * .90),
                         label: const Text(fullName)),
                   ),
                   // Row(
@@ -201,7 +207,7 @@ class _EditProfileState extends State<EditProfile> {
                     height: 20,
                   ),
                   DropdownButton(
-                    value:dropDownGender,
+                    value: dropDownGender,
                     style: TextStyle(color: Colors.grey.shade800, fontSize: 17),
                     isExpanded: true,
                     icon: const Icon(
@@ -271,7 +277,8 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                       IconButton(
                         onPressed: () {
-                           linkDialog(linkYouTube, youtubeURL,widget.user.youtube!,"youtube");
+                          linkDialog(linkYouTube, youtubeURL,
+                              widget.user.youtube!, "youtube");
                         },
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.only(),
@@ -282,8 +289,9 @@ class _EditProfileState extends State<EditProfile> {
                         width: 10,
                       ),
                       IconButton(
-                        onPressed: (){
-                          linkDialog(linkFacebook, facebookURL,widget.user.facebook!,"facebook");
+                        onPressed: () {
+                          linkDialog(linkFacebook, facebookURL,
+                              widget.user.facebook!, "facebook");
                         },
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.only(),
@@ -294,8 +302,9 @@ class _EditProfileState extends State<EditProfile> {
                         width: 10,
                       ),
                       IconButton(
-                        onPressed: (){
-                          linkDialog(linkInstagram, instagramURL,widget.user.instagram!,"instagram");
+                        onPressed: () {
+                          linkDialog(linkInstagram, instagramURL,
+                              widget.user.instagram!, "instagram");
                         },
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.only(),
@@ -306,8 +315,9 @@ class _EditProfileState extends State<EditProfile> {
                         width: 10,
                       ),
                       IconButton(
-                        onPressed: (){
-                           linkDialog(linkTwitter, twitterURL,widget.user.twitter,"twitter");
+                        onPressed: () {
+                          linkDialog(linkTwitter, twitterURL,
+                              widget.user.twitter, "twitter");
                         },
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.only(),
@@ -316,7 +326,9 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20,),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   ElevatedButton(
                       onPressed: () {
                         FocusScope.of(context).requestFocus(FocusNode());
@@ -335,12 +347,15 @@ class _EditProfileState extends State<EditProfile> {
                       },
                       style: ElevatedButton.styleFrom(
                           primary: ColorManager.cyan,
-                        fixedSize: Size(getWidth(context)*.80, 50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                      ),
+                          fixedSize: Size(getWidth(context) * .80, 50),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10))),
                       child: Text(
                         save,
-                        style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.white),
+                        style: Theme.of(context)
+                            .textTheme
+                            .headline3!
+                            .copyWith(color: Colors.white),
                       )),
                   const SizedBox(
                     height: 50,
@@ -354,9 +369,9 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
- linkDialog(String title, String link,String setTitle,String name)  {
+  linkDialog(String title, String link, String setTitle, String name) {
     controller.clear();
-    controller.text=setTitle;
+    controller.text = setTitle;
     showDialog(
         context: context,
         builder: (_) => Center(
@@ -411,10 +426,12 @@ class _EditProfileState extends State<EditProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
-                            onPressed: (){
+                            onPressed: () {
                               Navigator.pop(context);
                               FocusScope.of(context).requestFocus(FocusNode());
-                              setData(name,);
+                              setData(
+                                name,
+                              );
                               BlocProvider.of<ProfileBloc>(context).add(
                                 ProfileValidation(
                                     userNameCtr.text,
@@ -462,30 +479,25 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void setData(String name) {
-  switch (name) {
-    case "youtube":
-      final tile = socialList.firstWhere(
-              (item) => item.title == 'youtube');
-      setState(() => tile.url = controller.text);
-      break;
-    case "facebook":
-      final tile = socialList.firstWhere(
-              (item) => item.title == 'facebook');
-      setState(() => tile.url = controller.text);
-      break;
-    case "instagram":
-      final tile = socialList.firstWhere(
-              (item) => item.title == 'instagram');
-      setState(() => tile.url = controller.text);
-      break;
-    case "twitter":
-      final tile = socialList.firstWhere(
-              (item) => item.title == 'twitter');
-      setState(() => tile.url = controller.text);
-      break;
+    switch (name) {
+      case "youtube":
+        final tile = socialList.firstWhere((item) => item.title == 'youtube');
+        setState(() => tile.url = controller.text);
+        break;
+      case "facebook":
+        final tile = socialList.firstWhere((item) => item.title == 'facebook');
+        setState(() => tile.url = controller.text);
+        break;
+      case "instagram":
+        final tile = socialList.firstWhere((item) => item.title == 'instagram');
+        setState(() => tile.url = controller.text);
+        break;
+      case "twitter":
+        final tile = socialList.firstWhere((item) => item.title == 'twitter');
+        setState(() => tile.url = controller.text);
+        break;
+    }
   }
-
-}
 
   void pickImage(BuildContext context) async {
     var source = await imagePickerSheet(context);

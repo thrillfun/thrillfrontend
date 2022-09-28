@@ -9,7 +9,6 @@ class BlockStatusResponse {
     status = json['status'];
     error = json['error'];
     message = json['message'];
-   
   }
 
   Map<String, dynamic> toJson() {
@@ -20,4 +19,3 @@ class BlockStatusResponse {
     return data;
   }
 }
-

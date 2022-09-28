@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,24 +16,19 @@ import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
-import 'package:thrill/screens/auth/login.dart';
 import 'package:thrill/screens/following_and_followers.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/sound/sound_details.dart';
-import 'package:thrill/screens/spin/spin_the_wheel.dart';
-import 'package:thrill/widgets/better_video_player.dart';
-import 'package:thrill/widgets/fab_items.dart';
+import 'package:velocity_x/velocity_x.dart';
+
 import '../../blocs/profile/profile_bloc.dart';
 import '../../common/strings.dart';
 import '../../controller/comments_controller.dart';
-import '../../models/comment_model.dart';
 import '../../models/user.dart';
 import '../../rest/rest_url.dart';
-import '../../utils/home_bottomsheet_layout.dart';
 import '../../utils/util.dart';
 import '../../widgets/image_rotate.dart';
 import '../../widgets/video_item.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 int selectedTopIndex = 1;
 
@@ -55,6 +51,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
   List<String> likeComment = List<String>.empty(growable: true);
   TextEditingController msgCtr = TextEditingController();
   List<String> followList = List<String>.empty(growable: true);
+
   // final PageController _pageController =
   //     PageController(initialPage: 0, keepPage: true);
 
@@ -206,8 +203,6 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
                     return Stack(
                       fit: StackFit.expand,
                       children: [
-                    
-
                         // BetterReelsPlayer(
                         //   state.list[index].gif_image,
                         //   state.list[index].video,
@@ -1532,5 +1527,4 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
               },
             ));
   }
-
 }

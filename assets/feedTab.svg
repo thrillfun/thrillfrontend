@@ -1,8 +1,14 @@
-<svg id="feed_icon" data-name="feed icon" xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16">
-  <rect id="Rectangle" width="2" height="7" rx="0.25" transform="translate(0 0)" fill="#161823"/>
-  <rect id="Rectangle-2" data-name="Rectangle" width="2" height="7" rx="0.25" transform="translate(0 9)" fill="#161823"/>
-  <rect id="Rectangle-3" data-name="Rectangle" width="2" height="7" rx="0.25" transform="translate(6 0)" fill="#161823"/>
-  <rect id="Rectangle-4" data-name="Rectangle" width="2" height="7" rx="0.25" transform="translate(6 9)" fill="#161823"/>
-  <rect id="Rectangle-5" data-name="Rectangle" width="2" height="7" rx="0.25" transform="translate(12 0)" fill="#161823"/>
-  <rect id="Rectangle-6" data-name="Rectangle" width="2" height="7" rx="0.25" transform="translate(12 9)" fill="#161823"/>
+<svg data-name="feed icon" height="16" id="feed_icon" viewBox="0 0 14 16" width="14"
+    xmlns="http://www.w3.org/2000/svg">
+    <rect fill="#161823" height="7" id="Rectangle" rx="0.25" transform="translate(0 0)" width="2" />
+    <rect data-name="Rectangle" fill="#161823" height="7" id="Rectangle-2" rx="0.25"
+        transform="translate(0 9)" width="2" />
+    <rect data-name="Rectangle" fill="#161823" height="7" id="Rectangle-3" rx="0.25"
+        transform="translate(6 0)" width="2" />
+    <rect data-name="Rectangle" fill="#161823" height="7" id="Rectangle-4" rx="0.25"
+        transform="translate(6 9)" width="2" />
+    <rect data-name="Rectangle" fill="#161823" height="7" id="Rectangle-5" rx="0.25"
+        transform="translate(12 0)" width="2" />
+    <rect data-name="Rectangle" fill="#161823" height="7" id="Rectangle-6" rx="0.25"
+        transform="translate(12 9)" width="2" />
 </svg>

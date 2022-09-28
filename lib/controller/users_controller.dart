@@ -1,16 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/model/block_status_response.dart';
 import 'package:thrill/controller/model/followers_model.dart';
 import 'package:thrill/controller/model/profile_model_pojo.dart';
 import 'package:thrill/models/user.dart';
-import 'package:thrill/screens/profile/view_profile.dart';
-import 'package:thrill/screens/video/video_item.dart';
 import 'package:thrill/utils/util.dart';
 
 class UserController extends GetxController {

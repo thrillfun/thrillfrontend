@@ -1,14 +1,15 @@
 import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:thrill/models/banner_model.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 import '../../common/strings.dart';
 import '../../models/vidio_discover_model.dart';
 import '../../widgets/video_item.dart';
@@ -32,204 +33,218 @@ class _DiscoverState extends State<Discover> {
   @override
   void initState() {
     loadAllData();
-    try{
+    try {
       reelsPlayerController?.pause();
-    }catch(_){}
+    } catch (_) {}
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Discover"),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[Color(0xFF2F8897),
-                  Color(0xff1F2A52),
-                  Color(0xff1F244E)]),
+        appBar: AppBar(
+          title: Text("Discover"),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[
+                    Color(0xFF2F8897),
+                    Color(0xff1F2A52),
+                    Color(0xff1F244E)
+                  ]),
+            ),
           ),
         ),
-      ),
-      backgroundColor: Colors.white,
-      body:
-      SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 20,
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 10,right: 10),
-                child: TextFormField(
-                  maxLength: 30,
-                  textInputAction: TextInputAction.next,
-                  onChanged: (txt) {
-                    setState(() {
-                      query = txt;
-                    });
-                  },
-                  decoration: InputDecoration(
-                      hintText: search,
-                      counterText: '',
-                      isDense: true,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.grey.shade300, width: 2),
-                          borderRadius: BorderRadius.circular(10)),
-                      contentPadding: const EdgeInsets.only(top: 5),
-                      constraints: BoxConstraints(
-                          maxHeight: 45,
-                          maxWidth:
-                          MediaQuery.of(context).size.width ),
-                      prefixIcon: const Icon(Icons.search, size: 30,)),
-                ),),
-              const SizedBox(
-                height: 20,
-              ),
-              isLoading? Container(
-                  height: 200,
-                  child:Center(child: CircularProgressIndicator(),)): CarouselSlider.builder(
-                options: CarouselOptions(
-                  autoPlayAnimationDuration:
-                  const Duration(seconds: 7),
-                  autoPlayCurve: Curves.easeIn,
-                  viewportFraction: 1,
-                  height: 200,
-                  enlargeCenterPage: true,
-                  enableInfiniteScroll: false,
-                  autoPlay: false,
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 20,
                 ),
-                itemCount: bannerList.length,
-                itemBuilder: (context, index, realIndex) {
-                  return Stack(
-                    children: [
-                      Card(
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10), // if you need this
-                          side: BorderSide(
-                            color: Colors.transparent,
-                            width: 1,
-                          ),
+                Container(
+                  margin: EdgeInsets.only(left: 10, right: 10),
+                  child: TextFormField(
+                    maxLength: 30,
+                    textInputAction: TextInputAction.next,
+                    onChanged: (txt) {
+                      setState(() {
+                        query = txt;
+                      });
+                    },
+                    decoration: InputDecoration(
+                        hintText: search,
+                        counterText: '',
+                        isDense: true,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.grey.shade300, width: 2),
+                            borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.only(top: 5),
+                        constraints: BoxConstraints(
+                            maxHeight: 45,
+                            maxWidth: MediaQuery.of(context).size.width),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          size: 30,
+                        )),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                isLoading
+                    ? Container(
+                        height: 200,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ))
+                    : CarouselSlider.builder(
+                        options: CarouselOptions(
+                          autoPlayAnimationDuration: const Duration(seconds: 7),
+                          autoPlayCurve: Curves.easeIn,
+                          viewportFraction: 1,
+                          height: 200,
+                          enlargeCenterPage: true,
+                          enableInfiniteScroll: false,
+                          autoPlay: false,
                         ),
-                        child: Container(
-                            height: 250,
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(
-                                borderRadius:
-                                BorderRadius.circular(20)),
-                            child: CachedNetworkImage(
-                              imageBuilder: (context, imageProvider) => Container(
-                                width: MediaQuery.of(context).size.width,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  shape: BoxShape.rectangle,
-                                  image: DecorationImage(
-                                      image: imageProvider, fit: BoxFit.fill),
-                                ),
-                              ),
-                              fit: BoxFit.fill,
-                              imageUrl:
-                              '${RestUrl.bannerUrl}${bannerList[index].image}',
-                            )),
-                      ),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment.center,
-                            crossAxisAlignment:
-                            CrossAxisAlignment.center,
+                        itemCount: bannerList.length,
+                        itemBuilder: (context, index, realIndex) {
+                          return Stack(
                             children: [
-                              for (int i = 0;
-                              i < bannerList.length;
-                              i++)
-                                Container(
-                                    margin: const EdgeInsets.only(
-                                        left: 8, bottom: 8),
-                                    height: 13,
-                                    width: 13,
+                              Card(
+                                elevation: 5,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  // if you need this
+                                  side: BorderSide(
+                                    color: Colors.transparent,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Container(
+                                    height: 250,
+                                    width: MediaQuery.of(context).size.width,
                                     decoration: BoxDecoration(
-                                        color: i == index
-                                            ? Colors.white
-                                            : Colors.grey,
                                         borderRadius:
-                                        BorderRadius.circular(
-                                            5))),
-                            ]),
-                      )
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Builder(builder: (context) {
-                if (query.trim().isNotEmpty) {
-                  List<DiscoverVideo> searchList = [];
-                  for (DiscoverVideo discover in videoList) {
-                    if (discover.hashtag_name
-                        .toLowerCase()
-                        .contains(query.toLowerCase())) {
-                      searchList.add(discover);
-                    } else {
-                      for(VideoModel vm in discover.videoModel){
-                        if(vm.user!.name.toLowerCase().contains(query.toLowerCase())){
-                          searchList.add(discover);
-                          break;
+                                            BorderRadius.circular(20)),
+                                    child: CachedNetworkImage(
+                                      imageBuilder: (context, imageProvider) =>
+                                          Container(
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          shape: BoxShape.rectangle,
+                                          image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.fill),
+                                        ),
+                                      ),
+                                      fit: BoxFit.fill,
+                                      imageUrl:
+                                          '${RestUrl.bannerUrl}${bannerList[index].image}',
+                                    )),
+                              ),
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      for (int i = 0;
+                                          i < bannerList.length;
+                                          i++)
+                                        Container(
+                                            margin: const EdgeInsets.only(
+                                                left: 8, bottom: 8),
+                                            height: 13,
+                                            width: 13,
+                                            decoration: BoxDecoration(
+                                                color: i == index
+                                                    ? Colors.white
+                                                    : Colors.grey,
+                                                borderRadius:
+                                                    BorderRadius.circular(5))),
+                                    ]),
+                              )
+                            ],
+                          );
+                        },
+                      ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Builder(builder: (context) {
+                  if (query.trim().isNotEmpty) {
+                    List<DiscoverVideo> searchList = [];
+                    for (DiscoverVideo discover in videoList) {
+                      if (discover.hashtag_name
+                          .toLowerCase()
+                          .contains(query.toLowerCase())) {
+                        searchList.add(discover);
+                      } else {
+                        for (VideoModel vm in discover.videoModel) {
+                          if (vm.user!.name
+                              .toLowerCase()
+                              .contains(query.toLowerCase())) {
+                            searchList.add(discover);
+                            break;
+                          }
                         }
                       }
                     }
-                  }
 
-                  if (searchList.isEmpty) {
-                    return Container(
-                      height: 180,
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'No Hashtag Found',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white),
-                      ),
-                    );
+                    if (searchList.isEmpty) {
+                      return Container(
+                        height: 180,
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'No Hashtag Found',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white),
+                        ),
+                      );
+                    }
+                    return isLoading
+                        ? CircularProgressIndicator()
+                        : ListView.builder(
+                            itemCount: searchList.length,
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.only(bottom: 25),
+                            itemBuilder: (context, index) {
+                              return listWidget(searchList[index], index);
+                            },
+                          );
                   }
-                  return isLoading?CircularProgressIndicator():ListView.builder(
-                    itemCount: searchList.length,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.only(bottom: 25),
-                    itemBuilder: (context, index) {
-                      return listWidget(searchList[index], index);
-                    },
-                  );
-                }
-                return isLoading?CircularProgressIndicator(): ListView.builder(
-                    itemCount: videoList.length,
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (BuildContext context, int index) {
-                      return listWidget(videoList[index], index);
-                    });
-
-              }),
-            ],
+                  return isLoading
+                      ? CircularProgressIndicator()
+                      : ListView.builder(
+                          itemCount: videoList.length,
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemBuilder: (BuildContext context, int index) {
+                            return listWidget(videoList[index], index);
+                          });
+                }),
+              ],
+            ),
           ),
-        ),
-      )
-    );
+        ));
   }
 
   void loadAllData() async {
@@ -237,11 +252,15 @@ class _DiscoverState extends State<Discover> {
       var bannerResult = await RestApi.getDiscoverBanner();
       var json = jsonDecode(bannerResult.body);
       bannerList.clear();
-      bannerList = List<BannerModel>.from(json.map((i) => BannerModel.fromJson(i))).toList(growable: true);
+      bannerList =
+          List<BannerModel>.from(json.map((i) => BannerModel.fromJson(i)))
+              .toList(growable: true);
       var videoResult = await RestApi.getVideoWithHash();
       var jsonResult = jsonDecode(videoResult.body);
       videoList.clear();
-      videoList = List<DiscoverVideo>.from(jsonResult['data'].map((i) => DiscoverVideo.fromJson(i))).toList(growable: true);
+      videoList = List<DiscoverVideo>.from(
+              jsonResult['data'].map((i) => DiscoverVideo.fromJson(i)))
+          .toList(growable: true);
       //final List vList = jsonResult['data']['videos'] as List;
       //videoModelList = List<VideoModel>.from(jsonResult['data'].map((i) => VideoModel.fromJson(i))).toList(growable: true);
       setState(() {
@@ -256,17 +275,19 @@ class _DiscoverState extends State<Discover> {
   }
 
   Widget listWidget(DiscoverVideo discoverVideo, int index) {
-    return Column( children: [
+    return Column(children: [
       GestureDetector(
         onTap: () {
-          Navigator.pushNamed(context, '/tagDetails',arguments: discoverVideo);
+          Navigator.pushNamed(context, '/tagDetails', arguments: discoverVideo);
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const SizedBox(width: 10,),
+            const SizedBox(
+              width: 10,
+            ),
             Container(
-              margin: EdgeInsets.only(top: 10,bottom: 10),
+              margin: EdgeInsets.only(top: 10, bottom: 10),
               height: 20,
               width: 20,
               alignment: Alignment.center,
@@ -275,7 +296,10 @@ class _DiscoverState extends State<Discover> {
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey, width: 1),
               ),
-              child: const Text('#',style: TextStyle(fontWeight: FontWeight.bold),),
+              child: const Text(
+                '#',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
             const SizedBox(
               width: 5,
@@ -284,9 +308,9 @@ class _DiscoverState extends State<Discover> {
               child: RichText(
                   text: TextSpan(children: [
                 TextSpan(
-                    text: '${discoverVideo.hashtag_name}'
-                        .allWordsCapitilize(),
-                    style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                    text: '${discoverVideo.hashtag_name}'.allWordsCapitilize(),
+                    style: const TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold)),
                 // const TextSpan(
                 //     text: 'Trending HashTag',
                 //     style: TextStyle(color: Colors.grey))
@@ -300,8 +324,8 @@ class _DiscoverState extends State<Discover> {
                   border: Border.all(color: Colors.grey, width: 1),
                   borderRadius: BorderRadius.circular(5)),
               child: Text("${discoverVideo.video_count}"),
-            )
-            , const SizedBox(
+            ),
+            const SizedBox(
               width: 5,
             ),
           ],
@@ -315,14 +339,17 @@ class _DiscoverState extends State<Discover> {
           scrollDirection: Axis.horizontal,
           itemBuilder: (BuildContext context2, int index2) {
             return GestureDetector(
-              onTap: (){
-                 Navigator.pushReplacementNamed(context, '/', arguments: {'videoModel': discoverVideo.videoModel[index2]});
+              onTap: () {
+                Navigator.pushReplacementNamed(context, '/', arguments: {
+                  'videoModel': discoverVideo.videoModel[index2]
+                });
               },
               child: Container(
                 margin: const EdgeInsets.all(2),
                 padding: const EdgeInsets.only(left: 5),
                 width: 120,
-                child: imgNet('${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}'),
+                child: imgNet(
+                    '${RestUrl.gifUrl}${discoverVideo.hashVideo[index2].gif_image}'),
                 // CachedNetworkImage(
                 //   fit: BoxFit.cover,
                 //   imageUrl:

@@ -1,12 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
-
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/model/comments_model.dart';
 import 'package:thrill/controller/model/comments_post_response.dart';
 import 'package:thrill/controller/model/follow_unfollow_model.dart';
@@ -15,14 +12,9 @@ import 'package:thrill/controller/model/login_model.dart';
 import 'package:thrill/controller/model/popular_videos_model.dart';
 import 'package:thrill/controller/model/profile_model_pojo.dart';
 import 'package:thrill/controller/model/user_video_model.dart';
-import 'package:thrill/controller/model/video_model_controller.dart';
-import 'package:thrill/controller/model/profile_model_pojo.dart';
 import 'package:thrill/models/level_model.dart';
 import 'package:thrill/models/user.dart';
-import 'package:thrill/screens/following_and_followers.dart';
-import 'package:thrill/screens/profile/view_profile.dart';
 
-import '../blocs/login/login_bloc.dart';
 import '../models/video_model.dart';
 
 class DataController extends GetxController with StateMixin<dynamic> {
@@ -32,7 +24,7 @@ class DataController extends GetxController with StateMixin<dynamic> {
   var isUserProfileLoading = true.obs;
   var LoginStatus = false.obs;
 
-    var isMyProfile = false.obs;
+  var isMyProfile = true.obs;
 
   CommentsModel? commentsModel;
   late FollowersModel followersModel;
@@ -132,9 +124,6 @@ class DataController extends GetxController with StateMixin<dynamic> {
     }
   }
 
-
-
-
   Future<FollowUnfollowModel> followUnfollowUser(int userId) async {
     isLoading.value = true;
     var instance = await SharedPreferences.getInstance();
@@ -202,8 +191,6 @@ class DataController extends GetxController with StateMixin<dynamic> {
       return CommentsPostResponse.fromJson(json.decode(response.body));
     }
   }
-
-  
 
   getPopularVideos() async {
     isLoading.value = true;

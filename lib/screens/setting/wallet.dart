@@ -1,8 +1,10 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:thrill/models/wallet_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
+
 import '../../common/strings.dart';
 import '../../utils/util.dart';
 
@@ -23,7 +25,6 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
-
   bool isLoading = true;
   List<WalletBalance> balanceList = List<WalletBalance>.empty(growable: true);
   WalletBalance? walBalance;
@@ -72,9 +73,9 @@ class _WalletState extends State<Wallet> {
                     children: [
                       InkWell(
                         onTap: () {
-                          Navigator.pushNamed(context, '/paymentRequest', arguments: balanceList).then((value) => {
-                            loadWalletInfo()
-                          });
+                          Navigator.pushNamed(context, '/paymentRequest',
+                                  arguments: balanceList)
+                              .then((value) => {loadWalletInfo()});
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(left: 12.0),
@@ -103,18 +104,20 @@ class _WalletState extends State<Wallet> {
                               width: 40,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(50),
-                                  border: Border.all(color: Colors.grey, width: 1)),
+                                  border:
+                                      Border.all(color: Colors.grey, width: 1)),
                               child: Center(
                                 child: walBalance!.symbol.isEmpty
                                     ? Image.network(
-                                  RestUrl.currencyUrl + walBalance!.image,
-                                  width: 20,
-                                  height: 20,
-                                )
+                                        RestUrl.currencyUrl + walBalance!.image,
+                                        width: 20,
+                                        height: 20,
+                                      )
                                     : Text(
-                                  walBalance!.symbol,
-                                  style: const TextStyle(fontSize: 15,color: Colors.white),
-                                ),
+                                        walBalance!.symbol,
+                                        style: const TextStyle(
+                                            fontSize: 15, color: Colors.white),
+                                      ),
                               ),
                             ),
                             const SizedBox(
@@ -139,9 +142,8 @@ class _WalletState extends State<Wallet> {
                           ]),
                       InkWell(
                         onTap: () {
-                          Navigator.pushNamed(context, '/paymentHistory').then((value)=>{
-                            loadWalletInfo()
-                          });
+                          Navigator.pushNamed(context, '/paymentHistory')
+                              .then((value) => {loadWalletInfo()});
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(right: 12.0),
@@ -193,9 +195,9 @@ class _WalletState extends State<Wallet> {
 
   availableBal(WalletBalance walletBalance) {
     return InkWell(
-      onTap: (){
+      onTap: () {
         setState(() {
-          walBalance=walletBalance;
+          walBalance = walletBalance;
         });
       },
       child: Container(
@@ -233,15 +235,17 @@ class _WalletState extends State<Wallet> {
                     width: 5,
                   ),
                   Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                      Text("Available Balance in ${walletBalance.code}"),
-                      const SizedBox(height: 2),
-                      Text("Status : ${walletBalance.isActive==1 ? "active" :"suspended"}"),
-                        ],
-                      ),),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Available Balance in ${walletBalance.code}"),
+                        const SizedBox(height: 2),
+                        Text(
+                            "Status : ${walletBalance.isActive == 1 ? "active" : "suspended"}"),
+                      ],
+                    ),
+                  ),
                   Text(
                     walletBalance.code + ' ${walletBalance.amount.toString()}',
                     style: const TextStyle(
@@ -266,7 +270,7 @@ class _WalletState extends State<Wallet> {
       balanceList = List<WalletBalance>.from(
               jsonBal['data'].map((i) => WalletBalance.fromJson(i)))
           .toList(growable: true);
-      walBalance=balanceList[0];
+      walBalance = balanceList[0];
       isLoading = false;
       setState(() {});
     } catch (e) {

@@ -1,10 +1,12 @@
 import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
+
 import '../common/strings.dart';
 import '../models/hashtags_model.dart';
 import '../models/vidio_discover_model.dart';
@@ -30,6 +32,7 @@ class TagDetails extends StatefulWidget {
 class _TagDetailsState extends State<TagDetails> {
   List<String> favTagList = List<String>.empty(growable: true);
   bool isLoading = true;
+
   @override
   void initState() {
     loadData();
@@ -98,23 +101,28 @@ class _TagDetailsState extends State<TagDetails> {
                           height: 7,
                         ),
                         GestureDetector(
-                          onTap: ()async{
-                            if (favTagList.contains(widget.tag.hashtag_id.toString())) {
-                              var result = await RestApi.addAndRemoveFavariteSoundHastag(widget.tag.hashtag_id, "hashtag", 0);
+                          onTap: () async {
+                            if (favTagList
+                                .contains(widget.tag.hashtag_id.toString())) {
+                              var result =
+                                  await RestApi.addAndRemoveFavariteSoundHastag(
+                                      widget.tag.hashtag_id, "hashtag", 0);
                               var json = jsonDecode(result.body);
                               if (json['status']) {
-                                favTagList.remove(widget.tag.hashtag_id.toString());
+                                favTagList
+                                    .remove(widget.tag.hashtag_id.toString());
                                 showSuccessToast(context, json['message']);
                               } else {
                                 showErrorToast(context, json['message']);
                               }
                             } else {
                               var result =
-                              await RestApi.addAndRemoveFavariteSoundHastag(
-                                  widget.tag.hashtag_id, "hashtag", 1);
+                                  await RestApi.addAndRemoveFavariteSoundHastag(
+                                      widget.tag.hashtag_id, "hashtag", 1);
                               var json = jsonDecode(result.body);
                               if (json['status']) {
-                                favTagList.add(widget.tag.hashtag_id.toString());
+                                favTagList
+                                    .add(widget.tag.hashtag_id.toString());
                                 showSuccessToast(context, json['message']);
                               } else {
                                 showErrorToast(context, json['message']);
@@ -122,7 +130,7 @@ class _TagDetailsState extends State<TagDetails> {
                             }
                             setState(() {});
                             SharedPreferences pref =
-                            await SharedPreferences.getInstance();
+                                await SharedPreferences.getInstance();
                             pref.setStringList('favTag', favTagList);
                           },
                           child: Container(
@@ -143,8 +151,11 @@ class _TagDetailsState extends State<TagDetails> {
                                         : Colors.grey.shade700,
                                     size: 15,
                                   ),
-                                  Text(favTagList.contains(widget.tag.hashtag_id.toString())?
-                                    addedToFavourite:"Add to Favourite",
+                                  Text(
+                                    favTagList.contains(
+                                            widget.tag.hashtag_id.toString())
+                                        ? addedToFavourite
+                                        : "Add to Favourite",
                                     style: TextStyle(
                                         color: Colors.grey.shade700,
                                         fontSize: 13),
@@ -170,8 +181,11 @@ class _TagDetailsState extends State<TagDetails> {
                       itemCount: widget.tag.hashVideo.length,
                       itemBuilder: (BuildContext context, int index) {
                         return GestureDetector(
-                          onTap: (){
-                            Navigator.pushNamedAndRemoveUntil(context, '/', (route)=>true, arguments: {'videoModel': widget.tag.videoModel[index]});
+                          onTap: () {
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/', (route) => true, arguments: {
+                              'videoModel': widget.tag.videoModel[index]
+                            });
                           },
                           child: Stack(
                             fit: StackFit.expand,
@@ -181,8 +195,12 @@ class _TagDetailsState extends State<TagDetails> {
                                         child: CircularProgressIndicator(),
                                       ),
                                   fit: BoxFit.cover,
-                                  errorWidget: (a,b,c)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
-                                  imageUrl: widget.tag.hashVideo[index].gif_image.isEmpty
+                                  errorWidget: (a, b, c) => Image.network(
+                                        '${RestUrl.thambUrl}thumb-not-available.png',
+                                        fit: BoxFit.fill,
+                                      ),
+                                  imageUrl: widget.tag.hashVideo[index]
+                                          .gif_image.isEmpty
                                       ? '${RestUrl.thambUrl}thumb-not-available.png'
                                       : '${RestUrl.gifUrl}${widget.tag.hashVideo[index].gif_image}'),
                               Positioned(
@@ -199,7 +217,8 @@ class _TagDetailsState extends State<TagDetails> {
                                         size: 20,
                                       ),
                                       Text(
-                                        widget.tag.hashVideo[index].views.toString(),
+                                        widget.tag.hashVideo[index].views
+                                            .toString(),
                                         style: const TextStyle(
                                             color: Colors.white, fontSize: 13),
                                       ),
@@ -209,7 +228,8 @@ class _TagDetailsState extends State<TagDetails> {
                                         size: 20,
                                       ),
                                       Text(
-                                        widget.tag.hashVideo[index].likes.toString(),
+                                        widget.tag.hashVideo[index].likes
+                                            .toString(),
                                         style: const TextStyle(
                                             color: Colors.white, fontSize: 13),
                                       ),
@@ -230,7 +250,8 @@ class _TagDetailsState extends State<TagDetails> {
     var json = jsonDecode(result.body);
     if (json['status']) {
       List jsonList = json['data']['hash_tags'] as List;
-      favTagList=jsonList.map((e) => HashtagModel.fromJson(e).id.toString()).toList();
+      favTagList =
+          jsonList.map((e) => HashtagModel.fromJson(e).id.toString()).toList();
       SharedPreferences pref = await SharedPreferences.getInstance();
       pref.setStringList('favTag', favTagList);
     }

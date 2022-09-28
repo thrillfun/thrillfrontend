@@ -54,47 +54,47 @@ class Followers {
 
   Followers(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.emailVerifiedAt,
-        this.phone,
-        this.avtars,
-        this.coverImage,
-        this.rating,
-        this.notification,
-        this.twoFAToggle,
-        this.status,
-        this.deactivationRequest,
-        this.role,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.createdAt,
-        this.updatedAt,
-        this.isVerified});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.emailVerifiedAt,
+      this.phone,
+      this.avtars,
+      this.coverImage,
+      this.rating,
+      this.notification,
+      this.twoFAToggle,
+      this.status,
+      this.deactivationRequest,
+      this.role,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.createdAt,
+      this.updatedAt,
+      this.isVerified});
 
   Followers.fromJson(Map<String, dynamic> json) {
-    id = json['id']??"";
-    name = json['name']??"";
-    username = json['username']??"";
-    email = json['email']??"";
-    dob = json['dob']??"";
-    emailVerifiedAt = json['email_verified_at']??"";
-    phone = json['phone']??"";
-    avtars = json['avtars']??"";
-    coverImage = json['cover_image']??"";
-    rating = json['rating']??"";
-    notification = json['notification']??"";
-    twoFAToggle = json['two_FA_toggle']??"";
-    status = json['status']??"";
-    deactivationRequest = json['deactivation_request']??"";
-    role = json['role']??"";
-    socialLoginId = json['social_login_id']??"";
-    socialLoginType = json['social_login_type']??"";
-    createdAt = json['created_at']??"";
-    updatedAt = json['updated_at']??"";
-    isVerified = json['is_verified']??"";
+    id = json['id'] ?? "";
+    name = json['name'] ?? "";
+    username = json['username'] ?? "";
+    email = json['email'] ?? "";
+    dob = json['dob'] ?? "";
+    emailVerifiedAt = json['email_verified_at'] ?? "";
+    phone = json['phone'] ?? "";
+    avtars = json['avtars'] ?? "";
+    coverImage = json['cover_image'] ?? "";
+    rating = json['rating'] ?? "";
+    notification = json['notification'] ?? "";
+    twoFAToggle = json['two_FA_toggle'] ?? "";
+    status = json['status'] ?? "";
+    deactivationRequest = json['deactivation_request'] ?? "";
+    role = json['role'] ?? "";
+    socialLoginId = json['social_login_id'] ?? "";
+    socialLoginType = json['social_login_type'] ?? "";
+    createdAt = json['created_at'] ?? "";
+    updatedAt = json['updated_at'] ?? "";
+    isVerified = json['is_verified'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
@@ -122,4 +122,3 @@ class Followers {
     return data;
   }
 }
-

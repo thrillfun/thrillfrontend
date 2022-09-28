@@ -1,23 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
+import 'package:camera/camera.dart';
 import 'package:external_path/external_path.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simple_s3/simple_s3.dart';
+import 'package:thrill/models/post_data.dart';
 import 'package:thrill/screens/screen.dart';
-import 'package:thrill/screens/video/preview.dart';
+import 'package:velocity_x/velocity_x.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_player/video_player.dart';
-import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:thrill/models/post_data.dart';
-import 'package:flutter/services.dart';
-import 'package:velocity_x/velocity_x.dart';
+
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../main.dart';
@@ -25,7 +28,6 @@ import '../../models/add_sound_model.dart';
 import '../../models/user.dart';
 import '../../utils/util.dart';
 import '../../widgets/video_item.dart';
-import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
 
 class Record extends StatefulWidget {
   const Record({Key? key, required this.soundMap}) : super(key: key);
@@ -67,6 +69,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
   Duration videoDuration = const Duration();
   String speed = '1';
   late UserModel userModel;
+  final SimpleS3 _simpleS3 = SimpleS3();
 
   /*final deepArController = CameraDeepArController(config);
   String _platformVersion = 'Unknown';
@@ -774,19 +777,20 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                                 trimStart: 0,
                                 trimEnd: 0,
                               );
-                              final directory = await ExternalPath
-                                  .getExternalStoragePublicDirectory(
-                                      ExternalPath.DIRECTORY_DOWNLOADS);
-                      
+                              
                               await VESDK
-                                  .openEditor(Video(m.filePath),
-                                      configuration: setConfig(directory))
+                                  .openEditor(
+                                Video(m.filePath),
+                              )
                                   .then((value) async {
                                 if (value != null) {
+                                  File file = File(value.video);
+
                                   PostData postData = PostData(
                                     speed: '1',
-                                    filePath: value!.video,
-                                    filterName: filterImage,
+                                    newPath: value.video,
+                                    filePath: value.video,
+                                    filterName: "",
                                     addSoundModel: addSoundModel,
                                     isDuet: false,
                                     isDefaultSound: true,
@@ -794,7 +798,8 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                                     trimStart: 0,
                                     trimEnd: 0,
                                   );
-                                  Get.off(Editing(data: postData));
+                                  // Get.snackbar("path", value.video);
+                                  await Get.to(PostVideo(data: postData));
                                 }
                               });
                               //Navigator.pushNamed(context, "/trim", arguments: m);
@@ -917,10 +922,11 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                               );
                               final directory = await ExternalPath
                                   .getExternalStoragePublicDirectory(
-                                      ExternalPath.DIRECTORY_DOWNLOADS);
+                                      ExternalPath.DIRECTORY_PICTURES);
                               await VESDK
                                   .openEditor(Video(m.filePath),
-                                      configuration: setConfig(directory))
+                                      configuration:
+                                          setConfig(directory + '/thrill'))
                                   .then((value) async {
                                 PostData postData = PostData(
                                   speed: '1',
@@ -933,8 +939,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                                   trimStart: 0,
                                   trimEnd: 0,
                                 );
-                                Get.off(Editing(data: postData));
-                                if (value != null) {}
+                                await Get.to(Editing(data: postData));
                               });
                             },
                             child: VxCircle(

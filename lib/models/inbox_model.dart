@@ -8,7 +8,7 @@ class InboxModel {
     required this.message,
     required this.msgDate,
     required this.name,
-});
+  });
 
   factory InboxModel.fromJson(dynamic json) {
     return InboxModel(

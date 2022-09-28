@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/utils.dart';
-import 'package:thrill/main.dart';
+
 import '../common/strings.dart';
 import '../rest/rest_url.dart';
 
@@ -30,6 +31,7 @@ const LinearGradient profile_options_gradient = LinearGradient(
       Color(0xFF1F2128),
       Color(0xFF1F2128),
     ]);
+
 T getRandomElement<T>(List<T> list) {
   final random = Random();
   var i = random.nextInt(list.length);

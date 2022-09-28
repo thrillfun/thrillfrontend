@@ -1,11 +1,10 @@
 import 'dart:convert';
 
-import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/instance_manager.dart';
 import 'package:get/get.dart';
+import 'package:get/instance_manager.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/icons/fluent.dart';
@@ -15,7 +14,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/controller/comments_controller.dart';
-import 'package:thrill/controller/model/comments_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/models/user.dart';
@@ -63,6 +61,7 @@ class BetterReelsPlayer extends StatefulWidget {
   String description;
   bool isHome = false;
   List hashtagsList;
+
   @override
   State<BetterReelsPlayer> createState() => _VideoAppState();
 }

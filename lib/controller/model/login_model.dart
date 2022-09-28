@@ -79,66 +79,66 @@ class User {
 
   User(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.phone,
-        this.avatar,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.firstName,
-        this.lastName,
-        this.gender,
-        this.websiteUrl,
-        this.bio,
-        this.youtube,
-        this.facebook,
-        this.instagram,
-        this.twitter,
-        this.firebaseToken,
-        this.referralCount,
-        this.following,
-        this.followers,
-        this.likes,
-        this.isVerified,
-        this.levels,
-        this.totalVideos,
-        this.boxTwo,
-        this.boxThree,
-        this.referralCode});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.phone,
+      this.avatar,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.firstName,
+      this.lastName,
+      this.gender,
+      this.websiteUrl,
+      this.bio,
+      this.youtube,
+      this.facebook,
+      this.instagram,
+      this.twitter,
+      this.firebaseToken,
+      this.referralCount,
+      this.following,
+      this.followers,
+      this.likes,
+      this.isVerified,
+      this.levels,
+      this.totalVideos,
+      this.boxTwo,
+      this.boxThree,
+      this.referralCode});
 
   User.fromJson(Map<String, dynamic> json) {
-    id = json['id']??"";
-    name = json['name']??"";
-    username = json['username']??"";
-    email = json['email']??"";
-    dob = json['dob']??"";
-    phone = json['phone']??"";
-    avatar = json['avatar']??"";
-    socialLoginId = json['social_login_id']??"";
-    socialLoginType = json['social_login_type']??"";
-    firstName = json['first_name']??"";
-    lastName = json['last_name']??"";
-    gender = json['gender']??"";
-    websiteUrl = json['website_url']??"";
-    bio = json['bio']??"";
-    youtube = json['youtube']??"";
-    facebook = json['facebook']??"";
-    instagram = json['instagram']??"";
-    twitter = json['twitter']??"";
-    firebaseToken = json['firebase_token']??"";
-    referralCount = json['referral_count']??"";
-    following = json['following']??"";
-    followers = json['followers']??"";
-    likes = json['likes']??"";
-    isVerified = json['is_verified']??"";
+    id = json['id'] ?? "";
+    name = json['name'] ?? "";
+    username = json['username'] ?? "";
+    email = json['email'] ?? "";
+    dob = json['dob'] ?? "";
+    phone = json['phone'] ?? "";
+    avatar = json['avatar'] ?? "";
+    socialLoginId = json['social_login_id'] ?? "";
+    socialLoginType = json['social_login_type'] ?? "";
+    firstName = json['first_name'] ?? "";
+    lastName = json['last_name'] ?? "";
+    gender = json['gender'] ?? "";
+    websiteUrl = json['website_url'] ?? "";
+    bio = json['bio'] ?? "";
+    youtube = json['youtube'] ?? "";
+    facebook = json['facebook'] ?? "";
+    instagram = json['instagram'] ?? "";
+    twitter = json['twitter'] ?? "";
+    firebaseToken = json['firebase_token'] ?? "";
+    referralCount = json['referral_count'] ?? "";
+    following = json['following'] ?? "";
+    followers = json['followers'] ?? "";
+    likes = json['likes'] ?? "";
+    isVerified = json['is_verified'] ?? "";
     levels =
-    json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
-    totalVideos = json['total_videos']??"";
-    boxTwo = json['box_two']??"";
-    boxThree = json['box_three']??"";
-    referralCode = json['referral_code']??"";
+        json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
+    totalVideos = json['total_videos'] ?? "";
+    boxTwo = json['box_two'] ?? "";
+    boxThree = json['box_three'] ?? "";
+    referralCode = json['referral_code'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
@@ -186,9 +186,9 @@ class Levels {
   Levels({this.current, this.next, this.progress});
 
   Levels.fromJson(Map<String, dynamic> json) {
-    current = json['current']??"";
-    next = json['next']??"";
-    progress = json['progress']??"";
+    current = json['current'] ?? "";
+    next = json['next'] ?? "";
+    progress = json['progress'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
@@ -199,4 +199,3 @@ class Levels {
     return data;
   }
 }
-

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/sound_category_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
+
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
@@ -27,7 +29,8 @@ class AddSound extends StatefulWidget {
 
 class _AddSoundState extends State<AddSound> {
   int selectedTab = 0;
-  List<SoundCategoryModel> discoverList = List<SoundCategoryModel>.empty(growable: true);
+  List<SoundCategoryModel> discoverList =
+      List<SoundCategoryModel>.empty(growable: true);
   bool isLoading = true;
 
   @override
@@ -41,7 +44,6 @@ class _AddSoundState extends State<AddSound> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0.5,
-
         title: const Text(
           addSound,
           style: TextStyle(color: Colors.black),
@@ -108,10 +110,10 @@ class _AddSoundState extends State<AddSound> {
   }
 
   Widget discoverLayout() {
-    if(isLoading){
+    if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     } else {
-      if(discoverList.isEmpty){
+      if (discoverList.isEmpty) {
         return const Center(child: Text("Sounds not found..."));
       } else {
         return Expanded(
@@ -126,26 +128,32 @@ class _AddSoundState extends State<AddSound> {
                 itemBuilder: (BuildContext context, int index) {
                   return ElevatedButton(
                       onPressed: () async {
-                        await Navigator.pushNamed(context, "/newSong").then((value) async {
-                          if(value!=null){
-                            AddSoundModel? addSoundModelTemp = value as AddSoundModel?;
-                            File file = File('$saveCacheDirectory${addSoundModelTemp?.sound}');
-                            try{
-                              if(await file.exists()){
+                        await Navigator.pushNamed(context, "/newSong")
+                            .then((value) async {
+                          if (value != null) {
+                            AddSoundModel? addSoundModelTemp =
+                                value as AddSoundModel?;
+                            File file = File(
+                                '$saveCacheDirectory${addSoundModelTemp?.sound}');
+                            try {
+                              if (await file.exists()) {
                                 Navigator.pop(context, addSoundModelTemp);
                               } else {
                                 progressDialogue(context);
                                 await FileSupport().downloadCustomLocation(
-                                  url: "${RestUrl.downloadSound}${addSoundModelTemp?.sound}",
+                                  url:
+                                      "${RestUrl.downloadSound}${addSoundModelTemp?.sound}",
                                   path: saveCacheDirectory,
-                                  filename: addSoundModelTemp!.sound.split('.')[0],
-                                  extension: ".${addSoundModelTemp.sound.split('.')[1]}",
+                                  filename:
+                                      addSoundModelTemp!.sound.split('.')[0],
+                                  extension:
+                                      ".${addSoundModelTemp.sound.split('.')[1]}",
                                   progress: (progress) async {},
                                 );
                                 closeDialogue(context);
                                 Navigator.pop(context, addSoundModelTemp);
                               }
-                            } catch(e){
+                            } catch (e) {
                               closeDialogue(context);
                               showErrorToast(context, e.toString());
                             }
@@ -159,7 +167,8 @@ class _AddSoundState extends State<AddSound> {
                           side: const BorderSide(color: Colors.grey, width: 1)),
                       child: Text(
                         discoverList[index].name,
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 12),
                       ));
                 }));
       }
@@ -177,17 +186,18 @@ class _AddSoundState extends State<AddSound> {
     );
   }
 
-  getSoundCat()async{
-      try{
-        var response = await RestApi.getSoundCategories();
-        var json = jsonDecode(response.body);
-        var jsonList = json['data'] as List;
-        discoverList = jsonList.map((e) => SoundCategoryModel.fromJson(e)).toList();
-        isLoading = false;
-        setState(() {});
-      } catch(e){
-        showErrorToast(context, e.toString());
-        setState(()=>isLoading=false);
-      }
+  getSoundCat() async {
+    try {
+      var response = await RestApi.getSoundCategories();
+      var json = jsonDecode(response.body);
+      var jsonList = json['data'] as List;
+      discoverList =
+          jsonList.map((e) => SoundCategoryModel.fromJson(e)).toList();
+      isLoading = false;
+      setState(() {});
+    } catch (e) {
+      showErrorToast(context, e.toString());
+      setState(() => isLoading = false);
+    }
   }
 }

@@ -5,8 +5,7 @@ class BannerModel {
   BannerModel(this.id, this.image);
 
   factory BannerModel.fromJson(dynamic json) {
-    return BannerModel(
-        json['id'] ?? 0, json['image'] ?? '');
+    return BannerModel(json['id'] ?? 0, json['image'] ?? '');
   }
 
   Map<String, dynamic> toJson() {

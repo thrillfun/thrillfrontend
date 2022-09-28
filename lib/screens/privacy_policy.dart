@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/rest/rest_api.dart';
@@ -10,16 +11,16 @@ class PrivacyPolicy extends StatefulWidget {
   State<PrivacyPolicy> createState() => _PrivacyPolicyState();
 
   static const String routeName = '/privacyPolicy';
+
   static Route route() {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
-      builder: (context) =>  const PrivacyPolicy(),
+      builder: (context) => const PrivacyPolicy(),
     );
   }
 }
 
 class _PrivacyPolicyState extends State<PrivacyPolicy> {
-
   String data = '';
   bool isLoading = true;
 
@@ -47,27 +48,30 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
             color: Colors.black,
             icon: const Icon(Icons.arrow_back_ios)),
       ),
-      body: isLoading?
-      const Center(
-        child: CircularProgressIndicator(),
-      ):
-      SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(data, style: const TextStyle(fontSize: 13),),
-          )),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                data,
+                style: const TextStyle(fontSize: 13),
+              ),
+            )),
     );
   }
 
-  getPrivacyPolicy()async{
-    try{
+  getPrivacyPolicy() async {
+    try {
       var response = await RestApi.getCmsPage('PrivacyPolicy');
       var json = jsonDecode(response.body);
       setState(() {
         data = json['data']['description'] ?? '';
         isLoading = false;
       });
-    } catch(e){
+    } catch (e) {
       setState(() {
         data = "Error!";
         isLoading = false;

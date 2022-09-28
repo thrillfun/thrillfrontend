@@ -63,32 +63,32 @@ class _EarnSpinsState extends State<EarnSpins> {
                   child: Center(child: CircularProgressIndicator()),
                 )
               : SizedBox(
-                height: getHeight(context),
-                child: ListView.builder(
-                itemCount: earnList.length,
-                itemBuilder: (context, index) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
-                         Text(
-                           'Level for ${earnList[index].name}',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        card(earnList[index]),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                      ],
-                    );
-                  }),
-              ),
+                  height: getHeight(context),
+                  child: ListView.builder(
+                      itemCount: earnList.length,
+                      itemBuilder: (context, index) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Text(
+                              'Level for ${earnList[index].name}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            card(earnList[index]),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                          ],
+                        );
+                      }),
+                ),
         ),
       ),
     );
@@ -109,13 +109,15 @@ class _EarnSpinsState extends State<EarnSpins> {
             children: [
               Expanded(
                   child: RichText(
-                text:  TextSpan(children: [
-                   TextSpan(
+                text: TextSpan(children: [
+                  TextSpan(
                       text: earnModel.conditions + '\n\n',
                       style: const TextStyle(color: Colors.black)),
                   const TextSpan(
                       text: earnedSpins, style: TextStyle(color: Colors.black)),
-                  TextSpan(text: '${earnModel.earned_spins}/${earnModel.total_spin}', style: const TextStyle(color: Colors.black))
+                  TextSpan(
+                      text: '${earnModel.earned_spins}/${earnModel.total_spin}',
+                      style: const TextStyle(color: Colors.black))
                 ]),
               )),
               ElevatedButton(
@@ -150,7 +152,7 @@ class _EarnSpinsState extends State<EarnSpins> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                       color: Colors.blue.shade900, shape: BoxShape.circle),
-                  child:Text(
+                  child: Text(
                     earnModel.current_level,
                     style: const TextStyle(
                         color: Colors.white,
@@ -167,7 +169,7 @@ class _EarnSpinsState extends State<EarnSpins> {
                     child: Slider(
                         max: 100,
                         min: 0,
-                        value: double.parse(earnModel.current_level)*10,
+                        value: double.parse(earnModel.current_level) * 10,
                         activeColor: ColorManager.cyan,
                         onChanged: (val) {}),
                   ),
@@ -180,7 +182,7 @@ class _EarnSpinsState extends State<EarnSpins> {
                   decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.grey, width: 1)),
-                  child:Text(
+                  child: Text(
                     earnModel.next_level,
                     style: const TextStyle(
                         color: Colors.grey,

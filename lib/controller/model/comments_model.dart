@@ -37,18 +37,18 @@ class CommentData {
 
   CommentData(
       {this.id,
-        this.comment,
-        this.userId,
-        this.avatar,
-        this.name,
-        this.commentLikeCounter});
+      this.comment,
+      this.userId,
+      this.avatar,
+      this.name,
+      this.commentLikeCounter});
 
   CommentData.fromJson(Map<String, dynamic> json) {
-    id = json['id']??"";
-    comment = json['comment']??'';
-    userId = json['user_id']??'';
-    avatar = json['avatar']??'';
-    name = json['name']??'';
+    id = json['id'] ?? "";
+    comment = json['comment'] ?? '';
+    userId = json['user_id'] ?? '';
+    avatar = json['avatar'] ?? '';
+    name = json['name'] ?? '';
     commentLikeCounter = json['comment_like_counter'];
   }
 
@@ -63,4 +63,3 @@ class CommentData {
     return data;
   }
 }
-

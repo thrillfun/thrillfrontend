@@ -1,7 +1,11 @@
-String saveCacheDirectory = "/data/user/0/com.thrill/cache/";               //sound will be downloaded here
-String saveDirectory = "/storage/emulated/0/Download/";                     //unposted videos will be stored here (posted/draft videos gets deleted from device)
-const admobAppId = "ca-app-pub-3940256099942544~3347511713";                      //replace this with live and also change in Android Manifest
-const homeInterstitialAdUnit = "ca-app-pub-3940256099942544/1033173712";          //this is test id, replace with live
+String saveCacheDirectory =
+    "/data/user/0/com.thrill/cache/"; //sound will be downloaded here
+String saveDirectory =
+    "/storage/emulated/0/Download/"; //unposted videos will be stored here (posted/draft videos gets deleted from device)
+const admobAppId =
+    "ca-app-pub-3940256099942544~3347511713"; //replace this with live and also change in Android Manifest
+const homeInterstitialAdUnit =
+    "ca-app-pub-3940256099942544/1033173712"; //this is test id, replace with live
 
 const String login = 'LOG IN';
 const String mobileNumber = 'Mobile Number';

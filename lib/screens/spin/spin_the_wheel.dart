@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thrill/models/recent_rewards.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
+
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../models/earnSpin_model.dart';
@@ -47,7 +49,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   List<EarnSpin> earnList = List<EarnSpin>.empty(growable: true);
   WheelDetails? wheelDetails;
   var listForReward = [];
-  int rewardId=0;
+  int rewardId = 0;
   AudioPlayer player = AudioPlayer();
 
   @override
@@ -62,21 +64,21 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   void initState() {
     setSpinSound();
     loadWheelDetails();
-    try{
+    try {
       reelsPlayerController?.pause();
-    }catch(_){}
+    } catch (_) {}
     super.initState();
   }
 
-  setSpinSound()async{
-    try{
-      if(Platform.isIOS){
+  setSpinSound() async {
+    try {
+      if (Platform.isIOS) {
         player.setUrl('${saveCacheDirectory}spin.mp3', isLocal: true);
       } else {
         player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
         player.pause();
       }
-    }catch(_){}
+    } catch (_) {}
   }
 
   @override
@@ -183,7 +185,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                           children: [
                             Text(
                               //usedChanceValue.toString(),
-                              wheelDetails?.last_reward??'',
+                              wheelDetails?.last_reward ?? '',
                               style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -264,23 +266,25 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                                                     .wheelRewards[i].is_image ==
                                                 0
                                             ? Padding(
-                                              padding: const EdgeInsets.only(left: 25),
-                                              child: Text(
+                                                padding: const EdgeInsets.only(
+                                                    left: 25),
+                                                child: Text(
                                                   '${wheelDetails!.wheelRewards[i].currency_symbol} ${wheelDetails!.wheelRewards[i].amount} ',
                                                   style: const TextStyle(
                                                       color: Colors.black,
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
-                                            )
+                                              )
                                             : Padding(
-                                              padding: const EdgeInsets.only(left: 25),
-                                              child: Image.network(
+                                                padding: const EdgeInsets.only(
+                                                    left: 25),
+                                                child: Image.network(
                                                   "${RestUrl.profileUrl}${wheelDetails!.wheelRewards[i].image_path}",
                                                   width: 30,
                                                   height: 30,
                                                 ),
-                                            ),
+                                              ),
                                         style: FortuneItemStyle(
                                           color: i % 2 == 1
                                               ? ColorManager.spinColorTwo
@@ -309,8 +313,8 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                             height: 12,
                           ),
                           ElevatedButton(
-                            //isSpin ? null :
-                              onPressed:  spinTheWheelTap,
+                              //isSpin ? null :
+                              onPressed: spinTheWheelTap,
                               style: ElevatedButton.styleFrom(
                                   primary: isSpin
                                       ? Colors.grey[400]
@@ -372,30 +376,31 @@ class _SpinTheWheelState extends State<SpinTheWheel>
 
   spinTheWheelTap() async {
     try {
-       if (remainingChance > 0) {
-         setState(() {
+      if (remainingChance > 0) {
+        setState(() {
           isSpin = true;
-         });
-          listForReward.clear();
-          var result = await RestApi.getAvailableProbilityCounter();
-          var jsonResult=jsonDecode(result.body);
-          listForReward = List<ProbilityCounter>.from(
-              jsonResult['data'].map((i) => ProbilityCounter.fromJson(i)))
-              .toList(growable: true);
-          ProbilityCounter element = getRandomElement(listForReward) as ProbilityCounter;
-          int id=element.id-1;
-          rewardId=element.id;
-          await player.resume();
-          setState(() {
-            selectedInt = id;
-            controller.add(selectedInt);
-          });
-       }else{
-         setState(() {
-           isSpin = true;
-         });
-       }
-    }catch(e){
+        });
+        listForReward.clear();
+        var result = await RestApi.getAvailableProbilityCounter();
+        var jsonResult = jsonDecode(result.body);
+        listForReward = List<ProbilityCounter>.from(
+                jsonResult['data'].map((i) => ProbilityCounter.fromJson(i)))
+            .toList(growable: true);
+        ProbilityCounter element =
+            getRandomElement(listForReward) as ProbilityCounter;
+        int id = element.id - 1;
+        rewardId = element.id;
+        await player.resume();
+        setState(() {
+          selectedInt = id;
+          controller.add(selectedInt);
+        });
+      } else {
+        setState(() {
+          isSpin = true;
+        });
+      }
+    } catch (e) {
       showErrorToast(context, e.toString());
     }
   }
@@ -552,7 +557,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                         thumbShape: SliderComponentShape.noThumb,
                         trackHeight: 3),
                     child: Slider(
-                        max: int.parse(earnModel.max_level)*10,
+                        max: int.parse(earnModel.max_level) * 10,
                         min: 0,
                         value: double.parse(earnModel.progress.toString()) * 10,
                         activeColor: ColorManager.cyan,

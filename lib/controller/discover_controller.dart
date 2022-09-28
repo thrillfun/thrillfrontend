@@ -1,10 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/model/discover_model.dart';
 import 'package:thrill/controller/model/hashtag_videos_model.dart';
 import 'package:thrill/controller/model/top_hastag_videos_model.dart';
@@ -17,6 +16,7 @@ class DiscoverController extends GetxController {
   RxList<HashTags> hasTagsList = RxList();
   RxList<HashTagVideos> hashTagsVideos = RxList();
   RxList<HashTagsDetails> hashTagsDetailsList = RxList();
+
   DiscoverController() {
     getBanners();
     getTopHashTags();
@@ -58,6 +58,7 @@ class DiscoverController extends GetxController {
     var result = jsonDecode(response.body);
     try {
       hasTagsList = TopHastagVideosModel.fromJson(result).data!.obs;
+      hashTagsVideos.clear();
 
       if (hasTagsList.isNotEmpty) {
         hasTagsList.forEach((element) {
@@ -98,8 +99,6 @@ class DiscoverController extends GetxController {
         update();
         errorToast(HashTagVideosModel.fromJson(result).message.toString());
       }
-    } else {
-      hashTagsVideos.clear();
     }
   }
 }

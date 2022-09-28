@@ -8,7 +8,7 @@ ThemeData theme() {
       backgroundColor: const Color(0xFFF4F4F4),
       colorScheme: ColorScheme.fromSwatch().copyWith(
           secondary: const Color(0xff2DCBC8), primary: const Color(0xff1e234d)),
-      fontFamily:GoogleFonts.comfortaa().fontFamily,
+      fontFamily: GoogleFonts.comfortaa().fontFamily,
       textTheme: const TextTheme(
         headline1: TextStyle(
           color: Color(0xff1e234d),

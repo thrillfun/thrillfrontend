@@ -1,20 +1,18 @@
 import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/utils.dart';
-import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:iconly/iconly.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
-import 'package:thrill/screens/auth/login.dart';
-import 'package:thrill/screens/home/discover.dart';
 import 'package:thrill/screens/home/discover_getx.dart';
 import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
@@ -23,17 +21,17 @@ import 'package:thrill/widgets/fab_items.dart';
 import 'package:thrill/widgets/video_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 import '../../blocs/profile/profile_bloc.dart';
 import '../../main.dart';
 import '../../repository/login/login_repository.dart';
 import '../../utils/util.dart';
-import 'home.dart';
 import 'notifications.dart';
 
 bool popupDisplayed = false;
 
 class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({Key? key, this.mapData}) : super(key: key);
+  BottomNavigation({Key? key, this.mapData}) : super(key: key);
   final Map? mapData;
 
   @override
@@ -68,45 +66,57 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback(
+        (timeStamp) => ShowCaseWidget.of(this.context).startShowCase([key]));
     if (widget.mapData?['index'] != null)
       selectedIndex = widget.mapData?['index'] ?? 0;
     if (!popupDisplayed) {
       showPromotionalPopup();
       popupDisplayed = true;
     }
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        if (selectedIndex != 0) {
-          setState(() {
-            selectedIndex = 0;
-            shouldAutoPlayReel = true;
-          });
-          return false;
-        } else {
-          showExitDialog();
-          return false;
-        }
-      },
-      child: Scaffold(
-          extendBody: true,
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: FloatingActionButton(
-            child: Image.asset(
-              'assets/spin.png',
-              //scale: 1.4,
-              fit: BoxFit.cover,
-            ),
-            onPressed: () => Get.to(SpinTheWheel()),
-          ),
-          bottomNavigationBar: myDrawer2(),
-          body: screens[selectedIndex]),
-    );
+        onWillPop: () async {
+          if (selectedIndex != 0) {
+            setState(() {
+              selectedIndex = 0;
+              shouldAutoPlayReel = true;
+            });
+            return false;
+          } else {
+            showExitDialog();
+            return false;
+          }
+        },
+        child: Scaffold(
+            extendBody: true,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: Showcase(
+                showcaseBackgroundColor: Color.fromARGB(255, 1, 180, 177),
+                shapeBorder: const CircleBorder(),
+                radius: const BorderRadius.all(Radius.circular(40)),
+                tipBorderRadius: const BorderRadius.all(Radius.circular(8)),
+                overlayPadding: const EdgeInsets.all(5),
+                key: key,
+                child: FloatingActionButton(
+                  child: Image.asset(
+                    'assets/spin.png',
+                    //scale: 1.4,
+                    fit: BoxFit.cover,
+                  ),
+                  onPressed: () => Get.to(() => const SpinTheWheel()),
+                ),
+                textColor: Colors.white,
+                descTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+                description: "check out the spin wheel to earn rewards!!"),
+            bottomNavigationBar: myDrawer2(),
+            body: screens[selectedIndex]));
   }
 
   myDrawer2() {

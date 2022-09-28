@@ -3,17 +3,13 @@ import 'package:carousel_indicator/carousel_indicator.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:thrill/controller/discover_controller.dart';
-import 'package:thrill/controller/model/public_videosModel.dart';
-import 'package:thrill/controller/model/top_hastag_videos_model.dart';
 import 'package:thrill/rest/rest_url.dart';
-import 'package:get/get.dart';
-import 'package:thrill/screens/following_and_followers.dart';
 import 'package:thrill/screens/hash_tags/hash_tags_screen.dart';
 import 'package:thrill/utils/util.dart';
-import 'package:thrill/widgets/better_video_player.dart';
 import 'package:thrill/widgets/video_player_screen.dart';
 
 class DiscoverGetx extends StatelessWidget {
@@ -37,6 +33,7 @@ class DiscoverGetx extends StatelessWidget {
                       child: Stack(
                     children: [
                       SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
                           child: controller.hashTagsVideos.isEmpty
                               ? Container(
                                   height: MediaQuery.of(context).size.height,
@@ -180,27 +177,29 @@ class DiscoverGetx extends StatelessWidget {
                                             physics:
                                                 const NeverScrollableScrollPhysics(),
                                             //cross axis cell count
-                                            mainAxisSpacing:
-                                                8, // vertical spacing between items
-                                            crossAxisSpacing:
-                                                8, // horizontal spacing between items
+                                            mainAxisSpacing: 8,
+                                            // vertical spacing between items
+                                            crossAxisSpacing: 8,
+                                            // horizontal spacing between items
                                             crossAxisCount: 3,
                                             shrinkWrap: true,
-                                            itemCount: controller
-                                                .hashTagsVideos.length,
+                                            itemCount:
+                                                controller.hasTagsList.length,
                                             itemBuilder: (context, index) =>
                                                 InkWell(
-                                                  onTap: () {
-                                                    // controller
-                                                    //     .getVideosByHashTags(
-                                                    //         controller
-                                                    //             .hashTagsVideos[
-                                                    //                 index]
-                                                    //             .id!
-                                                    //             .toInt());
-                                                    // Get.to(VideoPlayerScreen(
-                                                    //     controller
-                                                    //         .hashTagsDetailsList));
+                                                  onTap: () async {
+                                                    await controller
+                                                        .getVideosByHashTags(
+                                                            controller
+                                                                .hasTagsList[
+                                                                    index]
+                                                                .hashtagId!
+                                                                .toInt());
+
+                                                    Get.to(VideoPlayerScreen(
+                                                        controller
+                                                            .hashTagsDetailsList,
+                                                        index));
                                                   },
                                                   child: Card(
                                                     elevation: 8,
@@ -221,7 +220,7 @@ class DiscoverGetx extends StatelessWidget {
                                                                 controller
                                                                     .hashTagsVideos[
                                                                         index]
-                                                                    .gifImage
+                                                                    .gifImage!
                                                                     .toString())),
                                                   ),
                                                 )),

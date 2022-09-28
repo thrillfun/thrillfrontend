@@ -1,5 +1,3 @@
-import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -8,13 +6,12 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconly/iconly.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/blocs/login/login_bloc.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/comments_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
-import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/following_and_followers.dart';
+import 'package:thrill/screens/video/camera_screen.dart';
 import 'package:thrill/screens/video/record.dart';
 import 'package:thrill/widgets/better_video_player.dart';
 
@@ -44,12 +41,13 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
   PreloadPageController? preloadPageController2;
 
   TabController? tabController;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     loadInterstitialAd();
-    tabController = TabController(length: 3, vsync: this);
+    tabController = TabController(length: 3, vsync: this, initialIndex: 1);
     preloadPageController = PreloadPageController();
     preloadPageController!.addListener(scrollListener);
 
@@ -71,135 +69,180 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
             body: Stack(
+          fit: StackFit.expand,
           children: [
+            Image.asset(
+              "assets/background_profile.png",
+              fit: BoxFit.fill,
+            ),
             TabBarView(
                 physics: NeverScrollableScrollPhysics(),
                 controller: tabController,
                 children: [
-                  PreloadPageView.builder(
-                      preloadPagesCount: 6,
-                      controller: preloadPageController,
-                      onPageChanged: (int index) {
-                        if (videosController.adIndexes.contains(index)) {
-                          showAd();
-                        }
-                      },
-                      scrollDirection: Axis.vertical,
-                      itemCount: videosController.followingVideosList.length,
-                      itemBuilder: (context, index) => GetX<VideosController>(
-                          builder: (vidoesController) => BetterReelsPlayer(
-                              videosController
-                                  .followingVideosList[index].gifImage!,
-                              videosController
-                                  .followingVideosList[index].video!,
-                              index,
-                              current,
-                              isOnPageTurning,
-                              () {},
-                              videosController.followingVideosList[index].user,
-                              videosController.followingVideosList[index].id!,
-                              videosController
-                                  .followingVideosList[index].soundName
-                                  .toString(),
-                              videosController.followingVideosList[index]
-                                          .isDuetable ==
-                                      "yes"
-                                  ? true
-                                  : false,
-                              vidoesController.followingVideosList[index],
-                              videosController
-                                  .followingVideosList[index].user!.id!,
-                              videosController
-                                  .followingVideosList[index].user!.name
-                                  .toString(),
-                              videosController
-                                  .followingVideosList[index].description
-                                  .toString(),
-                              true,
-                              videosController
-                                  .publicVideosList[index].hashtags!))),
-                  PreloadPageView.builder(
-                      controller: preloadPageController1,
-                      onPageChanged: (int index) {
-                        if (videosController.adIndexes.contains(index)) {
-                          showAd();
-                        }
-                      },
-                      scrollDirection: Axis.vertical,
-                      preloadPagesCount: 6,
-                      itemCount: videosController.publicVideosList.length,
-                      //Notice this
-                      itemBuilder: (context, index) => GetX<VideosController>(
-                          builder: (vidoesController) => BetterReelsPlayer(
-                              videosController
-                                  .publicVideosList[index].gifImage!,
-                              videosController.publicVideosList[index].video!,
-                              index,
-                              related,
-                              isRelatedTurning,
-                              () {},
-                              videosController.publicVideosList[index].user,
-                              videosController.publicVideosList[index].id!,
-                              videosController.publicVideosList[index].soundName
-                                  .toString(),
-                              videosController
-                                          .publicVideosList[index].isDuetable ==
-                                      "yes"
-                                  ? true
-                                  : false,
-                              videosController.publicVideosList[index],
-                              videosController
-                                  .publicVideosList[index].user!.id!,
-                              videosController
-                                  .publicVideosList[index].user!.name
-                                  .toString(),
-                              videosController
-                                  .publicVideosList[index].description
-                                  .toString(),
-                              true,
-                              videosController
-                                  .publicVideosList[index].hashtags!))),
-                  PreloadPageView.builder(
-                      controller: preloadPageController2,
-                      onPageChanged: (int index) {
-                        if (videosController.adIndexes.contains(index)) {
-                          showAd();
-                        }
-                      },
-                      scrollDirection: Axis.vertical,
-                      preloadPagesCount: 6,
-                      itemCount: videosController.publicVideosList.length,
-                      //Notice this
-                      itemBuilder: (context, index) => GetX<VideosController>(
-                          builder: (vidoesController) => BetterReelsPlayer(
-                              videosController
-                                  .publicVideosList[index].gifImage!,
-                              videosController.publicVideosList[index].video!,
-                              index,
-                              popular,
-                              isPopularTurning,
-                              () {},
-                              videosController.publicVideosList[index].user,
-                              videosController.publicVideosList[index].id!,
-                              videosController.publicVideosList[index].soundName
-                                  .toString(),
-                              videosController
-                                          .publicVideosList[index].isDuetable ==
-                                      "Yes"
-                                  ? true
-                                  : false,
-                              vidoesController.publicVideosList[index],
-                              videosController
-                                  .publicVideosList[index].user!.id!,
-                              videosController
-                                  .publicVideosList[index].user!.name
-                                  .toString(),
-                              videosController
-                                  .publicVideosList[index].description
-                                  .toString(),
-                              true,
-                              videosController
-                                  .publicVideosList[index].hashtags!)))
+                  GetX<VideosController>(
+                    builder: (videosController) => VideosController()
+                                .followingVideosList
+                                .value
+                                .length ==
+                            0
+                        ? const Center(
+                            child: Text(
+                              "You dont have any followings yet",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        : RefreshIndicator(
+                            child: PreloadPageView.builder(
+                                preloadPagesCount: 6,
+                                physics: AlwaysScrollableScrollPhysics(),
+                                controller: preloadPageController,
+                                onPageChanged: (int index) {
+                                  if (videosController.adIndexes
+                                      .contains(index)) {
+                                    showAd();
+                                  }
+                                },
+                                scrollDirection: Axis.vertical,
+                                itemCount:
+                                    videosController.followingVideosList.length,
+                                itemBuilder: (context, index) => BetterReelsPlayer(
+                                    videosController
+                                        .followingVideosList[index].gifImage!,
+                                    videosController
+                                        .followingVideosList[index].video!,
+                                    index,
+                                    current,
+                                    isOnPageTurning,
+                                    () {},
+                                    videosController
+                                        .followingVideosList[index].user,
+                                    videosController
+                                        .followingVideosList[index].id!,
+                                    videosController.followingVideosList[index].soundName
+                                        .toString(),
+                                    videosController.followingVideosList[index].isDuetable == "yes"
+                                        ? true
+                                        : false,
+                                    videosController.followingVideosList[index],
+                                    videosController
+                                        .followingVideosList[index].user!.id!,
+                                    videosController.followingVideosList[index].user!.name
+                                        .toString(),
+                                    videosController
+                                        .followingVideosList[index].description
+                                        .toString(),
+                                    true,
+                                    videosController.publicVideosList[index].hashtags!)),
+                            onRefresh: () => VideosController().getFollowingVideos()),
+                  ),
+                  videosController.publicVideosList.isEmpty
+                      ? const Center(
+                          child: Text(
+                            "no videos found",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          child: PreloadPageView.builder(
+                              controller: preloadPageController1,
+                              onPageChanged: (int index) {
+                                if (videosController.adIndexes
+                                    .contains(index)) {
+                                  showAd();
+                                }
+                              },
+                              scrollDirection: Axis.vertical,
+                              preloadPagesCount: 6,
+                              itemCount:
+                                  videosController.publicVideosList.length,
+                              //Notice this
+                              itemBuilder: (context, index) =>
+                                  BetterReelsPlayer(
+                                      videosController
+                                          .publicVideosList[index].gifImage!,
+                                      videosController
+                                          .publicVideosList[index].video!,
+                                      index,
+                                      related,
+                                      isRelatedTurning,
+                                      () {},
+                                      videosController
+                                          .publicVideosList[index].user,
+                                      videosController
+                                          .publicVideosList[index].id!,
+                                      videosController
+                                          .publicVideosList[index].soundName
+                                          .toString(),
+                                      videosController.publicVideosList[index]
+                                                  .isDuetable ==
+                                              "yes"
+                                          ? true
+                                          : false,
+                                      videosController.publicVideosList[index],
+                                      videosController
+                                          .publicVideosList[index].user!.id!,
+                                      videosController
+                                          .publicVideosList[index].user!.name
+                                          .toString(),
+                                      videosController
+                                          .publicVideosList[index].description
+                                          .toString(),
+                                      true,
+                                      videosController
+                                          .publicVideosList[index].hashtags!)),
+                          onRefresh: () => VideosController().getAllVideos()),
+                  RefreshIndicator(
+                      child: PreloadPageView.builder(
+                          controller: preloadPageController2,
+                          onPageChanged: (int index) {
+                            if (videosController.adIndexes.contains(index)) {
+                              showAd();
+                            }
+                          },
+                          scrollDirection: Axis.vertical,
+                          preloadPagesCount: 6,
+                          itemCount: videosController.publicVideosList.length,
+                          //Notice this
+                          itemBuilder: (context, index) => GetX<
+                                  VideosController>(
+                              builder: (vidoesController) => BetterReelsPlayer(
+                                  videosController
+                                      .publicVideosList[index].gifImage!,
+                                  videosController
+                                      .publicVideosList[index].video!,
+                                  index,
+                                  popular,
+                                  isPopularTurning,
+                                  () {},
+                                  videosController.publicVideosList[index].user,
+                                  videosController.publicVideosList[index].id!,
+                                  videosController
+                                      .publicVideosList[index].soundName
+                                      .toString(),
+                                  videosController.publicVideosList[index]
+                                              .isDuetable ==
+                                          "Yes"
+                                      ? true
+                                      : false,
+                                  vidoesController.publicVideosList[index],
+                                  videosController
+                                      .publicVideosList[index].user!.id!,
+                                  videosController
+                                      .publicVideosList[index].user!.name
+                                      .toString(),
+                                  videosController
+                                      .publicVideosList[index].description
+                                      .toString(),
+                                  true,
+                                  videosController
+                                      .publicVideosList[index].hashtags!))),
+                      onRefresh: () => VideosController().getAllVideos())
                 ]),
             Container(
                 alignment: Alignment.topCenter,
@@ -223,10 +266,7 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
                             ]),
                         InkWell(
                             onTap: () {
-                              Get.to(const Record(soundMap: {
-                                "soundName": "",
-                                "soundPath": "",
-                              }));
+                              Get.to( CameraScreen());
                             },
                             child: const Icon(
                               IconlyLight.camera,

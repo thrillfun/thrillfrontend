@@ -7,10 +7,10 @@ class FollowUnfollowModel {
   FollowUnfollowModel({this.status, this.data, this.message, this.error});
 
   FollowUnfollowModel.fromJson(Map<String, dynamic> json) {
-    status = json['status']??"";
-    data = json['data'].cast<String>()??"";
-    message = json['message']??"";
-    error = json['error']??"";
+    status = json['status'] ?? "";
+    data = json['data'].cast<String>() ?? "";
+    message = json['message'] ?? "";
+    error = json['error'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
@@ -22,4 +22,3 @@ class FollowUnfollowModel {
     return data;
   }
 }
-

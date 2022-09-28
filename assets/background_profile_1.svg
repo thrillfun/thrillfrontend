@@ -1,14 +1,16 @@
-<svg width="298" height="99" viewBox="0 0 298 99" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle cx="71" cy="4" r="4" fill="#41444E"/>
-<circle cx="80" cy="28" r="2" fill="#41444E"/>
-<circle cx="254" cy="43" r="4.5" stroke="#00CCC9"/>
-<circle cx="41" cy="36" r="2" fill="#00CCC9"/>
-<circle cx="296" cy="65" r="2" fill="#41444E"/>
-<path d="M232 70C232 71.1046 231.105 72 230 72C228.895 72 228 71.1046 228 70C228 68.8954 228.895 68 230 68C231.105 68 232 68.8954 232 70Z" fill="#41444E"/>
-<circle cx="41.5" cy="85.5" r="2.5" fill="#41444E"/>
-<circle cx="226.5" cy="13.5" r="2.5" fill="#41444E"/>
-<circle cx="85.5" cy="95.5" r="3.5" fill="#00CCC9"/>
-<circle cx="64.5" cy="64.5" r="1.5" fill="#41444E"/>
-<circle cx="274.5" cy="79.5" r="1.5" fill="#41444E"/>
-<circle cx="3.5" cy="64.5" r="3" stroke="#41444E"/>
+<svg fill="none" height="99" viewBox="0 0 298 99" width="298" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="71" cy="4" fill="#41444E" r="4" />
+    <circle cx="80" cy="28" fill="#41444E" r="2" />
+    <circle cx="254" cy="43" r="4.5" stroke="#00CCC9" />
+    <circle cx="41" cy="36" fill="#00CCC9" r="2" />
+    <circle cx="296" cy="65" fill="#41444E" r="2" />
+    <path
+        d="M232 70C232 71.1046 231.105 72 230 72C228.895 72 228 71.1046 228 70C228 68.8954 228.895 68 230 68C231.105 68 232 68.8954 232 70Z"
+        fill="#41444E" />
+    <circle cx="41.5" cy="85.5" fill="#41444E" r="2.5" />
+    <circle cx="226.5" cy="13.5" fill="#41444E" r="2.5" />
+    <circle cx="85.5" cy="95.5" fill="#00CCC9" r="3.5" />
+    <circle cx="64.5" cy="64.5" fill="#41444E" r="1.5" />
+    <circle cx="274.5" cy="79.5" fill="#41444E" r="1.5" />
+    <circle cx="3.5" cy="64.5" r="3" stroke="#41444E" />
 </svg>

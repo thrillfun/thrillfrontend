@@ -1,10 +1,12 @@
 import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/hashtags_model.dart';
+
 import '../common/color.dart';
 import '../common/strings.dart';
 import '../models/video_model.dart';
@@ -112,8 +114,8 @@ class _FavouritesState extends State<Favourites> {
             ),
             isLoading
                 ? const Center(
-                    child:
-                        CircularProgressIndicator(color: Colors.lightBlueAccent),
+                    child: CircularProgressIndicator(
+                        color: Colors.lightBlueAccent),
                   )
                 : tabview()
           ],
@@ -139,25 +141,23 @@ class _FavouritesState extends State<Favourites> {
             text: TextSpan(children: [
               TextSpan(
                   text: whoops + '\n',
-                  style:
-                      TextStyle(color: Colors.grey.shade700, fontSize: 20)),
+                  style: TextStyle(color: Colors.grey.shade700, fontSize: 20)),
               TextSpan(
                   text: '\nThere is no favourite video so far.',
-                  style:
-                      TextStyle(color: Colors.grey.shade400, fontSize: 18)),
+                  style: TextStyle(color: Colors.grey.shade400, fontSize: 18)),
             ]))
         : GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 1.8,
-                mainAxisSpacing: 1.8),
+                crossAxisCount: 3, crossAxisSpacing: 1.8, mainAxisSpacing: 1.8),
             itemCount: favVideo.length,
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
-                onTap: (){
-                  Navigator.pushNamedAndRemoveUntil(context, '/', (route) => true, arguments: {'videoModel': favVideo[index]});
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/', (route) => true,
+                      arguments: {'videoModel': favVideo[index]});
                 },
                 child: Stack(
                   fit: StackFit.expand,
@@ -167,7 +167,10 @@ class _FavouritesState extends State<Favourites> {
                               child: CircularProgressIndicator(),
                             ),
                         fit: BoxFit.cover,
-                        errorWidget: (a,b,c)=>Image.network('${RestUrl.thambUrl}thumb-not-available.png', fit: BoxFit.fill,),
+                        errorWidget: (a, b, c) => Image.network(
+                              '${RestUrl.thambUrl}thumb-not-available.png',
+                              fit: BoxFit.fill,
+                            ),
                         imageUrl: favVideo[index].gif_image.isEmpty
                             ? '${RestUrl.thambUrl}thumb-not-available.png'
                             : '${RestUrl.gifUrl}${favVideo[index].gif_image}'),
@@ -213,12 +216,10 @@ class _FavouritesState extends State<Favourites> {
             text: TextSpan(children: [
               TextSpan(
                   text: whoops + '\n',
-                  style:
-                      TextStyle(color: Colors.grey.shade700, fontSize: 20)),
+                  style: TextStyle(color: Colors.grey.shade700, fontSize: 20)),
               TextSpan(
                   text: '\nThere is no favourite sounds so far.',
-                  style:
-                      TextStyle(color: Colors.grey.shade400, fontSize: 18)),
+                  style: TextStyle(color: Colors.grey.shade400, fontSize: 18)),
             ]))
         : ListView.builder(
             shrinkWrap: true,
@@ -226,8 +227,8 @@ class _FavouritesState extends State<Favourites> {
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (BuildContext context, int index) {
               return Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 15, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                 child: Row(
                   children: [
                     Container(
@@ -246,7 +247,7 @@ class _FavouritesState extends State<Favourites> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                           Text(
+                          Text(
                             favSound[index].name,
                             style: const TextStyle(color: Colors.grey),
                           ),
@@ -254,18 +255,18 @@ class _FavouritesState extends State<Favourites> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               InkWell(
-                                onTap:()async{
-                                    var result =
-                                        await RestApi.addAndRemoveFavariteSoundHastag(
-                                        favSound[index].id, "sound", 0);
-                                    var json = jsonDecode(result.body);
-                                    if (json['status']) {
-                                      favSound.removeAt(index);
-                                      showSuccessToast(context, json['message']);
-                                    } else {
-                                      showErrorToast(context, json['message']);
-                                    }
-                                    setState(() {});
+                                onTap: () async {
+                                  var result = await RestApi
+                                      .addAndRemoveFavariteSoundHastag(
+                                          favSound[index].id, "sound", 0);
+                                  var json = jsonDecode(result.body);
+                                  if (json['status']) {
+                                    favSound.removeAt(index);
+                                    showSuccessToast(context, json['message']);
+                                  } else {
+                                    showErrorToast(context, json['message']);
+                                  }
+                                  setState(() {});
                                 },
                                 child: Material(
                                   borderRadius: BorderRadius.circular(50),
@@ -279,8 +280,8 @@ class _FavouritesState extends State<Favourites> {
                                           border: Border.all(
                                               color: Colors.grey.shade300,
                                               width: 1)),
-                                      child: const Icon(
-                                          Icons.bookmark,color: Colors.lightBlueAccent)),
+                                      child: const Icon(Icons.bookmark,
+                                          color: Colors.lightBlueAccent)),
                                 ),
                               ),
                             ],
@@ -301,12 +302,10 @@ class _FavouritesState extends State<Favourites> {
             text: TextSpan(children: [
               TextSpan(
                   text: whoops + '\n',
-                  style:
-                      TextStyle(color: Colors.grey.shade700, fontSize: 20)),
+                  style: TextStyle(color: Colors.grey.shade700, fontSize: 20)),
               TextSpan(
                   text: '\nThere is no favourite hashtag so far.',
-                  style:
-                      TextStyle(color: Colors.grey.shade400, fontSize: 18)),
+                  style: TextStyle(color: Colors.grey.shade400, fontSize: 18)),
             ]))
         : GridView.builder(
             shrinkWrap: true,
@@ -355,7 +354,8 @@ class _FavouritesState extends State<Favourites> {
       List jsonList = json['data']['hash_tags'] as List;
       favHastag = jsonList.map((e) => HashtagModel.fromJson(e)).toList();
 
-      favId = jsonList.map((e) => HashtagModel.fromJson(e).id.toString()).toList();
+      favId =
+          jsonList.map((e) => HashtagModel.fromJson(e).id.toString()).toList();
 
       SharedPreferences pref = await SharedPreferences.getInstance();
       pref.setStringList('favTag', favId);
@@ -366,7 +366,7 @@ class _FavouritesState extends State<Favourites> {
       List jsonSoundList = json['data']['sounds'] as List;
       favSound = jsonSoundList.map((e) => AddSoundModel.fromJson(e)).toList();
     }
-    if(jsonV['status']){
+    if (jsonV['status']) {
       List jsonVideoList = jsonV['data'] as List;
       favVideo = jsonVideoList.map((e) => VideoModel.fromJson(e)).toList();
     }

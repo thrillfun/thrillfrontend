@@ -1,41 +1,33 @@
-import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/controller/data_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/inbox_model.dart';
-import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/screens/chat/chat_screen.dart';
 import 'package:thrill/screens/following_and_followers.dart';
 import 'package:thrill/screens/screen.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
-import '../../blocs/profile/profile_bloc.dart';
+
 import '../../common/color.dart';
 import '../../common/strings.dart';
-import '../../models/follower_model.dart';
-import '../../models/user.dart';
-import '../../models/video_model.dart';
 import '../../rest/rest_url.dart';
-import '../../widgets/video_item.dart';
 
 class ViewProfile extends StatelessWidget {
   var showFollowers = false.obs;
   var userController = Get.find<UserController>();
 
   var selectedTab = 0.obs;
+
   ViewProfile({Key? key, required this.mapData, this.userId}) : super(key: key);
   final Map mapData;
   String? userId = "";
+
   @override
   Widget build(BuildContext context) {
     userController.getUserProfile(usersController.userId.value);

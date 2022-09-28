@@ -1,7 +1,6 @@
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit_config.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,6 +8,7 @@ import 'package:thrill/common/color.dart';
 import 'package:thrill/screens/screen.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
 import 'package:video_player/video_player.dart';
+
 import '../../common/strings.dart';
 import '../../models/post_data.dart';
 import '../../utils/util.dart';
@@ -20,11 +20,9 @@ class Preview extends StatefulWidget {
 
   @override
   State<Preview> createState() => _PreviewState();
-
 }
 
 class _PreviewState extends State<Preview> {
-
   bool isProcessing = true, wasSuccess = false;
   String percentage = "50%", newName = '';
   VideoPlayerController? videoPlayerController;
@@ -35,13 +33,13 @@ class _PreviewState extends State<Preview> {
   void initState() {
     startVideoProcessing();
     FFmpegKitConfig.enableStatisticsCallback(statisticsCallback);
-    try{
+    try {
       reelsPlayerController?.pause();
-    }catch(_){}
+    } catch (_) {}
     super.initState();
   }
 
-  statisticsCallback(Statistics statistics){
+  statisticsCallback(Statistics statistics) {
     final int time = statistics.getTime();
     //final int seconds = videoPlayerController.value.duration.inMilliseconds;
     //final double percent = (time/seconds)*100;
@@ -60,47 +58,48 @@ class _PreviewState extends State<Preview> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         showCloseDialog();
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[Color(0xFF2F8897),
-                    Color(0xff1F2A52),
-                    Color(0xff1F244E)]),
+          appBar: AppBar(
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      Color(0xFF2F8897),
+                      Color(0xff1F2A52),
+                      Color(0xff1F244E)
+                    ]),
+              ),
             ),
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            centerTitle: true,
+            title: const Text(
+              "Preview",
+              style: TextStyle(color: Colors.white),
+            ),
+            leading: IconButton(
+                onPressed: () {
+                  showCloseDialog();
+                },
+                color: Colors.white,
+                icon: const Icon(Icons.arrow_back)),
           ),
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          centerTitle: true,
-          title: const Text(
-            "Preview",
-            style: TextStyle(color: Colors.white),
-          ),
-          leading: IconButton(
-              onPressed: () {
-                showCloseDialog();
-              },
-              color: Colors.white,
-              icon: const Icon(Icons.arrow_back)
-          ),
-        ),
-        body: getLayout()
-      ),
+          body: getLayout()),
     );
   }
-  Widget getLayout(){
-    if(isProcessing){
+
+  Widget getLayout() {
+    if (isProcessing) {
       return processedLayout();
     } else {
-      if(wasSuccess){
-        if(isVControllerInitialized){
+      if (wasSuccess) {
+        if (isVControllerInitialized) {
           return processedLayout();
         } else {
           return processedLayout();
@@ -110,130 +109,177 @@ class _PreviewState extends State<Preview> {
       }
     }
   }
-  Widget processingLayout(){
+
+  Widget processingLayout() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("Processing Video", style: Theme.of(context).textTheme.headline3!.copyWith(color: ColorManager.cyan),),
-          Text("Please Wait...", style: Theme.of(context).textTheme.headline5,),
-          const SizedBox(height: 10,),
+          Text(
+            "Processing Video",
+            style: Theme.of(context)
+                .textTheme
+                .headline3!
+                .copyWith(color: ColorManager.cyan),
+          ),
+          Text(
+            "Please Wait...",
+            style: Theme.of(context).textTheme.headline5,
+          ),
+          const SizedBox(
+            height: 10,
+          ),
           //Text(percentage, style: Theme.of(context).textTheme.headline2!.copyWith(color: ColorManager.cyan),),
-          const CircularProgressIndicator(color: ColorManager.cyan,)
+          const CircularProgressIndicator(
+            color: ColorManager.cyan,
+          )
         ],
       ),
     );
   }
-  Widget processedLayout(){
+
+  Widget processedLayout() {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Container(height: getHeight(context),width: getWidth(context),color: Colors.black87,),
-        isVControllerInitialized?
-        AspectRatio(
-          aspectRatio: videoPlayerController!.value.aspectRatio,
-          child: VideoPlayer(videoPlayerController!),
-        ): Container(),
+        Container(
+          height: getHeight(context),
+          width: getWidth(context),
+          color: Colors.black87,
+        ),
+        isVControllerInitialized
+            ? AspectRatio(
+                aspectRatio: videoPlayerController!.value.aspectRatio,
+                child: VideoPlayer(videoPlayerController!),
+              )
+            : Container(),
         Positioned(
           bottom: 140,
-          child: isVControllerInitialized?
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.55),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-                onPressed: (){
-                  videoPlayerController!.value.isPlaying?
-                  videoPlayerController!.pause():
-                  videoPlayerController!.play();
-                  setState((){});
-                },
-                constraints: const BoxConstraints(),
-                padding: EdgeInsets.zero,
-                iconSize: 50,
-                color: Theme.of(context).primaryColor,
-                icon: Icon(videoPlayerController!.value.isPlaying?Icons.pause_circle_filled_rounded:Icons.play_circle_fill_rounded)),
-          ): Container(),
+          child: isVControllerInitialized
+              ? DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.55),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                      onPressed: () {
+                        videoPlayerController!.value.isPlaying
+                            ? videoPlayerController!.pause()
+                            : videoPlayerController!.play();
+                        setState(() {});
+                      },
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                      iconSize: 50,
+                      color: Theme.of(context).primaryColor,
+                      icon: Icon(videoPlayerController!.value.isPlaying
+                          ? Icons.pause_circle_filled_rounded
+                          : Icons.play_circle_fill_rounded)),
+                )
+              : Container(),
         ),
         Positioned(
-            bottom: 70,
-            left: 10,
-            right: 10,
-            child: isVControllerInitialized?
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFF2F8897),
-                  Color(0xff1F2A52),
-                  Color(0xff1F244E)]),
-                  color: Colors.white.withOpacity(0.55),
-                  borderRadius: BorderRadius.circular(8)
-              ),
-              child: Row(
-                children: [
-                  Text(getDurationString(videoPlayerController!.value.position), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
-                  Expanded(
-                    child: Slider(
-                      min: 0,
-                      max: videoPlayerController!.value.duration.inSeconds.toDouble(),
-                      value: videoPlayerController!.value.position.inSeconds.toDouble(),
-                      onChanged: (double val) => videoPlayerController!.seekTo(Duration(seconds: val.toInt())),
-                      thumbColor: ColorManager.cyan,
-                    ),
+          bottom: 70,
+          left: 10,
+          right: 10,
+          child: isVControllerInitialized
+              ? Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [
+                        Color(0xFF2F8897),
+                        Color(0xff1F2A52),
+                        Color(0xff1F244E)
+                      ]),
+                      color: Colors.white.withOpacity(0.55),
+                      borderRadius: BorderRadius.circular(8)),
+                  child: Row(
+                    children: [
+                      Text(
+                        getDurationString(
+                            videoPlayerController!.value.position),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      Expanded(
+                        child: Slider(
+                          min: 0,
+                          max: videoPlayerController!.value.duration.inSeconds
+                              .toDouble(),
+                          value: videoPlayerController!.value.position.inSeconds
+                              .toDouble(),
+                          onChanged: (double val) => videoPlayerController!
+                              .seekTo(Duration(seconds: val.toInt())),
+                          thumbColor: ColorManager.cyan,
+                        ),
+                      ),
+                      Text(
+                        getDurationString(
+                            videoPlayerController!.value.duration),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ],
                   ),
-                  Text(getDurationString(videoPlayerController!.value.duration), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
-                ],
-              ),
-            ): Container(),
+                )
+              : Container(),
         ),
         Positioned(
             bottom: 10,
             child: Container(
-              margin:EdgeInsets.only(bottom: 10,top: 10),
-              padding: EdgeInsets.only(left: 10,right: 10),
+              margin: EdgeInsets.only(bottom: 10, top: 10),
+              padding: EdgeInsets.only(left: 10, right: 10),
               child: GradientElevatedButton(
-                onPressed: () async {
-                  videoPlayerController!.pause();
-                  PostData postDate = PostData(
-                      speed: widget.data.speed,
-                      addSoundModel: widget.data.addSoundModel,
-                      filePath: widget.data.filePath,
-                      filterName: widget.data.filterName,
-                      trimStart: 0,
-                      trimEnd: 0,
-                      isDuet: widget.data.isDuet,
-                      isDefaultSound: widget.data.isDefaultSound,
-                      isUploadedFromGallery: widget.data.isUploadedFromGallery,
-                      newPath: '$saveDirectory$newName.mp4',
-                      duetFrom: widget.data.duetFrom,
-                      newName: newName,
-                      duetSoundName: widget.data.duetSoundName,
-                      duetSound: widget.data.duetSound
-                  );
-                  setState(()=>isVControllerInitialized=false);
-                  videoPlayerController?.dispose();
-                   Get.to(PostVideo(data: postDate));
-                  //await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
-                  initPreview();
-                },
-
-                child: const Text("Continue")
-            ),)),
+                  onPressed: () async {
+                    videoPlayerController!.pause();
+                    PostData postDate = PostData(
+                        speed: widget.data.speed,
+                        addSoundModel: widget.data.addSoundModel,
+                        filePath: widget.data.filePath,
+                        filterName: widget.data.filterName,
+                        trimStart: 0,
+                        trimEnd: 0,
+                        isDuet: widget.data.isDuet,
+                        isDefaultSound: widget.data.isDefaultSound,
+                        isUploadedFromGallery:
+                            widget.data.isUploadedFromGallery,
+                        newPath: '$saveDirectory$newName.mp4',
+                        duetFrom: widget.data.duetFrom,
+                        newName: newName,
+                        duetSoundName: widget.data.duetSoundName,
+                        duetSound: widget.data.duetSound);
+                    setState(() => isVControllerInitialized = false);
+                    videoPlayerController?.dispose();
+                    Get.to(PostVideo(data: postDate));
+                    //await Navigator.pushNamed(context, "/postVideo", arguments: postDate);
+                    initPreview();
+                  },
+                  child: const Text("Continue")),
+            )),
       ],
     );
   }
-  Widget failedLayout(){
+
+  Widget failedLayout() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("Video Processing Failed!", style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.red),),
-          const SizedBox(height: 25,),
+          Text(
+            "Video Processing Failed!",
+            style: Theme.of(context)
+                .textTheme
+                .headline3!
+                .copyWith(color: Colors.red),
+          ),
+          const SizedBox(
+            height: 25,
+          ),
           IconButton(
-              onPressed: (){
+              onPressed: () {
                 setState(() {
                   isProcessing = true;
                   wasSuccess = false;
@@ -241,106 +287,140 @@ class _PreviewState extends State<Preview> {
                 startVideoProcessing();
               },
               iconSize: 40,
-              icon: const Icon(Icons.refresh_rounded)
-          ),
+              icon: const Icon(Icons.refresh_rounded)),
           const Text("Retry")
         ],
       ),
     );
   }
-  showCloseDialog(){
-    showDialog(context: context, builder: (_)=> Center(
-      child: Material(
-        type: MaterialType.transparency,
-        child: Container(
-          width: getWidth(context)*.80,
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10)
-          ),
-          child: isProcessing?
-          Column(
-            mainAxisSize: MainAxisSize.min,
-               children: [
-                 const Icon(Icons.warning_amber, size: 40, color: Colors.red,),
-                 const SizedBox(height: 10,),
-                 Padding(
-                   padding: const EdgeInsets.symmetric(horizontal: 30),
-                   child: Text("Please wait until processing finishes!", style: Theme.of(context).textTheme.headline3, textAlign: TextAlign.center,),
-                 ),
-                 const SizedBox(height: 15,),
-                 ElevatedButton(
-                     onPressed: (){
-                       Get.back();
-                     },
-                     style: ElevatedButton.styleFrom(
-                       primary: ColorManager.cyan,
-                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                       fixedSize: Size(getWidth(context)*.50, 45)
-                     ),
-                     child: const Text("OK")
-                 )
-               ],
-             ):
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Text(closeDialog, style: Theme.of(context).textTheme.headline3, textAlign: TextAlign.center,),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 35),
-                child: Text("The processed video will be discarded!", style: Theme.of(context).textTheme.headline4!.copyWith(fontWeight: FontWeight.normal), textAlign: TextAlign.center,),
-              ),
-              const SizedBox(height: 15,),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ElevatedButton(
-                      onPressed: (){
 
-                        Get.back(closeOverlays: true);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          primary: Colors.red,
-                          fixedSize: Size(getWidth(context)*.26, 40),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                      ),
-                      child: const Text(no)
-                  ),
-                  const SizedBox(width: 15,),
-                  ElevatedButton(
-                      onPressed: (){
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          primary: Colors.green,
-                          fixedSize: Size(getWidth(context)*.26, 40),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                      ),
-                      child: const Text(yes)
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    )
-    );
+  showCloseDialog() {
+    showDialog(
+        context: context,
+        builder: (_) => Center(
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  width: getWidth(context) * .80,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: isProcessing
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.warning_amber,
+                              size: 40,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 30),
+                              child: Text(
+                                "Please wait until processing finishes!",
+                                style: Theme.of(context).textTheme.headline3,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            ElevatedButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    primary: ColorManager.cyan,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    fixedSize:
+                                        Size(getWidth(context) * .50, 45)),
+                                child: const Text("OK"))
+                          ],
+                        )
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 30),
+                              child: Text(
+                                closeDialog,
+                                style: Theme.of(context).textTheme.headline3,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 35),
+                              child: Text(
+                                "The processed video will be discarded!",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline4!
+                                    .copyWith(fontWeight: FontWeight.normal),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Get.back(closeOverlays: true);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        primary: Colors.red,
+                                        fixedSize:
+                                            Size(getWidth(context) * .26, 40),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10))),
+                                    child: const Text(no)),
+                                const SizedBox(
+                                  width: 15,
+                                ),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        primary: Colors.green,
+                                        fixedSize:
+                                            Size(getWidth(context) * .26, 40),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10))),
+                                    child: const Text(yes)),
+                              ],
+                            )
+                          ],
+                        ),
+                ),
+              ),
+            ));
   }
-  startVideoProcessing()async{
+
+  startVideoProcessing() async {
     DateTime dateTime = DateTime.now();
-    newName = "Thrill-${dateTime.day}-${dateTime.month}-${dateTime.year}-${dateTime.hour}-${dateTime.minute}";
+    newName =
+        "Thrill-${dateTime.day}-${dateTime.month}-${dateTime.year}-${dateTime.hour}-${dateTime.minute}";
     String outputPath = '$saveDirectory$newName.mp4';
     String? audioFilePath = widget.data.addSoundModel?.sound;
     File videoFile = File(widget.data.filePath);
-                    isProcessing = false;
-                  wasSuccess = true;
-                  initPreview();
+    isProcessing = false;
+    wasSuccess = true;
+    initPreview();
 
     // if(widget.data.isDuet && widget.data.duetPath!=null){
 
@@ -541,23 +621,26 @@ class _PreviewState extends State<Preview> {
     //   }
     // }
   }
-  initPreview()async{
-    videoPlayerController = VideoPlayerController.file(File('$saveDirectory$newName.mp4'));
+
+  initPreview() async {
+    videoPlayerController =
+        VideoPlayerController.file(File('$saveDirectory$newName.mp4'));
     await videoPlayerController!.initialize().then((_) {
       videoPlayerController!.setPlaybackSpeed(double.parse(widget.data.speed));
       isVControllerInitialized = true;
       videoPlayerController!.setPlaybackSpeed(double.parse(widget.data.speed));
       setState(() {});
       videoPlayerController!.addListener(() {
-        if(videoPlayerController!.value.isPlaying) setState((){});
+        if (videoPlayerController!.value.isPlaying) setState(() {});
       });
     });
     await videoPlayerController!.setLooping(true);
     await videoPlayerController!.play();
   }
-  String getDurationString(Duration duration){
+
+  String getDurationString(Duration duration) {
     String string = '';
-    if(duration.inHours!=0){
+    if (duration.inHours != 0) {
       string = duration.toString().split('.').first;
     } else {
       string = duration.toString().substring(2, 7);

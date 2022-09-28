@@ -9,7 +9,9 @@ class RotatedImage extends StatefulWidget {
   @override
   _RotatedImageState createState() => _RotatedImageState();
 }
-class _RotatedImageState extends State<RotatedImage> with SingleTickerProviderStateMixin {
+
+class _RotatedImageState extends State<RotatedImage>
+    with SingleTickerProviderStateMixin {
   late AnimationController animationController;
   late Animation<double> animation;
 
@@ -47,7 +49,7 @@ class _RotatedImageState extends State<RotatedImage> with SingleTickerProviderSt
           SvgPicture.asset(
             'assets/spinning_disc.svg',
           ),
-         /* Positioned.directional(
+          /* Positioned.directional(
             textDirection: Directionality.of(context),
             start: 7.5,
             top: 7.5,

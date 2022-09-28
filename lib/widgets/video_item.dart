@@ -1,38 +1,40 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:video_player/video_player.dart';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:video_player/video_player.dart';
+
 import '../rest/rest_url.dart';
 
 VideoPlayerController? reelsPlayerController;
 bool shouldAutoPlayReel = true;
 
 class VideoPlayerItem extends StatefulWidget {
-   String? videoUrl, filter;
-   int? pageIndex;
-   int? currentPageIndex;
-   bool? isPaused;
-   int? videoId;
-   int? pagesLength;
-   VoidCallback? callback;
-   String? speed;
-   PageController? pageController;
+  String? videoUrl, filter;
+  int? pageIndex;
+  int? currentPageIndex;
+  bool? isPaused;
+  int? videoId;
+  int? pagesLength;
+  VoidCallback? callback;
+  String? speed;
+  PageController? pageController;
 
-   VideoPlayerItem(
+  VideoPlayerItem(
       {Key? key,
-       this.videoUrl,
-       this.pageIndex,
-       this.currentPageIndex,
-       this.isPaused,
-       this.filter,
-       this.videoId,
-       this.speed,
-       this.pageController,
-       this.pagesLength,
-        this.callback})
+      this.videoUrl,
+      this.pageIndex,
+      this.currentPageIndex,
+      this.isPaused,
+      this.filter,
+      this.videoId,
+      this.speed,
+      this.pageController,
+      this.pagesLength,
+      this.callback})
       : super(key: key);
 
   @override
@@ -43,7 +45,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   bool isLoading = true;
   bool showGIF = false;
   bool initialized = false;
-  bool isDispose= false;
+  bool isDispose = false;
   Timer? _timer;
   int _start = 40;
   bool isBuffering = false;
@@ -51,31 +53,36 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   void initState() {
     super.initState();
-    if (reelsPlayerController!=null) reelsPlayerController?.pause();
+    if (reelsPlayerController != null) reelsPlayerController?.pause();
     reelsPlayerController?.dispose();
-      reelsPlayerController = VideoPlayerController.network(
-          RestUrl.videoUrl+widget.videoUrl!)
-        ..initialize().then((value) {
-          if (reelsPlayerController!.value.isInitialized) {
-            reelsPlayerController!.setPlaybackSpeed(widget.speed!.contains('x')?double.parse(widget.speed!.replaceAll('x', '')):double.parse(widget.speed!));
-            if (shouldAutoPlayReel) reelsPlayerController!.play();
-            reelsPlayerController!.setLooping(true);
-            reelsPlayerController!.setVolume(1);
-            initialized = true;
-            showGIF = true;
-            _start = reelsPlayerController!.value.duration.inSeconds;
-            startTimer();
-            if (mounted) setState(() {});
-            reelsPlayerController?.addListener(() {
-              if(reelsPlayerController!.value.isBuffering){
-                if (mounted) setState(()=>isBuffering = true);
-              } else {
-                if (mounted && isBuffering && !reelsPlayerController!.value.isBuffering) setState(()=>isBuffering = false);
-              }
-            });
-          }
-        });
-
+    reelsPlayerController =
+        VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
+          ..initialize().then((value) {
+            if (reelsPlayerController!.value.isInitialized) {
+              reelsPlayerController!.setPlaybackSpeed(
+                  widget.speed!.contains('x')
+                      ? double.parse(widget.speed!.replaceAll('x', ''))
+                      : double.parse(widget.speed!));
+              if (shouldAutoPlayReel) reelsPlayerController!.play();
+              reelsPlayerController!.setLooping(true);
+              reelsPlayerController!.setVolume(1);
+              initialized = true;
+              showGIF = true;
+              _start = reelsPlayerController!.value.duration.inSeconds;
+              startTimer();
+              if (mounted) setState(() {});
+              reelsPlayerController?.addListener(() {
+                if (reelsPlayerController!.value.isBuffering) {
+                  if (mounted) setState(() => isBuffering = true);
+                } else {
+                  if (mounted &&
+                      isBuffering &&
+                      !reelsPlayerController!.value.isBuffering)
+                    setState(() => isBuffering = false);
+                }
+              });
+            }
+          });
   }
 
   @override
@@ -83,18 +90,19 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     super.dispose();
     _timer?.cancel();
     //if(reelsPlayerController!=null){reelsPlayerController!.dispose();}
-    isDispose=true;
+    isDispose = true;
   }
 
-  void startTimer()async {
+  void startTimer() async {
     const oneSec = Duration(seconds: 1);
-    if(mounted){
+    if (mounted) {
       var instance = await SharedPreferences.getInstance();
-      var loginData=instance.getString('currentUser');
-      if(loginData !=null){
+      var loginData = instance.getString('currentUser');
+      if (loginData != null) {
         _timer = Timer.periodic(
-          oneSec, (Timer timer) {
-            if(reelsPlayerController?.value.isPlaying??false){
+          oneSec,
+          (Timer timer) {
+            if (reelsPlayerController?.value.isPlaying ?? false) {
               if (_start == 0) {
                 callViewApi();
                 timer.cancel();
@@ -136,8 +144,8 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                     child: CircularProgressIndicator(),
                   )
                 : AspectRatio(
-                aspectRatio: reelsPlayerController!.value.aspectRatio,
-                child: VideoPlayer(reelsPlayerController!)),
+                    aspectRatio: reelsPlayerController!.value.aspectRatio,
+                    child: VideoPlayer(reelsPlayerController!)),
             widget.filter!.isEmpty
                 ? const SizedBox(width: 10)
                 : !showGIF
@@ -149,24 +157,29 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                         height: getHeight(context),
                       ),
             Positioned(
-              top: 70,
+                top: 70,
                 child: Visibility(
-                  visible: reelsPlayerController!.value.volume==0?true:false,
+                  visible:
+                      reelsPlayerController!.value.volume == 0 ? true : false,
                   child: IconButton(
-                    icon: const Icon(Icons.volume_off,color: Colors.white,size: 40,),
-                    onPressed: ()=> reelsPlayerController!.setVolume(1).then((value) => setState((){})),
+                    icon: const Icon(
+                      Icons.volume_off,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                    onPressed: () => reelsPlayerController!
+                        .setVolume(1)
+                        .then((value) => setState(() {})),
                   ),
                 )),
             Visibility(
               visible: isBuffering,
               child: Center(
                   child: RichText(
-                    textAlign: TextAlign.center,
+                      textAlign: TextAlign.center,
                       text: const TextSpan(children: [
                         WidgetSpan(child: CircularProgressIndicator()),
-                      ])
-                  )
-              ),
+                      ]))),
             ),
           ],
         ),
@@ -203,37 +216,46 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
         viewList.add(widget.videoId.toString());
         pref.setStringList('viewList', viewList);
         if (mounted) setState(() {});
-        try{
-          widget.pagesLength!-1==widget.pageIndex?
-          widget.pageController!.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
-          widget.pageController!.animateToPage(widget.pageIndex!+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
-        } catch(_){}
+        try {
+          widget.pagesLength! - 1 == widget.pageIndex
+              ? widget.pageController!.animateToPage(0,
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.decelerate)
+              : widget.pageController!.animateToPage(widget.pageIndex! + 1,
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.decelerate);
+        } catch (_) {}
       }
     } else {
-      try{
-        widget.pagesLength!-1==widget.pageIndex?
-        widget.pageController!.animateToPage(0, duration: const Duration(seconds: 1), curve: Curves.decelerate):
-        widget.pageController!.animateToPage(widget.pageIndex!+1, duration: const Duration(seconds: 1), curve: Curves.decelerate);
-      } catch(_){}
+      try {
+        widget.pagesLength! - 1 == widget.pageIndex
+            ? widget.pageController!.animateToPage(0,
+                duration: const Duration(seconds: 1), curve: Curves.decelerate)
+            : widget.pageController!.animateToPage(widget.pageIndex! + 1,
+                duration: const Duration(seconds: 1), curve: Curves.decelerate);
+      } catch (_) {}
     }
   }
 
-  onLongPressStart(LongPressStartDetails d)async{
-    setState((){showGIF = false;});
+  onLongPressStart(LongPressStartDetails d) async {
+    setState(() {
+      showGIF = false;
+    });
     reelsPlayerController?.pause();
   }
 
-  onLongPressEnd(LongPressEndDetails d){
-    setState((){showGIF = true;});
+  onLongPressEnd(LongPressEndDetails d) {
+    setState(() {
+      showGIF = true;
+    });
     reelsPlayerController?.play();
   }
 
-  onTap(){
-    if(reelsPlayerController!.value.volume>=1){
-      reelsPlayerController!.setVolume(0).then((value) => setState((){}));
+  onTap() {
+    if (reelsPlayerController!.value.volume >= 1) {
+      reelsPlayerController!.setVolume(0).then((value) => setState(() {}));
     } else {
-      reelsPlayerController!.setVolume(1).then((value) => setState((){}));
+      reelsPlayerController!.setVolume(1).then((value) => setState(() {}));
     }
   }
-
 }

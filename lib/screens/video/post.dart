@@ -1,20 +1,22 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
-import 'package:thrill/screens/screen.dart';
-import 'package:thrill/widgets/gradient_elevated_button.dart';
-import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:thrill/models/post_data.dart';
-import 'package:thrill/models/model.dart';
-import 'package:thrill/utils/util.dart';
-import 'package:velocity_x/velocity_x.dart';
+import 'package:get/get.dart';
 import 'package:simple_s3/simple_s3.dart';
+import 'package:thrill/controller/videos_controller.dart';
+import 'package:thrill/models/model.dart';
+import 'package:thrill/models/post_data.dart';
+import 'package:thrill/utils/util.dart';
+import 'package:thrill/widgets/gradient_elevated_button.dart';
+import 'package:velocity_x/velocity_x.dart';
+import 'package:video_player/video_player.dart';
+
 import '../../blocs/video/video_bloc.dart';
 import '../../common/color.dart';
 import '../../common/strings.dart';
@@ -27,18 +29,18 @@ class PostVideo extends StatefulWidget {
   @override
   State<PostVideo> createState() => _PostVideoState();
   final PostData data;
-
 }
 
 class _PostVideoState extends State<PostVideo> {
-
+  var controller = Get.find<VideosController>();
   String dropDownLanguageValue = '1', dropDownCategoryValue = '1';
   TextEditingController desCtr = TextEditingController();
   bool commentsSwitch = true, duetSwitch = true;
   late VideoPlayerController videoPlayerController;
   final SimpleS3 _simpleS3 = SimpleS3();
   List<CategoryModel> videoCategory = List<CategoryModel>.empty(growable: true);
-  List<LanguagesModel> videoLanguage = List<LanguagesModel>.empty(growable: true);
+  List<LanguagesModel> videoLanguage =
+      List<LanguagesModel>.empty(growable: true);
   bool isLoading = true;
   double percentage = 0;
   List<HashtagModel> hashtagsList = List<HashtagModel>.empty(growable: true);
@@ -53,18 +55,17 @@ class _PostVideoState extends State<PostVideo> {
     createGIF();
     loadVideoFields();
     getHashtags();
-    videoPlayerController =
-    VideoPlayerController.file(
-        File(widget.data.newPath!))
-          ..initialize().then((value) {
-            videoPlayerController.play();
-            videoPlayerController.setLooping(true);
-            videoPlayerController.setVolume(1);
-            setState(() {});
-          });
-    try{
+    videoPlayerController = VideoPlayerController.file(
+        File(widget.data.newPath!.substring(7, widget.data.newPath!.length)))
+      ..initialize().then((value) {
+        videoPlayerController.play();
+        videoPlayerController.setLooping(true);
+        videoPlayerController.setVolume(1);
+        setState(() {});
+      });
+    try {
       reelsPlayerController?.pause();
-    }catch(_){}
+    } catch (_) {}
   }
 
   @override
@@ -85,7 +86,7 @@ class _PostVideoState extends State<PostVideo> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         showCloseDialog();
         return false;
       },
@@ -96,9 +97,11 @@ class _PostVideoState extends State<PostVideo> {
               gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: <Color>[Color(0xFF2F8897),
+                  colors: <Color>[
+                    Color(0xFF2F8897),
                     Color(0xff1F2A52),
-                    Color(0xff1F244E)]),
+                    Color(0xff1F244E)
+                  ]),
             ),
           ),
           backgroundColor: Colors.transparent,
@@ -135,12 +138,12 @@ class _PostVideoState extends State<PostVideo> {
                           width: 10,
                         ),
                         GestureDetector(
-                          onTap: (){
-                            try{
-                              videoPlayerController.value.isPlaying?
-                              videoPlayerController.pause():
-                              videoPlayerController.play();
-                            }catch(_){}
+                          onTap: () {
+                            try {
+                              videoPlayerController.value.isPlaying
+                                  ? videoPlayerController.pause()
+                                  : videoPlayerController.play();
+                            } catch (_) {}
                           },
                           child: SizedBox(
                             height: 160,
@@ -235,11 +238,10 @@ class _PostVideoState extends State<PostVideo> {
                       spacing: 10,
                       children: [
                         Visibility(
-                          visible: selectedHashtags.length<3?true:false,
+                          visible: selectedHashtags.length < 3 ? true : false,
                           child: GestureDetector(
-                            onTap: ()async{
+                            onTap: () async {
                               addNewTagDialog();
-
                             },
                             child: Card(
                               color: Colors.white,
@@ -261,29 +263,34 @@ class _PostVideoState extends State<PostVideo> {
                             ),
                           ),
                         ),
-                        for(var element in selectedHashtags)
-                        Chip(
-                          backgroundColor: Colors.white,
-                          elevation: 3,
-                          deleteIcon: const Icon(Icons.delete_forever, size: 18, color: Colors.red,),
-                          onDeleted: (){
-                            setState(() {
-                              selectedHashtags.remove(element);
-                            });
+                        for (var element in selectedHashtags)
+                          Chip(
+                            backgroundColor: Colors.white,
+                            elevation: 3,
+                            deleteIcon: const Icon(
+                              Icons.delete_forever,
+                              size: 18,
+                              color: Colors.red,
+                            ),
+                            onDeleted: () {
+                              setState(() {
+                                selectedHashtags.remove(element);
+                              });
                             },
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          useDeleteButtonTooltip: true,
-                          label: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Text(
-                              element,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14.0,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            useDeleteButtonTooltip: true,
+                            label: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Text(
+                                element,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14.0,
+                                ),
                               ),
                             ),
-                          ),
-                        )
+                          )
                       ],
                     ),
                     const SizedBox(
@@ -300,7 +307,8 @@ class _PostVideoState extends State<PostVideo> {
                         value: videoLanguage[0],
                         underline: Container(),
                         isExpanded: true,
-                        style: const TextStyle(color: Colors.grey, fontSize: 18),
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 18),
                         icon: const Icon(
                           Icons.keyboard_arrow_down,
                           color: Colors.grey,
@@ -333,7 +341,8 @@ class _PostVideoState extends State<PostVideo> {
                         value: videoCategory[0],
                         underline: Container(),
                         isExpanded: true,
-                        style: const TextStyle(color: Colors.grey, fontSize: 18),
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 18),
                         icon: const Icon(
                           Icons.keyboard_arrow_down,
                           color: Colors.grey,
@@ -360,7 +369,11 @@ class _PostVideoState extends State<PostVideo> {
                         const SizedBox(
                           width: 18,
                         ),
-                        const Icon(Icons.lock, color: Colors.grey, size: 28,),
+                        const Icon(
+                          Icons.lock,
+                          color: Colors.grey,
+                          size: 28,
+                        ),
                         const SizedBox(
                           width: 10,
                         ),
@@ -374,17 +387,17 @@ class _PostVideoState extends State<PostVideo> {
                         TextButton(
                             onPressed: () {
                               setState(() {
-                                isPublic =  !isPublic;
+                                isPublic = !isPublic;
                               });
                             },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  isPublic?
-                                  public:private,
+                                  isPublic ? public : private,
                                   style: TextStyle(
-                                      color: Colors.grey.shade700, fontSize: 18),
+                                      color: Colors.grey.shade700,
+                                      fontSize: 18),
                                 ),
                                 Icon(
                                   Icons.arrow_forward_ios,
@@ -405,7 +418,11 @@ class _PostVideoState extends State<PostVideo> {
                         const SizedBox(
                           width: 18,
                         ),
-                        const Icon(Icons.comment, color: Colors.grey, size: 28,),
+                        const Icon(
+                          Icons.comment,
+                          color: Colors.grey,
+                          size: 28,
+                        ),
                         const SizedBox(
                           width: 10,
                         ),
@@ -442,7 +459,11 @@ class _PostVideoState extends State<PostVideo> {
                         const SizedBox(
                           width: 18,
                         ),
-                        const Icon(Icons.video_camera_front_sharp, color: Colors.grey, size: 28,),
+                        const Icon(
+                          Icons.video_camera_front_sharp,
+                          color: Colors.grey,
+                          size: 28,
+                        ),
                         const SizedBox(
                           width: 10,
                         ),
@@ -525,45 +546,44 @@ class _PostVideoState extends State<PostVideo> {
                     //     const SizedBox(
                     //       width: 15,
                     //     ),
-                        GradientElevatedButton(
-                            onPressed: () async {
-                              try {
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                videoPlayerController.pause();
-                                if (desCtr.text.isEmpty) {
-                                  showErrorToast(context, "Describe your video");
+                    GradientElevatedButton(
+                        onPressed: () async {
+                          try {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            videoPlayerController.pause();
+                            if (desCtr.text.isEmpty) {
+                              showErrorToast(context, "Describe your video");
+                            } else {
+                              if (dropDownCategoryValue.isEmpty) {
+                                showErrorToast(context, "Select Category");
+                              } else {
+                                if (dropDownLanguageValue.isEmpty) {
+                                  showErrorToast(context, "Select Language");
                                 } else {
-                                  if (dropDownCategoryValue.isEmpty) {
-                                    showErrorToast(context, "Select Category");
-                                  } else {
-                                    if (dropDownLanguageValue.isEmpty) {
-                                      showErrorToast(context, "Select Language");
-                                    } else {
-                                      progressDialogue(context);
-                                      isPublic? postUpload():draftUpload();
-                                    }
-                                  }
+                                  // progressDialogue(context);
+                                  isPublic ? postUpload() : draftUpload();
                                 }
-                              } catch (e) {
-                                closeDialogue(context);
-                                showErrorToast(context, e.toString());
                               }
-                            },
-
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SvgPicture.asset('assets/post.svg'),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                const Text(
-                                  postVideo,
-                                  style: TextStyle(fontSize: 15),
-                                )
-                              ],
-                            ))
-                      ],
+                            }
+                          } catch (e) {
+                            closeDialogue(context);
+                            showErrorToast(context, e.toString());
+                          }
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SvgPicture.asset('assets/post.svg'),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            const Text(
+                              postVideo,
+                              style: TextStyle(fontSize: 15),
+                            )
+                          ],
+                        ))
+                  ],
                   //   ),
                   // ],
                 ).h(getHeight(context) - kToolbarHeight),
@@ -594,8 +614,12 @@ class _PostVideoState extends State<PostVideo> {
 
   createGIF() async {
     String outputPath = '$saveCacheDirectory${widget.data.newName}.png';
-    String filePath = widget.data.isDuet?widget.data.newPath!:widget.data.filePath;
-    FFmpegKit.execute("-i $filePath -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath").then((session) async {
+    String filePath = widget.data.isDuet
+        ? widget.data.newPath!.substring(7, widget.data.newPath!.length)
+        : widget.data.filePath!.substring(7, widget.data.filePath!.length);
+    FFmpegKit.execute(
+            "-i $filePath -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath")
+        .then((session) async {
       final returnCode = await session.getReturnCode();
 
       if (ReturnCode.isSuccess(returnCode)) {
@@ -606,13 +630,13 @@ class _PostVideoState extends State<PostVideo> {
     });
   }
 
-  draftUpload()async{
-    int currentUnix =
-        DateTime.now().millisecondsSinceEpoch;
+  draftUpload() async {
+    int currentUnix = DateTime.now().millisecondsSinceEpoch;
     String videoId = '$currentUnix.mp4';
 
-    await _simpleS3.uploadFile(
-      File(widget.data.newPath!),
+    await _simpleS3
+        .uploadFile(
+      File(widget.data.newPath!.substring(7, widget.data.newPath!.length)),
       "thrillvideo",
       "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
       AWSRegions.usEast1,
@@ -622,7 +646,8 @@ class _PostVideoState extends State<PostVideo> {
       accessControl: S3AccessControl.publicRead,
     )
         .then((value) async {
-      await _simpleS3.uploadFile(
+      await _simpleS3
+          .uploadFile(
         File('$saveCacheDirectory${widget.data.newName}.png'),
         "thrillvideo",
         "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
@@ -631,48 +656,53 @@ class _PostVideoState extends State<PostVideo> {
         s3FolderPath: "gif",
         fileName: '$currentUnix.png',
         accessControl: S3AccessControl.publicRead,
-      ).then((value) async {
-        if(widget.data.addSoundModel==null || !widget.data.addSoundModel!.isSoundFromGallery){
-          String tagList =
-          jsonEncode(selectedHashtags);
+      )
+          .then((value) async {
+        if (widget.data.addSoundModel == null ||
+            !widget.data.addSoundModel!.isSoundFromGallery) {
+          String tagList = jsonEncode(selectedHashtags);
           var result = await RestApi.postVideo(
               videoId,
-              widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
-              widget.data.isDuet?widget.data.duetSoundName??"":widget.data.addSoundModel?.name??"Original Sound",
+              widget.data.isDuet
+                  ? widget.data.duetSound ?? ""
+                  : widget.data.addSoundModel == null
+                      ? ""
+                      : widget.data.addSoundModel!.isSoundFromGallery
+                          ? "$currentUnix.mp3"
+                          : widget.data.addSoundModel!.sound.split('/').last,
+              widget.data.isDuet
+                  ? widget.data.duetSoundName ?? ""
+                  : widget.data.addSoundModel?.name ?? "Original Sound",
               dropDownCategoryValue,
               tagList,
               "Private",
               commentsSwitch ? 1 : 0,
               desCtr.text,
-              widget.data.filterName.isEmpty
-                  ? ''
-                  : widget.data.filterName,
+              widget.data.filterName.isEmpty ? '' : widget.data.filterName,
               dropDownLanguageValue,
               '$currentUnix.png',
               widget.data.speed,
-            duetSwitch,
-            commentsSwitch,
-            widget.data.duetFrom??'',
-            widget.data.isDuet,
-            widget.data.addSoundModel?.userId??0
-          );
+              duetSwitch,
+              commentsSwitch,
+              widget.data.duetFrom ?? '',
+              widget.data.isDuet,
+              widget.data.addSoundModel?.userId ?? 0);
           var json = jsonDecode(result.body);
           closeDialogue(context);
           if (json['status']) {
             BlocProvider.of<VideoBloc>(context)
                 .add(const VideoLoading(selectedTabIndex: 1));
-            showSuccessToast(context,
-                "Video has been saved successfully");
+            showSuccessToast(context, "Video has been saved successfully");
             await Future.delayed(const Duration(milliseconds: 200));
-            File recordedVideoFile = File(widget.data.filePath);
-            File processedVideoFile = File(widget.data.newPath!);
+            File recordedVideoFile = File(widget.data.filePath!
+                .substring(7, widget.data.filePath!.length));
+            File processedVideoFile = File(
+                widget.data.newPath!.substring(7, widget.data.newPath!.length));
             recordedVideoFile.delete();
             processedVideoFile.delete();
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/', (route) => false);
+            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           } else {
-            showErrorToast(
-                context, json['message']);
+            showErrorToast(context, json['message']);
           }
         } else {
           await _simpleS3
@@ -685,13 +715,19 @@ class _PostVideoState extends State<PostVideo> {
             fileName: '$currentUnix.mp3',
             s3FolderPath: "sound",
             accessControl: S3AccessControl.publicRead,
-          ).then((value) async {
-            String tagList =
-            jsonEncode(selectedHashtags);
+          )
+              .then((value) async {
+            String tagList = jsonEncode(selectedHashtags);
             var result = await RestApi.postVideo(
                 videoId,
-                widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
-                widget.data.addSoundModel?.name??"",
+                widget.data.isDuet
+                    ? widget.data.duetSound ?? ""
+                    : widget.data.addSoundModel == null
+                        ? ""
+                        : widget.data.addSoundModel!.isSoundFromGallery
+                            ? "$currentUnix.mp3"
+                            : widget.data.addSoundModel!.sound.split('/').last,
+                widget.data.addSoundModel?.name ?? "",
                 dropDownCategoryValue,
                 tagList,
                 "Private",
@@ -703,28 +739,25 @@ class _PostVideoState extends State<PostVideo> {
                 widget.data.speed,
                 duetSwitch,
                 commentsSwitch,
-                widget.data.duetFrom??'',
+                widget.data.duetFrom ?? '',
                 widget.data.isDuet,
-                widget.data.addSoundModel?.userId??0
-            );
+                widget.data.addSoundModel?.userId ?? 0);
             var json = jsonDecode(result.body);
             closeDialogue(context);
             if (json['status']) {
               BlocProvider.of<VideoBloc>(context)
-                  .add( const VideoLoading(selectedTabIndex: 1));
-              showSuccessToast(context,
-                  "Video has been saved successfully");
-              await Future.delayed(
-                  const Duration(milliseconds: 200));
-              File recordedVideoFile = File(widget.data.filePath);
-              File processedVideoFile = File(widget.data.newPath!);
+                  .add(const VideoLoading(selectedTabIndex: 1));
+              showSuccessToast(context, "Video has been saved successfully");
+              await Future.delayed(const Duration(milliseconds: 200));
+              File recordedVideoFile = File(widget.data.filePath!
+                  .substring(7, widget.data.filePath!.length));
+              File processedVideoFile = File(widget.data.newPath!
+                  .substring(7, widget.data.newPath!.length));
               recordedVideoFile.delete();
               processedVideoFile.delete();
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/', (route) => false);
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
             } else {
-              showErrorToast(
-                  context, json['message']);
+              showErrorToast(context, json['message']);
             }
           });
         }
@@ -732,14 +765,18 @@ class _PostVideoState extends State<PostVideo> {
     });
   }
 
-  postUpload()async{
-    int currentUnix =
-        DateTime.now().millisecondsSinceEpoch;
+  postUpload() async {
+    int currentUnix = DateTime.now().millisecondsSinceEpoch;
     String videoId = '$currentUnix.mp4';
-
+    Get.defaultDialog(
+        content: StreamBuilder(
+            stream: _simpleS3.getUploadPercentage,
+            builder: ((context, snapshot) => snapshot.data != null
+                ? Text("${snapshot.data}")
+                : const Text("Uploading"))));
     await _simpleS3
         .uploadFile(
-      File(widget.data.newPath!),
+      File(widget.data.newPath!.substring(7, widget.data.newPath!.length)),
       "thrillvideo",
       "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
       AWSRegions.usEast1,
@@ -749,7 +786,8 @@ class _PostVideoState extends State<PostVideo> {
       accessControl: S3AccessControl.publicRead,
     )
         .then((value) async {
-      await _simpleS3.uploadFile(
+      await _simpleS3
+          .uploadFile(
         File('$saveCacheDirectory${widget.data.newName}.png'),
         "thrillvideo",
         "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
@@ -758,48 +796,58 @@ class _PostVideoState extends State<PostVideo> {
         s3FolderPath: "gif",
         fileName: '$currentUnix.png',
         accessControl: S3AccessControl.publicRead,
-      ).then((value) async {
-        if(widget.data.addSoundModel==null || !widget.data.addSoundModel!.isSoundFromGallery){
-          String tagList =
-          jsonEncode(selectedHashtags);
-          var result = await RestApi.postVideo(
+      )
+          .then((value) async {
+        if (widget.data.addSoundModel == null ||
+            !widget.data.addSoundModel!.isSoundFromGallery) {
+          String tagList = jsonEncode(selectedHashtags);
+
+          controller.postVideo(
               videoId,
-              widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
-              widget.data.isDuet?widget.data.duetSoundName??"":widget.data.addSoundModel?.name??"Original Sound",
+              widget.data.isDuet
+                  ? widget.data.duetSound ?? ""
+                  : widget.data.addSoundModel == null
+                      ? ""
+                      : widget.data.addSoundModel!.isSoundFromGallery
+                          ? "$currentUnix.mp3"
+                          : widget.data.addSoundModel!.sound.split('/').last,
+              widget.data.isDuet
+                  ? widget.data.duetSoundName ?? ""
+                  : widget.data.addSoundModel!.name == null
+                      ? ""
+                      : "Original Sound",
               dropDownCategoryValue,
               tagList,
               "Public",
               commentsSwitch ? 1 : 0,
               desCtr.text,
-              widget.data.filterName.isEmpty
-                  ? ''
-                  : widget.data.filterName,
+              widget.data.filterName.isEmpty ? '' : widget.data.filterName,
               dropDownLanguageValue,
               '$currentUnix.png',
               widget.data.speed,
-            duetSwitch,
-            commentsSwitch,
-              widget.data.duetFrom??'',
-            widget.data.isDuet,
-              widget.data.addSoundModel?.userId??0
-          );
-          var json = jsonDecode(result.body);
+              duetSwitch,
+              commentsSwitch,
+              widget.data.duetFrom ?? '',
+              widget.data.isDuet,
+              widget.data.addSoundModel?.userId ?? 0);
+          // var result = await RestApi.postVideo(
+          //     );
+          // var json = jsonDecode(result.body);
           closeDialogue(context);
-          if (json['status']) {
-          //  BlocProvider.of<VideoBloc>(context).add( const VideoLoading(selectedTabIndex: 1));
-            showSuccessToast(context,
-                "Video has been posted successfully");
-            await Future.delayed(const Duration(milliseconds: 200));
-            File recordedVideoFile = File(widget.data.filePath);
-            File processedVideoFile = File(widget.data.newPath!);
-            recordedVideoFile.delete();
-            processedVideoFile.delete();
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/', (route) => false);
-          } else {
-            showErrorToast(
-                context, json['message']);
-          }
+          // if (json['status']) {
+          //   //  BlocProvider.of<VideoBloc>(context).add( const VideoLoading(selectedTabIndex: 1));
+          //   showSuccessToast(context, "Video has been posted successfully");
+          //   await Future.delayed(const Duration(milliseconds: 200));
+          //   File recordedVideoFile = File(widget.data.filePath!
+          //       .substring(7, widget.data.filePath!.length));
+          //   File processedVideoFile = File(
+          //       widget.data.newPath!.substring(7, widget.data.newPath!.length));
+          //   recordedVideoFile.delete();
+          //   processedVideoFile.delete();
+          //   Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+          // } else {
+          //   showErrorToast(context, json['message']);
+          // }
         } else {
           await _simpleS3
               .uploadFile(
@@ -811,209 +859,235 @@ class _PostVideoState extends State<PostVideo> {
             fileName: '$currentUnix.mp3',
             s3FolderPath: "sound",
             accessControl: S3AccessControl.publicRead,
-          ).then((value) async {
-            String tagList =
-            jsonEncode(selectedHashtags);
-            var result = await RestApi.postVideo(
+          )
+              .then((value) async {
+            String tagList = jsonEncode(selectedHashtags);
+            controller.postVideo(
                 videoId,
-                widget.data.isDuet?widget.data.duetSound??"":widget.data.addSoundModel==null?"":widget.data.addSoundModel!.isSoundFromGallery?"$currentUnix.mp3":widget.data.addSoundModel!.sound.split('/').last,
-                widget.data.addSoundModel?.name??"",
+                widget.data.isDuet
+                    ? widget.data.duetSound ?? ""
+                    : widget.data.addSoundModel == null
+                        ? ""
+                        : widget.data.addSoundModel!.isSoundFromGallery
+                            ? "$currentUnix.mp3"
+                            : widget.data.addSoundModel!.sound.split('/').last,
+                widget.data.addSoundModel?.name ?? "",
                 dropDownCategoryValue,
                 tagList,
                 "Public",
                 commentsSwitch ? 1 : 0,
                 desCtr.text,
-                widget.data.filterName.isEmpty
-                    ? ''
-                    : widget.data.filterName,
+                widget.data.filterName.isEmpty ? '' : widget.data.filterName,
                 dropDownLanguageValue,
                 '$currentUnix.png',
                 widget.data.speed,
-              duetSwitch,
-              commentsSwitch,
-                widget.data.duetFrom??'',
-              widget.data.isDuet,
-                widget.data.addSoundModel?.userId??0
-            );
-            var json = jsonDecode(result.body);
-            closeDialogue(context);
-            if (json['status']) {
-              BlocProvider.of<VideoBloc>(context).add( const VideoLoading(selectedTabIndex: 1));
-              showSuccessToast(context, "Video has been posted successfully");
-              await Future.delayed(const Duration(milliseconds: 200));
-              File recordedVideoFile = File(widget.data.filePath);
-              File processedVideoFile = File(widget.data.newPath!);
-              recordedVideoFile.delete();
-              processedVideoFile.delete();
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            } else {
-              showErrorToast(
-                  context, json['message']);
-            }
+                duetSwitch,
+                commentsSwitch,
+                widget.data.duetFrom ?? '',
+                widget.data.isDuet,
+                widget.data.addSoundModel?.userId ?? 0);
           });
         }
       });
     });
   }
 
-  getHashtags()async{
-    try{
+  getHashtags() async {
+    try {
       var response = await RestApi.getHashtagList();
       var json = jsonDecode(response.body);
-      if(json['status']){
+      if (json['status']) {
         List jsonList = json['data'] as List;
         hashtagsList = jsonList.map((e) => HashtagModel.fromJson(e)).toList();
-        setState((){});
+        setState(() {});
       }
-    } catch(e){
+    } catch (e) {
       showErrorToast(context, e.toString());
     }
   }
 
-  addNewTagDialog(){
+  addNewTagDialog() {
     hashtagTextFieldController.clear();
-    List<HashtagModel> suggestedHashtags = List<HashtagModel>.empty(growable: true);
-    showDialog(context: context, builder: (_)=>StatefulBuilder(
-      builder: (BuildContext context, void Function(void Function()) setState) {
-        return Center(
-          child: Material(
-            type: MaterialType.transparency,
-            child: Container(
-              height: getHeight(context)*.60,
-              width: getWidth(context)*.90,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15)
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 10,),
-                  Row(
-                    children: [
-                      const SizedBox(width: 10,),
-                      Expanded(
-                        child: TextFormField(
-                        maxLength: 10,
-                        controller: hashtagTextFieldController,
-                        onChanged: (String txt){
-                          if(txt.isEmpty){
-                            setState(() => suggestedHashtags = List.empty(growable: true));
-                          } else {
-                            for(var element in hashtagsList){
-                              if(element.name.toLowerCase().contains(txt.toLowerCase())){
-                                setState(()=>suggestedHashtags.add(element));
-                              }
-                            }
-                          }
-                        },
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.done,
-                        decoration: InputDecoration(
-                          hintText: "Input Hashtag",
-                          isDense: true,
-                          counterText: '',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
-                                  width: 2),
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),),
-                      IconButton(
-                          onPressed: (){
-                            if(hashtagTextFieldController.text.trim().isNotEmpty){
-                              selectedHashtags.add(hashtagTextFieldController.text);
-                            }
+    List<HashtagModel> suggestedHashtags =
+        List<HashtagModel>.empty(growable: true);
+    showDialog(
+        context: context,
+        builder: (_) => StatefulBuilder(
+              builder: (BuildContext context,
+                  void Function(void Function()) setState) {
+                return Center(
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Container(
+                      height: getHeight(context) * .60,
+                      width: getWidth(context) * .90,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15)),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: TextFormField(
+                                  maxLength: 10,
+                                  controller: hashtagTextFieldController,
+                                  onChanged: (String txt) {
+                                    if (txt.isEmpty) {
+                                      setState(() => suggestedHashtags =
+                                          List.empty(growable: true));
+                                    } else {
+                                      for (var element in hashtagsList) {
+                                        if (element.name
+                                            .toLowerCase()
+                                            .contains(txt.toLowerCase())) {
+                                          setState(() =>
+                                              suggestedHashtags.add(element));
+                                        }
+                                      }
+                                    }
+                                  },
+                                  keyboardType: TextInputType.text,
+                                  textInputAction: TextInputAction.done,
+                                  decoration: InputDecoration(
+                                    hintText: "Input Hashtag",
+                                    isDense: true,
+                                    counterText: '',
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.grey.shade300,
+                                            width: 2),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                  onPressed: () {
+                                    if (hashtagTextFieldController.text
+                                        .trim()
+                                        .isNotEmpty) {
+                                      selectedHashtags
+                                          .add(hashtagTextFieldController.text);
+                                    }
 
-                    //        Navigator.pop(context);
-                            Get.back(closeOverlays: true);
-                          }, icon: Icon(hashtagTextFieldController.text.isEmpty?Icons.close:Icons.check))
-                    ],
-                  ),
-                  const SizedBox(height: 10,),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: suggestedHashtags.length,
-                        itemBuilder: (BuildContext context, int index){
-                          return ListTile(
-                            title: Text(suggestedHashtags[index].name),
-                            trailing: IconButton(onPressed: (){
-                              selectedHashtags.add(suggestedHashtags[index].name);
-                              Get.back(closeOverlays: true);
-                        //      Navigator.pop(context);
-                            }, icon: const Icon(Icons.check)),
-                          );
-                        }
+                                    //        Navigator.pop(context);
+                                    Get.back(closeOverlays: true);
+                                  },
+                                  icon: Icon(
+                                      hashtagTextFieldController.text.isEmpty
+                                          ? Icons.close
+                                          : Icons.check))
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                                itemCount: suggestedHashtags.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return ListTile(
+                                    title: Text(suggestedHashtags[index].name),
+                                    trailing: IconButton(
+                                        onPressed: () {
+                                          selectedHashtags.add(
+                                              suggestedHashtags[index].name);
+                                          Get.back(closeOverlays: true);
+                                          //      Navigator.pop(context);
+                                        },
+                                        icon: const Icon(Icons.check)),
+                                  );
+                                }),
+                          )
+                        ],
+                      ),
                     ),
-                  )
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    )).then((value) => setState((){}));
+                  ),
+                );
+              },
+            )).then((value) => setState(() {}));
   }
 
-  showCloseDialog(){
-    showDialog(context: context, builder: (_)=> Center(
-      child: Material(
-        type: MaterialType.transparency,
-        child: Container(
-          width: getWidth(context)*.80,
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10)
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Text(closeDialog, style: Theme.of(context).textTheme.headline3, textAlign: TextAlign.center,),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 35),
-                child: Text(discardDialog, style: Theme.of(context).textTheme.headline4!.copyWith(fontWeight: FontWeight.normal), textAlign: TextAlign.center,),
-              ),
-              const SizedBox(height: 15,),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ElevatedButton(
-                      onPressed: (){
-                        Get.back(closeOverlays: true);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          primary: Colors.red,
-                          fixedSize: Size(getWidth(context)*.26, 40),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+  showCloseDialog() {
+    showDialog(
+        context: context,
+        builder: (_) => Center(
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  width: getWidth(context) * .80,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: Text(
+                          closeDialog,
+                          style: Theme.of(context).textTheme.headline3,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      child: const Text(no)
-                  ),
-                  const SizedBox(width: 15,),
-                  ElevatedButton(
-                      onPressed: (){
-                        Navigator.pop(context);
-                       },
-                      style: ElevatedButton.styleFrom(
-                          primary: Colors.green,
-                          fixedSize: Size(getWidth(context)*.26, 40),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 35),
+                        child: Text(
+                          discardDialog,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline4!
+                              .copyWith(fontWeight: FontWeight.normal),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      child: const Text(yes)
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                              onPressed: () {
+                                Get.back(closeOverlays: true);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.red,
+                                  fixedSize: Size(getWidth(context) * .26, 40),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10))),
+                              child: const Text(no)),
+                          const SizedBox(
+                            width: 15,
+                          ),
+                          ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.green,
+                                  fixedSize: Size(getWidth(context) * .26, 40),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10))),
+                              child: const Text(yes)),
+                        ],
+                      )
+                    ],
                   ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    )
-    );
+                ),
+              ),
+            ));
   }
 }

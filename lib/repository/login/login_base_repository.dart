@@ -6,18 +6,29 @@ abstract class BaseLoginRepository {
   Future<void> registerUser(
       String fullName, String phone, String dob, String password);
 
-  Future<void> socialLoginRegister(String id, String type, String email,String name);
+  Future<void> socialLoginRegister(
+      String id, String type, String email, String name);
 
-  Future<void> updateProfile(String fullName, String username, String fname,String lname,String imageFile,String gender,String webUrl,
-      String bio,List<SocialUrlModel> list);
+  Future<void> updateProfile(
+      String fullName,
+      String username,
+      String fname,
+      String lname,
+      String imageFile,
+      String gender,
+      String webUrl,
+      String bio,
+      List<SocialUrlModel> list);
 
   Future<void> isPhoneExist(String phone);
 
-  Future<void> resetPass(String phone,String password);
+  Future<void> resetPass(String phone, String password);
 
   Future<void> getProfile(int userId);
 
   Future<void> getLikesVideo();
+
   Future<void> getPrivateVideo();
+
   Future<void> getPublicVideo();
 }

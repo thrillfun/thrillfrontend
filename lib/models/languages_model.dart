@@ -1,11 +1,12 @@
-class LanguagesModel{
+class LanguagesModel {
   int id;
-  String code,name;
+  String code, name;
 
   LanguagesModel(this.id, this.code, this.name);
 
   factory LanguagesModel.fromJson(dynamic json) {
-    return LanguagesModel(json['id'] ?? 0, json['code'] ?? '', json['name'] ?? '');
+    return LanguagesModel(
+        json['id'] ?? 0, json['code'] ?? '', json['name'] ?? '');
   }
 
   Map<String, dynamic> toJson() {

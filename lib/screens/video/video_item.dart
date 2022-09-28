@@ -1,9 +1,7 @@
 // import 'package:cached_video_player/cached_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:thrill/controller/data_controller.dart';
-import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:video_player/video_player.dart';
 
@@ -18,7 +16,7 @@ var checkNumber = '';
 class VideoApp extends StatefulWidget {
   final String? url, description, songName, songDescription, profileImage;
   final int? likes, comments, id;
-  final int?  pageIndex;
+  final int? pageIndex;
   final int? currentPageIndex;
   final bool? isPaused;
 
@@ -34,8 +32,7 @@ class VideoApp extends StatefulWidget {
     this.pageIndex,
     this.currentPageIndex,
     this.isPaused,
-  }
-  );
+  });
 
   @override
   _VideoItemState createState() => _VideoItemState();
@@ -53,7 +50,7 @@ class _VideoItemState extends State<VideoApp> {
     textEditingController = TextEditingController();
     print(widget.url);
 
-    _controller = VideoPlayerController.network(RestUrl.videoUrl+widget.url!)
+    _controller = VideoPlayerController.network(RestUrl.videoUrl + widget.url!)
       ..initialize
       ..setLooping(true).then((value) => initialized = true);
 
@@ -71,7 +68,7 @@ class _VideoItemState extends State<VideoApp> {
   @override
   Widget build(BuildContext context) {
     if (widget.pageIndex == widget.currentPageIndex &&
-        !widget.isPaused! ==true &&
+        !widget.isPaused! == true &&
         initialized) {
       _controller?.play();
     } else {
@@ -81,171 +78,168 @@ class _VideoItemState extends State<VideoApp> {
       backgroundColor: Colors.black26,
       body: Center(
           child: Stack(
+        alignment: Alignment.centerRight,
+        children: [
+          Container(
             alignment: Alignment.centerRight,
-            children: [
-              Container(
-                alignment: Alignment.centerRight,
-                margin: const EdgeInsets.only(right: 10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+            margin: const EdgeInsets.only(right: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Stack(
+                  fit: StackFit.loose,
+                  alignment: Alignment.bottomCenter,
                   children: [
-                    Stack(
-                      fit: StackFit.loose,
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        // CircleAvatar(
-                        //   radius: 30,
-                        //   backgroundImage: NetworkImage(
-                        //     widget.profileImage == 'null'
-                        //         ? profileUrl + 'profile_images1655296950.jpg'
-                        //         : profileUrl + widget.profileImage,
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    InkWell(
-                      onTap: () {
-                      },
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.chat,
-                            color: Colors.white,
-                          ),
-                          Text(
-                            widget.comments.toString(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    const Icon(
-                      Icons.share,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    const Icon(
-                      Icons.deck_outlined,
-                      color: Color.fromRGBO(255, 255, 255, 1),
-                    ),
-                    const SizedBox(
-                      height: 50,
-                    ),
+                    // CircleAvatar(
+                    //   radius: 30,
+                    //   backgroundImage: NetworkImage(
+                    //     widget.profileImage == 'null'
+                    //         ? profileUrl + 'profile_images1655296950.jpg'
+                    //         : profileUrl + widget.profileImage,
+                    //   ),
+                    // ),
                   ],
                 ),
-              ),
-
-              Container(
-                  margin: const EdgeInsets.only(bottom: 10, left: 10),
-                  alignment: Alignment.bottomLeft,
+                const SizedBox(
+                  height: 20,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                InkWell(
+                  onTap: () {},
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            widget.description! == 'null' ? '' : widget
-                                .description!,
-                            style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Container(
-                              padding: const EdgeInsets.all(5.0),
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.white),
-                                  borderRadius: BorderRadius.circular(3.0)),
-                              child: Obx((() =>
-                                  Text(
-                                    isFollowing.value,
-                                    style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
-                                  ))))
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 5,
+                      const Icon(
+                        Icons.chat,
+                        color: Colors.white,
                       ),
                       Text(
-                        widget.songName! == 'null' ? '' : widget.songName!,
+                        widget.comments.toString(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Icon(
+                  Icons.share,
+                  color: Colors.white,
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                const Icon(
+                  Icons.deck_outlined,
+                  color: Color.fromRGBO(255, 255, 255, 1),
+                ),
+                const SizedBox(
+                  height: 50,
+                ),
+              ],
+            ),
+          ),
+          Container(
+              margin: const EdgeInsets.only(bottom: 10, left: 10),
+              alignment: Alignment.bottomLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        widget.description! == 'null'
+                            ? ''
+                            : widget.description!,
                         style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 10,
                             color: Colors.white,
                             fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(
-                        height: 5,
+                        width: 10,
                       ),
-                      Text(
-                        widget.songDescription! == 'null'
-                            ? ''
-                            : widget.songDescription!,
-                        style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
+                      Container(
+                          padding: const EdgeInsets.all(5.0),
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.white),
+                              borderRadius: BorderRadius.circular(3.0)),
+                          child: Obx((() => Text(
+                                isFollowing.value,
+                                style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ))))
                     ],
-                  )),
-              Container(
-                alignment: Alignment.bottomCenter,
-                child: VideoProgressIndicator(
-                  _controller!, //controller
-                  allowScrubbing: true,
-                  colors: VideoProgressColors(
-                    playedColor: Colors.white,
-                    bufferedColor: Colors.blueGrey.shade200,
-                    backgroundColor: Colors.blueGrey,
                   ),
-                ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    widget.songName! == 'null' ? '' : widget.songName!,
+                    style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    widget.songDescription! == 'null'
+                        ? ''
+                        : widget.songDescription!,
+                    style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                ],
+              )),
+          Container(
+            alignment: Alignment.bottomCenter,
+            child: VideoProgressIndicator(
+              _controller!, //controller
+              allowScrubbing: true,
+              colors: VideoProgressColors(
+                playedColor: Colors.white,
+                bufferedColor: Colors.blueGrey.shade200,
+                backgroundColor: Colors.blueGrey,
               ),
-              Center(
-                  child: GestureDetector(
-                      onTapUp: (details) =>
-                          setState(() {
-                            _controller!.play();
-                          }),
-                      onDoubleTap: () {
+            ),
+          ),
+          Center(
+              child: GestureDetector(
+                  onTapUp: (details) => setState(() {
+                        _controller!.play();
+                      }),
+                  onDoubleTap: () {
+                    setState(() {
+                      visible.value = true;
+                      Future.delayed(const Duration(seconds: 2), () {
+                        // Here you can write your code
                         setState(() {
-                          visible.value = true;
-                          Future.delayed(const Duration(seconds: 2), () {
-                            // Here you can write your code
-                            setState(() {
-                              visible.value = false;
-                            });
-                          });
+                          visible.value = false;
                         });
-                      },
-                      onTapDown: (pressed) {
-                        setState(() {
-                          _controller!.pause;
-                        });
-                      },
-                      child: VideoPlayer(_controller!))),
-            ],
-          )),
+                      });
+                    });
+                  },
+                  onTapDown: (pressed) {
+                    setState(() {
+                      _controller!.pause;
+                    });
+                  },
+                  child: VideoPlayer(_controller!))),
+        ],
+      )),
     );
   }
 
@@ -437,10 +431,8 @@ class _VideoItemState extends State<VideoApp> {
   //   }
   // }
 
-
   bool isNumericUsingRegularExpression(String string) {
     final numericRegex = RegExp(r'^-?(([0-9])|(([0-9])\.([0-9]*)))$');
     return numericRegex.hasMatch(string);
   }
-
 }

@@ -47,21 +47,21 @@ class User {
   int? id;
   String? name;
   String? username;
-  String  email ="null";
+  String email = "null";
   String? dob;
   String? phone;
-  String  avatar = "null";
-  String socialLoginId="null";
-  String socialLoginType="null";
-  String firstName="null";
-  String lastName="";
+  String avatar = "null";
+  String socialLoginId = "null";
+  String socialLoginType = "null";
+  String firstName = "null";
+  String lastName = "";
   String gender = "";
-  String websiteUrl="";
+  String websiteUrl = "";
   String? bio;
-  String youtube="";
-  String facebook="";
-  String instagram="";
-  String twitter="";
+  String youtube = "";
+  String facebook = "";
+  String instagram = "";
+  String twitter = "";
   String? firebaseToken;
   String? referralCount;
   String? following;
@@ -76,66 +76,66 @@ class User {
 
   User(
       {this.id,
-        this.name,
-        this.username,
-        required this.email,
-        this.dob,
-        this.phone,
-        required this.avatar,
-        required this.socialLoginId,
-        required this.socialLoginType,
-        required this.firstName,
-        required this.lastName,
-        required  this.gender,
-        required  this.websiteUrl,
-        this.bio,
-        required this.youtube,
-        required  this.facebook,
-        required  this.instagram,
-        required  this.twitter,
-        this.firebaseToken,
-        this.referralCount,
-        this.following,
-        this.followers,
-        this.likes,
-        this.isVerified,
-        this.levels,
-        this.totalVideos,
-        this.boxTwo,
-        this.boxThree,
-        this.referralCode});
+      this.name,
+      this.username,
+      required this.email,
+      this.dob,
+      this.phone,
+      required this.avatar,
+      required this.socialLoginId,
+      required this.socialLoginType,
+      required this.firstName,
+      required this.lastName,
+      required this.gender,
+      required this.websiteUrl,
+      this.bio,
+      required this.youtube,
+      required this.facebook,
+      required this.instagram,
+      required this.twitter,
+      this.firebaseToken,
+      this.referralCount,
+      this.following,
+      this.followers,
+      this.likes,
+      this.isVerified,
+      this.levels,
+      this.totalVideos,
+      this.boxTwo,
+      this.boxThree,
+      this.referralCode});
 
   User.fromJson(Map<String, dynamic> json) {
-    id = json['id']??"";
-    name = json['name']??"";
-    username = json['username']?? "";
+    id = json['id'] ?? "";
+    name = json['name'] ?? "";
+    username = json['username'] ?? "";
     email = json['email'] ?? "";
-    dob = json['dob']??"";
+    dob = json['dob'] ?? "";
     phone = json['phone'];
     avatar = json['avatar'] ?? "";
-    socialLoginId = json['social_login_id']?? "";
+    socialLoginId = json['social_login_id'] ?? "";
     socialLoginType = json['social_login_type'] ?? "";
     firstName = json['first_name'] ?? "";
     lastName = json['last_name'] ?? "";
-    gender = json['gender']??"";
+    gender = json['gender'] ?? "";
     websiteUrl = json['website_url'] ?? "";
-    bio = json['bio']??'';
+    bio = json['bio'] ?? '';
     youtube = json['youtube'] ?? "";
     facebook = json['facebook'] ?? "";
-    instagram = json['instagram']?? "";
-    twitter = json['twitter']?? "";
-    firebaseToken = json['firebase_token']??"";
-    referralCount = json['referral_count']??"0";
-    following = json['following']??"0";
-    followers = json['followers']??"0";
-    likes = json['likes']??"0";
-    isVerified = json['is_verified']??'';
+    instagram = json['instagram'] ?? "";
+    twitter = json['twitter'] ?? "";
+    firebaseToken = json['firebase_token'] ?? "";
+    referralCount = json['referral_count'] ?? "0";
+    following = json['following'] ?? "0";
+    followers = json['followers'] ?? "0";
+    likes = json['likes'] ?? "0";
+    isVerified = json['is_verified'] ?? '';
     levels =
-    json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
-    totalVideos = json['total_videos']??"0";
-    boxTwo = json['box_two']??'';
-    boxThree = json['box_three']??'';
-    referralCode = json['referral_code']??'';
+        json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
+    totalVideos = json['total_videos'] ?? "0";
+    boxTwo = json['box_two'] ?? '';
+    boxThree = json['box_three'] ?? '';
+    referralCode = json['referral_code'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -199,4 +199,3 @@ class Levels {
     return data;
   }
 }
-

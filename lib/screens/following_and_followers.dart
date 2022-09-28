@@ -1,28 +1,18 @@
-import 'dart:convert';
-import 'dart:ffi';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
-import 'package:thrill/controller/model/followers_model.dart';
-import 'package:thrill/controller/model/profile_model_pojo.dart';
 import 'package:thrill/controller/users_controller.dart';
-import 'package:thrill/models/level_model.dart';
-import 'package:thrill/models/user.dart';
-import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
-import 'package:thrill/screens/screen.dart';
 import 'package:thrill/utils/util.dart';
+
 import '../controller/data_controller.dart';
-import '../models/follower_model.dart';
-import '../widgets/video_item.dart';
 
 var controller = Get.find<DataController>();
-  var selectedTabIndex = 0.obs;
+var selectedTabIndex = 0.obs;
 
 class FollowingAndFollowers extends StatelessWidget {
   var usersController = Get.find<UserController>();
@@ -36,93 +26,102 @@ class FollowingAndFollowers extends StatelessWidget {
 
     return GetX<UserController>(
         builder: ((userController) => Scaffold(
-            backgroundColor: Colors.grey.shade300,
-            body: SafeArea(
-                child: Column(
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                      gradient: LinearGradient(colors: [
-                    Color(0xFF2F8897),
-                    Color(0xff1F2A52),
-                    Color(0xff1F244E)
-                  ])),
-                  alignment: Alignment.bottomCenter,
-                  height: 50,
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                body: Stack(fit: StackFit.expand, children: [
+              Image.asset(
+                "assets/background_profile.png",
+                fit: BoxFit.fill,
+              ),
+              SafeArea(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: () => selectedTabIndex.value = 0,
-                              child: Text(
-                                followers,
-                                style: TextStyle(
-                                  color: selectedTabIndex.value == 0
-                                      ? Colors.white
-                                      : Colors.grey,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                children: [
+                  Container(
+                    alignment: Alignment.bottomCenter,
+                    height: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: () => selectedTabIndex.value = 0,
+                                child: Text(
+                                  followers,
+                                  style: TextStyle(
+                                    color: selectedTabIndex.value == 0
+                                        ? Colors.white
+                                        : Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
-                            ),
-                            GestureDetector(
-                              onTap: () => selectedTabIndex.value = 1,
-                              child: Text(
-                                following,
-                                style: TextStyle(
-                                  color: selectedTabIndex.value == 1
-                                      ? Colors.white
-                                      : Colors.grey,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                              GestureDetector(
+                                onTap: () => selectedTabIndex.value = 1,
+                                child: Text(
+                                  following,
+                                  style: TextStyle(
+                                    color: selectedTabIndex.value == 1
+                                        ? Colors.white
+                                        : Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      AnimatedAlign(
-                          alignment: selectedTabIndex.value == 0
-                              ? Alignment.topLeft
-                              : Alignment.topRight,
-                          duration: const Duration(milliseconds: 300),
-                          child: Container(
-                            color: ColorManager.cyan,
-                            height: 3,
-                            width: 100,
-                            margin: const EdgeInsets.symmetric(vertical: 3),
-                          ))
-                    ],
+                        AnimatedAlign(
+                            alignment: selectedTabIndex.value == 0
+                                ? Alignment.topLeft
+                                : Alignment.topRight,
+                            duration: const Duration(milliseconds: 300),
+                            child: Container(
+                              color: ColorManager.cyan,
+                              height: 3,
+                              width: 100,
+                              margin: const EdgeInsets.symmetric(vertical: 3),
+                            ))
+                      ],
+                    ),
                   ),
-                ),
-                selectedTabIndex.value == 1
-                    ? usersController.followingModel.value.isEmpty
-                        ? const Flexible(
-                            child: Center(
-                              child: Text(
-                                "You are not following anyone",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
+                  selectedTabIndex.value == 1
+                      ? usersController.followingModel.value.isEmpty
+                          ? const Flexible(
+                              child: Center(
+                                child: Text(
+                                  "No Followings yet",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
-                            ),
-                          )
-                        : followingTabLayout()
-                    : usersController.followersModel.value.isEmpty
-                        ? const Flexible(
-                            child: Center(
-                            child: Text("No Followers Yet",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold)),
-                          ))
-                        : followersTabLayout()
-              ],
-            )))));
+                            )
+                          : Container(
+                              margin: EdgeInsets.only(top: 10),
+                              child: followingTabLayout(),
+                            )
+                      : usersController.followersModel.value.isEmpty
+                          ? const Flexible(
+                              child: Center(
+                              child: Text("No Followers Yet",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                            ))
+                          : Container(
+                              margin: EdgeInsets.only(top: 20),
+                              child: followersTabLayout(),
+                            )
+                ],
+              ))
+            ]))));
   }
 
   followingTabLayout() {
@@ -148,8 +147,8 @@ class FollowingAndFollowers extends StatelessWidget {
                             children: [
                               Container(
                                   padding: const EdgeInsets.all(2),
-                                  height: 35,
-                                  width: 35,
+                                  height: 60,
+                                  width: 60,
                                   decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border:
@@ -161,16 +160,14 @@ class FollowingAndFollowers extends StatelessWidget {
                                         padding: const EdgeInsets.all(10.0),
                                         child: SvgPicture.asset(
                                           'assets/profile.svg',
-                                          width: 10,
-                                          height: 10,
-                                          fit: BoxFit.contain,
-                                          color: Colors.white60,
+                                          fit: BoxFit.fill,
+                                          color: Colors.white,
                                         ),
                                       ),
                                       imageUrl: controller.followingModel!
                                               .value[index].avtars!.isEmpty
                                           ? "https://www.pngmart.com/files/21/Account-Avatar-Profile-PNG-Photo.png"
-                                          : '${RestUrl.profileUrl}${controller.followingModel.value[index].avtars}',
+                                          : '${RestUrl.profileUrl}${controller.followingModel[index].avtars}',
                                       placeholder: (a, b) => const Center(
                                         child: CircularProgressIndicator(),
                                       ),
@@ -201,9 +198,9 @@ class FollowingAndFollowers extends StatelessWidget {
                                         controller.followingModel!.value![index]
                                             .username!,
                                         style: const TextStyle(
-                                            color: Colors.black,
+                                            color: Colors.white,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 13),
+                                            fontSize: 16),
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                       ),
@@ -214,7 +211,7 @@ class FollowingAndFollowers extends StatelessWidget {
                                         controller.followingModel!.value![index]
                                             .name!,
                                         style: const TextStyle(
-                                            color: Colors.black, fontSize: 13),
+                                            color: Colors.white, fontSize: 13),
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                       ),
@@ -240,29 +237,47 @@ class FollowingAndFollowers extends StatelessWidget {
                                 ),
                               ),
                               GetX<DataController>(
-                                  builder: (dataController) => Visibility(
-                                      visible: dataController.isMyProfile.value,
-                                      child: IconButton(
-                                          onPressed: () async {
-                                            var response = await dataController
-                                                .followUnfollowUser(controller
-                                                    .followingModel!
-                                                    .value![index]
-                                                    .id!);
-                                            GetSnackBar(
-                                              message: "${response.message}",
-                                              title: "Unfollowed",
-                                              duration: Duration(seconds: 3),
-                                              backgroundGradient:
-                                                  LinearGradient(colors: [
-                                                Color(0xFF2F8897),
-                                                Color(0xff1F2A52),
-                                                Color(0xff1F244E)
-                                              ]),
-                                              isDismissible: true,
-                                            ).show();
-                                          },
-                                          icon: Icon(Icons.person_remove))))
+                                  builder: (dataController) => dataController
+                                          .isLoading.value
+                                      ? Visibility(
+                                          visible: true,
+                                          child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                ),
+                                              ),
+                                              onPressed: () async {
+                                                var response =
+                                                    await dataController
+                                                        .followUnfollowUser(
+                                                            controller
+                                                                .followingModel
+                                                                .value[index]
+                                                                .id!);
+                                              },
+                                              child: const Text('Following')))
+                                      : Visibility(
+                                          visible: true,
+                                          child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Color(0xff00CCC9),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                ),
+                                              ),
+                                              onPressed: () async {
+                                                var response =
+                                                    await dataController
+                                                        .followUnfollowUser(
+                                                            controller
+                                                                .followingModel
+                                                                .value[index]
+                                                                .id!);
+                                              },
+                                              child: const Text('Following'))))
                             ],
                           ),
                         ),
@@ -308,8 +323,8 @@ class FollowingAndFollowers extends StatelessWidget {
                               children: [
                                 Container(
                                     padding: const EdgeInsets.all(2),
-                                    height: 35,
-                                    width: 35,
+                                    height: 60,
+                                    width: 60,
                                     decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border:
@@ -324,7 +339,7 @@ class FollowingAndFollowers extends StatelessWidget {
                                             width: 10,
                                             height: 10,
                                             fit: BoxFit.contain,
-                                            color: Colors.white60,
+                                            color: Colors.white,
                                           ),
                                         ),
                                         imageUrl: controller.followersModel
@@ -348,9 +363,9 @@ class FollowingAndFollowers extends StatelessWidget {
                                       controller.followersModel.value![index]
                                           .username!,
                                       style: const TextStyle(
-                                          color: Colors.black,
+                                          color: Colors.white,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13),
+                                          fontSize: 16),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                     ),
@@ -361,7 +376,7 @@ class FollowingAndFollowers extends StatelessWidget {
                                       controller
                                           .followersModel.value[index].name!,
                                       style: const TextStyle(
-                                          color: Colors.black, fontSize: 13),
+                                          color: Colors.white, fontSize: 13),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                     ),

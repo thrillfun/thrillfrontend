@@ -6,6 +6,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/common/color.dart';
@@ -15,7 +16,7 @@ import 'package:thrill/screens/screen.dart';
 import 'package:thrill/screens/terms_of_service.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
-import 'package:share_plus/share_plus.dart';
+
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
 import '../../widgets/video_item.dart';

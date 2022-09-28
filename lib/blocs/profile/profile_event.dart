@@ -13,8 +13,16 @@ class ProfileValidation extends ProfileEvent {
   final List<SocialUrlModel> list;
   final String profileImage;
 
-  const ProfileValidation(this.userName, this.firstName, this.lastName, this.fullName, this.bio,
-      this.profileImage, this.gender, this.websiteUrl, this.list);
+  const ProfileValidation(
+      this.userName,
+      this.firstName,
+      this.lastName,
+      this.fullName,
+      this.bio,
+      this.profileImage,
+      this.gender,
+      this.websiteUrl,
+      this.list);
 
   @override
   List<Object> get props => [
@@ -32,7 +40,7 @@ class ProfileValidation extends ProfileEvent {
 
 class ProfileLoading extends ProfileEvent {
   const ProfileLoading();
+
   @override
   List<Object> get props => [];
 }
-

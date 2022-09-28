@@ -26,16 +26,13 @@ class RequestVerification extends StatefulWidget {
       builder: (context) => const RequestVerification(),
     );
   }
-
 }
 
 class _RequestVerificationState extends State<RequestVerification> {
-
   File? image;
   TextEditingController userNameCtr = TextEditingController();
   TextEditingController fullNameCtr = TextEditingController();
-  bool isLoading=true;
-
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -156,7 +153,6 @@ class _RequestVerificationState extends State<RequestVerification> {
     );
   }
 
-
   void pickImage(BuildContext context) async {
     var source = await imagePickerSheet(context);
     if (source != null) {
@@ -230,32 +226,31 @@ class _RequestVerificationState extends State<RequestVerification> {
     try {
       var instance = await SharedPreferences.getInstance();
       var loginData = instance.getString('currentUser');
-      var user=UserModel.fromJson(jsonDecode(loginData!));
-      userNameCtr.text=user.username;
-      fullNameCtr.text=user.name;
-      isLoading=false;
+      var user = UserModel.fromJson(jsonDecode(loginData!));
+      userNameCtr.text = user.username;
+      fullNameCtr.text = user.name;
+      isLoading = false;
     } on Exception catch (_) {
-      isLoading=false;
+      isLoading = false;
     }
     setState(() {});
   }
 
-  void sendVerification()async {
-    if(userNameCtr.text.isEmpty || fullNameCtr.text.isEmpty || image==null){
+  void sendVerification() async {
+    if (userNameCtr.text.isEmpty || fullNameCtr.text.isEmpty || image == null) {
       showErrorToast(context, "Username,FullName and File required");
-    }else {
+    } else {
       progressDialogue(context);
       var result = await RestApi.sendVerification(
-          fullNameCtr.text, image!=null ? image!.path : "", userNameCtr.text);
-      var json=jsonDecode(result.body);
-      if(json['status']){
+          fullNameCtr.text, image != null ? image!.path : "", userNameCtr.text);
+      var json = jsonDecode(result.body);
+      if (json['status']) {
         closeDialogue(context);
         showSuccessToast(context, json['message']);
-      }else{
+      } else {
         closeDialogue(context);
         showErrorToast(context, json['message']);
       }
     }
   }
-
 }

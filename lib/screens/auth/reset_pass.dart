@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/repository/login/login_repository.dart';
+
 import '../../common/color.dart';
 import '../../utils/util.dart';
 
@@ -11,6 +12,7 @@ class ResetPasswordScreen extends StatefulWidget {
 
   static const String routeName = '/resetPass';
   final String phone;
+
   static Route route({required String phone}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
@@ -55,7 +57,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 width: getWidth(context),
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage('assets/splash.png'), fit: BoxFit.cover),
+                      image: AssetImage('assets/splash.png'),
+                      fit: BoxFit.cover),
                 ),
                 child: Column(
                   children: [
@@ -106,7 +109,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               obscureText: true,
                               keyboardType: TextInputType.number,
                               mainAxisAlignment: MainAxisAlignment.center,
-                              animationDuration: const Duration(milliseconds: 0),
+                              animationDuration:
+                                  const Duration(milliseconds: 0),
                               cursorColor: ColorManager.cyan,
                               textStyle: const TextStyle(
                                   fontSize: 25,
@@ -123,9 +127,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   inactiveColor: Colors.grey,
                                   borderWidth: 1,
                                   shape: PinCodeFieldShape.box,
-                                  fieldOuterPadding: const EdgeInsets.only(left: 8, right: 8)),
-                              onChanged: (text) =>
-                                  setState(() => mPin = text),
+                                  fieldOuterPadding:
+                                      const EdgeInsets.only(left: 8, right: 8)),
+                              onChanged: (text) => setState(() => mPin = text),
                             ),
                             state is OnPassValidation
                                 ? state.isPass
@@ -134,8 +138,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                             vertical: 3),
                                         child: Text(
                                           state.message,
-                                          style:
-                                              const TextStyle(color: Colors.red),
+                                          style: const TextStyle(
+                                              color: Colors.red),
                                         ),
                                       )
                                     : const SizedBox(
@@ -153,7 +157,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               obscureText: true,
                               keyboardType: TextInputType.number,
                               mainAxisAlignment: MainAxisAlignment.center,
-                              animationDuration: const Duration(milliseconds: 0),
+                              animationDuration:
+                                  const Duration(milliseconds: 0),
                               cursorColor: ColorManager.cyan,
                               textStyle: const TextStyle(
                                   fontSize: 25,
@@ -170,9 +175,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   inactiveColor: Colors.grey,
                                   borderWidth: 1,
                                   shape: PinCodeFieldShape.box,
-                                  fieldOuterPadding: const EdgeInsets.only(left: 8, right: 8)),
-                              onChanged: (text) =>
-                                  setState(() => cPin = text),
+                                  fieldOuterPadding:
+                                      const EdgeInsets.only(left: 8, right: 8)),
+                              onChanged: (text) => setState(() => cPin = text),
                             ),
                             state is OnPassValidation
                                 ? state.isConfirm
@@ -181,8 +186,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                             vertical: 3),
                                         child: Text(
                                           state.message,
-                                          style:
-                                              const TextStyle(color: Colors.red),
+                                          style: const TextStyle(
+                                              color: Colors.red),
                                         ),
                                       )
                                     : const SizedBox(
@@ -199,10 +204,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             ),
                             ElevatedButton(
                               onPressed: () {
-                                FocusScope.of(context).requestFocus(FocusNode());
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
                                 BlocProvider.of<LoginBloc>(context).add(
                                     PassValidation(
-                                        phone: widget.phone, confirm: cPin, pass: mPin));
+                                        phone: widget.phone,
+                                        confirm: cPin,
+                                        pass: mPin));
                               },
                               style: ElevatedButton.styleFrom(
                                   fixedSize: Size(getWidth(context) - 80, 55),
