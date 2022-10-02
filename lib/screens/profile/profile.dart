@@ -56,14 +56,16 @@ class _ProfileState extends State<Profile> {
             } else if (state is ProfileLoaded) {}
           },
           child: Stack(
+            fit: StackFit.expand,
             children: [
-              Image.asset(
-                "assets/background_profile.png",
-                filterQuality: FilterQuality.high,
-                fit: BoxFit.fill,
-                width: Get.width,
-                height: Get.height,
-              ),
+              SvgPicture.network(RestUrl.assetsUrl+"background_2.svg",
+              colorBlendMode: BlendMode.darken,
+              color: Colors.black.withOpacity(0.3),
+              fit: BoxFit.fill,
+              width: Get.width,
+              height: Get.height,)
+
+             ,
               BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
                 if (state is ProfileLoaded) {
                   return SingleChildScrollView(
@@ -79,616 +81,612 @@ class _ProfileState extends State<Profile> {
                               width: MediaQuery.of(context).size.width,
                             ),
                           ),
-                          Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.centerRight,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    IconButton(
-                                        onPressed: () {
-                                          Get.back(closeOverlays: true);
-                                        },
-                                        icon: const Icon(
-                                          Icons.arrow_back,
-                                          color: Colors.white,
-                                        )),
-                                    IconButton(
-                                        onPressed: () {
-                                          Get.to(SettingAndPrivacy());
-                                          //       Navigator.pushNamed(context, "/setting");
-                                        },
-                                        icon: const Iconify(
-                                          Carbon.settings,
-                                          color: Colors.white,
-                                        ))
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                            begin: Alignment.topRight,
-                                            end: Alignment.centerLeft,
-                                            colors: [
-                                              Color.fromARGB(25, 0, 204, 201),
-                                              Color.fromARGB(10, 31, 33, 40)
-                                            ]),
-                                        border: Border.all(
-                                          color: Colors.transparent,
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(200))),
-                                    width: 180,
-                                    height: 180,
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Container(
-                                            height: 120,
-                                            width: 120,
-                                            child: state
-                                                    .userModel.avatar.isNotEmpty
-                                                ? ClipOval(
-                                                    child: CachedNetworkImage(
-                                                      fit: BoxFit.cover,
-                                                      imageUrl:
-                                                          '${RestUrl.profileUrl}${state.userModel.avatar}',
-                                                      placeholder: (a, b) =>
-                                                          const Center(
-                                                        child:
-                                                            CircularProgressIndicator(),
-                                                      ),
-                                                    ),
-                                                  )
-                                                : Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10.0),
-                                                    child: SvgPicture.asset(
-                                                      'assets/profile.svg',
-                                                      width: 10,
-                                                      height: 10,
-                                                      fit: BoxFit.contain,
-                                                    ),
-                                                  )),
-                                        Container(
-                                          height: 120,
-                                          width: 120,
-                                          child: CircularProgressIndicator(
-                                            value: double.parse(state
-                                                .userModel.levels.current
-                                                .toString()),
-                                            backgroundColor: Colors.transparent,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                    Colors.purple),
-                                            color: Colors.green,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                  // Expanded(
-                                  //   child:
-                                  // )
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    margin: const EdgeInsets.only(
-                                        bottom: 5, top: 5),
-                                    child: Text(
-                                      "@" + state.userModel.username,
-                                      style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                  state.userModel.is_verified.contains('1')
-                                      ? SvgPicture.asset(
-                                          'assets/verified.svg',
-                                        )
-                                      : const SizedBox(width: 2),
-                                ],
-                              ),
-                              Container(
-                                alignment: Alignment.center,
-                                margin: EdgeInsets.only(left: 10, bottom: 20),
-                                width: MediaQuery.of(context).size.width,
-                                child: Text(
-                                  '${state.userModel.name.isNotEmpty ? state.userModel.name : 'anonymous'}',
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xffB2B2B2)),
-                                  textAlign: TextAlign.start,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                      onTap: () {
-                                        usersController.userId.value =
-                                            state.userModel.id;
+                         Container(
+                           margin: EdgeInsets.only(bottom: 60),
+                             child:  Column(
+                           children: [
+                             Container(
+                               alignment: Alignment.centerRight,
+                               child: Row(
 
-                                        usersController.isMyProfile.value =
-                                            true;
-                                        selectedTabIndex.value = 1;
+                                 mainAxisAlignment:
+                                 MainAxisAlignment.end,
+                                 children: [
 
-                                        Get.to(FollowingAndFollowers());
-                                      },
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                              '${state.userModel.following.isEmpty ? 0 : state.userModel.following}',
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold)),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          const Text(following,
-                                              style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold))
-                                        ],
-                                      )),
-                                  Container(
-                                    margin:
-                                        EdgeInsets.only(left: 15, right: 15),
-                                    height: 40,
-                                    width: 1,
-                                    color: Colors.white.withOpacity(0.2),
-                                  ),
-                                  GestureDetector(
-                                      onTap: () {
-                                        usersController.userId.value =
-                                            state.userModel.id;
+                                   IconButton(
+                                       onPressed: () {
+                                         Get.to(SettingAndPrivacy());
+                                         //       Navigator.pushNamed(context, "/setting");
+                                       },
+                                       icon: const Iconify(
+                                         Carbon.settings,
+                                         color: Colors.white,
+                                       ))
+                                 ],
+                               ),
+                             ),
+                             const SizedBox(
+                               height: 10,
+                             ),
+                             Column(
+                               children: [
+                                 Container(
+                                   alignment: Alignment.center,
+                                   decoration: BoxDecoration(
 
-                                        usersController.isMyProfile.value =
-                                            true;
-                                        selectedTabIndex.value = 0;
+                                       border: Border.all(
+                                         color: Colors.transparent,
+                                       ),
+                                       borderRadius: const BorderRadius.all(
+                                           Radius.circular(200))),
+                                   width: 170,
+                                   height: 170,
+                                   child: Stack(
+                                     alignment: Alignment.center,
+                                     children: [
+                                       SvgPicture.network(RestUrl.assetsUrl+"profile_circle.svg",fit: BoxFit.fill,height: Get.height,width: Get.width,),
+                                       SvgPicture.network(RestUrl.assetsUrl+"profile_circle_2.svg",width: 130,height: 130,fit: BoxFit.fill,),
 
-                                        Get.to(FollowingAndFollowers());
-                                      },
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                              '${state.userModel.followers.isEmpty ? 0 : state.userModel.followers}',
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold)),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          const Text(followers,
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
-                                                  fontWeight: FontWeight.bold))
-                                        ],
-                                      )),
-                                  Container(
-                                    margin:
-                                        EdgeInsets.only(left: 15, right: 15),
-                                    height: 40,
-                                    width: 1,
-                                    color: Colors.white.withOpacity(0.2),
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(
-                                          '${state.userModel.likes.isEmpty ? 0 : state.userModel.likes}',
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold)),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      const Text(likes,
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.bold))
-                                    ],
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                child: GlassContainer(
-                                    border: const Border.fromBorderSide(
-                                        BorderSide.none),
-                                    shape: BoxShape.rectangle,
-                                    borderRadius: BorderRadius.circular(20),
-                                    color: Color.fromARGB(50, 31, 33, 40),
-                                    shadowStrength: 0,
-                                    blur: 20,
-                                    child: Container(
-                                      margin: EdgeInsets.all(10),
-                                      child: Column(
-                                        children: [
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          Container(
-                                            margin: const EdgeInsets.only(
-                                                bottom: 10),
-                                            alignment: Alignment.center,
-                                            child: const Text(
-                                              'About',
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 15,
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                          Container(
-                                            margin: const EdgeInsets.only(
-                                                left: 10, right: 20),
-                                            alignment: Alignment.centerLeft,
-                                            child: Text(
-                                              state.userModel.bio,
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.white
-                                                      .withOpacity(0.5)),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
-                                            margin:
-                                                const EdgeInsets.only(left: 10),
-                                            alignment: Alignment.centerLeft,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            child: Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.link,
-                                                  color: Colors.white,
-                                                ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                InkWell(
-                                                  onTap: () {
-                                                    Uri openInBrowser = Uri(
-                                                      scheme: 'https',
-                                                      path:
-                                                          "${state.userModel.website_url}",
-                                                    );
-                                                    launchUrl(openInBrowser,
-                                                        mode: LaunchMode
-                                                            .externalApplication);
-                                                  },
-                                                  child: Text(
-                                                    state.userModel.website_url,
-                                                    maxLines: 3,
-                                                    textAlign: TextAlign.start,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                        fontSize: 15,
-                                                        color: Colors
-                                                            .blue.shade300),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Container(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 25, horizontal: 20),
-                                      alignment: Alignment.center,
-                                      decoration: const BoxDecoration(
-                                          color: Color.fromARGB(50, 31, 33, 40),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(200))),
-                                      child: Column(
-                                        children: [
-                                          ClipOval(
-                                            child: InkWell(
-                                              onTap: () {
-                                                Navigator.pushNamed(
-                                                        context, '/editProfile',
-                                                        arguments:
-                                                            state.userModel)
-                                                    .then((value) async {
-                                                  var pref =
-                                                      await SharedPreferences
-                                                          .getInstance();
-                                                  var currentUser = pref
-                                                      .getString('currentUser');
-                                                  UserModel current =
-                                                      UserModel.fromJson(
-                                                          jsonDecode(
-                                                              currentUser!));
-                                                  state.userModel.copyWith(
-                                                      username: state.userModel
-                                                              .username =
-                                                          current.username);
-                                                  state.userModel.copyWith(
-                                                      first_name: state
-                                                              .userModel
-                                                              .first_name =
-                                                          current.first_name);
-                                                  state.userModel.copyWith(
-                                                      last_name: state.userModel
-                                                              .last_name =
-                                                          current.last_name);
-                                                  state.userModel.copyWith(
-                                                      gender: state.userModel
-                                                              .gender =
-                                                          current.gender);
-                                                  state.userModel.copyWith(
-                                                      website_url: state
-                                                              .userModel
-                                                              .website_url =
-                                                          current.website_url);
-                                                  state.userModel.copyWith(
-                                                      bio: state.userModel.bio =
-                                                          current.bio);
-                                                  state.userModel.copyWith(
-                                                      youtube: state.userModel
-                                                              .youtube =
-                                                          current.youtube);
-                                                  state.userModel.copyWith(
-                                                      facebook: state.userModel
-                                                              .facebook =
-                                                          current.facebook);
-                                                  state.userModel.copyWith(
-                                                      instagram: state.userModel
-                                                              .instagram =
-                                                          current.instagram);
-                                                  state.userModel.copyWith(
-                                                      twitter: state.userModel
-                                                              .twitter =
-                                                          current.twitter);
-                                                  state.userModel.copyWith(
-                                                      avatar: state.userModel
-                                                              .avatar =
-                                                          current.avatar);
-                                                  state.userModel.copyWith(
-                                                      name: state.userModel
-                                                          .name = current.name);
-                                                  setState(() {});
-                                                });
-                                              },
-                                              child: Container(
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                          gradient:
-                                                              LinearGradient(
-                                                                  colors: [
-                                                        Color(0xff5FAFFC),
-                                                        Color(0xff2464D2)
-                                                      ])),
-                                                  padding: const EdgeInsets
-                                                          .symmetric(
-                                                      horizontal: 15,
-                                                      vertical: 15),
-                                                  height: 60,
-                                                  width: 60,
-                                                  child: const Iconify(
-                                                    Carbon.edit,
-                                                    color: Colors.white,
-                                                    size: 10,
-                                                  )),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          const Text("Edit Profile",
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.white))
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 25, horizontal: 20),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                          color: Color.fromARGB(50, 31, 33, 40),
-                                          border: Border.all(
-                                            color: Colors.transparent,
-                                          ),
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(200))),
-                                      child: Column(
-                                        children: [
-                                          ClipOval(
-                                            child: InkWell(
-                                                onTap: () {
-                                                  Navigator.pushNamed(
-                                                      context, '/referral');
-                                                },
-                                                child: Container(
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                            gradient:
-                                                                LinearGradient(
-                                                                    colors: [
-                                                          Color(0xff9B67FB),
-                                                          Color(0xff6E1DE9)
-                                                        ])),
-                                                    height: 60,
-                                                    width: 60,
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            15),
-                                                    child: const Iconify(
-                                                      Carbon.share,
-                                                      color: Colors.white,
-                                                      size: 15,
-                                                    ))),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          const Text("Invite User",
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.white))
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 25, horizontal: 20),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                          color: Color.fromARGB(50, 31, 33, 40),
-                                          border: Border.all(
-                                            color: Colors.transparent,
-                                          ),
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(200))),
-                                      child: Column(
-                                        children: [
-                                          ClipOval(
-                                            child: Container(
-                                              decoration: const BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                      colors: [
-                                                    Color(0xffFF87CF),
-                                                    Color(0xffE968D9)
-                                                  ])),
-                                              width: 60,
-                                              height: 60,
-                                              child: InkWell(
-                                                onTap: () {
-                                                  Navigator.pushNamed(
-                                                      context, '/favourites');
-                                                },
-                                                child: Container(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            15),
-                                                    child: const Iconify(
-                                                      Carbon.star,
-                                                      color: Colors.white,
-                                                      size: 15,
-                                                    )),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          const Text(
-                                            "Favourite",
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.white),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              DefaultTabController(
-                                  length: 3,
-                                  initialIndex: selectedTab,
-                                  child: TabBar(
-                                      onTap: (int index) {
-                                        setState(() {
-                                          selectedTab = index;
-                                        });
-                                      },
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 0, vertical: 0),
-                                      indicatorColor: Color(0XffB2E3E3),
-                                      indicatorPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                      tabs: [
-                                        Tab(
-                                          icon: SvgPicture.asset(
-                                            'assets/feedTab.svg',
-                                            color: selectedTab == 0
-                                                ? Colors.white
-                                                : const Color(0XffB2E3E3),
-                                          ),
-                                        ),
-                                        Tab(
-                                          icon: Icon(Icons.lock,
-                                              color: selectedTab == 1
-                                                  ? Colors.white
-                                                  : const Color(0XffB2E3E3)),
-                                        ),
-                                        Tab(
-                                          icon: Icon(Icons.favorite,
-                                              color: selectedTab == 2
-                                                  ? Colors.white
-                                                  : const Color(0XffB2E3E3)),
-                                        )
-                                      ])),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              tabview(
-                                  state.userModel,
-                                  state.publicList.isEmpty
-                                      ? []
-                                      : state.publicList,
-                                  state.privateList.isEmpty
-                                      ? []
-                                      : state.privateList,
-                                  state.likesList.isEmpty
-                                      ? []
-                                      : state.likesList)
-                            ],
-                          ),
+                                       Container(
+                                           height: 100,
+                                           width: 100,
+                                           child: state
+                                               .userModel.avatar.isNotEmpty
+                                               ? ClipOval(
+                                             child: CachedNetworkImage(
+                                               fit: BoxFit.cover,
+                                               imageUrl:
+                                               '${RestUrl.profileUrl}${state.userModel.avatar}',
+                                               placeholder: (a, b) =>
+                                               const Center(
+                                                 child:
+                                                 CircularProgressIndicator(),
+                                               ),
+                                             ),
+                                           )
+                                               : Padding(
+                                             padding:
+                                             const EdgeInsets.all(
+                                                 10.0),
+                                             child: SvgPicture.asset(
+                                               'assets/profile.svg',
+                                               width: 10,
+                                               height: 10,
+                                               fit: BoxFit.contain,
+                                             ),
+                                           )),
+                                       Container(
+                                         height: 120,
+                                         width: 120,
+                                         child: CircularProgressIndicator(
+                                           value: double.parse(state
+                                               .userModel.levels.current
+                                               .toString()),
+                                           backgroundColor: Colors.transparent,
+                                           valueColor:
+                                           AlwaysStoppedAnimation<Color>(
+                                               Colors.purple),
+                                           color: Colors.green,
+                                         ),
+                                       ),
+                                     ],
+                                   ),
+                                 )
+                                 // Expanded(
+                                 //   child:
+                                 // )
+                               ],
+                             ),
+                             Row(
+                               mainAxisAlignment: MainAxisAlignment.center,
+                               children: [
+                                 Container(
+                                   margin: const EdgeInsets.only(
+                                       bottom: 5, top: 5),
+                                   child: Text(
+                                     "@" + state.userModel.username,
+                                     style: const TextStyle(
+                                         fontSize: 20,
+                                         fontWeight: FontWeight.bold,
+                                         color: Colors.white),
+                                   ),
+                                 ),
+                                 state.userModel.is_verified.contains('1')
+                                     ? SvgPicture.asset(
+                                   'assets/verified.svg',
+                                 )
+                                     : const SizedBox(width: 2),
+                               ],
+                             ),
+                             Container(
+                               alignment: Alignment.center,
+                               margin: EdgeInsets.only(left: 10, bottom: 20),
+                               width: MediaQuery.of(context).size.width,
+                               child: Text(
+                                 '${state.userModel.name.isNotEmpty ? state.userModel.name : 'anonymous'}',
+                                 style: const TextStyle(
+                                     fontSize: 15,
+                                     fontWeight: FontWeight.bold,
+                                     color: Color(0xffB2B2B2)),
+                                 textAlign: TextAlign.start,
+                                 overflow: TextOverflow.ellipsis,
+                               ),
+                             ),
+                             Row(
+                               crossAxisAlignment: CrossAxisAlignment.center,
+                               mainAxisAlignment: MainAxisAlignment.center,
+                               children: [
+                                 GestureDetector(
+                                     onTap: () {
+                                       usersController.userId.value =
+                                           state.userModel.id;
+
+                                       usersController.isMyProfile.value =
+                                       true;
+                                       selectedTabIndex.value = 1;
+
+                                       Get.to(FollowingAndFollowers());
+                                     },
+                                     child: Column(
+                                       children: [
+                                         Text(
+                                             '${state.userModel.following.isEmpty ? 0 : state.userModel.following}',
+                                             style: const TextStyle(
+                                                 color: Colors.white,
+                                                 fontSize: 16,
+                                                 fontWeight: FontWeight.bold)),
+                                         const SizedBox(
+                                           height: 10,
+                                         ),
+                                         const Text(following,
+                                             style: TextStyle(
+                                                 color: Colors.grey,
+                                                 fontSize: 12,
+                                                 fontWeight: FontWeight.bold))
+                                       ],
+                                     )),
+                                 Container(
+                                   margin:
+                                   EdgeInsets.only(left: 15, right: 15),
+                                   height: 40,
+                                   width: 1,
+                                   color: Colors.white.withOpacity(0.2),
+                                 ),
+                                 GestureDetector(
+                                     onTap: () {
+                                       usersController.userId.value =
+                                           state.userModel.id;
+
+                                       usersController.isMyProfile.value =
+                                       true;
+                                       selectedTabIndex.value = 0;
+
+                                       Get.to(FollowingAndFollowers());
+                                     },
+                                     child: Column(
+                                       children: [
+                                         Text(
+                                             '${state.userModel.followers.isEmpty ? 0 : state.userModel.followers}',
+                                             style: const TextStyle(
+                                                 color: Colors.white,
+                                                 fontSize: 16,
+                                                 fontWeight: FontWeight.bold)),
+                                         const SizedBox(
+                                           height: 10,
+                                         ),
+                                         const Text(followers,
+                                             style: TextStyle(
+                                                 fontSize: 12,
+                                                 color: Colors.grey,
+                                                 fontWeight: FontWeight.bold))
+                                       ],
+                                     )),
+                                 Container(
+                                   margin:
+                                   EdgeInsets.only(left: 15, right: 15),
+                                   height: 40,
+                                   width: 1,
+                                   color: Colors.white.withOpacity(0.2),
+                                 ),
+                                 Column(
+                                   children: [
+                                     Text(
+                                         '${state.userModel.likes.isEmpty ? 0 : state.userModel.likes}',
+                                         style: const TextStyle(
+                                             color: Colors.white,
+                                             fontSize: 16,
+                                             fontWeight: FontWeight.bold)),
+                                     const SizedBox(
+                                       height: 10,
+                                     ),
+                                     const Text(likes,
+                                         style: TextStyle(
+                                             fontSize: 12,
+                                             color: Colors.grey,
+                                             fontWeight: FontWeight.bold))
+                                   ],
+                                 )
+                               ],
+                             ),
+                             const SizedBox(
+                               height: 10,
+                             ),
+                             Container(
+                               padding: EdgeInsets.all(10),
+                               child: GlassContainer(
+                                   border: const Border.fromBorderSide(
+                                       BorderSide.none),
+                                   shape: BoxShape.rectangle,
+                                   borderRadius: BorderRadius.circular(20),
+                                   color: Color.fromARGB(50, 31, 33, 40),
+                                   shadowStrength: 0,
+                                   blur: 20,
+                                   child: Container(
+                                     margin: EdgeInsets.all(10),
+                                     child: Column(
+                                       children: [
+                                         const SizedBox(
+                                           height: 5,
+                                         ),
+                                         Container(
+                                           margin: const EdgeInsets.only(
+                                               bottom: 10),
+                                           alignment: Alignment.center,
+                                           child: const Text(
+                                             'About',
+                                             maxLines: 3,
+                                             overflow: TextOverflow.ellipsis,
+                                             style: TextStyle(
+                                                 fontWeight: FontWeight.bold,
+                                                 fontSize: 15,
+                                                 color: Colors.white),
+                                           ),
+                                         ),
+                                         Container(
+                                           margin: const EdgeInsets.only(
+                                               left: 10, right: 20),
+                                           alignment: Alignment.centerLeft,
+                                           child: Text(
+                                             state.userModel.bio,
+                                             maxLines: 3,
+                                             overflow: TextOverflow.ellipsis,
+                                             style: TextStyle(
+                                                 fontSize: 15,
+                                                 color: Colors.white
+                                                     .withOpacity(0.5)),
+                                           ),
+                                         ),
+                                         const SizedBox(
+                                           height: 10,
+                                         ),
+                                         Container(
+                                           margin:
+                                           const EdgeInsets.only(left: 10),
+                                           alignment: Alignment.centerLeft,
+                                           width: MediaQuery.of(context)
+                                               .size
+                                               .width,
+                                           child: Row(
+                                             children: [
+                                               const Icon(
+                                                 Icons.link,
+                                                 color: Colors.white,
+                                               ),
+                                               SizedBox(
+                                                 width: 5,
+                                               ),
+                                               InkWell(
+                                                 onTap: () {
+                                                   Uri openInBrowser = Uri(
+                                                     scheme: 'https',
+                                                     path:
+                                                     "${state.userModel.website_url}",
+                                                   );
+                                                   launchUrl(openInBrowser,
+                                                       mode: LaunchMode
+                                                           .externalApplication);
+                                                 },
+                                                 child: Text(
+                                                   state.userModel.website_url,
+                                                   maxLines: 3,
+                                                   textAlign: TextAlign.start,
+                                                   overflow:
+                                                   TextOverflow.ellipsis,
+                                                   style: TextStyle(
+                                                       fontSize: 15,
+                                                       color: Colors
+                                                           .blue.shade300),
+                                                 ),
+                                               )
+                                             ],
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   )),
+                             ),
+                             SizedBox(
+                               height: 20,
+                             ),
+                             Container(
+                               child: Row(
+                                 mainAxisSize: MainAxisSize.max,
+                                 mainAxisAlignment:
+                                 MainAxisAlignment.spaceEvenly,
+                                 children: [
+                                   Container(
+                                     padding: const EdgeInsets.symmetric(
+                                         vertical: 25, horizontal: 20),
+                                     alignment: Alignment.center,
+                                     decoration: const BoxDecoration(
+                                         color: Color.fromARGB(50, 31, 33, 40),
+                                         borderRadius: BorderRadius.all(
+                                             Radius.circular(200))),
+                                     child: Column(
+                                       children: [
+                                         ClipOval(
+                                           child: InkWell(
+                                             onTap: () {
+                                               Navigator.pushNamed(
+                                                   context, '/editProfile',
+                                                   arguments:
+                                                   state.userModel)
+                                                   .then((value) async {
+                                                 var pref =
+                                                 await SharedPreferences
+                                                     .getInstance();
+                                                 var currentUser = pref
+                                                     .getString('currentUser');
+                                                 UserModel current =
+                                                 UserModel.fromJson(
+                                                     jsonDecode(
+                                                         currentUser!));
+                                                 state.userModel.copyWith(
+                                                     username: state.userModel
+                                                         .username =
+                                                         current.username);
+                                                 state.userModel.copyWith(
+                                                     first_name: state
+                                                         .userModel
+                                                         .first_name =
+                                                         current.first_name);
+                                                 state.userModel.copyWith(
+                                                     last_name: state.userModel
+                                                         .last_name =
+                                                         current.last_name);
+                                                 state.userModel.copyWith(
+                                                     gender: state.userModel
+                                                         .gender =
+                                                         current.gender);
+                                                 state.userModel.copyWith(
+                                                     website_url: state
+                                                         .userModel
+                                                         .website_url =
+                                                         current.website_url);
+                                                 state.userModel.copyWith(
+                                                     bio: state.userModel.bio =
+                                                         current.bio);
+                                                 state.userModel.copyWith(
+                                                     youtube: state.userModel
+                                                         .youtube =
+                                                         current.youtube);
+                                                 state.userModel.copyWith(
+                                                     facebook: state.userModel
+                                                         .facebook =
+                                                         current.facebook);
+                                                 state.userModel.copyWith(
+                                                     instagram: state.userModel
+                                                         .instagram =
+                                                         current.instagram);
+                                                 state.userModel.copyWith(
+                                                     twitter: state.userModel
+                                                         .twitter =
+                                                         current.twitter);
+                                                 state.userModel.copyWith(
+                                                     avatar: state.userModel
+                                                         .avatar =
+                                                         current.avatar);
+                                                 state.userModel.copyWith(
+                                                     name: state.userModel
+                                                         .name = current.name);
+                                                 setState(() {});
+                                               });
+                                             },
+                                             child: Container(
+                                                 decoration:
+                                                 const BoxDecoration(
+                                                     gradient:
+                                                     LinearGradient(
+                                                         colors: [
+                                                           Color(0xff5FAFFC),
+                                                           Color(0xff2464D2)
+                                                         ])),
+                                                 padding: const EdgeInsets
+                                                     .symmetric(
+                                                     horizontal: 15,
+                                                     vertical: 15),
+                                                 height: 60,
+                                                 width: 60,
+                                                 child: const Iconify(
+                                                   Carbon.edit,
+                                                   color: Colors.white,
+                                                   size: 10,
+                                                 )),
+                                           ),
+                                         ),
+                                         const SizedBox(
+                                           height: 20,
+                                         ),
+                                         const Text("Edit Profile",
+                                             style: TextStyle(
+                                                 fontSize: 12,
+                                                 color: Colors.white))
+                                       ],
+                                     ),
+                                   ),
+                                   Container(
+                                     padding: EdgeInsets.symmetric(
+                                         vertical: 25, horizontal: 20),
+                                     alignment: Alignment.center,
+                                     decoration: BoxDecoration(
+                                         color: Color.fromARGB(50, 31, 33, 40),
+                                         border: Border.all(
+                                           color: Colors.transparent,
+                                         ),
+                                         borderRadius: const BorderRadius.all(
+                                             Radius.circular(200))),
+                                     child: Column(
+                                       children: [
+                                         ClipOval(
+                                           child: InkWell(
+                                               onTap: () {
+                                                 Navigator.pushNamed(
+                                                     context, '/referral');
+                                               },
+                                               child: Container(
+                                                   decoration:
+                                                   const BoxDecoration(
+                                                       gradient:
+                                                       LinearGradient(
+                                                           colors: [
+                                                             Color(0xff9B67FB),
+                                                             Color(0xff6E1DE9)
+                                                           ])),
+                                                   height: 60,
+                                                   width: 60,
+                                                   padding:
+                                                   const EdgeInsets.all(
+                                                       15),
+                                                   child: const Iconify(
+                                                     Carbon.share,
+                                                     color: Colors.white,
+                                                     size: 15,
+                                                   ))),
+                                         ),
+                                         const SizedBox(
+                                           height: 20,
+                                         ),
+                                         const Text("Invite User",
+                                             style: TextStyle(
+                                                 fontSize: 12,
+                                                 color: Colors.white))
+                                       ],
+                                     ),
+                                   ),
+                                   Container(
+                                     padding: EdgeInsets.symmetric(
+                                         vertical: 25, horizontal: 20),
+                                     alignment: Alignment.center,
+                                     decoration: BoxDecoration(
+                                         color: Color.fromARGB(50, 31, 33, 40),
+                                         border: Border.all(
+                                           color: Colors.transparent,
+                                         ),
+                                         borderRadius: const BorderRadius.all(
+                                             Radius.circular(200))),
+                                     child: Column(
+                                       children: [
+                                         ClipOval(
+                                           child: Container(
+                                             decoration: const BoxDecoration(
+                                                 gradient: LinearGradient(
+                                                     colors: [
+                                                       Color(0xffFF87CF),
+                                                       Color(0xffE968D9)
+                                                     ])),
+                                             width: 60,
+                                             height: 60,
+                                             child: InkWell(
+                                               onTap: () {
+                                                 Navigator.pushNamed(
+                                                     context, '/favourites');
+                                               },
+                                               child: Container(
+                                                   padding:
+                                                   const EdgeInsets.all(
+                                                       15),
+                                                   child: const Iconify(
+                                                     Carbon.star,
+                                                     color: Colors.white,
+                                                     size: 15,
+                                                   )),
+                                             ),
+                                           ),
+                                         ),
+                                         const SizedBox(
+                                           height: 20,
+                                         ),
+                                         const Text(
+                                           "Favourite",
+                                           style: TextStyle(
+                                               fontSize: 12,
+                                               color: Colors.white),
+                                         )
+                                       ],
+                                     ),
+                                   ),
+                                 ],
+                               ),
+                             ),
+                             const SizedBox(
+                               height: 20,
+                             ),
+                             DefaultTabController(
+
+                                 length: 3,
+                                 initialIndex: selectedTab,
+                                 child: TabBar(
+                                   unselectedLabelColor: Color(0xff333742),
+                                     onTap: (int index) {
+                                       setState(() {
+                                         selectedTab = index;
+                                       });
+                                     },
+                                     padding: const EdgeInsets.symmetric(
+                                         horizontal: 0, vertical: 0),
+                                     indicatorColor: Colors.white,
+                                     indicatorPadding:
+                                     const EdgeInsets.symmetric(
+                                         horizontal: 10),
+                                     tabs: [
+                                       Tab(
+
+                                         icon: SvgPicture.asset(
+                                           'assets/feedTab.svg',
+                                           color: selectedTab == 0
+                                               ? Colors.white
+                                               : const Color(0XffB2E3E3),
+                                         ),
+                                       ),
+                                       Tab(
+                                         icon: Icon(Icons.lock,
+                                             color: selectedTab == 1
+                                                 ? Colors.white
+                                                 : const Color(0XffB2E3E3)),
+                                       ),
+                                       Tab(
+                                         icon: Icon(Icons.favorite,
+                                             color: selectedTab == 2
+                                                 ? Colors.white
+                                                 : const Color(0XffB2E3E3)),
+                                       )
+                                     ])),
+                             const SizedBox(
+                               height: 5,
+                             ),
+                             tabview(
+                                 state.userModel,
+                                 state.publicList.isEmpty
+                                     ? []
+                                     : state.publicList,
+                                 state.privateList.isEmpty
+                                     ? []
+                                     : state.privateList,
+                                 state.likesList.isEmpty
+                                     ? []
+                                     : state.likesList)
+                           ],
+                         ),)
                         ],
                       ));
                 } else {
@@ -734,7 +732,7 @@ class _ProfileState extends State<Profile> {
                 ]))
             : GridView.builder(
                 padding: const EdgeInsets.all(10),
-                physics: const AlwaysScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
@@ -835,7 +833,7 @@ class _ProfileState extends State<Profile> {
             ]))
         : GridView.builder(
             padding: const EdgeInsets.all(10),
-            physics: const ScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10),
@@ -937,7 +935,7 @@ class _ProfileState extends State<Profile> {
             ]))
         : GridView.builder(
             padding: const EdgeInsets.all(10),
-            physics: const ScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10),

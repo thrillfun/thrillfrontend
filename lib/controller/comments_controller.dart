@@ -11,14 +11,15 @@ import 'model/comments_model.dart';
 
 class CommentsController extends GetxController {
   var isLoading = false.obs;
+  var isCommentsLoading = false.obs;
   var commentsModel = RxList<CommentData>();
   var videoId = 0.obs;
   var commentsPostResponse = CommentsPostResponse().obs;
 
   CommentsController() {}
 
-  getComments(int videoId) async {
-    isLoading.value = true;
+ Future<void>  getComments(int videoId) async {
+    isCommentsLoading.value = true;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var response = await http.post(
@@ -28,14 +29,13 @@ class CommentsController extends GetxController {
 
     var result = jsonDecode(response.body);
     try {
+      isCommentsLoading.value = false;
       commentsModel = CommentsModel.fromJson(result).commentsData!.obs;
-      isLoading.value = false;
-      update();
     } catch (e) {
-      isLoading.value = false;
-      update();
+      isCommentsLoading.value = false;
       errorToast(CommentsModel.fromJson(result).message.toString());
     }
+    commentsModel.refresh();
   }
 
   postComment(int videoId, String userId, String comment) async {
@@ -62,6 +62,7 @@ class CommentsController extends GetxController {
       update();
       errorToast(CommentsPostResponse.fromJson(result).message.toString());
     }
+    commentsModel.refresh();
   }
 
   likeComment(String commentId, String isLike) async {
@@ -91,5 +92,6 @@ class CommentsController extends GetxController {
       update();
       errorToast(CommentLikeResponse.fromJson(result).message.toString());
     }
+    commentsModel.refresh();
   }
 }

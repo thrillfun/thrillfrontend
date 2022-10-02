@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
@@ -16,7 +17,7 @@ import '../../repository/login/login_repository.dart';
 part 'login_event.dart';
 part 'login_state.dart';
 
-var userId = 0.obs;
+var loggedInUserId = 0.obs;
 var isLoggedIn = false.obs;
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
@@ -67,7 +68,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           try {
             var pref = await SharedPreferences.getInstance();
             UserModel user = UserModel.fromJson(result['data']['user']);
-            userId.value = user.id;
+            GetStorage().write("user", user);
+
+            loggedInUserId.value = user.id;
 
             isLoggedIn.value = true;
 
@@ -116,7 +119,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             var pref = await SharedPreferences.getInstance();
             try {
               UserModel user = UserModel.fromJson(result['data']['user']);
-              userId.value = user.id;
+              loggedInUserId.value = user.id;
              
               isLoggedIn.value = true;
 
@@ -173,7 +176,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         if (result['status']) {
           try {
             UserModel user = UserModel.fromJson(result['data']['user']);
-            userId.value = user.id;
+            loggedInUserId.value = user.id;
             isLoggedIn.value = true;
 
 

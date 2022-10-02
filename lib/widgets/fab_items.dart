@@ -1,4 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:thrill/rest/rest_url.dart';
 
 class FABBottomAppBarItem {
   FABBottomAppBarItem({this.iconData, this.text});
@@ -59,23 +62,24 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
 
     return BottomAppBar(
       shape: widget.notchedShape,
-      notchMargin: 10.0,
-      child: Container(
-        decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topCenter,
+      notchMargin: 20.0,
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
+          Container(
+            height: 60,
+            decoration: BoxDecoration(gradient: LinearGradient(
+              begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-              Color(0xFF171D22),
-              Color(0xff143035),
-              Color(0xff171D23)
-            ])),
-        child: Row(
+            Color(0xff145158),Color(0xff193542),Color(0xff1A2C41)
+          ])),),
+        Row(
           mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: items,
         ),
-      ),
+      ],)
     );
   }
 

@@ -12,4 +12,6 @@ class ColorManager {
   static const Color spinColorBorder = Color(0xffA3683E);
   static const Color spinColorBorderTwo = Color(0xff20244C);
   static const Color spinColorDivider = Color(0xffC8CACA);
+
+  static const Color colorAccent = Color(0xff145158);
 }

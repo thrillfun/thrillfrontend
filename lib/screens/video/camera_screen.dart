@@ -18,6 +18,7 @@ import 'package:thrill/main.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/user.dart';
+import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/video/post.dart';
 import 'package:thrill/utils/custom_timer_painter.dart';
 import 'package:thrill/utils/util.dart';
@@ -365,13 +366,14 @@ class _CameraScreenState extends State<CameraScreen>
     ];
 
     var audioOptions = imgly.AudioOptions(categories: audioClipCategories);
-
+  var codec  = imgly.VideoCodec.values;
     var exportOptions = imgly.ExportOptions(
-        forceExport: true, video: imgly.VideoOptions(quality: 0.4));
+        forceExport: true, video: imgly.VideoOptions(quality: 0.4,codec:codec[0]
+    ));
 
     imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/1200px-Amazon_Web_Services_Logo.svg.png",
-        alignment: imgly.AlignmentMode.center);
+    RestUrl.assetsUrl+"logo.png",
+        alignment: imgly.AlignmentMode.bottomRight);
 
     var stickerList = [
       imgly.StickerCategory.giphy(

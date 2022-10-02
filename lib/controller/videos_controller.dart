@@ -69,7 +69,7 @@ class VideosController extends GetxController {
     300
   ].obs;
 
-  getAllVideos() async {
+  Future<void> getAllVideos() async {
     isLoading.value = true;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
@@ -97,6 +97,8 @@ class VideosController extends GetxController {
       isLoading.value = false;
       update();
     }
+    publicVideosList.refresh();
+    update();
   }
 
   getFollowingVideos() async {
@@ -115,14 +117,15 @@ class VideosController extends GetxController {
           PublicVideosModel.fromJson(json.decode(response.body)).data!.obs;
 
       isFollowingLoading.value = false;
-      update();
     } catch (e) {
       errorToast(PublicVideosModel.fromJson(json.decode(response.body))
           .message
           .toString());
       isFollowingLoading.value = false;
-      update();
     }
+    followingVideosList.refresh();
+    update();
+
   }
 
   getUserVideos() async {
@@ -154,8 +157,9 @@ class VideosController extends GetxController {
           .message
           .toString());
       isLoading.value = false;
-      update();
     }
+    update();
+
   }
 
   getOtherUserVideos(int userId) async {
@@ -180,6 +184,8 @@ class VideosController extends GetxController {
           .toString());
       videosLoading.value = false;
     }
+    update();
+
   }
 
   getUserLikedVideos(int userId) async {
@@ -229,14 +235,14 @@ class VideosController extends GetxController {
           .message
           .toString());
       isLoading.value = false;
-      update();
     } catch (e) {
       errorToast(LikedVideosModel.fromJson(json.decode(response.body))
           .message
           .toString());
       isLoading.value = false;
-      update();
     }
+    update();
+
   }
 
   postVideo(

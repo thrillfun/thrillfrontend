@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:get/utils.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -14,6 +15,7 @@ import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/discover_getx.dart';
+import 'package:thrill/screens/home/home.dart';
 import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/screens/spin/spin_the_wheel.dart';
@@ -67,7 +69,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
-        (timeStamp) => ShowCaseWidget.of(this.context).startShowCase([key]));
+        (timeStamp) => ShowCaseWidget.of(context).startShowCase([key]));
     if (widget.mapData?['index'] != null)
       selectedIndex = widget.mapData?['index'] ?? 0;
     if (!popupDisplayed) {
@@ -97,7 +99,12 @@ class _BottomNavigationState extends State<BottomNavigation> {
             extendBody: true,
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
-            floatingActionButton: Showcase(
+            floatingActionButton: Container(
+              height: 60,
+              width: 60,
+              child: FittedBox(
+
+              child: Showcase(
                 showcaseBackgroundColor: Color.fromARGB(255, 1, 180, 177),
                 shapeBorder: const CircleBorder(),
                 radius: const BorderRadius.all(Radius.circular(40)),
@@ -105,16 +112,17 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 overlayPadding: const EdgeInsets.all(5),
                 key: key,
                 child: FloatingActionButton(
+
                   child: Image.asset(
                     'assets/spin.png',
                     //scale: 1.4,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                   ),
                   onPressed: () => Get.to(() => const SpinTheWheel()),
                 ),
                 textColor: Colors.white,
                 descTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
-                description: "check out the spin wheel to earn rewards!!"),
+                description: "check out the spin wheel to earn rewards!!"),),),
             bottomNavigationBar: myDrawer2(),
             body: screens[selectedIndex]));
   }
@@ -140,6 +148,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     if (index == 1) {
       discoverController.getTopHashTags();
     }
+
     if (index >= 0) {
       await isLogined().then((value) {
         if (value) {
@@ -383,8 +392,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
   }
 
   Future<bool> isLogined() async {
-    var instance = await SharedPreferences.getInstance();
-    var loginData = instance.getString('currentUser');
+    var loginData = GetStorage().read("user");
     if (loginData != null) {
       return true;
     } else {

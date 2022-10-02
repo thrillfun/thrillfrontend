@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
@@ -13,21 +14,18 @@ class HashTagsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF171D22), Color(0xff143035), Color(0xff171D23)],
-        ),
-      ),
-      child: Scaffold(
+    return Stack(children: [
+      SvgPicture.network(RestUrl.assetsUrl+"background_2.svg",
+        fit: BoxFit.fill,
+        width: Get.width,
+        height: Get.height,),
+      Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
             child: GetX<DiscoverController>(
-          builder: (controller) => controller.isHashTagsLoading.value && controller.hashTagsVideos.isNotEmpty
-              ? Container()
-              : StaggeredGridView.countBuilder(
+              builder: (controller) => controller.isHashTagsLoading.value && controller.hashTagsVideos.isNotEmpty
+                  ? Container()
+                  : StaggeredGridView.countBuilder(
                 staggeredTileBuilder: (index) => index % 7 == 0
                     ? StaggeredTile.count(1, 2)
                     : StaggeredTile.count(1, 1),
@@ -59,8 +57,8 @@ class HashTagsScreen extends StatelessWidget {
                                       .toString())),
                     )),
               ),
-        )),
-      ),
-    );
+            )),
+      )
+    ],);
   }
 }

@@ -75,7 +75,7 @@ dependencies:
   get: ^4.6.5
   better_player: ^0.0.83
   persistent_bottom_nav_bar: ^4.0.2
-  video_editor_sdk: ^2.6.0
+  video_editor_sdk: ^2.7.0
   carousel_indicator: ^1.0.6
   curved_nav_bar: ^0.0.2
   external_path: ^1.0.1
@@ -85,6 +85,8 @@ dependencies:
   iconify_flutter: ^0.0.4
   animated_button_bar: ^0.0.2+1
   showcaseview: ^1.1.8
+  get_storage: ^2.0.3
+  gallery_saver: ^2.3.2
   
 dev_dependencies:
   flutter_test:

@@ -3,6 +3,7 @@ class RestUrl {
   static const String profileUrl =
       "http://3.129.172.46/dev/uploads/profile_images/";
   static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
+  static const String assetsUrl = "https://thrillvideo.s3.amazonaws.com/assets/";
   static const String bannerUrl = "http://3.129.172.46/dev/uploads/banners/";
   static const String thambUrl = "http://3.129.172.46/dev/uploads/videos/";
   static const String soundUrl = "http://3.129.172.46/dev/";

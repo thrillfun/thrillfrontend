@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -13,6 +14,7 @@ import 'package:iconly/iconly.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/blocs.dart';
+import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/comments_controller.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/users_controller.dart';
@@ -81,8 +83,8 @@ class _VideoAppState extends State<BetterReelsPlayer> {
     _textEditingController = TextEditingController();
 
     _betterPlayerController =
-        VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl)
-          ..setLooping(false)
+        VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl,videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false))
+          ..setLooping(true)
           ..initialize().then((value) => setState(() {
                 initialized.value = true;
               }));
@@ -108,6 +110,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
         _betterPlayerController.pause();
       }
     });
+
 
     return Stack(
       children: [
@@ -178,278 +181,280 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                         ),
                       ),
                       Container(
-                        margin: const EdgeInsets.only(right: 7),
+                        margin:widget.isHome? const EdgeInsets.only(right: 0): const EdgeInsets.only(right: 5),
                         child: Column(
                           children: [
                             IconButton(
-                                onPressed: () {
-                                  commentsController
+                                onPressed: () async {
+                                await commentsController
                                       .getComments(widget.videoId);
-                                  Get.bottomSheet(
-                                      GetX<CommentsController>(
-                                          builder:
-                                              (commentsController) => Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          const Padding(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    10),
-                                                            child: Text(
-                                                              "Comments",
-                                                              style: TextStyle(
-                                                                  fontSize: 16,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  color: Colors
-                                                                      .black),
-                                                            ),
-                                                          ),
-                                                          IconButton(
-                                                              onPressed: () {
-                                                                Get.back(
-                                                                    closeOverlays:
-                                                                        true);
-                                                              },
-                                                              icon: const Iconify(
-                                                                  IconParkOutline
-                                                                      .close_small))
-                                                        ],
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                      ),
-                                                      Divider(
-                                                        thickness: 2,
-                                                        color: Colors.grey
-                                                            .withOpacity(0.1),
-                                                      ),
-                                                      Flexible(
-                                                        child: commentsController
-                                                                .commentsModel
-                                                                .isEmpty
-                                                            ? const Center(
-                                                                child: Text(
-                                                                    "No Comments Yet",
-                                                                    style: TextStyle(
-                                                                        color: Color.fromARGB(
-                                                                            255,
-                                                                            179,
-                                                                            178,
-                                                                            178))),
-                                                              )
-                                                            : commentsController
-                                                                    .isLoading
-                                                                    .value
-                                                                ? const Center(
-                                                                    child:
-                                                                        CircularProgressIndicator(),
-                                                                  )
-                                                                : ListView
-                                                                    .builder(
-                                                                    scrollDirection:
-                                                                        Axis.vertical,
-                                                                    itemCount: commentsController
-                                                                        .commentsModel
-                                                                        .length,
-                                                                    itemBuilder: (context,
-                                                                            index) =>
-                                                                        Container(
-                                                                            margin:
-                                                                                const EdgeInsets.all(10),
-                                                                            child: Column(
-                                                                              children: [
-                                                                                Row(
-                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                  children: [
-                                                                                    InkWell(
-                                                                                      onTap: () {
-                                                                                        Get.to(ViewProfile(
-                                                                                          mapData: {},
-                                                                                          userId: userId.value.toString(),
-                                                                                        ));
-                                                                                      },
-                                                                                      child: ClipOval(
-                                                                                        child: CachedNetworkImage(
-                                                                                          imageUrl: commentsController.commentsModel[index].avatar!.isEmpty || commentsController.commentsModel[index].avatar == null ? "https://www.kindpng.com/picc/m/252-2524695_dummy-profile-image-jpg-hd-png-download.png" : RestUrl.profileUrl + commentsController.commentsModel[index].avatar.toString(),
-                                                                                          fit: BoxFit.cover,
-                                                                                          height: 30,
-                                                                                          width: 30,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    Container(
-                                                                                      margin: EdgeInsets.only(left: 10),
-                                                                                      child: Column(
-                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                        children: [
-                                                                                          Text(
-                                                                                            commentsController.commentsModel[index].name.toString(),
-                                                                                            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
-                                                                                          ),
-                                                                                          SizedBox(
-                                                                                            width: 300,
-                                                                                            child: Text(
-                                                                                              commentsController.commentsModel[index].comment.toString(),
-                                                                                              maxLines: 4,
-                                                                                              overflow: TextOverflow.clip,
-                                                                                              style: TextStyle(color: Colors.black, fontWeight: FontWeight.w400),
-                                                                                            ),
-                                                                                          ),
-                                                                                          SizedBox(
-                                                                                            height: 10,
-                                                                                          ),
-                                                                                          Text(
-                                                                                            commentsController.commentsModel[index].commentLikeCounter.toString() + " Likes",
-                                                                                            style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
-                                                                                          )
-                                                                                        ],
-                                                                                      ),
-                                                                                    ),
-                                                                                    Expanded(
-                                                                                        child: Container(
-                                                                                      alignment: Alignment.bottomRight,
-                                                                                      child: InkWell(
-                                                                                        onTap: () {
-                                                                                          commentsController.likeComment(commentsController.commentsModel[index].id.toString(), "1");
-                                                                                          Future.delayed(Duration(seconds: 1)).then((value) => commentsController.getComments(widget.videoId));
-                                                                                        },
-                                                                                        child: const Icon(
-                                                                                          IconlyLight.heart,
-                                                                                          size: 20,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ))
-                                                                                  ],
-                                                                                )
-                                                                              ],
-                                                                            )),
-                                                                  ),
-                                                      ),
-                                                      const Divider(
-                                                        color: Colors.grey,
-                                                      ),
-                                                      Expanded(
-                                                        flex: 0,
-                                                        child: Container(
-                                                            height: 40,
-                                                            margin:
-                                                                EdgeInsets.all(
-                                                                    15),
-                                                            child: Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .min,
-                                                              children: [
-                                                                Container(
-                                                                  child:
-                                                                      Flexible(
-                                                                    child:
-                                                                        TextFormField(
-                                                                      controller:
-                                                                          _textEditingController,
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            14,
-                                                                        color: Color.fromARGB(
-                                                                            255,
-                                                                            65,
-                                                                            64,
-                                                                            64),
-                                                                        fontWeight:
-                                                                            FontWeight.w600,
-                                                                      ),
-                                                                      onChanged:
-                                                                          (value) {
-                                                                        comment.value =
-                                                                            value;
-                                                                      },
-                                                                      decoration: const InputDecoration(
-                                                                          contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
-                                                                          enabledBorder: OutlineInputBorder(
-                                                                            borderRadius:
-                                                                                BorderRadius.all(Radius.circular(100)),
-                                                                            borderSide:
-                                                                                BorderSide(
-                                                                              color: Colors.transparent,
-                                                                            ),
-                                                                          ),
-                                                                          focusedBorder: OutlineInputBorder(
-                                                                            borderRadius:
-                                                                                BorderRadius.all(Radius.circular(50)),
-                                                                            borderSide:
-                                                                                BorderSide(
-                                                                              color: Colors.transparent,
-                                                                            ),
-                                                                          ),
-                                                                          fillColor: Color.fromARGB(255, 242, 240, 240),
-                                                                          filled: true,
-                                                                          focusColor: Colors.white,
-                                                                          hintStyle: TextStyle(fontSize: 12, color: Color.fromARGB(255, 113, 112, 112)),
-                                                                          hintText: "Post your comment"
-                                                                          //add prefix icon
+                                 Get.bottomSheet(
+                                     GetX<CommentsController>(
+                                         builder:
+                                             (commentsController) => Column(
+                                           crossAxisAlignment:
+                                           CrossAxisAlignment
+                                               .start,
+                                           children: [
+                                             Row(
+                                               children: [
+                                                 const Padding(
+                                                   padding:
+                                                   EdgeInsets.all(
+                                                       10),
+                                                   child: Text(
+                                                     "Comments",
+                                                     style: TextStyle(
+                                                         fontSize: 16,
+                                                         fontWeight:
+                                                         FontWeight
+                                                             .w600,
+                                                         color: Colors
+                                                             .black),
+                                                   ),
+                                                 ),
+                                                 IconButton(
+                                                     onPressed: () {
+                                                       Get.back(
+                                                           closeOverlays:
+                                                           true);
+                                                     },
+                                                     icon: const Iconify(
+                                                         IconParkOutline
+                                                             .close_small))
+                                               ],
+                                               mainAxisAlignment:
+                                               MainAxisAlignment
+                                                   .spaceBetween,
+                                             ),
+                                             Divider(
+                                               thickness: 2,
+                                               color: Colors.grey
+                                                   .withOpacity(0.1),
+                                             ),
+                                             Flexible(
+                                               child: commentsController
+                                                   .commentsModel
+                                                   .isEmpty
+                                                   ? const Center(
+                                                 child: Text(
+                                                     "No Comments Yet",
+                                                     style: TextStyle(
+                                                         color: Color.fromARGB(
+                                                             255,
+                                                             179,
+                                                             178,
+                                                             178))),
+                                               )
+                                                   : commentsController
+                                                   .isCommentsLoading
+                                                   .value
+                                                   ? const Center(
+                                                 child:
+                                                 CircularProgressIndicator(),
+                                               )
+                                                   : ListView
+                                                   .builder(
+                                                 scrollDirection:
+                                                 Axis.vertical,
+                                                 itemCount: commentsController
+                                                     .commentsModel
+                                                     .length,
+                                                 itemBuilder: (context,
+                                                     index) =>
+                                                     Container(
+                                                         margin:
+                                                         const EdgeInsets.all(10),
+                                                         child: Column(
+                                                           children: [
+                                                             Row(
+                                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                                               children: [
+                                                                 InkWell(
+                                                                   onTap: () {
+                                                                     Get.to(ViewProfile(
+                                                                       mapData: {},
+                                                                       userId: loggedInUserId.value.toString(),
+                                                                     ));
+                                                                   },
+                                                                   child: ClipOval(
+                                                                     child: CachedNetworkImage(
+                                                                       imageUrl: commentsController.commentsModel[index].avatar!.isEmpty || commentsController.commentsModel[index].avatar == null ? "https://www.kindpng.com/picc/m/252-2524695_dummy-profile-image-jpg-hd-png-download.png" : RestUrl.profileUrl + commentsController.commentsModel[index].avatar.toString(),
+                                                                       fit: BoxFit.cover,
+                                                                       height: 30,
+                                                                       width: 30,
+                                                                     ),
+                                                                   ),
+                                                                 ),
+                                                                 Container(
+                                                                   margin: EdgeInsets.only(left: 10),
+                                                                   child: Column(
+                                                                     crossAxisAlignment: CrossAxisAlignment.start,
+                                                                     children: [
+                                                                       Text(
+                                                                         commentsController.commentsModel[index].name.toString(),
+                                                                         style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
+                                                                       ),
+                                                                       SizedBox(
+                                                                         width: 300,
+                                                                         child: Text(
+                                                                           commentsController.commentsModel[index].comment.toString(),
+                                                                           maxLines: 4,
+                                                                           overflow: TextOverflow.clip,
+                                                                           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w400),
+                                                                         ),
+                                                                       ),
+                                                                       SizedBox(
+                                                                         height: 10,
+                                                                       ),
+                                                                       Text(
+                                                                         commentsController.commentsModel[index].commentLikeCounter.toString() + " Likes",
+                                                                         style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
+                                                                       )
+                                                                     ],
+                                                                   ),
+                                                                 ),
+                                                                 Expanded(
+                                                                     child: Container(
+                                                                       alignment: Alignment.bottomRight,
+                                                                       child: InkWell(
+                                                                         onTap: () {
+                                                                           commentsController.likeComment(commentsController.commentsModel[index].id.toString(), "1");
+                                                                           Future.delayed(Duration(seconds: 1)).then((value) => commentsController.getComments(widget.videoId));
+                                                                         },
+                                                                         child: const Icon(
+                                                                           IconlyLight.heart,
+                                                                           size: 20,
+                                                                         ),
+                                                                       ),
+                                                                     ))
+                                                               ],
+                                                             )
+                                                           ],
+                                                         )),
+                                               ),
+                                             ),
+                                             const Divider(
+                                               color: Colors.grey,
+                                             ),
+                                             Expanded(
+                                               flex: 0,
+                                               child: Container(
+                                                   height: 40,
+                                                   margin:
+                                                   EdgeInsets.all(
+                                                       15),
+                                                   child: Row(
+                                                     mainAxisSize:
+                                                     MainAxisSize
+                                                         .min,
+                                                     children: [
+                                                       Container(
+                                                         child:
+                                                         Flexible(
+                                                           child:
+                                                           TextFormField(
+                                                             controller:
+                                                             _textEditingController,
+                                                             style:
+                                                             const TextStyle(
+                                                               fontSize:
+                                                               14,
+                                                               color: Color.fromARGB(
+                                                                   255,
+                                                                   65,
+                                                                   64,
+                                                                   64),
+                                                               fontWeight:
+                                                               FontWeight.w600,
+                                                             ),
+                                                             onChanged:
+                                                                 (value) {
+                                                               comment.value =
+                                                                   value;
+                                                             },
+                                                             decoration: const InputDecoration(
+                                                                 contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
+                                                                 enabledBorder: OutlineInputBorder(
+                                                                   borderRadius:
+                                                                   BorderRadius.all(Radius.circular(100)),
+                                                                   borderSide:
+                                                                   BorderSide(
+                                                                     color: Colors.transparent,
+                                                                   ),
+                                                                 ),
+                                                                 focusedBorder: OutlineInputBorder(
+                                                                   borderRadius:
+                                                                   BorderRadius.all(Radius.circular(50)),
+                                                                   borderSide:
+                                                                   BorderSide(
+                                                                     color: Colors.transparent,
+                                                                   ),
+                                                                 ),
+                                                                 fillColor: Color.fromARGB(255, 242, 240, 240),
+                                                                 filled: true,
+                                                                 focusColor: Colors.white,
+                                                                 hintStyle: TextStyle(fontSize: 12, color: Color.fromARGB(255, 113, 112, 112)),
+                                                                 hintText: "Post your comment"
+                                                               //add prefix icon
 
-                                                                          ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                  width: 10,
-                                                                ),
-                                                                ClipOval(
-                                                                  child:
-                                                                      Container(
-                                                                    height: 35,
-                                                                    width: 35,
-                                                                    color: Colors
-                                                                        .black,
-                                                                    child: InkWell(
-                                                                        onTap: () async {
-                                                                          var pref =
-                                                                              await SharedPreferences.getInstance();
-                                                                          var currentUser =
-                                                                              pref.getString('currentUser');
-                                                                          UserModel
-                                                                              current =
-                                                                              UserModel.fromJson(jsonDecode(currentUser!));
+                                                             ),
+                                                           ),
+                                                         ),
+                                                       ),
+                                                       SizedBox(
+                                                         width: 10,
+                                                       ),
+                                                       ClipOval(
+                                                         child:
+                                                         Container(
+                                                           height: 35,
+                                                           width: 35,
+                                                           color: Colors
+                                                               .black,
+                                                           child: InkWell(
+                                                               onTap: () async {
+                                                                 var pref =
+                                                                 await SharedPreferences.getInstance();
+                                                                 var currentUser =
+                                                                 pref.getString('currentUser');
+                                                                 UserModel
+                                                                 current =
+                                                                 UserModel.fromJson(jsonDecode(currentUser!));
 
-                                                                          commentsController.postComment(
-                                                                              widget.videoId,
-                                                                              current.id.toString(),
-                                                                              comment.value);
+                                                                 commentsController.postComment(
+                                                                     widget.videoId,
+                                                                     current.id.toString(),
+                                                                     comment.value);
 
-                                                                          commentsController
-                                                                              .getComments(widget.videoId);
+                                                                 commentsController
+                                                                     .getComments(widget.videoId);
 
-                                                                          _textEditingController!
-                                                                              .clear();
-                                                                        },
-                                                                        child: Icon(
-                                                                          IconlyLight
-                                                                              .send,
-                                                                          color:
-                                                                              Colors.white,
-                                                                          size:
-                                                                              15,
-                                                                        )),
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            )),
-                                                      )
-                                                    ],
-                                                  )),
-                                      backgroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15)));
-                                },
+                                                                 _textEditingController!
+                                                                     .clear();
+                                                               },
+                                                               child: Icon(
+                                                                 IconlyLight
+                                                                     .send,
+                                                                 color:
+                                                                 Colors.white,
+                                                                 size:
+                                                                 15,
+                                                               )),
+                                                         ),
+                                                       )
+                                                     ],
+                                                   )),
+                                             )
+                                           ],
+                                         )),
+                                     backgroundColor: Colors.white,
+                                     shape: RoundedRectangleBorder(
+                                         borderRadius:
+                                         BorderRadius.circular(15)));
+
+
+                                 },
                                 icon: const Iconify(
                                   Fluent.comment_multiple_28_regular,
                                   color: Colors.white,
@@ -553,14 +558,14 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                       },
                                                       icon: const Icon(
                                                         IconlyLight.plus,
-                                                        color: Colors.black,
+                                                        color: ColorManager.colorAccent,
                                                         size: 30,
                                                       ),
                                                     ),
                                                     const Text(
                                                       "Duet",
                                                       style: TextStyle(
-                                                          color: Colors.black,
+                                                          color: ColorManager.colorAccent,
                                                           fontWeight:
                                                               FontWeight.bold),
                                                     )
@@ -575,10 +580,11 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                     IconButton(
                                                         onPressed: () {},
                                                         icon: const Iconify(Fluent
-                                                            .save_16_regular)),
+                                                            .save_16_regular,color: ColorManager.colorAccent,)),
                                                     const Text(
                                                       "Save",
                                                       style: TextStyle(
+                                                        color: ColorManager.colorAccent,
                                                           fontWeight:
                                                               FontWeight.bold),
                                                     )
@@ -593,10 +599,10 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                     IconButton(
                                                         onPressed: () {},
                                                         icon: const Iconify(Fluent
-                                                            .link_16_regular)),
+                                                            .link_16_regular,color: ColorManager.colorAccent,)),
                                                     const Text(
                                                       "Link",
-                                                      style: TextStyle(
+                                                      style: TextStyle(color: ColorManager.colorAccent,
                                                           fontWeight:
                                                               FontWeight.bold),
                                                     )
@@ -609,12 +615,15 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                 child: Column(
                                                   children: [
                                                     IconButton(
-                                                        onPressed: () {},
+                                                        onPressed: () {
+                                                          Get.back(closeOverlays: true);
+                                                          GallerySaver.saveVideo(RestUrl.videoUrl+widget.videoUrl).then((value) => showSuccessToast(context, "Video Saved Successfully"));
+                                                        },
                                                         icon: const Iconify(Fluent
-                                                            .arrow_download_16_regular)),
+                                                            .arrow_download_16_regular,color: ColorManager.colorAccent,)),
                                                     const Text(
                                                       "Download",
-                                                      style: TextStyle(
+                                                      style: TextStyle(color: ColorManager.colorAccent,
                                                           fontWeight:
                                                               FontWeight.bold),
                                                     )
@@ -688,7 +697,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                               children: const [
                                                 Iconify(
                                                   Fluent.block_24_regular,
-                                                  color: Colors.black,
+                                                  color: ColorManager.colorAccent,
                                                   size: 30,
                                                 ),
                                                 SizedBox(
@@ -699,7 +708,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      color: Colors.black),
+                                                      color: ColorManager.colorAccent),
                                                 )
                                               ],
                                             ),
@@ -737,21 +746,6 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        height: 25,
-                        child: ListView.builder(
-                            itemCount: widget.hashtagsList.length,
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) => Padding(
-                                  padding: EdgeInsets.only(right: 10),
-                                  child: Text(
-                                    "#" + widget.hashtagsList[index].toString(),
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 12),
-                                  ),
-                                )),
-                      ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -771,20 +765,20 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                               child: CachedNetworkImage(
                                 imageBuilder: (context, imageProvider) =>
                                     Container(
-                                  width: 25,
-                                  height: 25,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover),
-                                  ),
-                                ),
+                                      width: 25,
+                                      height: 25,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: imageProvider,
+                                            fit: BoxFit.cover),
+                                      ),
+                                    ),
                                 imageUrl: widget.publicUser!.avatar == null ||
-                                        widget.publicUser!.avatar!.isEmpty
+                                    widget.publicUser!.avatar!.isEmpty
                                     ? "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png"
                                     : RestUrl.profileUrl +
-                                        widget.publicUser!.avatar.toString(),
+                                    widget.publicUser!.avatar.toString(),
                                 fit: BoxFit.fill,
                               ),
                             ),
@@ -835,6 +829,33 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                             style: TextStyle(color: Colors.white),
                           )
                         ],
+                      ),
+                      Visibility(
+                        visible:widget.hashtagsList.isNotEmpty ,
+                        child: Container(
+                        height: 35,
+                        child: ListView.builder(
+                            itemCount: widget.hashtagsList.length,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) => Container(
+                              decoration: BoxDecoration(
+                                  color: ColorManager.colorAccent.withOpacity(0.5),
+
+                                  border: Border.all(
+                                      color: Colors.transparent
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(5))
+                              ),
+                              margin: const EdgeInsets.only(right: 5,top: 5,bottom: 5),
+                              padding:const  EdgeInsets.all(5),
+                              alignment: Alignment.center,
+                              child: Text(
+                                "#" + widget.hashtagsList[index].toString(),
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 10),
+                              ),)),
+                      ),
                       )
                     ],
                   ),
@@ -847,10 +868,10 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                   child: ClipOval(
                 child: Container(
                   padding: EdgeInsets.all(10),
-                  color: Colors.white.withOpacity(0.5),
+                  color: ColorManager.colorAccent.withOpacity(0.5),
                   child: Icon(
                     IconlyLight.volume_off,
-                    size: 25,
+                    size: 25,color: Colors.white,
                   ),
                 ),
               )),

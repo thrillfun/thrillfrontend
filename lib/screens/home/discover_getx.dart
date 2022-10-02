@@ -6,6 +6,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/hash_tags/hash_tags_screen.dart';
@@ -237,7 +238,7 @@ class DiscoverGetx extends StatelessWidget {
                               height: 5,
                             ),
                             GlassContainer(
-                              color: Colors.black.withOpacity(0.3),
+                              color: ColorManager.colorAccent.withOpacity(0.5),
                               blur: 5,
                               border: Border.all(
                                   color: Colors.white.withOpacity(0.4)),
@@ -281,7 +282,7 @@ class DiscoverGetx extends StatelessWidget {
                                       shadowColor: Colors.transparent,
                                       border: Border.all(
                                           color: Colors.white.withOpacity(0.4)),
-                                      color: Colors.black.withOpacity(0.3),
+                                      color: ColorManager.colorAccent.withOpacity(0.5),
                                       child: InkWell(
                                           onTap: () {
                                             controller.getVideosByHashTags(

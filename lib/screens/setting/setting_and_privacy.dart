@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -349,9 +350,11 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                                             .logOut();
                                                         isLoggedIn.value =
                                                             false;
-                                                        Get.off(LoginScreen());
+                                                        GetStorage().remove("user");
+                                                        Get.offAll(LoginScreen());
+                                                        // Get.off(LoginScreen());
 
-                                                        // Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
+                                                        //Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
                                                       },
                                                       style: ElevatedButton.styleFrom(
                                                           primary: Colors.green,

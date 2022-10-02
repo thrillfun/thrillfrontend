@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -8,16 +10,22 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart' as transition;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/controller/bindings.dart';
 import 'package:thrill/repository/video/video_repository.dart';
+import 'package:thrill/rest/rest_api.dart';
+import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/video_item.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import 'package:velocity_x/velocity_x.dart';
+import 'package:get_storage/get_storage.dart';
 import 'config/app_router.dart';
 import 'config/theme.dart';
+
 import 'screens/screen.dart';
 
 List<CameraDescription> cameras = [];
@@ -25,7 +33,11 @@ GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 GlobalKey key = GlobalKey();
 
 void main() async {
+  Paint.enableDithering = true;
+
   WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
@@ -52,13 +64,15 @@ void main() async {
         body: event.notification?.body ?? "");
   });
   getTempDirectory();
-  SystemChrome.setEnabledSystemUIOverlays([]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   runApp(transition.GetMaterialApp(
+    debugShowCheckedModeBanner: false,
     defaultTransition: transition.Transition.cupertino,
     initialBinding: DataBindings(),
     home: ShowCaseWidget(builder: Builder(builder: (context) => const MyApp())),
   ));
+
 }
 
 class MyApp extends StatefulWidget {

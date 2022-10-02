@@ -18,6 +18,7 @@ import 'package:thrill/models/user.dart';
 import '../models/video_model.dart';
 
 class DataController extends GetxController with StateMixin<dynamic> {
+  var isAdShown = false.obs;
   var commentsCounter = 0.obs;
   var isLoading = true.obs;
   var isPublicVideosLoading = true.obs;
