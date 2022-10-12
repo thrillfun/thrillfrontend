@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/discover_controller.dart';
+import 'package:thrill/controller/model/login_response_model.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:get_storage/get_storage.dart';
@@ -15,10 +16,10 @@ import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
 
 part 'login_event.dart';
+
 part 'login_state.dart';
 
-var loggedInUserId = 0.obs;
-var isLoggedIn = false.obs;
+var token = "".obs;
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginRepository _loginRepository;
@@ -68,13 +69,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           try {
             var pref = await SharedPreferences.getInstance();
             UserModel user = UserModel.fromJson(result['data']['user']);
-            GetStorage().write("user", user);
+            print(result['data']['token']);
+            GetStorage().write('token', result['data']['token']).toString();
+            GetStorage().write('user', UserModel.fromJson(result['data']['user']));
 
-            loggedInUserId.value = user.id;
-
-            isLoggedIn.value = true;
-
-        
             await pref.setString(
               'currentUser',
               jsonEncode(user.toJson()),
@@ -119,12 +117,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             var pref = await SharedPreferences.getInstance();
             try {
               UserModel user = UserModel.fromJson(result['data']['user']);
-              loggedInUserId.value = user.id;
-             
-              isLoggedIn.value = true;
 
-             
-           
+              GetStorage().write('token', result['data']['token']).toString();
+              GetStorage().write('user', UserModel.fromJson(result['data']['user']));
+
               await pref.setString(
                 'currentUser',
                 jsonEncode(user.toJson()),
@@ -176,9 +172,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         if (result['status']) {
           try {
             UserModel user = UserModel.fromJson(result['data']['user']);
-            loggedInUserId.value = user.id;
-            isLoggedIn.value = true;
-
+            GetStorage().write('token', result['data']['token']).toString();
+            GetStorage().write('user', UserModel.fromJson(result['data']['user']));
 
             var pref = await SharedPreferences.getInstance();
             await pref.setString(

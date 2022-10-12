@@ -3,21 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:thrill/controller/model/hashtag_videos_model.dart';
+import 'package:thrill/controller/model/liked_videos_model.dart';
+import 'package:thrill/controller/model/own_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/widgets/better_video_player.dart';
 
 class VideoPlayerScreen extends StatelessWidget {
-  VideoPlayerScreen(this.hashTagVideos, this.position);
+  VideoPlayerScreen(
+      {this.hashTagVideos, this.position, this.likedVideos, this.userVideos,required this.isFav,required this.isFeed});
 
-  List<HashTagsDetails> hashTagVideos;
-  int position;
+  List<HashTagsDetails>? hashTagVideos;
+  List<LikedVideos>? likedVideos;
+  List<Videos>? userVideos;
+  int? position;
+  bool isFav = false;
+  bool isFeed = false;
 
   var isOnPageTurning = false.obs;
+  var itemIndex =0.obs;
 
   @override
   Widget build(BuildContext context) {
     PreloadPageController preloadPageController =
-        PreloadPageController(initialPage: position);
+        PreloadPageController(initialPage: position ?? 0);
     var current = position.obs;
 
     void scrollListener() {
@@ -27,8 +35,8 @@ class VideoPlayerScreen extends StatelessWidget {
         current.value = preloadPageController.page!.toInt();
         isOnPageTurning.value = false;
       } else if (!isOnPageTurning.value &&
-          current.value.toDouble() != preloadPageController.page) {
-        if ((current.value.toDouble() - preloadPageController.page!.toDouble())
+          current.value!.toDouble() != preloadPageController.page) {
+        if ((current.value!.toDouble() - preloadPageController.page!.toDouble())
                 .abs() >
             0.1) {
           isOnPageTurning.value = true;
@@ -37,22 +45,7 @@ class VideoPlayerScreen extends StatelessWidget {
     }
 
     preloadPageController.addListener(scrollListener);
-    late PublicUser publicUser;
-    hashTagVideos.forEach((hashTagVideos) {
-      publicUser = PublicUser(
-          id: hashTagVideos.user!.id,
-          name: hashTagVideos.user?.name.toString(),
-          username: hashTagVideos.user?.username,
-          email: hashTagVideos.user?.email,
-          dob: hashTagVideos.user?.dob,
-          phone: hashTagVideos.user?.phone,
-          avatar: hashTagVideos.user!.avatar,
-          socialLoginType: hashTagVideos.user?.socialLoginType,
-          socialLoginId: hashTagVideos.user?.socialLoginId,
-          firstName: hashTagVideos.user?.firstName,
-          lastName: hashTagVideos.user?.lastName,
-          gender: hashTagVideos.user?.gender);
-    });
+
 
     PublicVideos publicVideos = PublicVideos();
 
@@ -60,29 +53,126 @@ class VideoPlayerScreen extends StatelessWidget {
         body: PreloadPageView.builder(
       controller: preloadPageController,
       preloadPagesCount: 6,
-      itemCount: hashTagVideos.length,
+      itemCount: isFeed?userVideos!.length:isFav?likedVideos!.length:hashTagVideos!.length,
       scrollDirection: Axis.vertical,
-      itemBuilder: (context, index) => AspectRatio(
-        aspectRatio: MediaQuery.of(context).size.aspectRatio /
-            MediaQuery.of(context).size.aspectRatio,
-        child: Obx(() => BetterReelsPlayer(
-            hashTagVideos[index].gifImage.toString(),
-            hashTagVideos[index].video.toString(),
-            index,
-            current.value,
-            isOnPageTurning.value,
-            () {},
-            publicUser,
-            hashTagVideos[index].id!.toInt(),
-            hashTagVideos[index].soundName.toString(),
-            true,
-            publicVideos,
-            hashTagVideos[index].user!.id!,
-            hashTagVideos[index].user!.username.toString(),
-            hashTagVideos[index].description.toString(),
-            false,
-            hashTagVideos[index].hashtags!)),
-      ),
-    ));
+      itemBuilder: (context, index) {
+
+        late PublicUser publicUser;
+        isFeed
+            ? userVideos!.forEach((hashTagVideos) {
+          publicUser = PublicUser(
+              id: userVideos![index].user!.id,
+              name: userVideos![index].user?.name.toString(),
+              username: userVideos![index].user?.username,
+              email: userVideos![index].user?.email,
+              dob: userVideos![index].user?.dob,
+              phone: userVideos![index].user?.phone,
+              avatar: userVideos![index].user!.avatar,
+              socialLoginType: userVideos![index].user?.socialLoginType,
+              socialLoginId: userVideos![index].user?.socialLoginId,
+              firstName: userVideos![index].user?.firstName,
+              lastName: userVideos![index].user?.lastName,
+              gender: userVideos![index].user?.gender);
+        })
+            : isFav
+            ? likedVideos!.forEach((hashTagVideos) {
+          publicUser = PublicUser(
+              id: likedVideos![index].user!.id,
+              name: likedVideos![index].user?.name.toString(),
+              username: likedVideos![index].user?.username,
+              email: likedVideos![index].user?.email,
+              dob: likedVideos![index].user?.dob,
+              phone: likedVideos![index].user?.phone,
+              avatar: likedVideos![index].user!.avatar,
+              socialLoginType: likedVideos![index].user?.socialLoginType,
+              socialLoginId: likedVideos![index].user?.socialLoginId,
+              firstName: likedVideos![index].user?.firstName,
+              lastName: likedVideos![index].user?.lastName,
+              gender: likedVideos![index].user?.gender);
+        })
+            : hashTagVideos!.forEach((videos) {
+          publicUser = PublicUser(
+              id: hashTagVideos![index].user!.id,
+              name: hashTagVideos![index].user?.name.toString(),
+              username: hashTagVideos![index].user?.username,
+              email: hashTagVideos![index].user?.email,
+              dob: hashTagVideos![index].user?.dob,
+              phone: hashTagVideos![index].user?.phone,
+              avatar: hashTagVideos![index].user!.avatar,
+              socialLoginType: hashTagVideos![index].user?.socialLoginType,
+              socialLoginId: hashTagVideos![index].user?.socialLoginId,
+              firstName: hashTagVideos![index].user?.firstName,
+              lastName: hashTagVideos![index].user?.lastName,
+              gender: hashTagVideos![index].user?.gender);
+        });
+        return  AspectRatio(
+
+          aspectRatio: MediaQuery.of(context).size.aspectRatio /
+              MediaQuery.of(context).size.aspectRatio,
+          child: Obx(() => BetterReelsPlayer(
+              isFeed
+                  ? userVideos![index].gifImage.toString()
+                  : isFav
+                  ? likedVideos![index].gifImage.toString()
+                  : hashTagVideos![index].gifImage.toString(),
+              isFeed
+                  ? userVideos![index].video.toString()
+                  : isFav
+                  ? likedVideos![index].video.toString()
+                  : hashTagVideos![index].video.toString(),
+              index,
+              current.value ?? 0,
+              isOnPageTurning.value,
+                  () {},
+              publicUser,
+              isFeed
+                  ? userVideos![index].id!.toInt()
+                  : isFav
+                  ? likedVideos![index].id!.toInt()
+                  : hashTagVideos![index].id!.toInt(),
+              isFeed
+                  ? userVideos![index].soundName.toString()
+                  : isFav
+                  ? likedVideos![index].soundName.toString()
+                  : hashTagVideos![index].soundName.toString(),
+              true,
+              publicVideos,
+              isFeed
+                  ? userVideos![index].user!.id!
+                  : isFav
+                  ? likedVideos![index].user!.id!
+                  : hashTagVideos![index].user!.id!,
+              isFeed
+                  ? userVideos![index].user!.username.toString()
+                  : isFav
+                  ? likedVideos![index].user!.username.toString()
+                  : hashTagVideos![index].user!.username.toString(),
+              isFeed
+                  ? userVideos![index].description.toString()
+                  : isFav
+                  ? likedVideos![index].description.toString()
+                  : hashTagVideos![index].description.toString(),
+              false,
+              isFeed
+                  ? []
+                  : isFav
+                  ? []
+                  : hashTagVideos![index].hashtags!,
+              isFeed
+                  ? userVideos![index].sound.toString()
+                  : isFav
+                  ? likedVideos![index].sound.toString()
+                  : hashTagVideos![index].sound.toString(),
+              isFeed
+                  ? userVideos![index].soundOwner.toString()
+                  : isFav
+                  ? likedVideos![index].soundOwner.toString()
+                  : hashTagVideos![index].soundOwner.toString())),
+        );
+      }
+
+
+
+        ));
   }
 }

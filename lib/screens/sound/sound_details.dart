@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
+import 'package:thrill/screens/video/camera_screen.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
 
@@ -286,10 +287,11 @@ class _SoundDetailsState extends State<SoundDetails> {
                       try {
                         if (await file.exists()) {
                           // Get.to(Record(soundMap: {"soundName":title,"soundPath":file.path}));
-                          Navigator.pushNamed(context, "/record", arguments: {
-                            "soundName": title,
-                            "soundPath": file.path
-                          });
+                          Get.to(CameraScreen(selectedSound: "${RestUrl.awsSoundUrl}$sound",));
+                          // Navigator.pushNamed(context, "/record", arguments: {
+                          //   "soundName": title,
+                          //   "soundPath": file.path
+                          // });
                         } else {
                           progressDialogue(context);
                           await FileSupport().downloadCustomLocation(
@@ -300,10 +302,11 @@ class _SoundDetailsState extends State<SoundDetails> {
                             progress: (progress) async {},
                           );
                           closeDialogue(context);
-                          Navigator.pushNamed(context, "/record", arguments: {
-                            "soundName": title,
-                            "soundPath": file.path
-                          });
+                          Get.to(CameraScreen(selectedSound: "${RestUrl.awsSoundUrl}$sound",));
+                          // Navigator.pushNamed(context, "/record", arguments: {
+                          //   "soundName": title,
+                          //   "soundPath": file.path
+                          // });
                         }
                       } catch (e) {
                         closeDialogue(context);

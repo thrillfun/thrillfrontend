@@ -22,7 +22,7 @@ class DiscoverGetx extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetX<DiscoverController>(
       builder: (controller) => controller.isLoading.value
-          ? Center(
+          ?const Center(
               child: CircularProgressIndicator(),
             )
           : Container(
@@ -32,24 +32,38 @@ class DiscoverGetx extends StatelessWidget {
                   extendBody: true,
                   body: SafeArea(
                       child: Stack(
+
                     children: [
                       SingleChildScrollView(
                           physics: const BouncingScrollPhysics(),
-                          child: controller.hashTagsVideos.isEmpty
-                              ? Container(
+                          child:
+                              controller.isLoading.value? SizedBox(
+                                height: MediaQuery.of(context).size.height,
+                                child: const Center(
+                                  child: Text(
+                                    "Getting videos.",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                  ),
+                                ),
+                              ):
+                          controller.hashTagsVideos.isEmpty
+                              ? SizedBox(
                                   height: MediaQuery.of(context).size.height,
                                   child: const Center(
                                     child: Text(
                                       "No Videos Found.",
                                       style: TextStyle(
-                                          fontSize: 24,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white),
                                     ),
                                   ),
                                 )
                               : Container(
-                                  margin: EdgeInsets.only(top: 80),
+                                  margin: const EdgeInsets.only(top: 80),
                                   child: Column(
                                     children: [
                                       CarouselSlider.builder(
@@ -169,12 +183,12 @@ class DiscoverGetx extends StatelessWidget {
                                         },
                                       ),
                                       Container(
-                                        margin: EdgeInsets.only(top: 20),
+                                        margin: const EdgeInsets.only(top: 20),
                                         child: StaggeredGridView.countBuilder(
                                             staggeredTileBuilder: (index) =>
                                                 index % 7 == 0
-                                                    ? StaggeredTile.count(1, 2)
-                                                    : StaggeredTile.count(1, 1),
+                                                    ? const StaggeredTile.count(1, 2)
+                                                    : const StaggeredTile.count(1, 1),
                                             physics:
                                                 const NeverScrollableScrollPhysics(),
                                             //cross axis cell count
@@ -198,9 +212,14 @@ class DiscoverGetx extends StatelessWidget {
                                                                 .toInt());
 
                                                     Get.to(VideoPlayerScreen(
-                                                        controller
-                                                            .hashTagsDetailsList,
-                                                        index));
+                                                      isFav: false,
+                                                      isFeed: false,
+                                                      position: index,
+                                                      hashTagVideos: controller
+                                                          .hashTagsDetailsList,
+                                                    ));
+
+
                                                   },
                                                   child: Card(
                                                     elevation: 8,
@@ -290,7 +309,8 @@ class DiscoverGetx extends StatelessWidget {
                                                     .hashtagId!
                                                     .toInt());
 
-                                            Get.to(HashTagsScreen());
+
+                                            Get.to(HashTagsScreen(controller.hasTagsList[index].hashtagName.toString()));
                                           },
                                           child: Container(
                                               alignment: Alignment.center,

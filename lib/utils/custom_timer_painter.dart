@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 class CustomTimerPainter extends CustomPainter{
 
   CustomTimerPainter({
@@ -15,9 +17,11 @@ class CustomTimerPainter extends CustomPainter{
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
       ..color = backgroundColor
-      ..strokeWidth = 10.0
+      ..strokeWidth = 5.0
+
       ..strokeCap = StrokeCap.butt
       ..style = PaintingStyle.stroke;
+
 
     canvas.drawCircle(size.center(Offset.zero), size.width / 2.0, paint);
     paint.color = color;

@@ -46,6 +46,65 @@
             {
               "client_id": "882291140458-h2ljmnevqujd77nn4s3c6l5d6blj7m50.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "882291140458-380scge8ae1r24jfji50av2153rqv5md.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.thrilltj"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882291140458:android:e516d50b0b10e9493e6713",
+        "android_client_info": {
+          "package_name": "com.thrilltj"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "882291140458-6rhfu1lbokehkq4ajpe9kkh1oi8bngso.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thrilltj",
+            "certificate_hash": "ad35685512420a611a27e3958b771d8aae31ce92"
+          }
+        },
+        {
+          "client_id": "882291140458-npd7q2r00idc1ch3mf4c4n9m12pnlbe4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thrilltj",
+            "certificate_hash": "6ec95f09dff029b97083735ab5133d6f9406a142"
+          }
+        },
+        {
+          "client_id": "882291140458-h2ljmnevqujd77nn4s3c6l5d6blj7m50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARlZ8FnRMLBCdmepxUhpodWEJre_Ii8GQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "882291140458-h2ljmnevqujd77nn4s3c6l5d6blj7m50.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "882291140458-380scge8ae1r24jfji50av2153rqv5md.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.thrilltj"
+              }
             }
           ]
         }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconly/iconly.dart';
 import 'package:preload_page_view/preload_page_view.dart';
@@ -31,12 +32,12 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
   var videosController = Get.find<VideosController>();
   var usersController = Get.find<UserController>();
 
-  int current = 0;
-  int related = 0;
-  int popular = 0;
-  bool isOnPageTurning = false;
-  bool isRelatedTurning = false;
-  bool isPopularTurning = false;
+  var current = 0.obs;
+  var related = 0.obs;
+  var popular = 0.obs;
+  var isOnPageTurning = false.obs;
+  var isRelatedTurning = false.obs;
+  var isPopularTurning = false.obs;
 
   PreloadPageController? preloadPageController;
   PreloadPageController? preloadPageController1;
@@ -69,185 +70,180 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
-            body: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              "assets/background_profile.png",
-              fit: BoxFit.fill,
-            ),
-            TabBarView(
-                physics: NeverScrollableScrollPhysics(),
-                controller: tabController,
-                children: [
-                    videosController.publicVideosList.isEmpty
-                      ? const Center(
-                          child: Text(
-                            "no videos found",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      : RefreshIndicator(
-                          child: PreloadPageView.builder(
-                              controller: preloadPageController1,
-                              onPageChanged: (int index) {
-                                if (videosController.adIndexes
-                                    .contains(index)) {
-                                  showAd();
-                                }
-                              },
-                              scrollDirection: Axis.vertical,
-                              preloadPagesCount: 6,
-                              itemCount:
-                                  videosController.publicVideosList.length,
-                              //Notice this
-                              itemBuilder: (context, index) =>
-                                  BetterReelsPlayer(
-                                      videosController
-                                          .publicVideosList[index].gifImage!,
-                                      videosController
-                                          .publicVideosList[index].video!,
-                                      index,
-                                      related,
-                                      isRelatedTurning,
-                                      () {},
-                                      videosController
-                                          .publicVideosList[index].user,
-                                      videosController
-                                          .publicVideosList[index].id!,
-                                      videosController
-                                          .publicVideosList[index].soundName
-                                          .toString(),
-                                      videosController.publicVideosList[index]
-                                                  .isDuetable ==
-                                              "yes"
-                                          ? true
-                                          : false,
-                                      videosController.publicVideosList[index],
-                                      videosController
-                                          .publicVideosList[index].user!.id!,
-                                      videosController
-                                          .publicVideosList[index].user!.name
-                                          .toString(),
-                                      videosController
-                                          .publicVideosList[index].description
-                                          .toString(),
-                                      true,
-                                      videosController
-                                          .publicVideosList[index].hashtags!)),
-                          onRefresh: ()async =>
-
-                              await videosController.getAllVideos()),
-                  GetX<VideosController>(
-                    builder: (videosController) => videosController
-                        .followingVideosList
-                        .value.isEmpty
-                        ? const Center(
-                      child: Text(
-                        "You dont have any followings yet",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    )
-                        : RefreshIndicator(
-                        child: PreloadPageView.builder(
-                            preloadPagesCount: 6,
-                            physics: AlwaysScrollableScrollPhysics(),
-                            controller: preloadPageController,
-                            onPageChanged: (int index) {
-                              if (videosController.adIndexes
-                                  .contains(index)) {
-                                showAd();
-                              }
-                            },
-                            scrollDirection: Axis.vertical,
-                            itemCount:
-                            videosController.followingVideosList.length,
-                            itemBuilder: (context, index) => BetterReelsPlayer(
-                                videosController
-                                    .followingVideosList[index].gifImage!,
-                                videosController
-                                    .followingVideosList[index].video!,
-                                index,
-                                current,
-                                isOnPageTurning,
-                                    () {},
-                                videosController
-                                    .followingVideosList[index].user,
-                                videosController
-                                    .followingVideosList[index].id!,
-                                videosController.followingVideosList[index].soundName
-                                    .toString(),
-                                videosController.followingVideosList[index].isDuetable == "yes"
-                                    ? true
-                                    : false,
-                                videosController.followingVideosList[index],
-                                videosController
-                                    .followingVideosList[index].user!.id!,
-                                videosController.followingVideosList[index].user!.name
-                                    .toString(),
-                                videosController
-                                    .followingVideosList[index].description
-                                    .toString(),
-                                true,
-                                videosController.publicVideosList[index].hashtags!)),
-                        onRefresh:  () => videosController.getFollowingVideos()),
-                  ),
-
-                ]),
-            Container(
-                alignment: Alignment.topCenter,
-                width: MediaQuery.of(context).size.width,
-                margin: const EdgeInsets.only(top: 50),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+    return GetX<VideosController>(
+        builder: (videosController) => Scaffold(
+                body: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  "assets/background_profile.png",
+                  fit: BoxFit.fill,
+                ),
+                TabBarView(
+                    physics: NeverScrollableScrollPhysics(),
+                    controller: tabController,
+                    children: [
+                      videosController.isLoading.value
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : videosController.publicVideosList.isEmpty
+                              ? RefreshIndicator(
+                                  child: const Center(
+                                    child: Text(
+                                      "no videos found",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  onRefresh: () =>
+                                      videosController.getAllVideos())
+                              : RefreshIndicator(
+                                  child: relatedLayout(),
+                                  onRefresh: () async =>
+                                      await videosController.getAllVideos()),
+                      GetStorage().read("token").toString().isEmpty || GetStorage().read("token")==null
+                          ? const Center(
+                              child: Text("Login to access followers",style: TextStyle(color: Colors.white,fontSize: 16),),
+                            )
+                          : videosController.followingVideosList.isEmpty
+                              ? RefreshIndicator(
+                                  child: const Center(
+                                    child: Text(
+                                      "You dont have any followings yet",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  onRefresh: () =>
+                                      videosController.getFollowingVideos())
+                              : RefreshIndicator(
+                                  child: followingVideosLayout(),
+                                  onRefresh: () =>
+                                      videosController.getFollowingVideos()),
+                    ]),
+                Container(
+                    alignment: Alignment.topCenter,
+                    width: MediaQuery.of(context).size.width,
+                    margin: const EdgeInsets.only(top: 50),
+                    child: Column(
                       children: [
-                      Expanded(
-                        flex: 1,
-                          child: Center(child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 20),
-                        child:  SegmentedTabControl(
-                            height: 35,
-                            splashColor: ColorManager.colorAccent,
-                            splashHighlightColor: Colors.red,
-                            radius: Radius.circular(10),
-                            backgroundColor:Color(0xff1F2128),
-                            indicatorColor: ColorManager.colorAccent,
-                            tabTextColor: Colors.white,
-                            selectedTabTextColor: Colors.white,
-                            controller: tabController,
-
-                            tabs: const [
-                              SegmentTab(label: 'Related'),
-                              SegmentTab(label: 'Following'),
-
-                            ]),),)),
-                       Expanded(flex: 0,
-                           child: Container(
-                             margin: const EdgeInsets.only(right: 10),
-                             child:  InkWell(
-                               onTap: () {
-                                 Get.to( CameraScreen());
-                               },
-                               child: const Icon(
-                                 IconlyLight.camera,
-                                 color: Colors.white,
-                               )),))
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                                flex: 1,
+                                child: Center(
+                                  child: Container(
+                                    margin:
+                                        EdgeInsets.symmetric(horizontal: 20),
+                                    child: SegmentedTabControl(
+                                        height: 35,
+                                        splashColor: ColorManager.colorAccent,
+                                        splashHighlightColor: Colors.red,
+                                        radius: Radius.circular(10),
+                                        backgroundColor: Color(0xff1F2128),
+                                        indicatorColor:
+                                            ColorManager.colorAccent,
+                                        tabTextColor: Colors.white,
+                                        selectedTabTextColor: Colors.white,
+                                        controller: tabController,
+                                        tabs: const [
+                                          SegmentTab(label: 'Related'),
+                                          SegmentTab(label: 'Following'),
+                                        ]),
+                                  ),
+                                )),
+                            Expanded(
+                                flex: 0,
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 10),
+                                  child: InkWell(
+                                      onTap: () {
+                                        Get.to(CameraScreen(selectedSound: "",));
+                                      },
+                                      child: const Icon(
+                                        IconlyLight.camera,
+                                        color: Colors.white,
+                                      )),
+                                ))
+                          ],
+                        ),
                       ],
-                    ),
-                  ],
-                ))
-          ],
-        )));
+                    ))
+              ],
+            )));
+  }
+
+  relatedLayout() {
+    return PreloadPageView.builder(
+        controller: preloadPageController1,
+        onPageChanged: (int index) {
+          if (videosController.adIndexes.contains(index)) {
+            showAd();
+          }
+        },
+        scrollDirection: Axis.vertical,
+        preloadPagesCount: 6,
+        itemCount: videosController.publicVideosList.length,
+        //Notice this
+        itemBuilder: (context, index) => BetterReelsPlayer(
+            videosController.publicVideosList[index].gifImage!,
+            videosController.publicVideosList[index].video!,
+            index,
+            related.value,
+            isRelatedTurning.value,
+            () {},
+            videosController.publicVideosList[index].user,
+            videosController.publicVideosList[index].id!,
+            videosController.publicVideosList[index].soundName.toString(),
+            videosController.publicVideosList[index].isDuetable == "yes"
+                ? true
+                : false,
+            videosController.publicVideosList[index],
+            videosController.publicVideosList[index].user!.id!,
+            videosController.publicVideosList[index].user!.name.toString(),
+            videosController.publicVideosList[index].description.toString(),
+            true,
+            videosController.publicVideosList[index].hashtags!,videosController.publicVideosList[index].sound.toString(),videosController.publicVideosList[index].soundOwner.toString()));
+  }
+
+  followingVideosLayout() {
+    return PreloadPageView.builder(
+        preloadPagesCount: 6,
+        physics: AlwaysScrollableScrollPhysics(),
+        controller: preloadPageController,
+        onPageChanged: (int index) {
+          if (videosController.adIndexes.contains(index)) {
+            showAd();
+          }
+        },
+        scrollDirection: Axis.vertical,
+        itemCount: videosController.followingVideosList.length,
+        itemBuilder: (context, index) => BetterReelsPlayer(
+            videosController.followingVideosList[index].gifImage!,
+            videosController.followingVideosList[index].video!,
+            index,
+            current.value,
+            isOnPageTurning.value,
+            () {},
+            videosController.followingVideosList[index].user,
+            videosController.followingVideosList[index].id!,
+            videosController.followingVideosList[index].soundName.toString(),
+            videosController.followingVideosList[index].isDuetable == "yes"
+                ? true
+                : false,
+            videosController.followingVideosList[index],
+            videosController.followingVideosList[index].user!.id!,
+            videosController.followingVideosList[index].user!.name.toString(),
+            videosController.followingVideosList[index].description.toString(),
+            true,
+            videosController.publicVideosList[index].hashtags!,videosController.followingVideosList[index].sound.toString(),videosController.followingVideosList[index].soundOwner.toString()));
   }
 
   loadInterstitialAd() async {
@@ -290,59 +286,59 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
   }
 
   void scrollListener() {
-    if (isOnPageTurning &&
+    if (isOnPageTurning.value &&
         preloadPageController!.page ==
             preloadPageController!.page!.roundToDouble()) {
       setState(() {
-        current = preloadPageController!.page!.toInt();
-        isOnPageTurning = false;
+        current.value = preloadPageController!.page!.toInt();
+        isOnPageTurning.value = false;
       });
-    } else if (!isOnPageTurning &&
+    } else if (!isOnPageTurning.value &&
         current.toDouble() != preloadPageController!.page) {
       if ((current.toDouble() - preloadPageController!.page!.toDouble()).abs() >
           0.1) {
         setState(() {
-          isOnPageTurning = true;
+          isOnPageTurning.value = true;
         });
       }
     }
   }
 
   void scrollListener1() {
-    if (isRelatedTurning &&
+    if (isRelatedTurning.value &&
         preloadPageController1!.page ==
             preloadPageController1!.page!.roundToDouble()) {
       setState(() {
-        related = preloadPageController1!.page!.toInt();
-        isRelatedTurning = false;
+        related.value = preloadPageController1!.page!.toInt();
+        isRelatedTurning.value = false;
       });
-    } else if (!isRelatedTurning &&
+    } else if (!isRelatedTurning.value &&
         related.toDouble() != preloadPageController1!.page) {
       if ((related.toDouble() - preloadPageController1!.page!.toDouble())
               .abs() >
           0.1) {
         setState(() {
-          isRelatedTurning = true;
+          isRelatedTurning.value = true;
         });
       }
     }
   }
 
   void scrollListener2() {
-    if (isPopularTurning &&
+    if (isPopularTurning.value &&
         preloadPageController2!.page ==
             preloadPageController2!.page!.roundToDouble()) {
       setState(() {
-        popular = preloadPageController2!.page!.toInt();
-        isPopularTurning = false;
+        popular.value = preloadPageController2!.page!.toInt();
+        isPopularTurning.value = false;
       });
-    } else if (!isPopularTurning &&
+    } else if (!isPopularTurning.value &&
         popular.toDouble() != preloadPageController2!.page) {
       if ((popular.toDouble() - preloadPageController2!.page!.toDouble())
               .abs() >
           0.1) {
         setState(() {
-          isPopularTurning = true;
+          isPopularTurning.value = true;
         });
       }
     }

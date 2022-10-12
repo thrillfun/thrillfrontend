@@ -363,8 +363,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
                                                 state.list[index].user!.id;
 
                                             Get.to(ViewProfile(
-                                              mapData: {},
-                                              userId: state
+                                               state
                                                   .list[index]!.user!.id
                                                   .toString(),
                                             ));

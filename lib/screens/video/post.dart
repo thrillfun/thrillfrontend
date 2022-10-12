@@ -74,14 +74,6 @@ class _PostVideoState extends State<PostVideo> {
     super.dispose();
   }
 
-  // statisticsCallback(Statistics statistics){
-  //   final int time = statistics.getTime();
-  //   final int seconds = videoPlayerController.value.duration.inMilliseconds;
-  //   final double percent = (time/seconds)*100;
-  //   //print("Progress ====>>> ${percent.toStringAsFixed(0)}%");
-  //   percentage = percent;
-  //   if (mounted) setState((){});
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -497,55 +489,6 @@ class _PostVideoState extends State<PostVideo> {
                     const SizedBox(
                       height: 25,
                     ),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     ElevatedButton(
-                    //         onPressed: () async {
-                    //           try {
-                    //             FocusScope.of(context).requestFocus(FocusNode());
-                    //             videoPlayerController.pause();
-                    //             if (desCtr.text.isEmpty) {
-                    //               showErrorToast(context, "Describe your video");
-                    //             } else {
-                    //               if (dropDownCategoryValue.isEmpty) {
-                    //                 showErrorToast(context, "Select Category");
-                    //               } else {
-                    //                 if (dropDownLanguageValue.isEmpty) {
-                    //                   showErrorToast(context, "Select Language");
-                    //                 } else {
-                    //                   progressDialogue(context);
-                    //                   startProcessing('draft');
-                    //                 }
-                    //               }
-                    //             }
-                    //           } catch (e) {
-                    //             closeDialogue(context);
-                    //             showErrorToast(context, e.toString());
-                    //           }
-                    //         },
-                    //         style: ElevatedButton.styleFrom(
-                    //             primary: ColorManager.deepPurple,
-                    //             fixedSize: Size(
-                    //                 MediaQuery.of(context).size.width * .40, 50),
-                    //             shape: RoundedRectangleBorder(
-                    //                 borderRadius: BorderRadius.circular(50))),
-                    //         child: Row(
-                    //           mainAxisSize: MainAxisSize.min,
-                    //           children: [
-                    //             Image.asset('assets/draft.png'),
-                    //             const SizedBox(
-                    //               width: 10,
-                    //             ),
-                    //             const Text(
-                    //               draft,
-                    //               style: TextStyle(fontSize: 15),
-                    //             )
-                    //           ],
-                    //         )),
-                    //     const SizedBox(
-                    //       width: 15,
-                    //     ),
                     GradientElevatedButton(
                         onPressed: () async {
                           try {
@@ -616,7 +559,7 @@ class _PostVideoState extends State<PostVideo> {
     String outputPath = '$saveCacheDirectory${widget.data.newName}.png';
     String filePath = widget.data.isDuet
         ? widget.data.newPath!.substring(7, widget.data.newPath!.length)
-        : widget.data.filePath!.substring(7, widget.data.filePath!.length);
+        : widget.data.newPath!.substring(7, widget.data.newPath!.length);
     FFmpegKit.execute(
             "-i $filePath -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath")
         .then((session) async {

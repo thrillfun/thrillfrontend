@@ -4,12 +4,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/utils.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/rest/rest_api.dart';
@@ -19,6 +21,7 @@ import 'package:thrill/screens/home/home.dart';
 import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/screens/spin/spin_the_wheel.dart';
+import 'package:thrill/widgets/better_video_player.dart';
 import 'package:thrill/widgets/fab_items.dart';
 import 'package:thrill/widgets/video_item.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -31,7 +34,7 @@ import '../../utils/util.dart';
 import 'notifications.dart';
 
 bool popupDisplayed = false;
-
+ var index = 0;
 class BottomNavigation extends StatefulWidget {
   BottomNavigation({Key? key, this.mapData}) : super(key: key);
   final Map? mapData;
@@ -55,11 +58,14 @@ class BottomNavigation extends StatefulWidget {
   }
 }
 
-class _BottomNavigationState extends State<BottomNavigation> {
+class _BottomNavigationState extends State<BottomNavigation>
+    with TickerProviderStateMixin {
   var discoverController = Get.find<DiscoverController>();
+  late AnimationController _animationController;
+  late Animation _animation;
 
   int selectedIndex = 0;
-  late List screens = [
+  late List<Widget> screens = [
     const HomeGetx(),
     DiscoverGetx(),
     const Notifications(),
@@ -70,6 +76,14 @@ class _BottomNavigationState extends State<BottomNavigation> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
         (timeStamp) => ShowCaseWidget.of(context).startShowCase([key]));
+
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 600));
+    _animationController.repeat(reverse: true);
+    _animation = Tween(begin: 5.0, end: 15.0).animate(_animationController)
+      ..addStatusListener((status) {
+        setState(() {});
+      });
     if (widget.mapData?['index'] != null)
       selectedIndex = widget.mapData?['index'] ?? 0;
     if (!popupDisplayed) {
@@ -102,49 +116,74 @@ class _BottomNavigationState extends State<BottomNavigation> {
             floatingActionButton: Container(
               height: 60,
               width: 60,
-              child: FittedBox(
-
-              child: Showcase(
-                showcaseBackgroundColor: Color.fromARGB(255, 1, 180, 177),
-                shapeBorder: const CircleBorder(),
-                radius: const BorderRadius.all(Radius.circular(40)),
-                tipBorderRadius: const BorderRadius.all(Radius.circular(8)),
-                overlayPadding: const EdgeInsets.all(5),
-                key: key,
-                child: FloatingActionButton(
-
-                  child: Image.asset(
-                    'assets/spin.png',
-                    //scale: 1.4,
-                    fit: BoxFit.fill,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.transparent,
                   ),
-                  onPressed: () => Get.to(() => const SpinTheWheel()),
-                ),
-                textColor: Colors.white,
-                descTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
-                description: "check out the spin wheel to earn rewards!!"),),),
-            bottomNavigationBar: myDrawer2(),
-            body: screens[selectedIndex]));
+                  borderRadius: const BorderRadius.all(Radius.circular(80)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xff00CCC9).withOpacity(0.7),
+                      blurRadius: 15,
+                      spreadRadius: 15,
+                    )
+                  ]),
+              child: Container(
+                height: 60,
+                width: 60,
+                child: Showcase(
+                    showcaseBackgroundColor: Color.fromARGB(255, 1, 180, 177),
+                    shapeBorder: const CircleBorder(),
+                    radius: const BorderRadius.all(Radius.circular(40)),
+                    tipBorderRadius: const BorderRadius.all(Radius.circular(8)),
+                    overlayPadding: const EdgeInsets.all(5),
+                    key: key,
+                    child: FloatingActionButton(
+                      child: SvgPicture.network(
+                        RestUrl.assetsUrl + 'spin_wheel.svg',
+                        //scale: 1.4,
+                        fit: BoxFit.fill,
+                      ),
+                      onPressed: () => Get.to(() => const SpinTheWheel()),
+                    ),
+                    textColor: Colors.white,
+                    descTextStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white),
+                    description: "check out the spin wheel to earn rewards!!"),
+              ),
+            ),
+            bottomNavigationBar:myDrawer2(),
+            body: IndexedStack(
+              index: selectedIndex,
+                children: screens),));
   }
 
   myDrawer2() {
-    return FABBottomAppBar(
-      backgroundColor: Colors.green,
-      color: Color(0xffB2E3E3),
-      selectedColor: Colors.white,
-      notchedShape: const CircularNotchedRectangle(),
-      onTabSelected: _selectedTab,
-      items: [
-        FABBottomAppBarItem(iconData: IconlyLight.home, text: 'Home'),
-        FABBottomAppBarItem(iconData: IconlyLight.discovery, text: 'Discover'),
-        FABBottomAppBarItem(
-            iconData: IconlyLight.notification, text: 'Notification'),
-        FABBottomAppBarItem(iconData: IconlyLight.profile, text: 'Profile'),
-      ],
+    return Container(
+      decoration: const BoxDecoration(boxShadow: [
+        BoxShadow(color: Color(0xff262B41), blurRadius: 100, spreadRadius: 15),
+        BoxShadow(color: Color(0xff000000), blurRadius: 100, spreadRadius: 15),
+      ]),
+      child: FABBottomAppBar(
+        backgroundColor: Colors.green,
+        color: Color(0xffB2E3E3),
+        selectedColor: Colors.white,
+        iconSize: 35,
+        notchedShape: const CircularNotchedRectangle(),
+        onTabSelected: _selectedTab,
+        items: [
+          FABBottomAppBarItem(iconData: IconlyLight.home, text: ''),
+          FABBottomAppBarItem(iconData: IconlyLight.discovery, text: ''),
+          FABBottomAppBarItem(iconData: IconlyLight.notification, text: ''),
+          FABBottomAppBarItem(iconData: IconlyLight.profile, text: ''),
+        ],
+      ),
     );
   }
 
-  void _selectedTab(int index) async {
+
+  void _selectedTab(index) async {
+
     if (index == 1) {
       discoverController.getTopHashTags();
     }
@@ -156,7 +195,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
             selectedIndex = index;
           });
         } else {
-          showAlertDialog(context);
+         showLoginAlert(context);
         }
       });
     }
@@ -210,7 +249,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                     shouldAutoPlayReel = false;
                   });
                 } else {
-                  showAlertDialog(context);
+                  showLoginAlert(context);
                 }
               });
             },
@@ -248,7 +287,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   shouldAutoPlayReel = true;
                   setState(() => selectedIndex = 0);
                 } else {
-                  showAlertDialog(context);
+                  showLoginAlert(context);
                 }
               });
             },
@@ -273,7 +312,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                     shouldAutoPlayReel = false;
                   });
                 } else {
-                  showAlertDialog(context);
+                  showLoginAlert(context);
                 }
               });
             },
@@ -311,7 +350,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                     //BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
                   });
                 } else {
-                  showAlertDialog(context);
+                  showLoginAlert(context);
                 }
               });
             },
@@ -346,53 +385,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
     );
   }
 
-  showAlertDialog(BuildContext context) {
-    Get.defaultDialog(
-        title: 'Login',
-        middleText: 'Please Login to your account',
-        confirm: TextButton(
-            onPressed: () {
-              Get.back(closeOverlays: true);
-            },
-            child: Text('Cancel')),
-        cancel: TextButton(
-            onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/login', (route) => false);
-              Get.back(closeOverlays: true);
-            },
-            child: Text('Ok')));
-    // Widget continueButton = TextButton(
-    //   child: const Text("OK"),
-    //   onPressed: () async {
-    //     // Get.back();
-    //     // Get.to(LoginScreen());
-    //     Navigator.pop(context);
-    //     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-    //   },
-    // );
-    // Widget cancelButton = TextButton(
-    //   child: const Text("CANCEL"),
-    //   onPressed: () async {
-    //     Get.back();
-    //         },
-    // );
-    // AlertDialog alert = AlertDialog(
-    //   title: const Text("Login"),
-    //   content: const Text("Please login your account."),
-    //   actions: [continueButton, cancelButton],
-    // );
-    // showDialog(
-    //   context: context,
-    //   barrierDismissible: false,
-    //   builder: (BuildContext context) {
-    //     return alert;
-    //   },
-    // );
-  }
+
 
   Future<bool> isLogined() async {
-    var loginData = GetStorage().read("user");
+    var loginData = GetStorage().read("token");
     if (loginData != null) {
       return true;
     } else {
@@ -452,7 +448,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                                 }
                               },
                               child: CachedNetworkImage(
-                                fit: BoxFit.cover,
+                                fit: BoxFit.contain,
                                 imageUrl: "${RestUrl.profileUrl}$imgPath",
                                 placeholder: (a, b) => const Center(
                                   child: CircularProgressIndicator(),

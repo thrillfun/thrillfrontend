@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/utils.dart';
-
+import 'package:flutter_advanced_networkimage_2/provider.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:thrill/common/color.dart';
 import '../common/strings.dart';
 import '../rest/rest_url.dart';
 
@@ -14,6 +17,16 @@ const LinearGradient gradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [Color(0xFF162C31), Color(0xff181A20), Color(0xff1F2128)]);
+
+const LinearGradient processGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      ColorManager.colorPrimaryLight,
+      Color(0xff1F2128),
+      Color(0xff1F2128),
+      Color(0xff1F2128)
+    ]);
 
 const LinearGradient profile_gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -430,4 +443,43 @@ extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
   }
+}
+
+loadSvgCacheImage(String url) {
+  return FittedBox(
+    fit: BoxFit.fill,
+    child: SvgPicture(
+      AdvancedNetworkSvg(
+        RestUrl.assetsUrl + url,
+        (theme) => (bytes, colorFilter, key) {
+          return svg.svgPictureDecoder(
+            bytes ?? Uint8List.fromList(const []),
+            false,
+            colorFilter,
+            key,
+            theme: theme,
+          );
+        },
+        useDiskCache: true,
+      ),
+    ),
+  );
+}
+
+showLoginAlert(BuildContext context) {
+  Get.defaultDialog(
+      title: 'Login',
+      middleText: 'Please Login to your account',
+      confirm: TextButton(
+          onPressed: () {
+            Get.back(closeOverlays: true);
+          },
+          child: Text('Cancel')),
+      cancel: TextButton(
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/login', (route) => false);
+            Get.back(closeOverlays: true);
+          },
+          child: Text('Ok')));
 }

@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/model/discover_model.dart';
+import 'package:thrill/controller/model/hash_tags_list_model.dart';
 import 'package:thrill/controller/model/hashtag_videos_model.dart';
 import 'package:thrill/controller/model/top_hastag_videos_model.dart';
 import 'package:thrill/utils/util.dart';
@@ -12,6 +14,8 @@ import 'package:thrill/utils/util.dart';
 class DiscoverController extends GetxController {
   var isLoading = false.obs;
   var isHashTagsLoading = false.obs;
+  var isHashTagsListLoading = false.obs;
+  RxList<HashTagsList> hashTagsList = RxList();
   RxList<DiscoverModel> discoverBanners = RxList();
   RxList<HashTags> hasTagsList = RxList();
   RxList<HashTagVideos> hashTagsVideos = RxList();
@@ -20,6 +24,7 @@ class DiscoverController extends GetxController {
   DiscoverController() {
     getBanners();
     getTopHashTags();
+    getHashTagsList();
   }
 
   getBanners() async {
@@ -38,13 +43,11 @@ class DiscoverController extends GetxController {
           .map((i) => DiscoverModel.fromJson(i))
           .toList()
           .obs;
-      isLoading.value = false;
-      update();
     } catch (e) {
-      isLoading.value = false;
-      update();
       errorToast('Something went wrong');
     }
+    isLoading.value = false;
+    update();
   }
 
   getTopHashTags() async {
@@ -58,6 +61,7 @@ class DiscoverController extends GetxController {
     var result = jsonDecode(response.body);
     try {
       hasTagsList = TopHastagVideosModel.fromJson(result).data!.obs;
+
       hashTagsVideos.clear();
 
       if (hasTagsList.isNotEmpty) {
@@ -67,14 +71,11 @@ class DiscoverController extends GetxController {
           });
         });
       }
-
-      isHashTagsLoading.value = false;
-      update();
     } catch (e) {
-      isHashTagsLoading.value = false;
-      update();
       errorToast(TopHastagVideosModel.fromJson(result).message.toString());
     }
+    isHashTagsLoading.value = false;
+    update();
   }
 
   getVideosByHashTags(int hashTagId) async {
@@ -91,14 +92,31 @@ class DiscoverController extends GetxController {
       var result = jsonDecode(response.body);
       try {
         hashTagsDetailsList = HashTagVideosModel.fromJson(result).data!.obs;
-
-        isHashTagsLoading.value = false;
-        update();
       } catch (e) {
-        isHashTagsLoading.value = false;
-        update();
         errorToast(HashTagVideosModel.fromJson(result).message.toString());
       }
+      isHashTagsLoading.value = false;
+      update();
     }
   }
+
+  getHashTagsList() async {
+    isHashTagsListLoading.value = true;
+    var token = GetStorage().read("token");
+    var response = await http.get(
+      Uri.parse('http://3.129.172.46/dev/api/hashtag/list'),
+      headers: {"Authorization": "Bearer $token"},
+    ).timeout(const Duration(seconds: 60));
+    var result = jsonDecode(response.body);
+    try {
+      hashTagsList.clear();
+      hashTagsList = HashTagsListModel.fromJson(result).data!.obs;
+    } catch (e) {
+      errorToast(HashTagsListModel.fromJson(result).message.toString());
+    }
+    isHashTagsListLoading.value = false;
+    hashTagsList.refresh();
+    update();
+  }
+
 }

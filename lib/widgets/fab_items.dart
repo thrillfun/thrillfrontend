@@ -61,26 +61,23 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
     items.insert(items.length >> 1, _buildMiddleTabItem());
 
     return BottomAppBar(
-      shape: widget.notchedShape,
-      notchMargin: 20.0,
-      child: Stack(
-        fit: StackFit.passthrough,
-        children: [
-          Container(
-            height: 60,
-            decoration: BoxDecoration(gradient: LinearGradient(
-              begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-            Color(0xff145158),Color(0xff193542),Color(0xff1A2C41)
-          ])),),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: items,
-        ),
-      ],)
-    );
+        shape: widget.notchedShape,
+        elevation: 0,
+        notchMargin: 20.0,
+        child: Stack(
+          fit: StackFit.passthrough,
+          children: [
+            Container(
+              child: SvgPicture.network(RestUrl.assetsUrl + "bottom_nav.svg",
+                  fit: BoxFit.fill),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: items,
+            ),
+          ],
+        ));
   }
 
   Widget _buildMiddleTabItem() {
@@ -124,7 +121,7 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
                 Text(
                   item.text!,
                   style: TextStyle(color: color),
-                )
+                ),
               ],
             ),
           ),

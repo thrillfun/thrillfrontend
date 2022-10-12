@@ -348,9 +348,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                                         await FacebookAuth
                                                             .instance
                                                             .logOut();
-                                                        isLoggedIn.value =
-                                                            false;
-                                                        GetStorage().remove("user");
+                                                        GetStorage().remove("token");
                                                         Get.offAll(LoginScreen());
                                                         // Get.off(LoginScreen());
 

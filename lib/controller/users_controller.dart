@@ -15,8 +15,13 @@ class UserController extends GetxController {
   var isProfileLoading = false.obs;
   var isFollowersLoading = false.obs;
   var isFollowingLoading = false.obs;
+
   var followersModel = RxList<Followers>();
   var followingModel = RxList<Followers>();
+
+  var userFollowersModel = RxList<Followers>();
+  var userFollowingModel = RxList<Followers>();
+
   var userBlocked = false.obs;
   var userId = 0.obs;
   var isMyProfile = false.obs;
@@ -26,6 +31,7 @@ class UserController extends GetxController {
   UserController() {
     getFollowers();
     getFollowings();
+
   }
 
   getUserProfile(int userId) async {
@@ -43,14 +49,13 @@ class UserController extends GetxController {
       var result = jsonDecode(response.body);
       try {
         userProfile = ProfileModelPojo.fromJson(result).obs;
-        isProfileLoading.value = false;
       } catch (e) {
-        isProfileLoading.value = false;
-        errorToast(ProfileModelPojo.fromJson(result).message.toString());
+        errorToast(result['message']);
       }
     } else {
       errorToast(response.statusCode.toString());
     }
+    isProfileLoading.value = false;
   }
 
   getFollowers() async {
@@ -71,14 +76,12 @@ class UserController extends GetxController {
 
     var result = jsonDecode(response.body);
     try {
-      followersModel = FollowersModel.fromJson(result).data!.obs;
-      isFollowersLoading.value = false;
-      update();
+      userFollowersModel = FollowersModel.fromJson(result).data!.obs;
     } catch (e) {
-      isFollowersLoading.value = false;
-      update();
       errorToast(FollowersModel.fromJson(result).message.toString());
     }
+    isFollowersLoading.value = false;
+    update();
   }
 
   getFollowings() async {
@@ -101,21 +104,19 @@ class UserController extends GetxController {
 
     var result = jsonDecode(response.body);
     try {
-      followingModel = FollowersModel.fromJson(result).data!.obs;
-      isFollowingLoading.value = false;
-      update();
+      userFollowingModel = FollowersModel.fromJson(result).data!.obs;
     } catch (e) {
-      isFollowingLoading.value = false;
-      update();
       errorToast(FollowersModel.fromJson(result).message.toString());
     }
+    isFollowingLoading.value = false;
+    update();
   }
 
   getUserFollowers(int userId) async {
     isFollowersLoading.value = true;
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken') ?? "";
-
+    followersModel.clear();
     try {
       var response = await http.post(
           Uri.parse('http://3.129.172.46/dev/api/user/get-followers'),
@@ -124,11 +125,7 @@ class UserController extends GetxController {
 
       var result = jsonDecode(response.body);
       followersModel = FollowersModel.fromJson(result).data!.obs;
-      isFollowersLoading.value = false;
-      update();
     } catch (e) {
-      isFollowersLoading.value = false;
-      update();
       GetSnackBar(
         message: "$e",
         title: "Error",
@@ -138,10 +135,13 @@ class UserController extends GetxController {
         isDismissible: true,
       ).show();
     }
+    isFollowersLoading.value = false;
+    update();
   }
 
   getUserFollowing(int userId) async {
     isFollowersLoading.value = true;
+    followingModel.clear();
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken') ?? "";
     var response = await http.post(
@@ -152,13 +152,11 @@ class UserController extends GetxController {
     var result = jsonDecode(response.body);
     try {
       followingModel = FollowersModel.fromJson(result).data!.obs;
-      isFollowersLoading.value = false;
-      update();
     } catch (e) {
-      isFollowersLoading.value = false;
-      update();
       errorToast(FollowersModel.fromJson(result).message.toString());
     }
+    isFollowersLoading.value = false;
+    update();
   }
 
   isUserBlocked(int userId) async {
@@ -173,13 +171,11 @@ class UserController extends GetxController {
     var result = jsonDecode(response.body);
     try {
       userBlocked = BlockStatusResponse.fromJson(result).status!.obs;
-      isFollowersLoading.value = false;
-      update();
     } catch (e) {
-      isFollowersLoading.value = false;
-      update();
       errorToast(BlockStatusResponse.fromJson(result).message.toString());
     }
+    isFollowersLoading.value = false;
+    update();
   }
 
   blockUnblockUser(int userId, String action) async {
@@ -199,14 +195,13 @@ class UserController extends GetxController {
     var result = jsonDecode(response.body);
     try {
       userBlocked = BlockStatusResponse.fromJson(result).status!.obs;
-      isFollowersLoading.value = false;
-      update();
+
       print(BlockStatusResponse.fromJson(result).message);
       successToast(BlockStatusResponse.fromJson(result).message.toString());
     } catch (e) {
-      isFollowersLoading.value = false;
-      update();
       errorToast(BlockStatusResponse.fromJson(result).message.toString());
     }
+    isFollowersLoading.value = false;
+    update();
   }
 }

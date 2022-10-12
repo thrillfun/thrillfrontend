@@ -29,13 +29,13 @@ class CommentsController extends GetxController {
 
     var result = jsonDecode(response.body);
     try {
-      isCommentsLoading.value = false;
       commentsModel = CommentsModel.fromJson(result).commentsData!.obs;
     } catch (e) {
-      isCommentsLoading.value = false;
       errorToast(CommentsModel.fromJson(result).message.toString());
     }
+    isCommentsLoading.value = false;
     commentsModel.refresh();
+    update();
   }
 
   postComment(int videoId, String userId, String comment) async {
@@ -55,14 +55,13 @@ class CommentsController extends GetxController {
     try {
       commentsPostResponse = CommentsPostResponse.fromJson(result).obs;
       successToast(CommentsPostResponse.fromJson(result).message.toString());
-      isLoading.value = false;
-      update();
+
     } catch (e) {
-      isLoading.value = false;
-      update();
       errorToast(CommentsPostResponse.fromJson(result).message.toString());
     }
     commentsModel.refresh();
+    isLoading.value = false;
+    update();
   }
 
   likeComment(String commentId, String isLike) async {

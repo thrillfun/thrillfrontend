@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>882291140458-380scge8ae1r24jfji50av2153rqv5md.apps.googleusercontent.com</string>
+	<string>882291140458-of9jnfi8rp4ma6had7ajg5g2ccss2m5h.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.882291140458-380scge8ae1r24jfji50av2153rqv5md</string>
+	<string>com.googleusercontent.apps.882291140458-of9jnfi8rp4ma6had7ajg5g2ccss2m5h</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>882291140458-6rhfu1lbokehkq4ajpe9kkh1oi8bngso.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.thrilltj</string>
+	<string>com.thrill</string>
 	<key>PROJECT_ID</key>
 	<string>algebraic-envoy-350105</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:882291140458:ios:876fc96cea6013bf3e6713</string>
+	<string>1:882291140458:ios:5ffd843419ea79093e6713</string>
 	<key>DATABASE_URL</key>
 	<string>https://algebraic-envoy-350105-default-rtdb.firebaseio.com</string>
 </dict>

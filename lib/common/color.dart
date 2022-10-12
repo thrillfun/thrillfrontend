@@ -5,6 +5,7 @@ class ColorManager {
   static const Color cyan = Color(0xff2DCBC8);
   static const Color orange = Color(0xffFF9933);
   static const Color red = Color(0xfff64a4a);
+  static const Color colorPrimaryLight =  Color(0xff00CCC9);
 
   static const Color spinColorOne = Color(0xffB9E2E2);
   static const Color spinColorTwo = Color(0xffC8ECEC);
