@@ -10,7 +10,6 @@ class DataBindings extends Bindings {
   @override
   void dependencies() {
     Get.put(UserController());
-    Get.put(DataController());
     Get.put(CommentsController());
     Get.put(VideosController());
     Get.put(DiscoverController());

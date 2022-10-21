@@ -1,11 +1,11 @@
-import 'package:thrill/models/user.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 
 class PrivateModel {
   int id;
   List comments;
   String video, description, filter, gif_image, sound_name, sound_category_name;
   int likes, views;
-  UserModel user;
+  User user;
   String speed;
   List<String> hashtags;
   String is_duet;
@@ -32,8 +32,8 @@ class PrivateModel {
       this.sound_owner);
 
   factory PrivateModel.fromJson(dynamic json) {
-    UserModel users;
-    users = UserModel.fromJson(json['user'] ?? {});
+    User users;
+    users = User.fromJson(json['user'] ?? {});
     return PrivateModel(
       json['id'],
       json['comments'] ?? [],

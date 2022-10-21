@@ -10,6 +10,8 @@ import 'package:get/utils.dart';
 import 'package:flutter_advanced_networkimage_2/provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/screens/auth/login.dart';
+import 'package:thrill/screens/auth/login_getx.dart';
 import '../common/strings.dart';
 import '../rest/rest_url.dart';
 
@@ -466,7 +468,7 @@ loadSvgCacheImage(String url) {
   );
 }
 
-showLoginAlert(BuildContext context) {
+showLoginAlert() {
   Get.defaultDialog(
       title: 'Login',
       middleText: 'Please Login to your account',
@@ -477,9 +479,9 @@ showLoginAlert(BuildContext context) {
           child: Text('Cancel')),
       cancel: TextButton(
           onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/login', (route) => false);
-            Get.back(closeOverlays: true);
+            // Navigator.pushNamedAndRemoveUntil(
+            //     context, '/login', (route) => false);
+            Get.to(() => LoginGetxScreen());
           },
           child: Text('Ok')));
 }

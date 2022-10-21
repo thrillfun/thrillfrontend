@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/models/social_url_model.dart';
 import 'package:thrill/rest/rest_client.dart';
 import 'package:thrill/rest/rest_url.dart';
 
-import '../models/user.dart';
 
 class RestApi {
   static Future<http.Response> login(String phone, String password) async {
@@ -216,7 +216,7 @@ class RestApi {
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var currentUser = instance.getString('currentUser');
-    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
+    User current = User.fromJson(jsonDecode(currentUser!));
 
     var result = await RestClient.postData(
       RestUrl.postNewVideo,
@@ -698,7 +698,7 @@ class RestApi {
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var loginData = instance.getString('currentUser');
-    UserModel user = UserModel.fromJson(jsonDecode(loginData!));
+    User user = User.fromJson(jsonDecode(loginData!));
     var result = await RestClient.postData(
       RestUrl.userAllVideo,
       headers: {
@@ -719,7 +719,7 @@ class RestApi {
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var loginData = instance.getString('currentUser');
-    UserModel user = UserModel.fromJson(jsonDecode(loginData!));
+    User user = User.fromJson(jsonDecode(loginData!));
     var result = await RestClient.postData(RestUrl.userLikedVideo, headers: {
       'Authorization': 'Bearer $token',
     }, body: {

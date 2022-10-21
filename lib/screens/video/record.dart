@@ -15,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_s3/simple_s3.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/screens/screen.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -25,7 +26,6 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../main.dart';
 import '../../models/add_sound_model.dart';
-import '../../models/user.dart';
 import '../../utils/util.dart';
 import '../../widgets/video_item.dart';
 
@@ -68,7 +68,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
   Timer? autoStopRecordingTimer;
   Duration videoDuration = const Duration();
   String speed = '1';
-  late UserModel userModel;
+  late User userModel;
   final SimpleS3 _simpleS3 = SimpleS3();
 
   /*final deepArController = CameraDeepArController(config);
@@ -182,12 +182,12 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
   loadUserModel() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
-    userModel = UserModel.fromJson(jsonDecode(currentUser!));
+    userModel = User.fromJson(jsonDecode(currentUser!));
     if (widget.soundMap != null) {
       selectedSound = widget.soundMap?["soundName"];
       addSoundModel = AddSoundModel(
           0,
-          userModel.id,
+          userModel.id!,
           0,
           widget.soundMap?["soundPath"],
           widget.soundMap?["soundName"],

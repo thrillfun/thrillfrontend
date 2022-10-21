@@ -1,17 +1,28 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
+import 'package:thrill/controller/model/video_fields_model.dart';
+import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/post_data.dart';
+import 'package:thrill/screens/home/home.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/seperator.dart';
+import 'package:velocity_x/velocity_x.dart';
 import 'package:video_player/video_player.dart';
 import 'package:hashtagable/hashtagable.dart';
+
+var lastChangedWord = "".obs;
 
 class PostScreenGetx extends StatelessWidget {
   PostScreenGetx(this.postData);
@@ -23,14 +34,21 @@ class PostScreenGetx extends StatelessWidget {
   var discoverController = Get.find<DiscoverController>();
   var isPlaying = false.obs;
   var selectedItem = 'English'.obs;
-  var selectedType = "Funny".obs;
+  var selectedPrivacy = "Public".obs;
   var languages = ["English", "Hindi"].obs;
   var types = ["Funny", "boring "].obs;
   var allowComments = false.obs;
   var allowDuets = false.obs;
   var selectedChip = 0.obs;
   var selectedItems = [].obs;
+  var privacy = ["Public", "Private"].obs;
+  var selectedCategory = 'Funny'.obs;
   var searchItems = [].obs;
+  var videosController = Get.find<VideosController>();
+  final SimpleS3 _simpleS3 = SimpleS3();
+
+  var currentText = "".obs;
+  var userHashtagsList = [];
 
   TextEditingController searchController = TextEditingController();
 
@@ -39,11 +57,9 @@ class PostScreenGetx extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    videoPlayerController =
-        VideoPlayerController.file(File(postData!.newPath!.toString()))
-          ..initialize()
-          ..setLooping(true)
-          ..play().then((value) => isPlaying.value = true);
+    initPlayer();
+    createGIF();
+    getFields();
 
     buildContext = context;
 
@@ -62,6 +78,16 @@ class PostScreenGetx extends StatelessWidget {
       ),
     );
   }
+
+  getFields() => {
+        videosController.getVideoFields(),
+      };
+
+  initPlayer() => videoPlayerController =
+      VideoPlayerController.file(File(postData!.newPath!.toString()))
+        ..initialize()
+        ..setLooping(true)
+        ..play().then((value) => isPlaying.value = true);
 
   videoLayout() => Column(
         children: [
@@ -109,80 +135,84 @@ class PostScreenGetx extends StatelessWidget {
                   descriptionLayout(),
                 ],
               )),
-          Obx(() => Visibility(
-              child: ListView.builder(
-                  itemCount: searchItems.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) => Container(
-                      margin: EdgeInsets.all(10),
-                      padding: EdgeInsets.all(10),
-                      color: Colors.white,
-                      child: InkWell(
-                        onTap: () {
+          Obx(() => searchItems.isNotEmpty
+              ? Obx(() => Visibility(
+                  child: ListView.builder(
+                      itemCount: searchItems.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) => Container(
+                          margin: EdgeInsets.all(10),
+                          padding: EdgeInsets.all(10),
+                          child: InkWell(
+                            onTap: () {
+                              var words = textEditingController.text
+                                  .split(" "); // uses an array
+                              lastChangedWord.value = words[words.length - 1];
 
-                          
-                          textEditingController.text =
-                              textEditingController.text +
+                              textEditingController.text =
+                                  textEditingController.text.replaceAll(
+                                      words[words.length - 1],
+                                      searchItems[index].toString());
+
+                              searchItems.clear();
+                            },
+                            child: Text(
+                              "#" +
                                   searchItems[index]
                                       .toString()
-
-                                      .replaceAll(RegExp("#"), '');
-
-                          var data = textEditingController.text.toString();
-                          data.split(" ");
-                          print(data[data.length-1]);
-                          // textEditingController.text =  textEditingController.text.replaceAll(
-                          //     textEditingController.text, "#"+searchItems[index]
-                          //     .toString()
-                          //     .replaceAll(RegExp("#"), ''));
-                          searchItems.clear();
-                        },
-                        child: Text(searchItems[index].toString()),
-                      ))))),
-          hashTagLayout(),
-          chipSelectionLayout(),
-          const SizedBox(
-            height: 10,
-          ),
-          const MySeparator(
-            color: Color(0xff353841),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          dropDownLanguage(),
-          dropDownVideoType(),
-          videoSettingsLayout(),
-          InkWell(
-            onTap: () {
-              if (textEditingController.text.isEmpty) {
-                Get.snackbar("error", "fieldEmpty").show();
-              } else {
-                Get.snackbar("Success", "Posting video").show();
-              }
-            },
-            child: Container(
-              width: Get.width,
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              padding: const EdgeInsets.all(10),
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        ColorManager.colorPrimaryLight,
-                        ColorManager.colorAccent
-                      ])),
-              child: const Text(
-                "Post Video",
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            ),
-          )
+                                      .replaceAll(RegExp("#"), ''),
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          )))))
+              : Column(
+                  children: [
+                    hashTagLayout(),
+                    chipSelectionLayout(),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const MySeparator(
+                      color: Color(0xff353841),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    // dropDownLanguage(),
+                    // dropDownVideoType(),
+                    videoSettingsLayout(),
+                    InkWell(
+                      onTap: () {
+                        if (textEditingController.text.isEmpty) {
+                          Get.snackbar("error", "fieldEmpty").show();
+                        } else {
+                          postUpload();
+                        }
+                      },
+                      child: Container(
+                        width: Get.width,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 20),
+                        padding: const EdgeInsets.all(10),
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10),
+                            ),
+                            gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  ColorManager.colorPrimaryLight,
+                                  ColorManager.colorAccent
+                                ])),
+                        child: const Text(
+                          "Post Video",
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                      ),
+                    )
+                  ],
+                ))
         ],
       );
 
@@ -196,7 +226,10 @@ class PostScreenGetx extends StatelessWidget {
               controller: textEditingController,
               maxLines: 10,
               onChanged: (String txt) {
+                currentText.value = txt;
+
                 searchItems.clear();
+
                 if (txt.isEmpty) {
                   searchItems.value = [];
                 } else {
@@ -211,6 +244,7 @@ class PostScreenGetx extends StatelessWidget {
                       searchItems.add(element.name);
                     }
                   });
+                  lastChangedWord.value = txt;
                 }
               },
               basicStyle: const TextStyle(color: Colors.white),
@@ -330,87 +364,114 @@ class PostScreenGetx extends StatelessWidget {
             ),
           ));
 
-  dropDownLanguage() => Obx(() => Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      padding: const EdgeInsets.only(left: 10, right: 10),
-      width: Get.width,
-      decoration: BoxDecoration(
-          color: const Color(0xff353841),
-          border: Border.all(color: const Color(0xff353841)),
-          borderRadius: const BorderRadius.all(Radius.circular(10))),
-      child: Theme(
-        data: Theme.of(buildContext!)
-            .copyWith(canvasColor: const Color(0xff353841)),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton(
-              icon: const Icon(
-                Icons.keyboard_double_arrow_down,
-                color: Colors.white,
-              ),
-              value: selectedItem.value,
-              items: languages
-                  .map((String element) => DropdownMenuItem(
-                        value: element,
-                        child: Text(
-                          element.tr,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ))
-                  .toList(),
-              onChanged: (String? value) {
-                selectedItem.value = value!;
-                // (buildContext as Element).markNeedsBuild();
-                //ha
-              }),
-        ),
-      )));
+  dropDownLanguage() => GetX<VideosController>(
+      builder: (videosController) => videosController.isLoading.value
+          ? Container()
+          : Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              width: Get.width,
+              decoration: BoxDecoration(
+                  color: const Color(0xff353841),
+                  border: Border.all(color: const Color(0xff353841)),
+                  borderRadius: const BorderRadius.all(Radius.circular(10))),
+              child: Theme(
+                data: Theme.of(buildContext!)
+                    .copyWith(canvasColor: const Color(0xff353841)),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton(
+                    icon: const Icon(
+                      Icons.keyboard_double_arrow_down,
+                      color: Colors.white,
+                    ),
+                    value: selectedItem.value,
+                    items: videosController.languageList
+                        .map((Languages element) => DropdownMenuItem(
+                            value: element.name,
+                            child: Text(element.name.toString(),
+                                style: TextStyle(color: Colors.white))))
+                        .toList(growable: true),
+                    onChanged: (value) {
+                      selectedItem.value = value!.toString();
+                    },
+                  ),
+                ),
+              )));
 
-  dropDownVideoType() => Obx(() => Container(
-      margin: const EdgeInsets.only(left: 20, right: 20),
-      padding: const EdgeInsets.only(left: 10, right: 10),
-      width: Get.width,
-      decoration: BoxDecoration(
-          color: const Color(0xff353841),
-          border: Border.all(color: const Color(0xff353841)),
-          borderRadius: const BorderRadius.all(Radius.circular(10))),
-      child: Theme(
-        data: Theme.of(buildContext!)
-            .copyWith(canvasColor: const Color(0xff353841)),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton(
-              icon: const Icon(
-                Icons.keyboard_double_arrow_down,
-                color: Colors.white,
+  dropDownPrivacy() => Obx(() => selectedPrivacy.value == ""
+      ? Container()
+      : PopupMenuButton(
+          itemBuilder: (context) => privacy
+              .map((element) => PopupMenuItem(
+                  value: element,
+                  child: Text(element.toString(),
+                      style:
+                          const TextStyle(color: Colors.black, fontSize: 14))))
+              .toList(growable: true),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                selectedPrivacy.value,
+                style: const TextStyle(color: ColorManager.colorPrimaryLight),
               ),
-              value: selectedType.value,
-              items: types
-                  .map((String element) => DropdownMenuItem(
-                        value: element,
-                        child: Text(
-                          element.tr,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ))
-                  .toList(),
-              onChanged: (String? value) {
-                selectedType.value = value!;
-                //ha
-              }),
-        ),
-      )));
+              const Icon(
+                Icons.arrow_drop_down,
+                color: ColorManager.colorPrimaryLight,
+              ),
+            ],
+          ),
+          onSelected: (value) => {selectedPrivacy.value = value.toString()},
+        ));
+
+  dropDownVideoType() => GetX<VideosController>(
+      builder: (videosController) => videosController.isLoading.value
+          ? Container()
+          : Container(
+              margin: const EdgeInsets.only(left: 20, right: 20),
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              width: Get.width,
+              decoration: BoxDecoration(
+                  color: const Color(0xff353841),
+                  border: Border.all(color: const Color(0xff353841)),
+                  borderRadius: const BorderRadius.all(Radius.circular(10))),
+              child: Theme(
+                data: Theme.of(buildContext!)
+                    .copyWith(canvasColor: const Color(0xff353841)),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton(
+                    icon: const Icon(
+                      Icons.keyboard_double_arrow_down,
+                      color: Colors.white,
+                    ),
+                    value: selectedCategory.value,
+                    items: videosController.categoriesList
+                        .map((Categories element) => DropdownMenuItem(
+                              child: Text(
+                                element.title.toString(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              value: element.title,
+                            ))
+                        .toList(growable: true),
+                    onChanged: (value) {
+                      selectedCategory.value = value!.toString();
+                    },
+                  ),
+                ),
+              )));
 
   videoSettingsLayout() => Container(
         alignment: Alignment.center,
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                RichText(
-                    text: const TextSpan(children: [
+                Expanded(
+                    child: RichText(
+                        text: const TextSpan(children: [
                   WidgetSpan(
                       child: Icon(
                         Icons.lock_open,
@@ -420,13 +481,9 @@ class PostScreenGetx extends StatelessWidget {
                       alignment: PlaceholderAlignment.middle),
                   TextSpan(
                       text: " Who can view this video",
-                      style: TextStyle(color: Colors.white, fontSize: 18))
-                ])),
-                const Icon(
-                  Icons.chevron_right_outlined,
-                  color: ColorManager.colorPrimaryLight,
-                  size: 35,
-                )
+                      style: TextStyle(color: Colors.white, fontSize: 14))
+                ]))),
+                dropDownPrivacy()
               ],
             ),
             const SizedBox(
@@ -448,7 +505,7 @@ class PostScreenGetx extends StatelessWidget {
                   ),
                   TextSpan(
                       text: " Allow Comments",
-                      style: TextStyle(color: Colors.white, fontSize: 18))
+                      style: TextStyle(color: Colors.white, fontSize: 14))
                 ])),
                 Obx(
                   () => Switch(
@@ -476,7 +533,7 @@ class PostScreenGetx extends StatelessWidget {
                       alignment: PlaceholderAlignment.middle),
                   TextSpan(
                       text: " Allow Duets",
-                      style: TextStyle(color: Colors.white, fontSize: 18))
+                      style: TextStyle(color: Colors.white, fontSize: 14))
                 ])),
                 Obx(() => Switch(
                     onChanged: (value) => allowDuets.toggle(),
@@ -516,31 +573,30 @@ class PostScreenGetx extends StatelessWidget {
                                               discoverController
                                                   .hashTagsList[index].name
                                                   .toString()),
-                                          onSelected: (value) => {
-                                                value
-                                                    ? selectedItems.add(
+                                          onSelected: (value) {
+                                            value
+                                                ? selectedItems.add(
+                                                    discoverController
+                                                        .hashTagsList[index]
+                                                        .name
+                                                        .toString())
+                                                : selectedItems.removeWhere(
+                                                    (element) =>
+                                                        element ==
                                                         discoverController
                                                             .hashTagsList[index]
                                                             .name
-                                                            .toString())
-                                                    : selectedItems.removeWhere(
-                                                        (element) =>
-                                                            element ==
-                                                            discoverController
-                                                                .hashTagsList[
-                                                                    index]
-                                                                .name
-                                                                .toString()),
-                                                selectedItems.refresh(),
-                                                textEditingController.text =
-                                                    textEditingController.text +
-                                                        " #" +
-                                                        searchItems[index]
-                                                            .toString()
-                                                            .replaceAll(
-                                                                RegExp("#"),
-                                                                ''),
-                                              },
+                                                            .toString());
+                                            selectedItems.refresh();
+
+                                            textEditingController.text =
+                                                textEditingController.text +
+                                                    " #" +
+                                                    searchItems[index]
+                                                        .toString()
+                                                        .replaceAll(
+                                                            RegExp("#"), '');
+                                          },
                                           selectedColor:
                                               ColorManager.colorAccent,
                                           elevation: 10,
@@ -623,4 +679,137 @@ class PostScreenGetx extends StatelessWidget {
               //           style: const TextStyle(color: Colors.white),
               //         )))),
               ));
+
+  postUpload() async {
+    int currentUnix = DateTime.now().millisecondsSinceEpoch;
+    String videoId = '$currentUnix.mp4';
+    Get.defaultDialog(
+        content: StreamBuilder(
+            stream: _simpleS3.getUploadPercentage,
+            builder: ((context, snapshot) => snapshot.data != null
+                ? Text("${snapshot.data}")
+                : const Text("Uploading"))));
+    await _simpleS3
+        .uploadFile(
+      File(postData!.newPath!.substring(7, postData!.newPath!.length)),
+      "thrillvideo",
+      "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+      AWSRegions.usEast1,
+      debugLog: true,
+      fileName: videoId,
+      s3FolderPath: "test",
+      accessControl: S3AccessControl.publicRead,
+    )
+        .then((value) async {
+      await _simpleS3
+          .uploadFile(
+        File('$saveCacheDirectory${postData!.newName}.png'),
+        "thrillvideo",
+        "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+        AWSRegions.usEast1,
+        debugLog: true,
+        s3FolderPath: "gif",
+        fileName: '$currentUnix.png',
+        accessControl: S3AccessControl.publicRead,
+      )
+          .then((value) async {
+        if (postData!.addSoundModel == null ||
+            !postData!.addSoundModel!.isSoundFromGallery) {
+          String tagList =
+              jsonEncode(extractHashTags(textEditingController.text));
+
+          videosController.postVideo(
+              videoId,
+              postData!.isDuet
+                  ? postData!.duetSound ?? ""
+                  : postData!.addSoundModel == null
+                      ? ""
+                      : postData!.addSoundModel!.isSoundFromGallery
+                          ? "$currentUnix.mp3"
+                          : postData!.addSoundModel!.sound.split('/').last,
+              postData!.isDuet
+                  ? postData!.duetSoundName ?? ""
+                  : postData!.addSoundModel!.name == null
+                      ? ""
+                      : "Original Sound",
+              '1',
+              tagList,
+              selectedPrivacy.value,
+              allowComments.value ? 1 : 0,
+              textEditingController.text,
+              postData!.filterName.isEmpty ? '' : postData!.filterName,
+              "1",
+              '$currentUnix.png',
+              postData!.speed,
+              allowDuets.value,
+              allowComments.value,
+              postData!.duetFrom ?? '',
+              postData!.isDuet,
+              postData!.addSoundModel?.userId ?? 0);
+
+          closeDialogue(Get.context!);
+        } else {
+          await _simpleS3
+              .uploadFile(
+            File(postData!.addSoundModel!.sound),
+            "thrillvideo",
+            "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+            AWSRegions.usEast1,
+            debugLog: true,
+            fileName: '$currentUnix.mp3',
+            s3FolderPath: "sound",
+            accessControl: S3AccessControl.publicRead,
+          )
+              .then((value) async {
+            String tagList =
+                jsonEncode(extractHashTags(textEditingController.text));
+            videosController.postVideo(
+                videoId,
+                postData!.isDuet
+                    ? postData!.duetSound ?? ""
+                    : postData!.addSoundModel == null
+                        ? ""
+                        : postData!.addSoundModel!.isSoundFromGallery
+                            ? "$currentUnix.mp3"
+                            : postData!.addSoundModel!.sound.split('/').last,
+                postData!.addSoundModel?.name ?? "",
+                "1",
+                tagList,
+                selectedPrivacy.value,
+                allowComments.value ? 1 : 0,
+                textEditingController.text,
+                postData!.filterName.isEmpty ? '' : postData!.filterName,
+                "1",
+                '$currentUnix.png',
+                postData!.speed,
+                allowDuets.value,
+                allowComments.value,
+                postData!.duetFrom ?? '',
+                postData!.isDuet,
+                postData!.addSoundModel?.userId ?? 0);
+          });
+        }
+      });
+    });
+
+    GetStorage().write("videoPrivacy", selectedPrivacy.value);
+  }
+
+  createGIF() async {
+    String outputPath = '$saveCacheDirectory${postData!.newName}.png';
+    String filePath = postData!.isDuet
+        ? postData!.newPath!.substring(7, postData!.newPath!.length)
+        : postData!.newPath!.substring(7, postData!.newPath!.length);
+    FFmpegKit.execute(
+            "-i $filePath -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath")
+        .then((session) async {
+      final returnCode = await session.getReturnCode();
+
+      if (ReturnCode.isSuccess(returnCode)) {
+        // print("============================> GIF Success!!!!");
+      } else {
+        // print("============================> GIF Error!!!!");
+      }
+    });
+  }
 }

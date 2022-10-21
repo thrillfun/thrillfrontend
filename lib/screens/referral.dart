@@ -6,12 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../common/color.dart';
 import '../common/strings.dart';
-import '../models/user.dart';
 import '../widgets/video_item.dart';
 
 class Referral extends StatefulWidget {
@@ -31,7 +31,7 @@ class Referral extends StatefulWidget {
 
 class _ReferralState extends State<Referral> {
   bool checkBoxValue = true;
-  UserModel? userModel;
+  User? userModel;
   int referralCount = 0;
   String referralCode = '';
 
@@ -140,7 +140,7 @@ class _ReferralState extends State<Referral> {
                       children: [
                         Expanded(
                             child: Text(
-                          '${userModel?.referral_code}',
+                          '${userModel?.referralCode}',
                           style: const TextStyle(
                               fontSize: 18,
                               color: Colors.grey,
@@ -150,7 +150,7 @@ class _ReferralState extends State<Referral> {
                             onPressed: () {
                               try {
                                 Clipboard.setData(ClipboardData(
-                                        text: userModel?.referral_code))
+                                        text: userModel?.referralCode))
                                     .then((_) {
                                   showSuccessToast(context,
                                       "Referral Code Copied to Clipboard!");
@@ -202,7 +202,7 @@ class _ReferralState extends State<Referral> {
                         //share();
                         if (checkBoxValue) {
                           Share.share(
-                              "Hi, I am inviting you to Thrill a great short video app. Use my referral code: ${userModel?.referral_code} to earn rewards.");
+                              "Hi, I am inviting you to Thrill a great short video app. Use my referral code: ${userModel?.referralCode} to earn rewards.");
                         } else {
                           showErrorToast(
                               context, "You must agree to Privacy Policy!");
@@ -470,7 +470,7 @@ class _ReferralState extends State<Referral> {
   getUserData() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
-    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
+    User current = User.fromJson(jsonDecode(currentUser!));
     setState(() => userModel = current);
   }
 }

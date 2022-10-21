@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 
-import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
 
 part 'signup_event.dart';
@@ -129,7 +129,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
         var result = await _loginRepository.registerUser(
             event.fullName, event.mobile, event.dob, event.password);
         if (result['status']) {
-          UserModel user = UserModel.fromJson(result['data']['user']);
+          User user = User.fromJson(result['data']['user']);
           var pref = await SharedPreferences.getInstance();
           await pref.setString(
             'currentUser',

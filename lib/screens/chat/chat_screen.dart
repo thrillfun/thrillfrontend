@@ -8,11 +8,11 @@ import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 
 import '../../common/strings.dart';
-import '../../models/user.dart';
 import 'chat_contrroller.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -37,7 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController txtController = TextEditingController();
   String txtValue = '';
   List<ChatMsg> chats = List<ChatMsg>.empty(growable: true);
-  UserModel? userModel;
+  User? userModel;
   late InboxModel inboxModel = widget.inboxModel;
 
   @override
@@ -50,7 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
     if (currentUser != null) {
-      UserModel current = UserModel.fromJson(jsonDecode(currentUser));
+      User current = User.fromJson(jsonDecode(currentUser));
       setState(() => userModel = current);
     }
   }
@@ -156,7 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         : Expanded(
                             child: StreamBuilder<List<ChatMsg>>(
                               stream: ChatController.getChatMsg(
-                                userModel!.id > widget.inboxModel.id
+                                userModel!.id! > widget.inboxModel.id
                                     ? '${userModel!.id}_${widget.inboxModel.id}'
                                     : '${widget.inboxModel.id}_${userModel!.id}',
                               ),
@@ -229,7 +229,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             seen: false,
                                           );
                                           ChatController.sendMsg(
-                                              userModel!.id >
+                                              userModel!.id! >
                                                       widget.inboxModel.id
                                                   ? '${userModel!.id}_${widget.inboxModel.id}'
                                                   : '${widget.inboxModel.id}_${userModel!.id}',

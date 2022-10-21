@@ -8,7 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/models/user.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 
 import '../../common/color.dart';
 import '../../common/strings.dart';
@@ -34,7 +34,7 @@ class QrCode extends StatefulWidget {
 class _QrCodeState extends State<QrCode> {
   String qrData = "";
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  UserModel? userModel;
+  User? userModel;
 
   @override
   void initState() {
@@ -107,7 +107,7 @@ class _QrCodeState extends State<QrCode> {
                   decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: ColorManager.spinColorDivider)),
-                  child: userModel!.avatar.isEmpty
+                  child: userModel!.avatar!.isEmpty
                       ? Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: SvgPicture.asset("assets/profile.svg"),
@@ -128,7 +128,7 @@ class _QrCodeState extends State<QrCode> {
               ),
               Positioned(
                 top: 40,
-                child: Text(userModel!.name,
+                child: Text(userModel!.name!,
                     style: Theme.of(context).textTheme.headline3),
               ),
               Positioned(
@@ -302,7 +302,7 @@ class _QrCodeState extends State<QrCode> {
   getUserModel() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
-    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
+    User current = User.fromJson(jsonDecode(currentUser!));
     setState(() {
       userModel = current;
       qrData = "Thrill User ID :${userModel?.id}\nProfile: www.google.com";

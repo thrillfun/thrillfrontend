@@ -12,7 +12,6 @@ import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:get_storage/get_storage.dart';
 
-import '../../models/user.dart';
 import '../../repository/login/login_repository.dart';
 
 part 'login_event.dart';
@@ -68,10 +67,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         if (result['status']) {
           try {
             var pref = await SharedPreferences.getInstance();
-            UserModel user = UserModel.fromJson(result['data']['user']);
+            User user = User.fromJson(result['data']['user']);
             print(result['data']['token']);
             GetStorage().write('token', result['data']['token']).toString();
-            GetStorage().write('user', UserModel.fromJson(result['data']['user']));
+            GetStorage().write('user', User.fromJson(result['data']['user']));
 
             await pref.setString(
               'currentUser',
@@ -116,10 +115,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           if (result['status']) {
             var pref = await SharedPreferences.getInstance();
             try {
-              UserModel user = UserModel.fromJson(result['data']['user']);
+              User user = User.fromJson(result['data']['user']);
 
               GetStorage().write('token', result['data']['token']).toString();
-              GetStorage().write('user', UserModel.fromJson(result['data']['user']));
+              GetStorage().write('user', User.fromJson(result['data']['user']));
 
               await pref.setString(
                 'currentUser',
@@ -171,9 +170,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             fbid, 'facebook', email, name);
         if (result['status']) {
           try {
-            UserModel user = UserModel.fromJson(result['data']['user']);
+            User user = User.fromJson(result['data']['user']);
             GetStorage().write('token', result['data']['token']).toString();
-            GetStorage().write('user', UserModel.fromJson(result['data']['user']));
+            GetStorage().write('user', User.fromJson(result['data']['user']));
 
             var pref = await SharedPreferences.getInstance();
             await pref.setString(

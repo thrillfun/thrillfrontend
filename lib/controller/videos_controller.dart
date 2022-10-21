@@ -1,51 +1,58 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/blocs/login/login_bloc.dart';
-import 'package:thrill/controller/data_controller.dart';
+import 'package:thrill/controller/model/delete_video_response.dart';
 import 'package:thrill/controller/model/liked_videos_model.dart';
 import 'package:thrill/controller/model/own_videos_model.dart';
+import 'package:thrill/controller/model/private_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
+import 'package:thrill/controller/model/video_fields_model.dart' as videoFields;
 import 'package:thrill/controller/users_controller.dart';
-import 'package:thrill/models/user.dart';
 import 'package:thrill/models/videos_post_response.dart';
-import 'package:thrill/screens/home/home.dart';
+import 'package:thrill/rest/rest_url.dart';
+import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/utils/util.dart';
-import 'package:thrill/controller/model/delete_video_response.dart';
+
+import '../screens/profile/profile.dart';
 
 class VideosController extends GetxController {
   RxBool on = false.obs; // our observable
+  var token = GetStorage().read('token');
 
   // swap true/false & save it to observable
 
   var usersController = Get.find<UserController>();
-  var dataController = Get.find<DataController>();
 
   var isLoading = false.obs;
-  var isLikedVideosLoading = false.obs;
+  var isLikedVideosLoading = true.obs;
   var isUserVideosLoading = false.obs;
   var videosLoading = false.obs;
   var isFollowingLoading = false.obs;
   var isError = false.obs;
 
   RxList<Videos> userVideosList = RxList();
+  RxList<PrivateVideos> privateVideosList = RxList();
   RxList<PublicVideos> publicVideosList = RxList();
   RxList<PublicVideos> followingVideosList = RxList();
+  var languageList = RxList<videoFields.Languages>();
+  var categoriesList = RxList<videoFields.Categories>();
+  var hashTagList = RxList<videoFields.Hashtags>();
 
   var otherUserVideos = RxList<Videos>();
   var likedVideos = RxList<LikedVideos>();
   var othersLikedVideos = RxList<LikedVideos>();
 
   VideosController() {
-    getUserVideos();
-    getAllVideos();
-    getFollowingVideos();
-    getUserLikedVideos();
+    try {
+      getAllVideos();
+    } catch (e) {
+      print(e);
+    }
   }
+
   void toggle() => on.value = on.value ? false : true;
 
   RxList<int> adIndexes = [
@@ -105,25 +112,24 @@ class VideosController extends GetxController {
 
   getFollowingVideos() async {
     isFollowingLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
-    var currentUser = instance.getString('currentUser');
 
-    if (token!.isEmpty && currentUser!.isEmpty) {
+    if (token.isEmpty) {
       errorToast("Please Login to get your followings");
     } else {
       var response = await http.get(
-        Uri.parse('http://3.129.172.46/dev/api/video/following'),
+        Uri.parse('${RestUrl.baseUrl}/video/following'),
         headers: {"Authorization": "Bearer $token"},
       ).timeout(const Duration(seconds: 60));
 
       try {
         followingVideosList =
             PublicVideosModel.fromJson(json.decode(response.body)).data!.obs;
-      } catch (e) {
+      } on HttpException catch (e) {
         errorToast(PublicVideosModel.fromJson(json.decode(response.body))
             .message
             .toString());
+      } on Exception catch (e) {
+        print(e);
       }
     }
 
@@ -134,22 +140,14 @@ class VideosController extends GetxController {
 
   getUserVideos() async {
     isUserVideosLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
-    var currentUser = instance.getString('currentUser');
-    UserModel? current;
-    if (currentUser != null) {
-      current = UserModel.fromJson(jsonDecode(currentUser));
-    }
-    if (GetStorage().read("token").toString().isEmpty) {
+    if (token.isEmpty) {
     } else {
-      var response = await http.post(
-          Uri.parse('http://3.129.172.46/dev/api/video/user-videos'),
-          headers: {
-            "Authorization": "Bearer ${GetStorage().read("token")}"
-          },
-          body: {
-            "user_id": "${current!.id}"
-          }).timeout(const Duration(seconds: 60));
+      var response = await http
+          .post(Uri.parse('${RestUrl.baseUrl}/video/user-videos'), headers: {
+        "Authorization": "Bearer ${GetStorage().read("token")}"
+      }, body: {
+        "user_id": "${UserController().userModel.value.id}"
+      }).timeout(const Duration(seconds: 60));
 
       try {
         userVideosList =
@@ -165,19 +163,42 @@ class VideosController extends GetxController {
     update();
   }
 
+  getUserPrivateVideos() async {
+    isUserVideosLoading.value = true;
+
+    if (GetStorage().read("token").toString().isEmpty) {
+    } else {
+      var response = await http.get(
+        Uri.parse('${RestUrl.baseUrl}/video/private'),
+        headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
+      ).timeout(const Duration(seconds: 60));
+
+      try {
+        privateVideosList =
+            PrivateVideosModel.fromJson(json.decode(response.body)).data!.obs;
+      } catch (e) {
+        errorToast(PrivateVideosModel.fromJson(json.decode(response.body))
+            .message
+            .toString());
+      }
+    }
+
+    isUserVideosLoading.value = false;
+    update();
+  }
+
   getOtherUserVideos(int userId) async {
     videosLoading.value = true;
     otherUserVideos.clear();
-    if (GetStorage().read("token").toString().isNotEmpty) {
+    if (token != null) {
       var response = await http.post(
-          Uri.parse('http://3.129.172.46/dev/api/video/user-videos'),
+          Uri.parse('${RestUrl.baseUrl}/video/user-videos'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
           body: {"user_id": "$userId"}).timeout(const Duration(seconds: 60));
       try {
         otherUserVideos =
             OwnVideosModel.fromJson(json.decode(response.body)).data!.obs;
       } on Exception catch (e) {
-        log(e.toString());
         errorToast(OwnVideosModel.fromJson(json.decode(response.body))
             .message
             .toString());
@@ -189,18 +210,15 @@ class VideosController extends GetxController {
 
   getUserLikedVideos() async {
     isLikedVideosLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
-    var currentUser = instance.getString('currentUser');
-    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
 
-    if (GetStorage().read("token").toString().isNotEmpty) {
+    if (token != null) {
       var response = await http.post(
-          Uri.parse('http://3.129.172.46/dev/api/user/user-liked-videos'),
+          Uri.parse('${RestUrl.baseUrl}/user/user-liked-videos'),
           headers: {
             "Authorization": "Bearer ${GetStorage().read("token")}"
           },
           body: {
-            "user_id": "${current.id}"
+            "user_id": "${UserController().userModel.value.id}"
           }).timeout(const Duration(seconds: 60));
 
       try {
@@ -219,11 +237,10 @@ class VideosController extends GetxController {
   getOthersLikedVideos(int userId) async {
     othersLikedVideos.clear();
     isLikedVideosLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
 
-    if (GetStorage().read("token").toString().isNotEmpty) {
+    if (token != null) {
       var response = await http.post(
-          Uri.parse('http://3.129.172.46/dev/api/user/user-liked-videos'),
+          Uri.parse('${RestUrl.baseUrl}/user/user-liked-videos'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
           body: {"user_id": "$userId"}).timeout(const Duration(seconds: 60));
 
@@ -242,19 +259,15 @@ class VideosController extends GetxController {
 
   likeVideo(int isLike, int videoId) async {
     isLikedVideosLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
-    var currentUser = instance.getString('currentUser');
-    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
-
-    if (token!.isNotEmpty) {
-      var response = await http
-          .post(Uri.parse('http://3.129.172.46/dev/api/user/like'), headers: {
-        "Authorization": "Bearer $token"
-      }, body: {
-        "video_id": "$videoId",
-        "is_like": "$isLike"
-      }).timeout(const Duration(seconds: 60));
+    if (token != null) {
+      var response = await http.post(Uri.parse('${RestUrl.baseUrl}/user/like'),
+          headers: {
+            "Authorization": "Bearer $token"
+          },
+          body: {
+            "video_id": "$videoId",
+            "is_like": "$isLike"
+          }).timeout(const Duration(seconds: 60));
       likedVideos.clear();
       try {
         likedVideos =
@@ -291,17 +304,13 @@ class VideosController extends GetxController {
       bool isDuet,
       int soundOwnerId) async {
     isLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
-    var currentUser = instance.getString('currentUser');
-    UserModel current = UserModel.fromJson(jsonDecode(currentUser!));
 
-    if (token!.isNotEmpty) {
+    if (token != null) {
       var response = await http.post(
-        Uri.parse('http://3.129.172.46/dev/api/video/post'),
+        Uri.parse('${RestUrl.baseUrl}/video/post'),
         headers: {"Authorization": "Bearer $token"},
         body: {
-          'user_id': current.id.toString(),
+          'user_id': UserController().userModel.value.id.toString(),
           'video': videoUrl,
           'sound': sound,
           'sound_name': soundName,
@@ -331,6 +340,7 @@ class VideosController extends GetxController {
               .toString());
 
           videosController.getAllVideos();
+          Get.offAll(BottomNavigation());
         } catch (e) {
           errorToast(VideoPostResponse.fromJson(json.decode(response.body))
               .message
@@ -346,16 +356,10 @@ class VideosController extends GetxController {
   }
 
   deleteVideo(int videoId) async {
-    var instance = await SharedPreferences.getInstance();
-    var currentUser = instance.getString('currentUser');
-    UserModel? current;
-    if (currentUser != null) {
-      current = UserModel.fromJson(jsonDecode(currentUser));
-    }
-    if (GetStorage().read("token").toString().isEmpty) {
+    if (token.isEmpty) {
     } else {
       var response = await http.post(
-          Uri.parse('http://3.129.172.46/dev/api/video/delete'),
+          Uri.parse('${RestUrl.baseUrl}/video/delete'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
           body: {"video_id": "$videoId"}).timeout(const Duration(seconds: 60));
 
@@ -366,12 +370,46 @@ class VideosController extends GetxController {
 
         getAllVideos();
         getUserVideos();
-
+        getUserPrivateVideos();
       } catch (e) {
         errorToast(DeleteVideoResponse.fromJson(json.decode(response.body))
             .message
             .toString());
       }
     }
+  }
+
+  getVideoFields() async {
+    isLoading.value = true;
+
+    var response = await http.get(
+      Uri.parse('${RestUrl.baseUrl}/video/field-data'),
+      headers: {"Authorization": "Bearer $token"},
+    ).timeout(const Duration(seconds: 60));
+    try {
+      languageList =
+          videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
+              .data!
+              .languages!
+              .obs;
+
+      categoriesList =
+          videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
+              .data!
+              .categories!
+              .obs;
+      hashTagList =
+          videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
+              .data!
+              .hashtags!
+              .obs;
+    } catch (e) {
+      errorToast(e.toString());
+    }
+    languageList.refresh();
+    categoriesList.refresh();
+    hashTagList.refresh();
+    isLoading.value = false;
+    update();
   }
 }

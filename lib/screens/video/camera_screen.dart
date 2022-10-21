@@ -9,7 +9,9 @@ import 'package:external_path/external_path.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -17,10 +19,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/data_controller.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/main.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/post_data.dart';
-import 'package:thrill/models/user.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/video/post.dart';
@@ -35,7 +37,7 @@ import 'package:video_player/video_player.dart';
 import '../../common/color.dart';
 import 'package:just_audio/just_audio.dart';
 
-var timer = 60.obs;
+var timer = 10.obs;
 Timer? time;
 CameraController? _controller;
 
@@ -50,8 +52,6 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin<CameraScreen> {
-  final player = AudioPlayer(); // Create a player
-
   File? _imageFile;
   File? _videoFile;
 
@@ -79,8 +79,8 @@ class _CameraScreenState extends State<CameraScreen>
 
   AnimationController? animationController;
 
-  ResolutionPreset currentResolutionPreset = ResolutionPreset.max;
-  late UserModel userModel;
+  ResolutionPreset currentResolutionPreset = ResolutionPreset.medium;
+  late User userModel;
 
   //get camera permission status and start camera
   getPermissionStatus() async {
@@ -95,55 +95,11 @@ class _CameraScreenState extends State<CameraScreen>
       // Set and initialize the new camera
       onNewCameraSelected(cameras[0]);
       // refreshAlreadyCapturedImages();
-      if (widget.selectedSound.isNotEmpty) {
-        final duration = await player.setUrl(// Load a URL
-            widget.selectedSound);
-        timer.value = duration!.inSeconds;
-      } // Schemes: (https: | file: | asset: )
+
     } else {
       log('Camera Permission: DENIED');
     }
   }
-
-  //referesh gallery to check new videos or images
-  // refreshAlreadyCapturedImages() async {
-  //   //get directory
-  //   final directory = await getApplicationDocumentsDirectory();
-  //   //get directory media list
-  //   List<FileSystemEntity> fileList = await directory.list().toList();
-  //   allFileList.clear();
-  //   //get file names
-  //   List<Map<int, dynamic>> fileNames = [];
-
-  //   // loop through files lists containing video or audio
-  //   fileList.forEach((file) {
-  //     if (file.path.contains('.jpg') || file.path.contains('.mp4')) {
-  //       allFileList.add(File(file.path));
-
-  //       String name = file.path.split('/').last.split('.').first;
-  //       fileNames.add({0: int.parse(name), 1: file.path.split('/').last});
-  //     }
-  //   });
-
-  //   if (fileNames.isNotEmpty) {
-  //     //get recent file
-  //     final recentFile =
-  //         fileNames.reduce((curr, next) => curr[0] > next[0] ? curr : next);
-  //     String recentFileName = recentFile[1];
-
-  //     //check if recent file is audio or video
-  //     if (recentFileName.contains('.mp4')) {
-  //       _videoFile = File('${directory.path}/$recentFileName');
-  //       _imageFile = null;
-  //       //   _startVideoPlayer();
-  //     } else {
-  //       _imageFile = File('${directory.path}/$recentFileName');
-  //       _videoFile = null;
-  //     }
-
-  //     setState(() {});
-  //   }
-  // }
 
   //start video recording
   Future<void> startVideoRecording() async {
@@ -153,78 +109,51 @@ class _CameraScreenState extends State<CameraScreen>
     }
 
     try {
-
-      await _controller!.startVideoRecording();
-      player.play();
-
-      setState(() {
-        _isRecordingInProgress = true;
-        isRecordingComplete = false;
-        // startTimer();
-      });
+      await _controller!.startVideoRecording().then((value) => {
+            setState(() {
+              _isRecordingInProgress = true;
+              isRecordingComplete = false;
+            })
+          });
     } on CameraException catch (e) {
       print('Error starting to record video: $e');
     }
   }
 
-  Future<XFile?> stopVideoRecording() async {
-    if (!_controller!.value.isRecordingVideo) {
-      // Recording is already is stopped state
-      return null;
-    }
-    try {
-      player.pause();
+  Future<void> stopVideoRecording() async {
+    if (_controller!.value.isInitialized &&
+        _controller!.value.isRecordingVideo) {
+      try {
+        var file = await _controller!.stopVideoRecording();
+        File videoFile = File(file.path);
 
-      XFile? rawVideo = await _controller!.stopVideoRecording();
-      File videoFile = File(rawVideo.path);
+        final directory = await ExternalPath.getExternalStoragePublicDirectory(
+            ExternalPath.DIRECTORY_PICTURES);
 
-      setState(() {
-        _isRecordingInProgress = false;
-      });
-
-      File file = File(rawVideo.path);
-
-      final directory = await ExternalPath.getExternalStoragePublicDirectory(
-          ExternalPath.DIRECTORY_PICTURES);
-
-      String fileFormat = videoFile.path.split('.').last;
-
-      await checkDirectory('$directory/thrill');
-      await videoFile.copy('$directory/thrill/${rawVideo.name}');
-      // FFmpegKit.execute(
-      //     'ffmpeg -i ${videoFile.path} -filter:v "setpts=0.5*PTS" $directory/thrill/${rawVideo.name}')
-      //     .then((value) => Get.snackbar('output', ''));
-
-      // final dir = Directory("$directory/thrill");
-      // final List<FileSystemEntity> entities = await dir.list().toList();
-
-      // List<String> videosList = <String>[];
-
-      // entities.forEach((element) {
-      //   videosList.add("${element.path}");
-      // });
-
-      // await VESDK
-      //     .openEditor(Video.composition(videos: videosList),
-      //         configuration: setConfig("$directory/thrill"))
-      //     .then((value) {
-      //   print(value!.video);
-      // });
-
-      // _downloadImage(filterUrl);\
-      setState(() {
-        isRecordingComplete = true;
-      });
-      return rawVideo;
-    } on CameraException catch (e) {
-      print('Error stopping video recording: $e');
-      return null;
+        if (await Directory('$directory/thrill').exists() == true) {
+          print('Yes this directory Exists');
+        } else {
+          print('creating new Directory');
+          Directory('$directory/thrill').create();
+        }
+        await videoFile.copy('$directory/thrill/${file.name}');
+        setState(() {
+          _isRecordingInProgress = false;
+          isRecordingComplete = true;
+        });
+      } on CameraException catch (e) {
+        setState(() {
+          _isRecordingInProgress = false;
+        });
+        errorToast(e.description.toString());
+      }
+    } else {
+      return;
     }
   }
 
   Future<Directory> checkDirectory(String path) async {
-    var directory = await Directory(path).exists();
-    if (directory) {
+    if (await Directory(path).exists() == true) {
       print('Yes this directory Exists');
       return Directory(path);
     } else {
@@ -347,55 +276,19 @@ class _CameraScreenState extends State<CameraScreen>
     super.initState();
   }
 
-  //start timer for video recording to be ended on timer end
-  void startTimer() async {
-    //check if permission granted
-    var status = await Permission.storage.status;
-    if (status.isGranted) {
-      time = Timer.periodic(Duration(seconds: 1), (t) async {
-        if (timer.value > 0) {
-          timer.value--;
-        } else {
-          t.cancel();
-          animationController?.stop();
-          await stopVideoRecording();
-          timer.value = 60;
-          await player.stop();
-        }
-
-        // if (timer.value == 0 && _isRecordingInProgress) {
-        //
-        // }
-      });
-    } else {
-      //ask for permission
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.storage,
-      ].request();
-    }
-  }
-
-  imgly.Configuration setConfig() {
+  imgly.Configuration setConfig(List<SongInfo> albums) {
     var fileUrl = "https://samplelib.com/lib/preview/mp3/sample-15s.mp3";
     List<imgly.AudioClip> audioClips = [];
-    if (widget.selectedSound!.isNotEmpty) {
-      audioClips = [
-        imgly.AudioClip("sample1", widget.selectedSound.toString()),
-      ];
-    } else {
-      audioClips = [
-        imgly.AudioClip("sample1", fileUrl),
-        imgly.AudioClip("sample2",
-            "https://thrillvideo.s3.amazonaws.com/sound/1660389291493.mp3"),
-        imgly.AudioClip("sample3",
-            "https://thrillvideo.s3.amazonaws.com/sound/1660388748807.mp3"),
-        imgly.AudioClip("sample4",
-            "https://thrillvideo.s3.amazonaws.com/sound/1660641003254.mp3")
-      ];
-    }
+
+    albums.forEach((element) {
+      audioClips.add(imgly.AudioClip(
+        element.title,
+        element.filePath,
+      ));
+    });
 
     var audioClipCategories = [
-      imgly.AudioClipCategory("audio_cat_1", "AWS",
+      imgly.AudioClipCategory("audio_cat_1", "local",
           thumbnailURI:
               "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/1200px-Amazon_Web_Services_Logo.svg.png",
           items: audioClips),
@@ -404,8 +297,10 @@ class _CameraScreenState extends State<CameraScreen>
     var audioOptions = imgly.AudioOptions(categories: audioClipCategories);
     var codec = imgly.VideoCodec.values;
     var exportOptions = imgly.ExportOptions(
-        forceExport: true,
-        video: imgly.VideoOptions(quality: 0.4, codec: codec[0]));
+      serialization: imgly.SerializationOptions(
+          enabled: true, exportType: imgly.SerializationExportType.object),
+      video: imgly.VideoOptions(quality: 0.4, codec: codec[0]),
+    );
 
     imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
         RestUrl.assetsUrl + "logo.png",
@@ -421,7 +316,8 @@ class _CameraScreenState extends State<CameraScreen>
         backgroundColor: ColorManager.colorAccent,
         menuBackgroundColor: ColorManager.colorAccent,
         toolbarBackgroundColor: ColorManager.colorAccent));
-    var trimOptions = imgly.TrimOptions(maximumDuration: 60);
+    var trimOptions = imgly.TrimOptions(
+        maximumDuration: 60, forceMode: imgly.ForceTrimMode.always);
 
     final configuration = imgly.Configuration(
       trim: trimOptions,
@@ -457,14 +353,14 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void dispose() {
     _controller?.dispose();
+    animationController!.dispose();
+
     time?.cancel();
-    player.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -475,7 +371,7 @@ class _CameraScreenState extends State<CameraScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         AspectRatio(
-                          aspectRatio: .97 / _controller!.value.aspectRatio,
+                          aspectRatio: 9 / 16,
                           child: CameraPreview(_controller!),
                         ),
                         Expanded(
@@ -542,7 +438,7 @@ class _CameraScreenState extends State<CameraScreen>
                                   ),
                                   InkWell(
                                     onTap: () async {},
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.speed,
                                       color: Colors.white,
                                     ),
@@ -551,12 +447,15 @@ class _CameraScreenState extends State<CameraScreen>
                                   InkWell(
                                     onTap: () async {
                                       if (_isRecordingInProgress) {
-                                        isRecordingRunning();
-                                        await stopVideoRecording();
+                                        try {
+                                          await stopVideoRecording();
+                                          isRecordingRunning();
+                                        } on CameraException catch (e) {
+                                          errorToast(e.toString());
+                                        }
                                       } else {
-                                        isRecordingRunning();
                                         await startVideoRecording();
-                                        startTimer();
+                                        isRecordingRunning();
                                       }
                                     },
                                     child: Stack(
@@ -585,7 +484,7 @@ class _CameraScreenState extends State<CameraScreen>
                                           width: 80,
                                           height: 80,
                                           child: AnimatedBuilder(
-                                            animation: DataController(),
+                                            animation: animationController!,
                                             builder: (BuildContext context,
                                                 Widget? child) {
                                               return CustomPaint(
@@ -595,25 +494,6 @@ class _CameraScreenState extends State<CameraScreen>
                                                 color: Colors.red,
                                               ));
                                             },
-
-                                            // return CountDownProgressIndicator(
-                                            //   controller:
-                                            //       countDownController,
-                                            //   valueColor: Colors.red,
-                                            //   autostart: false,
-                                            //   backgroundColor: Colors.white,
-                                            //   initialPosition: 0,
-                                            //   duration: timer.value,
-                                            //   onComplete:
-                                            //       (timerValue) async {
-                                            //         timer.value = timerValue;
-                                            //     if (_isRecordingInProgress ||
-                                            //         timer.value == 0) {
-                                            //       await stopVideoRecording();
-                                            //       openEditor();
-                                            //     }
-                                            //   },
-                                            // );
                                           ),
                                         )
                                       ],
@@ -624,7 +504,7 @@ class _CameraScreenState extends State<CameraScreen>
                                       ImagePicker()
                                           .pickVideo(
                                               source: ImageSource.gallery)
-                                          .then((value) => VESDK
+                                          .then((value) async => await VESDK
                                                   .openEditor(
                                                       Video(value!.path))
                                                   .then((value) async {
@@ -632,7 +512,7 @@ class _CameraScreenState extends State<CameraScreen>
                                                   var addSoundModel =
                                                       AddSoundModel(
                                                           0,
-                                                          userModel.id,
+                                                          userModel.id!,
                                                           0,
                                                           "",
                                                           "",
@@ -660,6 +540,7 @@ class _CameraScreenState extends State<CameraScreen>
 
                                                   // await Get.to(PostVideo(
                                                   //     data: postData));
+
                                                   await Get.to(PostScreenGetx(
                                                     postData,
                                                   ));
@@ -772,9 +653,9 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   void isRecordingRunning() {
-    if (animationController!.isAnimating)
-      animationController?.stop();
-    else {
+    if (animationController!.isAnimating) {
+      animationController!.stop();
+    } else {
       animationController!.reverse(
           from: animationController?.value == 0.0
               ? 1.0
@@ -794,48 +675,131 @@ class _CameraScreenState extends State<CameraScreen>
     entities.forEach((element) {
       videosList.add("${element.path}");
     });
+    List<SongInfo> albums = [];
+    try {
+      FlutterAudioQuery flutterAudioQuery = FlutterAudioQuery();
+      albums = await flutterAudioQuery.getSongs();
+    } catch (e) {
+      errorToast(e.toString());
+    } finally {
+      await VESDK
+          .openEditor(Video.composition(videos: videosList),
+              configuration: setConfig(albums))
+          .then((value) async {
+        Map<dynamic, dynamic> serializationData = await value?.serialization;
 
-    return await VESDK
-        .openEditor(Video.composition(videos: videosList),
-            configuration: setConfig())
-        .then((value) async {
-      if (value == null) {
-        final dir = Directory("$directory/thrill");
-        dir.exists().then((value) => dir.delete(recursive: true));
-      }
-      await dir.delete(recursive: true);
+        print("data=>" + serializationData.toString());
 
-      if (value != null) {
-        var addSoundModel =
-            AddSoundModel(0, userModel.id, 0, "", "", '', '', false);
-        PostData postData = PostData(
-          speed: '1',
-          newPath: value.video,
-          filePath: value.video,
-          filterName: "",
-          addSoundModel: addSoundModel,
-          isDuet: false,
-          isDefaultSound: true,
-          isUploadedFromGallery: true,
-          trimStart: 0,
-          trimEnd: 0,
-        );
+        List<dynamic> operationData = serializationData['operations'].toList();
 
-        // Get.snackbar("path", value.video);
-        await Get.to(PostScreenGetx(
-          postData,
-        ));
-        //await Get.to(PostVideo(data: postData));
-      }
+        if (value == null) {
+          final dir = Directory("$directory/thrill");
+          dir.exists().then((value) => dir.delete(recursive: true));
+        }
 
-      print(value!.video);
-    });
+        await dir.delete(recursive: true);
+
+        var isOriginal = true.obs;
+        var path = '/storage/emulated/0/download/originalaudio.mp3';
+        var songPath = '';
+        var songName = '';
+        operationData.forEach((element) {
+          Map<dynamic, dynamic> data = element['options'];
+          if (data.containsKey("clips")) {
+            isOriginal.value = false;
+          }
+        });
+        if (!isOriginal.value) {
+          operationData.forEach((operation) {
+            albums.forEach((element) {
+              if(operation['options']['type'] =='audio'){
+                if (element.title.contains(operation
+                ['options']['clips'][0]['identifier']
+                    .toString())) {
+                  songPath = element.filePath;
+                  songName = element.title;
+                }
+              }
+
+
+            });
+          });
+
+          if (value != null) {
+            var addSoundModel = AddSoundModel(
+                0,
+                userModel.id!,
+                0,
+                songPath.isNotEmpty ? songPath : path,
+                songName.isNotEmpty ? songName : "original",
+                '',
+                '',
+                true);
+            PostData postData = PostData(
+              speed: '1',
+              newPath: value.video,
+              filePath: value.video,
+              filterName: "",
+              addSoundModel: addSoundModel,
+              isDuet: false,
+              isDefaultSound: true,
+              isUploadedFromGallery: true,
+              trimStart: 0,
+              trimEnd: 0,
+            );
+
+            // Get.snackbar("path", value.video);
+            Get.to(() => PostScreenGetx(
+              postData,
+            ))?.then((value) async {
+              File audioFile = File(path);
+              await audioFile.delete(recursive: true);
+            });
+          }
+        } else {
+          await FFmpegKit.execute(
+                  "-i ${value!.video} -map 0:a -acodec libmp3lame $path")
+              .then((audio) async {
+            if (value != null) {
+              var addSoundModel = AddSoundModel(
+                  0,
+                  userModel.id!,
+                  0,
+                  songPath.isNotEmpty ? songPath : path,
+                  songName.isNotEmpty ? songName : "original",
+                  '',
+                  '',
+                  true);
+              PostData postData = PostData(
+                speed: '1',
+                newPath: value.video,
+                filePath: value.video,
+                filterName: "",
+                addSoundModel: addSoundModel,
+                isDuet: false,
+                isDefaultSound: true,
+                isUploadedFromGallery: true,
+                trimStart: 0,
+                trimEnd: 0,
+              );
+
+              // Get.snackbar("path", value.video);
+              await Get.to(() => PostScreenGetx(
+                    postData,
+                  ));
+              File audioFile = File(path);
+              await audioFile.delete(recursive: true);
+            }
+          });
+        }
+      });
+    }
   }
 
   loadUserModel() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
-    userModel = UserModel.fromJson(jsonDecode(currentUser!));
+    userModel = User.fromJson(jsonDecode(currentUser!));
 
     setState(() {});
     var status = await Permission.storage.isGranted;

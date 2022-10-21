@@ -68,6 +68,7 @@ class HashTagsScreen extends StatelessWidget {
                               itemBuilder: (context, index) => InkWell(
                                   onTap: () {
                                     Get.to(VideoPlayerScreen(
+                                      isLock:false,
                                       isFav: false,
                                       isFeed: false,
                                       position: index,

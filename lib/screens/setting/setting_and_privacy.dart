@@ -7,12 +7,24 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ant_design.dart';
+import 'package:iconify_flutter/icons/carbon.dart';
+import 'package:iconify_flutter/icons/eva.dart';
+import 'package:iconify_flutter/icons/fluent.dart';
+import 'package:iconify_flutter/icons/ic.dart';
+import 'package:iconify_flutter/icons/icon_park_outline.dart';
+import 'package:iconify_flutter/icons/iconoir.dart';
+import 'package:iconify_flutter/icons/mdi.dart';
+import 'package:iconify_flutter/icons/ph.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/models/user.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/privacy_policy.dart';
+import 'package:thrill/screens/referal_screen.dart';
 import 'package:thrill/screens/screen.dart';
 import 'package:thrill/screens/terms_of_service.dart';
 import 'package:thrill/utils/util.dart';
@@ -22,168 +34,404 @@ import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
 import '../../widgets/video_item.dart';
 
-class SettingAndPrivacy extends StatefulWidget {
-  const SettingAndPrivacy({Key? key}) : super(key: key);
+class SettingAndPrivacy extends StatelessWidget {
+  SettingAndPrivacy(
+      {required this.avatar, required this.name, required this.userName});
 
-  @override
-  State<SettingAndPrivacy> createState() => _SettingAndPrivacyState();
-}
-
-class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
-  @override
-  void initState() {
-    try {
-      reelsPlayerController?.pause();
-    } catch (_) {}
-    super.initState();
-  }
+  String avatar = "";
+  String name = "";
+  String userName = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            padding: EdgeInsets.only(
-              top: 50,
-              left: 20,
-            ),
-            alignment: Alignment.topLeft,
+          SizedBox(
             width: MediaQuery.of(context).size.width,
-            height: 250,
-            child: Text(
-              "Settings",
-              style: TextStyle(color: Colors.white, fontSize: 25),
-            ),
-            decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20)),
-                gradient: LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                  colors: <Color>[
-                    Color(0xFF171D22),
-                    Color(0xff143035),
-                    Color(0xff171D23)
-                  ],
-                )),
+            height: Get.height,
+            child: loadSvgCacheImage("background_settings.svg"),
           ),
-          Container(
-            margin: const EdgeInsets.only(top: 150, left: 5, right: 5),
-            height: MediaQuery.of(context).size.height,
-            child: Card(
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10))),
-              elevation: 5,
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  IconButton(
+                      onPressed: () => Get.back(),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                      )),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.transparent,
+                              ),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(200))),
+                          width: 60,
+                          height: 60,
+                          child: SizedBox(
+                              height: 60,
+                              width: 60,
+                              child: avatar.isNotEmpty
+                                  ? ClipOval(
+                                      child: CachedNetworkImage(
+                                        fit: BoxFit.cover,
+                                        imageUrl:
+                                            '${RestUrl.profileUrl}${avatar}',
+                                        placeholder: (a, b) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                    )
+                                  : Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: SvgPicture.asset(
+                                        'assets/profile.svg',
+                                        width: 10,
+                                        height: 10,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ))),
                       const SizedBox(
-                        height: 15,
+                        width: 10,
                       ),
-                      title(account),
-                      const SizedBox(
-                        height: 10,
+                      Expanded(
+                          child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "@$userName",
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                                color: Colors.white.withOpacity(0.5),
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal),
+                          )
+                        ],
+                      )),
+                      GestureDetector(
+                        onTap: () => switchAccountLayout(),
+                        child: Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.white,
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(200))),
+                            width: 30,
+                            height: 30,
+                            child: const Iconify(
+                              Eva.flip_2_fill,
+                              color: Colors.white,
+                              size: 20,
+                            )),
+                      )
+                    ],
+                  ),
+                  Divider(
+                    color: Colors.white.withOpacity(0.5),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  //title(account),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(ManageAccount());
+                        //        Navigator.pushNamed(context, '/manageAccount');
+                      },
+                      child: mainTile(Carbon.person, manageAccount)),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(ReferalScreen());
+                        //  Navigator.pushNamed(context, '/inbox');
+                      },
+                      child: mainTile(
+                          Fluent.gift_card_arrow_right_24_regular, "Referral")),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const Inbox());
+                        //  Navigator.pushNamed(context, '/inbox');
+                      },
+                      child: mainTile(Mdi.email_newsletter, "Invite Friends")),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const Inbox());
+                        //  Navigator.pushNamed(context, '/inbox');
+                      },
+                      child: mainTile(Ic.twotone_favorite, 'Favourite')),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const Inbox());
+                        //  Navigator.pushNamed(context, '/inbox');
+                      },
+                      child: mainTile(Ic.round_inbox, inbox)),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const Privacy());
+                        //  Navigator.pushNamed(context, '/privacy');
+                      },
+                      child:
+                          mainTile(IconParkOutline.personal_privacy, privacy)),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const Wallet());
+                        //  Navigator.pushNamed(context, '/wallet');
+                      },
+                      child: mainTile(Ph.wallet_bold, wallet)),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const QrCode());
+                        //  Navigator.pushNamed(context, '/qrcode');
+                      },
+                      child: mainTile(Iconoir.qr_code, qrCode)),
+                  GestureDetector(
+                      onTap: () {
+                        //share();
+                        Share.share(
+                            'Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me.');
+                      },
+                      child: mainTile(Carbon.share, shareProfile)),
+
+                  //  title(contentAndActivity),
+
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const PushNotification());
+                        //  Navigator.pushNamed(context, '/pushNotification');
+                      },
+                      child: mainTile(
+                          Ic.outline_notifications_active, pushNotification)),
+                  GestureDetector(
+                    onTap: () {},
+                    child: SizedBox(
+                      height: 25,
+                      child: ListTile(
+                        title: const Text(
+                          appLanguage,
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                        leading: Card(
+                            margin: const EdgeInsets.only(right: 20),
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              child: const Iconify(
+                                Ic.baseline_language,
+                                color: ColorManager.colorAccent,
+                                size: 20,
+                              ),
+                            )),
+                        trailing: const Text(
+                          english,
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                        visualDensity: VisualDensity.compact,
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        horizontalTitleGap: 0,
+                        minLeadingWidth: 30,
+                        minVerticalPadding: 0,
                       ),
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(ManageAccount());
-                            //        Navigator.pushNamed(context, '/manageAccount');
-                          },
-                          child: mainTile(
-                              Icons.account_box_outlined, manageAccount)),
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(Inbox());
-                            //  Navigator.pushNamed(context, '/inbox');
-                          },
-                          child: mainTile(Icons.all_inbox, inbox)),
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(Privacy());
-                            //  Navigator.pushNamed(context, '/privacy');
-                          },
-                          child: mainTile(Icons.lock_outline_rounded, privacy)),
-                      /* const SizedBox(
-                height: 10,
-              ),
-             GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/requestVerification');
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.verified_outlined, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
                     ),
-                    Text(
-                      requestVerification,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
-              ),*/
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(Wallet());
-                            //  Navigator.pushNamed(context, '/wallet');
-                          },
-                          child: mainTile(
-                              Icons.account_balance_wallet_outlined, wallet)),
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(QrCode());
-                            //  Navigator.pushNamed(context, '/qrcode');
-                          },
-                          child: mainTile(Icons.qr_code, qrCode)),
-                      GestureDetector(
-                          onTap: () {
-                            //share();
-                            Share.share(
-                                'Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me.');
-                          },
-                          child: mainTile(Icons.share, shareProfile)),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      title(contentAndActivity),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(PushNotification());
-                            //  Navigator.pushNamed(context, '/pushNotification');
-                          },
-                          child: mainTile(Icons.notifications_none_outlined,
-                              pushNotification)),
-                      GestureDetector(
-                        onTap: () {},
-                        child: const SizedBox(
-                          height: 25,
+                  ),
+
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const TermsOfService());
+                        //Navigator.pushNamed(context, '/termsOfService');
+                      },
+                      child: mainTile(
+                          Mdi.newspaper_variant_multiple, termsOfService)),
+                  GestureDetector(
+                      onTap: () {
+                        Get.to(const PrivacyPolicy());
+                        //Navigator.pushNamed(context, '/privacyPolicy');
+                      },
+                      child: mainTile(Carbon.policy, privacyPolicy)),
+
+                  // GestureDetector(
+                  //     onTap: () {
+                  //       switchAccountLayout();
+                  //     },
+                  //     child: mainTile(
+                  //         AntDesign.user_switch_outlined, switchAccount)),
+                  GestureDetector(
+                      onTap: () async {
+                        Get.defaultDialog(
+                            title: "Logout?",
+                            middleText:
+                                "This will also logout from other accounts!",
+                            confirm: ElevatedButton(
+                                onPressed: () {
+                                  GetStorage().remove("token");
+                                  GetStorage().remove("user");
+                                  Get.offAll(LoginGetxScreen());
+                                },
+                                child: const Text('Yes')),
+                            cancel: ElevatedButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                child: const Text("No")));
+                        // showDialog(
+                        //     context: context,
+                        //     builder: (_) => Center(
+                        //           child: Material(
+                        //             type: MaterialType.transparency,
+                        //             child: Container(
+                        //               width: getWidth(context) * .80,
+                        //               padding: const EdgeInsets.symmetric(
+                        //                   vertical: 15),
+                        //               decoration: BoxDecoration(
+                        //                   color: Colors.white,
+                        //                   borderRadius:
+                        //                       BorderRadius.circular(10)),
+                        //               child: Column(
+                        //                 mainAxisSize: MainAxisSize.min,
+                        //                 children: [
+                        //                   Text(
+                        //                     "Are you sure you want to logout?",
+                        //                     style: Theme.of(context)
+                        //                         .textTheme
+                        //                         .headline4,
+                        //                     textAlign: TextAlign.center,
+                        //                   ),
+                        //                   const SizedBox(
+                        //                     height: 5,
+                        //                   ),
+                        //                   Padding(
+                        //                     padding: const EdgeInsets.symmetric(
+                        //                         horizontal: 25),
+                        //                     child: Text(
+                        //                       "This will also logout all your linked account if any.",
+                        //                       style: Theme.of(context)
+                        //                           .textTheme
+                        //                           .headline5!
+                        //                           .copyWith(
+                        //                               fontWeight:
+                        //                                   FontWeight.normal),
+                        //                       textAlign: TextAlign.center,
+                        //                     ),
+                        //                   ),
+                        //                   const SizedBox(
+                        //                     height: 25,
+                        //                   ),
+                        //                   Row(
+                        //                     mainAxisSize: MainAxisSize.min,
+                        //                     children: [
+                        //                       ElevatedButton(
+                        //                           onPressed: () {
+                        //                             Get.back(
+                        //                                 closeOverlays: true);
+                        //                             //     Navigator.pop(context);
+                        //                           },
+                        //                           style: ElevatedButton.styleFrom(
+                        //                               primary: Colors.red,
+                        //                               fixedSize: Size(
+                        //                                   getWidth(context) *
+                        //                                       .26,
+                        //                                   40),
+                        //                               shape:
+                        //                                   RoundedRectangleBorder(
+                        //                                       borderRadius:
+                        //                                           BorderRadius
+                        //                                               .circular(
+                        //                                                   10))),
+                        //                           child: const Text("No")),
+                        //                       const SizedBox(
+                        //                         width: 15,
+                        //                       ),
+                        //                       ElevatedButton(
+                        //                           onPressed: () async {
+                        //                             SharedPreferences
+                        //                                 preferences =
+                        //                                 await SharedPreferences
+                        //                                     .getInstance();
+                        //                             await preferences.clear();
+                        //                             GoogleSignIn googleSignIn =
+                        //                                 GoogleSignIn();
+                        //                             await googleSignIn
+                        //                                 .signOut();
+                        //                             await FacebookAuth.instance
+                        //                                 .logOut();
+                        //                             GetStorage()
+                        //                                 .remove("token");
+                        //                             Get.offAll(LoginGetxScreen());
+                        //
+                        //                             //Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
+                        //                           },
+                        //                           style: ElevatedButton.styleFrom(
+                        //                               primary: Colors.green,
+                        //                               fixedSize: Size(
+                        //                                   getWidth(context) *
+                        //                                       .26,
+                        //                                   40),
+                        //                               shape:
+                        //                                   RoundedRectangleBorder(
+                        //                                       borderRadius:
+                        //                                           BorderRadius
+                        //                                               .circular(
+                        //                                                   10))),
+                        //                           child: const Text("Yes"))
+                        //                     ],
+                        //                   )
+                        //                 ],
+                        //               ),
+                        //             ),
+                        //           ),
+                        //         ));
+                      },
+                      child: mainTile(Ic.baseline_login, logout)),
+                  Card(
+                    margin: const EdgeInsets.only(top: 20),
+                    elevation: 10,
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.to(const CustomerSupport());
+                        //Navigator.pushNamed(context, '/customerSupport');
+                      },
+                      child: Container(
+                          margin: const EdgeInsets.all(10),
                           child: ListTile(
-                            title: Text(
-                              appLanguage,
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 16),
+                            title: const Text(
+                              "Technical Support",
+                              style: TextStyle(
+                                  color: ColorManager.colorAccent,
+                                  fontSize: 18),
                             ),
-                            leading: Icon(
-                              Icons.translate_outlined,
-                              color: Colors.black,
-                              size: 22,
-                            ),
-                            trailing: Text(
-                              english,
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 16),
+                            leading: Card(
+                              elevation: 10,
+                              margin: const EdgeInsets.only(right: 20),
+                              child: Container(
+                                padding: const EdgeInsets.all(5),
+                                child: const Iconify(Ic.sharp_support_agent,
+                                    color: ColorManager.colorAccent, size: 20),
+                              ),
                             ),
                             visualDensity: VisualDensity.compact,
                             dense: true,
@@ -191,194 +439,10 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                             horizontalTitleGap: 0,
                             minLeadingWidth: 30,
                             minVerticalPadding: 0,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      /* const SizedBox(
-                height: 20,
-              ),
-              title(cacheAndCellularData),
-              const SizedBox(
-                height: 15,
-              ),
-              GestureDetector(
-                onTap: () {
-                Navigator.pushNamed(context, '/freeSpace');
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.restore_from_trash_outlined, color: Colors.grey, size: 18,),
-                    const SizedBox(
-                      width: 5,
+                          )),
                     ),
-                    Text(
-                      freeUpSpace,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                    )
-                  ],
-                ),
-              ),*/
-                      title(about.toUpperCase()),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(TermsOfService());
-                            //Navigator.pushNamed(context, '/termsOfService');
-                          },
-                          child: mainTile(
-                              Icons.library_books_outlined, termsOfService)),
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(PrivacyPolicy());
-                            //Navigator.pushNamed(context, '/privacyPolicy');
-                          },
-                          child: mainTile(
-                              Icons.library_books_outlined, privacyPolicy)),
-                      GestureDetector(
-                          onTap: () {
-                            Get.to(CustomerSupport());
-                            //Navigator.pushNamed(context, '/customerSupport');
-                          },
-                          child:
-                              mainTile(Icons.chat_outlined, technicalSupport)),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      title(login.toUpperCase()),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            switchAccountLayout();
-                          },
-                          child:
-                              mainTile(Icons.refresh_rounded, switchAccount)),
-                      GestureDetector(
-                          onTap: () async {
-                            showDialog(
-                                context: context,
-                                builder: (_) => Center(
-                                      child: Material(
-                                        type: MaterialType.transparency,
-                                        child: Container(
-                                          width: getWidth(context) * .80,
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 15),
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(10)),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                "Are you sure you want to logout?",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .headline4,
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 25),
-                                                child: Text(
-                                                  "This will also logout all your linked account if any.",
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .headline5!
-                                                      .copyWith(
-                                                          fontWeight: FontWeight
-                                                              .normal),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 25,
-                                              ),
-                                              Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  ElevatedButton(
-                                                      onPressed: () {
-                                                        Get.back(
-                                                            closeOverlays:
-                                                                true);
-                                                        //     Navigator.pop(context);
-                                                      },
-                                                      style: ElevatedButton.styleFrom(
-                                                          primary: Colors.red,
-                                                          fixedSize: Size(
-                                                              getWidth(
-                                                                      context) *
-                                                                  .26,
-                                                              40),
-                                                          shape: RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10))),
-                                                      child: const Text("No")),
-                                                  const SizedBox(
-                                                    width: 15,
-                                                  ),
-                                                  ElevatedButton(
-                                                      onPressed: () async {
-                                                        SharedPreferences
-                                                            preferences =
-                                                            await SharedPreferences
-                                                                .getInstance();
-                                                        await preferences
-                                                            .clear();
-                                                        GoogleSignIn
-                                                            googleSignIn =
-                                                            GoogleSignIn();
-                                                        await googleSignIn
-                                                            .signOut();
-                                                        await FacebookAuth
-                                                            .instance
-                                                            .logOut();
-                                                        GetStorage().remove("token");
-                                                        Get.offAll(LoginScreen());
-                                                        // Get.off(LoginScreen());
-
-                                                        //Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
-                                                      },
-                                                      style: ElevatedButton.styleFrom(
-                                                          primary: Colors.green,
-                                                          fixedSize: Size(
-                                                              getWidth(
-                                                                      context) *
-                                                                  .26,
-                                                              40),
-                                                          shape: RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10))),
-                                                      child: const Text("Yes"))
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ));
-                          },
-                          child: mainTile(Icons.login_outlined, logout)),
-                    ],
                   ),
-                ),
+                ],
               ),
             ),
           )
@@ -387,18 +451,19 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
     );
   }
 
-  Widget mainTile(IconData icon, String text) {
+  Widget mainTile(String icon, String text) {
     return SizedBox(
-      height: 30,
       child: ListTile(
         title: Text(
           text,
-          style: TextStyle(color: Colors.black, fontSize: 16),
+          style: const TextStyle(color: Colors.white, fontSize: 18),
         ),
-        leading: Icon(
-          icon,
-          color: Colors.black,
-          size: 22,
+        leading: Card(
+          margin: const EdgeInsets.only(right: 20),
+          child: Container(
+            padding: const EdgeInsets.all(5),
+            child: Iconify(icon, color: ColorManager.colorAccent, size: 20),
+          ),
         ),
         visualDensity: VisualDensity.compact,
         dense: true,
@@ -414,13 +479,13 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
     return Text(
       txt,
       style: const TextStyle(
-          color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+          color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
     );
   }
 
   share() {
     return showModalBottomSheet(
-        context: context,
+        context: Get.context!,
         backgroundColor: Colors.white,
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -655,19 +720,19 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
   switchAccountLayout() async {
     var pref = await SharedPreferences.getInstance();
     List<String> users = pref.getStringList('allUsers') ?? [];
-    List<UserModel> usersModel = List.empty(growable: true);
+    List<User> usersModel = List.empty(growable: true);
     for (var element in users) {
-      usersModel.add(UserModel.fromJson(jsonDecode(element)));
+      usersModel.add(User.fromJson(jsonDecode(element)));
     }
     return showModalBottomSheet(
         isScrollControlled: true,
-        context: context,
+        context: Get.context!,
         backgroundColor: Colors.white,
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         builder: (BuildContext context) {
-          return Container(
+          return SizedBox(
             height: 300,
             child: StatefulBuilder(
               builder: (BuildContext context,
@@ -889,7 +954,7 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                           },
                           child: Container(
                             alignment: Alignment.center,
-                            margin: EdgeInsets.only(left: 10),
+                            margin: const EdgeInsets.only(left: 10),
                             color: Colors.white,
                             child: Row(
                               children: [
@@ -903,14 +968,12 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         border: Border.all(
                                             color:
                                                 ColorManager.spinColorDivider)),
-                                    child: usersModel[index].avatar.isEmpty
+                                    child: usersModel[index].avatar!.isEmpty
                                         ? Padding(
                                             padding: const EdgeInsets.all(10.0),
-                                            child: SvgPicture.asset(
-                                              'assets/profile.svg',
-                                              width: 10,
-                                              height: 10,
-                                              fit: BoxFit.fill,
+                                            child: CachedNetworkImage(
+                                              imageUrl:
+                                                  RestUrl.placeholderImage,
                                             ),
                                           )
                                         : ClipOval(
@@ -936,12 +999,12 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        usersModel[index].username,
+                                        usersModel[index].username!,
                                         style: const TextStyle(fontSize: 16),
                                         maxLines: 1,
                                       ),
                                       Text(
-                                        usersModel[index].name,
+                                        usersModel[index].name!,
                                         maxLines: 1,
                                       ),
                                       const SizedBox(
@@ -1118,8 +1181,10 @@ class _SettingAndPrivacyState extends State<SettingAndPrivacy> {
                           )
                         : GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(context, '/login',
-                                  arguments: 'multiLogin');
+                              Get.to(const LoginScreen(
+                                  isMultiLogin: "multiLogin"));
+                              // Navigator.pushNamed(context, '/login',
+                              //     arguments: 'multiLogin');
                             },
                             child: Row(
                               children: [

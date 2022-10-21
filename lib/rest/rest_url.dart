@@ -1,18 +1,22 @@
 class RestUrl {
-  static const String baseUrl = "http://3.129.172.46/dev/api/";
+  static const String baseUrl = "http://thrill.fun/api";
   static const String profileUrl =
       "http://3.129.172.46/dev/uploads/profile_images/";
+
+  // static const String profileUrl =
+  //     "http://thrill.fun/public/dev/uploads/profile_images/";
   static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
   static const String assetsUrl = "https://thrillvideo.s3.amazonaws.com/assets/";
-  static const String bannerUrl = "http://3.129.172.46/dev/uploads/banners/";
-  static const String thambUrl = "http://3.129.172.46/dev/uploads/videos/";
-  static const String soundUrl = "http://3.129.172.46/dev/";
+  static const String bannerUrl = "http://thrill.fun/dev/uploads/banners/";
+  static const String thambUrl = "http://thrill.fun/dev/uploads/videos/";
+  static const String soundUrl = "http://thrill.fun/dev/";
   static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
+  static const String placeholderImage = "https://ttensports.com/wp-content/uploads/1982/02/person-placeholder.jpg";
   static const String awsSoundUrl =
       "https://thrillvideo.s3.amazonaws.com/sound/";
-  static const String currencyUrl = "http://3.129.172.46/dev/uploads/currency/";
+  static const String currencyUrl = "http://thrill.fun/dev/uploads/currency/";
   static const String spinSound =
-      "http://3.129.172.46/dev/public/uploads/spins.wav";
+      "http://thrill.fun/dev/public/uploads/spins.wav";
 
   // static const String baseUrl = "https://9starinfosolutions.com/thrill/api/";
   // static const String profileUrl = "https://9starinfosolutions.com/thrill/uploads/profile_images/";

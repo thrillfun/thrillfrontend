@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:thrill/models/inbox_model.dart';
-import 'package:thrill/models/user.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/models/wallet_model.dart';
 import 'package:thrill/screens/auth/otp_verification.dart';
@@ -17,12 +16,10 @@ import '../screens/sound/new_song.dart';
 class AppRouter {
   static Route onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case "/":
-        return BottomNavigation.route(map: settings.arguments as Map?);
       case SignUp.routeName:
         return SignUp.route();
-      case EditProfile.routeName:
-        return EditProfile.route(user: settings.arguments as UserModel);
+      // case EditProfile.routeName:
+      //   return EditProfile.route(user: settings.arguments as UserModel);
       case SplashScreen.routeName:
         return SplashScreen.route();
       case LoginScreen.routeName:
@@ -42,8 +39,7 @@ class AppRouter {
         return CustomerSupport.route();
       case FreeUpSpace.routeName:
         return FreeUpSpace.route();
-      case ManageAccount.routeName:
-        return ManageAccount.route();
+
       case Privacy.routeName:
         return Privacy.route();
       case QrCode.routeName:

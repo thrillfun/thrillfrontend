@@ -1,14 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/blocs/blocs.dart';
 import 'package:thrill/controller/model/discover_model.dart';
 import 'package:thrill/controller/model/hash_tags_list_model.dart';
 import 'package:thrill/controller/model/hashtag_videos_model.dart';
 import 'package:thrill/controller/model/top_hastag_videos_model.dart';
+import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 
 class DiscoverController extends GetxController {
@@ -21,22 +24,15 @@ class DiscoverController extends GetxController {
   RxList<HashTagVideos> hashTagsVideos = RxList();
   RxList<HashTagsDetails> hashTagsDetailsList = RxList();
 
-  DiscoverController() {
-    getBanners();
-    getTopHashTags();
-    getHashTagsList();
-  }
+  var token = GetStorage().read('token');
 
   getBanners() async {
     isLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+
     var response = await http.get(
-      Uri.parse('http://3.129.172.46/dev/api/banners'),
+      Uri.parse('${RestUrl.baseUrl}/banners'),
       headers: {"Authorization": "Bearer $token"},
     ).timeout(const Duration(seconds: 60));
-
-    var result = jsonDecode(response.body);
 
     try {
       discoverBanners = (json.decode(response.body) as List)
@@ -52,10 +48,9 @@ class DiscoverController extends GetxController {
 
   getTopHashTags() async {
     isHashTagsLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+
     var response = await http.get(
-      Uri.parse('http://3.129.172.46/dev/api/hashtag/top-hashtags-videos'),
+      Uri.parse('${RestUrl.baseUrl}/hashtag/top-hashtags-videos'),
       headers: {"Authorization": "Bearer $token"},
     ).timeout(const Duration(seconds: 60));
     var result = jsonDecode(response.body);
@@ -64,15 +59,15 @@ class DiscoverController extends GetxController {
 
       hashTagsVideos.clear();
 
-      if (hasTagsList.isNotEmpty) {
-        hasTagsList.forEach((element) {
-          element.videos!.forEach((element) {
-            hashTagsVideos.add(element);
-          });
-        });
+      if (hasTagsList.value.isNotEmpty) {
+        for(HashTags tags in hasTagsList.value){
+          hashTagsVideos.value = tags.videos!;
+        }
       }
-    } catch (e) {
+    } on HttpException catch (e) {
       errorToast(TopHastagVideosModel.fromJson(result).message.toString());
+    } on Exception catch(e){
+      e.printError();
     }
     isHashTagsLoading.value = false;
     update();
@@ -80,10 +75,9 @@ class DiscoverController extends GetxController {
 
   getVideosByHashTags(int hashTagId) async {
     isHashTagsLoading.value = true;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+
     var response = await http.post(
-      Uri.parse('http://3.129.172.46/dev/api/hashtag/get-videos-by-hashtag'),
+      Uri.parse('${RestUrl.baseUrl}/hashtag/get-videos-by-hashtag'),
       body: {"hashtag_id": "$hashTagId"},
       headers: {"Authorization": "Bearer $token"},
     ).timeout(const Duration(seconds: 60));
@@ -102,9 +96,9 @@ class DiscoverController extends GetxController {
 
   getHashTagsList() async {
     isHashTagsListLoading.value = true;
-    var token = GetStorage().read("token");
+
     var response = await http.get(
-      Uri.parse('http://3.129.172.46/dev/api/hashtag/list'),
+      Uri.parse('${RestUrl.baseUrl}/hashtag/list'),
       headers: {"Authorization": "Bearer $token"},
     ).timeout(const Duration(seconds: 60));
     var result = jsonDecode(response.body);
@@ -118,5 +112,4 @@ class DiscoverController extends GetxController {
     hashTagsList.refresh();
     update();
   }
-
 }

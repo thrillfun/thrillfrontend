@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../../common/color.dart';
 import '../../common/strings.dart';
-import '../../models/user.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
@@ -226,9 +226,9 @@ class _RequestVerificationState extends State<RequestVerification> {
     try {
       var instance = await SharedPreferences.getInstance();
       var loginData = instance.getString('currentUser');
-      var user = UserModel.fromJson(jsonDecode(loginData!));
-      userNameCtr.text = user.username;
-      fullNameCtr.text = user.name;
+      var user = User.fromJson(jsonDecode(loginData!));
+      userNameCtr.text = user.username!;
+      fullNameCtr.text = user.name!;
       isLoading = false;
     } on Exception catch (_) {
       isLoading = false;

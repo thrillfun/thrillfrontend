@@ -1,4 +1,4 @@
-import 'package:thrill/models/user.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 
 class VideoModel {
   int id, comments;
@@ -10,7 +10,7 @@ class VideoModel {
       sound_name,
       sound_category_name;
   int likes, views;
-  UserModel? user;
+  User? user;
   String speed;
   List hashtags;
   String is_duet;
@@ -38,8 +38,8 @@ class VideoModel {
       this.sound_owner);
 
   factory VideoModel.fromJson(dynamic json) {
-    UserModel users;
-    users = UserModel.fromJson(json['user'] ?? {});
+    User users;
+    users = User.fromJson(json['user'] ?? {});
     return VideoModel(
       json['id'] ?? 0,
       json['comments'] ?? 0,
@@ -93,7 +93,7 @@ class VideoModel {
     String? video,
     String? description,
     int? likes,
-    UserModel? user,
+    User? user,
     String? filter,
     String? gif_image,
     String? sound,

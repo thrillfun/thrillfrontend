@@ -14,6 +14,7 @@ import 'package:showcaseview/showcaseview.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
+import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/discover_getx.dart';
@@ -34,28 +35,14 @@ import '../../utils/util.dart';
 import 'notifications.dart';
 
 bool popupDisplayed = false;
- var index = 0;
+var index = 0;
+
 class BottomNavigation extends StatefulWidget {
   BottomNavigation({Key? key, this.mapData}) : super(key: key);
   final Map? mapData;
 
   @override
   State<BottomNavigation> createState() => _BottomNavigationState();
-
-  static const String routeName = '/';
-
-  static Route route({Map? map}) {
-    return MaterialPageRoute(
-      settings: const RouteSettings(name: routeName),
-      builder: (context) => BlocProvider(
-        create: (context) => ProfileBloc(loginRepository: LoginRepository())
-          ..add(const ProfileLoading()),
-        child: BottomNavigation(
-          mapData: map,
-        ),
-      ),
-    );
-  }
 }
 
 class _BottomNavigationState extends State<BottomNavigation>
@@ -69,7 +56,7 @@ class _BottomNavigationState extends State<BottomNavigation>
     const HomeGetx(),
     DiscoverGetx(),
     const Notifications(),
-    const Profile(),
+    Profile(),
   ];
 
   @override
@@ -110,52 +97,51 @@ class _BottomNavigationState extends State<BottomNavigation>
           }
         },
         child: Scaffold(
-            extendBody: true,
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-            floatingActionButton: Container(
+          extendBody: true,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.transparent,
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(80)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xff00CCC9).withOpacity(0.7),
+                    blurRadius: 15,
+                    spreadRadius: 15,
+                  )
+                ]),
+            child: Container(
               height: 60,
               width: 60,
-              decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.transparent,
-                  ),
-                  borderRadius: const BorderRadius.all(Radius.circular(80)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0xff00CCC9).withOpacity(0.7),
-                      blurRadius: 15,
-                      spreadRadius: 15,
-                    )
-                  ]),
-              child: Container(
-                height: 60,
-                width: 60,
-                child: Showcase(
-                    showcaseBackgroundColor: Color.fromARGB(255, 1, 180, 177),
-                    shapeBorder: const CircleBorder(),
-                    radius: const BorderRadius.all(Radius.circular(40)),
-                    tipBorderRadius: const BorderRadius.all(Radius.circular(8)),
-                    overlayPadding: const EdgeInsets.all(5),
-                    key: key,
-                    child: FloatingActionButton(
-                      child: SvgPicture.network(
-                        RestUrl.assetsUrl + 'spin_wheel.svg',
-                        //scale: 1.4,
-                        fit: BoxFit.fill,
-                      ),
-                      onPressed: () => Get.to(() => const SpinTheWheel()),
+              child: Showcase(
+                  showcaseBackgroundColor: Color.fromARGB(255, 1, 180, 177),
+                  shapeBorder: const CircleBorder(),
+                  radius: const BorderRadius.all(Radius.circular(40)),
+                  tipBorderRadius: const BorderRadius.all(Radius.circular(8)),
+                  overlayPadding: const EdgeInsets.all(5),
+                  key: key,
+                  child: FloatingActionButton(
+                    child: SvgPicture.network(
+                      RestUrl.assetsUrl + 'spin_wheel.svg',
+                      //scale: 1.4,
+                      fit: BoxFit.fill,
                     ),
-                    textColor: Colors.white,
-                    descTextStyle: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.white),
-                    description: "check out the spin wheel to earn rewards!!"),
-              ),
+                    onPressed: () => Get.to(() => const SpinTheWheel()),
+                  ),
+                  textColor: Colors.white,
+                  descTextStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.white),
+                  description: "check out the spin wheel to earn rewards!!"),
             ),
-            bottomNavigationBar:myDrawer2(),
-            body: IndexedStack(
-              index: selectedIndex,
-                children: screens),));
+          ),
+          bottomNavigationBar: myDrawer2(),
+          body: IndexedStack(index: selectedIndex, children: screens),
+        ));
   }
 
   myDrawer2() {
@@ -181,11 +167,20 @@ class _BottomNavigationState extends State<BottomNavigation>
     );
   }
 
-
   void _selectedTab(index) async {
-
+    if (index == 0) {
+      VideosController().getAllVideos();
+    }
     if (index == 1) {
-      discoverController.getTopHashTags();
+      DiscoverController().getHashTagsList();
+      DiscoverController().getBanners();
+      DiscoverController().getTopHashTags();
+    }
+    if (index == 3) {
+      VideosController().getUserVideos();
+      VideosController().getFollowingVideos();
+      VideosController().getUserPrivateVideos();
+      VideosController().getUserLikedVideos();
     }
 
     if (index >= 0) {
@@ -195,7 +190,7 @@ class _BottomNavigationState extends State<BottomNavigation>
             selectedIndex = index;
           });
         } else {
-         showLoginAlert(context);
+          showLoginAlert();
         }
       });
     }
@@ -249,7 +244,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                     shouldAutoPlayReel = false;
                   });
                 } else {
-                  showLoginAlert(context);
+                  showLoginAlert();
                 }
               });
             },
@@ -287,7 +282,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                   shouldAutoPlayReel = true;
                   setState(() => selectedIndex = 0);
                 } else {
-                  showLoginAlert(context);
+                  showLoginAlert();
                 }
               });
             },
@@ -312,7 +307,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                     shouldAutoPlayReel = false;
                   });
                 } else {
-                  showLoginAlert(context);
+                  showLoginAlert();
                 }
               });
             },
@@ -350,7 +345,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                     //BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
                   });
                 } else {
-                  showLoginAlert(context);
+                  showLoginAlert();
                 }
               });
             },
@@ -385,11 +380,9 @@ class _BottomNavigationState extends State<BottomNavigation>
     );
   }
 
-
-
   Future<bool> isLogined() async {
-    var loginData = GetStorage().read("token");
-    if (loginData != null) {
+    var token = GetStorage().read("token");
+    if (token != null) {
       return true;
     } else {
       return false;

@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
+import 'package:thrill/controller/model/hashtag_videos_model.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
@@ -105,7 +106,7 @@ class FollowingAndFollowers extends StatelessWidget {
                       )
                           : Container(
                         margin: const EdgeInsets.only(top: 10),
-                        child: followingTabLayout(userController.followingModel.length),
+                        child: followingTabLayout(),
                       )
                           : usersController.followersModel.isEmpty
                           ? const Flexible(
@@ -125,179 +126,179 @@ class FollowingAndFollowers extends StatelessWidget {
             ]))));
   }
 
-  followingTabLayout(int length) {
-    return  Expanded(
-                child: ListView.builder(
-                  itemCount: length,
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 10),
-                          child: Row(
-                            children: [
-                              Container(
-                                  padding: const EdgeInsets.all(2),
-                                  height: 60,
-                                  width: 60,
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border:
-                                          Border.all(color: Colors.white60)),
-                                  child: ClipOval(
-                                    child: CachedNetworkImage(
-                                      fit: BoxFit.cover,
-                                      errorWidget: (a, b, c) => Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: SvgPicture.asset(
-                                          'assets/profile.svg',
-                                          fit: BoxFit.fill,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      imageUrl:isProfile==true? usersController.userFollowingModel!
-                                      [index].avtars!.isEmpty
-                                          ? "https://www.pngmart.com/files/21/Account-Avatar-Profile-PNG-Photo.png"
-                                          : '${RestUrl.profileUrl}${usersController.userFollowingModel[index].avtars}': usersController.followingModel!
-                                      [index].avtars!.isEmpty
-                                          ? "https://www.pngmart.com/files/21/Account-Avatar-Profile-PNG-Photo.png"
-                                          : '${RestUrl.profileUrl}${usersController.followingModel[index].avtars}',
-                                      placeholder: (a, b) => const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    ),
-                                  )),
-                              const SizedBox(
-                                width: 10,
+  followingTabLayout() {
+    return  GetX<UserController>(builder: (userController)=>Expanded(
+      child: ListView.builder(
+        itemCount: userController.userFollowingModel.length,
+        shrinkWrap: true,
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        itemBuilder: (BuildContext context, int index) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 10, horizontal: 10),
+                child: Row(
+                  children: [
+                    Container(
+                        padding: const EdgeInsets.all(2),
+                        height: 60,
+                        width: 60,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border:
+                            Border.all(color: Colors.white60)),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            fit: BoxFit.cover,
+                            errorWidget: (a, b, c) => Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: SvgPicture.asset(
+                                'assets/profile.svg',
+                                fit: BoxFit.fill,
+                                color: Colors.white,
                               ),
-                              Expanded(
-                                child: InkWell(
-                                  onTap: () async {
-
-                                   isProfile==true? Get.to(ViewProfile(
-                                     usersController
-                                         .userFollowingModel[index].id!
-                                         .toString(),
-                                   )): Get.to(ViewProfile(
-                                     usersController
-                                         .followingModel[index].id!
-                                         .toString(),
-                                   ));
-                                  },
-                                  child: Expanded(
-                                      child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                       isProfile==true? usersController.userFollowingModel!.value![index]
-                                           .username!: usersController.followingModel!.value![index]
-                                           .username!,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                      const SizedBox(
-                                        height: 4,
-                                      ),
-                                      Text(
-                                       isProfile==true? usersController.userFollowingModel!.value![index]
-                                           .name!: usersController.followingModel!.value![index]
-                                           .name!,
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 13),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                      // Text(
-                                      //   getStarredEmail(followingList[index].email),
-                                      //   style: const TextStyle(
-                                      //       color: Colors.black, fontSize: 12),
-                                      //   overflow: TextOverflow.ellipsis,
-                                      //   maxLines: 1,
-                                      // ),
-                                      // const SizedBox(
-                                      //   height: 2,
-                                      // ),
-                                      // Text(
-                                      //   getFormattedDate(followingList[index].date),
-                                      //   style: const TextStyle(
-                                      //       color: Colors.black, fontSize: 12),
-                                      //   overflow: TextOverflow.ellipsis,
-                                      //   maxLines: 1,
-                                      // ),
-                                    ],
-                                  )),
-                                ),
-                              ),
-                              GetX<DataController>(
-                                  builder: (dataController) => dataController
-                                          .isLoading.value
-                                      ? Visibility(
-                                          visible: true,
-                                          child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(30),
-                                                ),
-                                              ),
-                                              onPressed: () async {
-                                                   isProfile==true? await dataController
-                                                       .followUnfollowUser(
-                                                       usersController
-                                                           .userFollowingModel
-                                                           .value[index]
-                                                           .id!): await dataController
-                                                       .followUnfollowUser(
-                                                       usersController
-                                                           .followingModel
-                                                           .value[index]
-                                                           .id!);
-                                              },
-                                              child: const Text('Following')))
-                                      : Visibility(
-                                          visible: true,
-                                          child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                primary: ColorManager.colorAccent,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(30),
-                                                ),
-                                              ),
-                                              onPressed: () async {
-                                                   isProfile==true? await dataController
-                                                       .followUnfollowUser(
-                                                       usersController
-                                                           .userFollowingModel
-                                                       [index]
-                                                           .id!): await dataController
-                                                       .followUnfollowUser(
-                                                       usersController
-                                                           .followingModel
-                                                       [index]
-                                                           .id!);
-                                              },
-                                              child: const Text('Following'))))
-                            ],
+                            ),
+                            imageUrl:isProfile==true? userController.userFollowingModel!
+                            [index].avtars!.isEmpty
+                                ? "https://www.pngmart.com/files/21/Account-Avatar-Profile-PNG-Photo.png"
+                                : '${RestUrl.profileUrl}${userController.userFollowingModel[index].avtars}': userController.followingModel!
+                            [index].avtars!.isEmpty
+                                ? "https://www.pngmart.com/files/21/Account-Avatar-Profile-PNG-Photo.png"
+                                : '${RestUrl.profileUrl}${userController.followingModel[index].avtars}',
+                            placeholder: (a, b) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           ),
-                        ),
-                      const  Divider(
-                          color: Colors.white,
-                        )
-                      ],
-                    );
-                  },
+                        )),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () async {
+
+                          isProfile==true? Get.to(ViewProfile(
+                            userController
+                                .userFollowingModel[index].id!
+                                .toString(),
+                          )): Get.to(ViewProfile(
+                            userController
+                                .followingModel[index].id!
+                                .toString(),
+                          ));
+                        },
+                        child: Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  isProfile==true? userController.userFollowingModel!.value![index]
+                                      .username!: userController.followingModel!.value![index]
+                                      .username!,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                const SizedBox(
+                                  height: 4,
+                                ),
+                                Text(
+                                  isProfile==true? userController.userFollowingModel!.value![index]
+                                      .name!: userController.followingModel!.value![index]
+                                      .name!,
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                // Text(
+                                //   getStarredEmail(followingList[index].email),
+                                //   style: const TextStyle(
+                                //       color: Colors.black, fontSize: 12),
+                                //   overflow: TextOverflow.ellipsis,
+                                //   maxLines: 1,
+                                // ),
+                                // const SizedBox(
+                                //   height: 2,
+                                // ),
+                                // Text(
+                                //   getFormattedDate(followingList[index].date),
+                                //   style: const TextStyle(
+                                //       color: Colors.black, fontSize: 12),
+                                //   overflow: TextOverflow.ellipsis,
+                                //   maxLines: 1,
+                                // ),
+                              ],
+                            )),
+                      ),
+                    ),
+                    GetX<DataController>(
+                        builder: (dataController) => dataController
+                            .isLoading.value
+                            ? Visibility(
+                            visible: true,
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.circular(30),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  isProfile==true? await dataController
+                                      .followUnfollowUser(
+                                      userController
+                                          .userFollowingModel
+                                          .value[index]
+                                          .id!): await dataController
+                                      .followUnfollowUser(
+                                      userController
+                                          .followingModel
+                                          .value[index]
+                                          .id!);
+                                },
+                                child: const Text('Following')))
+                            : Visibility(
+                            visible: true,
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  primary: ColorManager.colorAccent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.circular(30),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  isProfile==true? await dataController
+                                      .followUnfollowUser(
+                                      userController
+                                          .userFollowingModel
+                                      [index]
+                                          .id!): await dataController
+                                      .followUnfollowUser(
+                                      userController
+                                          .followingModel
+                                      [index]
+                                          .id!);
+                                },
+                                child: const Text('Following'))))
+                  ],
                 ),
-              );
+              ),
+              const  Divider(
+                color: Colors.white,
+              )
+            ],
+          );
+        },
+      ),
+    ));
   }
 
   followersTabLayout(int length) {

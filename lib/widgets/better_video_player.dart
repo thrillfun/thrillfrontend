@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
@@ -17,18 +19,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/comments_controller.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/users_controller.dart';
-import 'package:thrill/models/user.dart';
+import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
+import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/screen.dart';
 import 'package:thrill/screens/sound/sound_details.dart';
 import 'package:thrill/screens/video/duet.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
+var videosController = Get.find<VideosController>();
+var commentsController = Get.find<CommentsController>();
 class BetterReelsPlayer extends StatefulWidget {
   BetterReelsPlayer(
       this.gifImage,
@@ -48,13 +55,15 @@ class BetterReelsPlayer extends StatefulWidget {
       this.isHome,
       this.hashtagsList,
       this.sound,
-      this.soundOwner);
+      this.soundOwner,
+      this.isCommentAllowed);
 
   String gifImage, sound, soundOwner;
   String videoUrl;
   int pageIndex;
   int currentPageIndex;
   bool isPaused;
+  bool isCommentAllowed = true;
   VoidCallback callback;
   PublicUser? publicUser;
   int videoId;
@@ -198,9 +207,13 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                       GetStorage().read("token") != null) {
                                     commentsController
                                         .getComments(widget.videoId);
-                                    showComments();
+                                    GetStorage().read("videoPrivacy") ==
+                                            "Private"
+                                        ? showErrorToast(
+                                            context, "this video is private!")
+                                        : showComments();
                                   } else {
-                                    showLoginAlert(context);
+                                    showLoginAlert();
                                   }
                                 },
                                 icon: const Iconify(
@@ -384,7 +397,20 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                 child: Column(
                                                   children: [
                                                     IconButton(
-                                                        onPressed: () {},
+                                                        onPressed: () async {
+                                                          var deepLink =
+                                                              await createDynamicLink(
+                                                                  widget
+                                                                      .videoUrl);
+                                                          GetStorage().write("deeplink", deepLink.toString());
+                                                          Clipboard.setData(
+                                                              ClipboardData(
+                                                                  text: deepLink
+                                                                      .toString()));
+                                                          successToast(
+                                                              "Link copied!");
+                                                          //     widget.videoUrl));
+                                                        },
                                                         icon: const Iconify(
                                                           Fluent
                                                               .link_16_regular,
@@ -458,7 +484,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                         widget.videoId,
                                                         widget.userName,
                                                         widget.UserId)
-                                                    : showLoginAlert(context),
+                                                    : showLoginAlert(),
                                             child: Row(
                                               children: const [
                                                 Iconify(
@@ -510,7 +536,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                                                 widget.UserId,
                                                                 "Block"));
                                               } else {
-                                                showLoginAlert(context);
+                                                showLoginAlert();
                                               }
                                             },
                                             child: Row(
@@ -579,7 +605,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                               widget.UserId.toString(),
                             ));
                           } else {
-                            showLoginAlert(context);
+                            showLoginAlert();
                           }
                         },
                         child: Row(
@@ -693,8 +719,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                     padding: const EdgeInsets.all(5),
                                     alignment: Alignment.center,
                                     child: Text(
-                                      "#" +
-                                          widget.hashtagsList[index].toString(),
+                                      widget.hashtagsList[index].toString(),
                                       style: TextStyle(
                                           color: Colors.white, fontSize: 10),
                                     ),
@@ -946,7 +971,7 @@ class _VideoAppState extends State<BetterReelsPlayer> {
         GetX<CommentsController>(
             builder: (commentsController) => commentsController
                     .isCommentsLoading.value
-                ? Center(
+                ? const Center(
                     child: CircularProgressIndicator(),
                   )
                 : Column(
@@ -1137,51 +1162,53 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                         child: Container(
                             height: 40,
                             margin: EdgeInsets.all(15),
-                            child: Row(
+                            child: widget.isCommentAllowed?
+                            Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
                                   child: Flexible(
-                                    child: TextFormField(
-                                      controller: _textEditingController,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Color.fromARGB(255, 65, 64, 64),
-                                        fontWeight: FontWeight.w600,
+                                child: TextFormField(
+                                  enabled: widget.isCommentAllowed,
+                                  controller: _textEditingController,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color.fromARGB(255, 65, 64, 64),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  onChanged: (value) {
+                                    comment.value = value;
+                                  },
+                                  decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                          vertical: 0.0, horizontal: 20.0),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(100)),
+                                        borderSide: BorderSide(
+                                          color: Colors.transparent,
+                                        ),
                                       ),
-                                      onChanged: (value) {
-                                        comment.value = value;
-                                      },
-                                      decoration: const InputDecoration(
-                                          contentPadding: EdgeInsets.symmetric(
-                                              vertical: 0.0, horizontal: 20.0),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(100)),
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(50)),
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          fillColor: Color.fromARGB(
-                                              255, 242, 240, 240),
-                                          filled: true,
-                                          focusColor: Colors.white,
-                                          hintStyle: TextStyle(
-                                              fontSize: 12,
-                                              color: Color.fromARGB(
-                                                  255, 113, 112, 112)),
-                                          hintText: "Post your comment"
-                                          //add prefix icon
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(50)),
+                                        borderSide: BorderSide(
+                                          color: Colors.transparent,
+                                        ),
+                                      ),
+                                      fillColor: Color.fromARGB(
+                                          255, 242, 240, 240),
+                                      filled: true,
+                                      focusColor: Colors.white,
+                                      hintStyle: TextStyle(
+                                          fontSize: 12,
+                                          color: Color.fromARGB(
+                                              255, 113, 112, 112)),
+                                      hintText: "Post your comment"
+                                    //add prefix icon
 
-                                          ),
-                                    ),
+                                  ),
+                                ),
                                   ),
                                 ),
                                 SizedBox(
@@ -1196,15 +1223,11 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                         onTap: () async {
                                           var pref = await SharedPreferences
                                               .getInstance();
-                                          var currentUser =
-                                              pref.getString('currentUser');
-                                          UserModel current =
-                                              UserModel.fromJson(
-                                                  jsonDecode(currentUser!));
+                                          var currentUser = User.fromJson(GetStorage().read("user"));
 
                                           commentsController.postComment(
                                               widget.videoId,
-                                              current.id.toString(),
+                                              currentUser.id.toString(),
                                               comment.value);
 
                                           commentsController
@@ -1220,11 +1243,30 @@ class _VideoAppState extends State<BetterReelsPlayer> {
                                   ),
                                 )
                               ],
-                            )),
+                            ):SizedBox(width: Get.width,child: Text('Comments are disabled for this video',textAlign: TextAlign.center,),)),
                       )
                     ],
                   )),
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)));
+  }
+
+  Future<Uri> createDynamicLink(String videoName) async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: 'https://thrill.page.link/',
+      link: Uri.parse('https://thrillvideo.s3.amazonaws.com/test/$videoName'),
+      androidParameters: AndroidParameters(
+        packageName: 'com.thrill',
+        minimumVersion: 1,
+      ),
+      // iosParameters: IosParameters(
+      //   bundleId: 'your_ios_bundle_identifier',
+      //   minimumVersion: '1',x
+      //   appStoreId: 'your_app_store_id',
+      // ),
+    );
+    var dynamicUrl = await parameters.buildShortLink();
+    final Uri shortUrl = dynamicUrl.shortUrl;
+    return shortUrl;
   }
 }

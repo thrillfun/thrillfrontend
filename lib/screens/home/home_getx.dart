@@ -104,9 +104,14 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
                                   child: relatedLayout(),
                                   onRefresh: () async =>
                                       await videosController.getAllVideos()),
-                      GetStorage().read("token").toString().isEmpty || GetStorage().read("token")==null
+                      GetStorage().read("token").toString().isEmpty ||
+                              GetStorage().read("token") == null
                           ? const Center(
-                              child: Text("Login to access followers",style: TextStyle(color: Colors.white,fontSize: 16),),
+                              child: Text(
+                                "Login to access followers",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
                             )
                           : videosController.followingVideosList.isEmpty
                               ? RefreshIndicator(
@@ -165,7 +170,9 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
                                   margin: const EdgeInsets.only(right: 10),
                                   child: InkWell(
                                       onTap: () {
-                                        Get.to(CameraScreen(selectedSound: "",));
+                                        Get.to(CameraScreen(
+                                          selectedSound: "",
+                                        ));
                                       },
                                       child: const Icon(
                                         IconlyLight.camera,
@@ -210,7 +217,12 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
             videosController.publicVideosList[index].user!.name.toString(),
             videosController.publicVideosList[index].description.toString(),
             true,
-            videosController.publicVideosList[index].hashtags!,videosController.publicVideosList[index].sound.toString(),videosController.publicVideosList[index].soundOwner.toString()));
+            videosController.publicVideosList[index].hashtags!,
+            videosController.publicVideosList[index].sound.toString(),
+            videosController.publicVideosList[index].soundOwner.toString(),
+            videosController.publicVideosList[index].isCommentable.toString().toLowerCase() == "yes"
+                ? true
+                : false));
   }
 
   followingVideosLayout() {
@@ -243,7 +255,12 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
             videosController.followingVideosList[index].user!.name.toString(),
             videosController.followingVideosList[index].description.toString(),
             true,
-            videosController.publicVideosList[index].hashtags!,videosController.followingVideosList[index].sound.toString(),videosController.followingVideosList[index].soundOwner.toString()));
+            videosController.followingVideosList[index].hashtags!,
+            videosController.followingVideosList[index].sound.toString(),
+            videosController.followingVideosList[index].soundOwner.toString(),
+            videosController.followingVideosList[index].isCommentable.toString().toLowerCase() == "yes"
+                ? true
+                : false));
   }
 
   loadInterstitialAd() async {

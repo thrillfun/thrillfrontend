@@ -47,7 +47,7 @@ imglyConfig {
         include 'ui:giphy-sticker'
 
         // This module is big, remove the serializer if you don't need that feature.
-        //include 'backend:serializer'
+        include 'backend:serializer'
 
         // Remove the asset packs you don't need, these are also big in size.
         include 'assets:font-basic'

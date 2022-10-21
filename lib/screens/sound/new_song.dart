@@ -6,11 +6,11 @@ import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/strings.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
 
-import '../../models/user.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 import '../../widgets/video_item.dart';
@@ -35,7 +35,7 @@ class _NewSongState extends State<NewSong> {
   List<AddSoundModel> newSongList = List<AddSoundModel>.empty(growable: true);
   List<AddSoundModel> favSound = List<AddSoundModel>.empty(growable: true);
   List<int> bookmarkedIndexes = List.empty(growable: true);
-  late UserModel userModel;
+  late User userModel;
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _NewSongState extends State<NewSong> {
   loadUserModel() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
-    userModel = UserModel.fromJson(jsonDecode(currentUser!));
+    userModel = User.fromJson(jsonDecode(currentUser!));
     setState(() {});
   }
 
@@ -98,7 +98,7 @@ class _NewSongState extends State<NewSong> {
                 if (size < 101) {
                   if (size > 0.1) {
                     AddSoundModel addSoundModel = AddSoundModel(
-                        0, userModel.id, 0, file.path, name, '', '', true);
+                        0, userModel.id!, 0, file.path, name, '', '', true);
                     Navigator.pop(context, addSoundModel);
                   } else {
                     showErrorToast(context, "File Size too Small!!");

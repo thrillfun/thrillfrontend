@@ -74,7 +74,6 @@ class _PostVideoState extends State<PostVideo> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -504,7 +503,7 @@ class _PostVideoState extends State<PostVideo> {
                                   showErrorToast(context, "Select Language");
                                 } else {
                                   // progressDialogue(context);
-                                  isPublic ? postUpload() : draftUpload();
+                                  postUpload() ;
                                 }
                               }
                             }
@@ -573,140 +572,140 @@ class _PostVideoState extends State<PostVideo> {
     });
   }
 
-  draftUpload() async {
-    int currentUnix = DateTime.now().millisecondsSinceEpoch;
-    String videoId = '$currentUnix.mp4';
-
-    await _simpleS3
-        .uploadFile(
-      File(widget.data.newPath!.substring(7, widget.data.newPath!.length)),
-      "thrillvideo",
-      "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-      AWSRegions.usEast1,
-      debugLog: true,
-      fileName: videoId,
-      s3FolderPath: "test",
-      accessControl: S3AccessControl.publicRead,
-    )
-        .then((value) async {
-      await _simpleS3
-          .uploadFile(
-        File('$saveCacheDirectory${widget.data.newName}.png'),
-        "thrillvideo",
-        "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-        AWSRegions.usEast1,
-        debugLog: true,
-        s3FolderPath: "gif",
-        fileName: '$currentUnix.png',
-        accessControl: S3AccessControl.publicRead,
-      )
-          .then((value) async {
-        if (widget.data.addSoundModel == null ||
-            !widget.data.addSoundModel!.isSoundFromGallery) {
-          String tagList = jsonEncode(selectedHashtags);
-          var result = await RestApi.postVideo(
-              videoId,
-              widget.data.isDuet
-                  ? widget.data.duetSound ?? ""
-                  : widget.data.addSoundModel == null
-                      ? ""
-                      : widget.data.addSoundModel!.isSoundFromGallery
-                          ? "$currentUnix.mp3"
-                          : widget.data.addSoundModel!.sound.split('/').last,
-              widget.data.isDuet
-                  ? widget.data.duetSoundName ?? ""
-                  : widget.data.addSoundModel?.name ?? "Original Sound",
-              dropDownCategoryValue,
-              tagList,
-              "Private",
-              commentsSwitch ? 1 : 0,
-              desCtr.text,
-              widget.data.filterName.isEmpty ? '' : widget.data.filterName,
-              dropDownLanguageValue,
-              '$currentUnix.png',
-              widget.data.speed,
-              duetSwitch,
-              commentsSwitch,
-              widget.data.duetFrom ?? '',
-              widget.data.isDuet,
-              widget.data.addSoundModel?.userId ?? 0);
-          var json = jsonDecode(result.body);
-          closeDialogue(context);
-          if (json['status']) {
-            BlocProvider.of<VideoBloc>(context)
-                .add(const VideoLoading(selectedTabIndex: 1));
-            showSuccessToast(context, "Video has been saved successfully");
-            await Future.delayed(const Duration(milliseconds: 200));
-            File recordedVideoFile = File(widget.data.filePath!
-                .substring(7, widget.data.filePath!.length));
-            File processedVideoFile = File(
-                widget.data.newPath!.substring(7, widget.data.newPath!.length));
-            recordedVideoFile.delete();
-            processedVideoFile.delete();
-            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-          } else {
-            showErrorToast(context, json['message']);
-          }
-        } else {
-          await _simpleS3
-              .uploadFile(
-            File(widget.data.addSoundModel!.sound),
-            "thrillvideo",
-            "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-            AWSRegions.usEast1,
-            debugLog: true,
-            fileName: '$currentUnix.mp3',
-            s3FolderPath: "sound",
-            accessControl: S3AccessControl.publicRead,
-          )
-              .then((value) async {
-            String tagList = jsonEncode(selectedHashtags);
-            var result = await RestApi.postVideo(
-                videoId,
-                widget.data.isDuet
-                    ? widget.data.duetSound ?? ""
-                    : widget.data.addSoundModel == null
-                        ? ""
-                        : widget.data.addSoundModel!.isSoundFromGallery
-                            ? "$currentUnix.mp3"
-                            : widget.data.addSoundModel!.sound.split('/').last,
-                widget.data.addSoundModel?.name ?? "",
-                dropDownCategoryValue,
-                tagList,
-                "Private",
-                commentsSwitch ? 1 : 0,
-                desCtr.text,
-                widget.data.filterName.isEmpty ? '' : widget.data.filterName,
-                dropDownLanguageValue,
-                '$currentUnix.png',
-                widget.data.speed,
-                duetSwitch,
-                commentsSwitch,
-                widget.data.duetFrom ?? '',
-                widget.data.isDuet,
-                widget.data.addSoundModel?.userId ?? 0);
-            var json = jsonDecode(result.body);
-            closeDialogue(context);
-            if (json['status']) {
-              BlocProvider.of<VideoBloc>(context)
-                  .add(const VideoLoading(selectedTabIndex: 1));
-              showSuccessToast(context, "Video has been saved successfully");
-              await Future.delayed(const Duration(milliseconds: 200));
-              File recordedVideoFile = File(widget.data.filePath!
-                  .substring(7, widget.data.filePath!.length));
-              File processedVideoFile = File(widget.data.newPath!
-                  .substring(7, widget.data.newPath!.length));
-              recordedVideoFile.delete();
-              processedVideoFile.delete();
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            } else {
-              showErrorToast(context, json['message']);
-            }
-          });
-        }
-      });
-    });
-  }
+  // draftUpload() async {
+  //   int currentUnix = DateTime.now().millisecondsSinceEpoch;
+  //   String videoId = '$currentUnix.mp4';
+  //
+  //   await _simpleS3
+  //       .uploadFile(
+  //     File(widget.data.newPath!.substring(7, widget.data.newPath!.length)),
+  //     "thrillvideo",
+  //     "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+  //     AWSRegions.usEast1,
+  //     debugLog: true,
+  //     fileName: videoId,
+  //     s3FolderPath: "test",
+  //     accessControl: S3AccessControl.publicRead,
+  //   )
+  //       .then((value) async {
+  //     await _simpleS3
+  //         .uploadFile(
+  //       File('$saveCacheDirectory${widget.data.newName}.png'),
+  //       "thrillvideo",
+  //       "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+  //       AWSRegions.usEast1,
+  //       debugLog: true,
+  //       s3FolderPath: "gif",
+  //       fileName: '$currentUnix.png',
+  //       accessControl: S3AccessControl.publicRead,
+  //     )
+  //         .then((value) async {
+  //       if (widget.data.addSoundModel == null ||
+  //           !widget.data.addSoundModel!.isSoundFromGallery) {
+  //         String tagList = jsonEncode(selectedHashtags);
+  //         var result = await RestApi.postVideo(
+  //             videoId,
+  //             widget.data.isDuet
+  //                 ? widget.data.duetSound ?? ""
+  //                 : widget.data.addSoundModel == null
+  //                     ? ""
+  //                     : widget.data.addSoundModel!.isSoundFromGallery
+  //                         ? "$currentUnix.mp3"
+  //                         : widget.data.addSoundModel!.sound.split('/').last,
+  //             widget.data.isDuet
+  //                 ? widget.data.duetSoundName ?? ""
+  //                 : widget.data.addSoundModel?.name ?? "Original Sound",
+  //             dropDownCategoryValue,
+  //             tagList,
+  //             "Private",
+  //             commentsSwitch ? 1 : 0,
+  //             desCtr.text,
+  //             widget.data.filterName.isEmpty ? '' : widget.data.filterName,
+  //             dropDownLanguageValue,
+  //             '$currentUnix.png',
+  //             widget.data.speed,
+  //             duetSwitch,
+  //             commentsSwitch,
+  //             widget.data.duetFrom ?? '',
+  //             widget.data.isDuet,
+  //             widget.data.addSoundModel?.userId ?? 0);
+  //         var json = jsonDecode(result.body);
+  //         closeDialogue(context);
+  //         if (json['status']) {
+  //           BlocProvider.of<VideoBloc>(context)
+  //               .add(const VideoLoading(selectedTabIndex: 1));
+  //           showSuccessToast(context, "Video has been saved successfully");
+  //           await Future.delayed(const Duration(milliseconds: 200));
+  //           File recordedVideoFile = File(widget.data.filePath!
+  //               .substring(7, widget.data.filePath!.length));
+  //           File processedVideoFile = File(
+  //               widget.data.newPath!.substring(7, widget.data.newPath!.length));
+  //           recordedVideoFile.delete();
+  //           processedVideoFile.delete();
+  //           Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+  //         } else {
+  //           showErrorToast(context, json['message']);
+  //         }
+  //       } else {
+  //         await _simpleS3
+  //             .uploadFile(
+  //           File(widget.data.addSoundModel!.sound),
+  //           "thrillvideo",
+  //           "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+  //           AWSRegions.usEast1,
+  //           debugLog: true,
+  //           fileName: '$currentUnix.mp3',
+  //           s3FolderPath: "sound",
+  //           accessControl: S3AccessControl.publicRead,
+  //         )
+  //             .then((value) async {
+  //           String tagList = jsonEncode(selectedHashtags);
+  //           var result = await RestApi.postVideo(
+  //               videoId,
+  //               widget.data.isDuet
+  //                   ? widget.data.duetSound ?? ""
+  //                   : widget.data.addSoundModel == null
+  //                       ? ""
+  //                       : widget.data.addSoundModel!.isSoundFromGallery
+  //                           ? "$currentUnix.mp3"
+  //                           : widget.data.addSoundModel!.sound.split('/').last,
+  //               widget.data.addSoundModel?.name ?? "",
+  //               dropDownCategoryValue,
+  //               tagList,
+  //               "Private",
+  //               commentsSwitch ? 1 : 0,
+  //               desCtr.text,
+  //               widget.data.filterName.isEmpty ? '' : widget.data.filterName,
+  //               dropDownLanguageValue,
+  //               '$currentUnix.png',
+  //               widget.data.speed,
+  //               duetSwitch,
+  //               commentsSwitch,
+  //               widget.data.duetFrom ?? '',
+  //               widget.data.isDuet,
+  //               widget.data.addSoundModel?.userId ?? 0);
+  //           var json = jsonDecode(result.body);
+  //           closeDialogue(context);
+  //           if (json['status']) {
+  //             BlocProvider.of<VideoBloc>(context)
+  //                 .add(const VideoLoading(selectedTabIndex: 1));
+  //             showSuccessToast(context, "Video has been saved successfully");
+  //             await Future.delayed(const Duration(milliseconds: 200));
+  //             File recordedVideoFile = File(widget.data.filePath!
+  //                 .substring(7, widget.data.filePath!.length));
+  //             File processedVideoFile = File(widget.data.newPath!
+  //                 .substring(7, widget.data.newPath!.length));
+  //             recordedVideoFile.delete();
+  //             processedVideoFile.delete();
+  //             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+  //           } else {
+  //             showErrorToast(context, json['message']);
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
+  // }
 
   postUpload() async {
     int currentUnix = DateTime.now().millisecondsSinceEpoch;

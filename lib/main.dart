@@ -20,6 +20,7 @@ import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/video_item.dart';
+import 'package:truecaller_sdk/truecaller_sdk.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:get_storage/get_storage.dart';
@@ -37,6 +38,8 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
+  TruecallerSdk.initializeSDK(
+      sdkOptions: TruecallerSdkScope.SDK_OPTION_WITHOUT_OTP);
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
@@ -67,12 +70,12 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   runApp(transition.GetMaterialApp(
+    theme: ThemeData(fontFamily: ""),
     debugShowCheckedModeBanner: false,
     defaultTransition: transition.Transition.cupertino,
     initialBinding: DataBindings(),
     home: ShowCaseWidget(builder: Builder(builder: (context) => const MyApp())),
   ));
-
 }
 
 class MyApp extends StatefulWidget {
@@ -114,29 +117,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-            create: (context) => VideoBloc(videoRepository: VideoRepository())
-              ..add(const VideoLoading(selectedTabIndex: 1))),
-      ],
-      child: GestureDetector(
-        onTap: () {
-          FocusScopeNode currentFocus = FocusScope.of(context);
-          if (!currentFocus.hasPrimaryFocus &&
-              currentFocus.focusedChild != null) {
-            FocusManager.instance.primaryFocus?.unfocus();
-          }
-        },
-        child: MaterialApp(
-          title: 'Thrill',
-          navigatorKey: navigatorKey,
-          debugShowCheckedModeBanner: false,
-          theme: theme(),
-          onGenerateRoute: AppRouter.onGenerateRoute,
-          initialRoute: SplashScreen.routeName,
-        ),
-      ),
+    return MaterialApp(
+      title: 'Thrill',
+      navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: false,
+      theme: theme(),
+      home: BottomNavigation(),
+      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }

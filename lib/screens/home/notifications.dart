@@ -2,8 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/models/notification_model.dart';
-import 'package:thrill/models/user.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/utils/util.dart';
 
@@ -29,7 +30,6 @@ class _NotificationsState extends State<Notifications> {
   List<NotificationModel> notificationList =
       List<NotificationModel>.empty(growable: true);
   bool isLoading = true;
-  late UserModel userModel;
 
   @override
   void initState() {
@@ -102,7 +102,7 @@ class _NotificationsState extends State<Notifications> {
                                 } else if (redirectType == 'user' &&
                                     notificationList[index].userId != 0 &&
                                     notificationList[index].userId !=
-                                        userModel.id) {
+                                        UserController().userModel.value.id) {
                                   Navigator.pushNamed(context, "/viewProfile",
                                       arguments: {
                                         "id": notificationList[index].userId,
@@ -204,7 +204,6 @@ class _NotificationsState extends State<Notifications> {
   loadUserModel() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
-    userModel = UserModel.fromJson(jsonDecode(currentUser!));
     setState(() {});
   }
 }
