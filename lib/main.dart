@@ -1,32 +1,22 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart' as transition;
+import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:thrill/blocs/video/video_bloc.dart';
 import 'package:thrill/controller/bindings.dart';
-import 'package:thrill/repository/video/video_repository.dart';
-import 'package:thrill/rest/rest_api.dart';
-import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/video_item.dart';
 import 'package:truecaller_sdk/truecaller_sdk.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:velocity_x/velocity_x.dart';
-import 'package:get_storage/get_storage.dart';
+
 import 'config/app_router.dart';
 import 'config/theme.dart';
-
 import 'screens/screen.dart';
 
 List<CameraDescription> cameras = [];
@@ -37,9 +27,11 @@ void main() async {
   Paint.enableDithering = true;
 
   WidgetsFlutterBinding.ensureInitialized();
+
+
   await GetStorage.init();
   TruecallerSdk.initializeSDK(
-      sdkOptions: TruecallerSdkScope.SDK_OPTION_WITHOUT_OTP);
+      sdkOptions: TruecallerSdkScope.SDK_OPTION_WITH_OTP);
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
@@ -85,34 +77,15 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
+  void dispose() {super.dispose();
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.resumed:
-        break;
-      case AppLifecycleState.inactive:
-        break;
-      case AppLifecycleState.paused:
-        try {
-          reelsPlayerController?.pause();
-        } catch (_) {}
-        break;
-      case AppLifecycleState.detached:
-        break;
-    }
   }
 
   @override

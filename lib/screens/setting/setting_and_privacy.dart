@@ -26,6 +26,7 @@ import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/privacy_policy.dart';
 import 'package:thrill/screens/referal_screen.dart';
 import 'package:thrill/screens/screen.dart';
+import 'package:thrill/screens/setting/wallet_getx.dart';
 import 'package:thrill/screens/terms_of_service.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -50,7 +51,7 @@ class SettingAndPrivacy extends StatelessWidget {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             height: Get.height,
-            child: loadSvgCacheImage("background_settings.svg"),
+            child: loadLocalSvg("background_settings.svg"),
           ),
           SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -172,19 +173,19 @@ class SettingAndPrivacy extends StatelessWidget {
                           Fluent.gift_card_arrow_right_24_regular, "Referral")),
                   GestureDetector(
                       onTap: () {
-                        Get.to(const Inbox());
+                        Get.to( Inbox());
                         //  Navigator.pushNamed(context, '/inbox');
                       },
                       child: mainTile(Mdi.email_newsletter, "Invite Friends")),
                   GestureDetector(
                       onTap: () {
-                        Get.to(const Inbox());
+                        Get.to(const Favourites());
                         //  Navigator.pushNamed(context, '/inbox');
                       },
                       child: mainTile(Ic.twotone_favorite, 'Favourite')),
                   GestureDetector(
                       onTap: () {
-                        Get.to(const Inbox());
+                        Get.to( Inbox());
                         //  Navigator.pushNamed(context, '/inbox');
                       },
                       child: mainTile(Ic.round_inbox, inbox)),
@@ -197,7 +198,7 @@ class SettingAndPrivacy extends StatelessWidget {
                           mainTile(IconParkOutline.personal_privacy, privacy)),
                   GestureDetector(
                       onTap: () {
-                        Get.to(const Wallet());
+                        Get.to(const WalletGetx());
                         //  Navigator.pushNamed(context, '/wallet');
                       },
                       child: mainTile(Ph.wallet_bold, wallet)),
@@ -290,7 +291,7 @@ class SettingAndPrivacy extends StatelessWidget {
                                 onPressed: () {
                                   GetStorage().remove("token");
                                   GetStorage().remove("user");
-                                  Get.offAll(LoginGetxScreen());
+                                  Get.offAll(BottomNavigation());
                                 },
                                 child: const Text('Yes')),
                             cancel: ElevatedButton(
@@ -483,239 +484,6 @@ class SettingAndPrivacy extends StatelessWidget {
     );
   }
 
-  share() {
-    return showModalBottomSheet(
-        context: Get.context!,
-        backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30), topRight: Radius.circular(30))),
-        builder: (BuildContext context) {
-          return Column(
-            children: [
-              const SizedBox(
-                height: 20,
-              ),
-              const Text(
-                sendTo,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                height: 90,
-                child: ListView.builder(
-                    itemCount: 10,
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(left: 20, right: 20),
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              height: 60,
-                              width: 60,
-                              margin: const EdgeInsets.only(right: 10),
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                              ),
-                              child: CachedNetworkImage(
-                                fit: BoxFit.cover,
-                                imageUrl:
-                                    'https://mir-s3-cdn-cf.behance.net/project_modules/disp/b3053232163929.567197ac6e6f5.png',
-                                placeholder: (a, b) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              'User$index',
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.bold),
-                            )
-                          ],
-                        ),
-                      );
-                    }),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              const Text(
-                shareTo,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        VxCircle(
-                          radius: 60,
-                          backgroundImage: const DecorationImage(
-                              image: AssetImage('assets/message.png')),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          message,
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        VxCircle(
-                          radius: 60,
-                          backgroundImage: const DecorationImage(
-                              image: AssetImage('assets/whatsapp.png')),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          whatsApp,
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        VxCircle(
-                          radius: 60,
-                          backgroundImage: const DecorationImage(
-                              image: AssetImage('assets/facebook (2).png')),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          facebook,
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        VxCircle(
-                          radius: 60,
-                          backgroundImage: const DecorationImage(
-                              image: AssetImage('assets/messenger.png')),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          messenger,
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        VxCircle(
-                          radius: 60,
-                          backgroundImage: const DecorationImage(
-                              image: AssetImage('assets/sms.png')),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          sms,
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        VxCircle(
-                            radius: 60,
-                            backgroundColor: Colors.blue,
-                            child: SvgPicture.asset(
-                              'assets/link.svg',
-                              color: Colors.white,
-                            )),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          copyLink,
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ).scrollHorizontal(),
-              const Divider(
-                height: 30,
-                color: Colors.grey,
-              ),
-              const Spacer(),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    cancel,
-                    style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ))
-            ],
-          );
-        });
-  }
 
   switchAccountLayout() async {
     var pref = await SharedPreferences.getInstance();

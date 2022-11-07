@@ -1,33 +1,33 @@
 class RestUrl {
-  static const String baseUrl = "http://thrill.fun/api";
+  static const String baseUrl = "https://thrill.fun/api";
   static const String profileUrl =
       "http://3.129.172.46/dev/uploads/profile_images/";
 
   // static const String profileUrl =
   //     "http://thrill.fun/public/dev/uploads/profile_images/";
-  static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
+  // static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
   static const String assetsUrl = "https://thrillvideo.s3.amazonaws.com/assets/";
-  static const String bannerUrl = "http://thrill.fun/dev/uploads/banners/";
-  static const String thambUrl = "http://thrill.fun/dev/uploads/videos/";
-  static const String soundUrl = "http://thrill.fun/dev/";
-  static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
+  // static const String bannerUrl = "http://thrill.fun/dev/uploads/banners/";
+  // static const String thambUrl = "http://thrill.fun/dev/uploads/videos/";
+  // static const String soundUrl = "http://thrill.fun/dev/";
+  // static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
   static const String placeholderImage = "https://ttensports.com/wp-content/uploads/1982/02/person-placeholder.jpg";
-  static const String awsSoundUrl =
-      "https://thrillvideo.s3.amazonaws.com/sound/";
-  static const String currencyUrl = "http://thrill.fun/dev/uploads/currency/";
-  static const String spinSound =
-      "http://thrill.fun/dev/public/uploads/spins.wav";
-
+  // static const String awsSoundUrl =
+  //     "https://thrillvideo.s3.amazonaws.com/sound/";
+  // // static const String currencyUrl = "http://thrill.fun/dev/uploads/currency/";
+  // static const String spinSound =
+  //     "http://thrill.fun/dev/public/uploads/spins.wav";
+  //
   // static const String baseUrl = "https://9starinfosolutions.com/thrill/api/";
   // static const String profileUrl = "https://9starinfosolutions.com/thrill/uploads/profile_images/";
-  // static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
-  // static const String bannerUrl = "https://9starinfosolutions.com/thrill/uploads/banners/";
-  // static const String thambUrl = "https://9starinfosolutions.com/thrill/uploads/videos/";
-  // static const String soundUrl = "https://9starinfosolutions.com/thrill/";
-  // static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
-  // static const String awsSoundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
-  // static const String currencyUrl = "https://9starinfosolutions.com/thrill/uploads/currency/";
-  // static const String spinSound = "https://9starinfosolutions.com/thrill/public/uploads/spins.wav";
+  static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
+  static const String bannerUrl = "https://9starinfosolutions.com/thrill/uploads/banners/";
+  static const String thambUrl = "https://9starinfosolutions.com/thrill/uploads/videos/";
+  static const String soundUrl = "https://9starinfosolutions.com/thrill/";
+  static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
+  static const String awsSoundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
+  static const String currencyUrl = "https://9starinfosolutions.com/thrill/uploads/currency/";
+  static const String spinSound = "https://9starinfosolutions.com/thrill/public/uploads/spins.wav";
 
   static const String login = baseUrl + "login";
   static const String register = baseUrl + "register";
@@ -74,30 +74,30 @@ class RestUrl {
   static const String getUserWalletBalance = baseUrl + "wallet/balance";
   static const String withdrawRequest = baseUrl + "wallet/withdraw";
   static const String paymentHistory = baseUrl + "wallet/withdraw-history";
-  static const String videoBySound = baseUrl + "sound/videosbysound";
+  static const String videoBySound = baseUrl + "/sound/videosbysound";
 
-  static const String getProbilityCounter = baseUrl + "spin-wheel/counter-data";
-  static const String cmsPage = baseUrl + "CmsPage";
-  static const String siteSettings = baseUrl + "SiteSettings";
-  static const String popularVideos = baseUrl + "video/popular";
-  static const String followingVideos = baseUrl + "video/following";
-  static const String sendOTP = baseUrl + "send-otp";
-  static const String verifyOTP = baseUrl + "verify-otp";
-  static const String notificationList = baseUrl + "user/notification-list";
-  static const String inbox = baseUrl + "user/chat-inbox";
+  static const String getProbilityCounter = baseUrl + "/spin-wheel/counter-data";
+  static const String cmsPage = baseUrl + "/CmsPage";
+  static const String siteSettings = baseUrl + "/SiteSettings";
+  static const String popularVideos = baseUrl + "/video/popular";
+  static const String followingVideos = baseUrl + "/video/following";
+  static const String sendOTP = baseUrl + "/send-otp";
+  static const String verifyOTP = baseUrl + "/verify-otp";
+  static const String notificationList = baseUrl + "/user/notification-list";
+  static const String inbox = baseUrl + "/user/chat-inbox";
   static const String sendChatNotification =
-      baseUrl + "user/send-chat-notification";
-  static const String safetyPreference = baseUrl + "user/safety-preference";
-  static const String followerList = baseUrl + "user/get-followers";
-  static const String followingList = baseUrl + "user/get-followings";
-  static const String reportUser = baseUrl + "user/report-user";
-  static const String checkBlock = baseUrl + "user/is-user-blocked";
-  static const String blockUnblockUser = baseUrl + "user/block-unblock-user";
-  static const String deleteVideo = baseUrl + "video/delete";
-  static const String publishPrivateVideo = baseUrl + "video/publish-private";
-  static const String currencyDetails = baseUrl + "currencies/data";
-  static const String checkReport = baseUrl + "video/is-video-report";
-  static const String reportVideo = baseUrl + "video/report";
-  static const String favUnfavVideo = baseUrl + "video/do-fav-unfav";
-  static const String favVideos = baseUrl + "video/favorite-videos";
+      baseUrl + "/user/send-chat-notification";
+  static const String safetyPreference = baseUrl + "/user/safety-preference";
+  static const String followerList = baseUrl + "/user/get-followers";
+  static const String followingList = baseUrl + "/user/get-followings";
+  static const String reportUser = baseUrl + "/user/report-user";
+  static const String checkBlock = baseUrl + "/user/is-user-blocked";
+  static const String blockUnblockUser = baseUrl + "/user/block-unblock-user";
+  static const String deleteVideo = baseUrl + "/video/delete";
+  static const String publishPrivateVideo = baseUrl + "/video/publish-private";
+  static const String currencyDetails = baseUrl + "/currencies/data";
+  static const String checkReport = baseUrl + "/video/is-video-report";
+  static const String reportVideo = baseUrl + "/video/report";
+  static const String favUnfavVideo = baseUrl + "/video/do-fav-unfav";
+  static const String favVideos = baseUrl + "/video/favorite-videos";
 }

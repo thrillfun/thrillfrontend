@@ -8,7 +8,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:simple_s3/simple_s3.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/model.dart';
 import 'package:thrill/models/post_data.dart';
@@ -515,7 +517,7 @@ class _PostVideoState extends State<PostVideo> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SvgPicture.asset('assets/post.svg'),
+                            // SvgPicture.asset('assets/post.svg'),
                             const SizedBox(
                               width: 10,
                             ),
@@ -744,7 +746,7 @@ class _PostVideoState extends State<PostVideo> {
             !widget.data.addSoundModel!.isSoundFromGallery) {
           String tagList = jsonEncode(selectedHashtags);
 
-          controller.postVideo(
+          controller.postVideo(User.fromJson(GetStorage().read("user")).id!.toString(),
               videoId,
               widget.data.isDuet
                   ? widget.data.duetSound ?? ""
@@ -804,7 +806,7 @@ class _PostVideoState extends State<PostVideo> {
           )
               .then((value) async {
             String tagList = jsonEncode(selectedHashtags);
-            controller.postVideo(
+            controller.postVideo(User.fromJson(GetStorage().read("user")).id!.toString(),
                 videoId,
                 widget.data.isDuet
                     ? widget.data.duetSound ?? ""

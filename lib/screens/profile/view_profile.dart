@@ -44,8 +44,8 @@ class ViewProfile extends StatelessWidget {
     userController.getUserProfile(int.parse(userId.toString()));
     userController.getUserFollowers(int.parse(userId.toString()));
     userController.getUserFollowing(int.parse(userId.toString()));
-    videosController!.getOtherUserVideos(int.parse(userId.toString()));
-    videosController!.getOthersLikedVideos(int.parse(userId.toString()));
+    videosController.getOtherUserVideos(int.parse(userId.toString()));
+    videosController.getOthersLikedVideos(int.parse(userId.toString()));
 
     return GetX<UserController>(
         builder: (user) => user.isProfileLoading.value ||
@@ -677,41 +677,41 @@ class ViewProfile extends StatelessWidget {
                                           ClipOval(
                                             child: InkWell(
                                               onTap: () {
-                                                InboxModel inboxModel = InboxModel(
-                                                    id: user.isProfileLoading
-                                                        .value
-                                                        ? 0
-                                                        : user
-                                                        .userProfile
-                                                        .value
-                                                        .data!
-                                                        .user!
-                                                        .id!,
-                                                    userImage: user
-                                                        .isProfileLoading
-                                                        .value
-                                                        ? ""
-                                                        : user
-                                                        .userProfile
-                                                        .value
-                                                        .data!
-                                                        .user!
-                                                        .avatar,
-                                                    message: "",
-                                                    msgDate: "",
-                                                    name: user
-                                                        .isProfileLoading
-                                                        .value
-                                                        ? ""
-                                                        : user
-                                                        .userProfile
-                                                        .value
-                                                        .data!
-                                                        .user!
-                                                        .name!);
-                                                Get.to(ChatScreen(
-                                                    inboxModel:
-                                                    inboxModel));
+                                                // Inbox inboxModel = InboxModel(
+                                                //     id: user.isProfileLoading
+                                                //         .value
+                                                //         ? 0
+                                                //         : user
+                                                //         .userProfile
+                                                //         .value
+                                                //         .data!
+                                                //         .user!
+                                                //         .id!,
+                                                //     userImage: user
+                                                //         .isProfileLoading
+                                                //         .value
+                                                //         ? ""
+                                                //         : user
+                                                //         .userProfile
+                                                //         .value
+                                                //         .data!
+                                                //         .user!
+                                                //         .avatar,
+                                                //     message: "",
+                                                //     msgDate: "",
+                                                //     name: user
+                                                //         .isProfileLoading
+                                                //         .value
+                                                //         ? ""
+                                                //         : user
+                                                //         .userProfile
+                                                //         .value
+                                                //         .data!
+                                                //         .user!
+                                                //         .name!);
+                                                // Get.to(ChatScreen(
+                                                //     inboxModel:
+                                                //     inboxModel));
                                               },
                                               child: Container(
                                                   decoration:
@@ -937,7 +937,7 @@ class ViewProfile extends StatelessWidget {
                                   "This user's liked videos or private",
                               style: TextStyle(
                                   fontSize: 18,
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.bold)),
                           TextSpan(
                               text: '\n\n'

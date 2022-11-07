@@ -13,15 +13,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/rest/rest_url.dart';
+import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/profile/edit_profile.dart';
 import 'package:colorful_iconify_flutter/icons/logos.dart';
+import 'package:thrill/screens/profile/profile.dart';
 
 import '../../common/strings.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
 class ManageAccount extends StatelessWidget {
-  User user = User.fromJson(GetStorage().read("user"));
   var selectedGender = 'Male'.obs;
   var genderList = ["Male", "Female", "Other"];
   ImagePicker _imagePicker = ImagePicker();
@@ -32,6 +33,7 @@ class ManageAccount extends StatelessWidget {
   var instaLink = "https://www.instagram.com/".obs;
   var youtubeLink = "https://www.youtube.com/".obs;
   var twitterLink = "https://twitter.com/".obs;
+  User user = User.fromJson(GetStorage().read("user"));
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +63,7 @@ class ManageAccount extends StatelessWidget {
   }
 
   profilePicLayout() => Container(
-      margin: EdgeInsets.only(top: 10, bottom: 20),
+      margin: const EdgeInsets.only(top: 10, bottom: 20),
       alignment: Alignment.center,
       decoration: BoxDecoration(
           border: Border.all(
@@ -120,7 +122,7 @@ class ManageAccount extends StatelessWidget {
                 onTap: () => Get.defaultDialog(
                     title: "Update Profile Image",
                     content: Container(
-                      margin: EdgeInsets.all(20),
+                      margin: const EdgeInsets.all(20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -162,7 +164,7 @@ class ManageAccount extends StatelessWidget {
                         ],
                       ),
                     )),
-                child: Iconify(
+                child: const Iconify(
                   Carbon.camera,
                   color: Colors.white,
                   size: 30,
@@ -185,7 +187,7 @@ class ManageAccount extends StatelessWidget {
                 border: Border.all(color: const Color(0xff353841)),
                 borderRadius: const BorderRadius.all(Radius.circular(10))),
             child: TextFormField(
-              initialValue: user.username,
+              initialValue:user.username,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: "Username",
@@ -234,10 +236,10 @@ class ManageAccount extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(10))),
             child: TextFormField(
               initialValue: user.websiteUrl,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: "Website Url",
-                hintStyle: TextStyle(color: Colors.grey),
+                hintStyle: const TextStyle(color: Colors.grey),
                 isDense: true,
                 counterText: '',
                 border:
@@ -257,11 +259,11 @@ class ManageAccount extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(10))),
             child: TextFormField(
               initialValue: user.bio,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               maxLines: 10,
               decoration: InputDecoration(
                 hintText: "Bio",
-                hintStyle: TextStyle(color: Colors.grey),
+                hintStyle: const TextStyle(color: Colors.grey),
                 isDense: true,
                 counterText: '',
                 border:
@@ -273,18 +275,18 @@ class ManageAccount extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              layoutYoutube(),
-              layoutFacebook(),
-              layoutInstagram(),
-              layoutTwitter(),
-            ],
-          )
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //   children: [
+          //     layoutYoutube(),
+          //     layoutFacebook(),
+          //     layoutInstagram(),
+          //     layoutTwitter(),
+          //   ],
+          // )
         ],
       );
 
@@ -337,7 +339,7 @@ class ManageAccount extends StatelessWidget {
                       .map((element) => DropdownMenuItem(
                             child: Text(
                               element,
-                              style: TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.white),
                             ),
                             value: element,
                           ))
@@ -489,12 +491,12 @@ class ManageAccount extends StatelessWidget {
       child: ListTile(
         title: Text(
           text,
-          style: TextStyle(color: Colors.white, fontSize: 18),
+          style: const TextStyle(color: Colors.white, fontSize: 18),
         ),
         leading: Card(
-          margin: EdgeInsets.only(right: 20),
+          margin: const EdgeInsets.only(right: 20),
           child: Container(
-            padding: EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5),
             child: Iconify(icon, color: ColorManager.colorAccent, size: 20),
           ),
         ),

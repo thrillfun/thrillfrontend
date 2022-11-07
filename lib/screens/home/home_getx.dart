@@ -1,7 +1,5 @@
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -11,11 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/comments_controller.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
-import 'package:thrill/screens/following_and_followers.dart';
 import 'package:thrill/screens/video/camera_screen.dart';
-import 'package:thrill/screens/video/record.dart';
 import 'package:thrill/widgets/better_video_player.dart';
 
 class HomeGetx extends StatefulWidget {
@@ -172,6 +169,8 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
                                       onTap: () {
                                         Get.to(CameraScreen(
                                           selectedSound: "",
+                                          id: User.fromJson(GetStorage().read("user")).id,
+                                          owner: User.fromJson(GetStorage().read("user")).username,
                                         ));
                                       },
                                       child: const Icon(
@@ -200,29 +199,38 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
         itemCount: videosController.publicVideosList.length,
         //Notice this
         itemBuilder: (context, index) => BetterReelsPlayer(
-            videosController.publicVideosList[index].gifImage!,
-            videosController.publicVideosList[index].video!,
-            index,
-            related.value,
-            isRelatedTurning.value,
-            () {},
-            videosController.publicVideosList[index].user,
-            videosController.publicVideosList[index].id!,
-            videosController.publicVideosList[index].soundName.toString(),
-            videosController.publicVideosList[index].isDuetable == "yes"
-                ? true
-                : false,
-            videosController.publicVideosList[index],
-            videosController.publicVideosList[index].user!.id!,
-            videosController.publicVideosList[index].user!.name.toString(),
-            videosController.publicVideosList[index].description.toString(),
-            true,
-            videosController.publicVideosList[index].hashtags!,
-            videosController.publicVideosList[index].sound.toString(),
-            videosController.publicVideosList[index].soundOwner.toString(),
-            videosController.publicVideosList[index].isCommentable.toString().toLowerCase() == "yes"
-                ? true
-                : false));
+                videosController.publicVideosList[index].gifImage!,
+                videosController.publicVideosList[index].video!,
+                index,
+                related.value,
+                isRelatedTurning.value, () {
+              videosController.publicVideosList[index].videoLikeStatus == 0
+                  ? videosController.likeVideo(
+                      1, videosController.publicVideosList[index].id!)
+                  : videosController.likeVideo(
+                      0, videosController.publicVideosList[index].id!);
+            },
+                videosController.publicVideosList[index].user,
+                videosController.publicVideosList[index].id!,
+                videosController.publicVideosList[index].soundName.toString(),
+                videosController.publicVideosList[index].isDuetable == "yes"
+                    ? true
+                    : false,
+                videosController.publicVideosList[index],
+                videosController.publicVideosList[index].user!.id!,
+                videosController.publicVideosList[index].user!.name.toString(),
+                videosController.publicVideosList[index].description.toString(),
+                true,
+                videosController.publicVideosList[index].hashtags!,
+                videosController.publicVideosList[index].sound.toString(),
+                videosController.publicVideosList[index].soundOwner.toString(),
+                videosController.publicVideosList[index].videoLikeStatus,
+                videosController.publicVideosList[index].isCommentable
+                            .toString()
+                            .toLowerCase() ==
+                        "yes"
+                    ? true
+                    : false));
   }
 
   followingVideosLayout() {
@@ -258,7 +266,11 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
             videosController.followingVideosList[index].hashtags!,
             videosController.followingVideosList[index].sound.toString(),
             videosController.followingVideosList[index].soundOwner.toString(),
-            videosController.followingVideosList[index].isCommentable.toString().toLowerCase() == "yes"
+            videosController.followingVideosList[index].videoLikeStatus,
+            videosController.followingVideosList[index].isCommentable
+                        .toString()
+                        .toLowerCase() ==
+                    "yes"
                 ? true
                 : false));
   }

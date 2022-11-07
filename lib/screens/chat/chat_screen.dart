@@ -8,6 +8,7 @@ import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/controller/model/inbox_model.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/rest/rest_api.dart';
@@ -18,9 +19,9 @@ import 'chat_contrroller.dart';
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key, required this.inboxModel}) : super(key: key);
   static const String routeName = '/chatScreen';
-  final InboxModel inboxModel;
+  final Inbox inboxModel;
 
-  static Route route(InboxModel senderInbox) {
+  static Route route(Inbox senderInbox) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
       builder: (context) => ChatScreen(
@@ -38,7 +39,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String txtValue = '';
   List<ChatMsg> chats = List<ChatMsg>.empty(growable: true);
   User? userModel;
-  late InboxModel inboxModel = widget.inboxModel;
+  late Inbox inboxModel = widget.inboxModel;
 
   @override
   initState() {
@@ -83,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Expanded(
                 child: Text(
-                  widget.inboxModel.name.capitalizeFirst!.toString(),
+                  widget.inboxModel.name!.toString(),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                       color: Colors.white,
@@ -94,7 +95,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(20.0),
                 child: widget.inboxModel.userImage == "null" ||
-                        widget.inboxModel.userImage.isEmpty
+                        widget.inboxModel.userImage.toString().isEmpty
                     ? Container(
                         padding: EdgeInsets.all(2),
                         width: 35,
@@ -111,10 +112,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         )),
                       )
                     : CachedNetworkImage(
-                        imageUrl: widget.inboxModel.userImage == "null" ||
-                                widget.inboxModel.userImage.isEmpty
+                        imageUrl: widget.inboxModel.userImage.toString() == "null" ||
+                                widget.inboxModel.userImage.toString().isEmpty
                             ? "https://www.worldpeacecouncil.net/images/photos/home/thumbnails/thumb_Gandhi1.jpg"
-                            : widget.inboxModel.userImage,
+                            : widget.inboxModel.userImage.toString(),
                         fit: BoxFit.contain,
                         width: 35,
                         height: 35,
@@ -156,7 +157,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         : Expanded(
                             child: StreamBuilder<List<ChatMsg>>(
                               stream: ChatController.getChatMsg(
-                                userModel!.id! > widget.inboxModel.id
+                                userModel!.id! > widget.inboxModel.id!
                                     ? '${userModel!.id}_${widget.inboxModel.id}'
                                     : '${widget.inboxModel.id}_${userModel!.id}',
                               ),
@@ -230,14 +231,14 @@ class _ChatScreenState extends State<ChatScreen> {
                                           );
                                           ChatController.sendMsg(
                                               userModel!.id! >
-                                                      widget.inboxModel.id
+                                                      widget.inboxModel.id!
                                                   ? '${userModel!.id}_${widget.inboxModel.id}'
                                                   : '${widget.inboxModel.id}_${userModel!.id}',
                                               message);
                                           txtValue = '';
                                           txtController.clear();
                                           inboxModel.message = message.message;
-                                          inboxModel.msgDate = message.time;
+                                          inboxModel.time = message.time;
                                           await RestApi.sendChatNotification(
                                               widget.inboxModel.id.toString(),
                                               message.message);

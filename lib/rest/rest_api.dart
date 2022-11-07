@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/models/social_url_model.dart';
 import 'package:thrill/rest/rest_client.dart';
 import 'package:thrill/rest/rest_url.dart';
-
 
 class RestApi {
   static Future<http.Response> login(String phone, String password) async {
@@ -178,7 +178,7 @@ class RestApi {
   static Future<http.Response> getUserProfile(int userid) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.getUserProfile,
       headers: {
@@ -214,7 +214,7 @@ class RestApi {
       int soundOwnerId) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var currentUser = instance.getString('currentUser');
     User current = User.fromJson(jsonDecode(currentUser!));
 
@@ -256,7 +256,7 @@ class RestApi {
     http.Response response;
 
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
 
     var result = await RestClient.postData(
       RestUrl.likeDislikeComment,
@@ -278,7 +278,7 @@ class RestApi {
     http.Response response;
 
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
 
     var result = await RestClient.postData(
       RestUrl.postComment,
@@ -302,7 +302,7 @@ class RestApi {
   static Future<http.Response> getCommentListOnVideo(int videoId) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.getCommentList,
       headers: {
@@ -321,11 +321,11 @@ class RestApi {
   static Future<http.Response> getWheelDetails() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.wheelDetails,
       headers: {
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${GetStorage().read("token")}',
       },
     );
 
@@ -340,7 +340,7 @@ class RestApi {
     http.Response response;
 
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
 
     var result = await RestClient.postData(
       RestUrl.wheelUpdate,
@@ -359,7 +359,7 @@ class RestApi {
   static Future<http.Response> getWheelEarnedDetails() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.wheelEarned,
       headers: {
@@ -377,7 +377,7 @@ class RestApi {
   static Future<http.Response> getVideoFields() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(RestUrl.getVideoFields, headers: {
       'Authorization': 'Bearer $token',
     });
@@ -390,7 +390,7 @@ class RestApi {
   static Future<http.Response> getDiscoverBanner() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.getBanner,
       headers: {
@@ -408,7 +408,7 @@ class RestApi {
   static Future<http.Response> getVideoWithHash() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.getVideoByHashtag,
       headers: {
@@ -426,7 +426,7 @@ class RestApi {
   static Future<http.Response> getPrivateVideo() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.getPrivateVideo,
       headers: {
@@ -444,7 +444,7 @@ class RestApi {
   static Future<http.Response> getSounds() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.getSoundList,
       headers: {
@@ -460,7 +460,7 @@ class RestApi {
     http.Response response;
 
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
 
     var result = await RestClient.postData(
       RestUrl.viewCount,
@@ -480,7 +480,7 @@ class RestApi {
       int publisherId, String action) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.followUnfollow,
       headers: {
@@ -499,7 +499,7 @@ class RestApi {
       int commentId, int isLike) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.commentLikeDislike,
       headers: {
@@ -518,7 +518,7 @@ class RestApi {
       int id, String type, int action) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.favrateSundHastagRemoveAdd,
       headers: {
@@ -537,7 +537,7 @@ class RestApi {
   static Future<http.Response> getFavriteItems() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.getFavriteList,
       headers: {
@@ -553,7 +553,7 @@ class RestApi {
   static Future<http.Response> getSoundCategories() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.getSoundCategories,
       headers: {
@@ -567,7 +567,7 @@ class RestApi {
   static Future<http.Response> getSoundList() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.getSoundList,
       headers: {
@@ -585,7 +585,7 @@ class RestApi {
       String type, int action) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.notificationSetting,
       headers: {
@@ -605,7 +605,7 @@ class RestApi {
   static Future<http.Response> getNotificationSetting() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.notificationSetting,
       headers: {
@@ -621,7 +621,7 @@ class RestApi {
   static Future<http.Response> deactiveAccount() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.deactiveAc,
       headers: {
@@ -639,7 +639,7 @@ class RestApi {
       String fullname, String fileImg, String username) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     try {
       http.MultipartRequest request =
           http.MultipartRequest('POST', Uri.parse(RestUrl.userVerification));
@@ -680,7 +680,7 @@ class RestApi {
   static Future<http.Response> checkAccountStatus() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.checkAcStatus,
       headers: {
@@ -696,7 +696,7 @@ class RestApi {
   static Future<http.Response> getUserPublicVideo() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var loginData = instance.getString('currentUser');
     User user = User.fromJson(jsonDecode(loginData!));
     var result = await RestClient.postData(
@@ -717,7 +717,7 @@ class RestApi {
   static Future<http.Response> getUserLikedVideo({int? userID}) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var loginData = instance.getString('currentUser');
     User user = User.fromJson(jsonDecode(loginData!));
     var result = await RestClient.postData(RestUrl.userLikedVideo, headers: {
@@ -734,7 +734,7 @@ class RestApi {
   static Future<http.Response> getUserPrivateVideo() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
 
     var result = await RestClient.getData(
       RestUrl.userPrivateVideo,
@@ -753,7 +753,7 @@ class RestApi {
   static Future<http.Response> getHashtagList() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.getHashtagList,
       headers: {
@@ -769,7 +769,7 @@ class RestApi {
   static Future<http.Response> getCommissionSetting() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.settingAdminCommission,
       headers: {
@@ -786,7 +786,7 @@ class RestApi {
   static Future<http.Response> getWalletBalance() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.getUserWalletBalance,
       headers: {
@@ -804,7 +804,7 @@ class RestApi {
       String upiId, String network, String fee, String amount) async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.withdrawRequest,
       headers: {
@@ -829,7 +829,7 @@ class RestApi {
   static Future<http.Response> getPaymentHistory() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.paymentHistory,
       headers: {
@@ -845,8 +845,8 @@ class RestApi {
 
   static Future<http.Response> getVideosBySound(String sound) async {
     http.Response response;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+
+    var token = GetStorage().read("token");
     var result = await RestClient.postData(
       RestUrl.videoBySound,
       headers: {
@@ -864,12 +864,15 @@ class RestApi {
 
   static Future<http.Response> getAvailableProbilityCounter() async {
     http.Response response;
+    var tempToken =
+        "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYzdkZWQ4Y2VkNDUwZDE1NWQ0NzY5NjFkYmUzOGNlZjJlODk4ZDAxNjk0NzdiNTZmMmIxMGI1MGYxZTI4OTcwYzljYmRlMGFiNzk2OWM2NjIiLCJpYXQiOjE2NjYzNDE0MzkuNjYzOTk0LCJuYmYiOjE2NjYzNDE0MzkuNjYzOTk3LCJleHAiOjE2OTc4Nzc0MzkuNjU5NDExLCJzdWIiOiIxNiIsInNjb3BlcyI6W119.wQrhTRwPK8IeEhAfYiZId3COXKOoQhzTQay9qnsY64JfYUUEAbgwbhJ-t7OAwJ3Xj8An1Fn6r0j4CkPA96Y_gE3cMQkposykW6p5yoB2lk7xgY602JPRTMDC752pP-ePZqP7WOyV-AiC0Obs2kbMtIbsNqd6NufAIVpXTY8HzHdXivXgnHqOazcsJAffo8mkcEW--bQy4gnT6TZuxQ7sxdc4Br-IYbft-MksrfzVsERg91K5lkWSjlmvOY9fqi3rmvitpv1g6TOlQ6WiU5GEdIZAs_kQGWWOVksGYCv2tubOd5VAHbn_reL7u2R1KgJ8UwcvI21NS4CmjYqTNz_C_zCeVjBT6Zvxr4vjn4AjWvKm0HoS2WwbtOBdXTwRnO6riPjjLt06w-Ez3j4tvlp0ZOGfw_wLj8S-VqNO3AvanySEhyusEyYsOSqywy9tiztA0Uxos_VENpCkAcDn5YlU0QUsil1xPaQwwpaqOo3eFKfV_LgSVuvKG1kO0yBGW2vDd8F2F3Xuchls_HAHaJ2ePy8V1w4Mrnychq6mv1BD1uxjp113bR3NSjWPsk2oDbdii-zSp-MwxR3UX3zvNPbU6NeVFqsS6-6Oc84PQqO9VGVlhkTZBRzfZEXnKaO0Rh2XhX6NTgOb6XIv972WkCUijggOUbjKfGKAAyUdm5jKdro";
+
     var instance = await SharedPreferences.getInstance();
     var token = instance.getString('currentToken');
     var result = await RestClient.getData(
       RestUrl.getProbilityCounter,
       headers: {
-        'Authorization': 'Bearer $token',
+        'Authorization': tempToken,
       },
     );
 
@@ -1025,11 +1028,12 @@ class RestApi {
   static Future<http.Response> getInbox() async {
     http.Response response;
     var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.inbox,
       headers: {
-        'Authorization': 'Bearer $token',
+        'Authorization':
+            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZjM0NmQ0Zjk0MzY3NDg0MGVlZTRkZWQzNTFjOGQ2Y2NmMjMzM2E4ZGIwYWE2MjMzMGNiZGYxNjI4MWM1YzU2MGU5NjkzZjNlNzg4YjkyNWEiLCJpYXQiOjE2NTgzOTk5NjguMzY3NTE4LCJuYmYiOjE2NTgzOTk5NjguMzY3NTIyLCJleHAiOjE2ODk5MzU5NjguMzYyMzMxLCJzdWIiOiIyIiwic2NvcGVzIjpbXX0.L6P2281VvL7BDqLWeKvZA8h7PEaYQZXjy5ysGxjDFF8qyeUh6GT3FJ4YbKZ_sfiZkCv1FdZCrML8Kr4OulOl4JGBnBXj_lNoP2mHfmOI-anx4fb_tipINA8kQ0PLM2HDyXV7ZtTDQt-Oyw1u8M7A3NB9NMXg377mZvkt_ZuoUpqX4ScJYJ-uNrhBBZEK_LTXJl_tlCDpJEbmFlOvKu6xCuiC-Iaj2KabYuWbDT3FZ7W6hr2-YVQsvlOqXRU5ynLhSekAdo-4kAEUxT_T_isXNSCQiDkWGDDmlwlAqAqdKE5VfyOB3Dgjb5QoTyH8Om3E-bY43xKa3Q9J9Ibpvu6iVeQRlQgRsU2nRGecOvTzr3WQN_pB3R78fmtqk2AJ-sjAzCf1AxWKc5JgAqixkYqBUJPksoIM9voyAQn0wd1-652LUtUeapd16W0-nNB1LTqMEFuq3cwJyjMUdZ-RwBKXA087lbfKut6fy3UQy-1fXDsBKd1cH4wJMG1N2BUhaZXmZNQyf37TDoWxC4YdkemKY0t0GVKHLduCO1q530g8wHjvE6Mpp60YWERsMkKaQ0eXC1o-OatDhAPbAobLM4GJnaSWe3s-wX_SMvp9ZgiP5zMUPKgWCTMzU43URWn2YMiqOPJjN5l6KoAaVMCZw6AsDIGdcFs4Xc9QItRFPtwvO7M',
       },
     );
     response = http.Response(jsonEncode(result), 200, headers: {

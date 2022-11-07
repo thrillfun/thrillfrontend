@@ -45,6 +45,7 @@ class HashTagsDetails {
   int? comments;
   List? hashtags;
   String? soundOwner;
+  int? videoLikeStatus;
   User? user;
 
   HashTagsDetails(
@@ -62,6 +63,7 @@ class HashTagsDetails {
       this.comments,
       this.hashtags,
       this.soundOwner,
+        this.videoLikeStatus,
       this.user});
 
   HashTagsDetails.fromJson(Map<String, dynamic> json) {
@@ -79,6 +81,7 @@ class HashTagsDetails {
     comments = json['comments'];
     hashtags = json['hashtags'];
     soundOwner = json['sound_owner'];
+    videoLikeStatus = json['video_like_status']??0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
   }
 
@@ -98,6 +101,7 @@ class HashTagsDetails {
     data['comments'] = this.comments;
     data['hashtags'] = this.hashtags;
     data['sound_owner'] = this.soundOwner;
+    data['video_like_status']  = this.videoLikeStatus;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }

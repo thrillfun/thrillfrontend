@@ -37,7 +37,7 @@ class CommentsController extends GetxController {
     update();
   }
 
-  postComment(int videoId, String userId, String comment) async {
+  Future<void>postComment(int videoId, String userId, String comment) async {
     isLoading.value = true;
 
     var response = await http

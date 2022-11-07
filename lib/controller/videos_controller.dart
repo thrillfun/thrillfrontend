@@ -1,26 +1,37 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
+import 'package:external_path/external_path.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:simple_s3/simple_s3.dart';
+import 'package:thrill/common/color.dart';
+import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/model/delete_video_response.dart';
 import 'package:thrill/controller/model/liked_videos_model.dart';
 import 'package:thrill/controller/model/own_videos_model.dart';
 import 'package:thrill/controller/model/private_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
+import 'package:thrill/controller/model/user_details_model.dart' as user;
 import 'package:thrill/controller/model/video_fields_model.dart' as videoFields;
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/models/videos_post_response.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/utils/util.dart';
-
-import '../screens/profile/profile.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 class VideosController extends GetxController {
   RxBool on = false.obs; // our observable
   var token = GetStorage().read('token');
+  var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  var simpleS3 = SimpleS3();
+  GetSnackBar? snackBar;
 
   // swap true/false & save it to observable
 
@@ -51,6 +62,40 @@ class VideosController extends GetxController {
     } catch (e) {
       print(e);
     }
+    snackBar = GetSnackBar(
+      duration: null,
+      barBlur: 10,
+      borderColor: ColorManager.colorPrimaryLight,
+      borderWidth: 1.5,
+      margin: const EdgeInsets.only(
+        left: 10,
+        right: 10,
+        bottom: 10,
+      ),
+      borderRadius: 10,
+      backgroundColor: Colors.green.shade50,
+      messageText: StreamBuilder<dynamic>(
+          stream: simpleS3.getUploadPercentage,
+          builder: (context, snapshot) {
+            return snapshot.data != null
+                ? Text(snapshot.data)
+                : const LinearProgressIndicator(
+                    value: 0,
+                  );
+          }),
+      isDismissible: false,
+      mainButton: IconButton(
+        onPressed: () {
+          Get.back();
+        },
+        icon: const Icon(Icons.close),
+      ),
+      icon: const Icon(
+        Icons.error,
+        color: Colors.green,
+      ),
+    );
+
   }
 
   void toggle() => on.value = on.value ? false : true;
@@ -90,18 +135,15 @@ class VideosController extends GetxController {
 
   Future<void> getAllVideos() async {
     isLoading.value = true;
+    dio.options.headers['Authorization'] = token;
+    var response =
+        await dio.get("/video/list").timeout(const Duration(seconds: 60));
 
-    var response = await http
-        .get(
-          Uri.parse('http://3.129.172.46/dev/api/video/list'),
-          // headers: {"Authorization": "Bearer $token"},
-        )
-        .timeout(const Duration(seconds: 60));
+    print(response.data);
     try {
-      publicVideosList =
-          PublicVideosModel.fromJson(json.decode(response.body)).data!.obs;
+      publicVideosList = PublicVideosModel.fromJson(response.data).data!.obs;
     } catch (e) {
-      errorToast(PublicVideosModel.fromJson(json.decode(response.body))
+      errorToast(PublicVideosModel.fromJson(json.decode(response.data))
           .message
           .toString());
     }
@@ -140,14 +182,13 @@ class VideosController extends GetxController {
 
   getUserVideos() async {
     isUserVideosLoading.value = true;
-    if (token.isEmpty) {
+    if (token == null) {
     } else {
-      var response = await http
-          .post(Uri.parse('${RestUrl.baseUrl}/video/user-videos'), headers: {
-        "Authorization": "Bearer ${GetStorage().read("token")}"
-      }, body: {
-        "user_id": "${UserController().userModel.value.id}"
-      }).timeout(const Duration(seconds: 60));
+      var id = user.User.fromJson(GetStorage().read("user")).id;
+      var response = await http.post(
+          Uri.parse('${RestUrl.baseUrl}/video/user-videos'),
+          headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
+          body: {"user_id": "$id"}).timeout(const Duration(seconds: 60));
 
       try {
         userVideosList =
@@ -165,22 +206,20 @@ class VideosController extends GetxController {
 
   getUserPrivateVideos() async {
     isUserVideosLoading.value = true;
+    var id = user.User.fromJson(GetStorage().read("user")).id;
 
-    if (GetStorage().read("token").toString().isEmpty) {
-    } else {
-      var response = await http.get(
-        Uri.parse('${RestUrl.baseUrl}/video/private'),
-        headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
-      ).timeout(const Duration(seconds: 60));
+    var response = await http.get(
+      Uri.parse('${RestUrl.baseUrl}/video/private'),
+      headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
+    ).timeout(const Duration(seconds: 60));
 
-      try {
-        privateVideosList =
-            PrivateVideosModel.fromJson(json.decode(response.body)).data!.obs;
-      } catch (e) {
-        errorToast(PrivateVideosModel.fromJson(json.decode(response.body))
-            .message
-            .toString());
-      }
+    try {
+      privateVideosList =
+          PrivateVideosModel.fromJson(json.decode(response.body)).data!.obs;
+    } catch (e) {
+      errorToast(PrivateVideosModel.fromJson(json.decode(response.body))
+          .message
+          .toString());
     }
 
     isUserVideosLoading.value = false;
@@ -210,16 +249,12 @@ class VideosController extends GetxController {
 
   getUserLikedVideos() async {
     isLikedVideosLoading.value = true;
-
+    var id = user.User.fromJson(GetStorage().read("user")).id;
     if (token != null) {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/user/user-liked-videos'),
-          headers: {
-            "Authorization": "Bearer ${GetStorage().read("token")}"
-          },
-          body: {
-            "user_id": "${UserController().userModel.value.id}"
-          }).timeout(const Duration(seconds: 60));
+          headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
+          body: {"user_id": "$id"}).timeout(const Duration(seconds: 60));
 
       try {
         likedVideos =
@@ -260,7 +295,7 @@ class VideosController extends GetxController {
   likeVideo(int isLike, int videoId) async {
     isLikedVideosLoading.value = true;
     if (token != null) {
-      var response = await http.post(Uri.parse('${RestUrl.baseUrl}/user/like'),
+      var response = await http.post(Uri.parse('${RestUrl.baseUrl}/video/like'),
           headers: {
             "Authorization": "Bearer $token"
           },
@@ -281,11 +316,13 @@ class VideosController extends GetxController {
             .toString());
       }
     }
+    publicVideosList.refresh();
     isLikedVideosLoading.value = false;
     update();
   }
 
   postVideo(
+      String userId,
       String videoUrl,
       String sound,
       String soundName,
@@ -310,7 +347,7 @@ class VideosController extends GetxController {
         Uri.parse('${RestUrl.baseUrl}/video/post'),
         headers: {"Authorization": "Bearer $token"},
         body: {
-          'user_id': UserController().userModel.value.id.toString(),
+          'user_id': userId,
           'video': videoUrl,
           'sound': sound,
           'sound_name': soundName,
@@ -339,18 +376,22 @@ class VideosController extends GetxController {
               .message
               .toString());
 
-          videosController.getAllVideos();
+          final directory =
+              await ExternalPath.getExternalStoragePublicDirectory(
+                  ExternalPath.DIRECTORY_PICTURES);
+          final dir = Directory("$directory/thrill");
+
+          await dir.exists().then((value) => dir.delete(recursive: true));
           Get.offAll(BottomNavigation());
         } catch (e) {
           errorToast(VideoPostResponse.fromJson(json.decode(response.body))
               .message
               .toString());
         }
-      } else {
-        print(response.body);
-        errorToast("${response.body}");
       }
     }
+    snackBar!.hide();
+
     isLoading.value = false;
     update();
   }
@@ -411,5 +452,77 @@ class VideosController extends GetxController {
     hashTagList.refresh();
     isLoading.value = false;
     update();
+  }
+
+  Future<void> awsUploadVideo(File file, int currentUnix) async {
+    await simpleS3
+        .uploadFile(
+          file,
+          "thrillvideo",
+          "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+          AWSRegions.usEast1,
+          debugLog: true,
+          fileName: "Thrill-$currentUnix.mp4",
+          s3FolderPath: "test",
+          accessControl: S3AccessControl.publicRead,
+        )
+        .then((value) => {printInfo(info: value)});
+  }
+
+  Future<void> createGIF(int currentUnix, String filePath) async {
+    uploadingToast(simpleS3);
+
+    String outputPath = saveCacheDirectory + 'thumbnail.png';
+    String path = filePath.substring(7, filePath.length);
+    FFmpegKit.execute(
+            "-y -i $path -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath")
+        .then((session) async {
+      final returnCode = await session.getReturnCode();
+
+      if (ReturnCode.isSuccess(returnCode)) {
+        Get.back();
+        // print("============================> GIF Success!!!!");
+      } else {
+        snackBar!.hide();
+
+        // print("============================> GIF Error!!!!");
+      }
+    });
+  }
+
+  Future<void> awsUploadThumbnail(int currentUnix) async {
+    var file = File(saveCacheDirectory + 'thumbnail.png');
+    await simpleS3
+        .uploadFile(
+      file,
+      "thrillvideo",
+      "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+      AWSRegions.usEast1,
+      debugLog: true,
+      s3FolderPath: "gif",
+      fileName: 'Thrill-$currentUnix.png',
+      accessControl: S3AccessControl.publicRead,
+    )
+        .then((value) async {
+      print(value);
+      Get.back();
+    });
+  }
+
+  Future<void> awsUploadSound(File file, int currentUnix) async {
+    await simpleS3
+        .uploadFile(
+      file,
+      "thrillvideo",
+      "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+      AWSRegions.usEast1,
+      debugLog: true,
+      fileName: 'Thrill-$currentUnix.mp3',
+      s3FolderPath: "sound",
+      accessControl: S3AccessControl.publicRead,
+    )
+        .then((value) async {
+      print(value);
+    });
   }
 }

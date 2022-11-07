@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:thrill/models/inbox_model.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/models/wallet_model.dart';
 import 'package:thrill/screens/auth/otp_verification.dart';
@@ -12,7 +11,7 @@ import 'package:thrill/screens/video/duet.dart';
 
 import '../models/vidio_discover_model.dart';
 import '../screens/sound/new_song.dart';
-
+import 'package:thrill/controller/model/inbox_model.dart' as inbox;
 class AppRouter {
   static Route onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -48,8 +47,7 @@ class AppRouter {
         return Wallet.route();
       case PushNotification.routeName:
         return PushNotification.route();
-      case Inbox.routeName:
-        return Inbox.route();
+
       case Referral.routeName:
         return Referral.route();
       case Favourites.routeName:
@@ -68,8 +66,6 @@ class AppRouter {
         return RequestVerification.route();
       case PaymentRequest.routeName:
         return PaymentRequest.route(settings.arguments as List<WalletBalance>);
-      case SoundDetails.routeName:
-        return SoundDetails.route(map_: settings.arguments as Map);
       case TermsOfService.routeName:
         return TermsOfService.route();
       case PrivacyPolicy.routeName:
@@ -77,7 +73,7 @@ class AppRouter {
       case RecordDuet.routeName:
         return RecordDuet.route(settings.arguments as VideoModel);
       case ChatScreen.routeName:
-        return ChatScreen.route(settings.arguments as InboxModel);
+        return ChatScreen.route(settings.arguments as inbox.Inbox);
       case OtpVerification.routeName:
         return OtpVerification.route(settings.arguments as String);
       // case FollowingAndFollowers.routeName:

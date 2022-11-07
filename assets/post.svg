@@ -1,5 +1,0 @@
-<svg height="16" viewBox="0 0 12 16" width="12" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12,0H4A2,2,0,0,0,2,2V14a2,2,0,0,0,2,2h8a2,2,0,0,0,2-2V2A2,2,0,0,0,12,0ZM7.5,6.707,6.354,7.854a.5.5,0,0,1-.708-.708l2-2a.5.5,0,0,1,.708,0l2,2a.5.5,0,0,1-.708.708L8.5,6.707V10.5a.5.5,0,0,1-1,0Z"
-        fill="#fff"
-        id="file-arrow-up-fill" transform="translate(-2)" />
-</svg>

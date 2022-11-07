@@ -324,30 +324,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ),
                                     ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        FocusScope.of(context)
-                                            .requestFocus(FocusNode());
-                                        BlocProvider.of<LoginBloc>(context)
-                                            .add(TextChangeEvent(
-                                          email: emailCtr.text,
-                                          password: mPin,
-                                          loginType: 'google',
-                                        ));
-                                      },
-                                      child: Container(
-                                        height: 60,
-                                        width: 80,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                            color: Colors.grey.shade200,
-                                            borderRadius:
-                                                BorderRadius.circular(8)),
-                                        child: SvgPicture.asset(
-                                          'assets/google.svg',
-                                        ),
-                                      ),
-                                    )
+
                                   ],
                                 ).w(getWidth(context) * .80),
                                 const SizedBox(

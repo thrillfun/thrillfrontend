@@ -5,13 +5,13 @@ import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/utils.dart';
 import 'package:flutter_advanced_networkimage_2/provider.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
+import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/screens/auth/login.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
+
 import '../common/strings.dart';
 import '../rest/rest_url.dart';
 
@@ -62,57 +62,12 @@ double getWidth(BuildContext context) {
 }
 
 showErrorToast(BuildContext context, String msg) async {
-  // final scaffold = ScaffoldMessenger.of(context);
-  // scaffold.showSnackBar(
-  //   SnackBar(content:  Text(msg,style: const TextStyle(color: Colors.white),),
-  //     backgroundColor: Colors.red,
-  //   ),
-  // );
-  // Material(
-  //   type: MaterialType.transparency,
-  //   child: Container(
-  //     width: getWidth(context)*.80,
-  //     padding: const EdgeInsets.only(top: 7, bottom: 10),
-  //     decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         borderRadius: BorderRadius.circular(10)
-  //     ),
-  //     child: Column(
-  //       mainAxisSize: MainAxisSize.min,
-  //       children: [
-  //         Text(failed, style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.red),),
-  //         const Divider(color: Colors.red, thickness: 3, indent: 70, endIndent: 70,),
-  //         const SizedBox(height: 15,),
-  //         Padding(
-  //           padding: const EdgeInsets.symmetric(horizontal: 15),
-  //           child: Text(msg,
-  //             style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.grey),
-  //             textAlign: TextAlign.center,
-  //           ),
-  //         ),
-  //         const SizedBox(height: 15,),
-  //         Align(
-  //           alignment: Alignment.topRight,
-  //           child: TextButton(
-  //               onPressed: (){
-  //                 Get.back(closeOverlays: true);
-  //                 // Navigator.pop(navigatorKey.currentContext!);
-  //               },
-  //               style: TextButton.styleFrom(
-  //                 padding: const EdgeInsets.only(right: 10),
-  //               ),
-  //               child: Text(ok, style: Theme.of(context).textTheme.headline3,)),
-  //         )
-  //       ],
-  //     ),
-  //   ),
-  // )
   Get.showSnackbar(GetSnackBar(
-    duration: Duration(seconds: 3),
+    duration: const Duration(seconds: 3),
     barBlur: 10,
     borderColor: Colors.red,
     borderWidth: 1.5,
-    margin: EdgeInsets.only(
+    margin: const EdgeInsets.only(
       left: 10,
       right: 10,
       bottom: 10,
@@ -121,33 +76,29 @@ showErrorToast(BuildContext context, String msg) async {
     backgroundColor: Colors.red.shade50,
     messageText: Text(
       msg,
-      style: TextStyle(fontWeight: FontWeight.bold),
+      style: const TextStyle(fontWeight: FontWeight.bold),
     ),
     isDismissible: true,
     mainButton: IconButton(
       onPressed: () {
-        Get.back(closeOverlays: true);
+        Get.back();
       },
-      icon: Icon(Icons.close),
+      icon: const Icon(Icons.close),
     ),
-    icon: Icon(
+    icon: const Icon(
       Icons.error,
       color: Colors.red,
     ),
   ));
-  // try{
-  //   await Future.delayed(const Duration(seconds: 7));
-  //   if (!ModalRoute.of(context)!.isCurrent) Navigator.of(context, rootNavigator: true).pop();
-  // } catch(_){}
 }
 
 errorToast(String message) async {
   Get.showSnackbar(GetSnackBar(
-    duration: Duration(seconds: 3),
+    duration: const Duration(seconds: 3),
     barBlur: 10,
     borderColor: Colors.red,
     borderWidth: 1.5,
-    margin: EdgeInsets.only(
+    margin: const EdgeInsets.only(
       left: 10,
       right: 10,
       bottom: 10,
@@ -156,12 +107,12 @@ errorToast(String message) async {
     backgroundColor: Colors.red.shade50,
     messageText: Text(
       message,
-      style: TextStyle(fontWeight: FontWeight.bold),
+      style: const TextStyle(fontWeight: FontWeight.bold),
     ),
     isDismissible: true,
     mainButton: IconButton(
       onPressed: () {
-        Get.back(closeOverlays: true);
+        Get.back();
       },
       icon: const Icon(Icons.close),
     ),
@@ -174,11 +125,11 @@ errorToast(String message) async {
 
 showSuccessToast(BuildContext context, String msg) async {
   Get.showSnackbar(GetSnackBar(
-    duration: Duration(seconds: 3),
+    duration: const Duration(seconds: 3),
     barBlur: 10,
     borderColor: Colors.green,
     borderWidth: 1.5,
-    margin: EdgeInsets.only(
+    margin: const EdgeInsets.only(
       left: 10,
       right: 10,
       bottom: 10,
@@ -187,95 +138,29 @@ showSuccessToast(BuildContext context, String msg) async {
     backgroundColor: Colors.green.shade50,
     messageText: Text(
       msg,
-      style: TextStyle(fontWeight: FontWeight.bold),
+      style: const TextStyle(fontWeight: FontWeight.bold),
     ),
     isDismissible: true,
     mainButton: IconButton(
       onPressed: () {
-        Get.back(closeOverlays: true);
+        Get.back();
       },
-      icon: Icon(Icons.close),
+      icon: const Icon(Icons.close),
     ),
-    icon: Icon(
+    icon: const Icon(
       Icons.error,
       color: Colors.green,
     ),
   ));
-  // final scaffold = ScaffoldMessenger.of(context);
-  // scaffold.showSnackBar(
-  //   SnackBar(content:  Text(msg,style: const TextStyle(color: Colors.white),),
-  //     backgroundColor: Colors.green,
-  //   ),
-  // );
-  // showDialog(context: context, builder: (_) =>
-  //     Center(
-  //       child: Material(
-  //         type: MaterialType.transparency,
-  //         child: Container(
-  //           width: getWidth(context) * .80,
-  //           padding: const EdgeInsets.only(top: 7, bottom: 10),
-  //           decoration: BoxDecoration(
-  //               color: Colors.white,
-  //               borderRadius: BorderRadius.circular(10)
-  //           ),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               Text(successful, style: Theme
-  //                   .of(context)
-  //                   .textTheme
-  //                   .headline2!
-  //                   .copyWith(color: Colors.green),),
-  //               const Divider(color: Colors.green,
-  //                 thickness: 3,
-  //                 indent: 70,
-  //                 endIndent: 70,),
-  //               const SizedBox(height: 15,),
-  //               Padding(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 15),
-  //                 child: Text(msg,
-  //                   style: Theme
-  //                       .of(context)
-  //                       .textTheme
-  //                       .headline5!
-  //                       .copyWith(color: Colors.grey),
-  //                   textAlign: TextAlign.center,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 15,),
-  //               Align(
-  //                 alignment: Alignment.topRight,
-  //                 child: TextButton(
-  //                     onPressed: () {
-  //                       Get.back(closeOverlays: true);
-  //                       //      Navigator.pop(navigatorKey.currentContext!);
-  //                     },
-  //                     style: TextButton.styleFrom(
-  //                       padding: const EdgeInsets.only(right: 10),
-  //                     ),
-  //                     child: Text(ok, style: Theme
-  //                         .of(context)
-  //                         .textTheme
-  //                         .headline3,)),
-  //               )
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ));
-  // try{
-  //   await Future.delayed(const Duration(seconds: 7));
-  //   if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
-  // } catch(_){}
 }
 
 successToast(String msg) async {
   Get.showSnackbar(GetSnackBar(
-    duration: Duration(seconds: 3),
+    duration: const Duration(seconds: 3),
     barBlur: 10,
     borderColor: Colors.green,
     borderWidth: 1.5,
-    margin: EdgeInsets.only(
+    margin: const EdgeInsets.only(
       left: 10,
       right: 10,
       bottom: 10,
@@ -284,97 +169,54 @@ successToast(String msg) async {
     backgroundColor: Colors.green.shade50,
     messageText: Text(
       msg,
-      style: TextStyle(fontWeight: FontWeight.bold),
+      style: const TextStyle(fontWeight: FontWeight.bold),
     ),
     isDismissible: true,
     mainButton: IconButton(
       onPressed: () {
-        Get.back(closeOverlays: true);
+        Get.back();
       },
-      icon: Icon(Icons.close),
+      icon: const Icon(Icons.close),
     ),
-    icon: Icon(
+    icon: const Icon(
       Icons.error,
       color: Colors.green,
     ),
   ));
-  // final scaffold = ScaffoldMessenger.of(context);
-  // scaffold.showSnackBar(
-  //   SnackBar(content:  Text(msg,style: const TextStyle(color: Colors.white),),
-  //     backgroundColor: Colors.green,
-  //   ),
-  // );
-  // showDialog(context: context, builder: (_) =>
-  //     Center(
-  //       child: Material(
-  //         type: MaterialType.transparency,
-  //         child: Container(
-  //           width: getWidth(context) * .80,
-  //           padding: const EdgeInsets.only(top: 7, bottom: 10),
-  //           decoration: BoxDecoration(
-  //               color: Colors.white,
-  //               borderRadius: BorderRadius.circular(10)
-  //           ),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               Text(successful, style: Theme
-  //                   .of(context)
-  //                   .textTheme
-  //                   .headline2!
-  //                   .copyWith(color: Colors.green),),
-  //               const Divider(color: Colors.green,
-  //                 thickness: 3,
-  //                 indent: 70,
-  //                 endIndent: 70,),
-  //               const SizedBox(height: 15,),
-  //               Padding(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 15),
-  //                 child: Text(msg,
-  //                   style: Theme
-  //                       .of(context)
-  //                       .textTheme
-  //                       .headline5!
-  //                       .copyWith(color: Colors.grey),
-  //                   textAlign: TextAlign.center,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 15,),
-  //               Align(
-  //                 alignment: Alignment.topRight,
-  //                 child: TextButton(
-  //                     onPressed: () {
-  //                       Get.back(closeOverlays: true);
-  //                       //      Navigator.pop(navigatorKey.currentContext!);
-  //                     },
-  //                     style: TextButton.styleFrom(
-  //                       padding: const EdgeInsets.only(right: 10),
-  //                     ),
-  //                     child: Text(ok, style: Theme
-  //                         .of(context)
-  //                         .textTheme
-  //                         .headline3,)),
-  //               )
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ));
-  // try{
-  //   await Future.delayed(const Duration(seconds: 7));
-  //   if (!ModalRoute.of(context)!.isCurrent) Navigator.pop(context);
-  // } catch(_){}
 }
-
-progressDialogue(BuildContext context) {
-  /* AlertDialog alert = const AlertDialog(
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    content: Center(
-      child: CircularProgressIndicator(),
+uploadingToast(SimpleS3 _simpleS3) async {
+  Get.showSnackbar(GetSnackBar(
+    duration: null,
+    barBlur: 10,
+    borderColor: ColorManager.colorPrimaryLight,
+    borderWidth: 1.5,
+    margin: const EdgeInsets.only(
+      left: 10,
+      right: 10,
+      bottom: 10,
     ),
-  );*/
+    borderRadius: 10,
+    backgroundColor: Colors.green.shade50,
+    messageText:StreamBuilder<dynamic>(
+        stream: _simpleS3.getUploadPercentage,
+        builder: (context, snapshot) {
+          return snapshot.data!=null?  LinearProgressIndicator(value: (snapshot.data as int).toDouble(),): LinearProgressIndicator(value: 0,);
 
+        }),
+    isDismissible: false,
+    mainButton: IconButton(
+      onPressed: () {
+        Get.back();
+      },
+      icon: const Icon(Icons.close),
+    ),
+    icon: const Icon(
+      Icons.error,
+      color: Colors.green,
+    ),
+  ));
+}
+progressDialogue(BuildContext context) {
   showDialog(
     barrierDismissible: false,
     context: context,
@@ -392,7 +234,7 @@ progressDialogue(BuildContext context) {
 }
 
 closeDialogue(BuildContext context) {
-  Get.back(closeOverlays: true);
+  Get.back();
   // Navigator.pop(context);
 }
 
@@ -447,6 +289,11 @@ extension StringExtension on String {
   }
 }
 
+loadLocalSvg(String name) => SvgPicture.asset(
+      "assets/$name",
+      fit: BoxFit.fill,
+    );
+
 loadSvgCacheImage(String url) {
   return FittedBox(
     fit: BoxFit.fill,
@@ -468,6 +315,12 @@ loadSvgCacheImage(String url) {
   );
 }
 
+errorWidget() => CachedNetworkImage(
+      fit: BoxFit.fill,
+      imageUrl:
+          "https://cdn.dribbble.com/users/463734/screenshots/2016807/404_error_shot.png",
+    );
+
 showLoginAlert() {
   Get.defaultDialog(
       title: 'Login',
@@ -476,12 +329,87 @@ showLoginAlert() {
           onPressed: () {
             Get.back(closeOverlays: true);
           },
-          child: Text('Cancel')),
+          child: const Text('Cancel')),
       cancel: TextButton(
           onPressed: () {
             // Navigator.pushNamedAndRemoveUntil(
             //     context, '/login', (route) => false);
             Get.to(() => LoginGetxScreen());
           },
-          child: Text('Ok')));
+          child: const Text('Ok')));
 }
+
+showWinDialog(String msg) => Get.defaultDialog(
+    backgroundColor: Colors.transparent,
+    title: "",
+    content: Container(
+      height: 300,
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          Container(
+            height: 250,
+            margin: const EdgeInsets.only(top: 50),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+            ),
+            width: Get.width,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Text(
+                  "Successful",
+                  style: TextStyle(
+                      color: ColorManager.colorPrimaryLight,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  msg,
+                  style: const TextStyle(
+                      color: Color(0xff1C1E24),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400),
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Container(
+                    width: Get.width,
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+                    padding: const EdgeInsets.all(10),
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              ColorManager.colorPrimaryLight,
+                              ColorManager.colorAccent
+                            ])),
+                    child: const Text(
+                      "Excellent!",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          Container(
+            width: Get.width,
+            child: CachedNetworkImage(
+                fit: BoxFit.contain,
+                height: 150,
+                width: 150,
+                imageUrl: RestUrl.assetsUrl + "you_won_logo.png"),
+          )
+        ],
+      ),
+    ));

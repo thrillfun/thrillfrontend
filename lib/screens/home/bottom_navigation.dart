@@ -1,41 +1,42 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:get/utils.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
+import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
+import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/home/discover_getx.dart';
-import 'package:thrill/screens/home/home.dart';
 import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
-import 'package:thrill/screens/spin/spin_the_wheel.dart';
-import 'package:thrill/widgets/better_video_player.dart';
+import 'package:thrill/screens/setting/wallet_getx.dart';
+import 'package:thrill/screens/spin/spin_the_wheel_getx.dart';
 import 'package:thrill/widgets/fab_items.dart';
 import 'package:thrill/widgets/video_item.dart';
+import 'package:truecaller_sdk/truecaller_sdk.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-import '../../blocs/profile/profile_bloc.dart';
 import '../../main.dart';
-import '../../repository/login/login_repository.dart';
 import '../../utils/util.dart';
-import 'notifications.dart';
 
 bool popupDisplayed = false;
 var index = 0;
+var isUsableSdk = true.obs;
+var videosController = Get.find<VideosController>();
+var discoverController = Get.find<DiscoverController>();
+var userController = Get.find<UserController>();
 
 class BottomNavigation extends StatefulWidget {
   BottomNavigation({Key? key, this.mapData}) : super(key: key);
@@ -47,6 +48,8 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation>
     with TickerProviderStateMixin {
+  late StreamSubscription? streamSubscription;
+
   var discoverController = Get.find<DiscoverController>();
   late AnimationController _animationController;
   late Animation _animation;
@@ -55,7 +58,7 @@ class _BottomNavigationState extends State<BottomNavigation>
   late List<Widget> screens = [
     const HomeGetx(),
     DiscoverGetx(),
-    const Notifications(),
+    const WalletGetx(),
     Profile(),
   ];
 
@@ -71,8 +74,9 @@ class _BottomNavigationState extends State<BottomNavigation>
       ..addStatusListener((status) {
         setState(() {});
       });
-    if (widget.mapData?['index'] != null)
+    if (widget.mapData?['index'] != null) {
       selectedIndex = widget.mapData?['index'] ?? 0;
+    }
     if (!popupDisplayed) {
       showPromotionalPopup();
       popupDisplayed = true;
@@ -131,7 +135,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                       //scale: 1.4,
                       fit: BoxFit.fill,
                     ),
-                    onPressed: () => Get.to(() => const SpinTheWheel()),
+                    onPressed: () => Get.to(() => SpinTheWheelGetx()),
                   ),
                   textColor: Colors.white,
                   descTextStyle: const TextStyle(
@@ -160,7 +164,7 @@ class _BottomNavigationState extends State<BottomNavigation>
         items: [
           FABBottomAppBarItem(iconData: IconlyLight.home, text: ''),
           FABBottomAppBarItem(iconData: IconlyLight.discovery, text: ''),
-          FABBottomAppBarItem(iconData: IconlyLight.notification, text: ''),
+          FABBottomAppBarItem(iconData: IconlyLight.wallet, text: ''),
           FABBottomAppBarItem(iconData: IconlyLight.profile, text: ''),
         ],
       ),
@@ -168,30 +172,45 @@ class _BottomNavigationState extends State<BottomNavigation>
   }
 
   void _selectedTab(index) async {
-    if (index == 0) {
-      VideosController().getAllVideos();
-    }
     if (index == 1) {
-      DiscoverController().getHashTagsList();
-      DiscoverController().getBanners();
-      DiscoverController().getTopHashTags();
-    }
-    if (index == 3) {
-      VideosController().getUserVideos();
-      VideosController().getFollowingVideos();
-      VideosController().getUserPrivateVideos();
-      VideosController().getUserLikedVideos();
+      discoverController.getHashTagsList();
+      discoverController.getBanners();
+      discoverController.getTopHashTags();
+      setState(() {});
     }
 
-    if (index >= 0) {
+    if (index == 2) {
+      await isLogined().then((value) => {
+            if (value)
+              {
+                setState(() {
+                  selectedIndex = index;
+                })
+              }
+            else
+              {initTrueCallerLogin()}
+          });
+    }
+    if (index == 3) {
       await isLogined().then((value) {
+        if (index == 3) {
+          videosController.getUserVideos();
+          videosController.getFollowingVideos();
+          videosController.getUserPrivateVideos();
+          videosController.getUserLikedVideos();
+          setState(() {});
+        }
         if (value) {
           setState(() {
             selectedIndex = index;
           });
         } else {
-          showLoginAlert();
+          initTrueCallerLogin();
         }
+      });
+    } else {
+      setState(() {
+        selectedIndex = index;
       });
     }
   }
@@ -244,7 +263,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                     shouldAutoPlayReel = false;
                   });
                 } else {
-                  showLoginAlert();
+                  initTrueCallerLogin();
                 }
               });
             },
@@ -282,7 +301,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                   shouldAutoPlayReel = true;
                   setState(() => selectedIndex = 0);
                 } else {
-                  showLoginAlert();
+                  initTrueCallerLogin();
                 }
               });
             },
@@ -307,7 +326,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                     shouldAutoPlayReel = false;
                   });
                 } else {
-                  showLoginAlert();
+                  initTrueCallerLogin();
                 }
               });
             },
@@ -317,7 +336,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.notifications,
+                    Icons.wallet,
                     color: selectedIndex == 2 ? Colors.white : Colors.white60,
                   ),
                   const SizedBox(
@@ -345,7 +364,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                     //BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
                   });
                 } else {
-                  showLoginAlert();
+                  initTrueCallerLogin();
                 }
               });
             },
@@ -387,6 +406,105 @@ class _BottomNavigationState extends State<BottomNavigation>
     } else {
       return false;
     }
+  }
+
+  initTrueCallerLogin() {
+    TruecallerSdk.isUsable.then((isUsable) {
+      if (isUsable) {
+        TruecallerSdk.getProfile;
+
+        TruecallerSdk.streamCallbackData.listen((event) {
+          if (event.result == TruecallerSdkCallbackResult.success) {
+            Get.to(BottomNavigation());
+          }
+          if (event.result == TruecallerSdkCallbackResult.verification) {
+            //createStreamBuilder();
+            showModalBottomSheet(
+                isScrollControlled: true,
+                context: context,
+                builder: (BuildContext context) => LoginGetxScreen());
+          }
+          if (event.result ==
+              TruecallerSdkCallbackResult.verificationComplete) {
+            Get.to(BottomNavigation());
+          }
+        });
+      }
+    });
+  }
+
+  void createStreamBuilder() {
+    streamSubscription =
+        TruecallerSdk.streamCallbackData.listen((truecallerUserCallback) {
+      showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) => LoginGetxScreen());
+      // make sure you're changing state only after number has been entered. there could be case
+      // where user initiated missed call, pressed back, and came to this screen again after
+      // which the call was received and hence it would directly open input name screen.
+      // if (mobileNumber.value.length == 10) {
+      //   if (truecallerUserCallback.result !=
+      //       TruecallerSdkCallbackResult.exception) {
+      //     tempResult = truecallerUserCallback.result;
+      //   }
+      //   // showProgressBar =
+      //   //     tempResult == TruecallerSdkCallbackResult.missedCallInitiated;
+      //   // if (tempResult == TruecallerSdkCallbackResult.otpReceived) {
+      //   //   otpController.text = truecallerUserCallback.otp!;
+      //   // }
+      // }
+      //
+      // switch (truecallerUserCallback.result) {
+      //   case TruecallerSdkCallbackResult.missedCallInitiated:
+      //     // startCountdownTimer(
+      //     //     double.parse(truecallerUserCallback.ttl!).floor());
+      //     successToast(
+      //         "Missed call Initiated with TTL : ${truecallerUserCallback.ttl}");
+      //     break;
+      //   case TruecallerSdkCallbackResult.missedCallReceived:
+      //     // showSnackBar("Missed call Received");
+      //     break;
+      //   case TruecallerSdkCallbackResult.otpInitiated:
+      //     // startCountdownTimer(
+      //     //     double.parse(truecallerUserCallback.ttl!).floor());
+      //     successToast(
+      //         "OTP Initiated with TTL : ${truecallerUserCallback.ttl}");
+      //
+      //     break;
+      //   case TruecallerSdkCallbackResult.otpReceived:
+      //     successToast("Your Otp is : ${truecallerUserCallback.otp}");
+      //     // showSnackBar("OTP Received : ${truecallerUserCallback.otp}");
+      //     break;
+      //   case TruecallerSdkCallbackResult.verificationComplete:
+      //     successToast(
+      //         "Verification Completed : ${truecallerUserCallback.accessToken}");
+      //     // showSnackBar(
+      //     //     "Verification Completed : ${truecallerUserCallback.accessToken}");
+      //     // _navigateToResult(fNameController.text);
+      //     Get.to(BottomNavigation());
+      //
+      //     break;
+      //   case TruecallerSdkCallbackResult.verifiedBefore:
+      //     successToast("truecallerUserCallback.profile!.accessToken}");
+      //     // showSnackBar(
+      //     //     "Verified Before : ${truecallerUserCallback.profile!.accessToken}");
+      //     // _navigateToResult(truecallerUserCallback.profile!.firstName);
+      //
+      //     Get.to(BottomNavigation());
+      //     break;
+      //   case TruecallerSdkCallbackResult.exception:
+      //     showErrorToast(
+      //         Get.context!,
+      //         "${truecallerUserCallback.exception!.code}, "
+      //         "${truecallerUserCallback.exception!.message}");
+      //     // showSnackBar("Exception : ${truecallerUserCallback.exception!.code}, "
+      //     //     "${truecallerUserCallback.exception!.message}");
+      //     break;
+      //   default:
+      //     //print(tempResult.toString());
+      //     break;
+      //  }
+    });
   }
 
   showPromotionalPopup() async {
@@ -476,62 +594,18 @@ class _BottomNavigationState extends State<BottomNavigation>
   }
 
   showExitDialog() {
-    showDialog(
-        context: context,
-        builder: (_) => Center(
-              child: Material(
-                type: MaterialType.transparency,
-                child: Container(
-                  width: getWidth(context) * .80,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        child: Text(
-                          exitDialog,
-                          style: Theme.of(context).textTheme.headline3,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ElevatedButton(
-                              onPressed: () {
-                                Get.back(closeOverlays: true);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  primary: Colors.red,
-                                  fixedSize: Size(getWidth(context) * .26, 40),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              child: const Text(no)),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          ElevatedButton(
-                              onPressed: () {
-                                SystemNavigator.pop();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  primary: Colors.green,
-                                  fixedSize: Size(getWidth(context) * .26, 40),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              child: const Text(yes)),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ));
+    Get.defaultDialog(
+        title: "Are you sure?",
+        titleStyle: TextStyle(color: ColorManager.colorAccent),
+        middleText: "Do you really want to close this awesome app?",
+        cancel: ElevatedButton(
+          onPressed: () => Get.back(),
+          child: Text("No"),
+          style: ElevatedButton.styleFrom(primary: Colors.red),
+        ),
+        confirm: ElevatedButton(
+            style: ElevatedButton.styleFrom(primary: ColorManager.colorAccent),
+            onPressed: () => exit(0),
+            child: Text("Yes")));
   }
 }

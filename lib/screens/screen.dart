@@ -5,7 +5,6 @@ export 'auth/signup.dart';
 export 'chat/inbox.dart';
 export 'favourites.dart';
 export 'home/bottom_navigation.dart';
-export 'home/home.dart';
 export 'home/notifications.dart';
 export 'payment_history.dart';
 export 'profile/edit_profile.dart';

@@ -244,14 +244,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
                                   animateFirst: false,
                                   selected: controller.stream,
                                   indicators: <FortuneIndicator>[
-                                    FortuneIndicator(
-                                        alignment: Alignment.center,
-                                        child: SvgPicture.asset(
-                                          'assets/spinDirection.svg',
-                                          width: 85,
-                                          height: 85,
-                                          fit: BoxFit.cover,
-                                        )),
+
                                   ],
                                   physics: CircularPanPhysics(
                                     duration: const Duration(seconds: 10),

@@ -1,183 +1,184 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:thrill/rest/rest_api.dart';
+import 'package:get/get.dart';
+import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
-import 'package:thrill/utils/util.dart';
+import 'package:thrill/screens/chat/chat_screen.dart';
 
 import '../../common/color.dart';
-import '../../common/strings.dart';
-import '../../models/inbox_model.dart';
 
-class Inbox extends StatefulWidget {
-  const Inbox({Key? key}) : super(key: key);
+var usersController = Get.find<UserController>();
 
-  @override
-  State<Inbox> createState() => _InboxState();
-
-  static const String routeName = '/inbox';
-
-  static Route route() {
-    return MaterialPageRoute(
-      settings: const RouteSettings(name: routeName),
-      builder: (context) => const Inbox(),
-    );
-  }
-}
-
-class _InboxState extends State<Inbox> {
-  bool isLoading = true;
-  List<InboxModel> inboxList = List<InboxModel>.empty(growable: true);
-
-  @override
-  void initState() {
-    getInbox();
-    super.initState();
-  }
+class Inbox extends StatelessWidget {
+  Inbox({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    usersController.getInbox();
     return Scaffold(
-        appBar: AppBar(
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[
-                    Color(0xFF2F8897),
-                    Color(0xff1F2A52),
-                    Color(0xff1F244E)
-                  ]),
-            ),
+        body: Stack(
+      fit: StackFit.expand,
+      children: [
+        SizedBox(
+          child: SvgPicture.asset(
+            "assets/background_2.svg",
+            fit: BoxFit.fill,
           ),
-          elevation: 0.5,
-          title: const Text(
-            inbox,
-            style: TextStyle(color: Colors.white),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
+          height: Get.height,
         ),
-        body: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : inboxList.isEmpty
-                ? Center(
-                    child: Text(
-                      "Inbox is Empty!",
-                      style: Theme.of(context).textTheme.headline3,
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: inboxList.length,
-                    padding: const EdgeInsets.only(left: 20, right: 20),
-                    physics: const BouncingScrollPhysics(),
-                    itemBuilder: (BuildContext context, int index) {
-                      return GestureDetector(
-                        onTap: () async {
-                          await Navigator.pushNamed(context, '/chatScreen',
-                                  arguments: inboxList[index])
-                              .then((value) {
-                            if (value != null) {
-                              InboxModel _inboxModel = value as InboxModel;
-                              for (InboxModel im in inboxList) {
-                                if (im.id == _inboxModel.id) {
-                                  setState(() => inboxList.replaceRange(
-                                      inboxList.indexOf(im),
-                                      inboxList.indexOf(im) + 1,
-                                      [_inboxModel]));
-                                  break;
-                                }
-                              }
-                            }
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 5, top: 10),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(top: 10, bottom: 10),
-                                padding: const EdgeInsets.all(2),
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                        color: ColorManager.spinColorDivider)),
-                                child: ClipOval(
-                                  child: inboxList[index].userImage.isEmpty
-                                      ? SvgPicture.asset(
-                                          'assets/profile.svg',
-                                          width: 10,
-                                          height: 10,
-                                        )
-                                      : CachedNetworkImage(
-                                          fit: BoxFit.cover,
-                                          errorWidget: (a, b, c) => Padding(
-                                            padding: const EdgeInsets.all(15.0),
-                                            child: SvgPicture.asset(
-                                              'assets/profile.svg',
-                                              width: 10,
-                                              height: 10,
+        GetX<UserController>(
+          builder: (usersController) => usersController.isInboxLoading.value
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : usersController.inboxList.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "No Chats yet!",
+                        style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: usersController.inboxList.length,
+                      padding: const EdgeInsets.only(left: 20, right: 20),
+                      physics: const BouncingScrollPhysics(),
+                      itemBuilder: (BuildContext context, int index) {
+                        return GestureDetector(
+                          onTap: () async {
+                            Get.to(ChatScreen(inboxModel: usersController.inboxList[index]));
+                            await Navigator.pushNamed(context, '/chatScreen',
+                                    arguments: usersController.inboxList[index])
+                                .then((value) {
+                              // if (value != null) {
+                              //   InboxModel _inboxModel = value as InboxModel;
+                              //   for (Inbox im in usersController.inboxList) {
+                              //     if (im.id == _inboxModel.id) {
+                              //       setState(() => inboxList.replaceRange(
+                              //           inboxList.indexOf(im),
+                              //           inboxList.indexOf(im) + 1,
+                              //           [_inboxModel]));
+                              //       break;
+                              //     }
+                              //   }
+                              // }
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 5, top: 10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                      top: 10, bottom: 10),
+                                  padding: const EdgeInsets.all(2),
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color:
+                                              ColorManager.spinColorDivider)),
+                                  child: ClipOval(
+                                    child: usersController
+                                            .inboxList[index].userImage!.isEmpty
+                                        ? SvgPicture.asset(
+                                            'assets/profile.svg',
+                                            width: 10,
+                                            height: 10,
+                                          )
+                                        : CachedNetworkImage(
+                                            fit: BoxFit.cover,
+                                            errorWidget: (a, b, c) => Padding(
+                                              padding:
+                                                  const EdgeInsets.all(15.0),
+                                              child: SvgPicture.asset(
+                                                'assets/profile.svg',
+                                                width: 10,
+                                                height: 10,
+                                              ),
+                                            ),
+                                            imageUrl:
+                                                '${RestUrl.profileUrl}${usersController.inboxList[index].userImage}',
+                                            placeholder: (a, b) => const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
                                             ),
                                           ),
-                                          imageUrl:
-                                              '${RestUrl.profileUrl}${inboxList[index].userImage}',
-                                          placeholder: (a, b) => const Center(
-                                            child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(
+                                            height: 5,
                                           ),
-                                        ),
+                                          Text(
+                                            usersController
+                                                .inboxList[index].name
+                                                .toString(),
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14),
+                                          ),
+                                          Text(
+                                            usersController
+                                                .inboxList[index].message!,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w200,
+                                                fontSize: 12),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          )
+                                        ],
+                                      )),
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        Text(
-                                          inboxList[index].name.capitalize(),
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14),
-                                        ),
-                                        Text(
-                                          inboxList[index].message,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w200,
-                                              fontSize: 12),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        )
-                                      ],
-                                    )),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 15),
-                                child: Text(
-                                  getComparedTime(inboxList[index].msgDate),
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 10),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 15),
+                                  child: Text(
+                                    getComparedTime(usersController
+                                        .inboxList[index].time
+                                        .toString()),
+                                    style: const TextStyle(
+                                        color: Colors.grey, fontSize: 10),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }));
+                        );
+                      }),
+        ),
+       Align(
+         alignment: Alignment.topRight,
+           child:  Container(
+         margin: const EdgeInsets.only(right: 10, top: 10),
+         padding: const EdgeInsets.all(5),
+         decoration: BoxDecoration(
+             color: Colors.black.withOpacity(0.5),
+             borderRadius: BorderRadius.circular(70)),
+         child: InkWell(
+           onTap: () => Get.back(),
+           child: const Icon(
+             Icons.close,
+             size: 20,
+             color: Colors.white,
+           ),
+         ),
+       ),)
+      ],
+    ));
   }
 
   String getComparedTime(String dateTime) {
@@ -215,25 +216,6 @@ class _InboxState extends State<Inbox> {
       } else {
         return ("${difference.inDays} ${prefix[4]}");
       }
-    }
-  }
-
-  getInbox() async {
-    try {
-      var response = await RestApi.getInbox();
-      var json = jsonDecode(response.body);
-      if (json['status']) {
-        List jsonList = json['data'] as List;
-        if (jsonList.isNotEmpty)
-          inboxList = jsonList.map((e) => InboxModel.fromJson(e)).toList();
-        isLoading = false;
-        setState(() {});
-      } else {
-        showErrorToast(context, json['message'].toString());
-        setState(() => isLoading = false);
-      }
-    } catch (e) {
-      setState(() => isLoading = false);
     }
   }
 }

@@ -44,13 +44,14 @@ class PublicVideos {
   String? speed;
   int? comments;
   List? hashtags;
-
   String? isDuet;
   String? duetFrom;
   String? isDuetable;
   String? isCommentable;
 
   String? soundOwner;
+  int? videoLikeStatus;
+
   PublicUser? user;
 
   PublicVideos(
@@ -72,6 +73,7 @@ class PublicVideos {
       this.isDuetable,
       this.isCommentable,
       this.soundOwner,
+        this.videoLikeStatus,
       this.user});
 
   PublicVideos.fromJson(Map<String, dynamic> json) {
@@ -93,6 +95,7 @@ class PublicVideos {
     isDuetable = json['is_duetable'] ?? "";
     isCommentable = json['is_commentable'] ?? "";
     soundOwner = json['sound_owner'] ?? "";
+    videoLikeStatus = json["video_like_status"]??"0";
     user = json['user'] != null ? new PublicUser.fromJson(json['user']) : null;
   }
 
@@ -116,6 +119,7 @@ class PublicVideos {
     data['is_duetable'] = this.isDuetable;
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
+    data["video_like_status"] = this.videoLikeStatus;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }

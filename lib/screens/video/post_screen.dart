@@ -1,33 +1,32 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:hashtagable/hashtagable.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/model/video_fields_model.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/post_data.dart';
-import 'package:thrill/screens/home/home.dart';
+import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/seperator.dart';
-import 'package:velocity_x/velocity_x.dart';
 import 'package:video_player/video_player.dart';
-import 'package:hashtagable/hashtagable.dart';
 
 var lastChangedWord = "".obs;
 
 class PostScreenGetx extends StatelessWidget {
-  PostScreenGetx(this.postData);
+  PostScreenGetx(this.postData, this.selectedSound);
 
   PostData? postData;
+  String? selectedSound;
   VideoPlayerController? videoPlayerController;
   var isHashtag = false.obs;
   var descriptionText = "".obs;
@@ -58,7 +57,6 @@ class PostScreenGetx extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     initPlayer();
-    createGIF();
     getFields();
 
     buildContext = context;
@@ -102,7 +100,7 @@ class PostScreenGetx extends StatelessWidget {
             ),
           ),
           Container(
-              height: 180,
+              height: 220,
               decoration: const BoxDecoration(
                   color: Color(0xff353841),
                   borderRadius: BorderRadius.all(Radius.circular(10))),
@@ -117,10 +115,9 @@ class PostScreenGetx extends StatelessWidget {
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(10),
                             bottomLeft: Radius.circular(10)),
-                        child: AspectRatio(
+                        child: Container(
+                          height: 220,
                           child: VideoPlayer(videoPlayerController!),
-                          aspectRatio:
-                              1 / videoPlayerController!.value.aspectRatio,
                         )),
                     onTap: () {
                       if (isPlaying.value) {
@@ -681,131 +678,129 @@ class PostScreenGetx extends StatelessWidget {
               ));
 
   postUpload() async {
-    int currentUnix = DateTime.now().millisecondsSinceEpoch;
-    String videoId = '$currentUnix.mp4';
-    Get.defaultDialog(
-        content: StreamBuilder(
-            stream: _simpleS3.getUploadPercentage,
-            builder: ((context, snapshot) => snapshot.data != null
-                ? Text("${snapshot.data}")
-                : const Text("Uploading"))));
-    await _simpleS3
-        .uploadFile(
-      File(postData!.newPath!.substring(7, postData!.newPath!.length)),
-      "thrillvideo",
-      "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-      AWSRegions.usEast1,
-      debugLog: true,
-      fileName: videoId,
-      s3FolderPath: "test",
-      accessControl: S3AccessControl.publicRead,
-    )
-        .then((value) async {
-      await _simpleS3
-          .uploadFile(
-        File('$saveCacheDirectory${postData!.newName}.png'),
-        "thrillvideo",
-        "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-        AWSRegions.usEast1,
-        debugLog: true,
-        s3FolderPath: "gif",
-        fileName: '$currentUnix.png',
-        accessControl: S3AccessControl.publicRead,
-      )
-          .then((value) async {
-        if (postData!.addSoundModel == null ||
-            !postData!.addSoundModel!.isSoundFromGallery) {
-          String tagList =
-              jsonEncode(extractHashTags(textEditingController.text));
+    String tagList = jsonEncode(extractHashTags(textEditingController.text));
 
+    int currentUnix = DateTime.now().millisecondsSinceEpoch;
+    String videoId = 'Thrill-$currentUnix.mp4';
+    videoPlayerController!.pause();
+    var file =
+        File(postData!.filePath!.substring(7, postData!.filePath!.length));
+
+    try {
+      GetStorage().write("videoPrivacy", selectedPrivacy.value);
+      await videosController.createGIF(currentUnix, postData!.newPath!).then(
+              (value) async =>
+              { await videosController.awsUploadThumbnail(currentUnix).then((value)async{
+
+      })});
+    await  videosController
+          .awsUploadVideo(file, currentUnix);
+      var audioFile = File(saveCacheDirectory + "originalAudio.mp3");
+
+      if(postData!.addSoundModel!.sound.isNotEmpty){
+        audioFile = File(postData!.addSoundModel!.sound!);
+      }
+      if (selectedSound!.isEmpty) {
+
+        await videosController
+            .awsUploadSound(audioFile, currentUnix)
+            .then((value) => {
           videosController.postVideo(
+              User.fromJson(GetStorage().read("user"))
+                  .id
+                  .toString(),
               videoId,
               postData!.isDuet
                   ? postData!.duetSound ?? ""
                   : postData!.addSoundModel == null
-                      ? ""
-                      : postData!.addSoundModel!.isSoundFromGallery
-                          ? "$currentUnix.mp3"
-                          : postData!.addSoundModel!.sound.split('/').last,
-              postData!.isDuet
-                  ? postData!.duetSoundName ?? ""
-                  : postData!.addSoundModel!.name == null
-                      ? ""
-                      : "Original Sound",
-              '1',
+                  ? ""
+                  : postData!
+                  .addSoundModel!.isSoundFromGallery
+                  ? "Thrill-$currentUnix.mp3"
+                  : postData!.addSoundModel!.sound
+                  .split('/')
+                  .last,
+              postData!.addSoundModel?.name ?? "",
+              "1",
               tagList,
               selectedPrivacy.value,
               allowComments.value ? 1 : 0,
               textEditingController.text,
-              postData!.filterName.isEmpty ? '' : postData!.filterName,
+              postData!.filterName.isEmpty
+                  ? ''
+                  : postData!.filterName,
               "1",
-              '$currentUnix.png',
+              'Thrill-$currentUnix.png',
               postData!.speed,
               allowDuets.value,
               allowComments.value,
               postData!.duetFrom ?? '',
               postData!.isDuet,
-              postData!.addSoundModel?.userId ?? 0);
+              postData!.addSoundModel?.userId ?? 0)
+        });
+      }
+      else {
+        videosController.postVideo(
+            User.fromJson(GetStorage().read("user")).id.toString(),
+            videoId,
+            postData!.isDuet
+                ? postData!.duetSound ?? ""
+                : postData!.addSoundModel == null
+                ? ""
+                : postData!.addSoundModel!.isSoundFromGallery
+                ? "Thrill-$currentUnix.mp3"
+                : postData!.addSoundModel!.sound
+                .split('/')
+                .last,
+            postData!.addSoundModel?.name ?? "",
+            "1",
+            tagList,
+            selectedPrivacy.value,
+            allowComments.value ? 1 : 0,
+            textEditingController.text,
+            postData!.filterName.isEmpty ? '' : postData!.filterName,
+            "1",
+            'Thrill-$currentUnix.png',
+            postData!.speed,
+            allowDuets.value,
+            allowComments.value,
+            postData!.duetFrom ?? '',
+            postData!.isDuet,
+            postData!.addSoundModel?.userId ?? 0);
+      }
+      Get.offAll(BottomNavigation());
+      videosController.getAllVideos();
 
-          closeDialogue(Get.context!);
-        } else {
-          await _simpleS3
-              .uploadFile(
-            File(postData!.addSoundModel!.sound),
-            "thrillvideo",
-            "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-            AWSRegions.usEast1,
-            debugLog: true,
-            fileName: '$currentUnix.mp3',
-            s3FolderPath: "sound",
-            accessControl: S3AccessControl.publicRead,
-          )
-              .then((value) async {
-            String tagList =
-                jsonEncode(extractHashTags(textEditingController.text));
-            videosController.postVideo(
-                videoId,
-                postData!.isDuet
-                    ? postData!.duetSound ?? ""
-                    : postData!.addSoundModel == null
-                        ? ""
-                        : postData!.addSoundModel!.isSoundFromGallery
-                            ? "$currentUnix.mp3"
-                            : postData!.addSoundModel!.sound.split('/').last,
-                postData!.addSoundModel?.name ?? "",
-                "1",
-                tagList,
-                selectedPrivacy.value,
-                allowComments.value ? 1 : 0,
-                textEditingController.text,
-                postData!.filterName.isEmpty ? '' : postData!.filterName,
-                "1",
-                '$currentUnix.png',
-                postData!.speed,
-                allowDuets.value,
-                allowComments.value,
-                postData!.duetFrom ?? '',
-                postData!.isDuet,
-                postData!.addSoundModel?.userId ?? 0);
-          });
-        }
-      });
-    });
-
-    GetStorage().write("videoPrivacy", selectedPrivacy.value);
+    } catch (e) {
+      errorToast(e.toString());
+    }
   }
 
-  createGIF() async {
+  Future<void> createGIF(int currentUnix) async {
     String outputPath = '$saveCacheDirectory${postData!.newName}.png';
     String filePath = postData!.isDuet
         ? postData!.newPath!.substring(7, postData!.newPath!.length)
         : postData!.newPath!.substring(7, postData!.newPath!.length);
     FFmpegKit.execute(
-            "-i $filePath -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath")
+            "-y -i $filePath -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath")
         .then((session) async {
       final returnCode = await session.getReturnCode();
 
       if (ReturnCode.isSuccess(returnCode)) {
+        await _simpleS3
+            .uploadFile(
+          File('$saveCacheDirectory${postData!.newName}.png'),
+          "thrillvideo",
+          "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+          AWSRegions.usEast1,
+          debugLog: true,
+          s3FolderPath: "gif",
+          fileName: 'Thrill-$currentUnix.png',
+          accessControl: S3AccessControl.publicRead,
+        )
+            .then((value) async {
+          var file = File(postData!.addSoundModel!.sound);
+        });
         // print("============================> GIF Success!!!!");
       } else {
         // print("============================> GIF Error!!!!");

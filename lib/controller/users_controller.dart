@@ -2,26 +2,21 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/model/block_status_response.dart';
 import 'package:thrill/controller/model/followers_model.dart';
+import 'package:thrill/controller/model/inbox_model.dart';
 import 'package:thrill/controller/model/profile_model_pojo.dart';
 import 'package:thrill/controller/model/user_details_model.dart' as authUser;
-import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
-import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
-import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:dio/dio.dart';
 
 class UserController extends GetxController {
   var userModel = authUser.User().obs;
@@ -37,6 +32,9 @@ class UserController extends GetxController {
   var userFollowersModel = RxList<Followers>();
   var userFollowingModel = RxList<Followers>();
 
+  var isInboxLoading = false.obs;
+  var inboxList = RxList<Inbox>();
+
   var userBlocked = false.obs;
   var userId = 0.obs;
   var isMyProfile = false.obs;
@@ -44,21 +42,18 @@ class UserController extends GetxController {
   var userProfile = ProfileModelPojo().obs;
   String token = GetStorage().read("token");
 
-  UserController() {
-    if (GetStorage().read("user") != null) {
-      userModel.value = authUser.User.fromJson(GetStorage().read("user"));
-    }
-  }
+  var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+
 
   getUserProfile(int userId) async {
     isProfileLoading.value = true;
 
-    if (token.toString().isNotEmpty) {
+    if (token!=null) {
       var response = await http
           .post(Uri.parse('${RestUrl.baseUrl}/user/get-profile'), headers: {
         "Authorization": "Bearer $token"
       }, body: {
-        "id": "${userModel.value.id}"
+        "id": "$userId"
       }).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
@@ -251,7 +246,9 @@ class UserController extends GetxController {
         GetStorage().write('token', token).toString();
         GetStorage().write('user', user);
 
-        Get.to(BottomNavigation());
+        Get.back(closeOverlays: true);
+        update();
+        // Get.to(BottomNavigation());
 
         successToast(result['message']);
       } on HttpException catch (e) {
@@ -269,26 +266,29 @@ class UserController extends GetxController {
       firebase_token, name) async {
     isLoggingIn.value = true;
 
-    var response =
-        await http.post(Uri.parse('${RestUrl.baseUrl}/SocialLogin'), body: {
-      "social_login_id": social_login_id,
-      "social_login_type": social_login_type,
-      "email": email,
-      "phone": phone,
-      "firebase_token": firebase_token,
-      "name": name,
-    }).timeout(const Duration(seconds: 60));
+    createDynamicLink("123456").then((value) async {
+      var response =
+          await http.post(Uri.parse('${RestUrl.baseUrl}/SocialLogin'), body: {
+        "social_login_id": social_login_id,
+        "social_login_type": social_login_type,
+        "email": email,
+        "phone": phone,
+        "firebase_token": firebase_token,
+        "name": name,
+        "referral_code": value.toString(),
+      }).timeout(const Duration(seconds: 60));
 
-    if (response.statusCode == 200) {
       var result = jsonDecode(response.body);
       try {
         var userData = authUser.UserDetailsModel.fromJson(result).data;
-        var user = userData!.user;
-        var token = userData!.token;
-        GetStorage().write('token', token).toString();
-        GetStorage().write('user', user);
 
-        Get.to(BottomNavigation());
+        GetStorage().write('token', userData!.token!).toString();
+        GetStorage().write('user', userData!.user).then((value) {
+          Get.to(BottomNavigation());
+          userModel.value = authUser.User.fromJson(GetStorage().read("user"));
+          update();
+        });
+
 
         successToast(result['message']);
       } on HttpException catch (e) {
@@ -296,9 +296,8 @@ class UserController extends GetxController {
       } on Exception catch (e) {
         errorToast(e.toString());
       }
-    } else {
-      errorToast(response.statusCode.toString());
-    }
+    });
+
     isLoggingIn.value = false;
   }
 
@@ -317,7 +316,8 @@ class UserController extends GetxController {
     // Once signed in, return the UserCredential
     socialLoginRegister(googleUser.id, "google", googleUser.email ?? "", "",
         googleAuth.accessToken, googleUser.displayName ?? "");
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+
+       return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   signOut() async {
@@ -330,4 +330,44 @@ class UserController extends GetxController {
 
     googleUser.signOut();
   }
+  getInbox() async {
+
+    isInboxLoading.value = true;
+
+    dio.options.headers['Authorization'] = "Bearer $token";
+    var response = await dio.get("/user/chat-inbox");
+
+    try {
+      inboxList.clear();
+      inboxList = InboxModel.fromJson(response.data).data!.obs;
+    } catch (e) {
+      errorToast(InboxModel.fromJson(response.data).message.toString());
+    }
+    isInboxLoading.value = false;
+    inboxList.refresh();
+    update();
+  }
+
+
+  Future<Uri> createDynamicLink(String videoName) async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: 'https://thrill.fun/',
+      link: Uri.parse('https://thrillvideo.s3.amazonaws.com/test/$videoName'),
+      androidParameters: AndroidParameters(
+        packageName: 'com.thrill',
+        minimumVersion: 1,
+      ),
+      // iosParameters: IosParameters(
+      //   bundleId: 'your_ios_bundle_identifier',
+      //   minimumVersion: '1',x
+      //   appStoreId: 'your_app_store_id',
+      // ),
+    );
+    var dynamicUrl = await parameters.buildShortLink();
+    final Uri shortUrl = dynamicUrl.shortUrl;
+    return shortUrl;
+  }
+
+
+
 }

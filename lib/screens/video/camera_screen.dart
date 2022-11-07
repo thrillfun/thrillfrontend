@@ -1,50 +1,42 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:external_path/external_path.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
-
-import 'package:path_provider/path_provider.dart';
+import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/strings.dart';
-import 'package:thrill/controller/data_controller.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/main.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/rest/rest_url.dart';
-import 'package:thrill/screens/home/home_getx.dart';
-import 'package:thrill/screens/video/post.dart';
 import 'package:thrill/screens/video/post_screen.dart';
 import 'package:thrill/utils/custom_timer_painter.dart';
 import 'package:thrill/utils/util.dart';
-
 import 'package:video_editor_sdk/video_editor_sdk.dart';
-import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
-import 'package:video_player/video_player.dart';
 
 import '../../common/color.dart';
-import 'package:just_audio/just_audio.dart';
 
-var timer = 10.obs;
+var timer = 60.obs;
 Timer? time;
 CameraController? _controller;
 
 class CameraScreen extends StatefulWidget {
-  CameraScreen({required this.selectedSound});
+  CameraScreen({required this.selectedSound, this.owner, this.id});
 
   String selectedSound = "";
+  String? owner = "";
+  int? id;
 
   @override
   _CameraScreenState createState() => _CameraScreenState();
@@ -52,6 +44,8 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin<CameraScreen> {
+  var soundsController = Get.find<SoundsController>();
+
   File? _imageFile;
   File? _videoFile;
 
@@ -80,7 +74,6 @@ class _CameraScreenState extends State<CameraScreen>
   AnimationController? animationController;
 
   ResolutionPreset currentResolutionPreset = ResolutionPreset.medium;
-  late User userModel;
 
   //get camera permission status and start camera
   getPermissionStatus() async {
@@ -95,7 +88,6 @@ class _CameraScreenState extends State<CameraScreen>
       // Set and initialize the new camera
       onNewCameraSelected(cameras[0]);
       // refreshAlreadyCapturedImages();
-
     } else {
       log('Camera Permission: DENIED');
     }
@@ -109,12 +101,14 @@ class _CameraScreenState extends State<CameraScreen>
     }
 
     try {
-      await _controller!.startVideoRecording().then((value) => {
-            setState(() {
-              _isRecordingInProgress = true;
-              isRecordingComplete = false;
-            })
-          });
+      // startTimer();
+      await _controller!.startVideoRecording().then((value) =>
+      {
+        setState(() {
+          _isRecordingInProgress = true;
+          isRecordingComplete = false;
+        })
+      });
     } on CameraException catch (e) {
       print('Error starting to record video: $e');
     }
@@ -267,11 +261,22 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void initState() {
     // Hide the status bar in Android
-    loadUserModel();
+    soundsController.getSoundsList();
     getPermissionStatus();
     _currentFlashMode = FlashMode.off;
     animationController = AnimationController(
         vsync: this, duration: Duration(seconds: timer.value));
+
+    animationController!.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        animationController!.reset();
+        stopVideoRecording();
+        setState(() {
+          isRecordingComplete = true;
+        });
+        openEditor(false, "");
+      }
+    });
 
     super.initState();
   }
@@ -281,17 +286,32 @@ class _CameraScreenState extends State<CameraScreen>
     List<imgly.AudioClip> audioClips = [];
 
     albums.forEach((element) {
-      audioClips.add(imgly.AudioClip(
-        element.title,
-        element.filePath,
-      ));
+      audioClips.add(imgly.AudioClip(element.title, element.filePath,
+          title: element.title,
+          artist: element.artist,
+          duration: double.parse(element.duration)));
     });
+    late imgly.AudioClipCategory onlineCategory;
+
+    if (soundsController.soundsList.isNotEmpty) {
+      List<imgly.AudioClip> onlineAudioClips = [];
+      soundsController.soundsList.forEach((element) {
+        onlineAudioClips.add(imgly.AudioClip(element.name.toString(),
+            RestUrl.soundUrl + element.sound.toString(),
+            title: element.name));
+      });
+      onlineCategory = imgly.AudioClipCategory("online_cat", "online",
+          thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png",
+          items: onlineAudioClips);
+    }
+
 
     var audioClipCategories = [
+
       imgly.AudioClipCategory("audio_cat_1", "local",
-          thumbnailURI:
-              "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/1200px-Amazon_Web_Services_Logo.svg.png",
+          thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png",
           items: audioClips),
+      onlineCategory
     ];
 
     var audioOptions = imgly.AudioOptions(categories: audioClipCategories);
@@ -299,12 +319,12 @@ class _CameraScreenState extends State<CameraScreen>
     var exportOptions = imgly.ExportOptions(
       serialization: imgly.SerializationOptions(
           enabled: true, exportType: imgly.SerializationExportType.object),
-      video: imgly.VideoOptions(quality: 0.4, codec: codec[0]),
+      video: imgly.VideoOptions(quality: 0.9, codec: codec[0]),
     );
 
     imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
-        RestUrl.assetsUrl + "logo.png",
-        alignment: imgly.AlignmentMode.bottomRight);
+        RestUrl.assetsUrl + "transparent_logo.png",
+        alignment: imgly.AlignmentMode.topLeft);
 
     var stickerList = [
       imgly.StickerCategory.giphy(
@@ -323,7 +343,7 @@ class _CameraScreenState extends State<CameraScreen>
       trim: trimOptions,
       theme: themeOptions,
       sticker:
-          imgly.StickerOptions(personalStickers: true, categories: stickerList),
+      imgly.StickerOptions(personalStickers: true, categories: stickerList),
       audio: audioOptions,
       export: exportOptions,
       watermark: waterMarkOptions,
@@ -366,307 +386,280 @@ class _CameraScreenState extends State<CameraScreen>
         backgroundColor: Colors.black,
         body: _isCameraPermissionGranted
             ? _isCameraInitialized
-                ? Container(
+            ? Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              context.isTablet
+                  ? AspectRatio(
+                aspectRatio: 1 / _controller!.value.aspectRatio,
+                child: CameraPreview(_controller!),
+              )
+                  : AspectRatio(
+                aspectRatio: 9 / 16,
+                child: CameraPreview(_controller!),
+              ),
+              Expanded(
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(left: 20, right: 20),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xff145158),
+                            Color(0xff193542),
+                            Color(0xff1A2C41)
+                          ]),
+                    ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        AspectRatio(
-                          aspectRatio: 9 / 16,
-                          child: CameraPreview(_controller!),
-                        ),
-                        Expanded(
-                            child: Container(
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.only(left: 20, right: 20),
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Color(0xff145158),
-                                  Color(0xff193542),
-                                  Color(0xff1A2C41)
-                                ]),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // // timer picker layout
+                        // // timer picker layout
 
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                        Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: _isRecordingInProgress
+                                  ? () async {
+                                if (_controller!
+                                    .value.isRecordingPaused) {
+                                  await resumeVideoRecording();
+                                } else {
+                                  await pauseVideoRecording();
+                                }
+                              }
+                                  : () {
+                                setState(() {
+                                  _isCameraInitialized = false;
+                                });
+                                onNewCameraSelected(cameras[
+                                _isRearCameraSelected ? 1 : 0]);
+                                setState(() {
+                                  _isRearCameraSelected =
+                                  !_isRearCameraSelected;
+                                });
+                              },
+                              child: Stack(
+                                alignment: Alignment.center,
                                 children: [
-                                  InkWell(
-                                    onTap: _isRecordingInProgress
-                                        ? () async {
-                                            if (_controller!
-                                                .value.isRecordingPaused) {
-                                              await resumeVideoRecording();
-                                            } else {
-                                              await pauseVideoRecording();
-                                            }
-                                          }
-                                        : () {
-                                            setState(() {
-                                              _isCameraInitialized = false;
-                                            });
-                                            onNewCameraSelected(cameras[
-                                                _isRearCameraSelected ? 1 : 0]);
-                                            setState(() {
-                                              _isRearCameraSelected =
-                                                  !_isRearCameraSelected;
-                                            });
-                                          },
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.circle,
-                                          color: Colors.black38,
-                                          size: 50,
-                                        ),
-                                        Icon(
-                                          _isRearCameraSelected
-                                              ? Icons.camera_front
-                                              : Icons.camera_rear,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ],
-                                    ),
+                                  const Icon(
+                                    Icons.circle,
+                                    color: Colors.black38,
+                                    size: 50,
                                   ),
-                                  InkWell(
-                                    onTap: () async {},
-                                    child: const Icon(
-                                      Icons.speed,
-                                      color: Colors.white,
-                                    ),
+                                  Icon(
+                                    _isRearCameraSelected
+                                        ? Icons.camera_front
+                                        : Icons.camera_rear,
+                                    color: Colors.white,
+                                    size: 20,
                                   ),
-                                  //video recording button click listener
-                                  InkWell(
-                                    onTap: () async {
-                                      if (_isRecordingInProgress) {
-                                        try {
-                                          await stopVideoRecording();
-                                          isRecordingRunning();
-                                        } on CameraException catch (e) {
-                                          errorToast(e.toString());
-                                        }
-                                      } else {
-                                        await startVideoRecording();
-                                        isRecordingRunning();
-                                      }
-                                    },
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.circle,
-                                          color: _isVideoCameraSelected
-                                              ? Colors.white
-                                              : Colors.white38,
-                                          size: 75,
-                                        ),
-                                        const Icon(
-                                          Icons.circle,
-                                          color: Colors.red,
-                                          size: 35,
-                                        ),
-                                        _isRecordingInProgress
-                                            ? const Icon(
-                                                Icons.stop_rounded,
-                                                color: Colors.white,
-                                                size: 32,
-                                              )
-                                            : Container(),
-                                        SizedBox(
-                                          width: 80,
-                                          height: 80,
-                                          child: AnimatedBuilder(
-                                            animation: animationController!,
-                                            builder: (BuildContext context,
-                                                Widget? child) {
-                                              return CustomPaint(
-                                                  painter: CustomTimerPainter(
-                                                animation: animationController!,
-                                                backgroundColor: Colors.white,
-                                                color: Colors.red,
-                                              ));
-                                            },
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () async {
-                                      ImagePicker()
-                                          .pickVideo(
-                                              source: ImageSource.gallery)
-                                          .then((value) async => await VESDK
-                                                  .openEditor(
-                                                      Video(value!.path))
-                                                  .then((value) async {
-                                                if (value != null) {
-                                                  var addSoundModel =
-                                                      AddSoundModel(
-                                                          0,
-                                                          userModel.id!,
-                                                          0,
-                                                          "",
-                                                          "",
-                                                          '',
-                                                          '',
-                                                          false);
-                                                  PostData postData = PostData(
-                                                    speed: '1',
-                                                    newPath: value.video,
-                                                    filePath: value.video,
-                                                    filterName: "",
-                                                    addSoundModel:
-                                                        addSoundModel,
-                                                    isDuet: false,
-                                                    isDefaultSound: widget
-                                                            .selectedSound!
-                                                            .isNotEmpty
-                                                        ? false
-                                                        : true,
-                                                    isUploadedFromGallery: true,
-                                                    trimStart: 0,
-                                                    trimEnd: 0,
-                                                  );
-                                                  // Get.snackbar("path", value.video);
-
-                                                  // await Get.to(PostVideo(
-                                                  //     data: postData));
-
-                                                  await Get.to(PostScreenGetx(
-                                                    postData,
-                                                  ));
-                                                }
-                                              }));
-                                    },
-                                    child: const Icon(
-                                      Icons.browse_gallery_outlined,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  //preview button
-                                  !isRecordingComplete
-                                      ? InkWell(
-                                          onTap: () async {
-                                            if (_currentFlashMode ==
-                                                FlashMode.off) {
-                                              setState(() {
-                                                _currentFlashMode =
-                                                    FlashMode.torch;
-                                                _controller!.setFlashMode(
-                                                    FlashMode.torch);
-                                              });
-                                            } else {
-                                              setState(() {
-                                                _currentFlashMode =
-                                                    FlashMode.off;
-
-                                                _controller!.setFlashMode(
-                                                    FlashMode.off);
-                                              });
-                                            }
-                                            //await openEditor();
-                                            // Get.to(VideoEditor(
-                                            //   file: _videoFile!,
-                                            // ));
-                                          },
-                                          child:
-                                              _currentFlashMode == FlashMode.off
-                                                  ? const Icon(
-                                                      Icons.flash_off_rounded,
-                                                      color: Colors.white,
-                                                    )
-                                                  : const Icon(
-                                                      Icons.flash_on_rounded,
-                                                      color: Colors.white,
-                                                    ),
-                                        )
-                                      : InkWell(
-                                          onTap: () async {
-                                            setState(() {
-                                              isRecordingComplete = true;
-                                            });
-                                            openEditor();
-                                          },
-                                          child: const Icon(
-                                            Icons.done,
-                                            color: Colors.white,
-                                          ),
-                                        ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ))
+                            ),
+                            InkWell(
+                              onTap: () async {},
+                              child: const Icon(
+                                Icons.speed,
+                                color: Colors.white,
+                              ),
+                            ),
+                            //video recording button click listener
+                            InkWell(
+                              onTap: () async {
+                                if (_isRecordingInProgress) {
+                                  try {
+                                    if (animationController!
+                                        .isAnimating &&
+                                        animationController!.value <
+                                            0.1) {
+                                      errorToast(
+                                          "Please Record Atleast 10 seconds");
+                                    } else {
+                                      await stopVideoRecording();
+                                      isRecordingRunning();
+                                    }
+                                  } on CameraException catch (e) {
+                                    errorToast(e.toString());
+                                  }
+                                } else {
+                                  await startVideoRecording();
+                                  isRecordingRunning();
+                                }
+                              },
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.circle,
+                                    color: _isVideoCameraSelected
+                                        ? Colors.white
+                                        : Colors.white38,
+                                    size: 75,
+                                  ),
+                                  const Icon(
+                                    Icons.circle,
+                                    color: Colors.red,
+                                    size: 35,
+                                  ),
+                                  _isRecordingInProgress
+                                      ? const Icon(
+                                    Icons.stop_rounded,
+                                    color: Colors.white,
+                                    size: 32,
+                                  )
+                                      : Container(),
+                                  SizedBox(
+                                    width: 80,
+                                    height: 80,
+                                    child: AnimatedBuilder(
+                                      animation: animationController!,
+                                      builder: (BuildContext context,
+                                          Widget? child) {
+                                        return CustomPaint(
+                                            painter: CustomTimerPainter(
+                                              animation: animationController!,
+                                              backgroundColor: Colors.white,
+                                              color: Colors.red,
+                                            ));
+                                      },
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () async {
+                                ImagePicker()
+                                    .pickVideo(
+                                    source: ImageSource.gallery)
+                                    .then((value) async =>
+                                    openEditor(true, value!.path));
+                              },
+                              child: const Icon(
+                                Icons.browse_gallery_outlined,
+                                color: Colors.white,
+                              ),
+                            ),
+                            //preview button
+                            !isRecordingComplete
+                                ? InkWell(
+                              onTap: () async {
+                                if (_currentFlashMode ==
+                                    FlashMode.off) {
+                                  setState(() {
+                                    _currentFlashMode =
+                                        FlashMode.torch;
+                                    _controller!.setFlashMode(
+                                        FlashMode.torch);
+                                  });
+                                } else {
+                                  setState(() {
+                                    _currentFlashMode =
+                                        FlashMode.off;
 
-                        //flash layout
+                                    _controller!.setFlashMode(
+                                        FlashMode.off);
+                                  });
+                                }
+                                //await openEditor();
+                                // Get.to(VideoEditor(
+                                //   file: _videoFile!,
+                                // ));
+                              },
+                              child:
+                              _currentFlashMode == FlashMode.off
+                                  ? const Icon(
+                                Icons.flash_off_rounded,
+                                color: Colors.white,
+                              )
+                                  : const Icon(
+                                Icons.flash_on_rounded,
+                                color: Colors.white,
+                              ),
+                            )
+                                : InkWell(
+                              onTap: () async {
+                                setState(() {
+                                  isRecordingComplete = true;
+                                });
+                                openEditor(false, "");
+                              },
+                              child: const Icon(
+                                Icons.done,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  )
-                : //loading layout
-                const Center(
-                    child: Text(
-                      'LOADING',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  )
+                  ))
+
+              //flash layout
+            ],
+          ),
+        )
+            : //loading layout
+        const Center(
+          child: Text(
+            'LOADING',
+            style: TextStyle(color: Colors.white),
+          ),
+        )
             : //permission denied layout
-            Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(),
-                  const Text(
-                    'Permission denied',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      getPermissionStatus();
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        'Give permission',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(),
+            const Text(
+              'Permission denied',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
               ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                getPermissionStatus();
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Give permission',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void isRecordingRunning() {
+  void isRecordingRunning() async {
     if (animationController!.isAnimating) {
       animationController!.stop();
     } else {
-      animationController!.reverse(
-          from: animationController?.value == 0.0
-              ? 1.0
-              : animationController?.value);
+      animationController!.forward();
+      // animationController!.reverse(
+      //     from: animationController?.value == 0.0
+      //         ? 1.0
+      //         : animationController?.value);
     }
   }
 
-  Future<void> openEditor() async {
+  Future<void> openEditor(bool isGallery, String path) async {
     final directory = await ExternalPath.getExternalStoragePublicDirectory(
         ExternalPath.DIRECTORY_PICTURES);
-
     final dir = Directory("$directory/thrill");
     final List<FileSystemEntity> entities = await dir.list().toList();
 
@@ -675,6 +668,7 @@ class _CameraScreenState extends State<CameraScreen>
     entities.forEach((element) {
       videosList.add("${element.path}");
     });
+
     List<SongInfo> albums = [];
     try {
       FlutterAudioQuery flutterAudioQuery = FlutterAudioQuery();
@@ -682,91 +676,205 @@ class _CameraScreenState extends State<CameraScreen>
     } catch (e) {
       errorToast(e.toString());
     } finally {
-      await VESDK
-          .openEditor(Video.composition(videos: videosList),
-              configuration: setConfig(albums))
-          .then((value) async {
-        Map<dynamic, dynamic> serializationData = await value?.serialization;
+      if (!isGallery) {
+        await VESDK
+            .openEditor(Video.composition(videos: videosList),
+            configuration: setConfig(albums))
+            .then((value) async {
+          Map<dynamic, dynamic> serializationData = await value?.serialization;
 
-        print("data=>" + serializationData.toString());
+          print("data=>" + serializationData.toString());
 
-        List<dynamic> operationData = serializationData['operations'].toList();
+          List<dynamic> operationData =
+          serializationData['operations'].toList();
 
-        if (value == null) {
-          final dir = Directory("$directory/thrill");
-          dir.exists().then((value) => dir.delete(recursive: true));
-        }
-
-        await dir.delete(recursive: true);
-
-        var isOriginal = true.obs;
-        var path = '/storage/emulated/0/download/originalaudio.mp3';
-        var songPath = '';
-        var songName = '';
-        operationData.forEach((element) {
-          Map<dynamic, dynamic> data = element['options'];
-          if (data.containsKey("clips")) {
-            isOriginal.value = false;
+          if (value == null) {
+            dir.exists().then((value) => dir.delete(recursive: true));
           }
-        });
-        if (!isOriginal.value) {
-          operationData.forEach((operation) {
-            albums.forEach((element) {
-              if(operation['options']['type'] =='audio'){
-                if (element.title.contains(operation
-                ['options']['clips'][0]['identifier']
-                    .toString())) {
-                  songPath = element.filePath;
-                  songName = element.title;
-                }
-              }
 
+          // await dir.delete(recursive: true);
 
-            });
+          var isOriginal = true.obs;
+          var songPath = '';
+          var songName = '';
+          operationData.forEach((element) {
+            Map<dynamic, dynamic> data = element['options'];
+            if (data.containsKey("clips")) {
+              isOriginal.value = false;
+            }
           });
-
-          if (value != null) {
-            var addSoundModel = AddSoundModel(
-                0,
-                userModel.id!,
-                0,
-                songPath.isNotEmpty ? songPath : path,
-                songName.isNotEmpty ? songName : "original",
-                '',
-                '',
-                true);
-            PostData postData = PostData(
-              speed: '1',
-              newPath: value.video,
-              filePath: value.video,
-              filterName: "",
-              addSoundModel: addSoundModel,
-              isDuet: false,
-              isDefaultSound: true,
-              isUploadedFromGallery: true,
-              trimStart: 0,
-              trimEnd: 0,
-            );
-
-            // Get.snackbar("path", value.video);
-            Get.to(() => PostScreenGetx(
-              postData,
-            ))?.then((value) async {
-              File audioFile = File(path);
-              await audioFile.delete(recursive: true);
+          if (!isOriginal.value) {
+            operationData.forEach((operation) {
+              albums.forEach((element) {
+                if (operation['options']['type'] == 'audio') {
+                  if (element.title.contains(operation['options']['clips'][0]
+                  ['identifier']
+                      .toString())) {
+                    songPath = element.filePath;
+                    songName = element.title;
+                  }
+                }
+              });
             });
-          }
-        } else {
-          await FFmpegKit.execute(
-                  "-i ${value!.video} -map 0:a -acodec libmp3lame $path")
-              .then((audio) async {
+
             if (value != null) {
               var addSoundModel = AddSoundModel(
                   0,
-                  userModel.id!,
+                 widget.id!,
                   0,
                   songPath.isNotEmpty ? songPath : path,
-                  songName.isNotEmpty ? songName : "original",
+                  songName.isNotEmpty ? "$songName by ${widget.owner}" : "original by ${widget.owner}",
+                  '',
+                  '',
+                  true);
+              PostData postData = PostData(
+                speed: '1',
+                newPath: value.video,
+                filePath: value.video,
+                filterName: "",
+                addSoundModel: addSoundModel,
+                isDuet: false,
+                isDefaultSound: true,
+                isUploadedFromGallery: true,
+                trimStart: 0,
+                trimEnd: 0,
+              );
+              // Get.snackbar("path", value.video);
+              Get.to(() =>
+                  PostScreenGetx(
+                      postData,
+                      widget.selectedSound
+                  ));
+            }
+          } else {
+            if (widget.selectedSound.isNotEmpty) {
+              await FFmpegKit.execute(
+                'ffmpeg -i ${value!.video} -i ${widget.selectedSound} -c:v copy -c:a aac $dir/selectedVideo.mp4'
+                  )
+                  .then((ffmpegValue)async  {
+                   var data = await ffmpegValue.getOutput();
+                   print(ffmpegValue);
+                var addSoundModel = AddSoundModel(
+                    0,
+                    widget.id!,
+                    0,
+                    songPath.isNotEmpty ? songPath : path,
+                    songName.isNotEmpty ? songName : "original by ${widget
+                        .owner}",
+                    '',
+                    '',
+                    true);
+                PostData postData = PostData(
+                  speed: '1',
+                  newPath: "$dir/selectedVideo.mp4",
+                  filePath: "$dir/selectedVideo.mp4",
+                  filterName: "",
+                  addSoundModel: addSoundModel,
+                  isDuet: false,
+                  isDefaultSound: true,
+                  isUploadedFromGallery: true,
+                  trimStart: 0,
+                  trimEnd: 0,
+                );
+                Get.to(() =>
+                    PostScreenGetx(
+                        postData,
+                        widget.selectedSound
+
+                    ));
+              });
+            } else {
+              await FFmpegKit.execute(
+                  "-y -i ${value!
+                      .video} -map 0:a -acodec libmp3lame $saveCacheDirectory/originalAudio.mp3")
+                  .then((audio) async {
+                if (value != null) {
+                  var addSoundModel = AddSoundModel(
+                      0,
+                      widget.id!,
+                      0,
+                      songPath.isNotEmpty
+                          ? songPath
+                          : "$saveCacheDirectory/originalAudio.mp3",
+                      songName.isNotEmpty ? songName : "original by ${widget.owner}",
+                      '',
+                      '',
+                      true);
+                  PostData postData = PostData(
+                    speed: '1',
+                    newPath: value.video,
+                    filePath: value.video,
+                    filterName: "",
+                    addSoundModel: addSoundModel,
+                    isDuet: false,
+                    isDefaultSound: true,
+                    isUploadedFromGallery: true,
+                    trimStart: 0,
+                    trimEnd: 0,
+                  );
+
+                  // Get.snackbar("path", value.video);
+                  await Get.to(() =>
+                      PostScreenGetx(
+                          postData,
+                          widget.selectedSound
+
+                      ));
+                }
+              });
+            }
+          }
+        });
+      } else {
+        await VESDK
+            .openEditor(Video(path), configuration: setConfig(albums))
+            .then((value) async {
+          Map<dynamic, dynamic> serializationData = await value?.serialization;
+
+          print("data=>" + serializationData.toString());
+
+          List<dynamic> operationData =
+          serializationData['operations'].toList();
+
+          if (value == null) {
+            final dir = Directory("$directory/thrill");
+            dir.exists().then((value) => dir.delete(recursive: true));
+          }
+
+          // await dir.delete(recursive: true);
+
+          var isOriginal = true.obs;
+          var songPath = '';
+          var songName = '';
+          operationData.forEach((element) {
+            Map<dynamic, dynamic> data = element['options'];
+            if (data.containsKey("clips")) {
+              isOriginal.value = false;
+            }
+          });
+          if (!isOriginal.value) {
+            operationData.forEach((operation) {
+              albums.forEach((element) {
+                if (operation['options']['type'] == 'audio') {
+                  if (element.title.contains(operation['options']['clips'][0]
+                  ['identifier']
+                      .toString())) {
+                    songPath = element.filePath;
+                    songName = element.title;
+                  }
+                }
+              });
+            });
+
+            if (value != null) {
+              var addSoundModel = AddSoundModel(
+                  0,
+                  widget.id!,
+                  0,
+                  songPath.isNotEmpty
+                      ? songPath
+                      : "$saveCacheDirectory/originalAudio.mp3",
+                  songName.isNotEmpty ? songName : "original by ${widget.owner}",
                   '',
                   '',
                   true);
@@ -784,22 +892,56 @@ class _CameraScreenState extends State<CameraScreen>
               );
 
               // Get.snackbar("path", value.video);
-              await Get.to(() => PostScreenGetx(
-                    postData,
+              Get.to(() =>
+                  PostScreenGetx(
+                      postData, widget.selectedSound
+
                   ));
-              File audioFile = File(path);
-              await audioFile.delete(recursive: true);
             }
-          });
-        }
-      });
+          } else {
+            await FFmpegKit.execute(
+                "-y -i ${value!.video} -map 0:a -acodec libmp3lame $path")
+                .then((audio) async {
+              var addSoundModel = AddSoundModel(
+                  0,
+                  widget.id!,
+                  0,
+                  songPath.isNotEmpty
+                      ? songPath
+                      : "$saveCacheDirectory/originalAudio.mp3",
+                  songName.isNotEmpty ? songName : "original by ${widget.owner}",
+                  '',
+                  '',
+                  true);
+              PostData postData = PostData(
+                speed: '1',
+                newPath: value.video,
+                filePath: value.video,
+                filterName: "",
+                addSoundModel: addSoundModel,
+                isDuet: false,
+                isDefaultSound: true,
+                isUploadedFromGallery: true,
+                trimStart: 0,
+                trimEnd: 0,
+              );
+
+              // Get.snackbar("path", value.video);
+              await Get.to(() =>
+                  PostScreenGetx(
+                      postData, widget.selectedSound
+
+                  ));
+            });
+          }
+        });
+      }
     }
   }
 
   loadUserModel() async {
     var pref = await SharedPreferences.getInstance();
     var currentUser = pref.getString('currentUser');
-    userModel = User.fromJson(jsonDecode(currentUser!));
 
     setState(() {});
     var status = await Permission.storage.isGranted;

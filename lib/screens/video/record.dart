@@ -155,15 +155,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
       setState(() {});
     }));*/
 
-    effectsfirst.addAll({
-      'assets/filter0.gif',
-      'assets/filter1.gif',
-      'assets/filter2.gif',
-      'assets/filter3.gif',
-      'assets/filter4.gif',
-      'assets/filter5.gif',
-      'assets/filter7.gif'
-    });
+
   }
 
   @override
@@ -518,10 +510,6 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SvgPicture.asset(
-                              'assets/music.svg',
-                              height: 16.5,
-                            ),
                             const SizedBox(
                               width: 5,
                             ),
@@ -812,9 +800,7 @@ class _RecordState extends State<Record> with WidgetsBindingObserver {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SvgPicture.asset(
-                              'assets/images.svg',
-                            ),
+
                             const SizedBox(
                               height: 2,
                             ),

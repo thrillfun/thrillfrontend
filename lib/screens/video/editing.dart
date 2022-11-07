@@ -300,10 +300,7 @@ class _EditingState extends State<Editing> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SvgPicture.asset(
-                              'assets/music.svg',
-                              height: 16.5,
-                            ),
+
                             const SizedBox(
                               width: 5,
                             ),

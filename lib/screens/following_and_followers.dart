@@ -32,7 +32,7 @@ class FollowingAndFollowers extends StatelessWidget {
     return GetX<UserController>(
         builder: ((userController) => Scaffold(
                 body: Stack(fit: StackFit.expand, children: [
-                 loadSvgCacheImage("background_1.svg")
+                 loadLocalSvg("background_1.svg")
                   ,
                   Column(
                     children: [

@@ -64,15 +64,7 @@ class _RecordDuetState extends State<RecordDuet> {
     super.initState();
     onNewCameraSelected(cameras[0]);
     downloadVideo();
-    effectsfirst.addAll({
-      'assets/filter0.gif',
-      'assets/filter1.gif',
-      'assets/filter2.gif',
-      'assets/filter3.gif',
-      'assets/filter4.gif',
-      'assets/filter5.gif',
-      'assets/filter7.gif'
-    });
+
     videoController = VideoPlayerController.network(
         widget.videoModel.duet_from.isEmpty
             ? '${RestUrl.videoUrl}${widget.videoModel.video}'

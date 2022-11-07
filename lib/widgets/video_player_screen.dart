@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
@@ -7,8 +6,8 @@ import 'package:thrill/controller/model/liked_videos_model.dart';
 import 'package:thrill/controller/model/own_videos_model.dart';
 import 'package:thrill/controller/model/private_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
-import 'package:thrill/models/private_model.dart';
 import 'package:thrill/widgets/better_video_player.dart';
+import 'package:thrill/controller/model/search_hashtag_model.dart' as searchList;
 
 class VideoPlayerScreen extends StatelessWidget {
   VideoPlayerScreen(
@@ -21,7 +20,7 @@ class VideoPlayerScreen extends StatelessWidget {
       required this.isLock,
       this.privateVideos});
 
-  List<HashTagsDetails>? hashTagVideos;
+  List<searchList.Videos>? hashTagVideos;
   List<LikedVideos>? likedVideos;
   List<Videos>? userVideos;
   List<PrivateVideos>? privateVideos;
@@ -245,14 +244,31 @@ class VideoPlayerScreen extends StatelessWidget {
                             : isLock
                                 ? privateVideos![index].soundOwner.toString()
                                 : hashTagVideos![index].soundOwner.toString(),
-                    userVideos![index].isCommentable.toString().toLowerCase() == "yes"
-                        ? true
-                        : likedVideos![index].isCommentable.toString().toLowerCase() == "yes"
+                    isFeed
+                        ? userVideos![index].videoLikeStatus
+                        : isFav
+                            ? likedVideos![index].videoLikeStatus
+                            : isLock
+                                ? privateVideos![index].videoLikeStatus
+                                : 0,
+                    isFeed
+                        ? userVideos!=null && userVideos![index]
+                                    .isCommentable
+                                    .toString()
+                                    .toLowerCase() ==
+                                "yes"
                             ? true
-                            : privateVideos![index].isCommentable.toString().toLowerCase() ==
+                            : false
+                        : isFav
+                            ?
+                        likedVideos!=null && likedVideos![index]
+                                        .isCommentable
+                                        .toString()
+                                        .toLowerCase() ==
                                     "yes"
                                 ? true
-                                : false)),
+                                : false
+                            : true)),
               );
             }));
   }

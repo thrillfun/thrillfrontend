@@ -1,3 +1,5 @@
+import 'package:thrill/rest/rest_url.dart';
+
 class TopHastagVideosModel {
   bool? status;
   String? message;
@@ -111,7 +113,7 @@ class HashTagVideos {
     filter = json['filter'] ?? "";
     likes = json['likes'] ?? "";
     views = json['views'] ?? "";
-    gifImage = json['gif_image'] ?? "";
+    gifImage = json['gif_image'] ?? RestUrl.placeholderImage;
     speed = json['speed'] ?? "";
     comments = json['comments'] ?? "";
     hashtags = json['hashtags'];
