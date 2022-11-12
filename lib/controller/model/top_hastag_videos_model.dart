@@ -74,7 +74,7 @@ class HashTagVideos {
   String? gifImage;
   String? speed;
   int? comments;
-  List<dynamic>? hashtags;
+  List<Hashtags>? hashtags;
   String? isDuet;
   String? duetFrom;
   String? isDuetable;
@@ -116,7 +116,12 @@ class HashTagVideos {
     gifImage = json['gif_image'] ?? RestUrl.placeholderImage;
     speed = json['speed'] ?? "";
     comments = json['comments'] ?? "";
-    hashtags = json['hashtags'];
+    if (json['hashtags'] != null) {
+      hashtags = <Hashtags>[];
+      json['hashtags'].forEach((v) {
+        hashtags!.add(new Hashtags.fromJson(v));
+      });
+    }
     isDuet = json['is_duet'] ?? "";
     duetFrom = json['duet_from'] ?? "";
     isDuetable = json['is_duetable'] ?? "";
@@ -139,7 +144,9 @@ class HashTagVideos {
     data['gif_image'] = this.gifImage;
     data['speed'] = this.speed;
     data['comments'] = this.comments;
-    data['hashtags'] = this.hashtags;
+    if (this.hashtags != null) {
+      data['hashtags'] = this.hashtags!.map((v) => v.toJson()).toList();
+    }
     data['is_duet'] = this.isDuet;
     data['duet_from'] = this.duetFrom;
     data['is_duetable'] = this.isDuetable;
@@ -148,6 +155,25 @@ class HashTagVideos {
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
+    return data;
+  }
+}
+
+class Hashtags {
+  int? id;
+  String? name;
+
+  Hashtags({this.id, this.name});
+
+  Hashtags.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
     return data;
   }
 }

@@ -7,7 +7,6 @@ import 'package:thrill/controller/model/own_videos_model.dart';
 import 'package:thrill/controller/model/private_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/widgets/better_video_player.dart';
-import 'package:thrill/controller/model/search_hashtag_model.dart' as searchList;
 
 class VideoPlayerScreen extends StatelessWidget {
   VideoPlayerScreen(
@@ -20,7 +19,7 @@ class VideoPlayerScreen extends StatelessWidget {
       required this.isLock,
       this.privateVideos});
 
-  List<searchList.Videos>? hashTagVideos;
+  List<HashTagsDetails>? hashTagVideos;
   List<LikedVideos>? likedVideos;
   List<Videos>? userVideos;
   List<PrivateVideos>? privateVideos;
@@ -229,7 +228,8 @@ class VideoPlayerScreen extends StatelessWidget {
                             ? []
                             : isLock
                                 ? []
-                                : hashTagVideos![index].hashtags!,
+                                : [],
+                    // : hashTagVideos![index].hashtags!,
                     isFeed
                         ? userVideos![index].sound.toString()
                         : isFav
@@ -252,20 +252,21 @@ class VideoPlayerScreen extends StatelessWidget {
                                 ? privateVideos![index].videoLikeStatus
                                 : 0,
                     isFeed
-                        ? userVideos!=null && userVideos![index]
-                                    .isCommentable
-                                    .toString()
-                                    .toLowerCase() ==
-                                "yes"
-                            ? true
-                            : false
-                        : isFav
-                            ?
-                        likedVideos!=null && likedVideos![index]
+                        ? userVideos != null &&
+                                userVideos![index]
                                         .isCommentable
                                         .toString()
                                         .toLowerCase() ==
                                     "yes"
+                            ? true
+                            : false
+                        : isFav
+                            ? likedVideos != null &&
+                                    likedVideos![index]
+                                            .isCommentable
+                                            .toString()
+                                            .toLowerCase() ==
+                                        "yes"
                                 ? true
                                 : false
                             : true)),

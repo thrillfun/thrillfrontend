@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -6,12 +7,15 @@ import 'package:external_path/external_path.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
+import 'package:thrill/controller/model/LikeVideoModel.dart';
 import 'package:thrill/controller/model/delete_video_response.dart';
 import 'package:thrill/controller/model/liked_videos_model.dart';
 import 'package:thrill/controller/model/own_videos_model.dart';
@@ -19,15 +23,21 @@ import 'package:thrill/controller/model/private_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/model/user_details_model.dart' as user;
 import 'package:thrill/controller/model/video_fields_model.dart' as videoFields;
+import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
+import 'package:thrill/models/add_sound_model.dart';
+import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/videos_post_response.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
+import 'package:thrill/screens/video/post_screen.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:video_editor_sdk/video_editor_sdk.dart';
 
 class VideosController extends GetxController {
   RxBool on = false.obs; // our observable
+  var soundsController = Get.find<SoundsController>();
   var token = GetStorage().read('token');
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var simpleS3 = SimpleS3();
@@ -54,7 +64,7 @@ class VideosController extends GetxController {
 
   var otherUserVideos = RxList<Videos>();
   var likedVideos = RxList<LikedVideos>();
-  var othersLikedVideos = RxList<LikedVideos>();
+  RxList<LikedVideos> othersLikedVideos = RxList<LikedVideos>();
 
   VideosController() {
     try {
@@ -95,7 +105,6 @@ class VideosController extends GetxController {
         color: Colors.green,
       ),
     );
-
   }
 
   void toggle() => on.value = on.value ? false : true;
@@ -135,17 +144,21 @@ class VideosController extends GetxController {
 
   Future<void> getAllVideos() async {
     isLoading.value = true;
-    dio.options.headers['Authorization'] = token;
-    var response =
-        await dio.get("/video/list").timeout(const Duration(seconds: 60));
-
-    print(response.data);
     try {
-      publicVideosList = PublicVideosModel.fromJson(response.data).data!.obs;
-    } catch (e) {
-      errorToast(PublicVideosModel.fromJson(json.decode(response.data))
-          .message
-          .toString());
+      dio.options.headers['Authorization'] = token;
+      var response =
+          await dio.get("/video/list").timeout(const Duration(seconds: 60));
+
+      print(response.data);
+      try {
+        publicVideosList = PublicVideosModel.fromJson(response.data).data!.obs;
+      } catch (e) {
+        errorToast(PublicVideosModel.fromJson(json.decode(response.data))
+            .message
+            .toString());
+      }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     publicVideosList.refresh();
     isLoading.value = false;
@@ -155,9 +168,7 @@ class VideosController extends GetxController {
   getFollowingVideos() async {
     isFollowingLoading.value = true;
 
-    if (token.isEmpty) {
-      errorToast("Please Login to get your followings");
-    } else {
+    try {
       var response = await http.get(
         Uri.parse('${RestUrl.baseUrl}/video/following'),
         headers: {"Authorization": "Bearer $token"},
@@ -173,6 +184,8 @@ class VideosController extends GetxController {
       } on Exception catch (e) {
         print(e);
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
 
     isFollowingLoading.value = false;
@@ -182,8 +195,7 @@ class VideosController extends GetxController {
 
   getUserVideos() async {
     isUserVideosLoading.value = true;
-    if (token == null) {
-    } else {
+    try {
       var id = user.User.fromJson(GetStorage().read("user")).id;
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/video/user-videos'),
@@ -198,6 +210,8 @@ class VideosController extends GetxController {
             .message
             .toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
 
     isUserVideosLoading.value = false;
@@ -206,20 +220,24 @@ class VideosController extends GetxController {
 
   getUserPrivateVideos() async {
     isUserVideosLoading.value = true;
-    var id = user.User.fromJson(GetStorage().read("user")).id;
-
-    var response = await http.get(
-      Uri.parse('${RestUrl.baseUrl}/video/private'),
-      headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
-    ).timeout(const Duration(seconds: 60));
-
     try {
-      privateVideosList =
-          PrivateVideosModel.fromJson(json.decode(response.body)).data!.obs;
-    } catch (e) {
-      errorToast(PrivateVideosModel.fromJson(json.decode(response.body))
-          .message
-          .toString());
+      var id = user.User.fromJson(GetStorage().read("user")).id;
+
+      var response = await http.get(
+        Uri.parse('${RestUrl.baseUrl}/video/private'),
+        headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
+      ).timeout(const Duration(seconds: 60));
+
+      try {
+        privateVideosList =
+            PrivateVideosModel.fromJson(json.decode(response.body)).data!.obs;
+      } catch (e) {
+        errorToast(PrivateVideosModel.fromJson(json.decode(response.body))
+            .message
+            .toString());
+      }
+    } on Exception catch (e) {
+      log(e.toString());
     }
 
     isUserVideosLoading.value = false;
@@ -229,7 +247,7 @@ class VideosController extends GetxController {
   getOtherUserVideos(int userId) async {
     videosLoading.value = true;
     otherUserVideos.clear();
-    if (token != null) {
+    try {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/video/user-videos'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
@@ -242,6 +260,8 @@ class VideosController extends GetxController {
             .message
             .toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     videosLoading.value = false;
     update();
@@ -249,8 +269,8 @@ class VideosController extends GetxController {
 
   getUserLikedVideos() async {
     isLikedVideosLoading.value = true;
-    var id = user.User.fromJson(GetStorage().read("user")).id;
-    if (token != null) {
+    try {
+      var id = user.User.fromJson(GetStorage().read("user")).id;
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/user/user-liked-videos'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
@@ -264,16 +284,17 @@ class VideosController extends GetxController {
             .message
             .toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isLikedVideosLoading.value = false;
     update();
   }
 
   getOthersLikedVideos(int userId) async {
-    othersLikedVideos.clear();
     isLikedVideosLoading.value = true;
 
-    if (token != null) {
+    try {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/user/user-liked-videos'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
@@ -287,14 +308,16 @@ class VideosController extends GetxController {
             .message
             .toString());
       }
+    } on Exception catch (e) {
+      isLikedVideosLoading.value = false;
+      log(e.toString());
     }
     isLikedVideosLoading.value = false;
     update();
   }
 
   likeVideo(int isLike, int videoId) async {
-    isLikedVideosLoading.value = true;
-    if (token != null) {
+    try {
       var response = await http.post(Uri.parse('${RestUrl.baseUrl}/video/like'),
           headers: {
             "Authorization": "Bearer $token"
@@ -303,22 +326,16 @@ class VideosController extends GetxController {
             "video_id": "$videoId",
             "is_like": "$isLike"
           }).timeout(const Duration(seconds: 60));
-      likedVideos.clear();
-      try {
-        likedVideos =
-            LikedVideosModel.fromJson(json.decode(response.body)).data!.obs;
-        successToast(LikedVideosModel.fromJson(json.decode(response.body))
-            .message
-            .toString());
-      } catch (e) {
-        errorToast(LikedVideosModel.fromJson(json.decode(response.body))
-            .message
-            .toString());
-      }
+      VideoLikeModel.fromJson(json.decode(response.body)).status == true
+          ? successToast(VideoLikeModel.fromJson(json.decode(response.body))
+              .message
+              .toString())
+          : errorToast(VideoLikeModel.fromJson(json.decode(response.body))
+              .message
+              .toString());
+    } on Exception catch (e) {
+      log(e.toString());
     }
-    publicVideosList.refresh();
-    isLikedVideosLoading.value = false;
-    update();
   }
 
   postVideo(
@@ -342,32 +359,32 @@ class VideosController extends GetxController {
       int soundOwnerId) async {
     isLoading.value = true;
 
-    if (token != null) {
-      var response = await http.post(
-        Uri.parse('${RestUrl.baseUrl}/video/post'),
-        headers: {"Authorization": "Bearer $token"},
-        body: {
-          'user_id': userId,
-          'video': videoUrl,
-          'sound': sound,
-          'sound_name': soundName,
-          'filter': filterImg,
-          'language': language,
-          'category': category,
-          'hashtags': hashtags,
-          'visibility': visibility,
-          'is_comment_allowed': isCommentAllowed.toString(),
-          'description': description,
-          'gif_image': gifName,
-          'speed': speed,
-          'is_duetable': isDuetable ? "Yes" : "No",
-          'is_commentable': isCommentable ? "Yes" : "No",
-          'is_duet': isDuet ? "Yes" : "No",
-          'duet_from': duetFrom ?? '',
-          'sound_owner': soundOwnerId.toString()
-        },
-      ).timeout(const Duration(seconds: 60));
+    var response = await http.post(
+      Uri.parse('${RestUrl.baseUrl}/video/post'),
+      headers: {"Authorization": "Bearer $token"},
+      body: {
+        'user_id': userId,
+        'video': videoUrl,
+        'sound': sound,
+        'sound_name': soundName,
+        'filter': filterImg,
+        'language': language,
+        'category': category,
+        'hashtags': hashtags,
+        'visibility': visibility,
+        'is_comment_allowed': isCommentAllowed.toString(),
+        'description': description,
+        'gif_image': gifName,
+        'speed': speed,
+        'is_duetable': isDuetable ? "Yes" : "No",
+        'is_commentable': isCommentable ? "Yes" : "No",
+        'is_duet': isDuet ? "Yes" : "No",
+        'duet_from': duetFrom ?? '',
+        'sound_owner': soundOwnerId.toString()
+      },
+    ).timeout(const Duration(seconds: 60));
 
+    try {
       if (response.statusCode == 200) {
         try {
           // likedVideos =
@@ -389,6 +406,8 @@ class VideosController extends GetxController {
               .toString());
         }
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     snackBar!.hide();
 
@@ -397,8 +416,7 @@ class VideosController extends GetxController {
   }
 
   deleteVideo(int videoId) async {
-    if (token.isEmpty) {
-    } else {
+    try {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/video/delete'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
@@ -417,35 +435,41 @@ class VideosController extends GetxController {
             .message
             .toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
   }
 
   getVideoFields() async {
     isLoading.value = true;
 
-    var response = await http.get(
-      Uri.parse('${RestUrl.baseUrl}/video/field-data'),
-      headers: {"Authorization": "Bearer $token"},
-    ).timeout(const Duration(seconds: 60));
     try {
-      languageList =
-          videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
-              .data!
-              .languages!
-              .obs;
+      var response = await http.get(
+        Uri.parse('${RestUrl.baseUrl}/video/field-data'),
+        headers: {"Authorization": "Bearer $token"},
+      ).timeout(const Duration(seconds: 60));
+      try {
+        languageList =
+            videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
+                .data!
+                .languages!
+                .obs;
 
-      categoriesList =
-          videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
-              .data!
-              .categories!
-              .obs;
-      hashTagList =
-          videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
-              .data!
-              .hashtags!
-              .obs;
-    } catch (e) {
-      errorToast(e.toString());
+        categoriesList =
+            videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
+                .data!
+                .categories!
+                .obs;
+        hashTagList =
+            videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
+                .data!
+                .hashtags!
+                .obs;
+      } catch (e) {
+        errorToast(e.toString());
+      }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     languageList.refresh();
     categoriesList.refresh();
@@ -455,18 +479,22 @@ class VideosController extends GetxController {
   }
 
   Future<void> awsUploadVideo(File file, int currentUnix) async {
-    await simpleS3
-        .uploadFile(
-          file,
-          "thrillvideo",
-          "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-          AWSRegions.usEast1,
-          debugLog: true,
-          fileName: "Thrill-$currentUnix.mp4",
-          s3FolderPath: "test",
-          accessControl: S3AccessControl.publicRead,
-        )
-        .then((value) => {printInfo(info: value)});
+    try {
+      await simpleS3
+          .uploadFile(
+            file,
+            "thrillvideo",
+            "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+            AWSRegions.usEast1,
+            debugLog: true,
+            fileName: "Thrill-$currentUnix.mp4",
+            s3FolderPath: "test",
+            accessControl: S3AccessControl.publicRead,
+          )
+          .then((value) => {printInfo(info: value)});
+    } on Exception catch (e) {
+      log(e.toString());
+    }
   }
 
   Future<void> createGIF(int currentUnix, String filePath) async {
@@ -491,38 +519,406 @@ class VideosController extends GetxController {
   }
 
   Future<void> awsUploadThumbnail(int currentUnix) async {
-    var file = File(saveCacheDirectory + 'thumbnail.png');
-    await simpleS3
-        .uploadFile(
-      file,
-      "thrillvideo",
-      "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-      AWSRegions.usEast1,
-      debugLog: true,
-      s3FolderPath: "gif",
-      fileName: 'Thrill-$currentUnix.png',
-      accessControl: S3AccessControl.publicRead,
-    )
-        .then((value) async {
-      print(value);
-      Get.back();
-    });
+    try {
+      var file = File(saveCacheDirectory + 'thumbnail.png');
+      await simpleS3
+          .uploadFile(
+        file,
+        "thrillvideo",
+        "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+        AWSRegions.usEast1,
+        debugLog: true,
+        s3FolderPath: "gif",
+        fileName: 'Thrill-$currentUnix.png',
+        accessControl: S3AccessControl.publicRead,
+      )
+          .then((value) async {
+        print(value);
+      });
+    } on Exception catch (e) {
+      log(e.toString());
+    }
   }
 
-  Future<void> awsUploadSound(File file, int currentUnix) async {
-    await simpleS3
-        .uploadFile(
-      file,
-      "thrillvideo",
-      "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-      AWSRegions.usEast1,
-      debugLog: true,
-      fileName: 'Thrill-$currentUnix.mp3',
-      s3FolderPath: "sound",
-      accessControl: S3AccessControl.publicRead,
-    )
-        .then((value) async {
-      print(value);
+  Future<void> awsUploadSound(File file, String currentUnix) async {
+    var userName = "";
+    try {
+      await simpleS3
+          .uploadFile(
+        file,
+        "thrillvideo",
+        "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
+        AWSRegions.usEast1,
+        debugLog: true,
+        fileName: '$currentUnix.mp3',
+        s3FolderPath: "sound",
+        accessControl: S3AccessControl.publicRead,
+      )
+          .then((value) async {
+        print(value);
+      });
+    } on Exception catch (e) {
+      log(e.toString());
+    }
+  }
+
+  Future<void> openEditor(bool isGallery, String path, String selectedSound,
+      int id, String owner) async {
+    final directory = await ExternalPath.getExternalStoragePublicDirectory(
+        ExternalPath.DIRECTORY_PICTURES);
+    final dir = Directory("$directory/thrill");
+    final List<FileSystemEntity> entities = await dir.list().toList();
+
+    List<String> videosList = <String>[];
+
+    entities.forEach((element) {
+      videosList.add("${element.path}");
     });
+
+    List<SongInfo> albums = [];
+    try {
+      FlutterAudioQuery flutterAudioQuery = FlutterAudioQuery();
+      albums = await flutterAudioQuery.getSongs();
+    } catch (e) {
+      errorToast(e.toString());
+    } finally {
+      if (!isGallery) {
+        await VESDK
+            .openEditor(Video.composition(videos: videosList),
+                configuration: setConfig(albums, selectedSound, owner))
+            .then((value) async {
+          Map<dynamic, dynamic> serializationData = await value?.serialization;
+
+          print("data=>" + serializationData.toString());
+          var isOriginal = true.obs;
+          var songPath = '';
+          var songName = '';
+          for (int i = 0;
+              i < serializationData["operations"].toList().length;
+              i++) {
+            if (serializationData["operations"][i]["type"] == "audio") {
+              isOriginal.value = false;
+            }
+            for (var element in albums) {
+              print(element);
+              if (serializationData["operations"][i]["options"]["clips"] !=
+                  null) {
+                for (int j = 0;
+                    j <
+                        serializationData["operations"][i]["options"]["clips"]
+                            .toList()
+                            .length;
+                    j++) {
+                  List<dynamic> clipsList = serializationData["operations"][i]
+                          ["options"]["clips"]
+                      .toList();
+                  if (clipsList.isNotEmpty) {
+                    if (element.title.contains(serializationData["operations"]
+                            [i]["options"]["clips"][j]["options"]["identifier"]
+                        .toString())) {
+                      songPath = element.filePath;
+                      songName = element.title;
+                    }
+                  }
+                }
+              }
+            }
+            print(serializationData["operations"][i]["type"]);
+          }
+          List<dynamic> operationData =
+              serializationData['operations'].toList();
+
+          if (value == null) {
+            dir.exists().then((value) => dir.delete(recursive: true));
+          }
+
+          // await dir.delete(recursive: true);
+
+          if (!isOriginal.value) {
+            selectedSound = "";
+            if (value != null) {
+              var addSoundModel = AddSoundModel(
+                  0,
+                  id,
+                  0,
+                  songPath.isNotEmpty ? songPath : path,
+                  songName.isNotEmpty ? songName : "original by $owner",
+                  '',
+                  '',
+                  true);
+              PostData postData = PostData(
+                speed: '1',
+                newPath: value.video,
+                filePath: value.video,
+                filterName: "",
+                addSoundModel: addSoundModel,
+                isDuet: false,
+                isDefaultSound: true,
+                isUploadedFromGallery: true,
+                trimStart: 0,
+                trimEnd: 0,
+              );
+              // Get.snackbar("path", value.video);
+              Get.to(() => PostScreenGetx(postData, selectedSound));
+            }
+          } else {
+            if (selectedSound.isNotEmpty) {
+              await FFmpegKit.execute(
+                      '-y -i ${value!.video.substring(7, value!.video.length)} -i $selectedSound -map 0:v -map 1:a  -shortest $saveCacheDirectory/selectedVideo.mp4')
+                  .then((ffmpegValue) async {
+                final returnCode = await ffmpegValue.getReturnCode();
+                var data = await ffmpegValue.getOutput();
+                if (ReturnCode.isSuccess(returnCode)) {
+                  var addSoundModel = AddSoundModel(
+                      0,
+                      id!,
+                      0,
+                      songPath.isNotEmpty ? songPath : path,
+                      songName.isNotEmpty ? songName : "original by $owner",
+                      '',
+                      '',
+                      true);
+                  PostData postData = PostData(
+                    speed: '1',
+                    newPath: "$saveCacheDirectory/selectedVideo.mp4",
+                    filePath: "$saveCacheDirectory/selectedVideo.mp4",
+                    filterName: "",
+                    addSoundModel: addSoundModel,
+                    isDuet: false,
+                    isDefaultSound: true,
+                    isUploadedFromGallery: true,
+                    trimStart: 0,
+                    trimEnd: 0,
+                  );
+                  Get.to(() => PostScreenGetx(postData, selectedSound));
+                } else {
+                  errorToast(data.toString());
+                }
+              });
+            } else {
+              await FFmpegKit.execute(
+                      "-y -i ${value!.video} -map 0:a -acodec libmp3lame $saveCacheDirectory/originalAudio.mp3")
+                  .then((audio) async {
+                var addSoundModel = AddSoundModel(
+                    0,
+                    id!,
+                    0,
+                    songPath.isNotEmpty
+                        ? songPath
+                        : "$saveCacheDirectory/originalAudio.mp3",
+                    songName.isNotEmpty ? songName : "original by $owner",
+                    '',
+                    '',
+                    true);
+                PostData postData = PostData(
+                  speed: '1',
+                  newPath: value.video,
+                  filePath: value.video,
+                  filterName: "",
+                  addSoundModel: addSoundModel,
+                  isDuet: false,
+                  isDefaultSound: true,
+                  isUploadedFromGallery: true,
+                  trimStart: 0,
+                  trimEnd: 0,
+                );
+
+                // Get.snackbar("path", value.video);
+                await Get.to(() => PostScreenGetx(postData, selectedSound));
+              });
+            }
+          }
+        });
+      } else {
+        await VESDK
+            .openEditor(Video(path),
+                configuration: setConfig(albums, selectedSound, owner))
+            .then((value) async {
+          Map<dynamic, dynamic> serializationData = await value?.serialization;
+
+          print("data=>" + serializationData.toString());
+
+          List<dynamic> operationData =
+              serializationData['operations'].toList();
+
+          if (value == null) {
+            final dir = Directory("$directory/thrill");
+            dir.exists().then((value) => dir.delete(recursive: true));
+          }
+
+          // await dir.delete(recursive: true);
+
+          var isOriginal = true.obs;
+          var songPath = '';
+          var songName = '';
+          operationData.forEach((element) {
+            Map<dynamic, dynamic> data = element['options'];
+            if (data.containsKey("clips")) {
+              isOriginal.value = false;
+            }
+          });
+          if (!isOriginal.value) {
+            operationData.forEach((operation) {
+              albums.forEach((element) {
+                if (operation['options']['type'] == 'audio') {
+                  if (element.title.contains(operation['options']['clips'][0]
+                          ['identifier']
+                      .toString())) {
+                    songPath = element.filePath;
+                    songName = element.title;
+                  }
+                }
+              });
+            });
+
+            if (value != null) {
+              var addSoundModel = AddSoundModel(
+                  0,
+                  id!,
+                  0,
+                  songPath.isNotEmpty
+                      ? songPath
+                      : "$saveCacheDirectory/originalAudio.mp3",
+                  songName.isNotEmpty ? songName : "original by $owner",
+                  '',
+                  '',
+                  true);
+              PostData postData = PostData(
+                speed: '1',
+                newPath: value.video,
+                filePath: value.video,
+                filterName: "",
+                addSoundModel: addSoundModel,
+                isDuet: false,
+                isDefaultSound: true,
+                isUploadedFromGallery: true,
+                trimStart: 0,
+                trimEnd: 0,
+              );
+
+              // Get.snackbar("path", value.video);
+              Get.to(() => PostScreenGetx(postData, selectedSound));
+            }
+          } else {
+            await FFmpegKit.execute(
+                    "-y -i ${value!.video} -map 0:a -acodec libmp3lame $path")
+                .then((audio) async {
+              var addSoundModel = AddSoundModel(
+                  0,
+                  id!,
+                  0,
+                  songPath.isNotEmpty
+                      ? songPath
+                      : "$saveCacheDirectory/originalAudio.mp3",
+                  songName.isNotEmpty ? songName : "original by $owner",
+                  '',
+                  '',
+                  true);
+              PostData postData = PostData(
+                speed: '1',
+                newPath: value.video,
+                filePath: value.video,
+                filterName: "",
+                addSoundModel: addSoundModel,
+                isDuet: false,
+                isDefaultSound: true,
+                isUploadedFromGallery: true,
+                trimStart: 0,
+                trimEnd: 0,
+              );
+
+              // Get.snackbar("path", value.video);
+              await Get.to(() => PostScreenGetx(postData, selectedSound));
+            });
+          }
+        });
+      }
+    }
+  }
+
+  imgly.Configuration setConfig(
+      List<SongInfo> albums, String selectedSound, String? userName) {
+    var fileUrl =
+        "https://samplelib.com/lib/preview/msetConfigp3/sample-15s.mp3";
+    List<imgly.AudioClip> audioClips = [];
+    List<imgly.AudioClip> selectedAudioClips = [];
+
+    if (selectedSound.isNotEmpty) {
+      selectedAudioClips.add(
+          imgly.AudioClip("", selectedSound, title: "Original by $userName"));
+    }
+
+    if (albums.isNotEmpty) {
+      albums.forEach((element) {
+        audioClips.add(imgly.AudioClip(
+          element.title,
+          element.filePath,
+          title: element.title,
+          artist: element.artist,
+        ));
+      });
+    }
+
+    // late imgly.AudioClipCategory onlineCategory;
+    //
+    // if (soundsController.soundsList.isNotEmpty) {
+    //   List<imgly.AudioClip> onlineAudioClips = [];
+    //   soundsController.soundsList.forEach((element) {
+    //     onlineAudioClips.add(imgly.AudioClip(element.name.toString(),
+    //         RestUrl.soundUrl + element.sound.toString(),
+    //         title: element.name));
+    //   });
+    //   onlineCategory = imgly.AudioClipCategory("online_cat", "online",
+    //       thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png",
+    //       items: onlineAudioClips)
+    //
+    //
+    // }
+
+    List<imgly.AudioClipCategory> audioClipCategories = [];
+    if (selectedSound.isNotEmpty) {
+      audioClipCategories.add(imgly.AudioClipCategory("", "selected sound",
+          items: selectedAudioClips));
+    }
+    audioClipCategories.add(
+      imgly.AudioClipCategory("audio_cat_1", "local",
+          thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png",
+          items: audioClips),
+    );
+
+    var audioOptions = imgly.AudioOptions(categories: audioClipCategories);
+
+    var codec = imgly.VideoCodec.values;
+
+    var exportOptions = imgly.ExportOptions(
+      serialization: imgly.SerializationOptions(
+          enabled: true, exportType: imgly.SerializationExportType.object),
+      video: imgly.VideoOptions(quality: 0.9, codec: codec[0]),
+    );
+
+    imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
+        RestUrl.assetsUrl + "transparent_logo.png",
+        alignment: imgly.AlignmentMode.topLeft);
+
+    var stickerList = [
+      imgly.StickerCategory.giphy(
+          imgly.GiphyStickerProvider("Q1ltQCCxdfmLcaL6SpUhEo5OW6cBP6p0"))
+    ];
+
+    var trimOptions = imgly.TrimOptions(
+        maximumDuration: 60, forceMode: imgly.ForceTrimMode.always);
+    List<imgly.Tool> tools = [imgly.Tool.audio];
+    final configuration = imgly.Configuration(
+      // tools:tools ,
+      theme: imgly.ThemeOptions(imgly.Theme("")),
+      trim: trimOptions,
+      sticker:
+          imgly.StickerOptions(personalStickers: true, categories: stickerList),
+      audio: audioOptions,
+      export: exportOptions,
+      watermark: waterMarkOptions,
+    );
+
+    return configuration;
   }
 }

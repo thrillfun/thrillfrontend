@@ -31,7 +31,9 @@ void main() async {
 
   await GetStorage.init();
   TruecallerSdk.initializeSDK(
-      sdkOptions: TruecallerSdkScope.SDK_OPTION_WITH_OTP);
+    sdkOptions: TruecallerSdkScope.SDK_OPTION_WITHOUT_OTP,
+    footerType: TruecallerSdkScope.FOOTER_TYPE_MANUALLY,
+    consentMode: TruecallerSdkScope.CONSENT_MODE_POPUP,);
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,

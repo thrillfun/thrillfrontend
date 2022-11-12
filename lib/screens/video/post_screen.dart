@@ -684,7 +684,7 @@ class PostScreenGetx extends StatelessWidget {
     String videoId = 'Thrill-$currentUnix.mp4';
     videoPlayerController!.pause();
     var file =
-        File(postData!.filePath!.substring(7, postData!.filePath!.length));
+        File(selectedSound!.isEmpty?postData!.filePath!.substring(7, postData!.filePath.length):postData!.filePath!);
 
     try {
       GetStorage().write("videoPrivacy", selectedPrivacy.value);
@@ -698,12 +698,12 @@ class PostScreenGetx extends StatelessWidget {
       var audioFile = File(saveCacheDirectory + "originalAudio.mp3");
 
       if(postData!.addSoundModel!.sound.isNotEmpty){
-        audioFile = File(postData!.addSoundModel!.sound!);
+        audioFile = File(postData!.addSoundModel!.sound);
       }
       if (selectedSound!.isEmpty) {
 
         await videosController
-            .awsUploadSound(audioFile, currentUnix)
+            .awsUploadSound(audioFile, currentUnix.toString())
             .then((value) => {
           videosController.postVideo(
               User.fromJson(GetStorage().read("user"))
@@ -768,8 +768,8 @@ class PostScreenGetx extends StatelessWidget {
             postData!.isDuet,
             postData!.addSoundModel?.userId ?? 0);
       }
-      Get.offAll(BottomNavigation());
-      videosController.getAllVideos();
+      // Get.offAll(BottomNavigation());
+    //  videosController.getAllVideos();
 
     } catch (e) {
       errorToast(e.toString());

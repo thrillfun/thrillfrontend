@@ -17,7 +17,11 @@ class GradientElevatedButton extends StatelessWidget {
     this.width,
     this.height = 44.0,
     this.gradient = const LinearGradient(
-        colors: [Color(0xFF2F8897), Color(0xff1F2A52), Color(0xff1F244E)]),
+        colors: [
+          Color(0xff145158),
+          Color(0xff193542),
+          Color(0xff1A2C41)
+        ]),
   }) : super(key: key);
 
   @override

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -43,7 +44,7 @@ class WheelController extends GetxController {
   getCounterData() async {
     isCounterDataLoading.value = true;
 
-    if (tempToken.toString().isNotEmpty) {
+    try {
       dio.options.headers['Authorization'] = "Bearer $token";
       var response = await dio
           .get("/spin-wheel/counter-data")
@@ -54,7 +55,7 @@ class WheelController extends GetxController {
       if (response.statusCode == 200) {
         try {
           probabilityCounter.value =
-              CounterDataModel.fromJson(response.data).data!;
+          CounterDataModel.fromJson(response.data).data!;
         } on HttpException catch (e) {
           errorToast(response.data['message']);
         } on Exception catch (e) {
@@ -63,6 +64,8 @@ class WheelController extends GetxController {
       } else {
         errorToast(response.statusCode.toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isCounterDataLoading.value = false;
   }
@@ -70,29 +73,29 @@ class WheelController extends GetxController {
   getWheelData() async {
     isWheelDataLoading.value = true;
 
-    if (token!=null) {
-      dio.options.headers['Authorization'] = "Bearer $token";
-      var response =
-          await dio.get("/spin-wheel/data").timeout(const Duration(seconds: 60));
+    dio.options.headers['Authorization'] = "Bearer $token";
+    var response =
+    await dio.get("/spin-wheel/data").timeout(const Duration(seconds: 60));
 
-      print(response.data);
+    print(response.data);
 
+    try {
       if (response.statusCode == 200) {
         try {
           wheelData = WheelDataModel.fromJson(response.data).obs;
 
           recentRewardsList.value =
-              WheelDataModel.fromJson(response.data).data!.recentRewards!;
+          WheelDataModel.fromJson(response.data).data!.recentRewards!;
 
           wheelRewardsList.value =
-              WheelDataModel.fromJson(response.data).data!.wheelRewards!;
+          WheelDataModel.fromJson(response.data).data!.wheelRewards!;
 
-           remainingChance.value  =
+          remainingChance.value  =
               int.parse(wheelData!.value.data!.availableChance??"0");
-           usedChanceValue.value =
+          usedChanceValue.value =
               int.parse(wheelData!.value.data!.usedChance??"0");
 
-           lastReward.value = wheelController.wheelData.value.data!.lastReward.toString();
+          lastReward.value = wheelController.wheelData.value.data!.lastReward.toString();
 
 
         } on HttpException catch (e) {
@@ -103,6 +106,8 @@ class WheelController extends GetxController {
       } else {
         errorToast(response.statusCode.toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isWheelDataLoading.value = false;
   }
@@ -110,7 +115,7 @@ class WheelController extends GetxController {
   getRewardUpdate(var rewardId) async {
     isRewardUpdating.value = true;
 
-    if (token.toString().isNotEmpty) {
+    try {
       dio.options.headers['Authorization'] = "Bearer $token";
       var response = await dio.post("/spin-wheel/reward-won",
           data: {"reward_id": rewardId}).timeout(const Duration(seconds: 60));
@@ -128,21 +133,27 @@ class WheelController extends GetxController {
       } else {
         errorToast(response.statusCode.toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isRewardUpdating.value = false;
   }
 
   getEarnedSpinData() async {
-    dio.options.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYzJmZTcwZTEyOWEyNzllZGM3YWExZGY3ZjBiYzE1ZGJhNWUzOWZkYWRmY2RjNTQ5YTEzZjljNDU0MDcxYTIxNDA5M2FiYmUzMjcwMTZjMWYiLCJpYXQiOjE2Njc2MTkzNzYuMzU4NzE2OTY0NzIxNjc5Njg3NSwibmJmIjoxNjY3NjE5Mzc2LjM1ODcxOTExMDQ4ODg5MTYwMTU2MjUsImV4cCI6MTY5OTE1NTM3Ni4zNTU2MDc5ODY0NTAxOTUzMTI1LCJzdWIiOiIxNCIsInNjb3BlcyI6W119.BwWq7kdEXpYiI3Hw0nGGdPlBtMabw7KwW0sxe3DA8klhMBVGjccUsQCy8BQt-4WZM0A7D3JT-xwWC8hqEPBJLL3nhpmRO6g6wVbq0NF74TjfvgNE3DRPrFwarTY8NDWaTEr4eIl4OHyv8B-NtOSGcLpm9IXospafg3rbGk4-YvCaG9ySs4fgH_p_BRBDlYvBmzKjLkQo2hrJBhEtFMlzRPeZBJ4z8bp0KpAUhsLkNXz6l39uGJkG4aw4hIxYbPFOeqIvgzkCRYok0EzNPefblrt_5PevpnOYdMvXlAVIf2_MhEIYzt3ZLwSjhMfr51Y1QI_o1E51kqzJsBhdny6WMVdyzySb7YoCN-ioeuGFUuD9RE_V8TqjE_Ndp2Q26sVcIqTBaq0_dujXyLvsP7yFNVnH-e8FqOyOXTMT7wAbEn5_diURZk4LaWjrWfGq3kJ033R-XtuIKMRO9AmE2ush3M87jJ8ZYL1y0hYCl4S8QBIP-afkpz45EZ31ypzXbb7kqh8VwRnOpv51sNpbOILJ8j52avfrO_sAxGLStwE-WDYWGR5ySo5VqqY0ZQMN3y4eXOZrX-hlv_SxTORwi-iLGAKpswNdNDEp4cHTkdz-JeX_Dsubsk7_CBVCaDYCC8bBwq3oxAph0_8pgd2AEqbcO658Bm_RvnPUua_lY8_w3SM';
-    var response = await dio
-        .get("/spin-wheel/earned-spin")
-        .timeout(const Duration(seconds: 60));
-
     try {
-      activityList = EarnedSpinModel.fromJson(response.data).data!.activities!.obs;
-    } catch (e) {
-      errorToast(EarnedSpinModel.fromJson(response.data).message.toString());
+      dio.options.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYzJmZTcwZTEyOWEyNzllZGM3YWExZGY3ZjBiYzE1ZGJhNWUzOWZkYWRmY2RjNTQ5YTEzZjljNDU0MDcxYTIxNDA5M2FiYmUzMjcwMTZjMWYiLCJpYXQiOjE2Njc2MTkzNzYuMzU4NzE2OTY0NzIxNjc5Njg3NSwibmJmIjoxNjY3NjE5Mzc2LjM1ODcxOTExMDQ4ODg5MTYwMTU2MjUsImV4cCI6MTY5OTE1NTM3Ni4zNTU2MDc5ODY0NTAxOTUzMTI1LCJzdWIiOiIxNCIsInNjb3BlcyI6W119.BwWq7kdEXpYiI3Hw0nGGdPlBtMabw7KwW0sxe3DA8klhMBVGjccUsQCy8BQt-4WZM0A7D3JT-xwWC8hqEPBJLL3nhpmRO6g6wVbq0NF74TjfvgNE3DRPrFwarTY8NDWaTEr4eIl4OHyv8B-NtOSGcLpm9IXospafg3rbGk4-YvCaG9ySs4fgH_p_BRBDlYvBmzKjLkQo2hrJBhEtFMlzRPeZBJ4z8bp0KpAUhsLkNXz6l39uGJkG4aw4hIxYbPFOeqIvgzkCRYok0EzNPefblrt_5PevpnOYdMvXlAVIf2_MhEIYzt3ZLwSjhMfr51Y1QI_o1E51kqzJsBhdny6WMVdyzySb7YoCN-ioeuGFUuD9RE_V8TqjE_Ndp2Q26sVcIqTBaq0_dujXyLvsP7yFNVnH-e8FqOyOXTMT7wAbEn5_diURZk4LaWjrWfGq3kJ033R-XtuIKMRO9AmE2ush3M87jJ8ZYL1y0hYCl4S8QBIP-afkpz45EZ31ypzXbb7kqh8VwRnOpv51sNpbOILJ8j52avfrO_sAxGLStwE-WDYWGR5ySo5VqqY0ZQMN3y4eXOZrX-hlv_SxTORwi-iLGAKpswNdNDEp4cHTkdz-JeX_Dsubsk7_CBVCaDYCC8bBwq3oxAph0_8pgd2AEqbcO658Bm_RvnPUua_lY8_w3SM';
+      var response = await dio
+          .get("/spin-wheel/earned-spin")
+          .timeout(const Duration(seconds: 60));
 
+      try {
+        activityList = EarnedSpinModel.fromJson(response.data).data!.activities!.obs;
+      } catch (e) {
+        errorToast(EarnedSpinModel.fromJson(response.data).message.toString());
+
+      }
+    } on Exception catch (e) {
+      log(e.toString());
     }
   }
 }

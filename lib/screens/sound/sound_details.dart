@@ -68,8 +68,8 @@ class _SoundDetailsState extends State<SoundDetails>
             child: loadLocalSvg("background_2.svg"),
           ),
           videoList.isEmpty
-              ? const Center(
-                  child: CircularProgressIndicator(),
+              ?  Center(
+                  child: loader(),
                 )
               : Column(
                   children: [
@@ -116,6 +116,7 @@ class _SoundDetailsState extends State<SoundDetails>
                                 _controller!.repeat();
                               } else {
                                 isPlaying.value = false;
+                                audioPlayer.pause();
                                 _controller!.stop();
                               }
                             },
@@ -341,13 +342,13 @@ class _SoundDetailsState extends State<SoundDetails>
                                   progress: (progress) async {
                                     print(progress);
                                   },
-                                )
-                                .then((value) => Get.to(CameraScreen(
-                                      selectedSound: "$value",
-                                      owner: widget.map["user"],
-                                      id: widget.map['id'],
-                                    )));
-                            Get.back();
+                                );
+                            Get.to(CameraScreen(
+
+                              selectedSound: file.path,
+                              owner: widget.map["user"],
+                              id: widget.map['id'],
+                            ));
                           } catch (e) {
                             closeDialogue(context);
                             showErrorToast(context, e.toString());

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -21,16 +22,20 @@ class CommentsController extends GetxController {
   Future<void> getComments(int videoId) async {
     isCommentsLoading.value = true;
 
-    var response = await http.post(
-        Uri.parse('${RestUrl.baseUrl}/video/comments'),
-        headers: {"Authorization": "Bearer $token"},
-        body: {"video_id": "${videoId}"}).timeout(const Duration(seconds: 60));
-
-    var result = jsonDecode(response.body);
     try {
-      commentsModel = CommentsModel.fromJson(result).commentsData!.obs;
-    } catch (e) {
-      errorToast(CommentsModel.fromJson(result).message.toString());
+      var response = await http.post(
+          Uri.parse('${RestUrl.baseUrl}/video/comments'),
+          headers: {"Authorization": "Bearer $token"},
+          body: {"video_id": "${videoId}"}).timeout(const Duration(seconds: 60));
+
+      var result = jsonDecode(response.body);
+      try {
+        commentsModel = CommentsModel.fromJson(result).commentsData!.obs;
+      } catch (e) {
+        errorToast(CommentsModel.fromJson(result).message.toString());
+      }
+    } on Exception catch (e) {
+      log.printError(info: e.toString());
     }
     isCommentsLoading.value = false;
     commentsModel.refresh();
@@ -40,20 +45,24 @@ class CommentsController extends GetxController {
   Future<void>postComment(int videoId, String userId, String comment) async {
     isLoading.value = true;
 
-    var response = await http
-        .post(Uri.parse('${RestUrl.baseUrl}/video/comment'), headers: {
-      "Authorization": "Bearer $token"
-    }, body: {
-      "video_id": "$videoId",
-      "comment_by": userId,
-      "comment": comment
-    }).timeout(const Duration(seconds: 60));
-    var result = jsonDecode(response.body);
     try {
-      commentsPostResponse = CommentsPostResponse.fromJson(result).obs;
-      successToast(CommentsPostResponse.fromJson(result).message.toString());
-    } catch (e) {
-      errorToast(CommentsPostResponse.fromJson(result).message.toString());
+      var response = await http
+          .post(Uri.parse('${RestUrl.baseUrl}/video/comment'), headers: {
+        "Authorization": "Bearer $token"
+      }, body: {
+        "video_id": "$videoId",
+        "comment_by": userId,
+        "comment": comment
+      }).timeout(const Duration(seconds: 60));
+      var result = jsonDecode(response.body);
+      try {
+        commentsPostResponse = CommentsPostResponse.fromJson(result).obs;
+        successToast(CommentsPostResponse.fromJson(result).message.toString());
+      } catch (e) {
+        errorToast(CommentsPostResponse.fromJson(result).message.toString());
+      }
+    } on Exception catch (e) {
+      log.printError(info: e.toString());
     }
     commentsModel.refresh();
     isLoading.value = false;
@@ -63,24 +72,29 @@ class CommentsController extends GetxController {
   likeComment(String commentId, String isLike) async {
     isLoading.value = true;
 
-    var response = await http
-        .post(Uri.parse('${RestUrl.baseUrl}/video/comment-like'), headers: {
-      "Authorization": "Bearer $token"
-    }, body: {
-      "comment_id": commentId,
-      "is_like": isLike,
-    }).timeout(const Duration(seconds: 60));
-    var result = jsonDecode(response.body);
     try {
-      isLoading.value = false;
-      update();
+      var response = await http
+          .post(Uri.parse('${RestUrl.baseUrl}/video/comment-like'), headers: {
+        "Authorization": "Bearer $token"
+      }, body: {
+        "comment_id": commentId,
+        "is_like": isLike,
+      }).timeout(const Duration(seconds: 60));
+      var result = jsonDecode(response.body);
+      try {
+        isLoading.value = false;
+        update();
 
-      successToast(CommentLikeResponse.fromJson(result).message.toString());
-    } catch (e) {
-      isLoading.value = false;
-      update();
-      errorToast(CommentLikeResponse.fromJson(result).message.toString());
+        successToast(CommentLikeResponse.fromJson(result).message.toString());
+      } catch (e) {
+
+        errorToast(CommentLikeResponse.fromJson(result).message.toString());
+      }
+    } on Exception catch (e) {
+      log.printError(info: e.toString());
     }
+    isLoading.value = false;
+    update();
     commentsModel.refresh();
   }
 }

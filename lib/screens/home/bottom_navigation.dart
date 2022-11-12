@@ -14,6 +14,7 @@ import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
+import 'package:thrill/controller/wallet_controller.dart';
 import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
@@ -24,7 +25,6 @@ import 'package:thrill/screens/setting/wallet_getx.dart';
 import 'package:thrill/screens/spin/spin_the_wheel_getx.dart';
 import 'package:thrill/widgets/fab_items.dart';
 import 'package:thrill/widgets/video_item.dart';
-import 'package:truecaller_sdk/truecaller_sdk.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -183,6 +183,8 @@ class _BottomNavigationState extends State<BottomNavigation>
       await isLogined().then((value) => {
             if (value)
               {
+                WalletController().getBalance(),
+                WalletController().getCurrencies(),
                 setState(() {
                   selectedIndex = index;
                 })
@@ -409,102 +411,10 @@ class _BottomNavigationState extends State<BottomNavigation>
   }
 
   initTrueCallerLogin() {
-    TruecallerSdk.isUsable.then((isUsable) {
-      if (isUsable) {
-        TruecallerSdk.getProfile;
-
-        TruecallerSdk.streamCallbackData.listen((event) {
-          if (event.result == TruecallerSdkCallbackResult.success) {
-            Get.to(BottomNavigation());
-          }
-          if (event.result == TruecallerSdkCallbackResult.verification) {
-            //createStreamBuilder();
-            showModalBottomSheet(
-                isScrollControlled: true,
-                context: context,
-                builder: (BuildContext context) => LoginGetxScreen());
-          }
-          if (event.result ==
-              TruecallerSdkCallbackResult.verificationComplete) {
-            Get.to(BottomNavigation());
-          }
-        });
-      }
-    });
-  }
-
-  void createStreamBuilder() {
-    streamSubscription =
-        TruecallerSdk.streamCallbackData.listen((truecallerUserCallback) {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) => LoginGetxScreen());
-      // make sure you're changing state only after number has been entered. there could be case
-      // where user initiated missed call, pressed back, and came to this screen again after
-      // which the call was received and hence it would directly open input name screen.
-      // if (mobileNumber.value.length == 10) {
-      //   if (truecallerUserCallback.result !=
-      //       TruecallerSdkCallbackResult.exception) {
-      //     tempResult = truecallerUserCallback.result;
-      //   }
-      //   // showProgressBar =
-      //   //     tempResult == TruecallerSdkCallbackResult.missedCallInitiated;
-      //   // if (tempResult == TruecallerSdkCallbackResult.otpReceived) {
-      //   //   otpController.text = truecallerUserCallback.otp!;
-      //   // }
-      // }
-      //
-      // switch (truecallerUserCallback.result) {
-      //   case TruecallerSdkCallbackResult.missedCallInitiated:
-      //     // startCountdownTimer(
-      //     //     double.parse(truecallerUserCallback.ttl!).floor());
-      //     successToast(
-      //         "Missed call Initiated with TTL : ${truecallerUserCallback.ttl}");
-      //     break;
-      //   case TruecallerSdkCallbackResult.missedCallReceived:
-      //     // showSnackBar("Missed call Received");
-      //     break;
-      //   case TruecallerSdkCallbackResult.otpInitiated:
-      //     // startCountdownTimer(
-      //     //     double.parse(truecallerUserCallback.ttl!).floor());
-      //     successToast(
-      //         "OTP Initiated with TTL : ${truecallerUserCallback.ttl}");
-      //
-      //     break;
-      //   case TruecallerSdkCallbackResult.otpReceived:
-      //     successToast("Your Otp is : ${truecallerUserCallback.otp}");
-      //     // showSnackBar("OTP Received : ${truecallerUserCallback.otp}");
-      //     break;
-      //   case TruecallerSdkCallbackResult.verificationComplete:
-      //     successToast(
-      //         "Verification Completed : ${truecallerUserCallback.accessToken}");
-      //     // showSnackBar(
-      //     //     "Verification Completed : ${truecallerUserCallback.accessToken}");
-      //     // _navigateToResult(fNameController.text);
-      //     Get.to(BottomNavigation());
-      //
-      //     break;
-      //   case TruecallerSdkCallbackResult.verifiedBefore:
-      //     successToast("truecallerUserCallback.profile!.accessToken}");
-      //     // showSnackBar(
-      //     //     "Verified Before : ${truecallerUserCallback.profile!.accessToken}");
-      //     // _navigateToResult(truecallerUserCallback.profile!.firstName);
-      //
-      //     Get.to(BottomNavigation());
-      //     break;
-      //   case TruecallerSdkCallbackResult.exception:
-      //     showErrorToast(
-      //         Get.context!,
-      //         "${truecallerUserCallback.exception!.code}, "
-      //         "${truecallerUserCallback.exception!.message}");
-      //     // showSnackBar("Exception : ${truecallerUserCallback.exception!.code}, "
-      //     //     "${truecallerUserCallback.exception!.message}");
-      //     break;
-      //   default:
-      //     //print(tempResult.toString());
-      //     break;
-      //  }
-    });
+    showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (BuildContext context) => LoginGetxScreen());
   }
 
   showPromotionalPopup() async {

@@ -12,12 +12,12 @@ import 'data_controller.dart';
 class DataBindings extends Bindings {
   @override
   void dependencies() {
+    Get.put(SoundsController());
     Get.put(UserController());
     Get.put(CommentsController());
     Get.put(VideosController());
     Get.put(DiscoverController());
     Get.put(WheelController());
     Get.put(WalletController());
-    Get.put(SoundsController());
   }
 }

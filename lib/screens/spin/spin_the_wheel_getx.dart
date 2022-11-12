@@ -26,8 +26,6 @@ class SpinTheWheelGetx extends StatelessWidget {
 
   var isSpinning = false.obs;
 
-
-
   var selectedInt = 0.obs;
   late AnimationController spinController = AnimationController(
       vsync: Scaffold.of(Get.context!),
@@ -54,23 +52,29 @@ class SpinTheWheelGetx extends StatelessWidget {
           width: Get.width,
           decoration: const BoxDecoration(gradient: processGradient),
         ),
-        GetX<WheelController>(builder: (wheelController)=>wheelController.isWheelDataLoading.value?Center(child: CircularProgressIndicator(),):SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 20),
-                alignment: Alignment.center,
-                child: titleLayout(),
-              ),
-              rewardLayout(),
-              prizeLayout(),
-              wheelLayout(),
-              submitButtonLayout(),
-              levelsLayout()
-              //    lastRewardLayout()
-            ],
-          ),
-        ))
+        GetX<WheelController>(
+            builder: (wheelController) =>
+                wheelController.isWheelDataLoading.value
+                    ? Center(
+                        child: loader(),
+                      )
+                    : SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 20),
+                              alignment: Alignment.center,
+                              child: titleLayout(),
+                            ),
+                            rewardLayout(),
+                            prizeLayout(),
+                            wheelLayout(),
+                            submitButtonLayout(),
+                            levelsLayout()
+                            //    lastRewardLayout()
+                          ],
+                        ),
+                      ))
       ],
     ));
   }
@@ -294,18 +298,24 @@ class SpinTheWheelGetx extends StatelessWidget {
                             text: TextSpan(children: [
                           const TextSpan(
                             text: "Earned Spins: ",
-                            style:  TextStyle(
+                            style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400),
                           ),
-                              TextSpan(text:  wheelController.activityList[index].earnedSpins
-                                  .toString(),style: const TextStyle(
+                          TextSpan(
+                              text: wheelController
+                                  .activityList[index].earnedSpins
+                                  .toString(),
+                              style: const TextStyle(
                                   color: ColorManager.colorPrimaryLight,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400)),
-                              TextSpan(text:  "/"+wheelController.activityList[index].totalSpin
-                                  .toString(),style: const TextStyle(
+                          TextSpan(
+                              text: "/" +
+                                  wheelController.activityList[index].totalSpin
+                                      .toString(),
+                              style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400))

@@ -10,15 +10,13 @@ import 'package:gallery_saver/gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/icons/fluent.dart';
 import 'package:iconify_flutter/icons/icon_park_outline.dart';
 import 'package:iconly/iconly.dart';
+import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/comments_controller.dart';
-import 'package:thrill/controller/model/hashtag_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/model/user_details_model.dart' as userModel;
 import 'package:thrill/controller/users_controller.dart';
@@ -28,6 +26,7 @@ import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/hash_tags/hash_tags_screen.dart';
+import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/sound/sound_details.dart';
 import 'package:thrill/screens/video/duet.dart';
@@ -58,7 +57,8 @@ class BetterReelsPlayer extends StatefulWidget {
       this.sound,
       this.soundOwner,
       this.videoLikeStatus,
-      this.isCommentAllowed);
+      this.isCommentAllowed,
+      {this.like});
 
   String gifImage, sound, soundOwner;
   int? videoLikeStatus;
@@ -77,13 +77,15 @@ class BetterReelsPlayer extends StatefulWidget {
   String userName;
   String description;
   bool isHome = false;
-  List hashtagsList;
+  List<Hashtags> hashtagsList;
+  int? like = 0;
 
   @override
   State<BetterReelsPlayer> createState() => _VideoAppState();
 }
 
-class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserver{
+class _VideoAppState extends State<BetterReelsPlayer>
+    with WidgetsBindingObserver {
   AppLifecycleState? _lastLifecycleState;
 
   var userController = Get.find<UserController>();
@@ -91,8 +93,10 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
   var initialized = false.obs;
   var volume = 1.0.obs;
   var comment = "".obs;
+  var isVideoPaused = false.obs;
 
   late VideoPlayerController _betterPlayerController;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
@@ -130,8 +134,10 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
           widget.pageIndex == widget.currentPageIndex &&
           !widget.isPaused) {
         _betterPlayerController.play();
+        isVideoPaused.value = false;
       } else {
         _betterPlayerController.pause();
+        isVideoPaused.value = true;
       }
     });
 
@@ -189,16 +195,18 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                           children: [
                             IconButton(
                                 onPressed: () {},
-                                icon: widget.videoLikeStatus==0?const Icon(
-                                  IconlyLight.heart,
-                                  color: Colors.white,
-                                ): const Icon(
-                                  CupertinoIcons.heart_fill,
-                                  color: Colors.red,
-                                )),
-                            const Text(
-                              "Like",
-                              style: TextStyle(
+                                icon: widget.videoLikeStatus == 0
+                                    ? const Icon(
+                                        IconlyLight.heart,
+                                        color: Colors.white,
+                                      )
+                                    : const Icon(
+                                        CupertinoIcons.heart_fill,
+                                        color: Colors.red,
+                                      )),
+                            Text(
+                              widget.like == null ? "0" : "${widget.like}",
+                              style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
@@ -597,7 +605,7 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                 ),
                 Container(
                   margin: widget.isHome
-                      ? const EdgeInsets.only(bottom: 100, left: 10)
+                      ? const EdgeInsets.only(bottom: 100, left: 5)
                       : const EdgeInsets.only(left: 10, bottom: 10),
                   alignment: Alignment.bottomLeft,
                   child: Column(
@@ -606,22 +614,17 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                     children: [
                       GestureDetector(
                         onTap: () {
-                          if (GetStorage()
-                                  .read("token")
-                                  .toString()
-                                  .isNotEmpty &&
-                              GetStorage().read("token") != null) {
-                            Get.to(ViewProfile(
-                              widget.UserId.toString(),
-                            ));
-                          } else {
-                            showLoginAlert();
-                          }
+                          userController
+                              .getUserProfile(
+                                  int.parse(widget.UserId.toString()))
+                              .then((value) => Get.to(
+                                  ViewProfile(widget.UserId.toString())));
                         },
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
+                              margin: EdgeInsets.only(left: 8),
                               alignment: Alignment.bottomLeft,
                               width: 30,
                               height: 30,
@@ -688,17 +691,20 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                                 : widget.soundOwner,
                             "soundName": widget.soundName,
                             "title": widget.soundOwner,
-                            "id":widget.UserId
+                            "id": widget.UserId
                           },
                         )),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            const Iconify(
-                              Carbon.music,
-                              color: Colors.white,
+                            Padding(
+                              padding: EdgeInsets.all(0),
+                              child: Lottie.network(
+                                  "https://assets2.lottiefiles.com/packages/lf20_e3odbuvw.json",
+                                  height: 50),
                             ),
                             const SizedBox(
-                              width: 10,
+                              width: 5,
                             ),
                             Text(
                               widget.soundName.isEmpty
@@ -718,25 +724,36 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) => InkWell(
-                                onTap: ()=>Get.to(()=>HashTagsScreen(widget.hashtagsList[index].toString())),
-                                child: Container(
-                                decoration: BoxDecoration(
-                                    color: ColorManager.colorAccent
-                                        .withOpacity(0.5),
-                                    border: Border.all(
-                                        color: Colors.transparent),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(5))),
-                                margin: const EdgeInsets.only(
-                                    right: 5, top: 5, bottom: 5),
-                                padding: const EdgeInsets.all(5),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  widget.hashtagsList[index].toString(),
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 10),
-                                ),
-                              ),)),
+                                    onTap: () {
+                                      discoverController
+                                          .getVideosByHashTags(
+                                              widget.hashtagsList[index].id!)
+                                          .then((value) => Get.to(() =>
+                                              HashTagsScreen(
+                                                  tagName: widget
+                                                      .hashtagsList[index]
+                                                      .name)));
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: ColorManager.colorAccent
+                                              .withOpacity(0.5),
+                                          border: Border.all(
+                                              color: Colors.transparent),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(5))),
+                                      margin: const EdgeInsets.only(
+                                          right: 5, top: 5, bottom: 5),
+                                      padding: const EdgeInsets.all(5),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        widget.hashtagsList[index].name
+                                            .toString(),
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 10),
+                                      ),
+                                    ),
+                                  )),
                         ),
                       )
                     ],
@@ -746,7 +763,7 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
             )),
         IgnorePointer(
           child: Obx((() => Visibility(
-                visible: volume.value == 0,
+                visible: volume.value == 0 && !isVideoPaused.value,
                 child: Center(
                     child: ClipOval(
                   child: Container(
@@ -754,6 +771,23 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                     color: ColorManager.colorAccent.withOpacity(0.5),
                     child: const Icon(
                       IconlyLight.volume_off,
+                      size: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                )),
+              ))),
+        ),
+        IgnorePointer(
+          child: Obx((() => Visibility(
+                visible: isVideoPaused.value,
+                child: Center(
+                    child: ClipOval(
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    color: ColorManager.colorAccent.withOpacity(0.5),
+                    child: const Icon(
+                      IconlyLight.play,
                       size: 25,
                       color: Colors.white,
                     ),
@@ -984,8 +1018,12 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
         GetX<CommentsController>(
             builder: (commentsController) => commentsController
                     .isCommentsLoading.value
-                ? const Center(
-                    child: CircularProgressIndicator(),
+                ? Center(
+                    child: SizedBox(
+                      height: 100,
+                      width: 100,
+                      child: loader(),
+                    ),
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1023,8 +1061,8 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                                             255, 179, 178, 178))),
                               )
                             : commentsController.isCommentsLoading.value
-                                ? const Center(
-                                    child: CircularProgressIndicator(),
+                                ? Center(
+                                    child: loader(),
                                   )
                                 : ListView.builder(
                                     scrollDirection: Axis.vertical,
@@ -1042,12 +1080,17 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                                                   onTap: () {
                                                     usersController.userId
                                                         .value = widget.UserId;
-                                                    Get.to(ViewProfile(
-                                                      commentsController
-                                                          .commentsModel[index]
-                                                          .userId
-                                                          .toString(),
-                                                    ));
+
+                                                    userController
+                                                        .getUserProfile(
+                                                            commentsController
+                                                                .commentsModel[
+                                                                    index]
+                                                                .userId!)
+                                                        .then((value) => Get.to(
+                                                            ViewProfile(widget
+                                                                    .UserId
+                                                                .toString())));
                                                   },
                                                   child: ClipOval(
                                                     child: CachedNetworkImage(
@@ -1182,17 +1225,17 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                                         .isEmpty ||
                                     GetStorage().read("token") == null
                                 ? Container(
-                              alignment: Alignment.center,
+                                    alignment: Alignment.center,
                                     width: Get.width,
                                     child: RichText(
                                         text: TextSpan(children: [
                                       TextSpan(
                                           text: 'Login',
-                                          recognizer: TapGestureRecognizer()..onTap=(){
-                                            Get.back(closeOverlays: true);
-                                            Get.to(LoginGetxScreen());
-
-                                          },
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              Get.back(closeOverlays: true);
+                                              Get.to(LoginGetxScreen());
+                                            },
                                           style: const TextStyle(
                                               decoration:
                                                   TextDecoration.underline,
@@ -1290,7 +1333,6 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                                               color: Colors.black,
                                               child: InkWell(
                                                   onTap: () async {
-
                                                     var currentUser =
                                                         userModel.User.fromJson(
                                                             GetStorage()
@@ -1301,16 +1343,15 @@ class _VideoAppState extends State<BetterReelsPlayer>  with WidgetsBindingObserv
                                                             widget.videoId,
                                                             currentUser.id
                                                                 .toString(),
-                                                            comment.value).then((value)async {
-                                                    await commentsController
-                                                        .getComments(
-                                                    widget.videoId);
+                                                            comment.value)
+                                                        .then((value) async {
+                                                      await commentsController
+                                                          .getComments(
+                                                              widget.videoId);
 
-                                                        _textEditingController!
-                                                        .clear();
+                                                      _textEditingController!
+                                                          .clear();
                                                     });
-
-
                                                   },
                                                   child: const Icon(
                                                     IconlyLight.send,

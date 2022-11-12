@@ -48,8 +48,8 @@ class Profile extends StatelessWidget {
               ? GetX<UserController>(
                   builder: (usersController) => usersController
                           .isProfileLoading.value
-                      ? const Center(
-                          child: CircularProgressIndicator(),
+                      ?  Center(
+                          child: loader(),
                         )
                       : Stack(
                           fit: StackFit.expand,
@@ -186,9 +186,9 @@ class Profile extends StatelessWidget {
                                                                       : '${RestUrl.profileUrl}${User.fromJson(GetStorage().read("user")).avatar}',
                                                                   placeholder: (a,
                                                                           b) =>
-                                                                      const Center(
+                                                                       Center(
                                                                     child:
-                                                                        CircularProgressIndicator(),
+                                                                        loader(),
                                                                   ),
                                                                 ),
                                                               )
@@ -577,7 +577,7 @@ class Profile extends StatelessWidget {
                         ),
                 )
               : Center(
-                  child: CircularProgressIndicator(),
+                  child: loader(),
                 )
         ],
       ),
@@ -603,8 +603,8 @@ class Profile extends StatelessWidget {
     return GetX<VideosController>(
         builder: ((videoModelsController) => videoModelsController
                 .isUserVideosLoading.value
-            ? const Center(
-                child: CircularProgressIndicator(),
+            ?  Center(
+                child: loader(),
               )
             : videoModelsController.userVideosList.isEmpty
                 ? RichText(
@@ -827,12 +827,8 @@ class Profile extends StatelessWidget {
               }));
 
   fav() {
-    return videosController.isLikedVideosLoading.value
-        ? const Center(
-            child: CircularProgressIndicator(),
-          )
-        : videosController.likedVideos.isEmpty ||
-                videosController.likedVideos.length == 0
+    return GetX<VideosController>(
+        builder: (videosController) =>videosController.isLikedVideosLoading.value ?Center(child: loader(),): videosController.likedVideos.isEmpty
             ? RichText(
                 textAlign: TextAlign.center,
                 text: const TextSpan(children: [
@@ -906,7 +902,7 @@ class Profile extends StatelessWidget {
                       ],
                     ),
                   );
-                });
+                }));
   }
 
   showDeleteVideoDialog(int videoID, List list, int index) {

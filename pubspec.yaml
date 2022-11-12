@@ -96,6 +96,7 @@ dependencies:
   flutter_audio_query:
   truecaller_sdk:
   dio:
+  lottie: ^1.4.3
 
 dev_dependencies:
   flutter_test:

@@ -13,6 +13,7 @@ import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/screens/video/camera_screen.dart';
+import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/better_video_player.dart';
 
 class HomeGetx extends StatefulWidget {
@@ -81,8 +82,8 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
                     controller: tabController,
                     children: [
                       videosController.isLoading.value
-                          ? const Center(
-                              child: CircularProgressIndicator(),
+                          ?  Center(
+                              child: loader(),
                             )
                           : videosController.publicVideosList.isEmpty
                               ? RefreshIndicator(
@@ -272,7 +273,7 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
                         .toLowerCase() ==
                     "yes"
                 ? true
-                : false));
+                : false,like:videosController.publicVideosList[index].likes));
   }
 
   loadInterstitialAd() async {

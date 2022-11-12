@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -16,7 +17,6 @@ import 'package:thrill/controller/model/user_details_model.dart' as authUser;
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/utils/util.dart';
-import 'package:dio/dio.dart';
 
 class UserController extends GetxController {
   var userModel = authUser.User().obs;
@@ -44,38 +44,44 @@ class UserController extends GetxController {
 
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
 
-
-  getUserProfile(int userId) async {
+  Future<void> getUserProfile(int userId) async {
     isProfileLoading.value = true;
-
-    if (token!=null) {
-      var response = await http
-          .post(Uri.parse('${RestUrl.baseUrl}/user/get-profile'), headers: {
-        "Authorization": "Bearer $token"
-      }, body: {
-        "id": "$userId"
-      }).timeout(const Duration(seconds: 60));
+    Get.defaultDialog(content: loader(),title: "Loading");
+    try {
+      var response = await http.post(
+          Uri.parse('${RestUrl.baseUrl}/user/get-profile'),
+          headers: {"Authorization": "Bearer $token"},
+          body: {"id": "$userId"}).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         var result = jsonDecode(response.body);
         try {
           userProfile = ProfileModelPojo.fromJson(result).obs;
+
+          videosController.getOtherUserVideos(int.parse(userId.toString()));
+          videosController.getOthersLikedVideos(int.parse(userId.toString()));
+
         } on HttpException catch (e) {
           errorToast(result['message']);
         } on Exception catch (e) {
           errorToast(e.toString());
         }
       } else {
+        isProfileLoading.value = false;
         errorToast(response.statusCode.toString());
       }
+    } on Exception catch (e) {
+      isProfileLoading.value = false;
+      log(e.toString());
     }
+    Get.back();
     isProfileLoading.value = false;
   }
 
   getFollowers() async {
     isFollowersLoading.value = true;
 
-    if (token.toString().isNotEmpty) {
+    try {
       var response = await http
           .post(Uri.parse('${RestUrl.baseUrl}/user/get-followers'), headers: {
         "Authorization": "Bearer $token"
@@ -91,6 +97,8 @@ class UserController extends GetxController {
       } on Exception catch (e) {
         errorToast(e.toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isFollowersLoading.value = false;
     update();
@@ -99,7 +107,7 @@ class UserController extends GetxController {
   getFollowings() async {
     isFollowingLoading.value = true;
 
-    if (token.toString().isNotEmpty) {
+    try {
       var response = await http
           .post(Uri.parse('${RestUrl.baseUrl}/user/get-followings'), headers: {
         "Authorization": "Bearer $token"
@@ -115,6 +123,8 @@ class UserController extends GetxController {
       } on Exception catch (e) {
         errorToast(e.toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isFollowingLoading.value = false;
     update();
@@ -124,30 +134,16 @@ class UserController extends GetxController {
     isFollowersLoading.value = true;
 
     followersModel.clear();
-    if (token.isNotEmpty) {
-      try {
-        var response = await http
-            .post(Uri.parse('${RestUrl.baseUrl}/user/get-followers'), headers: {
-          "Authorization": "Bearer $token"
-        }, body: {
-          "user_id": "${userId}"
-        }).timeout(const Duration(seconds: 60));
+    try {
+      var response = await http.post(
+          Uri.parse('${RestUrl.baseUrl}/user/get-followers'),
+          headers: {"Authorization": "Bearer $token"},
+          body: {"user_id": "${userId}"}).timeout(const Duration(seconds: 60));
 
-        var result = jsonDecode(response.body);
-        followersModel = FollowersModel.fromJson(result).data!.obs;
-      } on HttpException catch (e) {
-        GetSnackBar(
-          message: "$e",
-          title: "Error",
-          duration: Duration(seconds: 3),
-          backgroundGradient: LinearGradient(colors: [
-            Color(0xFF2F8897),
-            Color(0xff1F2A52),
-            Color(0xff1F244E)
-          ]),
-          isDismissible: true,
-        ).show();
-      }
+      var result = jsonDecode(response.body);
+      followersModel = FollowersModel.fromJson(result).data!.obs;
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isFollowersLoading.value = false;
     update();
@@ -157,7 +153,7 @@ class UserController extends GetxController {
     isFollowersLoading.value = true;
     followingModel.clear();
 
-    if (token.isNotEmpty) {
+    try {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/user/get-followings'),
           headers: {"Authorization": "Bearer $token"},
@@ -169,6 +165,8 @@ class UserController extends GetxController {
       } catch (e) {
         errorToast(FollowersModel.fromJson(result).message.toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isFollowersLoading.value = false;
     update();
@@ -177,7 +175,7 @@ class UserController extends GetxController {
   isUserBlocked(int userId) async {
     isFollowersLoading.value = true;
 
-    if (token.isNotEmpty) {
+    try {
       var response = await http
           .post(Uri.parse('${RestUrl.baseUrl}/user/is-user-blocked'), headers: {
         "Authorization": "Bearer $token"
@@ -193,6 +191,8 @@ class UserController extends GetxController {
       } on Exception catch (e) {
         errorToast(e.toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isFollowersLoading.value = false;
     update();
@@ -201,7 +201,7 @@ class UserController extends GetxController {
   blockUnblockUser(int userId, String action) async {
     isFollowersLoading.value = true;
 
-    if (token.isNotEmpty) {
+    try {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/user/block-unblock-user'),
           headers: {
@@ -223,6 +223,8 @@ class UserController extends GetxController {
       } on Exception catch (e) {
         errorToast(e.toString());
       }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isFollowersLoading.value = false;
     update();
@@ -231,33 +233,37 @@ class UserController extends GetxController {
   loginUser(var phone, var password) async {
     isLoggingIn.value = true;
 
-    var response = await http.post(Uri.parse('${RestUrl.baseUrl}/login'),
-        body: {
-          "phone": phone,
-          "password": password
-        }).timeout(const Duration(seconds: 60));
+    try {
+      var response = await http.post(Uri.parse('${RestUrl.baseUrl}/login'),
+          body: {
+            "phone": phone,
+            "password": password
+          }).timeout(const Duration(seconds: 60));
 
-    if (response.statusCode == 200) {
-      var result = jsonDecode(response.body);
-      try {
-        var userData = authUser.UserDetailsModel.fromJson(result).data;
-        var user = userData!.user;
-        var token = userData!.token;
-        GetStorage().write('token', token).toString();
-        GetStorage().write('user', user);
+      if (response.statusCode == 200) {
+        var result = jsonDecode(response.body);
+        try {
+          var userData = authUser.UserDetailsModel.fromJson(result).data;
+          var user = userData!.user;
+          var token = userData!.token;
+          GetStorage().write('token', token).toString();
+          GetStorage().write('user', user);
 
-        Get.back(closeOverlays: true);
-        update();
-        // Get.to(BottomNavigation());
+          Get.back(closeOverlays: true);
+          update();
+          // Get.to(BottomNavigation());
 
-        successToast(result['message']);
-      } on HttpException catch (e) {
-        errorToast(result['message']);
-      } on Exception catch (e) {
-        errorToast(e.toString());
+          successToast(result['message']);
+        } on HttpException catch (e) {
+          errorToast(result['message']);
+        } on Exception catch (e) {
+          errorToast(e.toString());
+        }
+      } else {
+        errorToast(response.statusCode.toString());
       }
-    } else {
-      errorToast(response.statusCode.toString());
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isLoggingIn.value = false;
   }
@@ -266,37 +272,40 @@ class UserController extends GetxController {
       firebase_token, name) async {
     isLoggingIn.value = true;
 
-    createDynamicLink("123456").then((value) async {
-      var response =
-          await http.post(Uri.parse('${RestUrl.baseUrl}/SocialLogin'), body: {
-        "social_login_id": social_login_id,
-        "social_login_type": social_login_type,
-        "email": email,
-        "phone": phone,
-        "firebase_token": firebase_token,
-        "name": name,
-        "referral_code": value.toString(),
-      }).timeout(const Duration(seconds: 60));
+    try {
+      createDynamicLink("123456").then((value) async {
+        var response =
+            await http.post(Uri.parse('${RestUrl.baseUrl}/SocialLogin'), body: {
+          "social_login_id": social_login_id,
+          "social_login_type": social_login_type,
+          "email": email,
+          "phone": phone,
+          "firebase_token": firebase_token,
+          "name": name,
+          "referral_code": value.toString(),
+        }).timeout(const Duration(seconds: 60));
 
-      var result = jsonDecode(response.body);
-      try {
-        var userData = authUser.UserDetailsModel.fromJson(result).data;
+        var result = jsonDecode(response.body);
+        try {
+          var userData = authUser.UserDetailsModel.fromJson(result).data;
 
-        GetStorage().write('token', userData!.token!).toString();
-        GetStorage().write('user', userData!.user).then((value) {
-          Get.to(BottomNavigation());
-          userModel.value = authUser.User.fromJson(GetStorage().read("user"));
-          update();
-        });
+          GetStorage().write('token', userData!.token!).toString();
+          GetStorage().write('user', userData!.user).then((value) {
+            Get.to(BottomNavigation());
+            userModel.value = authUser.User.fromJson(GetStorage().read("user"));
+            update();
+          });
 
-
-        successToast(result['message']);
-      } on HttpException catch (e) {
-        errorToast(result['message']);
-      } on Exception catch (e) {
-        errorToast(e.toString());
-      }
-    });
+          successToast(result['message']);
+        } on HttpException catch (e) {
+          errorToast(result['message']);
+        } on Exception catch (e) {
+          errorToast(e.toString());
+        }
+      });
+    } on Exception catch (e) {
+      log(e.toString());
+    }
 
     isLoggingIn.value = false;
   }
@@ -317,7 +326,7 @@ class UserController extends GetxController {
     socialLoginRegister(googleUser.id, "google", googleUser.email ?? "", "",
         googleAuth.accessToken, googleUser.displayName ?? "");
 
-       return await FirebaseAuth.instance.signInWithCredential(credential);
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   signOut() async {
@@ -330,24 +339,27 @@ class UserController extends GetxController {
 
     googleUser.signOut();
   }
-  getInbox() async {
 
+  getInbox() async {
     isInboxLoading.value = true;
 
-    dio.options.headers['Authorization'] = "Bearer $token";
-    var response = await dio.get("/user/chat-inbox");
-
     try {
-      inboxList.clear();
-      inboxList = InboxModel.fromJson(response.data).data!.obs;
-    } catch (e) {
-      errorToast(InboxModel.fromJson(response.data).message.toString());
+      dio.options.headers['Authorization'] = "Bearer $token";
+      var response = await dio.get("/user/chat-inbox");
+
+      try {
+        inboxList.clear();
+        inboxList = InboxModel.fromJson(response.data).data!.obs;
+      } catch (e) {
+        errorToast(InboxModel.fromJson(response.data).message.toString());
+      }
+    } on Exception catch (e) {
+      log(e.toString());
     }
     isInboxLoading.value = false;
     inboxList.refresh();
     update();
   }
-
 
   Future<Uri> createDynamicLink(String videoName) async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
@@ -367,7 +379,4 @@ class UserController extends GetxController {
     final Uri shortUrl = dynamicUrl.shortUrl;
     return shortUrl;
   }
-
-
-
 }

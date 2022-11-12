@@ -43,7 +43,7 @@ class HashTagsDetails {
   String? gifImage;
   String? speed;
   int? comments;
-  List? hashtags;
+  List<Hashtags>? hashtags;
   String? soundOwner;
   int? videoLikeStatus;
   User? user;
@@ -79,8 +79,12 @@ class HashTagsDetails {
     gifImage = json['gif_image'];
     speed = json['speed'];
     comments = json['comments'];
-    hashtags = json['hashtags'];
-    soundOwner = json['sound_owner'];
+    if (json['hashtags'] != null) {
+      hashtags = <Hashtags>[];
+      json['hashtags'].forEach((v) {
+        hashtags!.add(new Hashtags.fromJson(v));
+      });
+    }    soundOwner = json['sound_owner'];
     videoLikeStatus = json['video_like_status']??0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
   }
@@ -99,12 +103,31 @@ class HashTagsDetails {
     data['gif_image'] = this.gifImage;
     data['speed'] = this.speed;
     data['comments'] = this.comments;
-    data['hashtags'] = this.hashtags;
-    data['sound_owner'] = this.soundOwner;
+    if (this.hashtags != null) {
+      data['hashtags'] = this.hashtags!.map((v) => v.toJson()).toList();
+    }    data['sound_owner'] = this.soundOwner;
     data['video_like_status']  = this.videoLikeStatus;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
+    return data;
+  }
+}
+class Hashtags {
+  int? id;
+  String? name;
+
+  Hashtags({this.id, this.name});
+
+  Hashtags.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
     return data;
   }
 }

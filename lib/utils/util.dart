@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_advanced_networkimage_2/provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
@@ -248,7 +249,7 @@ Widget imgNet(String imgPath) {
         imageBuilder: (context, imageProvider) => Container(
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(10),
                 shape: BoxShape.rectangle,
                 image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
               ),
@@ -339,6 +340,7 @@ showLoginAlert() {
           child: const Text('Ok')));
 }
 
+loader()=>Lottie.network("https://assets1.lottiefiles.com/packages/lf20_li0pgakp.json");
 showWinDialog(String msg) => Get.defaultDialog(
     backgroundColor: Colors.transparent,
     title: "",
