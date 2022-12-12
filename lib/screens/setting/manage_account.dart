@@ -2,27 +2,30 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:colorful_iconify_flutter/icons/logos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
-import 'package:thrill/screens/auth/login_getx.dart';
-import 'package:thrill/screens/profile/edit_profile.dart';
-import 'package:colorful_iconify_flutter/icons/logos.dart';
-import 'package:thrill/screens/profile/profile.dart';
 
-import '../../common/strings.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
+FocusNode fieldNode = FocusNode();
+FocusNode userNode = FocusNode();
+FocusNode nameNode = FocusNode();
+FocusNode bioNode = FocusNode();
+FocusNode urlNode = FocusNode();
+
 class ManageAccount extends StatelessWidget {
+  ManageAccount({Key? key}) : super(key: key);
+
   var selectedGender = 'Male'.obs;
   var genderList = ["Male", "Female", "Other"];
   ImagePicker _imagePicker = ImagePicker();
@@ -33,32 +36,62 @@ class ManageAccount extends StatelessWidget {
   var instaLink = "https://www.instagram.com/".obs;
   var youtubeLink = "https://www.youtube.com/".obs;
   var twitterLink = "https://twitter.com/".obs;
-  User user = User.fromJson(GetStorage().read("user"));
+
+  var name = "".obs;
+  var userName = "".obs;
+  var webSiteUrl = "".obs;
+  var gender = "".obs;
+  var bio = "".obs;
+
+  TextEditingController nameController = TextEditingController();
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController webSiteController = TextEditingController();
+  TextEditingController bioController = TextEditingController();
+
+  var usersController = Get.find<UserController>();
 
   @override
   Widget build(BuildContext context) {
+    nameController.text=usersController.userProfile.value.name.toString();
+    userNameController.text = usersController.userProfile.value.username.toString();
+    webSiteController.text = usersController.userProfile.value.websiteUrl.toString();
+    bioController.text = usersController.userProfile.value.bio.toString();
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(gradient: processGradient),
-          ),
-          Padding(
-              padding: const EdgeInsets.all(10),
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      backgroundColor: ColorManager.dayNight,
+      body: Padding(
+          padding: const EdgeInsets.all(10),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Row(
                   children: [
-                    profilePicLayout(),
-                    updateFieldsLayout(),
-                    submitButtonLayout()
-                    // InkWell(onTap: ()=>Get.to(EditProfile(user: user,)),child:  mainTile(Carbon.person, 'Edit Profile'),)
+                    IconButton(
+                        onPressed: () => Get.back(),
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: ColorManager.dayNightText,
+                        )),
+                    Text(
+                      "Edit Profile",
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: ColorManager.dayNightText),
+                    )
                   ],
                 ),
-              ))
-        ],
-      ),
+                profilePicLayout(),
+                Divider(
+                  color: ColorManager.dayNightText,
+                ),
+                updateFieldsLayout(),
+                submitButtonLayout()
+                // InkWell(onTap: ()=>Get.to(EditProfile(user: user,)),child:  mainTile(Carbon.person, 'Edit Profile'),)
+              ],
+            ),
+          )),
     );
   }
 
@@ -86,11 +119,12 @@ class ManageAccount extends StatelessWidget {
                 height: 100,
                 width: 100,
                 child: Obx(() => imagePath.value.isEmpty
-                    ? user.avatar!.isNotEmpty
+                    ? usersController.userProfile.value.avatar!.isNotEmpty
                         ? ClipOval(
                             child: CachedNetworkImage(
                               fit: BoxFit.cover,
-                              imageUrl: '${RestUrl.profileUrl}${user.avatar}',
+                              imageUrl:
+                                  '${RestUrl.profileUrl}${usersController.userProfile.value.avatar}',
                               placeholder: (a, b) => const Center(
                                 child: CircularProgressIndicator(),
                               ),
@@ -178,102 +212,203 @@ class ManageAccount extends StatelessWidget {
   updateFieldsLayout() => Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Container(
-            margin:
-                const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
-            width: Get.width,
-            decoration: BoxDecoration(
-                color: const Color(0xff353841),
-                border: Border.all(color: const Color(0xff353841)),
-                borderRadius: const BorderRadius.all(Radius.circular(10))),
-            child: TextFormField(
-              initialValue:user.username,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: "Username",
-                hintStyle: const TextStyle(color: Colors.grey),
-                isDense: true,
-                counterText: '',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(10)),
+          TextFormField(
+            controller: nameController,
+            focusNode: userNode,
+            style: const TextStyle(color: Colors.white),
+            onChanged: (value) {
+              userName.value = value;
+
+            },
+            decoration: InputDecoration(
+              focusColor: ColorManager.colorAccent,
+              fillColor: userNode.hasFocus
+                  ? ColorManager.colorAccentTransparent
+                  : Colors.grey.withOpacity(0.1),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: userNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : const BorderSide(
+                        color: Color(0xffFAFAFA),
+                      ),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: userNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                      ),
+              ),
+              filled: true,
+              prefixIcon: Icon(
+                Icons.person_outline,
+                color: userNode.hasFocus
+                    ? ColorManager.colorAccent
+                    : Colors.grey.withOpacity(0.3),
+              ),
+              hintText: "User name....",
+              hintStyle: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 14),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-            width: Get.width,
-            decoration: BoxDecoration(
-                color: const Color(0xff353841),
-                border: Border.all(color: const Color(0xff353841)),
-                borderRadius: const BorderRadius.all(Radius.circular(10))),
-            child: TextFormField(
-              initialValue: user.name,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: "Full Name",
-                hintStyle: const TextStyle(color: Colors.grey),
-                isDense: true,
-                counterText: '',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        const BorderSide(color: Colors.transparent, width: 2),
-                    borderRadius: BorderRadius.circular(10)),
+          SizedBox(
+            height: 10,
+          ),
+
+          TextFormField(
+            focusNode: nameNode,
+            controller: userNameController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              focusColor: ColorManager.colorAccent,
+              fillColor: nameNode.hasFocus
+                  ? ColorManager.colorAccentTransparent
+                  : Colors.grey.withOpacity(0.1),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: nameNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : const BorderSide(
+                        color: Color(0xffFAFAFA),
+                      ),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: nameNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                      ),
+              ),
+              filled: true,
+              prefixIcon: Icon(
+                Icons.person_outline,
+                color: userNode.hasFocus
+                    ? ColorManager.colorAccent
+                    : Colors.grey.withOpacity(0.3),
+              ),
+              hintText: "full name....",
+              hintStyle: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 14),
             ),
+            onChanged: (value) {
+              name.value = value;
+
+            },
+          ),
+          SizedBox(
+            height: 10,
           ),
           dropDownGender(),
-          Container(
-            margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-            width: Get.width,
-            decoration: BoxDecoration(
-                color: const Color(0xff353841),
-                border: Border.all(color: const Color(0xff353841)),
-                borderRadius: const BorderRadius.all(Radius.circular(10))),
-            child: TextFormField(
-              initialValue: user.websiteUrl,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: "Website Url",
-                hintStyle: const TextStyle(color: Colors.grey),
-                isDense: true,
-                counterText: '',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
+          SizedBox(
+            height: 10,
           ),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            width: Get.width,
-            decoration: BoxDecoration(
-                color: const Color(0xff353841),
-                border: Border.all(color: const Color(0xff353841)),
-                borderRadius: const BorderRadius.all(Radius.circular(10))),
-            child: TextFormField(
-              initialValue: user.bio,
-              style: const TextStyle(color: Colors.white),
-              maxLines: 10,
-              decoration: InputDecoration(
-                hintText: "Bio",
-                hintStyle: const TextStyle(color: Colors.grey),
-                isDense: true,
-                counterText: '',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        const BorderSide(color: Colors.transparent, width: 2),
-                    borderRadius: BorderRadius.circular(10)),
+
+          TextFormField(
+            focusNode: urlNode,
+            controller: webSiteController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              focusColor: ColorManager.colorAccent,
+              fillColor: urlNode.hasFocus
+                  ? ColorManager.colorAccentTransparent
+                  : Colors.grey.withOpacity(0.1),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: urlNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : const BorderSide(
+                        color: Color(0xffFAFAFA),
+                      ),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: urlNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                      ),
+              ),
+              filled: true,
+              prefixIcon: Icon(
+                Icons.person_outline,
+                color: urlNode.hasFocus
+                    ? ColorManager.colorAccent
+                    : Colors.grey.withOpacity(0.3),
+              ),
+              hintText: "Website URL....",
+              hintStyle: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 14),
             ),
+            onChanged: (value) {
+              webSiteUrl.value = value;
+
+            },
+          ),
+          SizedBox(
+            height: 10,
+          ),
+
+          TextFormField(
+            focusNode: bioNode,
+            controller: bioController,
+            style: const TextStyle(color: Colors.white),
+            maxLines: 10,
+            decoration: InputDecoration(
+              focusColor: ColorManager.colorAccent,
+              fillColor: bioNode.hasFocus
+                  ? ColorManager.colorAccentTransparent
+                  : Colors.grey.withOpacity(0.1),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: bioNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : const BorderSide(
+                        color: Color(0xffFAFAFA),
+                      ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: bioNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                      ),
+              ),
+              filled: true,
+              hintText: "Bio....",
+              hintStyle: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 14),
+            ),
+            onChanged: (value) {
+              bio.value = value;
+            },
           ),
           const SizedBox(
             height: 10,
@@ -291,7 +426,25 @@ class ManageAccount extends StatelessWidget {
       );
 
   submitButtonLayout() => InkWell(
-        onTap: () {},
+        onTap: () {
+          if(image.path.isNotEmpty){
+            usersController.updateuserProfile(
+                profileImage: File(image.path),
+                fullName: nameController.text,
+                userName: userNameController.text,
+                bio: bioController.text,
+                gender: selectedGender.value,
+                webSiteUrl: webSiteController.text);
+          }
+          else{
+            usersController.updateuserProfile(
+                fullName: nameController.text,
+                userName: userNameController.text,
+                bio: bioController.text,
+                gender: selectedGender.value,
+                webSiteUrl: webSiteController.text);
+          }
+        },
         child: Container(
           width: Get.width,
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -318,12 +471,11 @@ class ManageAccount extends StatelessWidget {
   dropDownGender() => Obx(() => selectedGender.value == ""
       ? Container()
       : Container(
-          margin: const EdgeInsets.only(left: 10, right: 10),
-          padding: const EdgeInsets.only(left: 10, right: 10),
+          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
           width: Get.width,
           decoration: BoxDecoration(
-              color: const Color(0xff353841),
-              border: Border.all(color: const Color(0xff353841)),
+              color: ColorManager.colorAccentTransparent,
+              border: Border.all(color: ColorManager.colorAccent),
               borderRadius: const BorderRadius.all(Radius.circular(10))),
           child: Theme(
               data: Theme.of(Get.context!)
@@ -332,14 +484,12 @@ class ManageAccount extends StatelessWidget {
                 child: DropdownButton(
                   icon: const Icon(
                     Icons.keyboard_double_arrow_down,
-                    color: Colors.white,
                   ),
                   value: selectedGender.value,
                   items: genderList
                       .map((element) => DropdownMenuItem(
                             child: Text(
                               element,
-                              style: const TextStyle(color: Colors.white),
                             ),
                             value: element,
                           ))

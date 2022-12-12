@@ -14,7 +14,6 @@ import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/screens/video/camera_screen.dart';
 import 'package:thrill/utils/util.dart';
-import 'package:thrill/widgets/better_video_player.dart';
 
 class HomeGetx extends StatefulWidget {
   const HomeGetx({Key? key}) : super(key: key);
@@ -23,7 +22,8 @@ class HomeGetx extends StatefulWidget {
   State<HomeGetx> createState() => _HomeGetxState();
 }
 
-class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
+class _HomeGetxState extends State<HomeGetx>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin<HomeGetx> {
   InterstitialAd? interstitialAd;
 
   var commentsController = Get.find<CommentsController>();
@@ -48,6 +48,7 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
     // TODO: implement initState
     super.initState();
     loadInterstitialAd();
+
     tabController = TabController(length: 2, vsync: this, initialIndex: 0);
     preloadPageController = PreloadPageController();
     preloadPageController!.addListener(scrollListener);
@@ -68,212 +69,148 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return GetX<VideosController>(
-        builder: (videosController) => Scaffold(
-                body: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  "assets/background_profile.png",
-                  fit: BoxFit.fill,
-                ),
-                TabBarView(
-                    physics: NeverScrollableScrollPhysics(),
-                    controller: tabController,
-                    children: [
-                      videosController.isLoading.value
-                          ?  Center(
-                              child: loader(),
-                            )
-                          : videosController.publicVideosList.isEmpty
-                              ? RefreshIndicator(
-                                  child: const Center(
-                                    child: Text(
-                                      "no videos found",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  onRefresh: () =>
-                                      videosController.getAllVideos())
-                              : RefreshIndicator(
-                                  child: relatedLayout(),
-                                  onRefresh: () async =>
-                                      await videosController.getAllVideos()),
-                      GetStorage().read("token").toString().isEmpty ||
-                              GetStorage().read("token") == null
-                          ? const Center(
-                              child: Text(
-                                "Login to access followers",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
-                            )
-                          : videosController.followingVideosList.isEmpty
-                              ? RefreshIndicator(
-                                  child: const Center(
-                                    child: Text(
-                                      "You dont have any followings yet",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  onRefresh: () =>
-                                      videosController.getFollowingVideos())
-                              : RefreshIndicator(
-                                  child: followingVideosLayout(),
-                                  onRefresh: () =>
-                                      videosController.getFollowingVideos()),
-                    ]),
-                Container(
-                    alignment: Alignment.topCenter,
-                    width: MediaQuery.of(context).size.width,
-                    margin: const EdgeInsets.only(top: 50),
-                    child: Column(
+    super.build(context);
+    return Scaffold(
+        backgroundColor: ColorManager.dayNight,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            TabBarView(
+                physics: NeverScrollableScrollPhysics(),
+                controller: tabController,
+                children: [
+                  RefreshIndicator(
+                      child: relatedLayout(),
+                      onRefresh: () async =>
+                          await videosController.getAllVideos()),
+                  GetStorage().read("token") == null
+                      ? const Center(
+                          child: Text(
+                            "Login to access followers",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          child: followingVideosLayout(),
+                          onRefresh: () =>
+                              videosController.getFollowingVideos()),
+                ]),
+            Container(
+                alignment: Alignment.topCenter,
+                width: MediaQuery.of(context).size.width,
+                margin: const EdgeInsets.only(top: 50),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                flex: 1,
-                                child: Center(
-                                  child: Container(
-                                    margin:
-                                        EdgeInsets.symmetric(horizontal: 20),
-                                    child: SegmentedTabControl(
-                                        height: 35,
-                                        splashColor: ColorManager.colorAccent,
-                                        splashHighlightColor: Colors.red,
-                                        radius: Radius.circular(10),
-                                        backgroundColor: Color(0xff1F2128),
-                                        indicatorColor:
-                                            ColorManager.colorAccent,
-                                        tabTextColor: Colors.white,
-                                        selectedTabTextColor: Colors.white,
-                                        controller: tabController,
-                                        tabs: const [
-                                          SegmentTab(label: 'Related'),
-                                          SegmentTab(label: 'Following'),
-                                        ]),
-                                  ),
-                                )),
-                            Expanded(
-                                flex: 0,
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 10),
-                                  child: InkWell(
-                                      onTap: () {
-                                        Get.to(CameraScreen(
-                                          selectedSound: "",
-                                          id: User.fromJson(GetStorage().read("user")).id,
-                                          owner: User.fromJson(GetStorage().read("user")).username,
-                                        ));
-                                      },
-                                      child: const Icon(
-                                        IconlyLight.camera,
-                                        color: Colors.white,
-                                      )),
-                                ))
-                          ],
-                        ),
+                        Expanded(
+                            flex: 1,
+                            child: Center(
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 20),
+                                child: SegmentedTabControl(
+                                    height: 35,
+                                    splashColor: ColorManager.colorAccent,
+                                    splashHighlightColor:
+                                        ColorManager.colorPrimaryLight,
+                                    radius: Radius.circular(10),
+                                    backgroundColor: Color(0xff1F2128),
+                                    indicatorColor: ColorManager.colorAccent,
+                                    tabTextColor: Colors.white,
+                                    selectedTabTextColor: Colors.white,
+                                    controller: tabController,
+                                    tabs: const [
+                                      SegmentTab(label: 'Related'),
+                                      SegmentTab(label: 'Following'),
+                                    ]),
+                              ),
+                            )),
+                        Expanded(
+                            flex: 0,
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 10),
+                              child: InkWell(
+                                  onTap: () {
+                                    Get.to(CameraScreen(
+                                      selectedSound: "",
+                                      id: usersController.storage
+                                          .read("userId"),
+                                      owner:"",
+                                    ));
+                                  },
+                                  child: const Icon(
+                                    IconlyLight.camera,
+                                    color: Colors.white,
+                                  )),
+                            ))
                       ],
-                    ))
-              ],
-            )));
+                    ),
+                  ],
+                ))
+          ],
+        ));
   }
 
   relatedLayout() {
-    return PreloadPageView.builder(
-        controller: preloadPageController1,
-        onPageChanged: (int index) {
-          if (videosController.adIndexes.contains(index)) {
-            showAd();
-          }
-        },
-        scrollDirection: Axis.vertical,
-        preloadPagesCount: 6,
-        itemCount: videosController.publicVideosList.length,
-        //Notice this
-        itemBuilder: (context, index) => BetterReelsPlayer(
-                videosController.publicVideosList[index].gifImage!,
-                videosController.publicVideosList[index].video!,
-                index,
-                related.value,
-                isRelatedTurning.value, () {
-              videosController.publicVideosList[index].videoLikeStatus == 0
-                  ? videosController.likeVideo(
-                      1, videosController.publicVideosList[index].id!)
-                  : videosController.likeVideo(
-                      0, videosController.publicVideosList[index].id!);
-            },
-                videosController.publicVideosList[index].user,
-                videosController.publicVideosList[index].id!,
-                videosController.publicVideosList[index].soundName.toString(),
-                videosController.publicVideosList[index].isDuetable == "yes"
-                    ? true
-                    : false,
-                videosController.publicVideosList[index],
-                videosController.publicVideosList[index].user!.id!,
-                videosController.publicVideosList[index].user!.name.toString(),
-                videosController.publicVideosList[index].description.toString(),
-                true,
-                videosController.publicVideosList[index].hashtags!,
-                videosController.publicVideosList[index].sound.toString(),
-                videosController.publicVideosList[index].soundOwner.toString(),
-                videosController.publicVideosList[index].videoLikeStatus,
-                videosController.publicVideosList[index].isCommentable
-                            .toString()
-                            .toLowerCase() ==
-                        "yes"
-                    ? true
-                    : false));
+    return GetX<VideosController>(
+        builder: (videosController) => videosController.publicVideosList.isEmpty
+            ? Container(
+                height: Get.height,
+                child: Center(
+                  child: Text(
+                    "No Videos!",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              )
+            : videosController.videosLoading.value
+                ? Container(
+                    color: ColorManager.dayNight,
+                    child: Center(
+                      child: loader(),
+                    ),
+                    height: Get.height,
+                  )
+                : videoItemLayout(videosController.publicVideosList));
+
+    // videosController.obx(
+    //   (state) =>,
+    //   onLoading: Container(
+    //     child: loader(),
+    //     height: Get.height,
+    //     width: Get.width,
+    //   ),
+    //   onEmpty: Container(
+    //     child: Center(
+    //       child: Text(
+    //         "No Videos Found",
+    //         style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+    //       ),
+    //     ),
+    //   ));
   }
 
   followingVideosLayout() {
-    return PreloadPageView.builder(
-        preloadPagesCount: 6,
-        physics: AlwaysScrollableScrollPhysics(),
-        controller: preloadPageController,
-        onPageChanged: (int index) {
-          if (videosController.adIndexes.contains(index)) {
-            showAd();
-          }
-        },
-        scrollDirection: Axis.vertical,
-        itemCount: videosController.followingVideosList.length,
-        itemBuilder: (context, index) => BetterReelsPlayer(
-            videosController.followingVideosList[index].gifImage!,
-            videosController.followingVideosList[index].video!,
-            index,
-            current.value,
-            isOnPageTurning.value,
-            () {},
-            videosController.followingVideosList[index].user,
-            videosController.followingVideosList[index].id!,
-            videosController.followingVideosList[index].soundName.toString(),
-            videosController.followingVideosList[index].isDuetable == "yes"
-                ? true
-                : false,
-            videosController.followingVideosList[index],
-            videosController.followingVideosList[index].user!.id!,
-            videosController.followingVideosList[index].user!.name.toString(),
-            videosController.followingVideosList[index].description.toString(),
-            true,
-            videosController.followingVideosList[index].hashtags!,
-            videosController.followingVideosList[index].sound.toString(),
-            videosController.followingVideosList[index].soundOwner.toString(),
-            videosController.followingVideosList[index].videoLikeStatus,
-            videosController.followingVideosList[index].isCommentable
-                        .toString()
-                        .toLowerCase() ==
-                    "yes"
-                ? true
-                : false,like:videosController.publicVideosList[index].likes));
+    return Obx(() => videosController.isFollowingLoading.isTrue
+        ? Container(
+            height: Get.height,
+            child: Center(
+              child: loader(),
+            ),
+          )
+        : videosController.followingVideosList.isNotEmpty
+            ? videoItemLayout(videosController.followingVideosList)
+            : Container(
+                height: Get.height,
+                child: Center(
+                  child: Text(
+                    "No Videos!",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ));
   }
 
   loadInterstitialAd() async {
@@ -373,4 +310,8 @@ class _HomeGetxState extends State<HomeGetx> with TickerProviderStateMixin {
       }
     }
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

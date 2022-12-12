@@ -229,7 +229,7 @@ PODS:
     - PINCache (>= 3.0.1-beta.3)
   - image_picker_ios (0.0.1):
     - Flutter
-  - imgly_sdk (2.7.0):
+  - imgly_sdk (2.7.1):
     - Flutter
     - imglyKit (~> 11.3)
   - imglyKit (11.3.2)
@@ -287,9 +287,9 @@ PODS:
   - SwiftyGif (5.4.3)
   - url_launcher_ios (0.0.1):
     - Flutter
-  - video_editor_sdk (2.7.0):
+  - video_editor_sdk (2.7.1):
     - Flutter
-    - imgly_sdk (= 2.7.0)
+    - imgly_sdk (= 2.7.1)
   - video_player_avfoundation (0.0.1):
     - Flutter
   - wakelock (0.0.1):
@@ -498,7 +498,7 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: ffbb25ec00ebcb5201adab0a56d808f6f1902d9f
   HLSCachingReverseProxyServer: 59935e1e0244ad7f3375d75b5ef46e8eb26ab181
   image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
-  imgly_sdk: d5bd730c962ab5d08c065211e3d0d499dbf402c1
+  imgly_sdk: e80792e7f6cc62a47d621e11c49f35182f8c2354
   imglyKit: 16f944026984f122fde938e58a07fb95756b56cd
   just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
   leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
@@ -518,7 +518,7 @@ SPEC CHECKSUMS:
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
   url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
-  video_editor_sdk: c51fecac47f7936142adb74f13f211b82244065a
+  video_editor_sdk: 4988b0a0512e19d6f520971be79c0f833ea9b240
   video_player_avfoundation: e489aac24ef5cf7af82702979ed16f2a5ef84cff
   wakelock: d0fc7c864128eac40eba1617cb5264d9c940b46f
 

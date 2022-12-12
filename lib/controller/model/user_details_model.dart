@@ -109,7 +109,7 @@ class User {
       this.referralCode});
 
   User.fromJson(Map<String, dynamic> json) {
-    id = json['id']??0;
+    id = json['id']??"";
     name = json['name']??"";
     username = json['username']??"";
     email = json['email']??"";

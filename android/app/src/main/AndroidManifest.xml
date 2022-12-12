@@ -43,9 +43,8 @@
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
 
-        <meta-data
-            android:name="com.truecaller.android.sdk.PartnerKey"
-            android:value="3UQqx6713cb5d03224ffcb1d3defde05f612a" />
+        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="3UQqx6713cb5d03224ffcb1d3defde05f612a"/>
+
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"

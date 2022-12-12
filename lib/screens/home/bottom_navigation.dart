@@ -11,7 +11,9 @@ import 'package:iconly/iconly.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/controller/auth_controller.dart';
 import 'package:thrill/controller/discover_controller.dart';
+import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/controller/wallet_controller.dart';
@@ -23,6 +25,7 @@ import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/screens/setting/wallet_getx.dart';
 import 'package:thrill/screens/spin/spin_the_wheel_getx.dart';
+import 'package:thrill/screens/truecaller/truecaller.dart';
 import 'package:thrill/widgets/fab_items.dart';
 import 'package:thrill/widgets/video_item.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -37,10 +40,14 @@ var isUsableSdk = true.obs;
 var videosController = Get.find<VideosController>();
 var discoverController = Get.find<DiscoverController>();
 var userController = Get.find<UserController>();
+var authController = Get.find<AuthController>();
+var usersController = Get.find<UserController>();
 
 class BottomNavigation extends StatefulWidget {
-  BottomNavigation({Key? key, this.mapData}) : super(key: key);
+  BottomNavigation({Key? key, this.mapData,this.id}) : super(key: key);
   final Map? mapData;
+
+  int? id;
 
   @override
   State<BottomNavigation> createState() => _BottomNavigationState();
@@ -57,7 +64,7 @@ class _BottomNavigationState extends State<BottomNavigation>
   int selectedIndex = 0;
   late List<Widget> screens = [
     const HomeGetx(),
-    DiscoverGetx(),
+    const DiscoverGetx(),
     const WalletGetx(),
     Profile(),
   ];
@@ -92,7 +99,6 @@ class _BottomNavigationState extends State<BottomNavigation>
           if (selectedIndex != 0) {
             setState(() {
               selectedIndex = 0;
-              shouldAutoPlayReel = true;
             });
             return false;
           } else {
@@ -190,22 +196,19 @@ class _BottomNavigationState extends State<BottomNavigation>
                 })
               }
             else
-              {initTrueCallerLogin()}
+              {
+                initTrueCallerLogin()
+              }
           });
     }
     if (index == 3) {
       await isLogined().then((value) {
-        if (index == 3) {
-          videosController.getUserVideos();
-          videosController.getFollowingVideos();
-          videosController.getUserPrivateVideos();
-          videosController.getUserLikedVideos();
-          setState(() {});
-        }
+
         if (value) {
-          setState(() {
-            selectedIndex = index;
-          });
+          usersController.getUserProfile(usersController.storage.read("user")["id"]).then((value) =>
+              setState(() {
+                selectedIndex = index;
+              }));
         } else {
           initTrueCallerLogin();
         }
@@ -229,7 +232,6 @@ class _BottomNavigationState extends State<BottomNavigation>
               setState(() {
                 selectedIndex = 0;
                 //reelsPlayerController?.play();
-                shouldAutoPlayReel = true;
               });
             },
             child: Container(
@@ -261,8 +263,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                 if (value) {
                   setState(() {
                     selectedIndex = 1;
-                    reelsPlayerController?.pause();
-                    shouldAutoPlayReel = false;
+
                   });
                 } else {
                   initTrueCallerLogin();
@@ -296,11 +297,7 @@ class _BottomNavigationState extends State<BottomNavigation>
             onTap: () async {
               await isLogined().then((value) async {
                 if (value) {
-                  reelsPlayerController?.pause();
-                  shouldAutoPlayReel = false;
-                  await Navigator.pushNamed(context, '/spin');
-                  reelsPlayerController?.play();
-                  shouldAutoPlayReel = true;
+
                   setState(() => selectedIndex = 0);
                 } else {
                   initTrueCallerLogin();
@@ -324,8 +321,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                 if (value) {
                   setState(() {
                     selectedIndex = 2;
-                    reelsPlayerController?.pause();
-                    shouldAutoPlayReel = false;
+
                   });
                 } else {
                   initTrueCallerLogin();
@@ -361,8 +357,7 @@ class _BottomNavigationState extends State<BottomNavigation>
                 if (value) {
                   setState(() {
                     selectedIndex = 3;
-                    reelsPlayerController?.pause();
-                    shouldAutoPlayReel = false;
+
                     //BlocProvider.of<ProfileBloc>(context).add( const ProfileLoading());
                   });
                 } else {
@@ -411,10 +406,11 @@ class _BottomNavigationState extends State<BottomNavigation>
   }
 
   initTrueCallerLogin() {
-    showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        builder: (BuildContext context) => LoginGetxScreen());
+    Get.to(LoginGetxScreen());
+    // showModalBottomSheet(
+    //     isScrollControlled: true,
+    //     context: context,
+    //     builder: (BuildContext context) => LoginGetxScreen());
   }
 
   showPromotionalPopup() async {

@@ -28,8 +28,7 @@ class AppRouter {
       case ResetPasswordScreen.routeName:
         return ResetPasswordScreen.route(phone: settings.arguments as String);
 
-      case Record.routeName:
-        return Record.route(soundMap_: settings.arguments as Map?);
+
       case SpinTheWheel.routeName:
         return SpinTheWheel.route();
       case EarnSpins.routeName:
@@ -41,15 +40,13 @@ class AppRouter {
 
       case Privacy.routeName:
         return Privacy.route();
-      case QrCode.routeName:
-        return QrCode.route();
+
       case Wallet.routeName:
         return Wallet.route();
       case PushNotification.routeName:
         return PushNotification.route();
 
-      case Referral.routeName:
-        return Referral.route();
+
       case Favourites.routeName:
         return Favourites.route();
       case AddSound.routeName:
@@ -72,8 +69,7 @@ class AppRouter {
         return PrivacyPolicy.route();
       case RecordDuet.routeName:
         return RecordDuet.route(settings.arguments as VideoModel);
-      case ChatScreen.routeName:
-        return ChatScreen.route(settings.arguments as inbox.Inbox);
+
       case OtpVerification.routeName:
         return OtpVerification.route(settings.arguments as String);
       // case FollowingAndFollowers.routeName:

@@ -65,7 +65,6 @@ class _SpinTheWheelState extends State<SpinTheWheel>
     setSpinSound();
     loadWheelDetails();
     try {
-      reelsPlayerController?.pause();
     } catch (_) {}
     super.initState();
   }

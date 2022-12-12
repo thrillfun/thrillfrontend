@@ -36,7 +36,6 @@ class _NotificationsState extends State<Notifications> {
     loadUserModel();
     getNotifications();
     try {
-      reelsPlayerController?.pause();
     } catch (_) {}
     super.initState();
   }

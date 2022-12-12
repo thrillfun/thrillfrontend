@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -15,13 +16,15 @@ import 'package:thrill/models/wheelDetails_model.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 
+import '../../controller/model/wheel_data_model.dart';
+
 var wheelController = Get.find<WheelController>();
 
-class SpinTheWheelGetx extends StatelessWidget {
+class SpinTheWheelGetx extends GetView<WheelController> {
   ScrollController _controller = ScrollController();
 
   SpinTheWheelGetx({Key? key}) : super(key: key);
-  StreamController<int> controller = StreamController<int>();
+  StreamController<int> _streamController = StreamController<int>();
   WheelDetails? wheelDetails;
 
   var isSpinning = false.obs;
@@ -45,44 +48,43 @@ class SpinTheWheelGetx extends StatelessWidget {
     wheelController.getWheelData();
     setSpinSound();
     return Scaffold(
+      backgroundColor: ColorManager.dayNight,
         body: Stack(
       children: [
-        Container(
-          height: Get.height,
-          width: Get.width,
-          decoration: const BoxDecoration(gradient: processGradient),
-        ),
-        GetX<WheelController>(
-            builder: (wheelController) =>
-                wheelController.isWheelDataLoading.value
-                    ? Center(
-                        child: loader(),
-                      )
-                    : SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(top: 20),
-                              alignment: Alignment.center,
-                              child: titleLayout(),
-                            ),
-                            rewardLayout(),
-                            prizeLayout(),
-                            wheelLayout(),
-                            submitButtonLayout(),
-                            levelsLayout()
-                            //    lastRewardLayout()
-                          ],
-                        ),
-                      ))
+        controller.obx(
+            (state) => SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 20),
+                        alignment: Alignment.center,
+                        child: titleLayout(),
+                      ),
+                      rewardLayout(),
+                      prizeLayout(),
+                      wheelLayout(),
+                      submitButtonLayout(),
+                      levelsLayout()
+                      //    lastRewardLayout()
+                    ],
+                  ),
+                ),
+            onLoading: Container(
+              color: ColorManager.dayNight,
+              child: loader(),
+              height: Get.height,
+              width: Get.width,
+            ))
       ],
     ));
   }
 
-  titleLayout() => const Text(
+  titleLayout() => Text(
         "Grab Extensive Rewards",
         style: TextStyle(
-            color: Colors.white, fontWeight: FontWeight.w700, fontSize: 25),
+            color: ColorManager.dayNightText,
+            fontWeight: FontWeight.w700,
+            fontSize: 25),
         textAlign: TextAlign.center,
       );
 
@@ -92,18 +94,18 @@ class SpinTheWheelGetx extends StatelessWidget {
         width: Get.width,
         decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
         child: Column(
-          children: const [
+          children: [
             Text(
               "Event Closing in ",
               style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.dayNightText,
                   fontWeight: FontWeight.w400,
                   fontSize: 18),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
-            Text(
+            const Text(
               "Month: 01 to 31 ",
               style: TextStyle(
                   color: ColorManager.colorPrimaryLight,
@@ -130,8 +132,8 @@ class SpinTheWheelGetx extends StatelessWidget {
               children: [
                 Obx(() => Text(
                       "${wheelController.remainingChance.value} ",
-                      style: const TextStyle(
-                          color: Colors.white,
+                      style: TextStyle(
+                          color: ColorManager.dayNightText,
                           fontWeight: FontWeight.w400,
                           fontSize: 50),
                     )),
@@ -153,8 +155,8 @@ class SpinTheWheelGetx extends StatelessWidget {
                 Obx(() => Text(
                       "${wheelController.lastReward.value}",
                       textAlign: TextAlign.left,
-                      style: const TextStyle(
-                          color: Colors.white,
+                      style: TextStyle(
+                          color: ColorManager.dayNightText,
                           fontWeight: FontWeight.w700,
                           fontSize: 18),
                     )),
@@ -173,61 +175,111 @@ class SpinTheWheelGetx extends StatelessWidget {
 
   wheelLayout() => Container(
         margin: const EdgeInsets.only(top: 40, bottom: 10),
-        height: 250,
-        child: FortuneWheel(
-          duration: const Duration(seconds: 20),
-          animateFirst: false,
-          selected: controller.stream,
-          indicators: <FortuneIndicator>[
-            FortuneIndicator(
-                alignment: Alignment.center,
-                child: SvgPicture.asset(
-                  'assets/spinDirection.svg',
-                  width: 85,
-                  height: 85,
-                  fit: BoxFit.cover,
-                )),
-          ],
-          physics: CircularPanPhysics(
-            duration: const Duration(seconds: 10),
-            curve: Curves.decelerate,
-          ),
-          items: [
-            for (int i = 0;
-                i < wheelController.wheelData.value.data!.wheelRewards!.length;
-                i++)
-              FortuneItem(
-                child: wheelController
-                            .wheelData.value.data!.wheelRewards![i].isImage ==
-                        0
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 25),
-                        child: Text(
-                          '${wheelController.wheelData.value.data!.wheelRewards![i].currencySymbol} ${wheelController.wheelData.value.data!.wheelRewards![i].amount} ',
-                          style: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
-                        ),
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.only(left: 25),
-                        child: Image.network(
-                          "${RestUrl.profileUrl}${wheelController.wheelData.value.data!.wheelRewards![i].imagePath}",
-                          width: 30,
-                          height: 30,
-                        ),
-                      ),
-                style: FortuneItemStyle(
-                  color: i % 2 == 1
-                      ? ColorManager.spinColorTwo
-                      : ColorManager.spinColorThree,
-                  borderColor: ColorManager.spinColorDivider,
-                  borderWidth: 1,
-                ),
+        height: Get.height / 2,
+        child: ClipOval(
+          child: Container(
+            decoration: const BoxDecoration(
+              color: ColorManager.colorAccent,
+              shape: BoxShape.circle,
+            ),
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: ColorManager.colorAccent,
               ),
-          ],
-          onAnimationEnd: () {
-            updateSpin();
-          },
+              padding: const EdgeInsets.all(2),
+              child: FortuneWheel(
+                duration: const Duration(seconds: 20),
+                animateFirst: false,
+                selected: _streamController.stream,
+                indicators: <FortuneIndicator>[
+                  FortuneIndicator(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        alignment: Alignment.topCenter,
+                        height: Get.height,
+                        margin: EdgeInsets.only(bottom: 20),
+                        child: RotatedBox(quarterTurns: 2,child: SvgPicture.asset(
+                        'assets/spinDirection.svg',
+                        height: 50,width: 50,
+                          fit: BoxFit.fill,
+                      ),),)),
+                ],
+                physics: CircularPanPhysics(
+                  duration: const Duration(seconds: 10),
+                  curve: Curves.decelerate,
+                ),
+                items: [
+                  for (int i = 0;
+                  i <
+                      wheelController
+                          .wheelData.value.data!.wheelRewards!.length;
+                  i++)
+                    FortuneItem(
+                      child: Container(
+                          height: Get.height,
+                          width: Get.width,
+                          decoration: BoxDecoration(
+                              image: i % 2 == 0
+                                  ? DecorationImage(
+                                  image: AssetImage(
+                                      "assets/pizza_two.png"),
+                                  fit: BoxFit.fitHeight)
+                                  :i % 2 == 1 ? DecorationImage(
+                                  image: AssetImage(
+                                      "assets/pizza_one.png"),
+                                  fit: BoxFit.fitHeight):DecorationImage(
+                                  image: AssetImage(
+                                      "assets/pizza_three.png"),
+                                  fit: BoxFit.fill)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceEvenly,
+                              children: [
+                                CachedNetworkImage(
+                                    fit: BoxFit.fill,
+                                    height: 30,
+                                    width: 30,
+                                    imageUrl: RestUrl.profileUrl +
+                                        wheelController
+                                            .wheelData
+                                            .value
+                                            .data!
+                                            .wheelRewards![i]
+                                            .imagePath
+                                            .toString()),
+                                Text(
+                                  '${wheelController.wheelData.value.data!.wheelRewards![i].currencySymbol} ${wheelController.wheelData.value.data!.wheelRewards![i].amount} ',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ],
+                            ),
+                          )),
+                      //     : Padding(
+                      //   padding: const EdgeInsets.only(left: 25),
+                      //   child: Image.network(
+                      //     "${RestUrl.profileUrl}${wheelController.wheelData.value.data!.wheelRewards![i].imagePath}",
+                      //     width: 30,
+                      //     height: 30,
+                      //   ),
+                      // ),
+                      style: const FortuneItemStyle(
+                        borderColor: Colors.white,
+                        borderWidth: 5,
+                      ),
+                    ),
+                ],
+                onAnimationEnd: () {
+                  updateSpin();
+                },
+              ),
+            ),
+          ),
         ),
       );
 
@@ -320,7 +372,7 @@ class SpinTheWheelGetx extends StatelessWidget {
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400))
                         ])),
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         Row(
@@ -338,7 +390,7 @@ class SpinTheWheelGetx extends StatelessWidget {
                                     width: 24,
                                     height: 24,
                                     child: Text(wheelController
-                                        .activityList[index].currentLevel
+                                        .activityList[index].progress
                                         .toString()),
                                   ),
                                 ),
@@ -348,8 +400,12 @@ class SpinTheWheelGetx extends StatelessWidget {
                                 child: LinearProgressIndicator(
                               color: ColorManager.colorPrimaryLight,
                               value: wheelController
-                                  .activityList[index].progress!
-                                  .toDouble(),
+                                          .activityList[index].progress !=
+                                      null
+                                  ? wheelController
+                                      .activityList[index].progress!
+                                      .toDouble()
+                                  : 0.0,
                               backgroundColor: Colors.grey,
                             )),
                             ClipOval(
@@ -373,7 +429,7 @@ class SpinTheWheelGetx extends StatelessWidget {
                             )
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                       ],
@@ -480,18 +536,37 @@ class SpinTheWheelGetx extends StatelessWidget {
   }
 
   spinTheWheelTap() async {
+    isSpin.value = true;
+
+    listForReward.clear();
+
+    Random p = Random();
+    double cumulativeProbability = 0.0;
+    List<WheelRewards> dataList = [];
+    for (WheelRewards data in wheelController.wheelRewardsList) {
+      cumulativeProbability = data.probability!.toDouble();
+      if (p.nextInt(100) + 1 <= cumulativeProbability) {
+        dataList.add(data);
+        // return data;
+      }
+    }
+
+    var random = getRandomElement(dataList);
+    int id = random.id!.toInt();
+    rewardId = id;
+    selectedInt = random.id!.toInt().obs;
+
+    // for(WheelRewards data in wheelController.wheelRewardsList){
+    //   if(data.probability != null && data.probability!.toInt() < 10 && data.probability!.toInt()>0){
+    //
+    //   }
+    // }
+    //
+
+    //await player.resume();
+    _streamController.add(selectedInt.value - 1);
+
     if (wheelController.remainingChance.value > 0) {
-      isSpin.value = true;
-
-      listForReward.clear();
-
-      var random = getRandomElement(wheelController.probabilityCounter);
-
-      int id = random.id! - 1;
-      rewardId = random.id!;
-      //await player.resume();
-      selectedInt.value = id;
-      controller.add(selectedInt.value);
     } else {
       isSpin.value = true;
     }
@@ -499,9 +574,9 @@ class SpinTheWheelGetx extends StatelessWidget {
 
   void updateSpin() async {
     try {
-      progressDialogue(Get.context!);
+      //progressDialogue(Get.context!);
       wheelController.getRewardUpdate(rewardId);
-      closeDialogue(Get.context!);
+      // closeDialogue(Get.context!);
       wheelController.getWheelData();
       player.stop();
       await player.stop();

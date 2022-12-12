@@ -10,14 +10,16 @@ import 'package:thrill/utils/util.dart';
 
 class SoundsController extends GetxController {
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  var isSoundsLoading = false.obs;
   RxList<Sounds>soundsList = RxList();
   RxList<SongInfo> localSoundsList = RxList();
-
+   var selectedSoundPath = "".obs;
   SoundsController() {
     getAlbums();
   }
 
   Future<void> getSoundsList() async {
+    isSoundsLoading.value = true;
     dio.options.headers["Authorization"] =
     "Bearer ${GetStorage().read("token")}";
     try {
@@ -33,8 +35,11 @@ class SoundsController extends GetxController {
         errorToast(e.toString());
       }
     } on Exception catch (e) {
+      isSoundsLoading.value = false;
       log(e.toString());
     }
+    isSoundsLoading.value = false;
+
   }
 
   getAlbums() async {

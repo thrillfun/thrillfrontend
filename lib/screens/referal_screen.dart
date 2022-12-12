@@ -1,22 +1,20 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/dashedline_vertical_painter.dart';
-
-User user = User.fromJson(GetStorage().read("user"));
 
 class ReferalScreen extends StatelessWidget {
   ReferalScreen({Key? key}) : super(key: key);
 
   var deepLink = ''.obs;
   var fullDeepLink = "".obs;
+
+  var usersController = Get.find<UserController>();
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +46,11 @@ class ReferalScreen extends StatelessWidget {
                       height: 150,
                       width: Get.width,
                       alignment: Alignment.center,
-                      child: Image.asset("assets/background_referal.png",fit: BoxFit.fill,width: Get.width,),
+                      child: Image.asset(
+                        "assets/background_referal.png",
+                        fit: BoxFit.fill,
+                        width: Get.width,
+                      ),
                     ),
                   ],
                 ),
@@ -242,7 +244,7 @@ class ReferalScreen extends StatelessWidget {
                 child: Padding(
               padding: EdgeInsets.only(left: 10),
               child: Text(
-                user.referralCode.toString(),
+                usersController.userProfile.value.referralCode.toString(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 18,

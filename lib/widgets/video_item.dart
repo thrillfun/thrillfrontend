@@ -1,261 +1,133 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/rest/rest_api.dart';
-import 'package:thrill/utils/util.dart';
-import 'package:video_player/video_player.dart';
-
-import '../rest/rest_url.dart';
-
-VideoPlayerController? reelsPlayerController;
-bool shouldAutoPlayReel = true;
+import 'package:get/get.dart';
+import 'package:preload_page_view/preload_page_view.dart';
+import 'package:thrill/controller/model/public_videosModel.dart';
+import 'package:thrill/widgets/better_video_player.dart';
 
 class VideoPlayerItem extends StatefulWidget {
-  String? videoUrl, filter;
-  int? pageIndex;
-  int? currentPageIndex;
-  bool? isPaused;
-  int? videoId;
-  int? pagesLength;
-  VoidCallback? callback;
-  String? speed;
-  PageController? pageController;
+  VideoPlayerItem({this.videosList, this.position});
 
-  VideoPlayerItem(
-      {Key? key,
-      this.videoUrl,
-      this.pageIndex,
-      this.currentPageIndex,
-      this.isPaused,
-      this.filter,
-      this.videoId,
-      this.speed,
-      this.pageController,
-      this.pagesLength,
-      this.callback})
-      : super(key: key);
+  List<PublicVideos>? videosList;
+  int? position;
+
+  var itemIndex = 0.obs;
 
   @override
-  _VideoPlayerItemState createState() => _VideoPlayerItemState();
+  State<VideoPlayerItem> createState() => _VideoPlayerItemState();
 }
 
 class _VideoPlayerItemState extends State<VideoPlayerItem> {
-  bool isLoading = true;
-  bool showGIF = false;
-  bool initialized = false;
-  bool isDispose = false;
-  Timer? _timer;
-  int _start = 40;
-  bool isBuffering = false;
+  PublicVideos publicVideos = PublicVideos();
+  bool isFav = false;
+  bool isLock = false;
+  bool isFeed = false;
+  var current = 0.obs;
+  var related = 0.obs;
+  var popular = 0.obs;
+  var isOnPageTurning = false.obs;
+
+  PreloadPageController? preloadPageController;
 
   @override
   void initState() {
+    // TODO: implement initState
+    preloadPageController = PreloadPageController();
+    preloadPageController!.addListener(scrollListener);
+
     super.initState();
-    if (reelsPlayerController != null) reelsPlayerController?.pause();
-    reelsPlayerController?.dispose();
-    reelsPlayerController =
-        VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
-          ..initialize().then((value) {
-            if (reelsPlayerController!.value.isInitialized) {
-              reelsPlayerController!.setPlaybackSpeed(
-                  widget.speed!.contains('x')
-                      ? double.parse(widget.speed!.replaceAll('x', ''))
-                      : double.parse(widget.speed!));
-              if (shouldAutoPlayReel) reelsPlayerController!.play();
-              reelsPlayerController!.setLooping(true);
-              reelsPlayerController!.setVolume(1);
-              initialized = true;
-              showGIF = true;
-              _start = reelsPlayerController!.value.duration.inSeconds;
-              startTimer();
-              if (mounted) setState(() {});
-              reelsPlayerController?.addListener(() {
-                if (reelsPlayerController!.value.isBuffering) {
-                  if (mounted) setState(() => isBuffering = true);
-                } else {
-                  if (mounted &&
-                      isBuffering &&
-                      !reelsPlayerController!.value.isBuffering)
-                    setState(() => isBuffering = false);
-                }
-              });
-            }
-          });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _timer?.cancel();
-    //if(reelsPlayerController!=null){reelsPlayerController!.dispose();}
-    isDispose = true;
-  }
-
-  void startTimer() async {
-    const oneSec = Duration(seconds: 1);
-    if (mounted) {
-      var instance = await SharedPreferences.getInstance();
-      var loginData = instance.getString('currentUser');
-      if (loginData != null) {
-        _timer = Timer.periodic(
-          oneSec,
-          (Timer timer) {
-            if (reelsPlayerController?.value.isPlaying ?? false) {
-              if (_start == 0) {
-                callViewApi();
-                timer.cancel();
-              } else {
-                _start--;
-              }
-            }
-          },
-        );
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // if (widget.pageIndex == widget.currentPageIndex &&
-    //     !widget.isPaused &&
-    //     initialized) {
-    //   if (!reelsPlayerController!.value.isPlaying) reelsPlayerController!.play();
-    // } else {
-    //   reelsPlayerController!.pause();
-    // }
-    return Container(
-      width: getWidth(context),
-      height: getHeight(context),
-      decoration: const BoxDecoration(
-        color: Colors.black,
-      ),
-      child: GestureDetector(
-        onLongPressStart: onLongPressStart,
-        onLongPressEnd: onLongPressEnd,
-        onDoubleTap: widget.callback,
-        onTap: onTap,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            !initialized
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : AspectRatio(
-                    aspectRatio: reelsPlayerController!.value.aspectRatio,
-                    child: VideoPlayer(reelsPlayerController!)),
-            widget.filter!.isEmpty
-                ? const SizedBox(width: 10)
-                : !showGIF
-                    ? const SizedBox(width: 10)
-                    : Image.asset(
-                        widget.filter!,
-                        fit: BoxFit.cover,
-                        width: getWidth(context),
-                        height: getHeight(context),
-                      ),
-            Positioned(
-                top: 70,
-                child: Visibility(
-                  visible:
-                      reelsPlayerController!.value.volume == 0 ? true : false,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.volume_off,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                    onPressed: () => reelsPlayerController!
-                        .setVolume(1)
-                        .then((value) => setState(() {})),
-                  ),
-                )),
-            Visibility(
-              visible: isBuffering,
-              child: Center(
-                  child: RichText(
-                      textAlign: TextAlign.center,
-                      text: const TextSpan(children: [
-                        WidgetSpan(child: CircularProgressIndicator()),
-                      ]))),
-            ),
-          ],
-        ),
-      ),
-    );
+    return Scaffold(
+        body: PreloadPageView.builder(
+            controller: preloadPageController,
+            preloadPagesCount: 6,
+            itemCount: widget.videosList!.length,
+            scrollDirection: Axis.vertical,
+            itemBuilder: (context, index) {
+              late PublicUser publicUser;
+              widget.videosList!.forEach((videos) {
+                publicUser = PublicUser(
+                    id: widget.videosList![index].user!.id,
+                    name: widget.videosList![index].user?.name.toString(),
+                    username: widget.videosList![index].user?.username,
+                    email: widget.videosList![index].user?.email,
+                    dob: widget.videosList![index].user?.dob,
+                    phone: widget.videosList![index].user?.phone,
+                    avatar: widget.videosList![index].user!.avatar,
+                    socialLoginType:
+                        widget.videosList![index].user?.socialLoginType,
+                    socialLoginId:
+                        widget.videosList![index].user?.socialLoginId,
+                    firstName: widget.videosList![index].user?.firstName,
+                    lastName: widget.videosList![index].user?.lastName,
+                    gender: widget.videosList![index].user?.gender);
+              });
+              return AspectRatio(
+                aspectRatio: MediaQuery.of(context).size.aspectRatio /
+                    MediaQuery.of(context).size.aspectRatio,
+                child: BetterReelsPlayer(
+                  widget.videosList![index].gifImage.toString(),
+                  widget.videosList![index].video.toString(),
+                  index.obs,
+                  current,
+                  isOnPageTurning,
+                  () {
+                    videosController.likeVideo(
+                        widget.videosList![index].videoLikeStatus == 0 ? 1 : 0,
+                        widget.videosList![index].id!);
+                  },
+                  publicUser,
+                  widget.videosList![index].id!.toInt(),
+                  widget.videosList![index].soundName.toString(),
+                  true.obs,
+                  publicVideos,
+                  widget.videosList![index].user!.id!,
+                  widget.videosList![index].user!.username.toString().obs,
+                  widget.videosList![index].description.toString().obs,
+                  false.obs,
+                  isFeed
+                      ? []
+                      : isFav
+                          ? []
+                          : isLock
+                              ? []
+                              : [],
+                  // : hashTagVideos![index].hashtags!,
+                  widget.videosList![index].sound.toString(),
+                  widget.videosList![index].soundOwner.toString(),
+                  widget.videosList![index].videoLikeStatus.toString(),
+                  widget.videosList != null &&
+                          widget.videosList![index].isCommentable.obs
+                                  .toString()
+                                  .toLowerCase() ==
+                              "yes"
+                      ? true.obs
+                      : false.obs,
+                  like: widget.videosList![index].likes!.obs,
+                  isfollow: widget.videosList![index].isfollow,
+                ),
+              );
+            }));
   }
 
-  // void _handleVisibilityDetector(VisibilityInfo info) {
-  //   double d=info.visibleFraction*100;
-  //   print(d);
-  //   if(mounted){
-  //     // reelsPlayerController!.pause();
-  //     // if (d < 60) {
-  //     //   reelsPlayerController!.pause();
-  //     //   if (initialized &&
-  //     //       widget.pageIndex == widget.currentPageIndex &&
-  //     //       !widget.isPaused) {
-  //     //     reelsPlayerController!.pause();
-  //     //   }
-  //     // } else {
-  //     //   reelsPlayerController!.play();
-  //     // }
-  //   }
-  // }
-
-  void callViewApi() async {
-    var pref = await SharedPreferences.getInstance();
-    List<String> viewList = List<String>.empty(growable: true);
-    viewList = pref.getStringList('likeList') ?? [];
-    if (!viewList.contains(widget.videoId.toString())) {
-      var result = await RestApi.countViewVideo(widget.videoId!);
-      var json = jsonDecode(result.body);
-      if (json['status']) {
-        viewList.add(widget.videoId.toString());
-        pref.setStringList('viewList', viewList);
-        if (mounted) setState(() {});
-        try {
-          widget.pagesLength! - 1 == widget.pageIndex
-              ? widget.pageController!.animateToPage(0,
-                  duration: const Duration(seconds: 1),
-                  curve: Curves.decelerate)
-              : widget.pageController!.animateToPage(widget.pageIndex! + 1,
-                  duration: const Duration(seconds: 1),
-                  curve: Curves.decelerate);
-        } catch (_) {}
+  void scrollListener() {
+    if (isOnPageTurning.value &&
+        preloadPageController!.page ==
+            preloadPageController!.page!.roundToDouble()) {
+      setState(() {
+        current.value = preloadPageController!.page!.toInt();
+        isOnPageTurning.value = false;
+      });
+    } else if (!isOnPageTurning.value &&
+        current.toDouble() != preloadPageController!.page) {
+      if ((current.toDouble() - preloadPageController!.page!.toDouble()).abs() >
+          0.1) {
+        setState(() {
+          isOnPageTurning.value = true;
+        });
       }
-    } else {
-      try {
-        widget.pagesLength! - 1 == widget.pageIndex
-            ? widget.pageController!.animateToPage(0,
-                duration: const Duration(seconds: 1), curve: Curves.decelerate)
-            : widget.pageController!.animateToPage(widget.pageIndex! + 1,
-                duration: const Duration(seconds: 1), curve: Curves.decelerate);
-      } catch (_) {}
-    }
-  }
-
-  onLongPressStart(LongPressStartDetails d) async {
-    setState(() {
-      showGIF = false;
-    });
-    reelsPlayerController?.pause();
-  }
-
-  onLongPressEnd(LongPressEndDetails d) {
-    setState(() {
-      showGIF = true;
-    });
-    reelsPlayerController?.play();
-  }
-
-  onTap() {
-    if (reelsPlayerController!.value.volume >= 1) {
-      reelsPlayerController!.setVolume(0).then((value) => setState(() {}));
-    } else {
-      reelsPlayerController!.setVolume(1).then((value) => setState(() {}));
     }
   }
 }

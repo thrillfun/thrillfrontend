@@ -80,6 +80,7 @@ class HashTagVideos {
   String? isDuetable;
   String? isCommentable;
   String? soundOwner;
+  int? isfollow;
   HashTagUser? user;
 
   HashTagVideos(
@@ -101,6 +102,7 @@ class HashTagVideos {
       this.isDuetable,
       this.isCommentable,
       this.soundOwner,
+        this.isfollow,
       this.user});
 
   HashTagVideos.fromJson(Map<String, dynamic> json) {
@@ -127,6 +129,7 @@ class HashTagVideos {
     isDuetable = json['is_duetable'] ?? "";
     isCommentable = json['is_commentable'] ?? "";
     soundOwner = json['sound_owner'] ?? "";
+    isfollow = json["isfollow"]??0;
     user = json['user'] != null ? new HashTagUser.fromJson(json['user']) : null;
   }
 
@@ -152,6 +155,7 @@ class HashTagVideos {
     data['is_duetable'] = this.isDuetable;
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
+    data["isfollow"] = this.isfollow;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }

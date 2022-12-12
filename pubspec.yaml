@@ -97,6 +97,11 @@ dependencies:
   truecaller_sdk:
   dio:
   lottie: ^1.4.3
+  audio_video_progress_bar: ^0.11.0
+  flutter_truecaller:
+  glassmorphism: ^3.0.0
+  path: ^1.8.2
+
 
 dev_dependencies:
   flutter_test:
@@ -136,10 +141,13 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+     - family: Urbanist
+       fonts:
+         - asset: fonts/Urbanist.ttf
+         - asset: fonts/Urbanist-Thin.ttf
+         - asset: fonts/Urbanist-Bold.ttf
+         - asset: fonts/Urbanist-Italic.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

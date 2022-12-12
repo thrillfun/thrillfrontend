@@ -40,7 +40,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     try {
-      reelsPlayerController?.pause();
     } catch (_) {}
     super.initState();
   }

@@ -46,6 +46,7 @@ class HashTagsDetails {
   List<Hashtags>? hashtags;
   String? soundOwner;
   int? videoLikeStatus;
+
   User? user;
 
   HashTagsDetails(

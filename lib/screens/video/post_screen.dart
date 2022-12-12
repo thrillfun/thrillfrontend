@@ -11,7 +11,6 @@ import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
-import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/model/video_fields_model.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/post_data.dart';
@@ -19,14 +18,16 @@ import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/seperator.dart';
 import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 var lastChangedWord = "".obs;
 
 class PostScreenGetx extends StatelessWidget {
-  PostScreenGetx(this.postData, this.selectedSound);
+  PostScreenGetx(this.postData, this.selectedSound, this.isFromGallery);
 
   PostData? postData;
   String? selectedSound;
+  bool? isFromGallery;
   VideoPlayerController? videoPlayerController;
   var isHashtag = false.obs;
   var descriptionText = "".obs;
@@ -36,8 +37,8 @@ class PostScreenGetx extends StatelessWidget {
   var selectedPrivacy = "Public".obs;
   var languages = ["English", "Hindi"].obs;
   var types = ["Funny", "boring "].obs;
-  var allowComments = false.obs;
-  var allowDuets = false.obs;
+  var allowComments = true.obs;
+  var allowDuets = true.obs;
   var selectedChip = 0.obs;
   var selectedItems = [].obs;
   var privacy = ["Public", "Private"].obs;
@@ -62,12 +63,21 @@ class PostScreenGetx extends StatelessWidget {
     buildContext = context;
 
     return Scaffold(
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: ColorManager.dayNightText),
+        backgroundColor: Colors.transparent.withOpacity(0.0),
+        elevation: 0,
+        title: Text(
+          "Post",
+          style: TextStyle(
+              color: ColorManager.dayNightText,
+              fontSize: 24,
+              fontWeight: FontWeight.w700),
+        ),
+      ),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Container(
-            decoration: const BoxDecoration(gradient: processGradient),
-          ),
           SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: videoLayout(),
@@ -90,46 +100,52 @@ class PostScreenGetx extends StatelessWidget {
   videoLayout() => Column(
         children: [
           Container(
-            margin: EdgeInsets.only(top: 20, bottom: 20),
-            child: const Text(
-              "Post",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-          Container(
-              height: 220,
-              decoration: const BoxDecoration(
-                  color: Color(0xff353841),
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            margin: EdgeInsets.all(10),
+              height: Get.height/5,
               child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
-                      child: InkWell(
-                    child: ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10)),
-                        child: Container(
-                          height: 220,
-                          child: VideoPlayer(videoPlayerController!),
-                        )),
-                    onTap: () {
-                      if (isPlaying.value) {
-                        videoPlayerController!.pause();
-                        isPlaying.value = false;
-                      } else {
-                        videoPlayerController!.play();
-                        isPlaying.value = true;
-                      }
-                    },
+                    flex:2,
+                      child: Container(
+                        width: Get.width,
+                    decoration: const BoxDecoration(
+                        color: Color(0xff353841),
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    margin: const EdgeInsets.only(
+                        right: 10),
+                    child: descriptionLayout(),
                   )),
-                  descriptionLayout(),
+                  Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                      color: Color(0xff353841),
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                      margin: const EdgeInsets.only(right: 10),
+                      child: VisibilityDetector(
+                      key: Key("post"),
+                      child: InkWell(
+                        child: ClipRRect(
+                          child: AspectRatio(aspectRatio: videoPlayerController!.value.aspectRatio/Get.height,child: VideoPlayer(videoPlayerController!),),
+                          borderRadius: BorderRadius.circular(20),
+                          
+                       ),
+                        onTap: () {
+                          if (isPlaying.value) {
+                            videoPlayerController!.pause();
+                            isPlaying.value = false;
+                          } else {
+                            videoPlayerController!.play();
+                            isPlaying.value = true;
+                          }
+                        },
+                      ),
+                      onVisibilityChanged: (VisibilityInfo info) {
+                        info.visibleFraction == 0
+                            ? videoPlayerController!.pause
+                            : videoPlayerController!.play;
+                      }),
+                    ),
+                  ),
                 ],
               )),
           Obx(() => searchItems.isNotEmpty
@@ -158,7 +174,9 @@ class PostScreenGetx extends StatelessWidget {
                                   searchItems[index]
                                       .toString()
                                       .replaceAll(RegExp("#"), ''),
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                color: ColorManager.dayNightText,
+                              ),
                             ),
                           )))))
               : Column(
@@ -168,8 +186,8 @@ class PostScreenGetx extends StatelessWidget {
                     const SizedBox(
                       height: 10,
                     ),
-                    const MySeparator(
-                      color: Color(0xff353841),
+                    MySeparator(
+                      color: ColorManager.dayNightText,
                     ),
                     const SizedBox(
                       height: 10,
@@ -202,9 +220,10 @@ class PostScreenGetx extends StatelessWidget {
                                   ColorManager.colorPrimaryLight,
                                   ColorManager.colorAccent
                                 ])),
-                        child: const Text(
+                        child: Text(
                           "Post Video",
-                          style: TextStyle(color: Colors.white, fontSize: 18),
+                          style: TextStyle(
+                              color: ColorManager.dayNightText, fontSize: 18),
                         ),
                       ),
                     )
@@ -244,9 +263,12 @@ class PostScreenGetx extends StatelessWidget {
                   lastChangedWord.value = txt;
                 }
               },
-              basicStyle: const TextStyle(color: Colors.white),
-              decoratedStyle:
-                  const TextStyle(color: ColorManager.colorPrimaryLight),
+              basicStyle: TextStyle(
+                color: ColorManager.dayNightText,
+              ),
+              decoratedStyle: TextStyle(
+                color: ColorManager.dayNightText,
+              ),
               decoration: InputDecoration.collapsed(
                   hintText: "Describe your video",
                   hintStyle: TextStyle(
@@ -322,15 +344,17 @@ class PostScreenGetx extends StatelessWidget {
               border: Border.all(color: Color(0xff353841)),
               borderRadius: BorderRadius.all(Radius.circular(10))),
           child: Row(
-            children: const [
+            children: [
               Icon(
                 Icons.add,
-                color: ColorManager.colorPrimaryLight,
+                color: ColorManager.dayNightIcon,
               ),
               Expanded(
                 child: Text(
                   "Add Hashtag",
-                  style: TextStyle(color: ColorManager.colorPrimaryLight),
+                  style: TextStyle(
+                    color: ColorManager.dayNightText,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               )
@@ -353,7 +377,9 @@ class PostScreenGetx extends StatelessWidget {
                               selectedColor: ColorManager.colorAccent,
                               elevation: 10,
                               label: Text(selectedItems[index].toString(),
-                                  style: const TextStyle(color: Colors.white)),
+                                  style: TextStyle(
+                                    color: ColorManager.dayNightText,
+                                  )),
                               onSelected: (value) =>
                                   selectedItems.removeAt(index)),
                         )),
@@ -377,16 +403,18 @@ class PostScreenGetx extends StatelessWidget {
                     .copyWith(canvasColor: const Color(0xff353841)),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.keyboard_double_arrow_down,
-                      color: Colors.white,
+                      color: ColorManager.dayNightText,
                     ),
                     value: selectedItem.value,
                     items: videosController.languageList
                         .map((Languages element) => DropdownMenuItem(
                             value: element.name,
                             child: Text(element.name.toString(),
-                                style: TextStyle(color: Colors.white))))
+                                style: TextStyle(
+                                  color: ColorManager.dayNightText,
+                                ))))
                         .toList(growable: true),
                     onChanged: (value) {
                       selectedItem.value = value!.toString();
@@ -402,15 +430,20 @@ class PostScreenGetx extends StatelessWidget {
               .map((element) => PopupMenuItem(
                   value: element,
                   child: Text(element.toString(),
-                      style:
-                          const TextStyle(color: Colors.black, fontSize: 14))))
+                      style: TextStyle(
+                          color: ColorManager.dayNightText,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18))))
               .toList(growable: true),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
                 selectedPrivacy.value,
-                style: const TextStyle(color: ColorManager.colorPrimaryLight),
+                style: const TextStyle(
+                    color: ColorManager.colorPrimaryLight,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18),
               ),
               const Icon(
                 Icons.arrow_drop_down,
@@ -437,16 +470,18 @@ class PostScreenGetx extends StatelessWidget {
                     .copyWith(canvasColor: const Color(0xff353841)),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.keyboard_double_arrow_down,
-                      color: Colors.white,
+                      color: ColorManager.dayNightIcon,
                     ),
                     value: selectedCategory.value,
                     items: videosController.categoriesList
                         .map((Categories element) => DropdownMenuItem(
                               child: Text(
                                 element.title.toString(),
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                  color: ColorManager.dayNightText,
+                                ),
                               ),
                               value: element.title,
                             ))
@@ -468,17 +503,20 @@ class PostScreenGetx extends StatelessWidget {
               children: [
                 Expanded(
                     child: RichText(
-                        text: const TextSpan(children: [
+                        text: TextSpan(children: [
                   WidgetSpan(
                       child: Icon(
                         Icons.lock_open,
                         size: 20,
-                        color: Colors.white,
+                        color: ColorManager.dayNightIcon,
                       ),
                       alignment: PlaceholderAlignment.middle),
                   TextSpan(
-                      text: " Who can view this video",
-                      style: TextStyle(color: Colors.white, fontSize: 14))
+                      text: " Visible to ",
+                      style: TextStyle(
+                          color: ColorManager.dayNightText,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18))
                 ]))),
                 dropDownPrivacy()
               ],
@@ -491,27 +529,31 @@ class PostScreenGetx extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 RichText(
-                    text: const TextSpan(children: <InlineSpan>[
+                    text: TextSpan(children: <InlineSpan>[
                   WidgetSpan(
                     child: Icon(
                       Icons.message_outlined,
-                      color: Colors.white,
+                      color: ColorManager.dayNightIcon,
                       size: 20,
                     ),
                     alignment: PlaceholderAlignment.middle,
                   ),
                   TextSpan(
                       text: " Allow Comments",
-                      style: TextStyle(color: Colors.white, fontSize: 14))
+                      style: TextStyle(
+                          color: ColorManager.dayNightText,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18))
                 ])),
                 Obx(
                   () => Switch(
-                      onChanged: (val) => allowComments.toggle(),
-                      value: allowComments.value,
-                      activeColor: Colors.white,
-                      activeTrackColor: ColorManager.colorPrimaryLight,
-                      inactiveThumbColor: ColorManager.colorPrimaryLight,
-                      inactiveTrackColor: Color(0xff353841)),
+                    onChanged: (val) => allowComments.toggle(),
+                    value: allowComments.value,
+                    activeColor: Colors.white,
+                    activeTrackColor: ColorManager.colorPrimaryLight,
+                    inactiveThumbColor: ColorManager.colorPrimaryLight,
+                    inactiveTrackColor: ColorManager.dayNightText,
+                  ),
                 )
               ],
             ),
@@ -520,17 +562,20 @@ class PostScreenGetx extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 RichText(
-                    text: const TextSpan(children: [
+                    text: TextSpan(children: [
                   WidgetSpan(
                       child: Icon(
                         Icons.videocam_outlined,
-                        color: Colors.white,
+                        color: ColorManager.dayNightIcon,
                         size: 25,
                       ),
                       alignment: PlaceholderAlignment.middle),
                   TextSpan(
                       text: " Allow Duets",
-                      style: TextStyle(color: Colors.white, fontSize: 14))
+                      style: TextStyle(
+                          color: ColorManager.dayNightText,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18))
                 ])),
                 Obx(() => Switch(
                     onChanged: (value) => allowDuets.toggle(),
@@ -646,8 +691,9 @@ class PostScreenGetx extends StatelessWidget {
                                             discoverController
                                                 .hashTagsList[index].name
                                                 .toString(),
-                                            style: const TextStyle(
-                                                color: Colors.white),
+                                            style: TextStyle(
+                                              color: ColorManager.dayNightText,
+                                            ),
                                           ))),
                                 )),
                       ),
@@ -683,52 +729,76 @@ class PostScreenGetx extends StatelessWidget {
     int currentUnix = DateTime.now().millisecondsSinceEpoch;
     String videoId = 'Thrill-$currentUnix.mp4';
     videoPlayerController!.pause();
-    var file =
-        File(selectedSound!.isEmpty?postData!.filePath!.substring(7, postData!.filePath.length):postData!.filePath!);
+    var file = File(postData!.filePath!);
 
     try {
       GetStorage().write("videoPrivacy", selectedPrivacy.value);
       await videosController.createGIF(currentUnix, postData!.newPath!).then(
-              (value) async =>
-              { await videosController.awsUploadThumbnail(currentUnix).then((value)async{
+          (value) async => {
+                await videosController
+                    .awsUploadThumbnail(currentUnix)
+                    .then((value) async {})
+              });
+      await videosController
+          .awsUploadVideo(file, currentUnix)
+          .then((value) async {
+        var audioFile = File(saveCacheDirectory + "originalAudio.mp3");
 
-      })});
-    await  videosController
-          .awsUploadVideo(file, currentUnix);
-      var audioFile = File(saveCacheDirectory + "originalAudio.mp3");
-
-      if(postData!.addSoundModel!.sound.isNotEmpty){
-        audioFile = File(postData!.addSoundModel!.sound);
-      }
-      if (selectedSound!.isEmpty) {
-
-        await videosController
-            .awsUploadSound(audioFile, currentUnix.toString())
-            .then((value) => {
+        if (postData!.addSoundModel!.sound.isNotEmpty) {
+          audioFile = File(postData!.addSoundModel!.sound);
+        }
+        if (selectedSound!.isEmpty) {
+          await videosController
+              .awsUploadSound(audioFile, currentUnix.toString())
+              .then((value) => {
+                    videosController.postVideo(
+                        usersController.storage.read("userId").toString(),
+                        videoId,
+                        postData!.isDuet
+                            ? postData!.duetSound ?? ""
+                            : postData!.addSoundModel == null
+                                ? ""
+                                : postData!.addSoundModel!.isSoundFromGallery
+                                    ? "Thrill-$currentUnix.mp3"
+                                    : postData!.addSoundModel!.sound
+                                        .split('/')
+                                        .last,
+                        postData!.addSoundModel?.name ?? "",
+                        "1",
+                        tagList,
+                        selectedPrivacy.value,
+                        allowComments.value ? 1 : 0,
+                        textEditingController.text,
+                        postData!.filterName.isEmpty
+                            ? ''
+                            : postData!.filterName,
+                        "1",
+                        'Thrill-$currentUnix.png',
+                        postData!.speed,
+                        allowDuets.value,
+                        allowComments.value,
+                        postData!.duetFrom ?? '',
+                        postData!.isDuet,
+                        postData!.addSoundModel?.userId ?? 0)
+                  });
+        } else {
           videosController.postVideo(
-              User.fromJson(GetStorage().read("user"))
-                  .id
-                  .toString(),
+              usersController.storage.read("userId").toString(),
               videoId,
               postData!.isDuet
                   ? postData!.duetSound ?? ""
                   : postData!.addSoundModel == null
-                  ? ""
-                  : postData!
-                  .addSoundModel!.isSoundFromGallery
-                  ? "Thrill-$currentUnix.mp3"
-                  : postData!.addSoundModel!.sound
-                  .split('/')
-                  .last,
+                      ? ""
+                      : postData!.addSoundModel!.isSoundFromGallery
+                          ? "Thrill-$currentUnix.mp3"
+                          : postData!.addSoundModel!.sound.split('/').last,
               postData!.addSoundModel?.name ?? "",
               "1",
               tagList,
               selectedPrivacy.value,
               allowComments.value ? 1 : 0,
               textEditingController.text,
-              postData!.filterName.isEmpty
-                  ? ''
-                  : postData!.filterName,
+              postData!.filterName.isEmpty ? '' : postData!.filterName,
               "1",
               'Thrill-$currentUnix.png',
               postData!.speed,
@@ -736,41 +806,12 @@ class PostScreenGetx extends StatelessWidget {
               allowComments.value,
               postData!.duetFrom ?? '',
               postData!.isDuet,
-              postData!.addSoundModel?.userId ?? 0)
-        });
-      }
-      else {
-        videosController.postVideo(
-            User.fromJson(GetStorage().read("user")).id.toString(),
-            videoId,
-            postData!.isDuet
-                ? postData!.duetSound ?? ""
-                : postData!.addSoundModel == null
-                ? ""
-                : postData!.addSoundModel!.isSoundFromGallery
-                ? "Thrill-$currentUnix.mp3"
-                : postData!.addSoundModel!.sound
-                .split('/')
-                .last,
-            postData!.addSoundModel?.name ?? "",
-            "1",
-            tagList,
-            selectedPrivacy.value,
-            allowComments.value ? 1 : 0,
-            textEditingController.text,
-            postData!.filterName.isEmpty ? '' : postData!.filterName,
-            "1",
-            'Thrill-$currentUnix.png',
-            postData!.speed,
-            allowDuets.value,
-            allowComments.value,
-            postData!.duetFrom ?? '',
-            postData!.isDuet,
-            postData!.addSoundModel?.userId ?? 0);
-      }
-      // Get.offAll(BottomNavigation());
-    //  videosController.getAllVideos();
+              postData!.addSoundModel?.userId ?? 0);
+        }
+      });
 
+      // Get.offAll(BottomNavigation());
+      //  videosController.getAllVideos();
     } catch (e) {
       errorToast(e.toString());
     }

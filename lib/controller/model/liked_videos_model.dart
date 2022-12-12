@@ -43,54 +43,61 @@ class LikedVideos {
   String? gifImage;
   String? speed;
   int? comments;
+  List<dynamic>? hashtags;
   String? isDuet;
   String? duetFrom;
   String? isDuetable;
   String? isCommentable;
   String? soundOwner;
-  int? videoLikeStatus;
+  String? videoLikeStatus;
+
+  int? isfollow;
   User? user;
 
   LikedVideos(
       {this.id,
-      this.video,
-      this.description,
-      this.sound,
-      this.soundName,
-      this.soundCategoryName,
-      this.filter,
-      this.likes,
-      this.views,
-      this.gifImage,
-      this.speed,
-      this.comments,
-      this.isDuet,
-      this.duetFrom,
-      this.isDuetable,
-      this.isCommentable,
-      this.soundOwner,
+        this.video,
+        this.description,
+        this.sound,
+        this.soundName,
+        this.soundCategoryName,
+        this.filter,
+        this.likes,
+        this.views,
+        this.gifImage,
+        this.speed,
+        this.comments,
+        this.hashtags,
+        this.isDuet,
+        this.duetFrom,
+        this.isDuetable,
+        this.isCommentable,
+        this.soundOwner,
+        this.isfollow,
         this.videoLikeStatus,
-      this.user});
+        this.user});
 
   LikedVideos.fromJson(Map<String, dynamic> json) {
-    id = json['id'] ?? "";
-    video = json['video'] ?? "";
-    description = json['description'] ?? "";
-    sound = json['sound'] ?? "";
-    soundName = json['sound_name'] ?? "";
-    soundCategoryName = json['sound_category_name'] ?? "";
-    filter = json['filter'] ?? "";
-    likes = json['likes'] ?? "";
-    views = json['views'] ?? "";
-    gifImage = json['gif_image'] ?? "";
-    speed = json['speed'] ?? "";
-    comments = json['comments'] ?? "";
-    isDuet = json['is_duet'] ?? "";
-    duetFrom = json['duet_from'] ?? "";
-    isDuetable = json['is_duetable'] ?? "";
-    isCommentable = json['is_commentable'] ?? "yes";
-    soundOwner = json['sound_owner'] ?? "";
-    videoLikeStatus = json['video_like_status']??0;
+    id = json['id'];
+    video = json['video'];
+    description = json['description'];
+    sound = json['sound'];
+    soundName = json['sound_name'];
+    soundCategoryName = json['sound_category_name'];
+    filter = json['filter'];
+    likes = json['likes'];
+    views = json['views'];
+    gifImage = json['gif_image'];
+    speed = json['speed'];
+    comments = json['comments'];
+    hashtags = json['hashtags'];
+    isDuet = json['is_duet'];
+    duetFrom = json['duet_from'];
+    isDuetable = json['is_duetable'];
+    isCommentable = json['is_commentable'];
+    soundOwner = json['sound_owner'];
+    isfollow=json['isfollow']??0;
+    videoLikeStatus = json["video_like_status"]??"0";
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
   }
 
@@ -108,12 +115,14 @@ class LikedVideos {
     data['gif_image'] = this.gifImage;
     data['speed'] = this.speed;
     data['comments'] = this.comments;
+    data['hashtags'] = this.hashtags??[];
     data['is_duet'] = this.isDuet;
     data['duet_from'] = this.duetFrom;
     data['is_duetable'] = this.isDuetable;
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
-    data['video_like_status'] = this.videoLikeStatus;
+    data["isfollow"] = this.isfollow;
+    data["video_like_status"] = this.videoLikeStatus;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
@@ -149,6 +158,7 @@ class User {
   String? totalVideos;
   String? boxTwo;
   String? boxThree;
+
 
   User(
       {this.id,

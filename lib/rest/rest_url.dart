@@ -1,10 +1,10 @@
 class RestUrl {
   static const String baseUrl = "https://thrill.fun/api";
   static const String profileUrl =
-      "http://3.129.172.46/dev/uploads/profile_images/";
+      "https://thrill.fun/public/uploads/profile_images/";
 
   // static const String profileUrl =
-  //     "http://thrill.fun/public/dev/uploads/profile_images/";
+  //     "http://thrill.fun/public/dev/uploads/profile_images/profile_images1663598406.jpg";
   // static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
   static const String assetsUrl = "https://thrillvideo.s3.amazonaws.com/assets/";
   // static const String bannerUrl = "http://thrill.fun/dev/uploads/banners/";
@@ -23,7 +23,7 @@ class RestUrl {
   static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
   static const String bannerUrl = "https://9starinfosolutions.com/thrill/uploads/banners/";
   static const String thambUrl = "https://9starinfosolutions.com/thrill/uploads/videos/";
-  static const String soundUrl = "https://9starinfosolutions.com/thrill/";
+  static const String soundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
   static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
   static const String awsSoundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
   static const String currencyUrl = "https://9starinfosolutions.com/thrill/uploads/currency/";

@@ -53,10 +53,10 @@ class Activities {
   String? currentLevel;
   String? nextLevel;
   String? conditions;
-  String? earnedSpins;
-  String? totalSpin;
-  String? maxLevel;
-  int? progress;
+  dynamic? earnedSpins;
+  dynamic? totalSpin;
+  dynamic? maxLevel;
+  num? progress;
 
   Activities(
       {this.name,
@@ -70,13 +70,13 @@ class Activities {
 
   Activities.fromJson(Map<String, dynamic> json) {
     name = json['name'];
-    currentLevel = json['current_level'];
-    nextLevel = json['next_level'];
+    currentLevel = json['current_level']??0;
+    nextLevel = json['next_level']??0;
     conditions = json['conditions'];
-    earnedSpins = json['earned_spins'];
-    totalSpin = json['total_spin'];
-    maxLevel = json['max_level'];
-    progress = json['progress'];
+    earnedSpins = json['earned_spins']??0;
+    totalSpin = json['total_spin']??0;
+    maxLevel = json['max_level']??0;
+    progress = json['progress']??0;
   }
 
   Map<String, dynamic> toJson() {

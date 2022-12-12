@@ -48,7 +48,8 @@ class Videos {
   String? isDuetable;
   String? isCommentable;
   String? soundOwner;
-  int? videoLikeStatus;
+  String? videoLikeStatus;
+  int? isfollow;
   User? user;
 
   Videos(
@@ -70,6 +71,7 @@ class Videos {
       this.isCommentable,
       this.soundOwner,
         this.videoLikeStatus,
+        this.isfollow,
       this.user});
 
   Videos.fromJson(Map<String, dynamic> json) {
@@ -90,7 +92,8 @@ class Videos {
     isDuetable = json['is_duetable'] ?? "";
     isCommentable = json['is_commentable'] ?? "";
     soundOwner = json['sound_owner'] ?? "";
-    videoLikeStatus = json['video_like_status']??0;
+    videoLikeStatus = json['video_like_status']??'';
+    isfollow=json["isfollow"]??0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
   }
 
@@ -114,6 +117,7 @@ class Videos {
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
     data['video_like_status'] = this.videoLikeStatus;
+    data["isfollow"] = this.isfollow;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }

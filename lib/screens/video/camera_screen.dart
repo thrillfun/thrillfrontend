@@ -6,22 +6,29 @@ import 'package:camera/camera.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/sounds_controller.dart';
+import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/main.dart';
-import 'package:thrill/screens/home/bottom_navigation.dart';
-import 'package:thrill/screens/sound/sound_details.dart';
 import 'package:thrill/utils/custom_timer_painter.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
 
+import '../../controller/videos_controller.dart';
 import '../../widgets/sound_list_bottom_sheet.dart';
 
 var timer = 60.obs;
 Timer? time;
 CameraController? _controller;
+var usersController = Get.find<UserController>();
+var videosController = Get.find<VideosController>();
+var soundsController = Get.find<SoundsController>();
+
+File? file;
 
 class CameraScreen extends StatefulWidget {
   CameraScreen({required this.selectedSound, this.owner, this.id});
@@ -70,12 +77,10 @@ class _CameraScreenState extends State<CameraScreen>
   //get camera permission status and start camera
   getPermissionStatus() async {
     await Permission.storage.request();
-    await Permission.manageExternalStorage.request();
     await Permission.camera.request();
     var status = await Permission.camera.status;
-    var storageStatus = await Permission.manageExternalStorage.status;
 
-    if (status.isGranted && storageStatus.isGranted) {
+    if (status.isGranted) {
       log('Camera Permission: GRANTED');
       log('Storage permission granted');
       setState(() {
@@ -257,6 +262,10 @@ class _CameraScreenState extends State<CameraScreen>
   void initState() {
     // Hide the status bar in Android
     soundsController.getSoundsList();
+
+    soundsController.selectedSoundPath.value = widget.selectedSound ?? "";
+
+    file = File(soundsController.selectedSoundPath.value);
     getPermissionStatus();
     _currentFlashMode = FlashMode.off;
     animationController = AnimationController(
@@ -271,7 +280,11 @@ class _CameraScreenState extends State<CameraScreen>
         });
         try {
           videosController.openEditor(
-              false, "", widget.selectedSound, widget.id!, widget.owner!);
+              false,
+              "",
+              soundsController.selectedSoundPath.value,
+              widget.id!,
+              widget.owner!);
         } catch (e) {
           errorToast(e.toString());
         }
@@ -335,7 +348,8 @@ class _CameraScreenState extends State<CameraScreen>
                             Expanded(
                                 child: Container(
                               alignment: Alignment.center,
-                              padding: EdgeInsets.only(left: 20, right: 20),
+                              padding:
+                                  const EdgeInsets.only(left: 20, right: 20),
                               decoration: const BoxDecoration(
                                 gradient: LinearGradient(
                                     begin: Alignment.topCenter,
@@ -472,19 +486,20 @@ class _CameraScreenState extends State<CameraScreen>
                                       ),
                                       InkWell(
                                         onTap: () async {
-                                          await ImagePicker()
+                                          ImagePicker()
                                               .pickVideo(
                                                   source: ImageSource.gallery)
                                               .then((value) {
-                                            try {
+                                            if (value != null) {
                                               videosController.openEditor(
                                                   true,
-                                                  value!.path,
-                                                  widget.selectedSound,
+                                                  value.path ?? "",
+                                                  soundsController
+                                                          .selectedSoundPath
+                                                          .value ??
+                                                      "",
                                                   widget.id!,
-                                                  widget.owner!);
-                                            } catch (e) {
-                                              errorToast(e.toString());
+                                                  widget.owner ?? "");
                                             }
                                           });
                                         },
@@ -539,9 +554,11 @@ class _CameraScreenState extends State<CameraScreen>
                                                   videosController.openEditor(
                                                       false,
                                                       "",
-                                                      widget.selectedSound,
+                                                      soundsController
+                                                          .selectedSoundPath
+                                                          .value,
                                                       widget.id!,
-                                                      widget.owner!);
+                                                      widget.owner ?? "");
                                                 } catch (e) {
                                                   errorToast(e.toString());
                                                 }
@@ -561,8 +578,17 @@ class _CameraScreenState extends State<CameraScreen>
                           ],
                         ),
                         GradientElevatedButton(
-                            onPressed: () => Get.bottomSheet(SoundListBottomSheet()),
-                            child: Text("Select Sound")),
+                            onPressed: () =>
+                                soundsController.getSoundsList().then(
+                                      (value) async => await usersController
+                                          .getfavouriteSounds()
+                                          .then((value) => Get.bottomSheet(
+                                              SoundListBottomSheet(),
+                                              isScrollControlled: true)),
+                                    ),
+                            child: Obx(()=>Text( soundsController
+                                .selectedSoundPath
+                                .value.isEmpty?"Select Sound": basename(soundsController.selectedSoundPath.value)))),
                       ],
                     ),
                   )

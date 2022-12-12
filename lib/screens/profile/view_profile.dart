@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,94 +5,82 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/controller/model/hashtag_videos_model.dart';
+import 'package:iconify_flutter/icons/radix_icons.dart';
+import 'package:thrill/controller/model/inbox_model.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
+import 'package:thrill/models/inbox_model.dart';
+import 'package:thrill/screens/chat/chat_screen.dart';
 import 'package:thrill/screens/following_and_followers.dart';
-import 'package:thrill/screens/screen.dart';
+import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/video_player_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:video_editor_sdk/video_editor_sdk.dart';
 
 import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
 
+var usersController = Get.find<UserController>();
 class ViewProfile extends StatelessWidget {
   var showFollowers = false.obs;
   var userController = Get.find<UserController>();
   var usersController = Get.find<UserController>();
   var selectedTab = 0.obs;
+  var videosController = Get.find<VideosController>();
 
-  User userModel = User.fromJson(GetStorage().read("user"));
 
-  ViewProfile(this.userId);
+  ViewProfile(this.userId,this.isFollow,this.profileName);
+
   String? userId = "";
+  RxInt? isFollow=0.obs;
+  String? profileName;
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.topLeft,
-        fit: StackFit.expand,
-        children: [
-          loadLocalSvg("background_2.svg"),
-          Container(
-            alignment: Alignment.topCenter,
-            margin: const EdgeInsets.only(
-                top: 40, left: 10, right: 10),
-            child: SvgPicture.asset(
-              "assets/background_profile_1.svg",
-              width: Get.width,
+      backgroundColor: ColorManager.dayNight,
+        appBar: AppBar(
+          title: Text(
+            profileName!,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Get.isPlatformDarkMode ? Colors.white : Colors.black,
             ),
           ),
-          GetX<UserController>(
-              builder: (user) => user.isProfileLoading.value
-                  ? Center(
-                child: loader(),
-              )
-                  :Column(
+          backgroundColor: Colors.transparent.withOpacity(0),
+          elevation: 0,
+          iconTheme: IconThemeData(
+              color: Get.isPlatformDarkMode ? Colors.white : Colors.black),
+        ),
+        body: GetX<UserController>(builder: (usersController)=>usersController.isProfileLoading.isTrue?Center(child: loader(),):
+            ListView(
+          children: [
+            Container(
+              height: Get.height,
+              child:  Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(
                     height: 20,
                   ),
                   Container(
-                    margin: const EdgeInsets.only(top: 20),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            begin: Alignment.topRight,
-                            end: Alignment.centerLeft,
-                            colors: [
-                              Color.fromARGB(25, 0, 204, 201),
-                              Color.fromARGB(10, 31, 33, 40)
-                            ]),
-                        border: Border.all(
-                          color: Colors.transparent,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(200))),
-                    width: 140,
-                    height: 140,
-                    child: Container(
-                      clipBehavior: Clip.antiAliasWithSaveLayer,
-                      height: 100,
-                      width: 100,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                      ),
-                      child: CachedNetworkImage(
-                        fit: BoxFit.cover,
-                        imageUrl: user.userProfile.value.data!.user!
-                            .avatar.isEmpty
-                            ? 'https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg'
-                            : '${RestUrl.profileUrl}${user.userProfile.value.data!.user!.avatar}',
-                        placeholder: (a, b) => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    height: 100,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                    ),
+                    child: CachedNetworkImage(
+                      fit: BoxFit.cover,
+                      imageUrl: usersController
+                          .otherProfile.value.avatar!.isEmpty
+                          ? 'https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg'
+                          : '${RestUrl.profileUrl}${usersController.otherProfile!.value.avatar}',
+                      placeholder: (a, b) => const Center(
+                        child: CircularProgressIndicator(),
                       ),
                     ),
                   ),
@@ -104,27 +90,34 @@ class ViewProfile extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('@${user.userProfile.value.data!.user!.username}',
-                        style: const TextStyle(
-                            fontSize: 16, color: Colors.white),
+                      Text(
+                        '@${usersController.otherProfile.value.username}',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(
                         width: 5,
                       ),
                       Visibility(
-                          visible: user.userProfile.value.data!.user
-                              ?.isVerified ==
+                          visible: usersController.otherProfile.value
+                              .isVerified ==
                               'true',
                           child: SvgPicture.asset(
                             'assets/verified.svg',
                           ))
                     ],
                   ),
+                  Text(
+                    '@${usersController.otherProfile.value.name}',
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
                   Visibility(
                     visible: showFollowers.value,
                     child: SizedBox(
                       height: 100,
-                      child: user.followersModel.value!.isEmpty
+                      child: usersController.followersModel.value!.isEmpty
                           ? Center(
                           child: Text(
                             "No Followers to Display!",
@@ -134,7 +127,7 @@ class ViewProfile extends StatelessWidget {
                           ))
                           : ListView.builder(
                         itemCount:
-                        user.followersModel.value!.length,
+                        usersController.followersModel.value!.length,
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 15),
@@ -178,7 +171,7 @@ class ViewProfile extends StatelessWidget {
                                               ),
                                             ),
                                         imageUrl:
-                                        '${RestUrl.profileUrl}${user.followersModel.value![index].avtars}',
+                                        '${RestUrl.profileUrl}${usersController.followersModel.value![index].avtars}',
                                         placeholder: (a, b) =>
                                         const Center(
                                           child:
@@ -192,7 +185,7 @@ class ViewProfile extends StatelessWidget {
                                 SizedBox(
                                     width: 70,
                                     child: Text(
-                                      user.followersModel
+                                      usersController.followersModel
                                           .value![index].name!,
                                       overflow:
                                       TextOverflow.ellipsis,
@@ -216,39 +209,63 @@ class ViewProfile extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           usersController.isMyProfile.value = true;
-                          Get.to(FollowingAndFollowers(
-                            isProfile: false,
-                          ));
+                          usersController
+                              .getUserFollowers(usersController
+                              .otherProfile.value.id!)
+                              .then((value) => usersController
+                              .getUserFollowing(usersController
+                              .otherProfile.value.id!)
+                              .then((value) =>
+                              Get.to(FollowingAndFollowers(
+                                isProfile: false.obs,
+                              ))));
                           // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':1});
                         },
                         child: RichText(
                             textAlign: TextAlign.center,
                             text: TextSpan(children: [
                               TextSpan(
-                                  text:'${user.userProfile.value.data!.user!.following}'
+                                  text:
+                                  '${usersController.otherProfile.value.following}'
                                       '\n',
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17)),
-                              const TextSpan(
+                                  style: TextStyle(
+                                      color: Get.isPlatformDarkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w700)),
+                              TextSpan(
                                   text: following,
-                                  style:
-                                  TextStyle(color: Colors.grey)),
+                                  style: TextStyle(
+                                      color: Get.isPlatformDarkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500)),
                             ])),
                       ),
-                      Container(
-                        height: 40,
-                        width: 1,
-                        color: Colors.white.withOpacity(0.2),
+                      SizedBox(
+                        height: 53,
+                        child: VerticalDivider(
+                          thickness: 1,
+                          width: 1,
+                        ),
                       ),
                       GestureDetector(
                         onTap: () {
-                          userController.userId.value =
-                          user.userProfile.value.data!.user!.id!;
-                          userController.isMyProfile.value = false;
-                          Get.to(FollowingAndFollowers(
-                            isProfile: false,
-                          ));
+                          usersController.userId.value =
+                          usersController.otherProfile.value.id!;
+                          usersController.isMyProfile.value = false;
+                          usersController
+                              .getUserFollowers(usersController
+                              .otherProfile.value.id!)
+                              .then((value) => usersController
+                              .getUserFollowing(usersController
+                              .otherProfile.value.id!)
+                              .then((value) =>
+                              Get.to(FollowingAndFollowers(
+                                isProfile: false.obs,
+                              ))));
 
                           // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
                         },
@@ -256,408 +273,237 @@ class ViewProfile extends StatelessWidget {
                             textAlign: TextAlign.center,
                             text: TextSpan(children: [
                               TextSpan(
-                                  text:  '${user.userProfile.value.data!.user!.followers}'
+                                  text:
+                                  '${usersController.otherProfile.value.followers}'
                                       '\n',
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17)),
-                              const TextSpan(
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      color: Get.isPlatformDarkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.w700)),
+                              TextSpan(
                                   text: followers,
-                                  style:
-                                  TextStyle(color: Colors.grey)),
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      color: Get.isPlatformDarkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.w500)),
                             ])),
                       ),
                       Container(
-                        height: 40,
-                        width: 1,
-                        color: Colors.white.withOpacity(0.2),
+                        height: 53,
+                        child: VerticalDivider(
+                          thickness: 1,
+                          width: 1,
+                        ),
                       ),
                       RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(children: [
                             TextSpan(
                                 text:
-                                '${user.userProfile.value.data!.user!.likes!.isEmpty ? 0 : user.userProfile.value.data!.user!.likes}'
+                                '${usersController.otherProfile.value.likes!.isEmpty ? 0 : usersController.otherProfile.value.likes}'
                                     '\n',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17)),
-                            const TextSpan(
+                                style: TextStyle(
+                                    color: Get.isPlatformDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w700)),
+                            TextSpan(
                                 text: likes,
-                                style: TextStyle(color: Colors.grey)),
+                                style: TextStyle(
+                                    color: Get.isPlatformDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500)),
                           ])),
                     ],
                   ).w(MediaQuery.of(context).size.width * .80),
                   const SizedBox(
                     height: 20,
                   ),
-                  Container(
-                    margin: EdgeInsets.only(left: 10, top: 10),
-                    width: MediaQuery.of(context).size.width,
-                    child: Text(
-                      '${user.userProfile.value.data!.user!.name!.isNotEmpty ? user.userProfile.value.data!.user!.name! : 'anonymous'}',
-                      style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                      textAlign: TextAlign.start,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(
-                        left: 10, top: 10, right: 10),
-                    width: MediaQuery.of(context).size.width,
-                    child: Text(
-                      user.userProfile.value.data!.user!.bio!
-                          .isNotEmpty
-                          ? user.userProfile.value.data!.user!.bio!
-                          : '',
-                      maxLines: 2,
-                      style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                      textAlign: TextAlign.start,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+                  // Container(
+                  //   margin: EdgeInsets.only(left: 10, top: 10),
+                  //   width: MediaQuery.of(context).size.width,
+                  //   child: Text(
+                  //     '${user.otherProfile.data!.user!.name!.isNotEmpty ? user.otherProfile.data!.user!.name! : 'anonymous'}',
+                  //     style: const TextStyle(
+                  //         fontSize: 15,
+                  //         fontWeight: FontWeight.bold,
+                  //         color: Colors.white),
+                  //     textAlign: TextAlign.start,
+                  //     overflow: TextOverflow.ellipsis,
+                  //   ),
+                  // ),
+                  // Container(
+                  //   margin: const EdgeInsets.only(
+                  //       left: 10, top: 10, right: 10),
+                  //   width: MediaQuery.of(context).size.width,
+                  //   child: Text(
+                  //     user.otherProfile.data!.user!.bio!
+                  //             .isNotEmpty
+                  //         ? user
+                  //             .otherProfile.data!.user!.bio!
+                  //         : '',
+                  //     maxLines: 2,
+                  //     style: const TextStyle(
+                  //         fontSize: 15,
+                  //         fontWeight: FontWeight.bold,
+                  //         color: Colors.white),
+                  //     textAlign: TextAlign.start,
+                  //     overflow: TextOverflow.ellipsis,
+                  //   ),
+                  // ),
                   const SizedBox(
                     height: 10,
                   ),
-                  Container(
-                    margin: EdgeInsets.only(left: 10),
-                    alignment: Alignment.centerLeft,
-                    width: MediaQuery.of(context).size.width,
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.link,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Uri openInBrowser = Uri(
-                              scheme: 'https',
-                              path:
-                              "${user.userProfile.value.data!.user!.websiteUrl}",
-                            );
-                            launchUrl(openInBrowser,
-                                mode: LaunchMode.externalApplication);
-                          },
-                          child: Text(
-                            user.userProfile.value.data!.user!
-                                .websiteUrl,
-                            maxLines: 3,
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.blue.shade300),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
+                  // Container(
+                  //   margin: EdgeInsets.only(left: 10),
+                  //   alignment: Alignment.centerLeft,
+                  //   width: MediaQuery.of(context).size.width,
+                  //   child: Row(
+                  //     children: [
+                  //       const Icon(
+                  //         Icons.link,
+                  //         color: Colors.white,
+                  //       ),
+                  //       const SizedBox(
+                  //         width: 5,
+                  //       ),
+                  //       InkWell(
+                  //         onTap: () {
+                  //           Uri openInBrowser = Uri(
+                  //             scheme: 'https',
+                  //             path:
+                  //                 "${user.otherProfile.data!.user!.websiteUrl}",
+                  //           );
+                  //           launchUrl(openInBrowser,
+                  //               mode: LaunchMode
+                  //                   .externalApplication);
+                  //         },
+                  //         child: Text(
+                  //           user.otherProfile.data!.user!
+                  //               .websiteUrl,
+                  //           maxLines: 3,
+                  //           textAlign: TextAlign.start,
+                  //           overflow: TextOverflow.ellipsis,
+                  //           style: TextStyle(
+                  //               fontSize: 15,
+                  //               color: Colors.blue.shade300),
+                  //         ),
+                  //       )
+                  //     ],
+                  //   ),
+                  // ),
                   const SizedBox(
                     height: 25,
                   ),
-                  userModel.id.toString() == userId
-                      ? Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceEvenly,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 25, horizontal: 20),
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                            color:
-                            Color.fromARGB(50, 31, 33, 40),
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(200))),
-                        child: Column(
-                          children: [
-                            ClipOval(
+                      Expanded(
+                          child: Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 10),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                  BorderRadius.circular(20),
+                                  color: ColorManager.colorAccent),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 20),
                               child: InkWell(
-                                onTap: () async {
-                                  var pref =
-                                  await SharedPreferences
-                                      .getInstance();
-
-                                  var currentUser = pref
-                                      .getString('currentUser');
-
-                                  User current = User.fromJson(
-                                      jsonDecode(currentUser!));
-
-                                  Get.to(ManageAccount());
-                                  // Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditProfile(user: userModel)));
-
-                                  // Navigator.pushNamed(
-                                  //     context, '/editProfile',
-                                  //     arguments:
-                                  //     current);
-                                },
-                                child: Container(
-                                    decoration:
-                                    const BoxDecoration(
-                                        gradient:
-                                        LinearGradient(
-                                            colors: [
-                                              Color(0xff5FAFFC),
-                                              Color(0xff2464D2)
-                                            ])),
-                                    padding: const EdgeInsets
-                                        .symmetric(
-                                        horizontal: 15,
-                                        vertical: 15),
-                                    height: 60,
-                                    width: 60,
-                                    child: const Iconify(
-                                      Carbon.edit,
-                                      color: Colors.white,
-                                      size: 10,
-                                    )),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            const Text("Edit Profile",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white))
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 25, horizontal: 20),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color:
-                            Color.fromARGB(50, 31, 33, 40),
-                            border: Border.all(
-                              color: Colors.transparent,
-                            ),
-                            borderRadius:
-                            const BorderRadius.all(
-                                Radius.circular(200))),
-                        child: Column(
-                          children: [
-                            ClipOval(
-                              child: InkWell(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                Referral()));
-                                  },
-                                  child: Container(
-                                      decoration:
-                                      const BoxDecoration(
-                                          gradient:
-                                          LinearGradient(
-                                              colors: [
-                                                Color(0xff9B67FB),
-                                                Color(0xff6E1DE9)
-                                              ])),
-                                      height: 60,
-                                      width: 60,
-                                      padding:
-                                      const EdgeInsets.all(
-                                          15),
-                                      child: const Iconify(
-                                        Carbon.share,
-                                        color: Colors.white,
-                                        size: 15,
-                                      ))),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            const Text("Invite User",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white))
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 25, horizontal: 20),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color:
-                            Color.fromARGB(50, 31, 33, 40),
-                            border: Border.all(
-                              color: Colors.transparent,
-                            ),
-                            borderRadius:
-                            const BorderRadius.all(
-                                Radius.circular(200))),
-                        child: Column(
-                          children: [
-                            ClipOval(
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                        colors: [
-                                          Color(0xffFF87CF),
-                                          Color(0xffE968D9)
-                                        ])),
-                                width: 60,
-                                height: 60,
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                Favourites()));
-                                  },
-                                  child: Container(
-                                      padding:
-                                      const EdgeInsets.all(
-                                          15),
-                                      child: const Iconify(
-                                        Carbon.star,
-                                        color: Colors.white,
-                                        size: 15,
-                                      )),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            const Text(
-                              "Favourite",
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  )
-                      : Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Column(
-                        children: [
-                          ClipOval(
-                            child: InkWell(
-                              onTap: () {
-                                // Inbox inboxModel = InboxModel(
-                                //     id: user.isProfileLoading
-                                //         .value
-                                //         ? 0
-                                //         : user
-                                //         .userProfile
-                                //         .value
-                                //         .data!
-                                //         .user!
-                                //         .id!,
-                                //     userImage: user
-                                //         .isProfileLoading
-                                //         .value
-                                //         ? ""
-                                //         : user
-                                //         .userProfile
-                                //         .value
-                                //         .data!
-                                //         .user!
-                                //         .avatar,
-                                //     message: "",
-                                //     msgDate: "",
-                                //     name: user
-                                //         .isProfileLoading
-                                //         .value
-                                //         ? ""
-                                //         : user
-                                //         .userProfile
-                                //         .value
-                                //         .data!
-                                //         .user!
-                                //         .name!);
-                                // Get.to(ChatScreen(
-                                //     inboxModel:
-                                //     inboxModel));
-                              },
-                              child: Container(
-                                  decoration:
-                                  const BoxDecoration(
-                                      gradient:
-                                      LinearGradient(
-                                          colors: [
-                                            Color(0xff5FAFFC),
-                                            Color(0xff2464D2)
-                                          ])),
-                                  padding: const EdgeInsets
-                                      .symmetric(
-                                      horizontal: 15,
-                                      vertical: 15),
-                                  height: 60,
-                                  width: 60,
-                                  child: const Iconify(
-                                    Carbon.chat,
-                                    color: Colors.white,
-                                    size: 10,
-                                  )),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          const Text("Message",
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white))
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          ClipOval(
-                            child: InkWell(
                                 onTap: () {
-                                  Navigator.pushNamed(
-                                      context, '/referral');
+                                  usersController.followUnfollowUser(usersController.otherProfile.value.id!,isFollow!.value ==0?"follow":"unfollow");
                                 },
-                                child: Container(
-                                    decoration:
-                                    const BoxDecoration(
-                                        gradient:
-                                        LinearGradient(
-                                            colors: [
-                                              Color(0xff9B67FB),
-                                              Color(0xff6E1DE9)
-                                            ])),
-                                    height: 60,
-                                    width: 60,
-                                    padding:
-                                    const EdgeInsets.all(
-                                        15),
-                                    child: const Iconify(
-                                      Carbon.share,
-                                      color: Colors.white,
-                                      size: 15,
-                                    ))),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          const Text("Share Profile",
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white))
-                        ],
+                                child: const Text("Follow",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    )),
+                              ))),
+                      Expanded(
+                          child: Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 10),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                BorderRadius.circular(20),
+                                border: Border.all(
+                                    color: ColorManager.colorAccent),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 20),
+                              child: InkWell(
+                                onTap: () {
+                                  var inboxModel = Inbox(
+                                      id:  userController
+                                          .otherProfile
+                                          .value
+                                          .id!,
+                                      userImage:  userController
+                                          .otherProfile
+                                          .value
+                                          .avatar!,
+                                      message: "",
+                                      name: userController
+                                          .otherProfile
+                                          .value
+                                          .name!);
+                                  Get.to(ChatScreen(
+                                      inboxModel:
+                                      inboxModel));
+                                },
+                                child: const Text("Message",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    )),
+                              ))),
+                      ClipOval(
+                        child: InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                  context, '/referral');
+                            },
+                            child: Container(
+                                margin: EdgeInsets.symmetric(
+                                    horizontal: 10),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(50),
+                                    color: ColorManager.colorAccentTransparent),
+                                padding: const EdgeInsets.all(15),
+                                child:  Iconify(
+                                  Carbon.logo_instagram,
+                                  size: 16,
+                                  color: ColorManager.dayNightIcon,
+                                ))),
+                      ),
+                      ClipOval(
+                        child: InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                  context, '/referral');
+                            },
+                            child: Container(
+                                margin: EdgeInsets.symmetric(
+                                    horizontal: 10),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(50),
+                                    color: ColorManager.colorAccentTransparent),
+                                padding: const EdgeInsets.all(15),
+                                child:  Iconify(
+                                  Carbon.bookmark,
+                                  size: 16,
+                                  color: ColorManager.dayNightIcon,
+                                ))),
                       ),
                     ],
                   ),
@@ -679,40 +525,32 @@ class ViewProfile extends StatelessWidget {
                               horizontal: 30),
                           tabs: [
                             Tab(
-                              icon: SvgPicture.asset(
-                                'assets/feedTab.svg',
+                              icon: Iconify(
+                                RadixIcons.dashboard,
                                 color: selectedTab.value == 0
+                                    ? ColorManager.colorAccent
+                                    : Get.isPlatformDarkMode
                                     ? Colors.white
-                                    : Color(0XffB2E3E3),
+                                    : Colors.black,
                               ),
                             ),
                             Tab(
-                              icon: SvgPicture.asset(
-                                  'assets/favTab.svg',
-                                  color: selectedTab.value == 1
-                                      ? Colors.white
-                                      : Color(0XffB2E3E3)),
+                              icon: Iconify(
+                                Carbon.favorite,
+                                color: selectedTab.value == 1
+                                    ? ColorManager.colorAccent
+                                    : Get.isPlatformDarkMode
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
                             )
                           ]))),
-                 Obx(() =>  tabview()),
+                  Obx(() => tabview()),
                 ],
-              ))
-
-          // Container(
-          //   width: Get.width,
-          //   height: Get.height,
-          //   alignment: Alignment.topLeft,
-          //   child: IconButton(
-          //       onPressed: () {
-          //         Get.back(closeOverlays: true);
-          //       },
-          //       color: Colors.white,
-          //       icon: const Icon(Icons.arrow_back)),
-          // )
-          //
-        ],
-      ),
-    );
+              ),
+            )
+          ],
+        ),) );
   }
 
   tabview() {
@@ -724,171 +562,193 @@ class ViewProfile extends StatelessWidget {
   }
 
   feed() {
-    return  Flexible(
-      child: GetX<VideosController>(
-          builder: (videosController) => GridView.builder(
-              padding: const EdgeInsets.all(10),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10),
-              itemCount: videosController.otherUserVideos.length,
-              itemBuilder: (BuildContext context, int index) {
-                return GestureDetector(
-                  onTap: () {
-                    Get.to(VideoPlayerScreen(
-                      isFav: false,
-                      isFeed: true,
-                      isLock: false,
-                      position: index,
-                      userVideos: videosController.otherUserVideos,
-                    ));
-                  },
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      imgNet(
-                          '${RestUrl.gifUrl}${videosController.otherUserVideos.value[index].gifImage}'),
-                      Positioned(
-                          bottom: 5,
-                          left: 5,
-                          right: 5,
-                          child: Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceEvenly,
-                            children: [
-                              const Icon(
-                                Icons.visibility,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                videosController.otherUserVideos.isEmpty
-                                    ? "0"
-                                    : videosController
-                                    .otherUserVideos.value[index].views
-                                    .toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                              const Icon(
-                                Icons.favorite,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Text(
-                                videosController
-                                    .otherUserVideos.value.isEmpty
-                                    ? "0"
-                                    : videosController
-                                    .otherUserVideos.value[index].likes
-                                    .toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                            ],
-                          ))
-                    ],
-                  ),
-                );
-              })) ,
-    );
+    return Flexible(
 
-
+      child:GetX<VideosController>(builder: (videosController)=>
+      videosController.isUserVideosLoading.isTrue?loader():
+      videosController.otherUserVideos.isEmpty?RichText(
+          textAlign: TextAlign.center,
+          text: const TextSpan(children: [
+            TextSpan(
+                text: '\n\n\n' "User's liked Video",
+                style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold)),
+            TextSpan(
+                text: '\n\n'
+                    "Videos liked are currently not available",
+                style: TextStyle(fontSize: 17, color: Colors.grey))
+          ])):GridView.count(
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      crossAxisCount: 3,
+      childAspectRatio: Get.width / Get.height,
+      padding: const EdgeInsets.all(10),
+      children: List.generate(
+          videosController.otherUserVideos.length,
+              (index) => GestureDetector(
+            onTap: () {
+              Get.to(VideoPlayerScreen(
+                isFav: false,
+                isFeed: true,
+                isLock: false,
+                position: index,
+                userVideos:
+                videosController.otherUserVideos,
+              ));
+            },
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                imgNet(
+                    '${RestUrl.gifUrl}${videosController.otherUserVideos.value[index].gifImage}'),
+                Positioned(
+                    bottom: 5,
+                    left: 5,
+                    right: 5,
+                    child: Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Icon(
+                          Icons.visibility,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        Text(
+                          videosController
+                              .otherUserVideos.isEmpty
+                              ? "0"
+                              : videosController
+                              .otherUserVideos
+                              .value[index]
+                              .views
+                              .toString(),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13),
+                        ),
+                        const Icon(
+                          Icons.favorite,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        Text(
+                          videosController.otherUserVideos
+                              .value.isEmpty
+                              ? "0"
+                              : videosController
+                              .otherUserVideos
+                              .value[index]
+                              .likes
+                              .toString(),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13),
+                        ),
+                      ],
+                    ))
+              ],
+            ),
+          )),
+    ),
+    ));
   }
 
   fav() {
-    return GetX<VideosController>(
-        builder: (videosController) =>  Flexible(
-                child: videosController
-                    .othersLikedVideos.isEmpty
-                    ? GetX<UserController>(
-                    builder: (userController) => RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(children: [
-                          const TextSpan(
-                              text: '\n\n\n'
-                                  "This user's liked videos or private",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
-                          TextSpan(
-                              text: '\n\n'
-                                  "Videos liked by @${userController.userProfile.value.data!.user!.username!.isNotEmpty ? userController.userProfile.value.data!.user!.username! : 'anonymous'} are currently hidden",
-                              style:
-                              const TextStyle(fontSize: 17, color: Colors.grey))
-                        ])))
-                    :GridView.builder(
-                    padding: const EdgeInsets.all(10),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10),
-                    itemCount: videosController.likedVideos.value.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Get.to(VideoPlayerScreen(
-                            isFav: true,
-                            isFeed: false,
-                            isLock: false,
-                            position: index,
-                            likedVideos: videosController.likedVideos,
-                          ));
-                        },
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            // CachedNetworkImage(
-                            //     placeholder: (a, b) => const Center(
-                            //       child: CircularProgressIndicator(),
-                            //     ),
-                            //     fit: BoxFit.cover,
-                            //     imageUrl:favVideos[index].gif_image.isEmpty
-                            //         ? '${RestUrl.thambUrl}thumb-not-available.png'
-                            //         : '${RestUrl.gifUrl}${favVideos[index].gif_image}'),
-                            imgNet(
-                                '${RestUrl.gifUrl}${videosController.likedVideos.value[index].gifImage}'),
-                            Positioned(
-                                bottom: 5,
-                                left: 5,
-                                right: 5,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    const Icon(
-                                      Icons.visibility,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    Text(
-                                      videosController
-                                          .likedVideos.value[index].views
-                                          .toString(),
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 13),
-                                    ),
-                                    const Icon(
-                                      Icons.favorite,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    Text(
-                                      videosController
-                                          .likedVideos.value[index].likes
-                                          .toString(),
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 13),
-                                    ),
-                                  ],
-                                ))
-                          ],
-                        ),
-                      );
-                    }),
-              ));
+    return Flexible(
+      child: GetX<VideosController>(builder: (videosController)=>
+      videosController.isUserVideosLoading.isTrue?loader():
+      videosController.othersLikedVideos.isEmpty?RichText(
+          textAlign: TextAlign.center,
+          text: const TextSpan(children: [
+            TextSpan(
+                text: '\n\n\n' "User's liked Video",
+                style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold)),
+            TextSpan(
+                text: '\n\n'
+                    "Videos liked are currently not available",
+                style:
+                TextStyle(fontSize: 17, color: Colors.grey))
+          ])) :
+          GridView.count(
+        crossAxisCount: 3,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: Get.width / Get.height,
+        padding: const EdgeInsets.all(10),
+        children: List.generate(
+            videosController.othersLikedVideos.length,
+                (index) => GestureDetector(
+              onTap: () {
+                Get.to(VideoPlayerScreen(
+                  isFav: true,
+                  isFeed: false,
+                  isLock: false,
+                  position: index,
+                  likedVideos:
+                  videosController.othersLikedVideos,
+                ));
+              },
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // CachedNetworkImage(
+                  //     placeholder: (a, b) => const Center(
+                  //       child: CircularProgressIndicator(),
+                  //     ),
+                  //     fit: BoxFit.cover,
+                  //     imageUrl:favVideos[index].gif_image.isEmpty
+                  //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                  //         : '${RestUrl.gifUrl}${favVideos[index].gif_image}'),
+                  imgNet(
+                      '${RestUrl.gifUrl}${videosController.othersLikedVideos[index].gifImage}'),
+                  Positioned(
+                      bottom: 5,
+                      left: 5,
+                      right: 5,
+                      child: Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Icon(
+                            Icons.visibility,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            videosController
+                                .othersLikedVideos[index]
+                                .views
+                                .toString(),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13),
+                          ),
+                          const Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          Text(
+                            videosController
+                                .othersLikedVideos[index]
+                                .likes
+                                .toString(),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13),
+                          ),
+                        ],
+                      ))
+                ],
+              ),
+            )),
+      ),)
+    );
   }
 }

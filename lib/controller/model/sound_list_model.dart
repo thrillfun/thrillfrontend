@@ -36,9 +36,12 @@ class Sounds {
   int? userId;
   String? category;
   String? name;
+  String? thumbnail;
   String? createdAt;
   String? updatedAt;
+  int? soundUsedCount;
   int? isFavorite;
+  SoundOwner? soundOwner;
 
   Sounds(
       {this.id,
@@ -46,9 +49,12 @@ class Sounds {
         this.userId,
         this.category,
         this.name,
+        this.thumbnail,
         this.createdAt,
         this.updatedAt,
-        this.isFavorite});
+        this.soundUsedCount,
+        this.isFavorite,
+        this.soundOwner});
 
   Sounds.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -56,9 +62,14 @@ class Sounds {
     userId = json['user_id'];
     category = json['category'];
     name = json['name'];
+    thumbnail = json['thumbnail'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    soundUsedCount = json['sound_used_count'];
     isFavorite = json['is_favorite'];
+    soundOwner = json['sound_owner'] != null
+        ? new SoundOwner.fromJson(json['sound_owner'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -68,9 +79,120 @@ class Sounds {
     data['user_id'] = this.userId;
     data['category'] = this.category;
     data['name'] = this.name;
+    data['thumbnail'] = this.thumbnail;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    data['sound_used_count'] = this.soundUsedCount;
     data['is_favorite'] = this.isFavorite;
+    if (this.soundOwner != null) {
+      data['sound_owner'] = this.soundOwner!.toJson();
+    }
+    return data;
+
+  }
+
+}
+class SoundOwner {
+  int? id;
+  String? name;
+  String? username;
+  String? email;
+  String? dob;
+  String? emailVerifiedAt;
+  String? phone;
+  String? avtars;
+  String? coverImage;
+  String? rating;
+  String? notification;
+  String? twoFAToggle;
+  String? status;
+  int? deactivationRequest;
+  int? role;
+  String? socialLoginId;
+  String? socialLoginType;
+  String? createdAt;
+  String? updatedAt;
+  int? isVerified;
+  int? followingCount;
+  int? followersCount;
+  bool? isfollowExists;
+
+  SoundOwner(
+      {this.id,
+        this.name,
+        this.username,
+        this.email,
+        this.dob,
+        this.emailVerifiedAt,
+        this.phone,
+        this.avtars,
+        this.coverImage,
+        this.rating,
+        this.notification,
+        this.twoFAToggle,
+        this.status,
+        this.deactivationRequest,
+        this.role,
+        this.socialLoginId,
+        this.socialLoginType,
+        this.createdAt,
+        this.updatedAt,
+        this.isVerified,
+        this.followingCount,
+        this.followersCount,
+        this.isfollowExists});
+
+  SoundOwner.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    username = json['username'];
+    email = json['email'];
+    dob = json['dob'];
+    emailVerifiedAt = json['email_verified_at'];
+    phone = json['phone'];
+    avtars = json['avtars'];
+    coverImage = json['cover_image'];
+    rating = json['rating'];
+    notification = json['notification'];
+    twoFAToggle = json['two_FA_toggle'];
+    status = json['status'];
+    deactivationRequest = json['deactivation_request'];
+    role = json['role'];
+    socialLoginId = json['social_login_id'];
+    socialLoginType = json['social_login_type'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    isVerified = json['is_verified'];
+    followingCount = json['following_count'];
+    followersCount = json['followers_count'];
+    isfollowExists = json['isfollow_exists'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['username'] = this.username;
+    data['email'] = this.email;
+    data['dob'] = this.dob;
+    data['email_verified_at'] = this.emailVerifiedAt;
+    data['phone'] = this.phone;
+    data['avtars'] = this.avtars;
+    data['cover_image'] = this.coverImage;
+    data['rating'] = this.rating;
+    data['notification'] = this.notification;
+    data['two_FA_toggle'] = this.twoFAToggle;
+    data['status'] = this.status;
+    data['deactivation_request'] = this.deactivationRequest;
+    data['role'] = this.role;
+    data['social_login_id'] = this.socialLoginId;
+    data['social_login_type'] = this.socialLoginType;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    data['is_verified'] = this.isVerified;
+    data['following_count'] = this.followingCount;
+    data['followers_count'] = this.followersCount;
+    data['isfollow_exists'] = this.isfollowExists;
     return data;
   }
 }

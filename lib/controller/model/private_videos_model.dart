@@ -49,7 +49,8 @@ class PrivateVideos {
   String? isDuetable;
   String? isCommentable;
   String? soundOwner;
-  int? videoLikeStatus;
+  String? videoLikeStatus;
+  int? isfollow;
   User? user;
 
   PrivateVideos(
@@ -72,6 +73,7 @@ class PrivateVideos {
         this.isCommentable,
         this.soundOwner,
         this.videoLikeStatus,
+        this.isfollow,
         this.user});
 
   PrivateVideos.fromJson(Map<String, dynamic> json) {
@@ -94,6 +96,7 @@ class PrivateVideos {
     isCommentable = json['is_commentable'];
     soundOwner = json['sound_owner'];
     videoLikeStatus = json['video_like_status']??0;
+    isfollow = json["isfollow"]??0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
   }
 
@@ -118,6 +121,7 @@ class PrivateVideos {
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
     data['video_like_status'] = this.videoLikeStatus;
+    data["isfollow"] = this.isfollow;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }

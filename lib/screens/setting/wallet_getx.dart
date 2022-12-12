@@ -16,11 +16,9 @@ class WalletGetx extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorManager.dayNight,
       body: Stack(
         children: [
-          Container(
-            decoration: const BoxDecoration(gradient: processGradient),
-          ),
           GetX<WalletController>(builder: (walletController)=>walletController.isCurrenciesLoading.value?Center(child: CircularProgressIndicator(),):Column(
             children: [
               backgroundWallet(walletController),
@@ -78,8 +76,8 @@ class WalletGetx extends StatelessWidget {
                   Text(
                     walletController.balance.first.symbol.toString() +
                         walletController.balance.first.amount.toString(),
-                    style: const TextStyle(
-                        color: Colors.white,
+                    style:  TextStyle(
+                      color:ColorManager.dayNightText ,
                         fontSize: 28,
                         fontWeight: FontWeight.bold),
                   )
@@ -120,8 +118,7 @@ class WalletGetx extends StatelessWidget {
               child: Container(
                 height: 40,
                 width: 40,
-                color: ColorManager.colorPrimaryLight,
-                child: Icon(icon),
+                child: Icon(icon,color: ColorManager.dayNightText,),
               ),
             ),
             const SizedBox(
@@ -129,9 +126,8 @@ class WalletGetx extends StatelessWidget {
             ),
             Text(
               text,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
+              style:  TextStyle(
+                  fontSize: 16,color: ColorManager.dayNightText,
                   fontWeight: FontWeight.w400),
             ),
             const SizedBox(
@@ -146,7 +142,9 @@ class WalletGetx extends StatelessWidget {
         width: Get.width,
         height: Get.height,
         decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          color:  ColorManager.dayNight,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(20),topRight: Radius.circular(20))
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -155,11 +153,11 @@ class WalletGetx extends StatelessWidget {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children:  [
                 Text(
                   "Portfolio",
                   textAlign: TextAlign.start,
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 25),
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 25,color: ColorManager.dayNightText),
                 ),
                 Icon(Icons.book),
               ],
@@ -181,7 +179,6 @@ class WalletGetx extends StatelessWidget {
                                     children: [
                                       ClipOval(
                                         child: Container(
-                                          color: const Color(0xffE5F3F3),
                                           height: 50,
                                           width: 50,
                                           padding: const EdgeInsets.all(10),
@@ -219,8 +216,8 @@ class WalletGetx extends StatelessWidget {
                                           Text(
                                             walletController.balance[index].code
                                                 .toString(),
-                                            style: const TextStyle(
-                                                color: Color(0xff1F2128),
+                                            style:  TextStyle(
+                                              color: ColorManager.dayNightText,
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w700),
                                           ),
@@ -228,7 +225,9 @@ class WalletGetx extends StatelessWidget {
                                               walletController
                                                   .balance[index].code
                                                   .toString(),
-                                              style: const TextStyle(
+                                              style:  TextStyle(
+                                                  color: ColorManager.dayNightText,
+
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w400))
                                         ],
@@ -242,8 +241,9 @@ class WalletGetx extends StatelessWidget {
                                               walletController
                                                   .balance[index].amount
                                                   .toString(),
-                                              style: const TextStyle(
-                                                  color: Color(0xff1F2128),
+                                              style:  TextStyle(
+                                                  color: ColorManager.dayNightText,
+
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w700),
                                             ),
@@ -256,7 +256,6 @@ class WalletGetx extends StatelessWidget {
                                   Container(
                                     margin: const EdgeInsets.only(top: 10),
                                     child: const Divider(
-                                      color: Colors.grey,
                                     ),
                                   ),
                                 ],

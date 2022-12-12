@@ -47,21 +47,21 @@ class User {
   int? id;
   String? name;
   String? username;
-  String email = "null";
+  String? email = "null";
   String? dob;
   String? phone;
-  String avatar = "null";
-  String socialLoginId = "null";
-  String socialLoginType = "null";
-  String firstName = "null";
-  String lastName = "";
-  String gender = "";
-  String websiteUrl = "";
+  String? avatar = "null";
+  String? socialLoginId = "null";
+  String? socialLoginType = "null";
+  String? firstName = "null";
+  String? lastName = "";
+  String? gender = "";
+  String? websiteUrl = "";
   String? bio;
-  String youtube = "";
-  String facebook = "";
-  String instagram = "";
-  String twitter = "";
+  String? youtube = "";
+  String? facebook = "";
+  String? instagram = "";
+  String? twitter = "";
   String? firebaseToken;
   String? referralCount;
   String? following;
@@ -78,21 +78,21 @@ class User {
       {this.id,
       this.name,
       this.username,
-      required this.email,
+       this.email,
       this.dob,
       this.phone,
-      required this.avatar,
-      required this.socialLoginId,
-      required this.socialLoginType,
-      required this.firstName,
-      required this.lastName,
-      required this.gender,
-      required this.websiteUrl,
+       this.avatar,
+       this.socialLoginId,
+       this.socialLoginType,
+       this.firstName,
+       this.lastName,
+       this.gender,
+       this.websiteUrl,
       this.bio,
-      required this.youtube,
-      required this.facebook,
-      required this.instagram,
-      required this.twitter,
+       this.youtube,
+       this.facebook,
+       this.instagram,
+       this.twitter,
       this.firebaseToken,
       this.referralCount,
       this.following,
@@ -132,7 +132,7 @@ class User {
     isVerified = json['is_verified'] ?? '';
     levels =
         json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
-    totalVideos = json['total_videos'] ?? "0";
+    totalVideos = json['total_videos'] ?? 0;
     boxTwo = json['box_two'] ?? '';
     boxThree = json['box_three'] ?? '';
     referralCode = json['referral_code'] ?? '';

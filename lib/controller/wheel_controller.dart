@@ -12,7 +12,7 @@ import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/spin/spin_the_wheel_getx.dart';
 import 'package:thrill/utils/util.dart';
 
-class WheelController extends GetxController {
+class WheelController extends GetxController with StateMixin<dynamic> {
   var isCounterDataLoading = false.obs;
   var isWheelDataLoading = false.obs;
   var isRewardUpdating = false.obs;
@@ -43,8 +43,9 @@ class WheelController extends GetxController {
 
   getCounterData() async {
     isCounterDataLoading.value = true;
-
     try {
+      change(probabilityCounter.value,status:RxStatus.loading());
+
       dio.options.headers['Authorization'] = "Bearer $token";
       var response = await dio
           .get("/spin-wheel/counter-data")
@@ -56,9 +57,15 @@ class WheelController extends GetxController {
         try {
           probabilityCounter.value =
           CounterDataModel.fromJson(response.data).data!;
+          change(probabilityCounter.value,status:RxStatus.success());
+
         } on HttpException catch (e) {
+          change(probabilityCounter.value,status:RxStatus.error(response.data['message']));
+
           errorToast(response.data['message']);
         } on Exception catch (e) {
+          change(probabilityCounter.value,status:RxStatus.error(e.toString()));
+
           errorToast(e.toString());
         }
       } else {
@@ -72,7 +79,7 @@ class WheelController extends GetxController {
 
   getWheelData() async {
     isWheelDataLoading.value = true;
-
+    change( RxStatus.loading());
     dio.options.headers['Authorization'] = "Bearer $token";
     var response =
     await dio.get("/spin-wheel/data").timeout(const Duration(seconds: 60));
@@ -83,6 +90,7 @@ class WheelController extends GetxController {
       if (response.statusCode == 200) {
         try {
           wheelData = WheelDataModel.fromJson(response.data).obs;
+          change( RxStatus.success());
 
           recentRewardsList.value =
           WheelDataModel.fromJson(response.data).data!.recentRewards!;
@@ -99,8 +107,12 @@ class WheelController extends GetxController {
 
 
         } on HttpException catch (e) {
+          change( RxStatus.error(e.toString()));
+
           errorToast(response.data['message']);
         } on Exception catch (e) {
+          change(RxStatus.error(e.toString()));
+
           errorToast(e.toString());
         }
       } else {
@@ -114,45 +126,58 @@ class WheelController extends GetxController {
 
   getRewardUpdate(var rewardId) async {
     isRewardUpdating.value = true;
+    change(wheelData,status: RxStatus.loading());
 
     try {
       dio.options.headers['Authorization'] = "Bearer $token";
       var response = await dio.post("/spin-wheel/reward-won",
           data: {"reward_id": rewardId}).timeout(const Duration(seconds: 60));
 
+
       print(response.data);
 
       if (response.statusCode == 200) {
         try {
           wheelRewards = RewardModel.fromJson(response.data).obs;
+          change(wheelRewards.value,status: RxStatus.success());
+
         } on HttpException catch (e) {
           errorToast(response.data['message']);
         } on Exception catch (e) {
           errorToast(e.toString());
         }
       } else {
+        change(wheelData,status: RxStatus.error(response.statusCode.toString()));
+
         errorToast(response.statusCode.toString());
       }
     } on Exception catch (e) {
+      change(wheelData,status: RxStatus.error(e.toString()));
+
       log(e.toString());
     }
     isRewardUpdating.value = false;
   }
 
   getEarnedSpinData() async {
+    change(activityList,status: RxStatus.loading());
+
     try {
-      dio.options.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYzJmZTcwZTEyOWEyNzllZGM3YWExZGY3ZjBiYzE1ZGJhNWUzOWZkYWRmY2RjNTQ5YTEzZjljNDU0MDcxYTIxNDA5M2FiYmUzMjcwMTZjMWYiLCJpYXQiOjE2Njc2MTkzNzYuMzU4NzE2OTY0NzIxNjc5Njg3NSwibmJmIjoxNjY3NjE5Mzc2LjM1ODcxOTExMDQ4ODg5MTYwMTU2MjUsImV4cCI6MTY5OTE1NTM3Ni4zNTU2MDc5ODY0NTAxOTUzMTI1LCJzdWIiOiIxNCIsInNjb3BlcyI6W119.BwWq7kdEXpYiI3Hw0nGGdPlBtMabw7KwW0sxe3DA8klhMBVGjccUsQCy8BQt-4WZM0A7D3JT-xwWC8hqEPBJLL3nhpmRO6g6wVbq0NF74TjfvgNE3DRPrFwarTY8NDWaTEr4eIl4OHyv8B-NtOSGcLpm9IXospafg3rbGk4-YvCaG9ySs4fgH_p_BRBDlYvBmzKjLkQo2hrJBhEtFMlzRPeZBJ4z8bp0KpAUhsLkNXz6l39uGJkG4aw4hIxYbPFOeqIvgzkCRYok0EzNPefblrt_5PevpnOYdMvXlAVIf2_MhEIYzt3ZLwSjhMfr51Y1QI_o1E51kqzJsBhdny6WMVdyzySb7YoCN-ioeuGFUuD9RE_V8TqjE_Ndp2Q26sVcIqTBaq0_dujXyLvsP7yFNVnH-e8FqOyOXTMT7wAbEn5_diURZk4LaWjrWfGq3kJ033R-XtuIKMRO9AmE2ush3M87jJ8ZYL1y0hYCl4S8QBIP-afkpz45EZ31ypzXbb7kqh8VwRnOpv51sNpbOILJ8j52avfrO_sAxGLStwE-WDYWGR5ySo5VqqY0ZQMN3y4eXOZrX-hlv_SxTORwi-iLGAKpswNdNDEp4cHTkdz-JeX_Dsubsk7_CBVCaDYCC8bBwq3oxAph0_8pgd2AEqbcO658Bm_RvnPUua_lY8_w3SM';
-      var response = await dio
+      dio.options.headers['Authorization'] = "Bearer $token";
+       await dio
           .get("/spin-wheel/earned-spin")
-          .timeout(const Duration(seconds: 60));
+          .timeout(const Duration(seconds: 60)).then((response) {
+         activityList = EarnedSpinModel.fromJson(response.data).data!.activities!.obs;
+         change(wheelData,status: RxStatus.success());
+       }).onError((error, stackTrace) {
 
-      try {
-        activityList = EarnedSpinModel.fromJson(response.data).data!.activities!.obs;
-      } catch (e) {
-        errorToast(EarnedSpinModel.fromJson(response.data).message.toString());
+         change(wheelData,status: RxStatus.error(error.toString()));
+       });
 
-      }
+
     } on Exception catch (e) {
+      change(wheelData,status: RxStatus.error(e.toString()));
+
       log(e.toString());
     }
   }

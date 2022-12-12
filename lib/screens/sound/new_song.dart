@@ -43,7 +43,6 @@ class _NewSongState extends State<NewSong> {
     loadUserModel();
     getSounds();
     try {
-      reelsPlayerController?.pause();
     } catch (_) {}
   }
 

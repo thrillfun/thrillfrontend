@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 class CounterDataModel {
   bool? status;
   List<CounterData>? data;
@@ -32,19 +34,22 @@ class CounterDataModel {
 
 class CounterData {
   int? id;
-  int? probabilityCounter;
+  num? probabilityCounter;
+  num? probability;
 
-  CounterData({this.id, this.probabilityCounter});
+  CounterData({this.id, this.probabilityCounter,this.probability});
 
   CounterData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     probabilityCounter = json['probability_counter'];
+    probability = json["probability"];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['probability_counter'] = this.probabilityCounter;
+    data["probability"] = this.probability;
     return data;
   }
 }

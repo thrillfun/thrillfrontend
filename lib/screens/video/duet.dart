@@ -79,7 +79,7 @@ class _RecordDuetState extends State<RecordDuet> {
         }
       });
     try {
-      reelsPlayerController?.pause();
+    //  reelsPlayerController?.pause();
     } catch (_) {}
   }
 

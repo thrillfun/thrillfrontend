@@ -51,6 +51,7 @@ class Followers {
   String? createdAt;
   String? updatedAt;
   int? isVerified;
+  int? isfollowing;
 
   Followers(
       {this.id,
@@ -72,7 +73,7 @@ class Followers {
       this.socialLoginType,
       this.createdAt,
       this.updatedAt,
-      this.isVerified});
+      this.isVerified,this.isfollowing});
 
   Followers.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? "";
@@ -95,7 +96,7 @@ class Followers {
     createdAt = json['created_at'] ?? "";
     updatedAt = json['updated_at'] ?? "";
     isVerified = json['is_verified'] ?? "";
-  }
+    isfollowing = json["isfollowing"]??0;}
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -119,6 +120,7 @@ class Followers {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['is_verified'] = this.isVerified;
+    data['isfollowing'] = this.isfollowing;
     return data;
   }
 }

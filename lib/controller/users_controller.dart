@@ -2,25 +2,31 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dioClient;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
+import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/model/block_status_response.dart';
+import 'package:thrill/controller/model/favourites_model.dart';
 import 'package:thrill/controller/model/followers_model.dart';
-import 'package:thrill/controller/model/inbox_model.dart';
-import 'package:thrill/controller/model/profile_model_pojo.dart';
+import 'package:thrill/controller/model/profile_model_pojo.dart'
+    as profileModel;
 import 'package:thrill/controller/model/user_details_model.dart' as authUser;
+import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
-import 'package:thrill/screens/home/bottom_navigation.dart';
+import 'package:thrill/screens/auth/login_getx.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/utils/util.dart';
+
+var videosController = Get.find<VideosController>();
 
 class UserController extends GetxController {
   var userModel = authUser.User().obs;
-
   var isProfileLoading = false.obs;
   var isFollowersLoading = false.obs;
   var isFollowingLoading = false.obs;
@@ -33,140 +39,161 @@ class UserController extends GetxController {
   var userFollowingModel = RxList<Followers>();
 
   var isInboxLoading = false.obs;
-  var inboxList = RxList<Inbox>();
 
   var userBlocked = false.obs;
   var userId = 0.obs;
   var isMyProfile = false.obs;
 
-  var userProfile = ProfileModelPojo().obs;
-  String token = GetStorage().read("token");
+  var userProfile = profileModel.User().obs;
 
-  var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  var otherProfile = profileModel.User().obs;
+  String token = GetStorage().read("token");
+  var storage = GetStorage();
+  var dio = dioClient.Dio(dioClient.BaseOptions(
+      baseUrl: RestUrl.baseUrl,
+      headers: {"Authorization": "Bearer ${GetStorage().read("token")}"}));
+  var selectedIndex = 0.obs;
+  RxList<FavouriteVideos> favouriteSounds = RxList();
+  RxList<FavouriteHashTags> favouriteHashtags = RxList();
 
   Future<void> getUserProfile(int userId) async {
-    isProfileLoading.value = true;
-    Get.defaultDialog(content: loader(),title: "Loading");
-    try {
-      var response = await http.post(
-          Uri.parse('${RestUrl.baseUrl}/user/get-profile'),
-          headers: {"Authorization": "Bearer $token"},
-          body: {"id": "$userId"}).timeout(const Duration(seconds: 60));
+    if (storage.read("token") == null || storage.read("userId") == null) {
+      Get.to(LoginGetxScreen());
+    } else {
+      isProfileLoading.value = true;
+      dio.post('/user/get-profile', queryParameters: {"id": "$userId"}).then(
+          (result) {
+        userProfile =
+            profileModel.ProfileModelPojo.fromJson(result.data).data!.user!.obs;
 
-      if (response.statusCode == 200) {
-        var result = jsonDecode(response.body);
-        try {
-          userProfile = ProfileModelPojo.fromJson(result).obs;
-
-          videosController.getOtherUserVideos(int.parse(userId.toString()));
-          videosController.getOthersLikedVideos(int.parse(userId.toString()));
-
-        } on HttpException catch (e) {
-          errorToast(result['message']);
-        } on Exception catch (e) {
-          errorToast(e.toString());
-        }
-      } else {
+        storage.write('user', userProfile.value);
+        videosController.getOtherUserVideos(userProfile.value.id!);
+        videosController.getOthersLikedVideos(userProfile.value.id!);
         isProfileLoading.value = false;
-        errorToast(response.statusCode.toString());
-      }
-    } on Exception catch (e) {
+      }).onError((error, stackTrace) {
+        isProfileLoading.value = false;
+      });
+    }
+  }
+
+  Future<void> getOthersProfile(int userId) async {
+    isProfileLoading.value = true;
+
+    dio.post('/user/get-profile', queryParameters: {"id": "$userId"}).then(
+        (result) {
+      otherProfile =
+          profileModel.ProfileModelPojo.fromJson(result.data).data!.user!.obs;
+
+      videosController.getOtherUserVideos(otherProfile.value.id!);
+      videosController.getOthersLikedVideos(otherProfile.value.id!);
       isProfileLoading.value = false;
-      log(e.toString());
-    }
-    Get.back();
-    isProfileLoading.value = false;
-  }
-
-  getFollowers() async {
-    isFollowersLoading.value = true;
-
-    try {
-      var response = await http
-          .post(Uri.parse('${RestUrl.baseUrl}/user/get-followers'), headers: {
-        "Authorization": "Bearer $token"
-      }, body: {
-        "user_id": "${userModel.value.id}"
-      }).timeout(const Duration(seconds: 60));
-
-      var result = jsonDecode(response.body);
-      try {
-        userFollowersModel = FollowersModel.fromJson(result).data!.obs;
-      } on HttpException catch (e) {
-        errorToast(FollowersModel.fromJson(result).message.toString());
-      } on Exception catch (e) {
-        errorToast(e.toString());
-      }
-    } on Exception catch (e) {
-      log(e.toString());
-    }
-    isFollowersLoading.value = false;
-    update();
-  }
-
-  getFollowings() async {
-    isFollowingLoading.value = true;
-
-    try {
-      var response = await http
-          .post(Uri.parse('${RestUrl.baseUrl}/user/get-followings'), headers: {
-        "Authorization": "Bearer $token"
-      }, body: {
-        "user_id": "${userModel.value.id}"
-      }).timeout(const Duration(seconds: 60));
-
-      var result = jsonDecode(response.body);
-      try {
-        userFollowingModel = FollowersModel.fromJson(result).data!.obs;
-      } on HttpException catch (e) {
-        errorToast(FollowersModel.fromJson(result).message.toString());
-      } on Exception catch (e) {
-        errorToast(e.toString());
-      }
-    } on Exception catch (e) {
-      log(e.toString());
-    }
-    isFollowingLoading.value = false;
-    update();
+    }).onError((error, stackTrace) {
+      isProfileLoading.value = false;
+    });
   }
 
   getUserFollowers(int userId) async {
     isFollowersLoading.value = true;
 
-    followersModel.clear();
-    try {
-      var response = await http.post(
-          Uri.parse('${RestUrl.baseUrl}/user/get-followers'),
-          headers: {"Authorization": "Bearer $token"},
-          body: {"user_id": "${userId}"}).timeout(const Duration(seconds: 60));
+    if (followersModel.isNotEmpty) followersModel.clear();
 
-      var result = jsonDecode(response.body);
-      followersModel = FollowersModel.fromJson(result).data!.obs;
-    } on Exception catch (e) {
-      log(e.toString());
-    }
-    isFollowersLoading.value = false;
-    update();
+    dio.options.headers['Authorization'] = "Bearer $token";
+    dio
+        .post('${RestUrl.baseUrl}/user/get-followers',
+            queryParameters: {"user_id": "$userId"})
+        .timeout(const Duration(seconds: 60))
+        .then((result) {
+          followersModel = FollowersModel.fromJson(result.data).data!.obs;
+          isFollowersLoading.value = false;
+
+    })
+        .onError((error, stackTrace) {
+      isFollowersLoading.value = false;
+
+      print(error);
+        });
   }
 
   getUserFollowing(int userId) async {
-    isFollowersLoading.value = true;
-    followingModel.clear();
+    isFollowingLoading.value = true;
+    dio
+        .post('/user/get-followings', queryParameters: {"user_id": "$userId"})
+        .timeout(const Duration(seconds: 60))
+        .then((result) {
+          if (followingModel.isNotEmpty) {
+            followingModel.value =
+                FollowersModel.fromJson(result.data).data!.obs;
+          } else {
+            followingModel = FollowersModel.fromJson(result.data).data!.obs;
+          }
+          isFollowingLoading.value = false;
+        })
+        .onError((error, stackTrace) {
+          isFollowingLoading.value = false;
+        });
+  }
 
+  Future<void> addToFavourites(int id, String type, int action) async {
     try {
       var response = await http.post(
-          Uri.parse('${RestUrl.baseUrl}/user/get-followings'),
-          headers: {"Authorization": "Bearer $token"},
-          body: {"user_id": "$userId"}).timeout(const Duration(seconds: 60));
+          Uri.parse('${RestUrl.baseUrl}/favorite/add-to-favorite'),
+          headers: {
+            "Authorization": "Bearer $token"
+          },
+          body: {
+            "id": "$id",
+            "type": "$type",
+            "action": "$action"
+          }).timeout(const Duration(seconds: 60));
 
       var result = jsonDecode(response.body);
-      try {
-        followingModel = FollowersModel.fromJson(result).data!.obs;
-      } catch (e) {
-        errorToast(FollowersModel.fromJson(result).message.toString());
-      }
+      successToast(result["message"]);
     } on Exception catch (e) {
       log(e.toString());
+    }
+  }
+
+  Future<void> getfavouriteSounds() async {
+    try {
+      var response = await http.get(
+        Uri.parse('${RestUrl.baseUrl}/favorite/user-favorites-list'),
+        headers: {"Authorization": "Bearer $token"},
+      ).timeout(const Duration(seconds: 60)).then((value){
+        favouriteSounds.value = FavouritesModel.fromJson(jsonDecode(value.body)).data!.videos!;
+
+        favouriteHashtags.value =
+        FavouritesModel.fromJson(jsonDecode(value.body)).data!.hashTags!;
+
+      }).onError((error, stackTrace){
+          errorToast(error.toString());
+      });
+
+
+    } on Exception catch (e) {
+      log(e.toString());
+    }
+  }
+
+  followUnfollowUser(int userId, String action, {int? id}) async {
+    isFollowersLoading.value = true;
+    var response = await http.post(
+        Uri.parse('${RestUrl.baseUrl}/user/follow-unfollow-user'),
+        headers: {
+          "Authorization": "Bearer $token"
+        },
+        body: {
+          "publisher_user_id": "$userId",
+          "action": action
+        }).timeout(const Duration(seconds: 60));
+    var result = jsonDecode(response.body);
+    successToast(result["message"]);
+    if (id != null) {
+      getUserFollowing(id);
+      getUserFollowers(id);
+    }
+    videosController.getAllVideos();
+    if (id != null) {
+      getUserFollowers(id);
     }
     isFollowersLoading.value = false;
     update();
@@ -246,14 +273,16 @@ class UserController extends GetxController {
           var userData = authUser.UserDetailsModel.fromJson(result).data;
           var user = userData!.user;
           var token = userData!.token;
-          GetStorage().write('token', token).toString();
-          GetStorage().write('user', user);
 
-          Get.back(closeOverlays: true);
+          storage.write('token', token).toString();
+
+          await storage
+              .write('user', user)
+              .then((value) => successToast(result['message']));
+
           update();
-          // Get.to(BottomNavigation());
 
-          successToast(result['message']);
+          Get.to(const LandingPageGetx());
         } on HttpException catch (e) {
           errorToast(result['message']);
         } on Exception catch (e) {
@@ -268,10 +297,14 @@ class UserController extends GetxController {
     isLoggingIn.value = false;
   }
 
-  socialLoginRegister(var social_login_id, social_login_type, email, phone,
-      firebase_token, name) async {
-    isLoggingIn.value = true;
+  authUser.User userDataModel() {
+    final map = storage.read('user') ?? {};
+    return authUser.User.fromJson(map);
+  }
 
+  Future<void> socialLoginRegister(var social_login_id, social_login_type,
+      email, phone, firebase_token, name) async {
+    isLoggingIn.value = true;
     try {
       createDynamicLink("123456").then((value) async {
         var response =
@@ -279,7 +312,7 @@ class UserController extends GetxController {
           "social_login_id": social_login_id,
           "social_login_type": social_login_type,
           "email": email,
-          "phone": phone,
+          // "phone": phone,
           "firebase_token": firebase_token,
           "name": name,
           "referral_code": value.toString(),
@@ -288,13 +321,9 @@ class UserController extends GetxController {
         var result = jsonDecode(response.body);
         try {
           var userData = authUser.UserDetailsModel.fromJson(result).data;
-
-          GetStorage().write('token', userData!.token!).toString();
-          GetStorage().write('user', userData!.user).then((value) {
-            Get.to(BottomNavigation());
-            userModel.value = authUser.User.fromJson(GetStorage().read("user"));
-            update();
-          });
+          storage.write("userId", userData!.user!.id);
+          storage.write('token', userData!.token!).toString();
+          storage.write("user", userData.user);
 
           successToast(result['message']);
         } on HttpException catch (e) {
@@ -310,7 +339,51 @@ class UserController extends GetxController {
     isLoggingIn.value = false;
   }
 
-  signInWithGoogle() async {
+  signinTrueCaller(var social_login_id, social_login_type, phone,
+      firebase_token, name) async {
+    isLoggingIn.value = true;
+
+    try {
+      createDynamicLink("123456").then((value) async {
+        var response =
+            await http.post(Uri.parse('${RestUrl.baseUrl}/SocialLogin'), body: {
+          "social_login_id": social_login_id,
+          "social_login_type": social_login_type,
+          "phone": phone,
+          "firebase_token": firebase_token,
+          "name": name,
+          "referral_code": value.toString(),
+        }).timeout(const Duration(seconds: 60)).then((value) {
+              var result = jsonDecode(value.body);
+              try {
+                var userData = authUser.UserDetailsModel.fromJson(result).data;
+
+                storage.write('token', userData!.token!).toString();
+                storage.write('user', userData!.user).then((value) {
+                  userModel = authUser.User.fromJson(GetStorage().read("user")).obs;
+                  Get.to(const LandingPageGetx());
+                });
+
+                successToast(result['message']);
+              } on HttpException catch (e) {
+                errorToast(result['message']);
+              } on Exception catch (e) {
+                errorToast(e.toString());
+              }
+            }).onError((error, stackTrace) {
+              errorToast(error.toString());
+
+            });
+
+      });
+    } on Exception catch (e) {
+      log(e.toString());
+    }
+
+    isLoggingIn.value = false;
+  }
+
+  Future<void> signInWithGoogle() async {
     GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();
     // fetch the auth details from the request made earlier
@@ -321,43 +394,23 @@ class UserController extends GetxController {
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    GetStorage().write("token", googleAuth.accessToken);
     // Once signed in, return the UserCredential
-    socialLoginRegister(googleUser.id, "google", googleUser.email ?? "", "",
-        googleAuth.accessToken, googleUser.displayName ?? "");
-
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+    await socialLoginRegister(googleUser.id, "google", googleUser.email ?? "",
+        "", googleAuth.accessToken, googleUser.displayName ?? "");
   }
 
-  signOut() async {
+  Future<void> signOut() async {
     final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     final GoogleSignIn googleUser =
         await GoogleSignIn(scopes: <String>["email"]);
 
-    await _firebaseAuth.signOut();
-
-    googleUser.signOut();
-  }
-
-  getInbox() async {
-    isInboxLoading.value = true;
-
-    try {
-      dio.options.headers['Authorization'] = "Bearer $token";
-      var response = await dio.get("/user/chat-inbox");
-
-      try {
-        inboxList.clear();
-        inboxList = InboxModel.fromJson(response.data).data!.obs;
-      } catch (e) {
-        errorToast(InboxModel.fromJson(response.data).message.toString());
-      }
-    } on Exception catch (e) {
-      log(e.toString());
+    if (googleUser != null) {
+      await GoogleSignIn().disconnect().catchError((e, stack) {});
+      await FirebaseAuth.instance.signOut();
+      googleUser.signOut();
     }
-    isInboxLoading.value = false;
-    inboxList.refresh();
+    selectedIndex.value = 0;
     update();
   }
 
@@ -378,5 +431,56 @@ class UserController extends GetxController {
     var dynamicUrl = await parameters.buildShortLink();
     final Uri shortUrl = dynamicUrl.shortUrl;
     return shortUrl;
+  }
+  
+  Future<void> updateuserProfile(
+
+      {File? profileImage,
+      String? fullName,
+      String? userName,
+      String? bio,
+      String? gender,String? webSiteUrl})async{
+
+    Get.defaultDialog(title:"Please wait",content: loader(),backgroundColor: ColorManager.dayNight);
+    if(profileImage!=null){
+      dioClient.FormData formData = dioClient.FormData.fromMap({
+        "avatar": profileImage!=null?await dioClient.MultipartFile.fromFile(profileImage.path, filename:basename(profileImage.path)):"",
+        "username":userName,
+        "first_name":fullName,
+        "last_name":"",
+        "gender":gender,
+        "bio":bio,
+        "website_url":webSiteUrl
+      });
+      await dio.post("/user/edit",data: formData).then((value){
+        successToast(value.data["message"]);
+        Get.offAll(LandingPageGetx());
+      }).onError((error, stackTrace) {
+        errorToast(error.toString());
+      });
+      getUserProfile(storage.read("userId"));
+      Get.back();
+
+    }
+    else{
+      dioClient.FormData formData = dioClient.FormData.fromMap({
+        "username":userName,
+        "first_name":fullName,
+        "last_name":"",
+        "gender":gender,
+        "bio":bio,
+        "website_url":webSiteUrl
+      });
+      dio.post("/user/edit",data: formData).then((value){
+        successToast(value.data["message"]);
+        Get.offAll(LandingPageGetx());
+      }).onError((error, stackTrace) {
+        errorToast(error.toString());
+      });
+    }
+    getUserProfile(storage.read("userId"));
+
+    Get.back();
+
   }
 }

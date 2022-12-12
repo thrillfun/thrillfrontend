@@ -54,7 +54,6 @@ class _SignUpState extends State<SignUp> {
   @override
   void initState() {
     try {
-      reelsPlayerController?.pause();
     } catch (_) {}
     super.initState();
   }
