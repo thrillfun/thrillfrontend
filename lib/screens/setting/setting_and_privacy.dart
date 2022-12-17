@@ -4,15 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/carbon.dart';
-import 'package:iconify_flutter/icons/eva.dart';
-import 'package:iconify_flutter/icons/fluent.dart';
-import 'package:iconify_flutter/icons/ic.dart';
-import 'package:iconify_flutter/icons/icon_park_outline.dart';
-import 'package:iconify_flutter/icons/iconoir.dart';
-import 'package:iconify_flutter/icons/mdi.dart';
-import 'package:iconify_flutter/icons/ph.dart';
+
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
@@ -32,22 +24,25 @@ import 'package:velocity_x/velocity_x.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
 
-var userController = Get.find<UserController>();
-var inboxController = Get.find<InboxController>();
+
 
 class SettingAndPrivacy extends StatelessWidget {
-  const SettingAndPrivacy(
+  
+   SettingAndPrivacy(
       {required this.avatar, required this.name, required this.userName});
 
   final avatar;
   final name;
   final userName;
 
+  var userController = Get.find<UserController>();
+var inboxController = Get.find<InboxController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.dayNight,
-      body:  SingleChildScrollView(
+      body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -56,9 +51,9 @@ class SettingAndPrivacy extends StatelessWidget {
             children: [
               IconButton(
                   onPressed: () => Get.back(),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.close,
-                    color: Colors.white,
+                    color: ColorManager.dayNightText,
                   )),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,10 +62,10 @@ class SettingAndPrivacy extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.transparent,
+                            color: ColorManager.dayNightText,
                           ),
                           borderRadius:
-                          const BorderRadius.all(Radius.circular(200))),
+                              const BorderRadius.all(Radius.circular(200))),
                       width: 60,
                       height: 60,
                       child: SizedBox(
@@ -78,65 +73,64 @@ class SettingAndPrivacy extends StatelessWidget {
                           width: 60,
                           child: avatar.isNotEmpty
                               ? ClipOval(
-                            child: CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              imageUrl:
-                              '${RestUrl.profileUrl}${avatar}',
-                              placeholder: (a, b) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                          )
+                                  child: CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    imageUrl: '${RestUrl.profileUrl}${avatar}',
+                                    placeholder: (a, b) => const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                )
                               : Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: SvgPicture.asset(
-                              'assets/profile.svg',
-                              width: 10,
-                              height: 10,
-                              fit: BoxFit.contain,
-                            ),
-                          ))),
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: SvgPicture.asset(
+                                    'assets/profile.svg',
+                                    width: 10,
+                                    height: 10,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ))),
                   const SizedBox(
                     width: 10,
                   ),
                   Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
-                            textAlign: TextAlign.left,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "@$userName",
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal),
-                          )
-                        ],
-                      )),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            color: ColorManager.dayNightText,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "@$userName",
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                            color: ColorManager.dayNightText.withOpacity(0.5),
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal),
+                      )
+                    ],
+                  )),
                   GestureDetector(
                     onTap: () => switchAccountLayout(),
                     child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                             border: Border.all(
-                              color: Colors.white,
+                              color: ColorManager.dayNightText,
                             ),
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(200))),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(200))),
                         width: 30,
                         height: 30,
-                        child: const Iconify(
-                          Eva.flip_2_fill,
-                          color: Colors.white,
+                        child: Icon(
+                          Icons.rotate_90_degrees_ccw,
+                          color: ColorManager.dayNightText,
                           size: 20,
                         )),
                   )
@@ -157,20 +151,19 @@ class SettingAndPrivacy extends StatelessWidget {
                     Get.to(ManageAccount());
                     //        Navigator.pushNamed(context, '/manageAccount');
                   },
-                  child: mainTile(Carbon.person, manageAccount)),
+                  child: mainTile(Icons.person, manageAccount)),
               GestureDetector(
                   onTap: () {
                     Get.to(ReferalScreen());
                   },
-                  child: mainTile(
-                      Fluent.gift_card_arrow_right_24_regular, "Referral")),
+                  child: mainTile(Icons.gif, "Referral")),
 
               GestureDetector(
                   onTap: () {
                     Get.to(const Favourites());
                     //  Navigator.pushNamed(context, '/inbox');
                   },
-                  child: mainTile(Ic.twotone_favorite, 'Favourite')),
+                  child: mainTile(Icons.favorite, 'Favourite')),
               // GestureDetector(
               //     onTap: () async {
               //       await inboxController
@@ -185,27 +178,26 @@ class SettingAndPrivacy extends StatelessWidget {
                     Get.to(const Privacy());
                     //  Navigator.pushNamed(context, '/privacy');
                   },
-                  child:
-                  mainTile(IconParkOutline.personal_privacy, privacy)),
+                  child: mainTile(Icons.privacy_tip, privacy)),
               GestureDetector(
                   onTap: () {
                     Get.to(const WalletGetx());
                     //  Navigator.pushNamed(context, '/wallet');
                   },
-                  child: mainTile(Ph.wallet_bold, wallet)),
+                  child: mainTile(Icons.wallet, wallet)),
               GestureDetector(
                   onTap: () {
-                    Get.to( QrCode());
+                    Get.to(QrCode());
                     //  Navigator.pushNamed(context, '/qrcode');
                   },
-                  child: mainTile(Iconoir.qr_code, qrCode)),
+                  child: mainTile(Icons.qr_code, qrCode)),
               GestureDetector(
                   onTap: () {
                     //share();
                     Share.share(
                         'Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me.');
                   },
-                  child: mainTile(Carbon.share, shareProfile)),
+                  child: mainTile(Icons.share, shareProfile)),
 
               //  title(contentAndActivity),
 
@@ -214,8 +206,7 @@ class SettingAndPrivacy extends StatelessWidget {
                     Get.to(const PushNotification());
                     //  Navigator.pushNamed(context, '/pushNotification');
                   },
-                  child: mainTile(
-                      Ic.outline_notifications_active, pushNotification)),
+                  child: mainTile(Icons.notifications, pushNotification)),
               GestureDetector(
                 onTap: () {},
                 child: SizedBox(
@@ -229,8 +220,8 @@ class SettingAndPrivacy extends StatelessWidget {
                         margin: const EdgeInsets.only(right: 20),
                         child: Container(
                           padding: const EdgeInsets.all(5),
-                          child: const Iconify(
-                            Ic.baseline_language,
+                          child: const Icon(
+                            Icons.language,
                             color: ColorManager.colorAccent,
                             size: 20,
                           ),
@@ -258,13 +249,13 @@ class SettingAndPrivacy extends StatelessWidget {
                     //Navigator.pushNamed(context, '/termsOfService');
                   },
                   child: mainTile(
-                      Mdi.newspaper_variant_multiple, termsOfService)),
+                      Icons.dashboard_customize_outlined, termsOfService)),
               GestureDetector(
                   onTap: () {
                     Get.to(const PrivacyPolicy());
                     //Navigator.pushNamed(context, '/privacyPolicy');
                   },
-                  child: mainTile(Carbon.policy, privacyPolicy)),
+                  child: mainTile(Icons.policy, privacyPolicy)),
 
               // GestureDetector(
               //     onTap: () {
@@ -277,14 +268,14 @@ class SettingAndPrivacy extends StatelessWidget {
                     Get.defaultDialog(
                         title: "Logout?",
                         middleText:
-                        "This will also logout from other accounts!",
+                            "This will also logout from other accounts!",
                         confirm: ElevatedButton(
                             onPressed: () async {
                               await userController.storage.remove("token");
                               await userController.storage.remove("user");
 
                               await userController.signOut().then((value) =>
-                                  Get.offAll(const LandingPageGetx()));
+                                  Get.offAll(LandingPageGetx()));
                             },
                             child: const Text('Yes')),
                         cancel: ElevatedButton(
@@ -400,7 +391,7 @@ class SettingAndPrivacy extends StatelessWidget {
                     //           ),
                     //         ));
                   },
-                  child: mainTile(Ic.baseline_login, logout)),
+                  child: mainTile(Icons.login, logout)),
               Card(
                 margin: const EdgeInsets.only(top: 20),
                 elevation: 10,
@@ -415,15 +406,14 @@ class SettingAndPrivacy extends StatelessWidget {
                         title: const Text(
                           "Technical Support",
                           style: TextStyle(
-                              color: ColorManager.colorAccent,
-                              fontSize: 18),
+                              color: ColorManager.colorAccent, fontSize: 18),
                         ),
                         leading: Card(
                           elevation: 10,
                           margin: const EdgeInsets.only(right: 20),
                           child: Container(
                             padding: const EdgeInsets.all(5),
-                            child: const Iconify(Ic.sharp_support_agent,
+                            child: const Icon(Icons.support_agent,
                                 color: ColorManager.colorAccent, size: 20),
                           ),
                         ),
@@ -443,7 +433,7 @@ class SettingAndPrivacy extends StatelessWidget {
     );
   }
 
-  Widget mainTile(String icon, String text) {
+  Widget mainTile(IconData icon, String text) {
     return SizedBox(
       child: ListTile(
         title: Text(
@@ -454,7 +444,7 @@ class SettingAndPrivacy extends StatelessWidget {
           margin: const EdgeInsets.only(right: 20),
           child: Container(
             padding: const EdgeInsets.all(5),
-            child: Iconify(icon, color: ColorManager.dayNightIcon, size: 20),
+            child: Icon(icon, color: ColorManager.dayNightIcon, size: 20),
           ),
         ),
         visualDensity: VisualDensity.compact,

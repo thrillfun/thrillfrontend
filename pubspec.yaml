@@ -29,30 +29,29 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  sqflite:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons:
-  velocity_x:
-  shared_preferences:
-  cached_network_image:
-  carousel_slider:
-  intl:
-  flutter_switch:
-  http:
-  google_fonts:
-  flutter_bloc:
-  equatable:
-  firebase_messaging:
-  firebase_core:
-  firebase_auth:
-  google_sign_in:
-  flutter_facebook_auth:
-  image_picker:
-  visibility_detector:
+  cupertino_icons: ^1.0.5
+  velocity_x: ^3.6.0
+  shared_preferences: ^2.0.15
+  cached_network_image: ^3.2.3
+  carousel_slider: ^4.2.1
+  intl: ^0.17.0
+  http: ^0.13.5
+  google_fonts: ^3.0.1
+  flutter_bloc: ^8.1.1
+  equatable: ^2.0.5
+  firebase_messaging: ^14.1.4
+  firebase_core: ^2.4.0
+  firebase_auth: ^4.2.0
+  google_sign_in: ^5.4.2
+  flutter_facebook_auth: ^5.0.6
+  image_picker: ^0.8.6
+  visibility_detector: ^0.3.3
   camera:
-  path_provider:
+  path_provider: ^2.0.11
   simple_s3:
   flutter_fortune_wheel:
   audioplayers:
@@ -83,7 +82,6 @@ dependencies:
   flutter_staggered_grid_view:
   animated_segmented_tab_control:
   iconly:
-  iconify_flutter:
   animated_button_bar:
   showcaseview:
   get_storage:
@@ -92,15 +90,15 @@ dependencies:
   just_audio:
   multi_select_flutter:
   hashtagable:
-  firebase_dynamic_links:
-  flutter_audio_query:
-  truecaller_sdk:
+  firebase_dynamic_links: ^5.0.8
+  truecaller_sdk: ^0.1.2
   dio:
   lottie: ^1.4.3
   audio_video_progress_bar: ^0.11.0
-  flutter_truecaller:
   glassmorphism: ^3.0.0
   path: ^1.8.2
+  on_audio_query: ^2.6.1
+  flutter_switch: ^0.3.2
 
 
 dev_dependencies:

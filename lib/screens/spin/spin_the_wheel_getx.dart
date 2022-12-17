@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
@@ -48,35 +48,35 @@ class SpinTheWheelGetx extends GetView<WheelController> {
     wheelController.getWheelData();
     setSpinSound();
     return Scaffold(
-      backgroundColor: ColorManager.dayNight,
+        backgroundColor: ColorManager.dayNight,
         body: Stack(
-      children: [
-        controller.obx(
-            (state) => SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 20),
-                        alignment: Alignment.center,
-                        child: titleLayout(),
+          children: [
+            controller.obx(
+                (state) => SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            alignment: Alignment.center,
+                            child: titleLayout(),
+                          ),
+                          rewardLayout(),
+                          prizeLayout(),
+                          wheelLayout(),
+                          submitButtonLayout(),
+                          levelsLayout()
+                          //    lastRewardLayout()
+                        ],
                       ),
-                      rewardLayout(),
-                      prizeLayout(),
-                      wheelLayout(),
-                      submitButtonLayout(),
-                      levelsLayout()
-                      //    lastRewardLayout()
-                    ],
-                  ),
-                ),
-            onLoading: Container(
-              color: ColorManager.dayNight,
-              child: loader(),
-              height: Get.height,
-              width: Get.width,
-            ))
-      ],
-    ));
+                    ),
+                onLoading: Container(
+                  color: ColorManager.dayNight,
+                  child: loader(),
+                  height: Get.height,
+                  width: Get.width,
+                ))
+          ],
+        ));
   }
 
   titleLayout() => Text(
@@ -176,109 +176,104 @@ class SpinTheWheelGetx extends GetView<WheelController> {
   wheelLayout() => Container(
         margin: const EdgeInsets.only(top: 40, bottom: 10),
         height: Get.height / 2,
-        child: ClipOval(
-          child: Container(
-            decoration: const BoxDecoration(
-              color: ColorManager.colorAccent,
-              shape: BoxShape.circle,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: FortuneWheel(
+            duration: const Duration(seconds: 10),
+            animateFirst: false,
+            selected: _streamController.stream,
+            indicators: <FortuneIndicator>[
+              FortuneIndicator(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    alignment: Alignment.center,
+                    height: Get.height,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: SvgPicture.asset(
+                      'assets/spinDirection.svg',
+                      height: 80,
+                      width: 80,
+                      fit: BoxFit.fill,
+                    ),
+                  )),
+            ],
+            physics: CircularPanPhysics(
+              duration: const Duration(seconds: 10),
+              curve: Curves.decelerate,
             ),
-            child: Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: ColorManager.colorAccent,
-              ),
-              padding: const EdgeInsets.all(2),
-              child: FortuneWheel(
-                duration: const Duration(seconds: 20),
-                animateFirst: false,
-                selected: _streamController.stream,
-                indicators: <FortuneIndicator>[
-                  FortuneIndicator(
-                      alignment: Alignment.topCenter,
-                      child: Container(
-                        alignment: Alignment.topCenter,
-                        height: Get.height,
-                        margin: EdgeInsets.only(bottom: 20),
-                        child: RotatedBox(quarterTurns: 2,child: SvgPicture.asset(
-                        'assets/spinDirection.svg',
-                        height: 50,width: 50,
-                          fit: BoxFit.fill,
-                      ),),)),
-                ],
-                physics: CircularPanPhysics(
-                  duration: const Duration(seconds: 10),
-                  curve: Curves.decelerate,
-                ),
-                items: [
-                  for (int i = 0;
+            items: [
+              for (int i = 0;
                   i <
                       wheelController
                           .wheelData.value.data!.wheelRewards!.length;
                   i++)
-                    FortuneItem(
-                      child: Container(
-                          height: Get.height,
-                          width: Get.width,
-                          decoration: BoxDecoration(
-                              image: i % 2 == 0
-                                  ? DecorationImage(
-                                  image: AssetImage(
-                                      "assets/pizza_two.png"),
+                FortuneItem(
+                  child: Container(
+                      height: Get.height,
+                      width: Get.width,
+                      decoration: BoxDecoration(
+                          image: i == 0
+                              ? const DecorationImage(
+                                  image: AssetImage("assets/pizza_three.png"),
                                   fit: BoxFit.fitHeight)
-                                  :i % 2 == 1 ? DecorationImage(
-                                  image: AssetImage(
-                                      "assets/pizza_one.png"),
-                                  fit: BoxFit.fitHeight):DecorationImage(
-                                  image: AssetImage(
-                                      "assets/pizza_three.png"),
-                                  fit: BoxFit.fill)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceEvenly,
-                              children: [
-                                CachedNetworkImage(
+                              : i.isEven
+                                  ? const DecorationImage(
+                                      image: AssetImage("assets/pizza_one.png"),
+                                      fit: BoxFit.fitHeight)
+                                  : const DecorationImage(
+                                      image: AssetImage("assets/pizza_two.png"),
+                                      fit: BoxFit.fitHeight)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            wheelController.wheelData.value.data!
+                                        .wheelRewards![i].imagePath ==
+                                    null
+                                ? Text(
+                                    wheelController.wheelData.value.data!
+                                        .wheelRewards![i].currencySymbol
+                                        .toString(),
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700),
+                                  )
+                                : CachedNetworkImage(
                                     fit: BoxFit.fill,
                                     height: 30,
                                     width: 30,
                                     imageUrl: RestUrl.profileUrl +
-                                        wheelController
-                                            .wheelData
-                                            .value
-                                            .data!
-                                            .wheelRewards![i]
-                                            .imagePath
+                                        wheelController.wheelData.value.data!
+                                            .wheelRewards![i].imagePath
                                             .toString()),
-                                Text(
-                                  '${wheelController.wheelData.value.data!.wheelRewards![i].currencySymbol} ${wheelController.wheelData.value.data!.wheelRewards![i].amount} ',
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
-                          )),
-                      //     : Padding(
-                      //   padding: const EdgeInsets.only(left: 25),
-                      //   child: Image.network(
-                      //     "${RestUrl.profileUrl}${wheelController.wheelData.value.data!.wheelRewards![i].imagePath}",
-                      //     width: 30,
-                      //     height: 30,
-                      //   ),
-                      // ),
-                      style: const FortuneItemStyle(
-                        borderColor: Colors.white,
-                        borderWidth: 5,
-                      ),
-                    ),
-                ],
-                onAnimationEnd: () {
-                  updateSpin();
-                },
-              ),
-            ),
+                            Text(
+                              '${wheelController.wheelData.value.data!.wheelRewards![i].currencySymbol} ${wheelController.wheelData.value.data!.wheelRewards![i].amount} ',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                      )),
+                  //     : Padding(
+                  //   padding: const EdgeInsets.only(left: 25),
+                  //   child: Image.network(
+                  //     "${RestUrl.profileUrl}${wheelController.wheelData.value.data!.wheelRewards![i].imagePath}",
+                  //     width: 30,
+                  //     height: 30,
+                  //   ),
+                  // ),
+                  style: const FortuneItemStyle(
+                    borderColor: Colors.white,
+                    borderWidth: 5,
+                  ),
+                ),
+            ],
+            onAnimationEnd: () {
+              updateSpin();
+            },
           ),
         ),
       );
@@ -527,46 +522,45 @@ class SpinTheWheelGetx extends GetView<WheelController> {
   setSpinSound() async {
     try {
       if (Platform.isIOS) {
-        player.setUrl('${saveCacheDirectory}spin.mp3', isLocal: true);
+        player.setUrl('${saveCacheDirectory}spin.mp3');
       } else {
-        player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
+        player.play();
         player.pause();
       }
     } catch (_) {}
   }
 
   spinTheWheelTap() async {
-    isSpin.value = true;
-
-    listForReward.clear();
-
-    Random p = Random();
-    double cumulativeProbability = 0.0;
-    List<WheelRewards> dataList = [];
-    for (WheelRewards data in wheelController.wheelRewardsList) {
-      cumulativeProbability = data.probability!.toDouble();
-      if (p.nextInt(100) + 1 <= cumulativeProbability) {
-        dataList.add(data);
-        // return data;
-      }
-    }
-
-    var random = getRandomElement(dataList);
-    int id = random.id!.toInt();
-    rewardId = id;
-    selectedInt = random.id!.toInt().obs;
-
-    // for(WheelRewards data in wheelController.wheelRewardsList){
-    //   if(data.probability != null && data.probability!.toInt() < 10 && data.probability!.toInt()>0){
-    //
-    //   }
-    // }
-    //
-
-    //await player.resume();
-    _streamController.add(selectedInt.value - 1);
-
     if (wheelController.remainingChance.value > 0) {
+      isSpin.value = true;
+
+      listForReward.clear();
+
+      Random p = Random();
+      double cumulativeProbability = 0.0;
+      List<WheelRewards> dataList = [];
+      for (WheelRewards data in wheelController.wheelRewardsList) {
+        cumulativeProbability = data.probability!.toDouble();
+        if (p.nextInt(100) + 1 <= cumulativeProbability) {
+          dataList.add(data);
+          // return data;
+        }
+      }
+
+      var random = getRandomElement(dataList);
+      int id = random.id!.toInt();
+      rewardId = id;
+      selectedInt = random.id!.toInt().obs;
+
+      // for(WheelRewards data in wheelController.wheelRewardsList){
+      //   if(data.probability != null && data.probability!.toInt() < 10 && data.probability!.toInt()>0){
+      //
+      //   }
+      // }
+      //
+
+      //await player.resume();
+      _streamController.add(selectedInt.value - 1);
     } else {
       isSpin.value = true;
     }
@@ -580,7 +574,7 @@ class SpinTheWheelGetx extends GetView<WheelController> {
       wheelController.getWheelData();
       player.stop();
       await player.stop();
-      await player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
+      await player.play();
       await player.pause();
       isSpin.value = false;
       showWinDialog(wheelController.wheelData.value.message.toString());

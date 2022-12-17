@@ -1,4 +1,4 @@
-package com.thrill
+package com.thrill.media
 import android.os.Parcel
 import ly.img.android.pesdk.VideoEditorSettingsList
 import ly.img.android.pesdk.kotlin_extension.parcelableCreator

@@ -107,7 +107,7 @@ class _SoundDetailsState extends State<SoundDetails>
                                   color: Colors.transparent.withOpacity(0),
                                   height: 60,
                                   width: 60,
-                            child: Stack(
+                                  child: Stack(
                                     alignment: Alignment.center,
                                     children: [
                                       RotationTransition(
@@ -193,12 +193,10 @@ class _SoundDetailsState extends State<SoundDetails>
                                     color: ColorManager.colorAccent, width: 2)),
                             child: InkWell(
                                 onTap: () {
-                                 musicPlayerBottomSheet(
-                                     widget
-                                     .map["userProfile"]
-                                     .toString().obs, title.obs
-                                     , widget
-                                     .map["sound"].toString().obs);
+                                  musicPlayerBottomSheet(
+                                      widget.map["userProfile"].toString().obs,
+                                      title.obs,
+                                      widget.map["sound"].toString().obs);
                                 },
                                 child: RichText(
                                   text: const TextSpan(
@@ -464,13 +462,15 @@ class _SoundDetailsState extends State<SoundDetails>
                                                               videoList[index]
                                                                   .views
                                                                   .toString(),
-                                                          style: const TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              fontSize: 16)),
+                                                          style:
+                                                              const TextStyle(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize:
+                                                                      16)),
                                                     ],
                                                   ),
                                                 )
@@ -573,34 +573,11 @@ class _SoundDetailsState extends State<SoundDetails>
                         borderRadius: BorderRadius.circular(50)),
                     child: InkWell(
                         onTap: () async {
-                          Get.defaultDialog(title: "Downloading audio",content: loader());
-
-                          String sound = widget.map["sound"];
-                          File file = File('$saveCacheDirectory$sound');
-                          try {
-
-                            await FileSupport().downloadCustomLocation(
-                              url: "${RestUrl.awsSoundUrl}$sound",
-                              path: saveCacheDirectory,
-                              filename: sound.split('.').first,
-                              extension: ".${sound.split('.').last}",
-                              progress: (progress) async {
-                                printInfo(info: progress);
-                              },
-                            );
-                            Get.back();
-                            Get.to(CameraScreen(
-                              selectedSound: file.path,
-                              owner: widget.map["user"],
-                              id: widget.map['id'],
-                            ));
-                          } catch (e) {
-                            closeDialogue(context);
-                            showErrorToast(context, e.toString());
-                          }
+                          soundsController.downloadAudio(widget.map["sound"],
+                              widget.map["user"], widget.map["id"]);
                         },
                         child: RichText(
-                          text:  TextSpan(
+                          text: const TextSpan(
                             children: [
                               WidgetSpan(
                                 child: Icon(

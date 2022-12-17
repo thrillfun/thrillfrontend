@@ -10,11 +10,11 @@ class UserDetailsModel {
     status = json['status'];
     error = json['error'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['status'] = this.status;
     data['error'] = this.error;
     data['message'] = this.message;
@@ -32,12 +32,12 @@ class Data {
   Data({this.user, this.token});
 
   Data.fromJson(Map<String, dynamic> json) {
-    user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    user = json['user'] != null ? User.fromJson(json['user']) : null;
     token = json['token'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
@@ -109,7 +109,7 @@ class User {
       this.referralCode});
 
   User.fromJson(Map<String, dynamic> json) {
-    id = json['id']??"";
+    id = json['id'];
     name = json['name']??"";
     username = json['username']??"";
     email = json['email']??"";
@@ -134,7 +134,7 @@ class User {
     likes = json['likes']??"";
     isVerified = json['is_verified']??"";
     levels =
-        json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
+        json['levels'] != null ? Levels.fromJson(json['levels']) : null;
     totalVideos = json['total_videos']??"";
     boxTwo = json['box_two']??"";
     boxThree = json['box_three']??"";
@@ -142,7 +142,7 @@ class User {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
     data['name'] = this.name;
     data['username'] = this.username;
@@ -192,7 +192,7 @@ class Levels {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['current'] = this.current;
     data['next'] = this.next;
     data['progress'] = this.progress;

@@ -729,7 +729,7 @@ class PostScreenGetx extends StatelessWidget {
     int currentUnix = DateTime.now().millisecondsSinceEpoch;
     String videoId = 'Thrill-$currentUnix.mp4';
     videoPlayerController!.pause();
-    var file = File(postData!.filePath!);
+    var file = File(postData!.filePath);
 
     try {
       GetStorage().write("videoPrivacy", selectedPrivacy.value);

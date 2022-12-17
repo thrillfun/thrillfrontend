@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_switch/flutter_switch.dart';
 import 'package:thrill/rest/rest_api.dart';
 
 import '../../common/color.dart';
 import '../../common/strings.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 
 class PushNotification extends StatefulWidget {
   const PushNotification({Key? key}) : super(key: key);

@@ -47,11 +47,11 @@ class _ChatScreenState extends State<ChatScreen> {
         body:Column(
           children: [
             Row(children: [
-              IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.keyboard_backspace)),
-              Text(widget.inboxModel!.name!,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 24),)
+              IconButton(onPressed: ()=>Get.back(), icon: const Icon(Icons.keyboard_backspace)),
+              Text(widget.inboxModel!.name!,style: const TextStyle(fontWeight: FontWeight.w700,fontSize: 24),)
             ],),
             Container(
-              margin: EdgeInsets.symmetric(vertical: 20),
+              margin: const EdgeInsets.symmetric(vertical: 20),
               child: Container(
                 child: CachedNetworkImage(
                     placeholder: (a, b) => const Center(
@@ -97,15 +97,15 @@ class _ChatScreenState extends State<ChatScreen> {
             Text(
               "@"+widget.inboxModel!.name!,
               style:
-              TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
             Expanded(
               child: StreamBuilder<List<ChatMsg>>(
                 stream: ChatController.getChatMsg(
                   usersController.userProfile.value.id! >
                       widget.inboxModel!.id!
-                      ? '${usersController.userProfile.value!.id}_${widget.inboxModel!.id}'
-                      : '${widget.inboxModel!.id}_${usersController.userProfile.value!.id}',
+                      ? '${usersController.userProfile.value.id}_${widget.inboxModel!.id}'
+                      : '${widget.inboxModel!.id}_${usersController.userProfile.value.id}',
                 ),
                 builder: (context, snapshot) {
                   chats = snapshot.data ?? [];
@@ -122,7 +122,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       }*/
 
                       if (chat.senderId ==
-                          usersController.userProfile.value?.id
+                          usersController.userProfile.value.id
                               .toString()) {
                         return myBubble(chat);
                       } else {
@@ -148,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
               //--code to remove border
-              border: Border.fromBorderSide(BorderSide.none),
+              border: const Border.fromBorderSide(BorderSide.none),
               shadowStrength: 3,
               color: Colors.red.withOpacity(0.5),
               shape: BoxShape.rectangle,
@@ -165,25 +165,25 @@ class _ChatScreenState extends State<ChatScreen> {
                         controller: txtController,
                         onChanged: (txt) =>
                             setState(() => txtValue = txt),
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: type,
-                          hintStyle: const TextStyle(
+                          hintStyle: TextStyle(
                               color: Colors.black26, fontSize: 13),
                           fillColor: Colors.white,
                           filled: true,
                           constraints:
-                          const BoxConstraints(maxHeight: 40),
-                          border: const OutlineInputBorder(
+                          BoxConstraints(maxHeight: 40),
+                          border: OutlineInputBorder(
                             borderRadius:
                             BorderRadius.all(Radius.circular(10.0)),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.only(
+                          contentPadding: EdgeInsets.only(
                               left: 15, right: 15),
                         ),
                       ),
                     ),
-                    SizedBox(width: 20,),
+                    const SizedBox(width: 20,),
                     InkWell(
                         onTap: () async {
                           if (txtController.text.isNotEmpty) {
@@ -191,17 +191,16 @@ class _ChatScreenState extends State<ChatScreen> {
                               msgId: '',
                               message: txtValue,
                               senderId: usersController
-                                  .userProfile.value!.id
+                                  .userProfile.value.id
                                   .toString(),
                               time: DateTime.now().toString(),
                               seen: false,
                             );
                             ChatController.sendMsg(
-                                usersController.userProfile.value!
-                                    .id! >
+                                usersController.userProfile.value.id! >
                                     widget.inboxModel!.id!
-                                    ? '${usersController.userProfile.value!.id}_${widget.inboxModel!.id}'
-                                    : '${widget.inboxModel!.id}_${usersController.userProfile.value!.id}',
+                                    ? '${usersController.userProfile.value.id}_${widget.inboxModel!.id}'
+                                    : '${widget.inboxModel!.id}_${usersController.userProfile.value.id}',
                                 message);
                             txtValue = '';
                             txtController.clear();
@@ -220,7 +219,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Container(
                             height: 50,
                             width: 50,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                                 gradient:
                                 LinearGradient(colors: [
                                   Color.fromRGBO(

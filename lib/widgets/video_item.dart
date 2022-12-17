@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
+import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/widgets/better_video_player.dart';
 
 class VideoPlayerItem extends StatefulWidget {
@@ -17,6 +18,7 @@ class VideoPlayerItem extends StatefulWidget {
 }
 
 class _VideoPlayerItemState extends State<VideoPlayerItem> {
+  var videosController = Get.find<VideosController>();
   PublicVideos publicVideos = PublicVideos();
   bool isFav = false;
   bool isLock = false;
@@ -48,7 +50,8 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
             itemBuilder: (context, index) {
               late PublicUser publicUser;
               widget.videosList!.forEach((videos) {
-                publicUser = PublicUser(
+               if(widget.videosList![index].user!=null){
+                 publicUser = PublicUser(
                     id: widget.videosList![index].user!.id,
                     name: widget.videosList![index].user?.name.toString(),
                     username: widget.videosList![index].user?.username,
@@ -63,6 +66,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                     firstName: widget.videosList![index].user?.firstName,
                     lastName: widget.videosList![index].user?.lastName,
                     gender: widget.videosList![index].user?.gender);
+               }
               });
               return AspectRatio(
                 aspectRatio: MediaQuery.of(context).size.aspectRatio /
@@ -106,7 +110,8 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       ? true.obs
                       : false.obs,
                   like: widget.videosList![index].likes!.obs,
-                  isfollow: widget.videosList![index].isfollow,
+                  isfollow: widget.videosList![index].isfollow ?? 0,
+                  commentsCount: widget.videosList![index].comments!.obs,
                 ),
               );
             }));

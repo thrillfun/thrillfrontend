@@ -49,7 +49,7 @@ class DiscoverController extends GetxController {
             Uri.parse('${RestUrl.baseUrl}/banners'),
             headers: {"Authorization": "Bearer $token"},
           )
-          .timeout(const Duration(seconds: 60))
+          .timeout(const Duration(seconds: 10))
           .then((value) {
             discoverBanners.value = (json.decode(value.body) as List)
                 .map((i) => DiscoverModel.fromJson(i))
@@ -78,7 +78,7 @@ class DiscoverController extends GetxController {
             Uri.parse('${RestUrl.baseUrl}/hashtag/top-hashtags-videos'),
             headers: {"Authorization": "Bearer $token"},
           )
-          .timeout(const Duration(seconds: 60))
+          .timeout(const Duration(seconds: 10))
           .then((value) {
         isHashTagsLoading.value = false;
 
@@ -118,7 +118,7 @@ class DiscoverController extends GetxController {
           body: {"hashtag_id": "$hashTagId"},
           headers: {"Authorization": "Bearer $token"},
         )
-        .timeout(const Duration(seconds: 60))
+        .timeout(const Duration(seconds: 10))
         .then((value) {
           hashTagsDetailsList =
               HashTagVideosModel.fromJson(jsonDecode(value.body)).data!.obs;
@@ -141,7 +141,7 @@ class DiscoverController extends GetxController {
             Uri.parse('${RestUrl.baseUrl}/hashtag/list'),
             headers: {"Authorization": "Bearer $token"},
           )
-          .timeout(const Duration(seconds: 60))
+          .timeout(const Duration(seconds: 10))
           .then((value) {
             hashTagsList =
                 HashTagsListModel.fromJson(jsonDecode(value.body)).data!.obs;
@@ -166,7 +166,7 @@ class DiscoverController extends GetxController {
 
     var response = await dio
         .get("/hashtag/search/", queryParameters: {'search': searchQuery})
-        .timeout(const Duration(seconds: 60))
+        .timeout(const Duration(seconds: 10))
         .then((value) {
           searchList =
               hashTagsModel.SearchHashTagsModel.fromJson(value.data).data!.obs;

@@ -2,15 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:colorful_iconify_flutter/icons/logos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/carbon.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 
@@ -48,14 +47,26 @@ class ManageAccount extends StatelessWidget {
   TextEditingController webSiteController = TextEditingController();
   TextEditingController bioController = TextEditingController();
 
-  var usersController = Get.find<UserController>();
+  var usersController = Get.find<UserDetailsController>();
 
   @override
   Widget build(BuildContext context) {
-    nameController.text=usersController.userProfile.value.name.toString();
-    userNameController.text = usersController.userProfile.value.username.toString();
-    webSiteController.text = usersController.userProfile.value.websiteUrl.toString();
-    bioController.text = usersController.userProfile.value.bio.toString();
+    nameController.text =
+        usersController.userProfile.value.name.toString() == "null"
+            ? ""
+            : usersController.userProfile.value.name.toString();
+    userNameController.text =
+        usersController.userProfile.value.username.toString() == "null"
+            ? ""
+            : usersController.userProfile.value.username.toString();
+    webSiteController.text =
+        usersController.userProfile.value.websiteUrl.toString() == "null"
+            ? ""
+            : usersController.userProfile.value.websiteUrl.toString();
+    bioController.text =
+        usersController.userProfile.value.bio.toString() == "null"
+            ? ""
+            : usersController.userProfile.value.bio.toString();
     return Scaffold(
       backgroundColor: ColorManager.dayNight,
       body: Padding(
@@ -168,8 +179,8 @@ class ManageAccount extends StatelessWidget {
                             },
                             child: Column(
                               children: const [
-                                Iconify(
-                                  Carbon.camera,
+                                Icon(
+                                  Icons.camera,
                                   color: ColorManager.colorAccent,
                                 ),
                                 Text('Take Picture',
@@ -186,7 +197,7 @@ class ManageAccount extends StatelessWidget {
                             },
                             child: Column(
                               children: const [
-                                Iconify(Carbon.image,
+                                Icon(Icons.image,
                                     color: ColorManager.colorAccent),
                                 Text(
                                   'Pick Image',
@@ -198,9 +209,9 @@ class ManageAccount extends StatelessWidget {
                         ],
                       ),
                     )),
-                child: const Iconify(
-                  Carbon.camera,
-                  color: Colors.white,
+                child: Icon(
+                  Icons.camera,
+                  color: ColorManager.dayNightIcon,
                   size: 30,
                 ),
               ),
@@ -215,10 +226,9 @@ class ManageAccount extends StatelessWidget {
           TextFormField(
             controller: nameController,
             focusNode: userNode,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: ColorManager.dayNightText),
             onChanged: (value) {
               userName.value = value;
-
             },
             decoration: InputDecoration(
               focusColor: ColorManager.colorAccent,
@@ -266,7 +276,7 @@ class ManageAccount extends StatelessWidget {
           TextFormField(
             focusNode: nameNode,
             controller: userNameController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: ColorManager.dayNightText),
             decoration: InputDecoration(
               focusColor: ColorManager.colorAccent,
               fillColor: nameNode.hasFocus
@@ -307,7 +317,6 @@ class ManageAccount extends StatelessWidget {
             ),
             onChanged: (value) {
               name.value = value;
-
             },
           ),
           SizedBox(
@@ -321,7 +330,7 @@ class ManageAccount extends StatelessWidget {
           TextFormField(
             focusNode: urlNode,
             controller: webSiteController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: ColorManager.dayNightText),
             decoration: InputDecoration(
               focusColor: ColorManager.colorAccent,
               fillColor: urlNode.hasFocus
@@ -362,7 +371,6 @@ class ManageAccount extends StatelessWidget {
             ),
             onChanged: (value) {
               webSiteUrl.value = value;
-
             },
           ),
           SizedBox(
@@ -372,7 +380,7 @@ class ManageAccount extends StatelessWidget {
           TextFormField(
             focusNode: bioNode,
             controller: bioController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: ColorManager.dayNightText),
             maxLines: 10,
             decoration: InputDecoration(
               focusColor: ColorManager.colorAccent,
@@ -427,7 +435,7 @@ class ManageAccount extends StatelessWidget {
 
   submitButtonLayout() => InkWell(
         onTap: () {
-          if(image.path.isNotEmpty){
+          if (image.path.isNotEmpty) {
             usersController.updateuserProfile(
                 profileImage: File(image.path),
                 fullName: nameController.text,
@@ -435,8 +443,7 @@ class ManageAccount extends StatelessWidget {
                 bio: bioController.text,
                 gender: selectedGender.value,
                 webSiteUrl: webSiteController.text);
-          }
-          else{
+          } else {
             usersController.updateuserProfile(
                 fullName: nameController.text,
                 userName: userNameController.text,
@@ -529,7 +536,7 @@ class ManageAccount extends StatelessWidget {
                 ),
               ),
             )),
-        child: const Iconify(Logos.youtube_icon),
+        child: const Icon(Icons.youtube_searched_for_sharp),
       );
 
   layoutFacebook() => InkWell(
@@ -561,7 +568,7 @@ class ManageAccount extends StatelessWidget {
                 ),
               ),
             )),
-        child: const Iconify(Logos.facebook),
+        child: const Icon(Icons.facebook),
       );
 
   layoutInstagram() => InkWell(
@@ -593,9 +600,9 @@ class ManageAccount extends StatelessWidget {
                 ),
               ),
             )),
-        child: const Iconify(
-          Logos.instagram_icon,
-          color: Colors.white,
+        child: Icon(
+          Icons.camera,
+          color: ColorManager.dayNightIcon,
         ),
       );
 
@@ -633,10 +640,10 @@ class ManageAccount extends StatelessWidget {
                 ),
               ],
             )),
-        child: const Iconify(Logos.twitter),
+        child: const Icon(Icons.brightness_medium),
       );
 
-  Widget mainTile(String icon, String text) {
+  Widget mainTile(IconData icon, String text) {
     return SizedBox(
       child: ListTile(
         title: Text(
@@ -647,7 +654,7 @@ class ManageAccount extends StatelessWidget {
           margin: const EdgeInsets.only(right: 20),
           child: Container(
             padding: const EdgeInsets.all(5),
-            child: Iconify(icon, color: ColorManager.colorAccent, size: 20),
+            child: Icon(icon, color: ColorManager.colorAccent, size: 20),
           ),
         ),
         visualDensity: VisualDensity.compact,

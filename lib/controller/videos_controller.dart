@@ -6,11 +6,12 @@ import 'package:external_path/external_path.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_audio_query/flutter_audio_query.dart';
+// import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
@@ -24,6 +25,8 @@ import 'package:thrill/controller/model/user_details_model.dart' as user;
 import 'package:thrill/controller/model/video_fields_model.dart' as videoFields;
 import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
+import 'package:thrill/controller/videos/Following_videos_controller.dart';
+import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/models/add_sound_model.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/models/videos_post_response.dart';
@@ -33,9 +36,12 @@ import 'package:thrill/screens/video/post_screen.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 
-class VideosController extends GetxController {
+var soundsController = Get.find<SoundsController>();
+var relatedVideosController = Get.find<RelatedVideosController>();
+var followingVideosController = Get.find<FollowingVideosController>();
+
+class VideosController extends GetxController with StateMixin<dynamic> {
   RxBool on = false.obs; // our observable
-  var soundsController = Get.lazyPut(() => SoundsController());
   var token = GetStorage().read('token');
   var dio = Dio(BaseOptions(
       baseUrl: RestUrl.baseUrl,
@@ -71,10 +77,6 @@ class VideosController extends GetxController {
   user.User? userData = user.User();
 
   VideosController() {
-    getAllVideos();
-    getUserPrivateVideos();
-    getFollowingVideos();
-
     // snackBar = GetSnackBar(
     //   duration: null,
     //   barBlur: 10,
@@ -116,7 +118,7 @@ class VideosController extends GetxController {
     try {
       dio.options.headers['Authorization'] = "Bearer $token";
       var response = await dio.post("/video/view",
-          data: {"video_id": videoId}).timeout(const Duration(seconds: 60));
+          data: {"video_id": videoId}).timeout(const Duration(seconds: 10));
       print(response.data);
       try {
         response.data["status"] == true
@@ -165,12 +167,8 @@ class VideosController extends GetxController {
     300
   ].obs;
 
-  getAllVideos() async {
-    if (publicVideosList.isEmpty) {
-      videosLoading.value = true;
-    }
-
-   await dio.get("/video/list").then((value) {
+  Future<void> getAllVideos() async {
+    dio.get("/video/list").then((value) {
       if (publicVideosList.isEmpty) {
         publicVideosList = PublicVideosModel.fromJson(value.data).data!.obs;
       } else {
@@ -178,44 +176,47 @@ class VideosController extends GetxController {
             PublicVideosModel.fromJson(value.data).data!.obs;
       }
       videosLoading.value = false;
+      change(RxStatus.success());
     }).onError((error, stackTrace) {
       debugPrint(error.toString());
       videosLoading.value = false;
+      change(RxStatus.error());
+      change(RxStatus.empty());
     });
-    update(publicVideosList);
+    if (publicVideosList.isEmpty) change(RxStatus.empty());
   }
 
   Future<void> getFollowingVideos() async {
     isFollowingLoading.value = true;
 
     await dio.get("/video/following").then((response) {
-        followingVideosList =
-            FollowingVideoModel.fromJson(response.data).data!.obs;
-      }
-      ).onError((error, stackTrace) {
-        debugPrint(error.toString());
-      });
-    isFollowingLoading.value = false;
+      followingVideosList =
+          FollowingVideoModel.fromJson(response.data).data!.obs;
+      change(followingVideosList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      debugPrint(error.toString());
+      change(followingVideosList, status: RxStatus.error(error.toString()));
+      change(followingVideosList, status: RxStatus.empty());
+    });
+    if (followingVideosList.isEmpty)
+      change(publicVideosList, status: RxStatus.empty());
 
+    isFollowingLoading.value = false;
   }
 
-  getUserVideos() async {
+  Future<void> getUserVideos() async {
     isUserVideosLoading.value = true;
     try {
       var id = userData!.id;
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/video/user-videos'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
-          body: {"user_id": "$id"}).timeout(const Duration(seconds: 60));
+          body: {"user_id": "$id"}).timeout(const Duration(seconds: 10));
 
       try {
         userVideosList =
             OwnVideosModel.fromJson(json.decode(response.body)).data!.obs;
-      } catch (e) {
-        errorToast(OwnVideosModel.fromJson(json.decode(response.body))
-            .message
-            .toString());
-      }
+      } catch (e) {}
     } on Exception catch (e) {
       debugPrint(e.toString());
     }
@@ -232,56 +233,60 @@ class VideosController extends GetxController {
       isUserVideosLoading.value = false;
     }).onError((error, stackTrace) {
       isUserVideosLoading.value = false;
-      errorToast(error.toString());
     });
     isUserVideosLoading.value = false;
-
   }
 
   Future<void> getOtherUserVideos(int userId) async {
     isUserVideosLoading.value = true;
     dio
         .post('/video/user-videos', queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 60))
+        .timeout(const Duration(seconds: 10))
         .then((response) {
           otherUserVideos.clear();
           otherUserVideos = OwnVideosModel.fromJson(response.data).data!.obs;
+          change(otherUserVideos, status: RxStatus.success());
         })
         .onError((error, stackTrace) {
-          errorToast(error.toString());
+          change(otherUserVideos, status: RxStatus.error());
         });
+    if (otherUserVideos.isEmpty)
+      change(otherUserVideos, status: RxStatus.empty());
 
     isUserVideosLoading.value = false;
   }
 
   Future<void> getOthersLikedVideos(int userId) async {
     isLikedVideosLoading.value = true;
+
     dio
         .post('/user/user-liked-videos',
             queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 60))
+        .timeout(const Duration(seconds: 10))
         .then((result) {
           othersLikedVideos.clear();
           othersLikedVideos.value =
               LikedVideosModel.fromJson(result.data).data!;
+          change(otherUserVideos, status: RxStatus.success());
         })
         .onError((error, stackTrace) {
           print(error);
+          change(otherUserVideos, status: RxStatus.error());
         });
     isLikedVideosLoading.value = false;
-
   }
 
-  likeVideo(int isLike, int videoId) async {
+  Future<void> likeVideo(int isLike, int videoId) async {
     dio.post('${RestUrl.baseUrl}/video/like', queryParameters: {
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) {
-      getAllVideos();
+      relatedVideosController.getAllVideos();
+      followingVideosController.getFollowingVideos();
     }).onError((error, stackTrace) {});
   }
 
-  postVideo(
+  Future<void> postVideo(
       String userId,
       String videoUrl,
       String sound,
@@ -327,7 +332,7 @@ class VideosController extends GetxController {
         'sound_owner': soundOwnerId.toString(),
         "cover_image": coverImage
       },
-    ).timeout(const Duration(seconds: 60));
+    ).timeout(const Duration(seconds: 10));
 
     try {
       if (response.statusCode == 200) {
@@ -353,21 +358,17 @@ class VideosController extends GetxController {
     update();
   }
 
-  deleteVideo(int videoId) async {
+  Future<void> deleteVideo(int videoId) async {
     try {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/video/delete'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
-          body: {"video_id": "$videoId"}).timeout(const Duration(seconds: 60));
+          body: {"video_id": "$videoId"}).timeout(const Duration(seconds: 10));
 
       try {
         successToast(DeleteVideoResponse.fromJson(json.decode(response.body))
             .message
             .toString());
-
-        getAllVideos();
-        getUserVideos();
-        getUserPrivateVideos();
       } catch (e) {
         errorToast(DeleteVideoResponse.fromJson(json.decode(response.body))
             .message
@@ -378,14 +379,14 @@ class VideosController extends GetxController {
     }
   }
 
-  getVideoFields() async {
+  Future<void> getVideoFields() async {
     isLoading.value = true;
 
     try {
       var response = await http.get(
         Uri.parse('${RestUrl.baseUrl}/video/field-data'),
         headers: {"Authorization": "Bearer $token"},
-      ).timeout(const Duration(seconds: 60));
+      ).timeout(const Duration(seconds: 10));
       try {
         languageList =
             videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
@@ -417,7 +418,10 @@ class VideosController extends GetxController {
   }
 
   Future<void> awsUploadVideo(File file, int currentUnix) async {
-    Get.defaultDialog(content: loader(), title: "Uploading Video",backgroundColor:ColorManager.dayNight);
+    Get.defaultDialog(
+        content: loader(),
+        title: "Uploading Video",
+        backgroundColor: ColorManager.dayNight);
 
     try {
       await simpleS3
@@ -459,7 +463,10 @@ class VideosController extends GetxController {
   }
 
   Future<void> awsUploadThumbnail(int currentUnix) async {
-    Get.defaultDialog(content: loader(), title: "Uploading Thumbnail",backgroundColor: ColorManager.dayNight);
+    Get.defaultDialog(
+        content: loader(),
+        title: "Uploading Thumbnail",
+        backgroundColor: ColorManager.dayNight);
     try {
       var file = File(saveCacheDirectory + 'thumbnail.png');
       await simpleS3
@@ -484,7 +491,10 @@ class VideosController extends GetxController {
   }
 
   Future<void> awsUploadSound(File file, String currentUnix) async {
-    Get.defaultDialog(content: loader(), title: "Uploading Sound",backgroundColor: ColorManager.dayNight);
+    Get.defaultDialog(
+        content: loader(),
+        title: "Uploading Sound",
+        backgroundColor: ColorManager.dayNight);
 
     var userName = "";
     try {
@@ -522,11 +532,8 @@ class VideosController extends GetxController {
       videosList.add("${element.path}");
     });
 
-    List<SongInfo> albums = [];
-    try {
-      FlutterAudioQuery flutterAudioQuery = FlutterAudioQuery();
-      albums = await flutterAudioQuery.getSongs();
-    } catch (e) {
+    List<SongModel> albums = await OnAudioQuery().querySongs();
+    try {} catch (e) {
       errorToast(e.toString());
     } finally {
       if (!isGallery) {
@@ -563,7 +570,7 @@ class VideosController extends GetxController {
                     if (element.title.contains(serializationData["operations"]
                             [i]["options"]["clips"][j]["options"]["identifier"]
                         .toString())) {
-                      songPath = element.filePath;
+                      songPath = element.uri.toString();
                       songName = element.displayName;
                     }
                   }
@@ -611,14 +618,14 @@ class VideosController extends GetxController {
           } else {
             if (selectedSound.isNotEmpty) {
               await FFmpegKit.execute(
-                      '-y -i ${value!.video.substring(7, value!.video.length)} -i $selectedSound -map 0:v -map 1:a  -shortest $saveCacheDirectory/selectedVideo.mp4')
+                      '-y -i ${value!.video.substring(7, value.video.length)} -i $selectedSound -map 0:v -map 1:a  -shortest $saveCacheDirectory/selectedVideo.mp4')
                   .then((ffmpegValue) async {
                 final returnCode = await ffmpegValue.getReturnCode();
                 var data = await ffmpegValue.getOutput();
                 if (ReturnCode.isSuccess(returnCode)) {
                   var addSoundModel = AddSoundModel(
                       0,
-                      id!,
+                      id,
                       0,
                       songPath.isNotEmpty ? songPath : path,
                       songName.isNotEmpty ? songName : "original by $owner",
@@ -648,7 +655,7 @@ class VideosController extends GetxController {
                   .then((audio) async {
                 var addSoundModel = AddSoundModel(
                     0,
-                    id!,
+                    id,
                     0,
                     songPath.isNotEmpty
                         ? songPath
@@ -712,7 +719,7 @@ class VideosController extends GetxController {
                   if (element.title.contains(operation['options']['clips'][0]
                           ['identifier']
                       .toString())) {
-                    songPath = element.filePath;
+                    songPath = element.uri.toString();
                     songName = element.title;
                   }
                 }
@@ -722,7 +729,7 @@ class VideosController extends GetxController {
             if (value != null) {
               var addSoundModel = AddSoundModel(
                   0,
-                  id!,
+                  id,
                   0,
                   songPath.isNotEmpty
                       ? songPath
@@ -753,7 +760,7 @@ class VideosController extends GetxController {
                 .then((audio) async {
               var addSoundModel = AddSoundModel(
                   0,
-                  id!,
+                  id,
                   0,
                   songPath.isNotEmpty
                       ? songPath
@@ -785,7 +792,7 @@ class VideosController extends GetxController {
   }
 
   imgly.Configuration setConfig(
-      List<SongInfo> albums, String selectedSound, String? userName) {
+      List<SongModel> albums, String selectedSound, String? userName) {
     var fileUrl =
         "https://samplelib.com/lib/preview/msetConfigp3/sample-15s.mp3";
     List<imgly.AudioClip> audioClips = [];
@@ -800,28 +807,26 @@ class VideosController extends GetxController {
       albums.forEach((element) {
         audioClips.add(imgly.AudioClip(
           element.title,
-          element.filePath,
+          element.uri.toString(),
           title: element.title,
           artist: element.artist,
         ));
       });
     }
 
-    // late imgly.AudioClipCategory onlineCategory;
-    //
-    // if (soundsController.soundsList.isNotEmpty) {
-    //   List<imgly.AudioClip> onlineAudioClips = [];
-    //   soundsController.soundsList.forEach((element) {
-    //     onlineAudioClips.add(imgly.AudioClip(element.name.toString(),
-    //         RestUrl.soundUrl + element.sound.toString(),
-    //         title: element.name));
-    //   });
-    //   onlineCategory = imgly.AudioClipCategory("online_cat", "online",
-    //       thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png",
-    //       items: onlineAudioClips)
-    //
-    //
-    // }
+    late imgly.AudioClipCategory onlineCategory;
+
+    if (soundsController.soundsList.isNotEmpty) {
+      List<imgly.AudioClip> onlineAudioClips = [];
+      soundsController.soundsList.forEach((element) {
+        onlineAudioClips.add(imgly.AudioClip(element.name.toString(),
+            RestUrl.soundUrl + element.sound.toString(),
+            title: element.name));
+      });
+      onlineCategory = imgly.AudioClipCategory("online_cat", "online",
+          thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png",
+          items: onlineAudioClips);
+    }
 
     List<imgly.AudioClipCategory> audioClipCategories = [];
     if (selectedSound.isNotEmpty) {

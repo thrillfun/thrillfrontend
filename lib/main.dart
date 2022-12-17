@@ -8,7 +8,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart' as transition;
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:path/path.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/bindings.dart';
 import 'package:thrill/utils/notification.dart';
@@ -25,10 +27,11 @@ GlobalKey key = GlobalKey();
 
 void main() async {
   Paint.enableDithering = true;
+  
+  await GetStorage.init();
+
 
   WidgetsFlutterBinding.ensureInitialized();
-
-  await GetStorage.init();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
@@ -48,6 +51,7 @@ void main() async {
   }
   await FirebaseMessaging.instance.getToken();
   CustomNotification.initialize();
+
   try {
     cameras = await availableCameras();
   } on CameraException catch (_) {}
@@ -63,7 +67,7 @@ void main() async {
       fontFamily: "Urbanist",
       brightness: Brightness.dark,
       primaryColor: ColorManager.colorPrimaryLight,
-       buttonTheme: const ButtonThemeData(
+      buttonTheme: const ButtonThemeData(
         buttonColor: ColorManager.colorAccent,
         disabledColor: Colors.blueGrey,
       ));
@@ -113,7 +117,7 @@ class _MyAppState extends State<MyApp> {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: theme(),
-      home: const LandingPageGetx(),
+      home: LandingPageGetx(),
       onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }

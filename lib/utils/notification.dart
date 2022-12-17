@@ -19,8 +19,7 @@ class CustomNotification {
         ],
         channelGroups: [
           NotificationChannelGroup(
-              channelGroupkey: 'normal_channel_group',
-              channelGroupName: 'Normal group'),
+              channelGroupName: 'Normal group', channelGroupKey: 'normal_channel_group'),
         ],
         debug: true);
   }

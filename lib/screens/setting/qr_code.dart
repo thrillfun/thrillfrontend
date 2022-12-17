@@ -155,7 +155,7 @@ class _QrCodeState extends State<QrCode> {
                     int _id = int.parse(
                         barcodeScanRes.split(':')[1].split('\n').first);
                     usersController.getUserProfile(_id).then((value) {
-                      Get.to(ViewProfile(usersController.userProfile.value.id.toString(),0.obs,usersController.userProfile.value.name));
+                      Get.to(ViewProfile(usersController.userProfile.value.id.toString(),0.obs,usersController.userProfile.value.name,usersController.userProfile.value.avatar));
 
                     });
                   }

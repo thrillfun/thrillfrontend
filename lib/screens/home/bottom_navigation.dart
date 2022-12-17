@@ -11,9 +11,7 @@ import 'package:iconly/iconly.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/controller/auth_controller.dart';
 import 'package:thrill/controller/discover_controller.dart';
-import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/controller/wallet_controller.dart';
@@ -25,9 +23,7 @@ import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/screens/setting/wallet_getx.dart';
 import 'package:thrill/screens/spin/spin_the_wheel_getx.dart';
-import 'package:thrill/screens/truecaller/truecaller.dart';
 import 'package:thrill/widgets/fab_items.dart';
-import 'package:thrill/widgets/video_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -40,11 +36,10 @@ var isUsableSdk = true.obs;
 var videosController = Get.find<VideosController>();
 var discoverController = Get.find<DiscoverController>();
 var userController = Get.find<UserController>();
-var authController = Get.find<AuthController>();
 var usersController = Get.find<UserController>();
 
 class BottomNavigation extends StatefulWidget {
-  BottomNavigation({Key? key, this.mapData,this.id}) : super(key: key);
+  BottomNavigation({Key? key, this.mapData, this.id}) : super(key: key);
   final Map? mapData;
 
   int? id;
@@ -63,7 +58,7 @@ class _BottomNavigationState extends State<BottomNavigation>
 
   int selectedIndex = 0;
   late List<Widget> screens = [
-    const HomeGetx(),
+    HomeGetx(),
     const DiscoverGetx(),
     const WalletGetx(),
     Profile(),
@@ -128,25 +123,14 @@ class _BottomNavigationState extends State<BottomNavigation>
             child: Container(
               height: 60,
               width: 60,
-              child: Showcase(
-                  showcaseBackgroundColor: Color.fromARGB(255, 1, 180, 177),
-                  shapeBorder: const CircleBorder(),
-                  radius: const BorderRadius.all(Radius.circular(40)),
-                  tipBorderRadius: const BorderRadius.all(Radius.circular(8)),
-                  overlayPadding: const EdgeInsets.all(5),
-                  key: key,
-                  child: FloatingActionButton(
-                    child: SvgPicture.network(
-                      RestUrl.assetsUrl + 'spin_wheel.svg',
-                      //scale: 1.4,
-                      fit: BoxFit.fill,
-                    ),
-                    onPressed: () => Get.to(() => SpinTheWheelGetx()),
-                  ),
-                  textColor: Colors.white,
-                  descTextStyle: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white),
-                  description: "check out the spin wheel to earn rewards!!"),
+              child: FloatingActionButton(
+                child: SvgPicture.network(
+                  RestUrl.assetsUrl + 'spin_wheel.svg',
+                  //scale: 1.4,
+                  fit: BoxFit.fill,
+                ),
+                onPressed: () => Get.to(() => SpinTheWheelGetx()),
+              ),
             ),
           ),
           bottomNavigationBar: myDrawer2(),
@@ -181,7 +165,6 @@ class _BottomNavigationState extends State<BottomNavigation>
     if (index == 1) {
       discoverController.getHashTagsList();
       discoverController.getBanners();
-      discoverController.getTopHashTags();
       setState(() {});
     }
 
@@ -196,19 +179,17 @@ class _BottomNavigationState extends State<BottomNavigation>
                 })
               }
             else
-              {
-                initTrueCallerLogin()
-              }
+              {initTrueCallerLogin()}
           });
     }
     if (index == 3) {
       await isLogined().then((value) {
-
         if (value) {
-          usersController.getUserProfile(usersController.storage.read("user")["id"]).then((value) =>
-              setState(() {
-                selectedIndex = index;
-              }));
+          usersController
+              .getUserProfile(usersController.storage.read("user")["id"])
+              .then((value) => setState(() {
+                    selectedIndex = index;
+                  }));
         } else {
           initTrueCallerLogin();
         }
@@ -263,7 +244,6 @@ class _BottomNavigationState extends State<BottomNavigation>
                 if (value) {
                   setState(() {
                     selectedIndex = 1;
-
                   });
                 } else {
                   initTrueCallerLogin();
@@ -297,7 +277,6 @@ class _BottomNavigationState extends State<BottomNavigation>
             onTap: () async {
               await isLogined().then((value) async {
                 if (value) {
-
                   setState(() => selectedIndex = 0);
                 } else {
                   initTrueCallerLogin();
@@ -321,7 +300,6 @@ class _BottomNavigationState extends State<BottomNavigation>
                 if (value) {
                   setState(() {
                     selectedIndex = 2;
-
                   });
                 } else {
                   initTrueCallerLogin();

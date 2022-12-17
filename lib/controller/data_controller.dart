@@ -59,7 +59,7 @@ class DataController extends GetxController with StateMixin<dynamic> {
         body: {
           "publisher_user_id": "$userId",
           "action": "unfollow"
-        }).timeout(const Duration(seconds: 60));
+        }).timeout(const Duration(seconds: 10));
 
     try {
       isLoading.value = false;
@@ -93,7 +93,7 @@ class DataController extends GetxController with StateMixin<dynamic> {
       "video_id": "$videoId",
       "comment_by": userId,
       "comment": comment
-    }).timeout(const Duration(seconds: 60));
+    }).timeout(const Duration(seconds: 10));
 
     try {
       isLoading.value = false;
@@ -126,7 +126,7 @@ class DataController extends GetxController with StateMixin<dynamic> {
         "Content-Type": "application/json;charset=utf-8",
         "Accept": "application/json"
       },
-    ).timeout(const Duration(seconds: 60));
+    ).timeout(const Duration(seconds: 10));
     try {
       var result = jsonDecode(response.body);
       popularVideosModel = PopularVideosModel.fromJson(result);

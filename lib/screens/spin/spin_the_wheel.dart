@@ -72,9 +72,9 @@ class _SpinTheWheelState extends State<SpinTheWheel>
   setSpinSound() async {
     try {
       if (Platform.isIOS) {
-        player.setUrl('${saveCacheDirectory}spin.mp3', isLocal: true);
+        player.setSourceUrl('${saveCacheDirectory}spin.mp3');
       } else {
-        player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
+        // player.play('${saveCacheDirectory}spin.mp3');
         player.pause();
       }
     } catch (_) {}
@@ -472,7 +472,7 @@ class _SpinTheWheelState extends State<SpinTheWheel>
         loadWheelDetails();
         player.stop();
         await player.stop();
-        await player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
+        // await player.play('${saveCacheDirectory}spin.mp3', isLocal: true);
         await player.pause();
         isSpin = false;
         remainingChance = int.parse(json['data']['available_chance']);

@@ -18,6 +18,7 @@ import 'package:thrill/utils/custom_timer_painter.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
 
+import '../../controller/Favourites/favourites_controller.dart';
 import '../../controller/videos_controller.dart';
 import '../../widgets/sound_list_bottom_sheet.dart';
 
@@ -43,7 +44,7 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin<CameraScreen> {
-  var soundsController = Get.find<SoundsController>();
+  var soundsController = Get.find<FavouritesController>();
 
   File? _imageFile;
   File? _videoFile;
@@ -261,9 +262,8 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void initState() {
     // Hide the status bar in Android
-    soundsController.getSoundsList();
 
-    soundsController.selectedSoundPath.value = widget.selectedSound ?? "";
+    soundsController.selectedSoundPath.value = widget.selectedSound;
 
     file = File(soundsController.selectedSoundPath.value);
     getPermissionStatus();
@@ -493,11 +493,10 @@ class _CameraScreenState extends State<CameraScreen>
                                             if (value != null) {
                                               videosController.openEditor(
                                                   true,
-                                                  value.path ?? "",
+                                                  value.path,
                                                   soundsController
                                                           .selectedSoundPath
-                                                          .value ??
-                                                      "",
+                                                          .value ,
                                                   widget.id!,
                                                   widget.owner ?? "");
                                             }
@@ -579,16 +578,16 @@ class _CameraScreenState extends State<CameraScreen>
                         ),
                         GradientElevatedButton(
                             onPressed: () =>
-                                soundsController.getSoundsList().then(
-                                      (value) async => await usersController
-                                          .getfavouriteSounds()
-                                          .then((value) => Get.bottomSheet(
-                                              SoundListBottomSheet(),
-                                              isScrollControlled: true)),
+                                soundsController.getFavourites().then(
+                                      (value) async => Get.bottomSheet(
+                                          SoundListBottomSheet(),
+                                          isScrollControlled: true),
                                     ),
-                            child: Obx(()=>Text( soundsController
-                                .selectedSoundPath
-                                .value.isEmpty?"Select Sound": basename(soundsController.selectedSoundPath.value)))),
+                            child: Obx(() => Text(
+                                soundsController.selectedSoundPath.value.isEmpty
+                                    ? "Select Sound"
+                                    : basename(soundsController
+                                        .selectedSoundPath.value)))),
                       ],
                     ),
                   )

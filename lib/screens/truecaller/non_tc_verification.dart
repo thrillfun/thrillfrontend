@@ -433,7 +433,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _navigateToResult(String firstName) {
-    Get.off(const LandingPageGetx());
+    Get.off( LandingPageGetx());
   }
 
   void onProceedClick() {

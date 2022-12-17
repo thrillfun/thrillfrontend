@@ -2,18 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:colorful_iconify_flutter/icons/logos.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/controller/auth_controller.dart';
+import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/screens/truecaller/non_tc_verification.dart';
 import 'package:truecaller_sdk/truecaller_sdk.dart';
 
-var authController = Get.find<AuthController>();
-var usersController = Get.find<UserController>();
+var usersController = Get.find<UserDetailsController>();
 
 class LoginGetxScreen extends StatelessWidget {
   LoginGetxScreen({Key? key}) : super(key: key);
@@ -26,164 +23,169 @@ class LoginGetxScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(child: Container(
-          height: Get.height,
-          width: Get.width,
-          child: Column(
-          children: [
-            ClipOval(
-              child: Image.asset(
-                "assets/logo.png",
-                width: 250,
-                height: 250,
-                fit: BoxFit.contain,
-              ),
-            ),
+        child: SingleChildScrollView(
+          child: Container(
+            height: Get.height,
+            width: Get.width,
+            child: Column(
+              children: [
+                ClipOval(
+                  child: Image.asset(
+                    "assets/logo.png",
+                    width: 250,
+                    height: 250,
+                    fit: BoxFit.contain,
+                  ),
+                ),
 
-            loginLayout(),
+                loginLayout(),
 
-            //   trueCallerLoginLayout(),
+                //   trueCallerLoginLayout(),
 
-            // Row(
-            //   children: const [
-            //     Expanded(
-            //         child: Divider(
-            //       indent: 10,
-            //       endIndent: 10,
-            //       color: Colors.white,
-            //       thickness: 1,
-            //     )),
-            //     SizedBox(
-            //       child: Text(
-            //         'Sign in with facebook or google',
-            //         style: TextStyle(
-            //             color: Colors.white,
-            //             fontWeight: FontWeight.bold,
-            //             fontSize: 14),
-            //       ),
-            //     ),
-            //     Expanded(
-            //         child: Divider(
-            //       color: Colors.white,
-            //       thickness: 1,
-            //       indent: 10,
-            //       endIndent: 10,
-            //     ))
-            //   ],
-            // ),
-            InkWell(
-                onTap: () {
-                  TruecallerSdk.initializeSDK(
-                      sdkOptions: TruecallerSdkScope.SDK_OPTION_WITH_OTP);
-                  TruecallerSdk.isUsable.then((isUsable) {
-                    if (isUsable) {
-                      TruecallerSdk.getProfile;
-                    } else {
-                      final snackBar = SnackBar(content: Text("Not Usable"));
-                      ScaffoldMessenger.of(Get.context!).showSnackBar(snackBar);
-                      print("***Not usable***");
-                    }
-                  });
-                },
-                child: Container(
+                // Row(
+                //   children: const [
+                //     Expanded(
+                //         child: Divider(
+                //       indent: 10,
+                //       endIndent: 10,
+                //       color: Colors.white,
+                //       thickness: 1,
+                //     )),
+                //     SizedBox(
+                //       child: Text(
+                //         'Sign in with facebook or google',
+                //         style: TextStyle(
+                //             color: Colors.white,
+                //             fontWeight: FontWeight.bold,
+                //             fontSize: 14),
+                //       ),
+                //     ),
+                //     Expanded(
+                //         child: Divider(
+                //       color: Colors.white,
+                //       thickness: 1,
+                //       indent: 10,
+                //       endIndent: 10,
+                //     ))
+                //   ],
+                // ),
+                InkWell(
+                    onTap: () {
+                      TruecallerSdk.initializeSDK(
+                          sdkOptions: TruecallerSdkScope.SDK_OPTION_WITH_OTP);
+                      TruecallerSdk.isUsable.then((isUsable) {
+                        if (isUsable) {
+                          TruecallerSdk.getProfile;
+                        } else {
+                          final snackBar =
+                              SnackBar(content: Text("Not Usable"));
+                          ScaffoldMessenger.of(Get.context!)
+                              .showSnackBar(snackBar);
+                          print("***Not usable***");
+                        }
+                      });
+                    },
+                    child: Container(
+                        margin: const EdgeInsets.only(
+                            left: 20, right: 20, top: 40, bottom: 20),
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: Colors.grey)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.travel_explore),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              "Login with phone number",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )
+                          ],
+                        ))),
+                InkWell(
+                    onTap: () => {},
+                    child: Container(
+                        margin: const EdgeInsets.only(
+                            left: 20, right: 20, bottom: 20),
+                        padding: const EdgeInsets.all(15),
+                        alignment: Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: Colors.grey)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.facebook),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              "Login with facebook",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 16),
+                            )
+                          ],
+                        ))),
+                InkWell(
+                  onTap: () async => await usersController.signInWithGoogle(),
+                  child: Container(
                     margin: const EdgeInsets.only(
-                        left: 20, right: 20, top: 40, bottom: 20),
+                        left: 20, right: 20, top: 0, bottom: 20),
                     padding: const EdgeInsets.all(15),
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
+                        color: Colors.transparent,
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(color: Colors.grey)),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Iconify(Logos.trello),
+                        Icon(Icons.search),
                         SizedBox(
                           width: 10,
                         ),
                         Text(
-                          "Login with phone number",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 16),
-                        )
-                      ],
-                    ))),
-            InkWell(
-                onTap: () => {},
-                child: Container(
-                    margin:
-                    const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                    padding: const EdgeInsets.all(15),
-                    alignment: Alignment.centerLeft,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: Colors.grey)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Iconify(Logos.facebook),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          "Login with facebook",
+                          "Login with google",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontWeight: FontWeight.w600, fontSize: 16),
                         )
                       ],
-                    ))),
-            InkWell(
-              onTap: () async => await usersController.signInWithGoogle(),
-              child: Container(
-                margin: const EdgeInsets.only(
-                    left: 20, right: 20, top: 0, bottom: 20),
-                padding: const EdgeInsets.all(15),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.grey)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Iconify(Logos.google_icon),
-                    SizedBox(
-                      width: 10,
                     ),
-                    Text(
-                      "Login with google",
-                      textAlign: TextAlign.center,
-                      style:
-                      TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                    )
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              child: Text(
-                'Or',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            submitButtonLayout(),
+                const SizedBox(
+                  child: Text(
+                    'Or',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+                submitButtonLayout(),
 
-            const SizedBox(
-              height: 10,
+                const SizedBox(
+                  height: 10,
+                ),
+                // SizedBox(
+                //   child: RichText(
+                //       text: TextSpan(children: [
+                //         const TextSpan(text: "Don't have an account?"),
+                //         const TextSpan(text: " "),
+                //         TextSpan(
+                //             text: "SignUp",
+                //             style: const TextStyle(color: ColorManager.colorPrimaryLight),
+                //             recognizer: TapGestureRecognizer()..onTap = () => {})
+                //       ])),
+                // ),
+              ],
             ),
-            // SizedBox(
-            //   child: RichText(
-            //       text: TextSpan(children: [
-            //         const TextSpan(text: "Don't have an account?"),
-            //         const TextSpan(text: " "),
-            //         TextSpan(
-            //             text: "SignUp",
-            //             style: const TextStyle(color: ColorManager.colorPrimaryLight),
-            //             recognizer: TapGestureRecognizer()..onTap = () => {})
-            //       ])),
-            // ),
-          ],
-        ),),),
+          ),
+        ),
       ),
     );
   }
@@ -299,14 +301,13 @@ class LoginGetxScreen extends StatelessWidget {
         String? lastName = truecallerSdkCallback.profile!.lastName;
         String phNo = truecallerSdkCallback.profile!.phoneNumber;
 
-
         var random = Random.secure();
-        var values = List<int>.generate(10, (i) =>  random.nextInt(255));
-        var token =  base64UrlEncode(values);
-      usersController.signinTrueCaller(
+        var values = List<int>.generate(10, (i) => random.nextInt(255));
+        var token = base64UrlEncode(values);
+        usersController.signinTrueCaller(
             token,
             "truecaller",
-            truecallerSdkCallback.profile!.phoneNumber.substring(3,13),
+            truecallerSdkCallback.profile!.phoneNumber.substring(3, 13),
             token,
             truecallerSdkCallback.profile!.firstName);
         break;
@@ -320,6 +321,4 @@ class LoginGetxScreen extends StatelessWidget {
         print("Invalid result");
     }
   });
-
-
 }

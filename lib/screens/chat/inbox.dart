@@ -152,7 +152,7 @@ class Inbox extends GetView<InboxController> {
                                                 ),
                                                 Text(
                                                   inboxController
-                                                      .inboxList![index].name
+                                                      .inboxList[index].name
                                                       .toString(),
                                                   style: const TextStyle(
                                                       fontWeight:
@@ -161,7 +161,7 @@ class Inbox extends GetView<InboxController> {
                                                 ),
                                                 Text(
                                                   inboxController
-                                                      .inboxList![index]
+                                                      .inboxList[index]
                                                       .message!,
                                                   style: const TextStyle(
                                                       fontWeight:
@@ -178,7 +178,7 @@ class Inbox extends GetView<InboxController> {
                                         padding: const EdgeInsets.only(top: 15),
                                         child: Text(
                                           getComparedTime(inboxController
-                                              .inboxList![index].time
+                                              .inboxList[index].time
                                               .toString()),
                                           style: const TextStyle(
                                               color: Colors.grey, fontSize: 10),

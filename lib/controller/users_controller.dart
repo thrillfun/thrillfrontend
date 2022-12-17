@@ -23,9 +23,9 @@ import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/utils/util.dart';
 
-var videosController = Get.find<VideosController>();
-
 class UserController extends GetxController {
+  var videosController = Get.find<VideosController>();
+
   var userModel = authUser.User().obs;
   var isProfileLoading = false.obs;
   var isFollowersLoading = false.obs;
@@ -47,12 +47,15 @@ class UserController extends GetxController {
   var userProfile = profileModel.User().obs;
 
   var otherProfile = profileModel.User().obs;
-  String token = GetStorage().read("token");
+
   var storage = GetStorage();
+
   var dio = dioClient.Dio(dioClient.BaseOptions(
       baseUrl: RestUrl.baseUrl,
       headers: {"Authorization": "Bearer ${GetStorage().read("token")}"}));
+
   var selectedIndex = 0.obs;
+
   RxList<FavouriteVideos> favouriteSounds = RxList();
   RxList<FavouriteHashTags> favouriteHashtags = RxList();
 
@@ -97,20 +100,20 @@ class UserController extends GetxController {
 
     if (followersModel.isNotEmpty) followersModel.clear();
 
-    dio.options.headers['Authorization'] = "Bearer $token";
+    dio.options.headers['Authorization'] =
+        "Bearer ${GetStorage().read("token")}";
     dio
         .post('${RestUrl.baseUrl}/user/get-followers',
             queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 60))
+        .timeout(const Duration(seconds: 10))
         .then((result) {
           followersModel = FollowersModel.fromJson(result.data).data!.obs;
           isFollowersLoading.value = false;
-
-    })
+        })
         .onError((error, stackTrace) {
-      isFollowersLoading.value = false;
+          isFollowersLoading.value = false;
 
-      print(error);
+          print(error);
         });
   }
 
@@ -118,7 +121,7 @@ class UserController extends GetxController {
     isFollowingLoading.value = true;
     dio
         .post('/user/get-followings', queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 60))
+        .timeout(const Duration(seconds: 10))
         .then((result) {
           if (followingModel.isNotEmpty) {
             followingModel.value =
@@ -138,13 +141,13 @@ class UserController extends GetxController {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/favorite/add-to-favorite'),
           headers: {
-            "Authorization": "Bearer $token"
+            "Authorization": "Bearer ${GetStorage().read("token")}"
           },
           body: {
             "id": "$id",
             "type": "$type",
             "action": "$action"
-          }).timeout(const Duration(seconds: 60));
+          }).timeout(const Duration(seconds: 10));
 
       var result = jsonDecode(response.body);
       successToast(result["message"]);
@@ -155,20 +158,24 @@ class UserController extends GetxController {
 
   Future<void> getfavouriteSounds() async {
     try {
-      var response = await http.get(
-        Uri.parse('${RestUrl.baseUrl}/favorite/user-favorites-list'),
-        headers: {"Authorization": "Bearer $token"},
-      ).timeout(const Duration(seconds: 60)).then((value){
-        favouriteSounds.value = FavouritesModel.fromJson(jsonDecode(value.body)).data!.videos!;
+      var response = await http
+          .get(
+            Uri.parse('${RestUrl.baseUrl}/favorite/user-favorites-list'),
+            headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
+          )
+          .timeout(const Duration(seconds: 10))
+          .then((value) {
+            favouriteSounds.value =
+                FavouritesModel.fromJson(jsonDecode(value.body)).data!.videos!;
 
-        favouriteHashtags.value =
-        FavouritesModel.fromJson(jsonDecode(value.body)).data!.hashTags!;
-
-      }).onError((error, stackTrace){
-          errorToast(error.toString());
-      });
-
-
+            favouriteHashtags.value =
+                FavouritesModel.fromJson(jsonDecode(value.body))
+                    .data!
+                    .hashTags!;
+          })
+          .onError((error, stackTrace) {
+            errorToast(error.toString());
+          });
     } on Exception catch (e) {
       log(e.toString());
     }
@@ -179,12 +186,12 @@ class UserController extends GetxController {
     var response = await http.post(
         Uri.parse('${RestUrl.baseUrl}/user/follow-unfollow-user'),
         headers: {
-          "Authorization": "Bearer $token"
+          "Authorization": "Bearer ${GetStorage().read("token")}"
         },
         body: {
           "publisher_user_id": "$userId",
           "action": action
-        }).timeout(const Duration(seconds: 60));
+        }).timeout(const Duration(seconds: 10));
     var result = jsonDecode(response.body);
     successToast(result["message"]);
     if (id != null) {
@@ -205,10 +212,10 @@ class UserController extends GetxController {
     try {
       var response = await http
           .post(Uri.parse('${RestUrl.baseUrl}/user/is-user-blocked'), headers: {
-        "Authorization": "Bearer $token"
+        "Authorization": "Bearer ${GetStorage().read("token")}"
       }, body: {
         "blocked_user": "$userId"
-      }).timeout(const Duration(seconds: 60));
+      }).timeout(const Duration(seconds: 10));
 
       var result = jsonDecode(response.body);
       try {
@@ -232,12 +239,12 @@ class UserController extends GetxController {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/user/block-unblock-user'),
           headers: {
-            "Authorization": "Bearer $token"
+            "Authorization": "Bearer ${GetStorage().read("token")}"
           },
           body: {
             "blocked_user": "$userId",
             "action": action
-          }).timeout(const Duration(seconds: 60));
+          }).timeout(const Duration(seconds: 10));
 
       var result = jsonDecode(response.body);
       try {
@@ -265,7 +272,7 @@ class UserController extends GetxController {
           body: {
             "phone": phone,
             "password": password
-          }).timeout(const Duration(seconds: 60));
+          }).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         var result = jsonDecode(response.body);
@@ -282,7 +289,7 @@ class UserController extends GetxController {
 
           update();
 
-          Get.to(const LandingPageGetx());
+          Get.to(LandingPageGetx());
         } on HttpException catch (e) {
           errorToast(result['message']);
         } on Exception catch (e) {
@@ -316,14 +323,22 @@ class UserController extends GetxController {
           "firebase_token": firebase_token,
           "name": name,
           "referral_code": value.toString(),
-        }).timeout(const Duration(seconds: 60));
+        }).timeout(const Duration(seconds: 10));
 
         var result = jsonDecode(response.body);
         try {
           var userData = authUser.UserDetailsModel.fromJson(result).data;
+
           storage.write("userId", userData!.user!.id);
-          storage.write('token', userData!.token!).toString();
-          storage.write("user", userData.user);
+
+          storage.write('token', userData.token!).toString();
+
+          await storage.write("user", userData).then((_) {
+            print(storage.read("user"));
+            Get.to(LandingPageGetx());
+          });
+
+          // var data = authUser.User.fromJson(jsonDecode(storage.read("user")));
 
           successToast(result['message']);
         } on HttpException catch (e) {
@@ -345,36 +360,38 @@ class UserController extends GetxController {
 
     try {
       createDynamicLink("123456").then((value) async {
-        var response =
-            await http.post(Uri.parse('${RestUrl.baseUrl}/SocialLogin'), body: {
-          "social_login_id": social_login_id,
-          "social_login_type": social_login_type,
-          "phone": phone,
-          "firebase_token": firebase_token,
-          "name": name,
-          "referral_code": value.toString(),
-        }).timeout(const Duration(seconds: 60)).then((value) {
+        var response = await http
+            .post(Uri.parse('${RestUrl.baseUrl}/SocialLogin'), body: {
+              "social_login_id": social_login_id,
+              "social_login_type": social_login_type,
+              "phone": phone,
+              "firebase_token": firebase_token,
+              "name": name,
+              "referral_code": value.toString(),
+            })
+            .timeout(const Duration(seconds: 10))
+            .then((value) {
               var result = jsonDecode(value.body);
               try {
                 var userData = authUser.UserDetailsModel.fromJson(result).data;
 
                 storage.write('token', userData!.token!).toString();
-                storage.write('user', userData!.user).then((value) {
-                  userModel = authUser.User.fromJson(GetStorage().read("user")).obs;
-                  Get.to(const LandingPageGetx());
+                storage.write('user', userData.user).then((value) {
+                  userModel =
+                      authUser.User.fromJson(GetStorage().read("user")).obs;
+                  Get.to(LandingPageGetx());
                 });
 
                 successToast(result['message']);
-              } on HttpException catch (e) {
+              } on HttpException {
                 errorToast(result['message']);
               } on Exception catch (e) {
                 errorToast(e.toString());
               }
-            }).onError((error, stackTrace) {
+            })
+            .onError((error, stackTrace) {
               errorToast(error.toString());
-
             });
-
       });
     } on Exception catch (e) {
       log(e.toString());
@@ -395,8 +412,8 @@ class UserController extends GetxController {
       idToken: googleAuth.idToken,
     );
     // Once signed in, return the UserCredential
-    await socialLoginRegister(googleUser.id, "google", googleUser.email ?? "",
-        "", googleAuth.accessToken, googleUser.displayName ?? "");
+    await socialLoginRegister(googleUser.id, "google", googleUser.email, "",
+        googleAuth.accessToken, googleUser.displayName ?? "");
   }
 
   Future<void> signOut() async {
@@ -428,59 +445,10 @@ class UserController extends GetxController {
       //   appStoreId: 'your_app_store_id',
       // ),
     );
-    var dynamicUrl = await parameters.buildShortLink();
-    final Uri shortUrl = dynamicUrl.shortUrl;
+    var dynamicUrl = await parameters.link;
+    final Uri shortUrl = dynamicUrl;
     return shortUrl;
   }
+
   
-  Future<void> updateuserProfile(
-
-      {File? profileImage,
-      String? fullName,
-      String? userName,
-      String? bio,
-      String? gender,String? webSiteUrl})async{
-
-    Get.defaultDialog(title:"Please wait",content: loader(),backgroundColor: ColorManager.dayNight);
-    if(profileImage!=null){
-      dioClient.FormData formData = dioClient.FormData.fromMap({
-        "avatar": profileImage!=null?await dioClient.MultipartFile.fromFile(profileImage.path, filename:basename(profileImage.path)):"",
-        "username":userName,
-        "first_name":fullName,
-        "last_name":"",
-        "gender":gender,
-        "bio":bio,
-        "website_url":webSiteUrl
-      });
-      await dio.post("/user/edit",data: formData).then((value){
-        successToast(value.data["message"]);
-        Get.offAll(LandingPageGetx());
-      }).onError((error, stackTrace) {
-        errorToast(error.toString());
-      });
-      getUserProfile(storage.read("userId"));
-      Get.back();
-
-    }
-    else{
-      dioClient.FormData formData = dioClient.FormData.fromMap({
-        "username":userName,
-        "first_name":fullName,
-        "last_name":"",
-        "gender":gender,
-        "bio":bio,
-        "website_url":webSiteUrl
-      });
-      dio.post("/user/edit",data: formData).then((value){
-        successToast(value.data["message"]);
-        Get.offAll(LandingPageGetx());
-      }).onError((error, stackTrace) {
-        errorToast(error.toString());
-      });
-    }
-    getUserProfile(storage.read("userId"));
-
-    Get.back();
-
-  }
 }

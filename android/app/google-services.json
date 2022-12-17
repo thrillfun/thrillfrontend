@@ -23,11 +23,71 @@
           }
         },
         {
+          "client_id": "882291140458-j4pg0lstrbfffhvvupj46dsaoimqhcum.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thrill",
+            "certificate_hash": "8564a7cac0803cc98e8f99b1009e4e93e295a379"
+          }
+        },
+        {
           "client_id": "882291140458-ubtbgtejppebc0hlamavrgijn37ntohh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.thrill",
             "certificate_hash": "ad35685512420a611a27e3958b771d8aae31ce92"
+          }
+        },
+        {
+          "client_id": "882291140458-h2ljmnevqujd77nn4s3c6l5d6blj7m50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARlZ8FnRMLBCdmepxUhpodWEJre_Ii8GQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "882291140458-h2ljmnevqujd77nn4s3c6l5d6blj7m50.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "882291140458-380scge8ae1r24jfji50av2153rqv5md.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.thrilltj"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882291140458:android:c3d27f7e98c8b54d3e6713",
+        "android_client_info": {
+          "package_name": "com.thrill.media"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "882291140458-d1bavq76rtg7qipnhg497dn57qvf666s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thrill.media",
+            "certificate_hash": "8564a7cac0803cc98e8f99b1009e4e93e295a379"
+          }
+        },
+        {
+          "client_id": "882291140458-vrouitl973stj817h6vj5s1q6h4c6clh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thrill.media",
+            "certificate_hash": "3cef413a306efbc26b43e3fd0d53360a3a6c6129"
           }
         },
         {
@@ -72,6 +132,14 @@
           "android_info": {
             "package_name": "com.thrilltj",
             "certificate_hash": "ad35685512420a611a27e3958b771d8aae31ce92"
+          }
+        },
+        {
+          "client_id": "882291140458-eqgc87bj2s7gd6d5h2nrou232svsr61d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thrilltj",
+            "certificate_hash": "8564a7cac0803cc98e8f99b1009e4e93e295a379"
           }
         },
         {

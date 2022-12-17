@@ -26,7 +26,7 @@ class CommentsController extends GetxController {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/video/comments'),
           headers: {"Authorization": "Bearer $token"},
-          body: {"video_id": "${videoId}"}).timeout(const Duration(seconds: 60));
+          body: {"video_id": "${videoId}"}).timeout(const Duration(seconds: 10));
 
       var result = jsonDecode(response.body);
       try {
@@ -53,7 +53,7 @@ class CommentsController extends GetxController {
         "video_id": "$videoId",
         "comment_by": userId,
         "comment": comment
-      }).timeout(const Duration(seconds: 60));
+      }).timeout(const Duration(seconds: 10));
       var result = jsonDecode(response.body);
       try {
         commentsPostResponse = CommentsPostResponse.fromJson(result).obs;
@@ -79,7 +79,7 @@ class CommentsController extends GetxController {
       }, body: {
         "comment_id": commentId,
         "is_like": isLike,
-      }).timeout(const Duration(seconds: 60));
+      }).timeout(const Duration(seconds: 10));
       var result = jsonDecode(response.body);
       try {
         isLoading.value = false;

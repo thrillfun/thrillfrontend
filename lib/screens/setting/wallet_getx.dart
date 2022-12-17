@@ -4,11 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
+import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
 import 'package:thrill/controller/wallet_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/dashedline_vertical_painter.dart';
-
 
 class WalletGetx extends StatelessWidget {
   const WalletGetx({Key? key}) : super(key: key);
@@ -19,74 +19,31 @@ class WalletGetx extends StatelessWidget {
       backgroundColor: ColorManager.dayNight,
       body: Stack(
         children: [
-          GetX<WalletController>(builder: (walletController)=>walletController.isCurrenciesLoading.value?Center(child: CircularProgressIndicator(),):Column(
-            children: [
-              backgroundWallet(walletController),
-              const SizedBox(
-                height: 20,
-              ),
-              walletOptionslayout(),
-              const SizedBox(
-                height: 20,
-              ),
-              Expanded(child: walletHistoryLayout())
-            ],
-          ))
+          GetX<WalletController>(
+              builder: (walletController) =>
+                  walletController.isCurrenciesLoading.value
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : Column(
+                          children: [
+                            backgroundWallet(),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            walletOptionslayout(),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Expanded(child: walletHistoryLayout())
+                          ],
+                        ))
         ],
       ),
     );
   }
 
-  backgroundWallet(WalletController walletController) => Container(
-        margin: const EdgeInsets.only(top: 10),
-        width: Get.width,
-        height: 180,
-        child: Stack(
-          alignment: Alignment.center,
-          fit: StackFit.loose,
-          children: [
-            SvgPicture.asset(
-              "assets/wallet_stars.svg",
-              fit: BoxFit.fill,
-            ),
-            Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.only(top: 20),
-              child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Image.asset("assets/thrill_token.png"),
-                      Container(
-                        padding: EdgeInsets.only(bottom: 15),
-                        alignment: Alignment.center,
-                        child: Image.asset(
-                          "assets/logo.png",
-                          width: 60,
-                          height: 40,
-                          fit: BoxFit.fill,
-                        ),
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    walletController.balance.first.symbol.toString() +
-                        walletController.balance.first.amount.toString(),
-                    style:  TextStyle(
-                      color:ColorManager.dayNightText ,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
-      );
+  backgroundWallet() => const WalletBalance();
 
   walletOptionslayout() => Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -118,7 +75,10 @@ class WalletGetx extends StatelessWidget {
               child: Container(
                 height: 40,
                 width: 40,
-                child: Icon(icon,color: ColorManager.dayNightText,),
+                child: Icon(
+                  icon,
+                  color: ColorManager.dayNightText,
+                ),
               ),
             ),
             const SizedBox(
@@ -126,8 +86,9 @@ class WalletGetx extends StatelessWidget {
             ),
             Text(
               text,
-              style:  TextStyle(
-                  fontSize: 16,color: ColorManager.dayNightText,
+              style: TextStyle(
+                  fontSize: 16,
+                  color: ColorManager.dayNightText,
                   fontWeight: FontWeight.w400),
             ),
             const SizedBox(
@@ -137,131 +98,212 @@ class WalletGetx extends StatelessWidget {
         ),
       );
 
-  walletHistoryLayout() => Container(
-        padding: const EdgeInsets.only(left: 10, right: 10),
-        width: Get.width,
-        height: Get.height,
-        decoration: BoxDecoration(
-          color:  ColorManager.dayNight,
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(20),topRight: Radius.circular(20))
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 15,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children:  [
-                Text(
-                  "Portfolio",
-                  textAlign: TextAlign.start,
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 25,color: ColorManager.dayNightText),
-                ),
-                Icon(Icons.book),
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Expanded(
-                child: GetX<WalletController>(
-                    builder: (walletController) => ListView.builder(
-                        shrinkWrap: true,
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: walletController.balance.length,
-                        itemBuilder: (context, index) => Container(
-                              margin: const EdgeInsets.all(10),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      ClipOval(
-                                        child: Container(
-                                          height: 50,
-                                          width: 50,
-                                          padding: const EdgeInsets.all(10),
-                                          child: ClipOval(
-                                            child: CachedNetworkImage(
-                                                fit: BoxFit.fill,
-                                                height: 30,
-                                                width: 30,
-                                                imageUrl: walletController
-                                                            .balance[index]
-                                                            .image
-                                                            .toString()
-                                                            .isEmpty ||
-                                                        walletController
-                                                                .balance[index]
-                                                                .image
-                                                                .toString() ==
-                                                            "null"
-                                                    ? "https://cdn1.iconfinder.com/data/icons/cryptocurrency-set-2018/375/Asset_1480-512.png"
-                                                    : RestUrl.currencyUrl +
-                                                        walletController
-                                                            .balance[index]
-                                                            .image
-                                                            .toString()),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text(
-                                            walletController.balance[index].code
-                                                .toString(),
-                                            style:  TextStyle(
-                                              color: ColorManager.dayNightText,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                          Text(
-                                              walletController
-                                                  .balance[index].code
-                                                  .toString(),
-                                              style:  TextStyle(
-                                                  color: ColorManager.dayNightText,
+  walletHistoryLayout() => const WalletHistory();
+}
 
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400))
-                                        ],
-                                      ),
-                                      Expanded(
-                                          child: Container(
-                                        alignment: Alignment.centerRight,
-                                        child: Column(
+class WalletHistory extends GetView<WalletBalanceController> {
+  const WalletHistory({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return controller.obx(
+        (state) => Container(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              width: Get.width,
+              height: Get.height,
+              decoration: BoxDecoration(
+                  color: ColorManager.dayNight,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Portfolio",
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 25,
+                            color: ColorManager.dayNightText),
+                      ),
+                      Icon(Icons.book),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Expanded(
+                      child: GetX<WalletController>(
+                          builder: (walletController) => ListView.builder(
+                              shrinkWrap: true,
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: walletController.balance.length,
+                              itemBuilder: (context, index) => Container(
+                                    margin: const EdgeInsets.all(10),
+                                    child: Column(
+                                      children: [
+                                        Row(
                                           children: [
-                                            Text(
-                                              walletController
-                                                  .balance[index].amount
-                                                  .toString(),
-                                              style:  TextStyle(
-                                                  color: ColorManager.dayNightText,
-
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w700),
+                                            ClipOval(
+                                              child: Container(
+                                                height: 50,
+                                                width: 50,
+                                                padding:
+                                                    const EdgeInsets.all(10),
+                                                child: ClipOval(
+                                                  child: CachedNetworkImage(
+                                                      fit: BoxFit.fill,
+                                                      height: 30,
+                                                      width: 30,
+                                                      imageUrl: controller
+                                                                  .balance[
+                                                                      index]
+                                                                  .image
+                                                                  .toString()
+                                                                  .isEmpty ||
+                                                              controller
+                                                                      .balance[
+                                                                          index]
+                                                                      .image
+                                                                      .toString() ==
+                                                                  "null"
+                                                          ? "https://cdn1.iconfinder.com/data/icons/cryptocurrency-set-2018/375/Asset_1480-512.png"
+                                                          : RestUrl
+                                                                  .currencyUrl +
+                                                              controller
+                                                                  .balance[
+                                                                      index]
+                                                                  .image
+                                                                  .toString()),
+                                                ),
+                                              ),
                                             ),
-
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Text(
+                                                  controller.balance[index].code
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                      color: ColorManager
+                                                          .dayNightText,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w700),
+                                                ),
+                                                Text(
+                                                    controller
+                                                        .balance[index].code
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                        color: ColorManager
+                                                            .dayNightText,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w400))
+                                              ],
+                                            ),
+                                            Expanded(
+                                                child: Container(
+                                              alignment: Alignment.centerRight,
+                                              child: Column(
+                                                children: [
+                                                  Text(
+                                                    controller
+                                                        .balance[index].amount
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                        color: ColorManager
+                                                            .dayNightText,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w700),
+                                                  ),
+                                                ],
+                                              ),
+                                            ))
                                           ],
                                         ),
-                                      ))
-                                    ],
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.only(top: 10),
-                                    child: const Divider(
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(top: 10),
+                                          child: const Divider(),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ))))
-          ],
-        ),
-      );
+                                  ))))
+                ],
+              ),
+            ),
+        onLoading: loader());
+  }
+}
+
+class WalletBalance extends GetView<WalletBalanceController> {
+  const WalletBalance({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return controller.obx((state) => Container(
+          margin: const EdgeInsets.only(top: 10),
+          width: Get.width,
+          height: 180,
+          child: Stack(
+            alignment: Alignment.center,
+            fit: StackFit.loose,
+            children: [
+              SvgPicture.asset(
+                "assets/wallet_stars.svg",
+                fit: BoxFit.fill,
+              ),
+              Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.only(top: 20),
+                child: Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Image.asset("assets/thrill_token.png"),
+                        Container(
+                          padding: EdgeInsets.only(bottom: 15),
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            "assets/logo.png",
+                            width: 60,
+                            height: 40,
+                            fit: BoxFit.fill,
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      controller.balance.first.symbol.toString() +
+                          controller.balance.first.amount.toString(),
+                      style: TextStyle(
+                          color: ColorManager.dayNightText,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
+        ));
+  }
 }

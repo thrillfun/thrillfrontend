@@ -50,30 +50,32 @@ class FollowingVideos {
   String? isCommentable;
   String? soundOwner;
   int? videoLikeStatus;
+  int? isfollow;
 
   FollowingUser? user;
 
   FollowingVideos(
       {this.id,
-        this.video,
-        this.description,
-        this.sound,
-        this.soundName,
-        this.soundCategoryName,
-        this.filter,
-        this.likes,
-        this.views,
-        this.gifImage,
-        this.speed,
-        this.comments,
-        this.hashtags,
-        this.isDuet,
-        this.duetFrom,
-        this.isDuetable,
-        this.isCommentable,
-        this.soundOwner,
-        this.videoLikeStatus,
-        this.user});
+      this.video,
+      this.description,
+      this.sound,
+      this.soundName,
+      this.soundCategoryName,
+      this.filter,
+      this.likes,
+      this.views,
+      this.gifImage,
+      this.speed,
+      this.comments,
+      this.hashtags,
+      this.isDuet,
+      this.duetFrom,
+      this.isDuetable,
+      this.isCommentable,
+      this.soundOwner,
+      this.videoLikeStatus,
+      this.isfollow,
+      this.user});
 
   FollowingVideos.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? "";
@@ -94,8 +96,10 @@ class FollowingVideos {
     isDuetable = json['is_duetable'] ?? "";
     isCommentable = json['is_commentable'] ?? "";
     soundOwner = json['sound_owner'] ?? "";
-    videoLikeStatus = json["video_like_status"]??0;
-    user = json['user'] != null ? new FollowingUser.fromJson(json['user']) : null;
+    videoLikeStatus = json["video_like_status"] ?? 0;
+    isfollow = json['isfollow'] ?? 0;
+    user =
+        json['user'] != null ? new FollowingUser.fromJson(json['user']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -112,19 +116,21 @@ class FollowingVideos {
     data['gif_image'] = this.gifImage;
     data['speed'] = this.speed;
     data['comments'] = this.comments;
-    data['hashtags'] = this.hashtags??[];
+    data['hashtags'] = this.hashtags ?? [];
     data['is_duet'] = this.isDuet;
     data['duet_from'] = this.duetFrom;
     data['is_duetable'] = this.isDuetable;
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
     data["video_like_status"] = this.videoLikeStatus;
+    data["isfollow"] = this.isfollow;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
     return data;
   }
 }
+
 class Hashtags {
   int? id;
   String? name;
@@ -143,6 +149,7 @@ class Hashtags {
     return data;
   }
 }
+
 class FollowingUser {
   int? id;
   String? name;
@@ -175,34 +182,33 @@ class FollowingUser {
 
   FollowingUser(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.phone,
-        this.avatar,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.firstName,
-        this.lastName,
-        this.gender,
-        this.websiteUrl,
-        this.bio,
-        this.youtube,
-        this.facebook,
-        this.instagram,
-        this.twitter,
-        this.firebaseToken,
-        this.referralCount,
-        this.following,
-        this.followers,
-        this.isfollow,
-
-        this.likes,
-        this.levels,
-        this.totalVideos,
-        this.boxTwo,
-        this.boxThree});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.phone,
+      this.avatar,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.firstName,
+      this.lastName,
+      this.gender,
+      this.websiteUrl,
+      this.bio,
+      this.youtube,
+      this.facebook,
+      this.instagram,
+      this.twitter,
+      this.firebaseToken,
+      this.referralCount,
+      this.following,
+      this.followers,
+      this.isfollow,
+      this.likes,
+      this.levels,
+      this.totalVideos,
+      this.boxTwo,
+      this.boxThree});
 
   FollowingUser.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? "";
@@ -227,7 +233,7 @@ class FollowingUser {
     referralCount = json['referral_count'] ?? "";
     following = json['following'] ?? "";
     followers = json['followers'] ?? "";
-    isfollow = json['isfollow']??0;
+    isfollow = json['isfollow'] ?? 0;
     likes = json['likes'] ?? "";
     levels = json['levels'] != null
         ? new PublicLevels.fromJson(json['levels'])

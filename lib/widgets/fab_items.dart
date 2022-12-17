@@ -1,7 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:thrill/rest/rest_url.dart';
+import 'package:thrill/common/color.dart';
 
 class FABBottomAppBarItem {
   FABBottomAppBarItem({this.iconData, this.text});
@@ -61,22 +59,17 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
     items.insert(items.length >> 1, _buildMiddleTabItem());
 
     return BottomAppBar(
+        color: ColorManager.dayNight,
         shape: widget.notchedShape,
-        elevation: 0,
+        elevation: 10,
         notchMargin: 20.0,
-        child: Stack(
-          fit: StackFit.passthrough,
-          children: [
-            Container(
-              child: SvgPicture.network(RestUrl.assetsUrl + "bottom_nav.svg",
-                  fit: BoxFit.fill),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: items,
-            ),
-          ],
+        child: Container(
+          margin: EdgeInsets.all(10),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: items,
+          ),
         ));
   }
 

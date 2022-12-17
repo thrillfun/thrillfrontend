@@ -206,6 +206,7 @@ successToast(String msg) async {
     ),
   ));
 }
+
 uploadingToast(SimpleS3 _simpleS3) async {
   Get.showSnackbar(GetSnackBar(
     duration: null,
@@ -219,11 +220,16 @@ uploadingToast(SimpleS3 _simpleS3) async {
     ),
     borderRadius: 10,
     backgroundColor: Colors.green.shade50,
-    messageText:StreamBuilder<dynamic>(
+    messageText: StreamBuilder<dynamic>(
         stream: _simpleS3.getUploadPercentage,
         builder: (context, snapshot) {
-          return snapshot.data!=null?  LinearProgressIndicator(value: (snapshot.data as int).toDouble(),): LinearProgressIndicator(value: 0,);
-
+          return snapshot.data != null
+              ? LinearProgressIndicator(
+                  value: (snapshot.data as int).toDouble(),
+                )
+              : const LinearProgressIndicator(
+                  value: 0,
+                );
         }),
     isDismissible: false,
     mainButton: IconButton(
@@ -238,6 +244,7 @@ uploadingToast(SimpleS3 _simpleS3) async {
     ),
   ));
 }
+
 progressDialogue(BuildContext context) {
   showDialog(
     barrierDismissible: false,
@@ -260,20 +267,26 @@ closeDialogue(BuildContext context) {
   // Navigator.pop(context);
 }
 
-videoItemLayout(List<dynamic> list){
+videoItemLayout(List<dynamic> list) {
   PublicUser? publicUser;
   List<PublicVideos> videosList1 = [];
   if (list.isNotEmpty) {
     list.forEach((element) {
-
       publicUser = PublicUser(
-          id: element.user?.id,
-          name: element.user?.name,
-          facebook: element.user?.facebook,
+          id: element.user!.id,
+          name: element.user?.name.toString(),
+          username: element.user?.username,
+          email: element.user?.email,
+          dob: element.user?.dob,
+          phone: element.user?.phone,
+          avatar: element.user!.avatar,
+          socialLoginType: element.user?.socialLoginType,
+          socialLoginId: element.user?.socialLoginId,
           firstName: element.user?.firstName,
           lastName: element.user?.lastName,
-          username: element.user?.username,
-          isfollow:element.user?.isfollow);
+          gender: element.user?.gender,
+          isfollow: element.isfollow ?? 0,
+          likes: element.likes.toString());
       videosList1.add(PublicVideos(
         id: element.id,
         video: element.video,
@@ -296,103 +309,109 @@ videoItemLayout(List<dynamic> list){
       ));
     });
 
-    return  VideoPlayerItem(
+    return VideoPlayerItem(
       videosList: videosList1,
     );
   }
 }
 
-musicPlayerBottomSheet(RxString profilePic,RxString soundName,RxString soundUrl)=> Get.bottomSheet(Container(
-  color: ColorManager.dayNight,
-    padding: const EdgeInsets.all(10),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset("assets/Image.png"),
-            imgProfile(profilePic.value),
-          ],
-        ),
+emptyListWidget() => Center(
+      child: Text(
+        "Oops nothing found",
+        style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: ColorManager.dayNightText),
+      ),
+    );
+musicPlayerBottomSheet(
+        RxString profilePic, RxString soundName, RxString soundUrl) =>
+    Get.bottomSheet(
+        Container(
+            color: ColorManager.dayNight,
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.asset("assets/Image.png"),
+                    imgProfile(profilePic.value),
+                  ],
+                ),
+                Text(
+                  soundName.toString(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 18),
+                ),
+                Obx(() => InkWell(
+                    onTap: () async {
+                      var duration = await audioPlayer
+                          .setUrl(RestUrl.soundUrl + soundUrl.toString());
+                      audioTotalDuration.value = duration!;
+                      audioPlayer.positionStream.listen((position) {
+                        final oldState = progressNotifier.value;
+                        audioDuration.value = position;
+                        progressNotifier.value = ProgressBarState(
+                          current: position,
+                          buffered: oldState.buffered,
+                          total: oldState.total,
+                        );
+                      });
+                      audioPlayer.bufferedPositionStream.listen((position) {
+                        final oldState = progressNotifier.value;
+                        audioBuffered.value = position;
+                        progressNotifier.value = ProgressBarState(
+                          current: oldState.current,
+                          buffered: position,
+                          total: oldState.total,
+                        );
+                      });
 
-        Text(
-         soundName
-              .toString(),
-          style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 18),
-        ),
-        Obx(() => InkWell(
-            onTap: () async {
-              var duration = await audioPlayer
-                  .setUrl(RestUrl.soundUrl +
-                  soundUrl
-                      .toString());
-              audioTotalDuration.value =
-              duration!;
-              audioPlayer.positionStream
-                  .listen((position) {
-                final oldState =
-                    progressNotifier.value;
-                audioDuration.value = position;
-                progressNotifier.value =
-                    ProgressBarState(
-                      current: position,
-                      buffered: oldState.buffered,
-                      total: oldState.total,
-                    );
-              });
-              audioPlayer.bufferedPositionStream
-                  .listen((position) {
-                final oldState =
-                    progressNotifier.value;
-                audioBuffered.value = position;
-                progressNotifier.value =
-                    ProgressBarState(
-                      current: oldState.current,
-                      buffered: position,
-                      total: oldState.total,
-                    );
-              });
+                      audioPlayer.playerStateStream.listen((event) {
+                        if (event.playing) {
+                          isPlaying.value = true;
+                        } else {
+                          isPlaying.value = false;
+                        }
+                      });
+                      if (!isPlaying.value) {
+                        await audioPlayer.play();
+                      } else {
+                        await audioPlayer.pause();
+                      }
+                    },
+                    child: isPlaying.value
+                        ? const Icon(
+                            Icons.pause_circle,
+                            color: ColorManager.colorAccent,
+                            size: 80,
+                          )
+                        : const Icon(
+                            Icons.play_circle,
+                            color: ColorManager.colorAccent,
+                            size: 80,
+                          ))),
+                Obx(() => ProgressBar(
+                    bufferedBarColor: ColorManager.colorAccent.withOpacity(0.3),
+                    thumbColor: ColorManager.colorAccent,
+                    baseBarColor:
+                        ColorManager.colorPrimaryLight.withOpacity(0.2),
+                    progressBarColor: ColorManager.colorAccent.withOpacity(0.8),
+                    onSeek: seek,
+                    buffered: audioBuffered.value,
+                    progress: audioDuration.value,
+                    total: audioTotalDuration.value))
+              ],
+            )),
+        backgroundColor: Get.isPlatformDarkMode ? Colors.grey : Colors.white);
 
-              audioPlayer.playerStateStream
-                  .listen((event) {
-                if (event.playing) {
-                  isPlaying.value = true;
-                } else {
-                  isPlaying.value = false;
-                }
-              });
-              if (!isPlaying.value) {
-                await audioPlayer.play();
-              } else {
-                await audioPlayer.pause();
-              }
-            },
-            child: isPlaying.value
-                ? const Icon(Icons.pause_circle,color: ColorManager.colorAccent,size: 80,)
-                : const Icon(
-              Icons.play_circle,color: ColorManager.colorAccent,size: 80,))),
-        Obx(() => ProgressBar(
-            bufferedBarColor: ColorManager.colorAccent.withOpacity(0.3),
-            thumbColor: ColorManager.colorAccent,
-            baseBarColor: ColorManager.colorPrimaryLight.withOpacity(0.2),
-            progressBarColor:
-            ColorManager.colorAccent.withOpacity(0.8),
-            onSeek: seek,
-            buffered: audioBuffered.value,
-            progress: audioDuration.value,
-            total: audioTotalDuration.value))
-      ],
-    )),backgroundColor: Get.isPlatformDarkMode?Colors.grey:Colors.white);
-
-    void seek(Duration position) {
-audioPlayer.seek(position);
+void seek(Duration position) {
+  audioPlayer.seek(position);
 }
 
-
-    Widget imgNet(String imgPath) {
+Widget imgNet(String imgPath) {
   return Container(
     child: CachedNetworkImage(
         placeholder: (a, b) => const Center(
@@ -407,56 +426,59 @@ audioPlayer.seek(position);
                 image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
               ),
             ),
-        errorWidget: (context, string, dynamic) =>
-            CachedNetworkImage(
-                placeholder: (a, b) => const Center(
+        errorWidget: (context, string, dynamic) => CachedNetworkImage(
+            placeholder: (a, b) => const Center(
                   child: CircularProgressIndicator(),
                 ),
-                fit: BoxFit.fill,
-                imageBuilder: (context, imageProvider) => Container(
+            fit: BoxFit.fill,
+            imageBuilder: (context, imageProvider) => Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     shape: BoxShape.rectangle,
-                    image: DecorationImage(image: imageProvider, fit: BoxFit.fill),
+                    image:
+                        DecorationImage(image: imageProvider, fit: BoxFit.fill),
                   ),
                 ),
-                imageUrl: '${RestUrl.thambUrl}thumb-not-available.png'),
+            imageUrl: '${RestUrl.thambUrl}thumb-not-available.png'),
         imageUrl: imgPath),
   );
 }
-Widget imgProfile(String imagePath)
-  =>Container(
-    child: CachedNetworkImage(
-        placeholder: (a, b) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        fit: BoxFit.fill,
-        height: 60,width: 60,
-        imageBuilder: (context, imageProvider) => Container(
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(60),
-            shape: BoxShape.rectangle,
-            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
-          ),
-        ),
-        errorWidget: (context, string, dynamic) =>
-            CachedNetworkImage(
-                placeholder: (a, b) => const Center(
-                  child: CircularProgressIndicator(),
+
+Widget imgProfile(String imagePath) => Container(
+      child: CachedNetworkImage(
+          placeholder: (a, b) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+          fit: BoxFit.fill,
+          height: 60,
+          width: 60,
+          imageBuilder: (context, imageProvider) => Container(
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(60),
+                  shape: BoxShape.rectangle,
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
                 ),
-                fit: BoxFit.fill,
-                height: 60,width: 60,
-                imageBuilder: (context, imageProvider) => Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(60),
-                    shape: BoxShape.rectangle,
-                    image: DecorationImage(image: imageProvider, fit: BoxFit.fill),
+              ),
+          errorWidget: (context, string, dynamic) => CachedNetworkImage(
+              placeholder: (a, b) => const Center(
+                    child: CircularProgressIndicator(),
                   ),
-                ),
-                imageUrl: RestUrl.placeholderImage),
-        imageUrl:RestUrl.profileUrl+ imagePath),
-  );
+              fit: BoxFit.fill,
+              height: 60,
+              width: 60,
+              imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(60),
+                      shape: BoxShape.rectangle,
+                      image: DecorationImage(
+                          image: imageProvider, fit: BoxFit.fill),
+                    ),
+                  ),
+              imageUrl: RestUrl.placeholderImage),
+          imageUrl: RestUrl.profileUrl + imagePath),
+    );
 
 getTempDirectory() async {
   var directoryIOS = await getApplicationDocumentsDirectory();
@@ -538,78 +560,83 @@ showLoginAlert() {
           child: const Text('Ok')));
 }
 
-loader()=>Stack(alignment:Alignment.center,children: [Lottie.asset("assets/loader_fab.json"),
-Image.asset("assets/logo.png",width: 100,height: 100,)],);
+showLoadingDialog() =>
+    Get.defaultDialog(title: "Please Wait", content: loader());
+
+loader() => Container(
+      color: Colors.transparent.withOpacity(0.0),
+      child: Lottie.network(
+          "https://assets10.lottiefiles.com/packages/lf20_dkz94xcg.json"),
+    );
 
 showWinDialog(String msg) => Get.defaultDialog(
-    backgroundColor: Colors.transparent,
-    title: "",
-    content: Stack(
-      children: [
-        Container(
-          height: 250,
-          margin: const EdgeInsets.only(top: 50),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-          ),
-          width: Get.width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text(
-                "Successful",
-                style: TextStyle(
-                    color: ColorManager.colorPrimaryLight,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w700),
-              ),
-              Text(
-                msg,
-                style: const TextStyle(
-                    color: Color(0xff1C1E24),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w400),
-              ),
-              InkWell(
-                onTap: () {
-                  Get.back();
-                },
-                child: Container(
-                  width: Get.width,
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 20),
-                  padding: const EdgeInsets.all(10),
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ),
-                      gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            ColorManager.colorPrimaryLight,
-                            ColorManager.colorAccent
-                          ])),
-                  child: const Text(
-                    "Excellent!",
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
+      backgroundColor: Colors.transparent,
+      title: "",
+      content: Stack(
+        children: [
+          Container(
+            height: 250,
+            margin: const EdgeInsets.only(top: 50),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+            ),
+            width: Get.width,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Text(
+                  "Successful",
+                  style: TextStyle(
+                      color: ColorManager.colorPrimaryLight,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w700),
                 ),
-              )
-            ],
+                Text(
+                  msg,
+                  style: const TextStyle(
+                      color: Color(0xff1C1E24),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400),
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Container(
+                    width: Get.width,
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+                    padding: const EdgeInsets.all(10),
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              ColorManager.colorPrimaryLight,
+                              ColorManager.colorAccent
+                            ])),
+                    child: const Text(
+                      "Excellent!",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
-        Container(
-          width: Get.width,
-          child: CachedNetworkImage(
-              fit: BoxFit.contain,
-              height: 150,
-              width: 150,
-              imageUrl: RestUrl.assetsUrl + "you_won_logo.png"),
-        )
-      ],
-    ), );
-
-
+          Container(
+            width: Get.width,
+            child: CachedNetworkImage(
+                fit: BoxFit.contain,
+                height: 150,
+                width: 150,
+                imageUrl: RestUrl.assetsUrl + "you_won_logo.png"),
+          )
+        ],
+      ),
+    );

@@ -49,7 +49,7 @@ class WheelController extends GetxController with StateMixin<dynamic> {
       dio.options.headers['Authorization'] = "Bearer $token";
       var response = await dio
           .get("/spin-wheel/counter-data")
-          .timeout(const Duration(seconds: 60));
+          .timeout(const Duration(seconds: 10));
 
       print(response.data);
 
@@ -82,7 +82,7 @@ class WheelController extends GetxController with StateMixin<dynamic> {
     change( RxStatus.loading());
     dio.options.headers['Authorization'] = "Bearer $token";
     var response =
-    await dio.get("/spin-wheel/data").timeout(const Duration(seconds: 60));
+    await dio.get("/spin-wheel/data").timeout(const Duration(seconds: 10));
 
     print(response.data);
 
@@ -99,9 +99,9 @@ class WheelController extends GetxController with StateMixin<dynamic> {
           WheelDataModel.fromJson(response.data).data!.wheelRewards!;
 
           remainingChance.value  =
-              int.parse(wheelData!.value.data!.availableChance??"0");
+              int.parse(wheelData.value.data!.availableChance??"0");
           usedChanceValue.value =
-              int.parse(wheelData!.value.data!.usedChance??"0");
+              int.parse(wheelData.value.data!.usedChance??"0");
 
           lastReward.value = wheelController.wheelData.value.data!.lastReward.toString();
 
@@ -131,7 +131,7 @@ class WheelController extends GetxController with StateMixin<dynamic> {
     try {
       dio.options.headers['Authorization'] = "Bearer $token";
       var response = await dio.post("/spin-wheel/reward-won",
-          data: {"reward_id": rewardId}).timeout(const Duration(seconds: 60));
+          data: {"reward_id": rewardId}).timeout(const Duration(seconds: 10));
 
 
       print(response.data);
@@ -166,7 +166,7 @@ class WheelController extends GetxController with StateMixin<dynamic> {
       dio.options.headers['Authorization'] = "Bearer $token";
        await dio
           .get("/spin-wheel/earned-spin")
-          .timeout(const Duration(seconds: 60)).then((response) {
+          .timeout(const Duration(seconds: 10)).then((response) {
          activityList = EarnedSpinModel.fromJson(response.data).data!.activities!.obs;
          change(wheelData,status: RxStatus.success());
        }).onError((error, stackTrace) {

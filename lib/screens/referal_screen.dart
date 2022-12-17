@@ -326,9 +326,9 @@ class ReferalScreen extends StatelessWidget {
       //   appStoreId: 'your_app_store_id',
       // ),
     );
-    var dynamicUrl = await parameters.buildShortLink();
-    deepLink.value = dynamicUrl.shortUrl.toString();
-    fullDeepLink.value = dynamicUrl.shortUrl.toString();
+    var dynamicUrl = await parameters.link;
+    deepLink.value = dynamicUrl.toString();
+    fullDeepLink.value = dynamicUrl.toString();
     if (deepLink.value.length > 18) {
       deepLink.value = deepLink.value.substring(19, deepLink.value.length);
     }
