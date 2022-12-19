@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="268px" height="173px" viewBox="0 0 268 173" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Ellipse 94</title>
+    <defs>
+        <filter x="-4.8%" y="-7.8%" width="109.6%" height="115.6%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <radialGradient cx="-3.99999986e-06%" cy="60.6743475%" fx="-3.99999986e-06%" fy="60.6743475%" r="161.921181%" gradientTransform="translate(-0.000000,0.606743),scale(0.616554,1.000000),rotate(-53.968100),translate(0.000000,-0.606743)" id="radialGradient-2">
+            <stop stop-color="#2F11A5" offset="0%"></stop>
+            <stop stop-color="#2F80ED" stop-opacity="0" offset="51.9097%"></stop>
+            <stop stop-color="#110056" stop-opacity="0.47" offset="75.3472%"></stop>
+            <stop stop-color="#2F11A5" offset="94.0972%"></stop>
+            <stop stop-color="#2F80ED" stop-opacity="0" offset="100%"></stop>
+        </radialGradient>
+        <path d="M242.53999,154.138574 C255.34099,102.918574 251.59799,48.961474 231.84799,5.88418203e-15 L-3.55271368e-15,93.522574 L242.53999,154.138574 Z" id="path-3"></path>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Ellipse-94" filter="url(#filter-1)" transform="translate(9.000000, 9.000000)">
+            <path d="M242.53999,154.138574 C255.34099,102.918574 251.59799,48.961474 231.84799,0 L0,93.522574 L242.53999,154.138574 Z" id="Path" fill="#2F80ED" fill-rule="nonzero"></path>
+            <path d="M242.53999,154.138574 C255.34099,102.918574 251.59799,48.961474 231.84799,0 L0,93.522574 L242.53999,154.138574 Z" id="Path" fill-opacity="0.5" fill="url(#radialGradient-2)" fill-rule="nonzero"></path>
+            <g id="Clipped">
+                <mask id="mask-4" fill="white">
+                    <use xlink:href="#path-3"></use>
+                </mask>
+                <g id="Path"></g>
+                <path d="M242.53999,154.138574 C255.34099,102.918574 251.59799,48.961474 231.84799,5.88418203e-15 L-3.55271368e-15,93.522574 L242.53999,154.138574 Z" id="Path" stroke="#FFFFFF" stroke-width="4" mask="url(#mask-4)"></path>
+            </g>
+        </g>
+    </g>
+</svg>
