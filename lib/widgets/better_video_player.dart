@@ -158,7 +158,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
     }
 
     return VisibilityDetector(
-        key: Key("key"),
+        key: const Key("key"),
         child: Stack(
           children: [
             GestureDetector(
@@ -174,7 +174,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
                   } else {
                     volume.value = 1;
                   }
-                  betterPlayerController.setVolume(volume.value);
+                  setState(() {
+                    betterPlayerController.setVolume(volume.value);
+                  });
                 },
                 onLongPressStart: (_) {
                   setState(() {
@@ -722,7 +724,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                             widget.isfollow == null
                                                 ? 0.obs
                                                 : widget.isfollow!.obs,
-                                            widget.userName.toString(),widget.publicUser!.avatar.toString())));
+                                            widget.userName.toString(),
+                                            widget.publicUser!.avatar
+                                                .toString())));
                               } else {
                                 Get.to(LoginGetxScreen());
                               }
@@ -942,7 +946,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                 )),
             IgnorePointer(
               child: Obx((() => Visibility(
-                    visible: volume.value == 0 && !isVideoPaused.value,
+                    visible: volume.value <= 0,
                     child: Center(
                         child: ClipOval(
                       child: Container(
@@ -1283,7 +1287,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                                           .obs)))
                                                           : await otherUsersController
                                                               .getOtherUserProfile(int.parse(commentsController.commentsModel[index].userId!.toString()))
-                                                              .then((value) => Get.to(ViewProfile(widget.UserId.toString(), widget.isfollow!.obs, widget.userName.toString(),widget.publicUser!.avatar.toString())));
+                                                              .then((value) => Get.to(ViewProfile(widget.UserId.toString(), widget.isfollow!.obs, widget.userName.toString(), widget.publicUser!.avatar.toString())));
                                                     } else {
                                                       Get.to(LoginGetxScreen());
                                                     }

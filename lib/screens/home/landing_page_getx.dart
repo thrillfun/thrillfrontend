@@ -16,6 +16,7 @@ import 'package:thrill/controller/videos/UserVideosController.dart';
 import 'package:thrill/controller/videos/like_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
+import 'package:thrill/controller/wallet/wallet_currencies_controller.dart';
 import 'package:thrill/controller/wallet_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
@@ -35,6 +36,8 @@ var userVideosController = Get.find<UserVideosController>();
 var userDetailsController = Get.find<UserDetailsController>();
 var walletController = Get.find<WalletController>();
 var walletBalanceController = Get.find<WalletBalanceController>();
+var walletCurrencyController = Get.find<WalletCurrenciesController>();
+
 var tophashtagsController = Get.find<TopHashtagsController>();
 
 class LandingPageGetx extends StatelessWidget {
@@ -331,9 +334,10 @@ class LandingPageGetx extends StatelessWidget {
     }
     if (index == 2) {
       if (usersController.storage.read("token") != null) {
-        walletBalanceController.getBalance();
-        //walletBalanceController.getCurrencies();
         selectedIndex.value = 2;
+        walletBalanceController.getBalance();
+        walletCurrencyController.getCurrencies();
+        //walletBalanceController.getCurrencies();
       } else {
         Get.to(LoginGetxScreen());
       }

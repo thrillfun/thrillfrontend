@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
+import 'package:thrill/controller/wallet/wallet_currencies_controller.dart';
 import 'package:thrill/controller/wallet_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
@@ -101,7 +102,7 @@ class WalletGetx extends StatelessWidget {
   walletHistoryLayout() => const WalletHistory();
 }
 
-class WalletHistory extends GetView<WalletBalanceController> {
+class WalletHistory extends GetView<WalletCurrenciesController> {
   const WalletHistory({Key? key}) : super(key: key);
 
   @override
@@ -140,109 +141,94 @@ class WalletHistory extends GetView<WalletBalanceController> {
                     height: 10,
                   ),
                   Expanded(
-                      child: GetX<WalletController>(
-                          builder: (walletController) => ListView.builder(
-                              shrinkWrap: true,
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: walletController.balance.length,
-                              itemBuilder: (context, index) => Container(
-                                    margin: const EdgeInsets.all(10),
-                                    child: Column(
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: state!.length,
+                          itemBuilder: (context, index) => Container(
+                                margin: const EdgeInsets.all(10),
+                                child: Column(
+                                  children: [
+                                    Row(
                                       children: [
-                                        Row(
+                                        ClipOval(
+                                          child: Container(
+                                            height: 50,
+                                            width: 50,
+                                            padding: const EdgeInsets.all(10),
+                                            child: ClipOval(
+                                              child: CachedNetworkImage(
+                                                  fit: BoxFit.fill,
+                                                  height: 30,
+                                                  width: 30,
+                                                  imageUrl: state[index]
+                                                              .image
+                                                              .toString()
+                                                              .isEmpty ||
+                                                          state[index]
+                                                                  .image
+                                                                  .toString() ==
+                                                              "null"
+                                                      ? "https://cdn1.iconfinder.com/data/icons/cryptocurrency-set-2018/375/Asset_1480-512.png"
+                                                      : RestUrl.currencyUrl +
+                                                          state[index]
+                                                              .image
+                                                              .toString()),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
                                           children: [
-                                            ClipOval(
-                                              child: Container(
-                                                height: 50,
-                                                width: 50,
-                                                padding:
-                                                    const EdgeInsets.all(10),
-                                                child: ClipOval(
-                                                  child: CachedNetworkImage(
-                                                      fit: BoxFit.fill,
-                                                      height: 30,
-                                                      width: 30,
-                                                      imageUrl: controller
-                                                                  .balance[
-                                                                      index]
-                                                                  .image
-                                                                  .toString()
-                                                                  .isEmpty ||
-                                                              controller
-                                                                      .balance[
-                                                                          index]
-                                                                      .image
-                                                                      .toString() ==
-                                                                  "null"
-                                                          ? "https://cdn1.iconfinder.com/data/icons/cryptocurrency-set-2018/375/Asset_1480-512.png"
-                                                          : RestUrl
-                                                                  .currencyUrl +
-                                                              controller
-                                                                  .balance[
-                                                                      index]
-                                                                  .image
-                                                                  .toString()),
-                                                ),
-                                              ),
+                                            Text(
+                                              state[index].code.toString(),
+                                              style: TextStyle(
+                                                  color:
+                                                      ColorManager.dayNightText,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700),
                                             ),
-                                            const SizedBox(
-                                              width: 10,
-                                            ),
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Text(
-                                                  controller.balance[index].code
-                                                      .toString(),
-                                                  style: TextStyle(
-                                                      color: ColorManager
-                                                          .dayNightText,
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w700),
-                                                ),
-                                                Text(
-                                                    controller
-                                                        .balance[index].code
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                        color: ColorManager
-                                                            .dayNightText,
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w400))
-                                              ],
-                                            ),
-                                            Expanded(
-                                                child: Container(
-                                              alignment: Alignment.centerRight,
-                                              child: Column(
-                                                children: [
-                                                  Text(
-                                                    controller
-                                                        .balance[index].amount
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                        color: ColorManager
-                                                            .dayNightText,
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w700),
-                                                  ),
-                                                ],
-                                              ),
-                                            ))
+                                            Text(state[index].code.toString(),
+                                                style: TextStyle(
+                                                    color: ColorManager
+                                                        .dayNightText,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w400))
                                           ],
                                         ),
-                                        Container(
-                                          margin:
-                                              const EdgeInsets.only(top: 10),
-                                          child: const Divider(),
-                                        ),
+                                        Expanded(
+                                            child: Container(
+                                          alignment: Alignment.centerRight,
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                state[index]
+                                                    .networks
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    color: ColorManager
+                                                        .dayNightText,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                            ],
+                                          ),
+                                        ))
                                       ],
                                     ),
-                                  ))))
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 10),
+                                      child: const Divider(),
+                                    ),
+                                  ],
+                                ),
+                              )))
                 ],
               ),
             ),

@@ -15,6 +15,7 @@ import 'package:thrill/models/earnSpin_model.dart';
 import 'package:thrill/models/wheelDetails_model.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
+import 'dart:math' as math;
 
 import '../../controller/model/wheel_data_model.dart';
 
@@ -174,10 +175,15 @@ class SpinTheWheelGetx extends GetView<WheelController> {
       );
 
   wheelLayout() => Container(
+        decoration: const BoxDecoration(
+            color: ColorManager.colorAccent, shape: BoxShape.circle),
         margin: const EdgeInsets.only(top: 40, bottom: 10),
+        padding: EdgeInsets.all(10),
         height: Get.height / 2,
         child: Container(
-          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2)),
           child: FortuneWheel(
             duration: const Duration(seconds: 10),
             animateFirst: false,
@@ -191,8 +197,8 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                     margin: const EdgeInsets.only(bottom: 20),
                     child: SvgPicture.asset(
                       'assets/spinDirection.svg',
-                      height: 80,
-                      width: 80,
+                      height: 120,
+                      width: 120,
                       fit: BoxFit.fill,
                     ),
                   )),
@@ -208,22 +214,24 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                           .wheelData.value.data!.wheelRewards!.length;
                   i++)
                 FortuneItem(
-                  child: Container(
-                      height: Get.height,
-                      width: Get.width,
-                      decoration: BoxDecoration(
-                          image: i == 0
-                              ? const DecorationImage(
-                                  image: AssetImage("assets/pizza_three.png"),
-                                  fit: BoxFit.fitHeight)
-                              : i.isEven
-                                  ? const DecorationImage(
-                                      image: AssetImage("assets/pizza_one.png"),
-                                      fit: BoxFit.fitHeight)
-                                  : const DecorationImage(
-                                      image: AssetImage("assets/pizza_two.png"),
-                                      fit: BoxFit.fitHeight)),
-                      child: Padding(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      i.isOdd
+                          ? Image.asset(
+                              "assets/ellipse6.png",
+                              fit: BoxFit.cover,
+                            )
+                          : i == 0
+                              ? Image.asset(
+                                  "assets/ellipse7.png",
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
+                                  "assets/ellipse8.png",
+                                  fit: BoxFit.cover,
+                                ),
+                      Padding(
                         padding: const EdgeInsets.all(20),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -256,7 +264,9 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                             )
                           ],
                         ),
-                      )),
+                      ),
+                    ],
+                  ),
                   //     : Padding(
                   //   padding: const EdgeInsets.only(left: 25),
                   //   child: Image.network(
@@ -266,8 +276,8 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                   //   ),
                   // ),
                   style: const FortuneItemStyle(
-                    borderColor: Colors.white,
-                    borderWidth: 5,
+                    borderColor: Colors.red,
+                    borderWidth: 20,
                   ),
                 ),
             ],

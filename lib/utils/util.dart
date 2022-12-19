@@ -564,6 +564,8 @@ showLoadingDialog() =>
     Get.defaultDialog(title: "Please Wait", content: loader());
 
 loader() => Container(
+      height: 150,
+      width: 150,
       color: Colors.transparent.withOpacity(0.0),
       child: Lottie.network(
           "https://assets10.lottiefiles.com/packages/lf20_dkz94xcg.json"),

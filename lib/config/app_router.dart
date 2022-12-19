@@ -31,15 +31,13 @@ class AppRouter {
 
       case SpinTheWheel.routeName:
         return SpinTheWheel.route();
+        
       case EarnSpins.routeName:
         return EarnSpins.route();
       case CustomerSupport.routeName:
         return CustomerSupport.route();
       case FreeUpSpace.routeName:
         return FreeUpSpace.route();
-
-      case Privacy.routeName:
-        return Privacy.route();
 
       case Wallet.routeName:
         return Wallet.route();

@@ -5,6 +5,7 @@ import 'package:thrill/controller/comments_controller.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/hashtags/search_hashtags_controller.dart';
 import 'package:thrill/controller/hashtags/top_hashtags_controller.dart';
+import 'package:thrill/controller/privacy_and_conditions/privacy_and_conditions_controller.dart';
 import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/controller/users/followers_controller.dart';
 import 'package:thrill/controller/users/other_users_controller.dart';
@@ -15,6 +16,7 @@ import 'package:thrill/controller/videos/UserVideosController.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
+import 'package:thrill/controller/wallet/wallet_currencies_controller.dart';
 import 'package:thrill/controller/wallet_controller.dart';
 import 'package:thrill/controller/wheel_controller.dart';
 
@@ -57,9 +59,13 @@ class DataBindings extends Bindings {
 
     // wallet
     Get.lazyPut(() => WalletController(), fenix: true);
-    Get.lazyPut(() => WalletBalanceController());
+    Get.lazyPut(() => WalletBalanceController(), fenix: true);
+    Get.lazyPut(() => WalletCurrenciesController(), fenix: true);
 
-    //
+    //inbox
     Get.lazyPut(() => InboxController(), fenix: true);
+
+    //privacy
+    Get.lazyPut(() => PrivacyAndConditionsController(), fenix: true);
   }
 }
