@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 
@@ -19,18 +19,16 @@ import '../../rest/rest_url.dart';
 import '../../utils/util.dart';
 import 'package:get/get.dart';
 
-var usersController = Get.find<UserController>();
 class QrCode extends StatefulWidget {
   const QrCode({Key? key}) : super(key: key);
 
   @override
   State<QrCode> createState() => _QrCodeState();
-
-
-
 }
 
 class _QrCodeState extends State<QrCode> {
+  var usersController = Get.find<UserDetailsController>();
+
   String qrData = "";
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   User? userModel;
@@ -50,97 +48,79 @@ class _QrCodeState extends State<QrCode> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.dayNight,
-
       body: qrView(),
     );
   }
 
-  Widget qrView() {
+  qrView() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Stack(
-          alignment: Alignment.topCenter,
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(45)),
-              padding:
-              const EdgeInsets.symmetric(horizontal: 25, vertical: 45),
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              child: QrImage(
-                padding: const EdgeInsets.all(25),
-                data: qrData,
-                version: QrVersions.auto,
-                embeddedImage: Image.asset("assets/logo_.png").image,
-              ),
-            ),
-            Positioned(
-              top: -60,
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: ColorManager.spinColorDivider)),
-                child:usersController.userProfile.value.avatar!.isEmpty
-                    ? Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SvgPicture.asset("assets/profile.svg"),
-                )
-                    : ClipOval(
-                  child: CachedNetworkImage(
-                    fit: BoxFit.cover,
-                    height: 95,
-                    width: 95,
-                    imageUrl:
-                    '${RestUrl.profileUrl}${usersController.userProfile.value.avatar}',
-                    placeholder: (a, b) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 40,
-              child: Text(usersController.userProfile.value.name!,
-                  style: Theme.of(context).textTheme.headline3),
-            ),
-            Positioned(
-              bottom: 30,
-              child: Text("Scan QR Code to follow account",
-                  style: Theme.of(context).textTheme.headline5),
-            ),
-          ],
+        Container(
+          height: 100,
+          width: Get.width,
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(),
+              image: DecorationImage(
+                  image: NetworkImage(
+                      usersController.userProfile.value.avatar != null
+                          ? RestUrl.profileUrl +
+                              usersController.userProfile.value.avatar!
+                          : RestUrl.placeholderImage))),
+        ),
+        Text(usersController.userProfile.value.name!,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 24)),
+        const Text("Scan QR Code to follow account",
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+        Container(
+          height: 250,
+          decoration: BoxDecoration(
+              color: ColorManager.dayNight,
+              borderRadius: BorderRadius.circular(45)),
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: QrImage(
+            eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle),
+            padding: const EdgeInsets.all(25),
+            dataModuleStyle:
+                QrDataModuleStyle(dataModuleShape: QrDataModuleShape.circle),
+            data: qrData,
+            foregroundColor: Colors.black,
+            version: QrVersions.auto,
+            embeddedImage: Image.asset(
+              "assets/logo.png",
+            ).image,
+            embeddedImageStyle: QrEmbeddedImageStyle(),
+          ),
         ),
         const SizedBox(
           height: 30,
         ),
-        Row(
+        Flexible(
+            child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             InkWell(
                 onTap: saveQrCode,
                 borderRadius: BorderRadius.circular(10),
-                splashColor: Colors.white.withOpacity(0.50),
+                splashColor: ColorManager.colorAccentTransparent,
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SvgPicture.asset('assets/download.svg'),
+                      Icon(
+                        Icons.download,
+                        color: ColorManager.dayNightIcon,
+                      ),
                       const SizedBox(
                         height: 5,
                       ),
-                      const Text(
+                      Text(
                         saveToDevice,
                         style: TextStyle(
                             fontSize: 16,
-                            color: Colors.white,
+                            color: ColorManager.dayNightIcon,
                             fontWeight: FontWeight.bold),
                       )
                     ],
@@ -149,14 +129,17 @@ class _QrCodeState extends State<QrCode> {
             InkWell(
                 onTap: () async {
                   String barcodeScanRes =
-                  await FlutterBarcodeScanner.scanBarcode(
-                      "#ff6666", "Cancel", true, ScanMode.QR);
+                      await FlutterBarcodeScanner.scanBarcode(
+                          "#ff6666", "Cancel", true, ScanMode.QR);
                   if (barcodeScanRes.isNotEmpty && barcodeScanRes != '-1') {
                     int _id = int.parse(
                         barcodeScanRes.split(':')[1].split('\n').first);
-                    usersController.getUserProfile(_id).then((value) {
-                      Get.to(ViewProfile(usersController.userProfile.value.id.toString(),0.obs,usersController.userProfile.value.name,usersController.userProfile.value.avatar));
-
+                    await usersController.getUserProfile(_id).then((value) {
+                      Get.to(ViewProfile(
+                          usersController.userProfile.value.id.toString(),
+                          0.obs,
+                          usersController.userProfile.value.name,
+                          usersController.userProfile.value.avatar));
                     });
                   }
                 },
@@ -167,22 +150,25 @@ class _QrCodeState extends State<QrCode> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SvgPicture.asset('assets/qr_small.svg'),
+                      Icon(
+                        Icons.qr_code,
+                        color: ColorManager.dayNightIcon,
+                      ),
                       const SizedBox(
                         height: 5,
                       ),
-                      const Text(
+                      Text(
                         scanQRCode,
                         style: TextStyle(
                             fontSize: 16,
-                            color: Colors.white,
+                            color: ColorManager.dayNightIcon,
                             fontWeight: FontWeight.bold),
                       )
                     ],
                   ),
                 ))
           ],
-        )
+        ))
       ],
     );
   }
@@ -266,11 +252,9 @@ class _QrCodeState extends State<QrCode> {
   }
 
   getUserModel() async {
-    var pref = await SharedPreferences.getInstance();
-    var currentUser = pref.getString('currentUser');
-    User current = User.fromJson(jsonDecode(currentUser!));
     setState(() {
-      qrData = "Thrill User ID :${GetStorage().read("userId")}\nProfile: www.google.com";
+      qrData =
+          "Thrill User ID :${GetStorage().read("userId")}\nProfile: www.google.com";
     });
   }
 

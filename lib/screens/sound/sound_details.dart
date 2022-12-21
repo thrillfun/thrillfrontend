@@ -7,6 +7,7 @@ import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart' as justAudio;
+import 'package:just_audio/just_audio.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
@@ -19,8 +20,26 @@ import '../../common/color.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
 import '../../widgets/video_item.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
 
 var progressCount = "".obs;
+var isPlaying = false.obs;
+var isAudioLoading = true.obs;
+var audioDuration = const Duration().obs;
+var audioTotalDuration = const Duration().obs;
+var audioBuffered = const Duration().obs;
+var isPlayerInit = false.obs;
+final progressNotifier = ValueNotifier<ProgressBarState>(
+  ProgressBarState(
+    current: Duration.zero,
+    buffered: Duration.zero,
+    total: Duration.zero,
+  ),
+);
+
+late AudioPlayer audioPlayer;
+late Duration duration;
+late PlayerController playerController;
 
 class SoundDetails extends StatefulWidget {
   SoundDetails({Key? key, required this.map}) : super(key: key);
@@ -49,15 +68,17 @@ class _SoundDetailsState extends State<SoundDetails>
     ),
   );
 
-  justAudio.AudioPlayer audioPlayer = justAudio.AudioPlayer();
-
   @override
   void initState() {
+    playerController = PlayerController();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
     if (widget.map['soundName'] != null) title = widget.map['soundName'];
+
+    setupAudioPlayer();
+
     super.initState();
     getVideos();
     try {} catch (_) {}
@@ -65,9 +86,9 @@ class _SoundDetailsState extends State<SoundDetails>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     audioPlayer.dispose();
     _controller!.dispose();
+    playerController.dispose();
     super.dispose();
   }
 
@@ -98,71 +119,15 @@ class _SoundDetailsState extends State<SoundDetails>
                         margin: const EdgeInsets.symmetric(vertical: 20),
                         child: Row(
                           children: [
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Image.asset("assets/Image.png"),
-                                Container(
-                                  alignment: Alignment.topLeft,
-                                  color: Colors.transparent.withOpacity(0),
-                                  height: 60,
-                                  width: 60,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      RotationTransition(
-                                        turns: Tween(begin: 0.0, end: 1.0)
-                                            .animate(_controller!),
-                                        child: Container(
-                                            height: 100,
-                                            width: 100,
-                                            decoration: BoxDecoration(
-                                                gradient: const LinearGradient(
-                                                    colors: [
-                                                      Color(0xFF2F8897),
-                                                      Color(0xff1F2A52),
-                                                      Color(0xff1F244E)
-                                                    ]),
-                                                borderRadius:
-                                                    BorderRadius.circular(50),
-                                                color: ColorManager.cyan)),
-                                      ),
-                                      Center(
-                                          child: InkWell(
-                                        onTap: () async {
-                                          // if (!isPlaying.value) {
-                                          //   audioPlayer
-                                          //       .play(
-                                          //           "https://thrillvideo.s3.amazonaws.com/sound/" +
-                                          //               widget.map["sound"])
-                                          //       .then((value) {
-                                          //     isPlaying.value = true;
-                                          //   });
-                                          //
-                                          //   _controller!.forward();
-                                          //   _controller!.repeat();
-                                          // } else {
-                                          //   isPlaying.value = false;
-                                          //   audioPlayer.pause();
-                                          //   _controller!.stop();
-                                          // }
-                                        },
-                                        child: Obx(() => !isPlaying.value
-                                            ? const Icon(
-                                                Icons.play_circle,
-                                                size: 25,
-                                                color: Colors.white,
-                                              )
-                                            : const Icon(
-                                                Icons.pause_circle,
-                                                size: 25,
-                                                color: Colors.white,
-                                              )),
-                                      )),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            Flexible(
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Image.asset("assets/Image.png"),
+                                  imgProfile(
+                                      widget.map["userProfile"].toString()),
+                                ],
+                              ),
                             ),
                             const SizedBox(
                               width: 20,
@@ -261,6 +226,108 @@ class _SoundDetailsState extends State<SoundDetails>
                       ),
                       const SizedBox(
                         height: 20,
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Obx(() => InkWell(
+                                      onTap: () async {
+                                        audioPlayer.positionStream
+                                            .listen((position) {
+                                          final oldState =
+                                              progressNotifier.value;
+                                          audioDuration.value = position;
+                                          progressNotifier.value =
+                                              ProgressBarState(
+                                            current: position,
+                                            buffered: oldState.buffered,
+                                            total: oldState.total,
+                                          );
+                                        });
+                                        audioPlayer.bufferedPositionStream
+                                            .listen((position) {
+                                          final oldState =
+                                              progressNotifier.value;
+                                          audioBuffered.value = position;
+                                          progressNotifier.value =
+                                              ProgressBarState(
+                                            current: oldState.current,
+                                            buffered: position,
+                                            total: oldState.total,
+                                          );
+                                        });
+                                        audioPlayer.playerStateStream
+                                            .listen((event) {
+                                          if (event.playing) {
+                                            isPlaying.value = true;
+                                          } else {
+                                            isPlaying.value = false;
+                                          }
+                                        });
+                                        if (!isPlaying.value) {
+                                          //await audioPlayer.play();
+                                          await playerController.startPlayer();
+                                          isPlaying.value = true;
+                                        } else {
+                                          // await audioPlayer.pause();
+                                          await playerController.pausePlayer();
+                                          isPlaying.value = false;
+                                        }
+                                      },
+                                      child: isPlaying.value
+                                          ? const Icon(
+                                              Icons.pause_circle,
+                                              color: ColorManager.colorAccent,
+                                              size: 40,
+                                            )
+                                          : const Icon(
+                                              Icons.play_circle,
+                                              color: ColorManager.colorAccent,
+                                              size: 40,
+                                            ))),
+                                  // Obx(() => ProgressBar(
+                                  //     bufferedBarColor:
+                                  //         ColorManager.colorAccent.withOpacity(0.3),
+                                  //     thumbColor: ColorManager.colorAccent,
+                                  //     baseBarColor: ColorManager.colorPrimaryLight
+                                  //         .withOpacity(0.2),
+                                  //     progressBarColor:
+                                  //         ColorManager.colorAccent.withOpacity(0.8),
+                                  //     onSeek: seek,
+                                  //     buffered: audioBuffered.value,
+                                  //     progress: audioDuration.value,
+                                  //     total: audioTotalDuration.value))
+                                ],
+                              )),
+                          Flexible(
+                              child: Obx(() => !isPlayerInit.value
+                                  ? const CircularProgressIndicator()
+                                  : Visibility(
+                                      visible: isPlayerInit.value,
+                                      child: AudioFileWaveforms(
+                                        margin: EdgeInsets.only(right: 20),
+                                        playerWaveStyle: const PlayerWaveStyle(
+                                            waveThickness: 2,
+                                            visualizerHeight: 10,
+                                            fixedWaveColor: ColorManager
+                                                .colorAccentTransparent,
+                                            liveWaveColor:
+                                                ColorManager.colorAccent),
+                                        animationCurve: Curves.easeInBack,
+                                        animationDuration:
+                                            audioTotalDuration.value,
+                                        size: Size(
+                                            MediaQuery.of(context).size.width /
+                                                1.5,
+                                            100),
+                                        playerController: playerController,
+                                      )))),
+                        ],
                       ),
                       Flexible(
                           child: Row(
@@ -604,6 +671,40 @@ class _SoundDetailsState extends State<SoundDetails>
 
   void seek(Duration position) {
     audioPlayer.seek(position);
+  }
+
+  setupAudioPlayer() async {
+    audioPlayer = AudioPlayer();
+    duration = (await audioPlayer
+        .setUrl(RestUrl.soundUrl + widget.map["sound"].toString()))!;
+
+    audioTotalDuration.value = duration;
+
+    var soundName = widget.map["sound"].toString();
+    var directory = await getTemporaryDirectory();
+    await FileSupport()
+        .downloadCustomLocation(
+      url: "${RestUrl.awsSoundUrl}$soundName",
+      path: directory.path,
+      filename: soundName.split('.').first,
+      extension: ".${soundName.split('.').last}",
+      progress: (progress) async {},
+    )
+        .then((value) async {
+      await playerController.preparePlayer(value!.path).then((value) {
+        isPlayerInit.value = true;
+      });
+    });
+
+    audioTotalDuration.value = Duration(seconds: playerController.maxDuration);
+    playerController.onCurrentDurationChanged.listen((duration)async {
+      Duration playerDuration = Duration(seconds: duration);
+      if (playerDuration == audioTotalDuration.value) {
+        await playerController.seekTo(0);
+        isPlaying.value = false;
+        setState(() async {});
+      }
+    });
   }
 
   getVideos() async {

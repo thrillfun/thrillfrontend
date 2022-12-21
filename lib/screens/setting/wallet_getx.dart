@@ -18,27 +18,17 @@ class WalletGetx extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.dayNight,
-      body: Stack(
+      body: Column(
         children: [
-          GetX<WalletController>(
-              builder: (walletController) =>
-                  walletController.isCurrenciesLoading.value
-                      ? Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      : Column(
-                          children: [
-                            backgroundWallet(),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            walletOptionslayout(),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            Expanded(child: walletHistoryLayout())
-                          ],
-                        ))
+          backgroundWallet(),
+          const SizedBox(
+            height: 20,
+          ),
+          walletOptionslayout(),
+          const SizedBox(
+            height: 20,
+          ),
+          Expanded(child: walletHistoryLayout())
         ],
       ),
     );
@@ -165,10 +155,8 @@ class WalletHistory extends GetView<WalletCurrenciesController> {
                                                               .image
                                                               .toString()
                                                               .isEmpty ||
-                                                          state[index]
-                                                                  .image
-                                                                  .toString() ==
-                                                              "null"
+                                                          state[index].image ==
+                                                              null
                                                       ? "https://cdn1.iconfinder.com/data/icons/cryptocurrency-set-2018/375/Asset_1480-512.png"
                                                       : RestUrl.currencyUrl +
                                                           state[index]

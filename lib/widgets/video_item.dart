@@ -28,12 +28,12 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   var popular = 0.obs;
   var isOnPageTurning = false.obs;
 
-  PreloadPageController? preloadPageController;
+  PageController? preloadPageController;
 
   @override
   void initState() {
     // TODO: implement initState
-    preloadPageController = PreloadPageController();
+    preloadPageController = PageController();
     preloadPageController!.addListener(scrollListener);
 
     super.initState();
@@ -42,31 +42,30 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: PreloadPageView.builder(
+        body: PageView.builder(
             controller: preloadPageController,
-            preloadPagesCount: 6,
             itemCount: widget.videosList!.length,
             scrollDirection: Axis.vertical,
             itemBuilder: (context, index) {
               late PublicUser publicUser;
               widget.videosList!.forEach((videos) {
-               if(widget.videosList![index].user!=null){
-                 publicUser = PublicUser(
-                    id: widget.videosList![index].user!.id,
-                    name: widget.videosList![index].user?.name.toString(),
-                    username: widget.videosList![index].user?.username,
-                    email: widget.videosList![index].user?.email,
-                    dob: widget.videosList![index].user?.dob,
-                    phone: widget.videosList![index].user?.phone,
-                    avatar: widget.videosList![index].user!.avatar,
-                    socialLoginType:
-                        widget.videosList![index].user?.socialLoginType,
-                    socialLoginId:
-                        widget.videosList![index].user?.socialLoginId,
-                    firstName: widget.videosList![index].user?.firstName,
-                    lastName: widget.videosList![index].user?.lastName,
-                    gender: widget.videosList![index].user?.gender);
-               }
+                if (widget.videosList![index].user != null) {
+                  publicUser = PublicUser(
+                      id: widget.videosList![index].user!.id,
+                      name: widget.videosList![index].user?.name.toString(),
+                      username: widget.videosList![index].user?.username,
+                      email: widget.videosList![index].user?.email,
+                      dob: widget.videosList![index].user?.dob,
+                      phone: widget.videosList![index].user?.phone,
+                      avatar: widget.videosList![index].user!.avatar,
+                      socialLoginType:
+                          widget.videosList![index].user?.socialLoginType,
+                      socialLoginId:
+                          widget.videosList![index].user?.socialLoginId,
+                      firstName: widget.videosList![index].user?.firstName,
+                      lastName: widget.videosList![index].user?.lastName,
+                      gender: widget.videosList![index].user?.gender);
+                }
               });
               return AspectRatio(
                 aspectRatio: MediaQuery.of(context).size.aspectRatio /

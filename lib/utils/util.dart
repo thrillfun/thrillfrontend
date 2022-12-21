@@ -340,70 +340,7 @@ musicPlayerBottomSheet(
                     imgProfile(profilePic.value),
                   ],
                 ),
-                Text(
-                  soundName.toString(),
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 18),
-                ),
-                Obx(() => InkWell(
-                    onTap: () async {
-                      var duration = await audioPlayer
-                          .setUrl(RestUrl.soundUrl + soundUrl.toString());
-                      audioTotalDuration.value = duration!;
-                      audioPlayer.positionStream.listen((position) {
-                        final oldState = progressNotifier.value;
-                        audioDuration.value = position;
-                        progressNotifier.value = ProgressBarState(
-                          current: position,
-                          buffered: oldState.buffered,
-                          total: oldState.total,
-                        );
-                      });
-                      audioPlayer.bufferedPositionStream.listen((position) {
-                        final oldState = progressNotifier.value;
-                        audioBuffered.value = position;
-                        progressNotifier.value = ProgressBarState(
-                          current: oldState.current,
-                          buffered: position,
-                          total: oldState.total,
-                        );
-                      });
-
-                      audioPlayer.playerStateStream.listen((event) {
-                        if (event.playing) {
-                          isPlaying.value = true;
-                        } else {
-                          isPlaying.value = false;
-                        }
-                      });
-                      if (!isPlaying.value) {
-                        await audioPlayer.play();
-                      } else {
-                        await audioPlayer.pause();
-                      }
-                    },
-                    child: isPlaying.value
-                        ? const Icon(
-                            Icons.pause_circle,
-                            color: ColorManager.colorAccent,
-                            size: 80,
-                          )
-                        : const Icon(
-                            Icons.play_circle,
-                            color: ColorManager.colorAccent,
-                            size: 80,
-                          ))),
-                Obx(() => ProgressBar(
-                    bufferedBarColor: ColorManager.colorAccent.withOpacity(0.3),
-                    thumbColor: ColorManager.colorAccent,
-                    baseBarColor:
-                        ColorManager.colorPrimaryLight.withOpacity(0.2),
-                    progressBarColor: ColorManager.colorAccent.withOpacity(0.8),
-                    onSeek: seek,
-                    buffered: audioBuffered.value,
-                    progress: audioDuration.value,
-                    total: audioTotalDuration.value))
-              ],
+                      ],
             )),
         backgroundColor: Get.isPlatformDarkMode ? Colors.grey : Colors.white);
 

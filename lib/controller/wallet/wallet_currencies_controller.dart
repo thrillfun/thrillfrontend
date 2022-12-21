@@ -12,16 +12,22 @@ class WalletCurrenciesController extends GetxController
   var currenciesList = RxList<Currencies>();
 
   getCurrencies() async {
-     dio.options.headers = {
-        "Authorization": "Bearer ${await GetStorage().read("token")}"
-      };
+    change(currenciesList, status: RxStatus.loading());
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
 
-    await dio.get("/currencies/data").then((response) {
-        currenciesList.value = CurrenciesModel.fromJson(response.data).data!;
-                change(currenciesList, status: RxStatus.success());
-
-      }).onError((error, stackTrace) {
-        change(currenciesList, status: RxStatus.error());
-      });
+    dio.get("/currencies/data").then((response) {
+      currenciesList.value = CurrenciesModel.fromJson(response.data).data!;
+      change(currenciesList, status: RxStatus.success());
+      if (currenciesList.isEmpty) {
+        change(currenciesList, status: RxStatus.empty());
+      }
+    }).onError((error, stackTrace) {
+      change(currenciesList, status: RxStatus.error());
+    });
+    if (currenciesList.isEmpty) {
+      change(currenciesList, status: RxStatus.empty());
+    }
   }
 }

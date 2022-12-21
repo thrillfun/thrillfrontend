@@ -333,7 +333,7 @@ class LandingPageGetx extends StatelessWidget {
       selectedIndex.value = 2;
     }
     if (index == 2) {
-      if (usersController.storage.read("token") != null) {
+      if (await GetStorage().read("token") != null) {
         selectedIndex.value = 2;
         walletBalanceController.getBalance();
         walletCurrencyController.getCurrencies();
@@ -343,7 +343,7 @@ class LandingPageGetx extends StatelessWidget {
       }
     }
     if (index == 3) {
-      if (usersController.storage.read("token") != null) {
+      if (await GetStorage().read("token") != null) {
         await userVideosController
             .getOtherUserVideos(userDetailsController.storage.read("userId"));
         await userDetailsController

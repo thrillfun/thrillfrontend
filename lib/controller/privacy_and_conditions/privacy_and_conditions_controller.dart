@@ -8,7 +8,7 @@ class PrivacyAndConditionsController extends GetxController
     with StateMixin<Rx<String>> {
   var url = "https://thrill.fun/terms-conditions".obs;
 
-  loadPrivacyPage() => WebViewWidget(
+  loadPrivacyPage(String url) => WebViewWidget(
       controller: WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(const Color(0x00000000))
@@ -28,5 +28,5 @@ class PrivacyAndConditionsController extends GetxController
             },
           ),
         )
-        ..loadRequest(Uri.parse(url.value)));
+        ..loadRequest(Uri.parse(url)));
 }

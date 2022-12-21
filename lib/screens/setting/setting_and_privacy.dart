@@ -24,11 +24,8 @@ import 'package:velocity_x/velocity_x.dart';
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
 
-
-
 class SettingAndPrivacy extends StatelessWidget {
-  
-   SettingAndPrivacy(
+  SettingAndPrivacy(
       {required this.avatar, required this.name, required this.userName});
 
   final avatar;
@@ -36,7 +33,7 @@ class SettingAndPrivacy extends StatelessWidget {
   final userName;
 
   var userController = Get.find<UserController>();
-var inboxController = Get.find<InboxController>();
+  var inboxController = Get.find<InboxController>();
 
   @override
   Widget build(BuildContext context) {
@@ -245,18 +242,11 @@ var inboxController = Get.find<InboxController>();
               ),
               GestureDetector(
                   onTap: () {
-                    Get.to(const TermsOfService());
+                    Get.to(TermsOfService());
                     //Navigator.pushNamed(context, '/termsOfService');
                   },
                   child: mainTile(
                       Icons.dashboard_customize_outlined, termsOfService)),
-              GestureDetector(
-                  onTap: () {
-                    Get.to(const PrivacyPolicy());
-                    //Navigator.pushNamed(context, '/privacyPolicy');
-                  },
-                  child: mainTile(Icons.policy, privacyPolicy)),
-
               // GestureDetector(
               //     onTap: () {
               //       switchAccountLayout();
@@ -274,8 +264,8 @@ var inboxController = Get.find<InboxController>();
                               await userController.storage.remove("token");
                               await userController.storage.remove("user");
 
-                              await userController.signOut().then((value) =>
-                                  Get.offAll(LandingPageGetx()));
+                              await userController.signOut().then(
+                                  (value) => Get.offAll(LandingPageGetx()));
                             },
                             child: const Text('Yes')),
                         cancel: ElevatedButton(
@@ -283,114 +273,7 @@ var inboxController = Get.find<InboxController>();
                               Get.back();
                             },
                             child: const Text("No")));
-                    // showDialog(
-                    //     context: context,
-                    //     builder: (_) => Center(
-                    //           child: Material(
-                    //             type: MaterialType.transparency,
-                    //             child: Container(
-                    //               width: getWidth(context) * .80,
-                    //               padding: const EdgeInsets.symmetric(
-                    //                   vertical: 15),
-                    //               decoration: BoxDecoration(
-                    //                   color: Colors.white,
-                    //                   borderRadius:
-                    //                       BorderRadius.circular(10)),
-                    //               child: Column(
-                    //                 mainAxisSize: MainAxisSize.min,
-                    //                 children: [
-                    //                   Text(
-                    //                     "Are you sure you want to logout?",
-                    //                     style: Theme.of(context)
-                    //                         .textTheme
-                    //                         .headline4,
-                    //                     textAlign: TextAlign.center,
-                    //                   ),
-                    //                   const SizedBox(
-                    //                     height: 5,
-                    //                   ),
-                    //                   Padding(
-                    //                     padding: const EdgeInsets.symmetric(
-                    //                         horizontal: 25),
-                    //                     child: Text(
-                    //                       "This will also logout all your linked account if any.",
-                    //                       style: Theme.of(context)
-                    //                           .textTheme
-                    //                           .headline5!
-                    //                           .copyWith(
-                    //                               fontWeight:
-                    //                                   FontWeight.normal),
-                    //                       textAlign: TextAlign.center,
-                    //                     ),
-                    //                   ),
-                    //                   const SizedBox(
-                    //                     height: 25,
-                    //                   ),
-                    //                   Row(
-                    //                     mainAxisSize: MainAxisSize.min,
-                    //                     children: [
-                    //                       ElevatedButton(
-                    //                           onPressed: () {
-                    //                             Get.back(
-                    //                                 closeOverlays: true);
-                    //                             //     Navigator.pop(context);
-                    //                           },
-                    //                           style: ElevatedButton.styleFrom(
-                    //                               primary: Colors.red,
-                    //                               fixedSize: Size(
-                    //                                   getWidth(context) *
-                    //                                       .26,
-                    //                                   40),
-                    //                               shape:
-                    //                                   RoundedRectangleBorder(
-                    //                                       borderRadius:
-                    //                                           BorderRadius
-                    //                                               .circular(
-                    //                                                   10))),
-                    //                           child: const Text("No")),
-                    //                       const SizedBox(
-                    //                         width: 15,
-                    //                       ),
-                    //                       ElevatedButton(
-                    //                           onPressed: () async {
-                    //                             SharedPreferences
-                    //                                 preferences =
-                    //                                 await SharedPreferences
-                    //                                     .getInstance();
-                    //                             await preferences.clear();
-                    //                             GoogleSignIn googleSignIn =
-                    //                                 GoogleSignIn();
-                    //                             await googleSignIn
-                    //                                 .signOut();
-                    //                             await FacebookAuth.instance
-                    //                                 .logOut();
-                    //                             GetStorage()
-                    //                                 .remove("token");
-                    //                             Get.offAll(LoginGetxScreen());
-                    //
-                    //                             //Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => true);
-                    //                           },
-                    //                           style: ElevatedButton.styleFrom(
-                    //                               primary: Colors.green,
-                    //                               fixedSize: Size(
-                    //                                   getWidth(context) *
-                    //                                       .26,
-                    //                                   40),
-                    //                               shape:
-                    //                                   RoundedRectangleBorder(
-                    //                                       borderRadius:
-                    //                                           BorderRadius
-                    //                                               .circular(
-                    //                                                   10))),
-                    //                           child: const Text("Yes"))
-                    //                     ],
-                    //                   )
-                    //                 ],
-                    //               ),
-                    //             ),
-                    //           ),
-                    //         ));
-                  },
+                       },
                   child: mainTile(Icons.login, logout)),
               Card(
                 margin: const EdgeInsets.only(top: 20),

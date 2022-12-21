@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
@@ -107,6 +108,8 @@ class Profile extends StatelessWidget {
       Get.find<PrivateVideosController>().getUserPrivateVideos();
       return lock();
     } else {
+      Get.find<LikedVideosController>()
+          .getOthersLikedVideos(GetStorage().read("userId"));
       return fav();
     }
   }
@@ -534,7 +537,7 @@ class LikedVideos extends GetView<LikedVideosController> {
               crossAxisCount: 3,
               childAspectRatio: Get.width / Get.height,
               children: List.generate(
-                  state!.value.length,
+                  state!.length,
                   (index) => GestureDetector(
                         onTap: () {
                           Get.to(VideoPlayerScreen(
@@ -630,7 +633,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                           onPressed: () => Get.to(SettingAndPrivacy(
                               avatar: state!.value.avatar!,
                               name: state.value.name!,
-                              userName: state.value.username!)),
+                              userName: state.value.name!)),
                           icon: Icon(
                             Icons.settings,
                             color: ColorManager.dayNightText,

@@ -16,7 +16,7 @@ class Privacy extends GetView<PrivacyAndConditionsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: controller.loadPrivacyPage() );
+      body: controller.loadPrivacyPage("https://thrill.fun/terms-conditions") );
   }
 
  

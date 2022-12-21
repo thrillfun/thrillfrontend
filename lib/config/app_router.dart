@@ -12,6 +12,7 @@ import 'package:thrill/screens/video/duet.dart';
 import '../models/vidio_discover_model.dart';
 import '../screens/sound/new_song.dart';
 import 'package:thrill/controller/model/inbox_model.dart' as inbox;
+
 class AppRouter {
   static Route onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -28,10 +29,9 @@ class AppRouter {
       case ResetPasswordScreen.routeName:
         return ResetPasswordScreen.route(phone: settings.arguments as String);
 
-
       case SpinTheWheel.routeName:
         return SpinTheWheel.route();
-        
+
       case EarnSpins.routeName:
         return EarnSpins.route();
       case CustomerSupport.routeName:
@@ -43,7 +43,6 @@ class AppRouter {
         return Wallet.route();
       case PushNotification.routeName:
         return PushNotification.route();
-
 
       case Favourites.routeName:
         return Favourites.route();
@@ -61,8 +60,7 @@ class AppRouter {
         return RequestVerification.route();
       case PaymentRequest.routeName:
         return PaymentRequest.route(settings.arguments as List<WalletBalance>);
-      case TermsOfService.routeName:
-        return TermsOfService.route();
+
       case PrivacyPolicy.routeName:
         return PrivacyPolicy.route();
       case RecordDuet.routeName:

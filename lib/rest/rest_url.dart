@@ -6,12 +6,14 @@ class RestUrl {
   // static const String profileUrl =
   //     "http://thrill.fun/public/dev/uploads/profile_images/profile_images1663598406.jpg";
   // static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
-  static const String assetsUrl = "https://thrillvideo.s3.amazonaws.com/assets/";
+  static const String assetsUrl =
+      "https://thrillvideo.s3.amazonaws.com/assets/";
   // static const String bannerUrl = "http://thrill.fun/dev/uploads/banners/";
   // static const String thambUrl = "http://thrill.fun/dev/uploads/videos/";
   // static const String soundUrl = "http://thrill.fun/dev/";
   // static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
-  static const String placeholderImage = "https://ttensports.com/wp-content/uploads/1982/02/person-placeholder.jpg";
+  static const String placeholderImage =
+      "https://ttensports.com/wp-content/uploads/1982/02/person-placeholder.jpg";
   // static const String awsSoundUrl =
   //     "https://thrillvideo.s3.amazonaws.com/sound/";
   // // static const String currencyUrl = "http://thrill.fun/dev/uploads/currency/";
@@ -20,14 +22,19 @@ class RestUrl {
   //
   // static const String baseUrl = "https://9starinfosolutions.com/thrill/api/";
   // static const String profileUrl = "https://9starinfosolutions.com/thrill/uploads/profile_images/";
-  static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
-  static const String bannerUrl = "https://9starinfosolutions.com/thrill/uploads/banners/";
-  static const String thambUrl = "https://9starinfosolutions.com/thrill/uploads/videos/";
-  static const String soundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
-  static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
-  static const String awsSoundUrl = "https://thrillvideo.s3.amazonaws.com/sound/";
-  static const String currencyUrl = "https://9starinfosolutions.com/thrill/uploads/currency/";
-  static const String spinSound = "https://9starinfosolutions.com/thrill/public/uploads/spins.wav";
+  static const String videoUrl = "https://d1cuxn87f1g3w1.cloudfront.net/test/";
+  static const String bannerUrl =
+      "https://thrill.fun/public/uploads/banners/";
+  static const String thambUrl =
+      "https://thrill.fun/public/uploads/videos/";
+  static const String soundUrl = "https://d1cuxn87f1g3w1.cloudfront.net/sound/";
+  static const String gifUrl = "https://d1cuxn87f1g3w1.cloudfront.net/gif/";
+  static const String awsSoundUrl =
+      "https://d1cuxn87f1g3w1.cloudfront.net/sound/";
+  static const String currencyUrl =
+      "https://thrill.fun/public/uploads/currency/";
+  static const String spinSound =
+      "https://thrill.fun/public/uploads/spins.wav";
 
   static const String login = baseUrl + "login";
   static const String register = baseUrl + "register";
@@ -76,7 +83,8 @@ class RestUrl {
   static const String paymentHistory = baseUrl + "wallet/withdraw-history";
   static const String videoBySound = baseUrl + "/sound/videosbysound";
 
-  static const String getProbilityCounter = baseUrl + "/spin-wheel/counter-data";
+  static const String getProbilityCounter =
+      baseUrl + "/spin-wheel/counter-data";
   static const String cmsPage = baseUrl + "/CmsPage";
   static const String siteSettings = baseUrl + "/SiteSettings";
   static const String popularVideos = baseUrl + "/video/popular";

@@ -19,6 +19,7 @@ import '../../utils/util.dart';
 FocusNode fieldNode = FocusNode();
 FocusNode userNode = FocusNode();
 FocusNode nameNode = FocusNode();
+FocusNode lastNameNode = FocusNode();
 FocusNode bioNode = FocusNode();
 FocusNode urlNode = FocusNode();
 
@@ -38,11 +39,14 @@ class ManageAccount extends StatelessWidget {
 
   var name = "".obs;
   var userName = "".obs;
+  var lastName = "".obs;
+
   var webSiteUrl = "".obs;
   var gender = "".obs;
   var bio = "".obs;
 
   TextEditingController nameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
   TextEditingController webSiteController = TextEditingController();
   TextEditingController bioController = TextEditingController();
@@ -52,9 +56,13 @@ class ManageAccount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     nameController.text =
-        usersController.userProfile.value.name.toString() == "null"
+        usersController.userProfile.value.firstName.toString() == "null"
             ? ""
-            : usersController.userProfile.value.name.toString();
+            : usersController.userProfile.value.firstName.toString();
+    lastNameController.text =
+        usersController.userProfile.value.lastName.toString() == "null"
+            ? ""
+            : usersController.userProfile.value.lastName.toString();
     userNameController.text =
         usersController.userProfile.value.username.toString() == "null"
             ? ""
@@ -269,7 +277,8 @@ class ManageAccount extends StatelessWidget {
                   fontSize: 14),
             ),
           ),
-          SizedBox(
+
+          const SizedBox(
             height: 10,
           ),
 
@@ -319,11 +328,60 @@ class ManageAccount extends StatelessWidget {
               name.value = value;
             },
           ),
-          SizedBox(
+          const SizedBox(
+            height: 10,
+          ),
+          TextFormField(
+            controller: lastNameController,
+            focusNode: lastNameNode,
+            style: TextStyle(color: ColorManager.dayNightText),
+            onChanged: (value) {
+              lastName.value = value;
+            },
+            decoration: InputDecoration(
+              focusColor: ColorManager.colorAccent,
+              fillColor: lastNameNode.hasFocus
+                  ? ColorManager.colorAccentTransparent
+                  : Colors.grey.withOpacity(0.1),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: lastNameNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : const BorderSide(
+                        color: Color(0xffFAFAFA),
+                      ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: lastNameNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                      ),
+              ),
+              filled: true,
+              prefixIcon: Icon(
+                Icons.person_outline,
+                color: lastNameNode.hasFocus
+                    ? ColorManager.colorAccent
+                    : Colors.grey.withOpacity(0.3),
+              ),
+              hintText: "Last name....",
+              hintStyle: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 14),
+            ),
+          ),
+          const SizedBox(
             height: 10,
           ),
           dropDownGender(),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
 
@@ -373,7 +431,7 @@ class ManageAccount extends StatelessWidget {
               webSiteUrl.value = value;
             },
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
 
@@ -439,6 +497,7 @@ class ManageAccount extends StatelessWidget {
             usersController.updateuserProfile(
                 profileImage: File(image.path),
                 fullName: nameController.text,
+                lastName: lastNameController.text,
                 userName: userNameController.text,
                 bio: bioController.text,
                 gender: selectedGender.value,
@@ -446,6 +505,7 @@ class ManageAccount extends StatelessWidget {
           } else {
             usersController.updateuserProfile(
                 fullName: nameController.text,
+                lastName: lastNameController.text,
                 userName: userNameController.text,
                 bio: bioController.text,
                 gender: selectedGender.value,

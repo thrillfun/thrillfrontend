@@ -122,6 +122,7 @@ class UserDetailsController extends GetxController
   Future<void> updateuserProfile(
       {File? profileImage,
       String? fullName,
+      String? lastName,
       String? userName,
       String? bio,
       String? gender,
@@ -138,7 +139,7 @@ class UserDetailsController extends GetxController
             : "",
         "username": userName,
         "first_name": fullName,
-        "last_name": "",
+        "last_name": lastName,
         "gender": gender,
         "bio": bio,
         "website_url": webSiteUrl
@@ -155,7 +156,7 @@ class UserDetailsController extends GetxController
       client.FormData formData = client.FormData.fromMap({
         "username": userName,
         "first_name": fullName,
-        "last_name": "",
+        "last_name": lastName,
         "gender": gender,
         "bio": bio,
         "website_url": webSiteUrl
