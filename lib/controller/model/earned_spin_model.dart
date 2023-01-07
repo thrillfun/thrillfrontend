@@ -54,29 +54,38 @@ class Activities {
   String? nextLevel;
   String? conditions;
   dynamic? earnedSpins;
-  dynamic? totalSpin;
+  num? totalSpin;
   dynamic? maxLevel;
   num? progress;
+  num? totalView;
+  num? currentView;
+  num? nextLvlView;
 
   Activities(
       {this.name,
-        this.currentLevel,
-        this.nextLevel,
-        this.conditions,
-        this.earnedSpins,
-        this.totalSpin,
-        this.maxLevel,
-        this.progress});
+      this.currentLevel,
+      this.nextLevel,
+      this.conditions,
+      this.earnedSpins,
+      this.totalSpin,
+      this.maxLevel,
+      this.progress,
+      this.totalView,
+      this.currentView,
+      this.nextLvlView});
 
   Activities.fromJson(Map<String, dynamic> json) {
     name = json['name'];
-    currentLevel = json['current_level']??0;
-    nextLevel = json['next_level']??0;
+    currentLevel = json['current_level'];
+    nextLevel = json['next_level'];
     conditions = json['conditions'];
-    earnedSpins = json['earned_spins']??0;
-    totalSpin = json['total_spin']??0;
-    maxLevel = json['max_level']??0;
-    progress = json['progress']??0;
+    earnedSpins = json['earned_spins'];
+    totalSpin = json['total_spin'];
+    maxLevel = json['max_level'];
+    progress = json['progress'];
+    totalView = json['total_view'];
+    currentView = json['current_view'];
+    nextLvlView = json['next_lvl_view'];
   }
 
   Map<String, dynamic> toJson() {
@@ -89,6 +98,9 @@ class Activities {
     data['total_spin'] = this.totalSpin;
     data['max_level'] = this.maxLevel;
     data['progress'] = this.progress;
+    data['total_view'] = this.totalView;
+    data['current_view'] = this.currentView;
+    data['next_lvl_view'] = this.nextLvlView;
     return data;
   }
 }

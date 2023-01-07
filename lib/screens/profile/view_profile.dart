@@ -9,6 +9,7 @@ import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/screens/chat/chat_screen.dart';
 import 'package:thrill/screens/following_and_followers.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
 
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/video_player_screen.dart';
@@ -57,94 +58,11 @@ class ViewProfile extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          OtherUserProfileDetails(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                  child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: ColorManager.colorAccent),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 20),
-                      child: InkWell(
-                        onTap: () {
-                          usersController.followUnfollowUser(
-                              usersController.otherProfile.value.id!,
-                              isFollow!.value == 0 ? "follow" : "unfollow");
-                        },
-                        child: const Text("Follow",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            )),
-                      ))),
-              Expanded(
-                  child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: ColorManager.colorAccent),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 20),
-                      child: InkWell(
-                        onTap: () {
-                          Get.to(ChatScreen(
-                              inboxModel: Inbox(
-                                  id: int.parse(userId!),
-                                  userImage: avatar,
-                                  name: profileName)));
-                        },
-                        child: const Text("Message",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            )),
-                      ))),
-              ClipOval(
-                child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/referral');
-                    },
-                    child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            color: ColorManager.colorAccentTransparent),
-                        padding: const EdgeInsets.all(15),
-                        child: Icon(
-                          Icons.camera,
-                          size: 16,
-                          color: ColorManager.dayNightIcon,
-                        ))),
-              ),
-              ClipOval(
-                child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/referral');
-                    },
-                    child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            color: ColorManager.colorAccentTransparent),
-                        padding: const EdgeInsets.all(15),
-                        child: Icon(
-                          Icons.bookmark,
-                          size: 16,
-                          color: ColorManager.dayNightIcon,
-                        ))),
-              ),
-            ],
-          ),
+          OtherUserProfileDetails(isFollow!),
           const SizedBox(
-            height: 10,
+            height: 20,
           ),
+
           Obx(() => DefaultTabController(
               length: 2,
               initialIndex: selectedTab.value,
@@ -385,78 +303,67 @@ class OtherUserVideos extends GetView<UserVideosController> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return controller.obx(
-        (state) => Flexible(
-              child: GridView.count(
-                padding: const EdgeInsets.all(10),
-                shrinkWrap: true,
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: Get.width / Get.height,
-                children: List.generate(
-                    state!.value.length,
-                    (index) => GestureDetector(
-                          onTap: () {
-                            Get.to(VideoPlayerScreen(
-                              isFav: false,
-                              isFeed: true,
-                              isLock: false,
-                              position: index,
-                              userVideos: state,
-                            ));
-                          },
-                          child: Stack(
-                            fit: StackFit.expand,
+      (state) => GridView.count(
+        padding: const EdgeInsets.all(10),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 3,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: Get.width / Get.height,
+        children: List.generate(
+            state!.value.length,
+            (index) => GestureDetector(
+                  onTap: () {
+                    Get.to(VideoPlayerScreen(
+                      isFav: false,
+                      isFeed: true,
+                      isLock: false,
+                      position: index,
+                      userVideos: state,
+                    ));
+                  },
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      imgNet(
+                          '${RestUrl.gifUrl}${state!.value[index].gifImage}'),
+                      Positioned(
+                          bottom: 10,
+                          left: 10,
+                          right: 10,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              imgNet(
-                                  '${RestUrl.gifUrl}${state!.value[index].gifImage}'),
-                              Positioned(
-                                  bottom: 10,
-                                  left: 10,
-                                  right: 10,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                          text: TextSpan(
-                                        children: [
-                                          const WidgetSpan(
-                                            child: Icon(
-                                              Icons.play_circle,
-                                              size: 18,
-                                              color: ColorManager.colorAccent,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                              text: " " +
-                                                  state!.value[index].views
-                                                      .toString(),
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 16)),
-                                        ],
-                                      ))
-                                    ],
-                                  ))
+                              RichText(
+                                  text: TextSpan(
+                                children: [
+                                  const WidgetSpan(
+                                    child: Icon(
+                                      Icons.play_circle,
+                                      size: 18,
+                                      color: ColorManager.colorAccent,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                      text: " " +
+                                          state!.value[index].views.toString(),
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16)),
+                                ],
+                              ))
                             ],
-                          ),
-                        )),
-              ),
-            ),
-        onLoading: loader(),
-        onEmpty: emptyListWidget(),
-        onError: (error) => Center(
-              child: Text(
-                "User Videos not available",
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: ColorManager.dayNightText),
-              ),
-            ));
+                          ))
+                    ],
+                  ),
+                )),
+      ),
+      onLoading: loader(),
+      onEmpty: emptyListWidget(),
+    );
   }
 }
 
@@ -468,8 +375,10 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-        (state) => Flexible(
-                child: GridView.count(
+      (state) => state!.isEmpty
+          ? emptyListWidget()
+          : GridView.count(
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(10),
               shrinkWrap: true,
               crossAxisSpacing: 10,
@@ -526,190 +435,271 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
                           ],
                         ),
                       )),
-            )),
-        onLoading: loader(),
-        onEmpty: emptyListWidget(),
-        onError: (error) => Padding(
-            padding: EdgeInsets.only(top: 50),
-            child: Center(
-              child: Text(
-                "Liked Videos not available",
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: ColorManager.dayNightText),
-              ),
-            )));
+            ),
+      onLoading: loader(),
+      onEmpty: emptyListWidget(),
+    );
   }
 }
 
 // ignore: must_be_immutable
 class OtherUserProfileDetails extends GetView<OtherUsersController> {
-  OtherUserProfileDetails({Key? key}) : super(key: key);
+  OtherUserProfileDetails(this.isFollow);
+
+  var isFollow = 0.obs;
   var followersController = Get.find<FollowersController>();
 
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-        (state) => Column(
-              children: [
-                Container(
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  height: 100,
-                  width: 100,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                  child: CachedNetworkImage(
-                    fit: BoxFit.cover,
-                    imageUrl: state!.value.avatar!.isEmpty
-                        ? 'https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg'
-                        : '${RestUrl.profileUrl}${state.value.avatar}',
-                    placeholder: (a, b) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '@${state.value.username}',
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Visibility(
-                        visible: state.value.isVerified == 'true',
-                        child: SvgPicture.asset(
-                          'assets/verified.svg',
-                        ))
-                  ],
-                ),
-                Text(
-                  '@${state.value.name}',
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        followersController
-                            .getUserFollowers(state.value.id!)
-                            .then((value) => followersController
-                                .getUserFollowing(state.value.id!)
-                                .then((value) => Get.to(FollowingAndFollowers(
-                                      isProfile: false.obs,
-                                    ))));
-                        // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':1});
-                      },
-                      child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(children: [
-                            TextSpan(
-                                text: '${state.value.following}'
-                                    '\n',
-                                style: TextStyle(
-                                    color: Get.isPlatformDarkMode
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w700)),
-                            TextSpan(
-                                text: following,
-                                style: TextStyle(
-                                    color: Get.isPlatformDarkMode
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500)),
-                          ])),
-                    ),
-                    const SizedBox(
-                      height: 53,
-                      child: VerticalDivider(
-                        thickness: 1,
-                        width: 1,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        followersController
-                            .getUserFollowers(state.value.id!)
-                            .then((value) => followersController
-                                .getUserFollowing(state.value.id!)
-                                .then((value) => Get.to(FollowingAndFollowers(
-                                      isProfile: false.obs,
-                                    ))));
-
-                        // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
-                      },
-                      child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(children: [
-                            TextSpan(
-                                text: '${state.value.followers}'
-                                    '\n',
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    color: Get.isPlatformDarkMode
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontWeight: FontWeight.w700)),
-                            TextSpan(
-                                text: followers,
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    color: Get.isPlatformDarkMode
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontWeight: FontWeight.w500)),
-                          ])),
-                    ),
-                    Container(
-                      height: 53,
-                      child: const VerticalDivider(
-                        thickness: 1,
-                        width: 1,
-                      ),
-                    ),
-                    RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(children: [
-                          TextSpan(
-                              text:
-                                  '${state.value.likes!.isEmpty ? 0 : state.value.likes}'
-                                  '\n',
-                              style: TextStyle(
-                                  color: Get.isPlatformDarkMode
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700)),
-                          TextSpan(
-                              text: likes,
-                              style: TextStyle(
-                                  color: Get.isPlatformDarkMode
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500)),
-                        ])),
-                  ],
-                ).w(MediaQuery.of(context).size.width * .80),
-              ],
+      (state) => Column(
+        children: [
+          Container(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            height: 100,
+            width: 100,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
             ),
-        onLoading: loader(),
-        onEmpty: emptyListWidget());
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              imageUrl: state!.value.avatar!.isEmpty
+                  ? 'https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg'
+                  : '${RestUrl.profileUrl}${state.value.avatar}',
+              placeholder: (a, b) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '@${state.value.username}',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              Visibility(
+                  visible: state.value.isVerified == 'true',
+                  child: SvgPicture.asset(
+                    'assets/verified.svg',
+                  ))
+            ],
+          ),
+          Text(
+            '@${state.value.name}',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  followersController.getUserFollowers(state.value.id!).then(
+                      (value) => followersController
+                          .getUserFollowing(state.value.id!)
+                          .then((value) => Get.to(FollowingAndFollowers(
+                                false.obs,
+                              ))));
+                  // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':1});
+                },
+                child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(children: [
+                      TextSpan(
+                          text: '${state.value.following}'
+                              '\n',
+                          style: TextStyle(
+                              color: Get.isPlatformDarkMode
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700)),
+                      TextSpan(
+                          text: following,
+                          style: TextStyle(
+                              color: Get.isPlatformDarkMode
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500)),
+                    ])),
+              ),
+              const SizedBox(
+                height: 53,
+                child: VerticalDivider(
+                  thickness: 1,
+                  width: 1,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  followersController.getUserFollowers(state.value.id!).then(
+                      (value) => followersController
+                          .getUserFollowing(state.value.id!)
+                          .then((value) => Get.to(FollowingAndFollowers(
+                              false.obs,
+                              ))));
+
+                  // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
+                },
+                child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(children: [
+                      TextSpan(
+                          text: '${state.value.followers}'
+                              '\n',
+                          style: TextStyle(
+                              fontSize: 24,
+                              color: Get.isPlatformDarkMode
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontWeight: FontWeight.w700)),
+                      TextSpan(
+                          text: followers,
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Get.isPlatformDarkMode
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontWeight: FontWeight.w500)),
+                    ])),
+              ),
+              Container(
+                height: 53,
+                child: const VerticalDivider(
+                  thickness: 1,
+                  width: 1,
+                ),
+              ),
+              RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text:
+                            '${state.value.likes!.isEmpty ? 0 : state.value.likes}'
+                            '\n',
+                        style: TextStyle(
+                            color: Get.isPlatformDarkMode
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700)),
+                    TextSpan(
+                        text: likes,
+                        style: TextStyle(
+                            color: Get.isPlatformDarkMode
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500)),
+                  ])),
+            ],
+          ).w(MediaQuery.of(context).size.width * .80),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                  child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: ColorManager.colorAccent),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 20),
+                      child: InkWell(
+                        onTap: () {
+                          userDetailsController.followUnfollowUser(
+                              int.parse(controller.userProfile.value.id.toString()),
+                              isFollow!.value == 0 ? "follow" : "unfollow");
+
+
+                        },
+                        child:
+                        Text(isFollow!.value == 0 ? "Follow" : "Following",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            )),
+                      ))),
+              Expanded(
+                  child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: ColorManager.colorAccent),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 20),
+                      child: InkWell(
+                        onTap: () {
+                          Get.to(ChatScreen(
+                              inboxModel: Inbox(
+                                  id: controller.userProfile.value.id,
+                                  userImage: controller.userProfile.value.avatar,
+                                  name: controller.userProfile.value.name)));
+                        },
+                        child: const Text("Message",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            )),
+                      ))),
+              ClipOval(
+                child: InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/referral');
+                    },
+                    child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: ColorManager.colorAccentTransparent),
+                        padding: const EdgeInsets.all(15),
+                        child: Icon(
+                          Icons.camera,
+                          size: 16,
+                          color: ColorManager.dayNightIcon,
+                        ))),
+              ),
+              ClipOval(
+                child: InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/referral');
+                    },
+                    child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: ColorManager.colorAccentTransparent),
+                        padding: const EdgeInsets.all(15),
+                        child: Icon(
+                          Icons.bookmark,
+                          size: 16,
+                          color: ColorManager.dayNightIcon,
+                        ))),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+        ],
+      ),
+      onLoading: loader(),
+      onEmpty: emptyListWidget(),
+    );
   }
 }

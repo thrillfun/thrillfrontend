@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
 import 'package:thrill/controller/Favourites/favourites_controller.dart';
 import 'package:thrill/controller/InboxController.dart';
-import 'package:thrill/controller/comments_controller.dart';
+import 'package:thrill/controller/comments/comments_controller.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/hashtags/search_hashtags_controller.dart';
 import 'package:thrill/controller/hashtags/top_hashtags_controller.dart';
+import 'package:thrill/controller/home/home_controller.dart';
+import 'package:thrill/controller/image/image_controller.dart';
 import 'package:thrill/controller/privacy_and_conditions/privacy_and_conditions_controller.dart';
 import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/controller/users/followers_controller.dart';
@@ -27,6 +29,8 @@ import 'videos/like_videos_controller.dart';
 class DataBindings extends Bindings {
   @override
   void dependencies() {
+    //home
+    Get.lazyPut(() => HomeController(), fenix: true);
     //users
     Get.lazyPut(() => UserController(), fenix: true);
     Get.lazyPut(() => FollowersController(), fenix: true);
@@ -67,5 +71,7 @@ class DataBindings extends Bindings {
 
     //privacy
     Get.lazyPut(() => PrivacyAndConditionsController(), fenix: true);
+    //image
+    Get.lazyPut(() => ImageController(), fenix: true);
   }
 }

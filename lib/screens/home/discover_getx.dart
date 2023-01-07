@@ -204,7 +204,8 @@ class HashtagsSuggestions extends GetView<TopHashtagsController> {
                                 ))),
                       ))),
             ),
-        onLoading: null);
+        onLoading: loader(),
+        onEmpty: emptyListWidget());
   }
 }
 
@@ -484,11 +485,7 @@ class Tophashtags extends GetView<TopHashtagsController> {
                         ))
               ],
             ),
-        onLoading: SizedBox(
-          height: Get.height,
-          child: Center(
-            child: loader(),
-          ),
-        ));
+        onLoading: loader(),
+        onEmpty: emptyListWidget());
   }
 }

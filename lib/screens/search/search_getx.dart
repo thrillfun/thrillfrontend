@@ -229,7 +229,7 @@ class SearchUsers extends GetView<SearchHashtagsController> {
                                       ? Get.to(Profile(isProfile: true.obs))
                                       : Get.to(ViewProfile(
                                           state[0].users![index].id!.toString(),
-                                          state[0].users![index].isfollow! ==
+                                          state[0].users![index].isfollow ==
                                                   null
                                               ? 0.obs
                                               : state[0]
@@ -239,7 +239,8 @@ class SearchUsers extends GetView<SearchHashtagsController> {
                                           state[0]
                                               .users![index]
                                               .username
-                                              .toString(),state[0]
+                                              .toString(),
+                                          state[0]
                                               .users![index]
                                               .avatar
                                               .toString())));
@@ -737,8 +738,9 @@ class SearchData extends GetView<SearchHashtagsController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-        (state) => state!.isNotEmpty
-            ? ListView(
+        (state) => state!.isEmpty
+            ? emptyListWidget()
+            : ListView(
                 shrinkWrap: true,
                 children: [
                   Container(
@@ -794,10 +796,11 @@ class SearchData extends GetView<SearchHashtagsController> {
                                               state[0]
                                                   .users![index]
                                                   .username
-                                                  .toString(),state[0]
-                                              .users![index]
-                                              .avatar
-                                              .toString())));
+                                                  .toString(),
+                                              state[0]
+                                                  .users![index]
+                                                  .avatar
+                                                  .toString())));
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
@@ -1252,19 +1255,33 @@ class SearchData extends GetView<SearchHashtagsController> {
                                 ],
                               ),
                             ),
-                            onTap: () => musicPlayerBottomSheet(
-                                state[0]
+                            onTap: () =>Get.to(SoundDetails(map: {
+                            "sound": state[0].sounds![index].sound,
+                            "user": state[0]
                                     .sounds![index]
                                     .soundOwner!
-                                    .avtars
-                                    .toString()
-                                    .obs,
-                                state[0].sounds![index].sound.toString().obs,
-                                state[0].sounds![index].sound.toString().obs),
+                                    .name!
+                                    .isEmpty
+                                ? ""
+                                : state[0].sounds![index].soundOwner!.name!,
+                            "soundName": state[0].sounds![index].sound,
+                            "title":
+                                state[0].sounds![index].soundOwner!.username,
+                            "id": state[0].sounds![index].soundOwner!.id,
+                            "sound_id": state[0].sounds![index].id,
+                            "profile":
+                                state[0].sounds![index].soundOwner!.avtars,
+                            "name": state[0].sounds![index].soundOwner!.name,
+                            "username":
+                                state[0].sounds![index].soundOwner!.username,
+                            "isFollow": 0,
+                          })),
                           ))
                 ],
-              )
-            : emptyListWidget(),
-        onLoading: loader());
+              ),
+        onLoading: Center(
+          child: loader(),
+          heightFactor: 10,
+        ));
   }
 }

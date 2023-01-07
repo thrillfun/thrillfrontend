@@ -9,13 +9,10 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
-import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/model/block_status_response.dart';
 import 'package:thrill/controller/model/favourites_model.dart';
 import 'package:thrill/controller/model/followers_model.dart';
-import 'package:thrill/controller/model/profile_model_pojo.dart'
-    as profileModel;
+import 'package:thrill/controller/model/profile_model_pojo.dart' as profileModel;
 import 'package:thrill/controller/model/user_details_model.dart' as authUser;
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
@@ -181,7 +178,7 @@ class UserController extends GetxController {
     }
   }
 
-  followUnfollowUser(int userId, String action, {int? id}) async {
+  Future<void> followUnfollowUser(int userId, String action, {int? id}) async {
     isFollowersLoading.value = true;
     var response = await http.post(
         Uri.parse('${RestUrl.baseUrl}/user/follow-unfollow-user'),

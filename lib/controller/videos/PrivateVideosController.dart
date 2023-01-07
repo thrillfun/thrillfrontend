@@ -12,11 +12,13 @@ class PrivateVideosController extends GetxController
   var userProfile = User().obs;
 
   var dio = Dio(BaseOptions(
-      baseUrl: RestUrl.baseUrl,
-      ));
+    baseUrl: RestUrl.baseUrl,
+  ));
 
-  Future<void> getUserPrivateVideos() async {
-        dio.options.headers = {"Authorization": "Bearer ${await GetStorage().read("token")}"};
+  getUserPrivateVideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
     change(privateVideosList, status: RxStatus.loading());
     dio.get('/video/private').then((value) {
       privateVideosList.value =
@@ -25,8 +27,5 @@ class PrivateVideosController extends GetxController
     }).onError((error, stackTrace) {
       change(privateVideosList, status: RxStatus.error(error.toString()));
     });
-    if (privateVideosList.isEmpty) {
-      change(privateVideosList, status: RxStatus.empty());
-    }
   }
 }

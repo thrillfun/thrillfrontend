@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart' as client;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -12,8 +13,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/model/user_details_model.dart' as authUser;
+import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
+import 'package:thrill/screens/auth/otp_verification.dart';
 import 'package:thrill/utils/util.dart';
 
 import '../../screens/home/landing_page_getx.dart';
@@ -24,13 +27,16 @@ class UserDetailsController extends GetxController
   var userProfile = authUser.User().obs;
 
   var dio = client.Dio(client.BaseOptions(baseUrl: RestUrl.baseUrl));
+  var qrData = "".obs;
 
-  getUserProfile(userId) async {
+  var isOtpSent = false.obs;
+  Future<void> getUserProfile(userId) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     change(userProfile, status: RxStatus.loading());
-    if (storage.read("token") == null || storage.read("userId") == null) {
+    if (await storage.read("token") == null ||
+        await storage.read("userId") == null) {
       Get.to(LoginGetxScreen());
     } else {
       dio.post('/user/get-profile', queryParameters: {"id": userId}).then(
@@ -44,9 +50,26 @@ class UserDetailsController extends GetxController
     }
   }
 
+  followUnfollowUser(int userId, String action, {int? id}) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("/user/follow-unfollow-user", queryParameters: {
+      "publisher_user_id": userId,
+      "action": action
+    }).then((value) {
+      if (value.data["status"] == true) {
+        relatedVideosController.getAllVideos();
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {});
+  }
+
   Future<void> socialLoginRegister(var social_login_id, social_login_type,
       email, phone, firebase_token, name) async {
-    createDynamicLink().then((value) =>
+    await createDynamicLink(storage.read("userId").toString()).then((value) =>
         dio.post("/SocialLogin", queryParameters: {
           "social_login_id": social_login_id,
           "social_login_type": social_login_type,
@@ -54,7 +77,7 @@ class UserDetailsController extends GetxController
           // "phone": phone,
           "firebase_token": firebase_token,
           "name": name,
-          "referral_code": value.toString(),
+          // "referral_code": qrData.value.isEmpty ? "" : qrData.value,
         }).then((value) async {
           userProfile =
               authUser.UserDetailsModel.fromJson(value.data).data!.user!.obs;
@@ -68,29 +91,6 @@ class UserDetailsController extends GetxController
                   .data!
                   .token!
                   .toString());
-
-          //var userDB =
-          //     await openDatabase(join(await getDatabasesPath(), "users.db"),
-          //         onCreate: (db, version) {
-          //   return db.execute(
-          //       "CREATE TABLE users(id PRIMARY KEY, name TEXT, username TEXT,email TEXTdob TEXT,phone TEXT,avatar TEXT,socialLoginId TEXT,socialLoginType TEXT,firstName TEXT,lastName TEXT,gender TEXT,websiteUrl TEXT,bio TEXT,youtube TEXT, firebaseToken TEXT,referralCount TEXT,following TEXT, followers TEXT, likes TEXT,isVerified TEXT,totalVideos TEXT,boxTwo TEXT, boxThree TEXT,referralCode TEXT)");
-          // }, version: 1);
-
-          // final authDB =
-          //     await openDatabase(join(await getDatabasesPath(), "auth.db"),
-          //         onCreate: (db, version) {
-          //   return db.execute("CREATE TABLE auth(token PRIMARY KEY)");
-          // }, version: 1);
-          // await userDB.insert("users", userProfile.value.toJson(),
-          //     conflictAlgorithm: ConflictAlgorithm.replace);
-
-          // await authDB.insert(
-          //     "auth",
-          //     {
-          //       "token":
-          //           authUser.UserDetailsModel.fromJson(value.data).data!.token!
-          //     },
-          //     conflictAlgorithm: ConflictAlgorithm.replace);
 
           change(userProfile, status: RxStatus.success());
 
@@ -119,6 +119,58 @@ class UserDetailsController extends GetxController
         googleAuth.accessToken, googleUser.displayName ?? "");
   }
 
+  Future<void> signInWithFacebook() async {
+    final LoginResult result = await FacebookAuth.instance.login(
+      permissions: [
+        'public_profile',
+        'email',
+        'pages_show_list',
+        'pages_messaging',
+        'pages_manage_metadata'
+      ],
+    );
+    if (result.status == LoginStatus.success) {
+      // you are logged
+      final AccessToken accessToken = result.accessToken!;
+      final userData = await FacebookAuth.i.getUserData(
+        fields: "name,email,picture.width(200),id,birthday,friends,gender,link",
+      );
+      await socialLoginRegister(userData["id"], "facebook", userData["email"],
+          "", accessToken, userData["name"] ?? "");
+    } else {
+      print(result.status);
+      print(result.message);
+    }
+    // by default we request the email and the public profile
+
+    // Once signed in, return the UserCredential
+  }
+
+  Future<void> signOutUser() async {
+    await storage.erase();
+    signOutFacebook();
+    signOutGoogle();
+  }
+
+  Future<void> signOutGoogle() async {
+    final GoogleSignIn googleUser = GoogleSignIn(scopes: <String>["email"]);
+
+    if (googleUser.currentUser != null) {
+      await GoogleSignIn().disconnect().catchError((e, stack) {});
+      await FirebaseAuth.instance.signOut();
+      googleUser.signOut();
+    }
+  }
+
+  Future<void> signOutFacebook() async {
+    final AccessToken? accessToken = await FacebookAuth.instance.accessToken;
+// or FacebookAuth.i.accessToken
+    if (accessToken != null) {
+      // user is logged
+      await FacebookAuth.instance.logOut();
+    }
+  }
+
   Future<void> updateuserProfile(
       {File? profileImage,
       String? fullName,
@@ -126,7 +178,11 @@ class UserDetailsController extends GetxController
       String? userName,
       String? bio,
       String? gender,
-      String? webSiteUrl}) async {
+      String? webSiteUrl,
+      String? dob,
+      String? location,
+      String? phone,
+      String? email}) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -138,70 +194,140 @@ class UserDetailsController extends GetxController
                 filename: basename(profileImage.path))
             : "",
         "username": userName,
-        "first_name": fullName,
-        "last_name": lastName,
+        "name": fullName,
         "gender": gender,
         "bio": bio,
-        "website_url": webSiteUrl
+        "website_url": webSiteUrl,
+        "dob": dob,
+        "location": location,
+        "phone": phone,
+        "email": email
       });
       await dio.post("/user/edit", data: formData).then((value) {
-        successToast(value.data["message"]);
-        Get.offAll(LandingPageGetx());
+        if (value.data["status"] == true) {
+          successToast(value.data["message"]);
+          Get.offAll(LandingPageGetx());
+        } else {
+          errorToast(value.data["message"]);
+        }
       }).onError((error, stackTrace) {
         errorToast(error.toString());
       });
-      getUserProfile(storage.read("userId"));
-      Get.back();
     } else {
       client.FormData formData = client.FormData.fromMap({
         "username": userName,
-        "first_name": fullName,
-        "last_name": lastName,
+        "name": fullName,
         "gender": gender,
         "bio": bio,
-        "website_url": webSiteUrl
+        "website_url": webSiteUrl,
+        "dob": dob,
+        "location": location,
+        "phone": phone,
+        "email": email
       });
       dio.post("/user/edit", data: formData).then((value) {
-        successToast(value.data["message"]);
-        Get.offAll(LandingPageGetx());
+        if (value.data["status"] == true) {
+          successToast(value.data["message"]);
+          Get.offAll(LandingPageGetx());
+        } else {
+          errorToast(value.data["message"]);
+        }
       }).onError((error, stackTrace) {
         errorToast(error.toString());
       });
     }
     getUserProfile(storage.read("userId"));
-
-    Get.back();
   }
 
-  signinTrueCaller(var social_login_id, social_login_type, phone,
-      firebase_token, name) async {
-  dio.post("/SocialLogin", queryParameters: {
-          "social_login_id": social_login_id,
-          "social_login_type": social_login_type,
-          "phone": phone,
-          "firebase_token": firebase_token,
-          "name": name,
-          "referral_code": value.toString(),
-        }).then((value) async {
-          userProfile =
-              authUser.UserDetailsModel.fromJson(value.data).data!.user!.obs;
+  Future<void> signinTrueCaller(String social_login_id, String phone,
+      String firebase_token, String name) async {
+    dio.post("/SocialLogin", queryParameters: {
+      "social_login_id": social_login_id,
+      "social_login_type": "truecaller",
+      "phone": phone,
+      "firebase_token": firebase_token,
+      "name": name,
+      //  "referral_code": qrData.value.isEmpty ? "" : qrData.value,
+    }).then((value) async {
+      try {
+        if (value.data["status"] == true) {
+          successToast(value.data["message"].toString());
+          authUser.UserDetailsModel.fromJson(value.data).data!.user!.obs;
 
-          await storage
-              .write('token',
-                  authUser.UserDetailsModel.fromJson(value.data).data!.token!)
-              .toString();
-        }).onError((error, stackTrace) {});
+          await storage.write("userId",
+              authUser.UserDetailsModel.fromJson(value.data).data!.user!.id!);
+
+          await storage.write(
+              "token",
+              authUser.UserDetailsModel.fromJson(value.data)
+                  .data!
+                  .token!
+                  .toString());
+
+          change(userProfile, status: RxStatus.success());
+
+          await storage.write("user", userProfile).then((_) {
+            Get.forceAppUpdate();
+            Get.to(LandingPageGetx());
+          });
+        } else {
+          errorToast(value.data["message"]);
+        }
+      } on Exception catch (e) {
+        print(e.toString());
+      }
+    }).onError((error, stackTrace) {});
   }
 
-  Future<Uri> createDynamicLink({String videoName = ""}) async {
-    dio.options.headers = {
-      "Authorization": "Bearer ${await GetStorage().read("token")}"
-    };
+  Future<void> verifyOtp(String mobileNumber, String otp) async {
+    dio.post("/verify-otp", queryParameters: {
+      "phone": mobileNumber,
+      "otp": otp,
+    }).then((value) async {
+      if (value.data["status"] == true) {
+        successToast(value.data["message"]);
+
+        authUser.UserDetailsModel.fromJson(value.data).data!.user!.obs;
+
+        await storage.write("userId",
+            authUser.UserDetailsModel.fromJson(value.data).data!.user!.id!);
+
+        await storage
+            .write(
+                "token",
+                authUser.UserDetailsModel.fromJson(value.data)
+                    .data!
+                    .token!
+                    .toString())
+            .then((value) {
+          Get.offAll(LandingPageGetx());
+        });
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<void> sendOtp(String mobileNumber) async {
+    dio.post("/send-otp", queryParameters: {"phone": mobileNumber}).then(
+        (value) {
+      if (value.data["status"] == true) {
+        successToast(value.data["message"]);
+        isOtpSent.value = true;
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<String> createDynamicLink(String id,
+      {String? type, String? name, String? something}) async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: 'https://thrill.fun/',
-      link: Uri.parse('https://thrillvideo.s3.amazonaws.com/test/$videoName'),
-      androidParameters: AndroidParameters(
-        packageName: 'com.thrill',
+      uriPrefix: 'https://thrill.page.link/',
+      link: Uri.parse(
+          "https://thrill.fun?type=$type&id=$id&name=$name&something=$something"),
+      androidParameters: const AndroidParameters(
+        packageName: 'com.thrill.media',
         minimumVersion: 1,
       ),
       // iosParameters: IosParameters(
@@ -210,8 +336,10 @@ class UserDetailsController extends GetxController
       //   appStoreId: 'your_app_store_id',
       // ),
     );
-    var dynamicUrl = parameters.link;
-    final Uri shortUrl = dynamicUrl;
-    return shortUrl;
+    final dynamicLink =
+        await FirebaseDynamicLinks.instance.buildLink(parameters);
+
+    qrData.value = dynamicLink.toString();
+    return qrData.value;
   }
 }

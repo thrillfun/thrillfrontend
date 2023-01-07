@@ -177,8 +177,8 @@ class PublicUser {
   String? twitter;
   String? firebaseToken;
   String? referralCount;
-  String? following;
-  String? followers;
+  int? following;
+  int? followers;
   int? isfollow;
   String? likes;
   PublicLevels? levels;

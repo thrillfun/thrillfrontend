@@ -27,8 +27,10 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'ly.img.android.sdk'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+
 // Comment out the modules you don't need, to save size.
 imglyConfig {
+
     modules {
         include 'ui:text'
         include 'ui:focus'
@@ -63,11 +65,14 @@ imglyConfig {
         include 'backend:background-removal'
     }
 }
+
+
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
+
 android {
     compileSdkVersion 33
     lintOptions {
@@ -91,7 +96,7 @@ android {
         applicationId "com.thrill.media"
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 2
+        versionCode 5
         versionName '1.0'
     }
 
@@ -121,11 +126,11 @@ flutter {
 
 
 dependencies {
-    def lifecycle_version = "2.4.0"
+    def lifecycle_version = "2.5.1"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.7.10"
     implementation 'com.android.support:multidex:1.0.3'
     implementation platform('com.google.firebase:firebase-bom:30.0.0')
-    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 }

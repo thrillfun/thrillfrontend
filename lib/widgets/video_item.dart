@@ -1,9 +1,12 @@
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:preload_page_view/preload_page_view.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/widgets/better_video_player.dart';
+
+import '../screens/profile/view_profile.dart';
+import '../utils/util.dart';
 
 class VideoPlayerItem extends StatefulWidget {
   VideoPlayerItem({this.videosList, this.position});
@@ -28,6 +31,8 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   var popular = 0.obs;
   var isOnPageTurning = false.obs;
 
+  var initialPage = 0.obs;
+
   PageController? preloadPageController;
 
   @override
@@ -42,7 +47,13 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: PageView.builder(
+        body: StreamBuilder<PendingDynamicLinkData>(
+      stream: FirebaseDynamicLinks.instance.onLink,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data != null) {
+         
+        }
+        return PageView.builder(
             controller: preloadPageController,
             itemCount: widget.videosList!.length,
             scrollDirection: Axis.vertical,
@@ -64,7 +75,8 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                           widget.videosList![index].user?.socialLoginId,
                       firstName: widget.videosList![index].user?.firstName,
                       lastName: widget.videosList![index].user?.lastName,
-                      gender: widget.videosList![index].user?.gender);
+                      gender: widget.videosList![index].user?.gender,
+                      isfollow: widget.videosList![index].isfollow);
                 }
               });
               return AspectRatio(
@@ -90,13 +102,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                   widget.videosList![index].user!.username.toString().obs,
                   widget.videosList![index].description.toString().obs,
                   false.obs,
-                  isFeed
-                      ? []
-                      : isFav
-                          ? []
-                          : isLock
-                              ? []
-                              : [],
+                  widget.videosList![index].hashtags!,
                   // : hashTagVideos![index].hashtags!,
                   widget.videosList![index].sound.toString(),
                   widget.videosList![index].soundOwner.toString(),
@@ -109,11 +115,13 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       ? true.obs
                       : false.obs,
                   like: widget.videosList![index].likes!.obs,
-                  isfollow: widget.videosList![index].isfollow ?? 0,
+                  isfollow: widget.videosList![index].isfollow,
                   commentsCount: widget.videosList![index].comments!.obs,
                 ),
               );
-            }));
+            });
+      },
+    ));
   }
 
   void scrollListener() {

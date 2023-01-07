@@ -191,14 +191,17 @@ successToast(String msg) async {
     backgroundColor: Colors.green.shade50,
     messageText: Text(
       msg,
-      style: const TextStyle(fontWeight: FontWeight.bold),
+      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
     ),
     isDismissible: true,
     mainButton: IconButton(
       onPressed: () {
         Get.back();
       },
-      icon: const Icon(Icons.close),
+      icon: const Icon(
+        Icons.close,
+        color: Colors.black,
+      ),
     ),
     icon: const Icon(
       Icons.error,
@@ -270,24 +273,23 @@ closeDialogue(BuildContext context) {
 videoItemLayout(List<dynamic> list) {
   PublicUser? publicUser;
   List<PublicVideos> videosList1 = [];
-  if (list.isNotEmpty) {
-    list.forEach((element) {
-      publicUser = PublicUser(
-          id: element.user!.id,
-          name: element.user?.name.toString(),
-          username: element.user?.username,
-          email: element.user?.email,
-          dob: element.user?.dob,
-          phone: element.user?.phone,
-          avatar: element.user!.avatar,
-          socialLoginType: element.user?.socialLoginType,
-          socialLoginId: element.user?.socialLoginId,
-          firstName: element.user?.firstName,
-          lastName: element.user?.lastName,
-          gender: element.user?.gender,
-          isfollow: element.isfollow ?? 0,
-          likes: element.likes.toString());
-      videosList1.add(PublicVideos(
+  list.forEach((element) {
+    publicUser = PublicUser(
+        id: element.user!.id,
+        name: element.user?.name.toString(),
+        username: element.user?.username,
+        email: element.user?.email,
+        dob: element.user?.dob,
+        phone: element.user?.phone,
+        avatar: element.user!.avatar,
+        socialLoginType: element.user?.socialLoginType,
+        socialLoginId: element.user?.socialLoginId,
+        firstName: element.user?.firstName,
+        lastName: element.user?.lastName,
+        gender: element.user?.gender,
+        isfollow: element.isfollow ?? 0,
+        likes: element.likes.toString());
+    videosList1.add(PublicVideos(
         id: element.id,
         video: element.video,
         description: element.description,
@@ -306,22 +308,26 @@ videoItemLayout(List<dynamic> list) {
         isCommentable: "yes",
         videoLikeStatus: element.videoLikeStatus,
         user: publicUser,
-      ));
-    });
+        isfollow: element.user?.isfollow ?? 0,
+        hashtags: element.hashtags));
+  });
 
-    return VideoPlayerItem(
-      videosList: videosList1,
-    );
-  }
+  return VideoPlayerItem(
+    videosList: videosList1,
+  );
 }
 
-emptyListWidget() => Center(
-      child: Text(
-        "Oops nothing found",
-        style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: ColorManager.dayNightText),
+emptyListWidget() => SizedBox(
+      height: Get.height,
+      width: Get.width,
+      child: Center(
+        child: Text(
+          "Oops nothing found",
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: ColorManager.dayNightText),
+        ),
       ),
     );
 musicPlayerBottomSheet(
@@ -340,7 +346,7 @@ musicPlayerBottomSheet(
                     imgProfile(profilePic.value),
                   ],
                 ),
-                      ],
+              ],
             )),
         backgroundColor: Get.isPlatformDarkMode ? Colors.grey : Colors.white);
 
@@ -505,7 +511,9 @@ loader() => Container(
       width: 150,
       color: Colors.transparent.withOpacity(0.0),
       child: Lottie.network(
-          "https://assets10.lottiefiles.com/packages/lf20_dkz94xcg.json"),
+          "https://assets10.lottiefiles.com/packages/lf20_dkz94xcg.json",
+          height: 150,
+          width: 150),
     );
 
 showWinDialog(String msg) => Get.defaultDialog(
@@ -568,7 +576,7 @@ showWinDialog(String msg) => Get.defaultDialog(
               ],
             ),
           ),
-          Container(
+          SizedBox(
             width: Get.width,
             child: CachedNetworkImage(
                 fit: BoxFit.contain,

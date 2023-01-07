@@ -3,12 +3,18 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
+import 'package:thrill/screens/auth/otp_verification.dart';
 import 'package:thrill/screens/truecaller/non_tc_verification.dart';
+import 'package:thrill/screens/video/video_item.dart';
+import 'package:thrill/utils/util.dart';
+import 'package:thrill/widgets/gradient_elevated_button.dart';
 import 'package:truecaller_sdk/truecaller_sdk.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 var usersController = Get.find<UserDetailsController>();
 
@@ -22,12 +28,14 @@ class LoginGetxScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorManager.dayNight,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Container(
+          child: SizedBox(
             height: Get.height,
             width: Get.width,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ClipOval(
                   child: Image.asset(
@@ -40,35 +48,6 @@ class LoginGetxScreen extends StatelessWidget {
 
                 loginLayout(),
 
-                //   trueCallerLoginLayout(),
-
-                // Row(
-                //   children: const [
-                //     Expanded(
-                //         child: Divider(
-                //       indent: 10,
-                //       endIndent: 10,
-                //       color: Colors.white,
-                //       thickness: 1,
-                //     )),
-                //     SizedBox(
-                //       child: Text(
-                //         'Sign in with facebook or google',
-                //         style: TextStyle(
-                //             color: Colors.white,
-                //             fontWeight: FontWeight.bold,
-                //             fontSize: 14),
-                //       ),
-                //     ),
-                //     Expanded(
-                //         child: Divider(
-                //       color: Colors.white,
-                //       thickness: 1,
-                //       indent: 10,
-                //       endIndent: 10,
-                //     ))
-                //   ],
-                // ),
                 InkWell(
                     onTap: () {
                       TruecallerSdk.initializeSDK(
@@ -78,7 +57,7 @@ class LoginGetxScreen extends StatelessWidget {
                           TruecallerSdk.getProfile;
                         } else {
                           final snackBar =
-                              SnackBar(content: Text("Not Usable"));
+                              const SnackBar(content: Text("Not Usable"));
                           ScaffoldMessenger.of(Get.context!)
                               .showSnackBar(snackBar);
                           print("***Not usable***");
@@ -100,7 +79,7 @@ class LoginGetxScreen extends StatelessWidget {
                               width: 10,
                             ),
                             Text(
-                              "Login with phone number",
+                              "Login with truecaller",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontWeight: FontWeight.w700, fontSize: 16),
@@ -108,7 +87,7 @@ class LoginGetxScreen extends StatelessWidget {
                           ],
                         ))),
                 InkWell(
-                    onTap: () => {},
+                    onTap: () => {usersController.signInWithFacebook()},
                     child: Container(
                         margin: const EdgeInsets.only(
                             left: 20, right: 20, bottom: 20),
@@ -147,9 +126,6 @@ class LoginGetxScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
                         Icon(Icons.search),
-                        SizedBox(
-                          width: 10,
-                        ),
                         Text(
                           "Login with google",
                           textAlign: TextAlign.center,
@@ -163,9 +139,10 @@ class LoginGetxScreen extends StatelessWidget {
                 const SizedBox(
                   child: Text(
                     'Or',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
+
                 submitButtonLayout(),
 
                 const SizedBox(
@@ -195,7 +172,7 @@ class LoginGetxScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(left: 20, top: 10),
             width: Get.width,
-            child: Text(
+            child: const Text(
               'Lets you in',
               textAlign: TextAlign.left,
               style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
@@ -271,30 +248,20 @@ class LoginGetxScreen extends StatelessWidget {
 
   // trueCallerLayout()=> ;
   submitButtonLayout() => InkWell(
-        onTap: () async {
-          //  usersController.loginUser(mobileNumber.value, password.value);
-        },
-        child: Container(
-          width: Get.width,
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          padding: const EdgeInsets.all(10),
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: ColorManager.colorPrimaryLight,
-            borderRadius: BorderRadius.all(
-              Radius.circular(20),
-            ),
-          ),
-          child: const Text(
-            "Login with phone number",
-            style: TextStyle(
-                color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
+        child: const Text(
+          "Login via OTP",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
         ),
+        onTap: () => Get.bottomSheet(
+            Container(
+              margin: const EdgeInsets.all(10),
+              child: VerifyOtpLayout(),
+            ),
+            backgroundColor: ColorManager.dayNight),
       );
 
   StreamSubscription streamSubscription =
-      TruecallerSdk.streamCallbackData.listen((truecallerSdkCallback) {
+      TruecallerSdk.streamCallbackData.listen((truecallerSdkCallback) async {
     switch (truecallerSdkCallback.result) {
       case TruecallerSdkCallbackResult.success:
         String firstName = truecallerSdkCallback.profile!.firstName;
@@ -304,21 +271,141 @@ class LoginGetxScreen extends StatelessWidget {
         var random = Random.secure();
         var values = List<int>.generate(10, (i) => random.nextInt(255));
         var token = base64UrlEncode(values);
-        usersController.signinTrueCaller(
-            token,
-            "truecaller",
-            truecallerSdkCallback.profile!.phoneNumber.substring(3, 13),
-            token,
-            truecallerSdkCallback.profile!.firstName);
+        await usersController.signinTrueCaller(
+            phNo, phNo.substring(3, 13), token, firstName+" "+lastName.toString());
         break;
       case TruecallerSdkCallbackResult.failure:
         int errorCode = truecallerSdkCallback.error!.code;
         break;
       case TruecallerSdkCallbackResult.verification:
-        Get.to(NonTcVerification());
+        Get.to(const NonTcVerification());
         break;
       default:
         print("Invalid result");
     }
   });
+}
+
+class VerifyOtpLayout extends GetView<UserDetailsController> {
+  VerifyOtpLayout({Key? key}) : super(key: key);
+  FocusNode fieldNode = FocusNode();
+  TextEditingController phoneController = TextEditingController();
+
+  var otp = "".obs;
+
+  @override
+  Widget build(BuildContext context) {
+    _listenSmsCode();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        const Text(
+          "Login via OTP",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+        ),
+        Container(
+          child: TextFormField(
+            focusNode: fieldNode,
+            controller: phoneController,
+            maxLength: 10,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              focusColor: ColorManager.colorAccent,
+              fillColor: fieldNode.hasFocus
+                  ? ColorManager.colorAccentTransparent
+                  : Colors.grey.withOpacity(0.1),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: fieldNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : const BorderSide(
+                        color: Color(0xffFAFAFA),
+                      ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: fieldNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                      ),
+              ),
+              filled: true,
+              prefixIcon: Icon(
+                Icons.call,
+                color: fieldNode.hasFocus
+                    ? ColorManager.colorAccent
+                    : Colors.grey.withOpacity(0.3),
+              ),
+              prefixText: "+91",
+              prefixStyle: TextStyle(
+                  color: fieldNode.hasFocus
+                      ? const Color(0xff2DCBC8)
+                      : Colors.grey,
+                  fontSize: 16),
+              labelText: "Enter Phone number",
+              labelStyle: TextStyle(
+                  color: fieldNode.hasFocus
+                      ? ColorManager.colorAccent
+                      : Colors.grey,
+                  fontSize: 16),
+              hintText: "99999-99999",
+              hintStyle: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 16),
+            ),
+          ),
+        ),
+        InkWell(
+          child: const Text("SEND OTP",
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  decoration: TextDecoration.underline)),
+          onTap: () async {
+            if (phoneController.text.isNotEmpty &&
+                phoneController.text.length == 10) {
+             await controller.sendOtp(phoneController.text);
+            } else {
+              phoneController.text.isEmpty
+                  ? errorToast("field empty")
+                  : phoneController.text.length != 10
+                      ? errorToast("please enter 10 digits")
+                      : errorToast("number is not correct");
+            }
+          },
+        ),
+        Obx(() => Visibility(
+            visible: controller.isOtpSent.value,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: PinFieldAutoFill(
+                  decoration: UnderlineDecoration(
+                      colorBuilder:
+                          FixedColorBuilder(ColorManager.dayNightText),
+                      hintText: "0000",
+                      textStyle: TextStyle(color: ColorManager.dayNightText)),
+                  onCodeSubmitted: ((p0) => {}), //code submitted callback
+                  onCodeChanged: ((p0) =>
+                      {otp.value = p0.toString()}), //code changed callback
+                  codeLength: 4 //code length, default 6
+                  ),
+            ))),
+        GradientElevatedButton(
+            onPressed: () async =>
+                controller.verifyOtp(phoneController.text, otp.value),
+            child: const Text("submit"))
+      ],
+    );
+  }
+
+  _listenSmsCode() async {
+    await SmsAutoFill().listenForCode();
+  }
 }

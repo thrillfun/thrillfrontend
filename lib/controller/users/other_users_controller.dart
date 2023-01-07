@@ -11,8 +11,10 @@ class OtherUsersController extends GetxController with StateMixin<Rx<User>> {
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
 
   getOtherUserProfile(userId) async {
-        dio.options.headers = {"Authorization": "Bearer ${await GetStorage().read("token")}"};
     change(userProfile, status: RxStatus.loading());
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
     dio.post('/user/get-profile', queryParameters: {"id": userId}).then(
         (result) {
       userProfile = UserDetailsModel.fromJson(result.data).data!.user!.obs;

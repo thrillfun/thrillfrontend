@@ -31,8 +31,8 @@ class DiscoverController extends GetxController {
   var token = GetStorage().read('token');
 
   var dio = Dio(BaseOptions(
-      baseUrl: RestUrl.baseUrl,
-      headers: {"Authorization": "Bearer ${GetStorage().read("token")}"}));
+    baseUrl: RestUrl.baseUrl,
+  ));
 
   DiscoverController() {
     getBanners();
@@ -55,17 +55,14 @@ class DiscoverController extends GetxController {
                 .map((i) => DiscoverModel.fromJson(i))
                 .toList();
             isLoading.value = false;
-      })
+          })
           .onError((error, stackTrace) {
-        isLoading.value = false;
-
-      });
+            isLoading.value = false;
+          });
     } on Exception catch (e) {
       isLoading.value = false;
 
-      log.printError(info: e.toString(
-
-      ));
+      log.printError(info: e.toString());
     }
   }
 
@@ -80,9 +77,9 @@ class DiscoverController extends GetxController {
           )
           .timeout(const Duration(seconds: 10))
           .then((value) {
-        isHashTagsLoading.value = false;
+            isHashTagsLoading.value = false;
 
-        hasTagsList =
+            hasTagsList =
                 TopHastagVideosModel.fromJson(jsonDecode(value.body)).data!.obs;
             if (hashTagsVideos.isNotEmpty) {
               hashTagsVideos.clear();
@@ -94,9 +91,8 @@ class DiscoverController extends GetxController {
             }
           })
           .onError((error, stackTrace) {
-        isHashTagsLoading.value = false;
-
-      });
+            isHashTagsLoading.value = false;
+          });
     } on Exception catch (e) {
       isLoading.value = false;
       log.printError(info: e.toString());
@@ -112,22 +108,14 @@ class DiscoverController extends GetxController {
       hashTagsDetailsList.clear();
     }
 
-    var response = await http
-        .post(
-          Uri.parse('${RestUrl.baseUrl}/hashtag/get-videos-by-hashtag'),
-          body: {"hashtag_id": "$hashTagId"},
-          headers: {"Authorization": "Bearer $token"},
-        )
-        .timeout(const Duration(seconds: 10))
-        .then((value) {
-          hashTagsDetailsList =
-              HashTagVideosModel.fromJson(jsonDecode(value.body)).data!.obs;
-          isLoading.value = false;
-
-    })
-        .onError((error, stackTrace) {
+    dio.options.headers["Authorization"] =
+        "Bearer ${await GetStorage().read("token")}";
+    dio.post("/hashtag/get-videos-by-hashtag",
+        queryParameters: {"hashtag_id": "$hashTagId"}).then((value) {
+      hashTagsDetailsList = HashTagVideosModel.fromJson(value.data).data!.obs;
       isLoading.value = false;
-
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
     });
   }
 
@@ -146,36 +134,32 @@ class DiscoverController extends GetxController {
             hashTagsList =
                 HashTagsListModel.fromJson(jsonDecode(value.body)).data!.obs;
             isHashTagsListLoading.value = false;
-
-      })
+          })
           .onError((error, stackTrace) {
-        isHashTagsListLoading.value = false;
-
-      });
+            isHashTagsListLoading.value = false;
+          });
     } on Exception catch (e) {
       log.printError(info: e.toString());
       isHashTagsListLoading.value = false;
-
     }
   }
 
   searchHashtags(String searchQuery) async {
     isSearchingHashtags.value = true;
     if (searchList.isNotEmpty) searchList.clear();
-    dio.options.headers["Authorization"] = "Bearer $token";
+    dio.options.headers["Authorization"] =
+        "Bearer ${await GetStorage().read("token")}";
 
-    var response = await dio
+    await dio
         .get("/hashtag/search/", queryParameters: {'search': searchQuery})
         .timeout(const Duration(seconds: 10))
         .then((value) {
           searchList =
               hashTagsModel.SearchHashTagsModel.fromJson(value.data).data!.obs;
           isSearchingHashtags.value = false;
-
-    })
+        })
         .onError((error, stackTrace) {
           false;
-
-    });
+        });
   }
 }

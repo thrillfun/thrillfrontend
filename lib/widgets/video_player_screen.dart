@@ -1,3 +1,4 @@
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
@@ -8,6 +9,8 @@ import 'package:thrill/controller/model/private_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/model/search_hash_tags_model.dart';
 import 'package:thrill/widgets/better_video_player.dart';
+
+import '../utils/util.dart';
 
 class VideoPlayerScreen extends StatelessWidget {
   VideoPlayerScreen(
@@ -36,8 +39,8 @@ class VideoPlayerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    PreloadPageController preloadPageController =
-        PreloadPageController(initialPage: position ?? 0);
+    PageController preloadPageController =
+        PageController(initialPage: position ?? 0);
     RxInt current = position!.obs;
 
     void scrollListener() {
@@ -54,16 +57,16 @@ class VideoPlayerScreen extends StatelessWidget {
           isOnPageTurning.value = true;
         }
       }
+      Get.appUpdate();
     }
 
     preloadPageController.addListener(scrollListener);
 
     PublicVideos publicVideos = PublicVideos();
-
+   
     return Scaffold(
-        body: PreloadPageView.builder(
+        body: PageView.builder(
             controller: preloadPageController,
-            preloadPagesCount: 6,
             itemCount: isFeed
                 ? userVideos!.length
                 : isFav
@@ -188,7 +191,17 @@ class VideoPlayerScreen extends StatelessWidget {
                       index.obs,
                       current,
                       isOnPageTurning,
-                      () {},
+                      () {
+                        videosController.likeVideo(
+                            1,
+                            isFeed
+                                ? userVideos![index].id!
+                                : isFav
+                                    ? likedVideos![index].id!
+                                    : isLock
+                                        ? privateVideos![index].id!
+                                        : hashTagVideos![index].id!);
+                      },
                       publicUser,
                       isFeed
                           ? userVideos![index].id!.toInt()
@@ -269,10 +282,29 @@ class VideoPlayerScreen extends StatelessWidget {
                                   ? privateVideos![index].soundOwner.toString()
                                   : hashTagVideos![index].soundOwner.toString(),
                       isFeed
-                          ? userVideos![index].videoLikeStatus.toString().isEmpty || userVideos![index].videoLikeStatus.toString()=="null"? "0": userVideos![index].videoLikeStatus.toString()
+                          ? userVideos![index]
+                                      .videoLikeStatus
+                                      .toString()
+                                      .isEmpty ||
+                                  userVideos![index]
+                                          .videoLikeStatus
+                                          .toString() ==
+                                      "null"
+                              ? "0"
+                              : userVideos![index].videoLikeStatus.toString()
                           : isFav
-                          ? likedVideos![index].videoLikeStatus.toString().isEmpty || likedVideos![index].videoLikeStatus.toString()=="null"? "0": likedVideos![index].videoLikeStatus.toString()
-
+                              ? likedVideos![index]
+                                          .videoLikeStatus
+                                          .toString()
+                                          .isEmpty ||
+                                      likedVideos![index]
+                                              .videoLikeStatus
+                                              .toString() ==
+                                          "null"
+                                  ? "0"
+                                  : likedVideos![index]
+                                      .videoLikeStatus
+                                      .toString()
                               : isLock
                                   ? privateVideos![index]
                                       .videoLikeStatus

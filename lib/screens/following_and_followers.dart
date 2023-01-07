@@ -21,9 +21,9 @@ class FollowingAndFollowers extends GetView<UserController> {
   var usersController = Get.find<UserController>();
   var selectedTab = 0.obs;
 
-  FollowingAndFollowers({this.isProfile});
+  FollowingAndFollowers(this.isProfile);
 
-  RxBool? isProfile;
+  var isProfile = false.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +47,10 @@ class FollowingAndFollowers extends GetView<UserController> {
           ),
         ),
         body: ListView(
+          shrinkWrap: true,
           children: [
             Obx(() => DefaultTabController(
-                length: 3,
+                length: 2,
                 initialIndex: selectedTab.value,
                 child: TabBar(
                     onTap: (int index) {
@@ -69,9 +70,6 @@ class FollowingAndFollowers extends GetView<UserController> {
                       Tab(
                         text: "Following",
                       ),
-                      Tab(
-                        text: "Suggested",
-                      ),
                     ]))),
             Obx(() => tabview())
           ],
@@ -83,13 +81,10 @@ class FollowingAndFollowers extends GetView<UserController> {
       return followersLayout();
     } else if (selectedTab.value == 1) {
       return followingLayout();
-    } else {
-      searchHashtagsController.searchHashtags("searchQuery");
-      return suggested();
     }
   }
 
-  followingLayout() => Followings();
+  followingLayout() => Followings(isProfile);
 
   followersLayout() => Followers();
 
@@ -99,106 +94,162 @@ class FollowingAndFollowers extends GetView<UserController> {
 class Followings extends GetView<FollowersController> {
   var userDetailsController = Get.find<UserDetailsController>();
   var usersController = Get.find<UserController>();
+
+  Followings(this.isProfile);
+
+  var isProfile = false.obs;
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return controller.obx(
-        (state) => state!.isEmpty
-            ? emptyListWidget()
-            : Wrap(
-                children: List.generate(
-                    controller.followingModel.length,
-                    (index) => Container(
-                          width: Get.width,
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 10),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Flexible(
-                                child: Row(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        likedVideosController
-                                            .getOthersLikedVideos(
-                                                state[index].id!);
-                                        userVideosController.getOtherUserVideos(
-                                            state[index].id!);
-                                        otherUsersController
-                                            .getOtherUserProfile(
-                                                state[index].id!)
-                                            .then((value) => Get.to(ViewProfile(
-                                                state[index].id.toString(),
-                                                state[index].isfollowing!.obs,
-                                                state[index].name.toString(),
-                                                state[index]
-                                                    .avtars
-                                                    .toString())));
-                                      },
-                                      child: imgProfile(
-                                          state[index].avtars.toString()),
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    Flexible(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            state[index].name.toString(),
-                                            maxLines: 1,
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                          Text(
-                                            state[index].name.toString() +
-                                                " | " +
-                                                state[index].rating.toString(),
-                                            maxLines: 1,
-                                            style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500),
-                                          )
-                                        ],
+      (_) => controller.followingModel.isEmpty
+          ? emptyListWidget()
+          : ListView.builder(
+              itemCount: controller.followingModel!.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) => controller.followingModel.isEmpty
+                  ? emptyListWidget()
+                  : Container(
+                      width: Get.width,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 10),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    likedVideosController.getOthersLikedVideos(
+                                        controller.followingModel![index].id!);
+                                    userVideosController.getOtherUserVideos(
+                                        controller.followingModel[index].id!);
+                                    otherUsersController
+                                        .getOtherUserProfile(controller
+                                            .followingModel[index].id!)
+                                        .then((value) => Get.to(ViewProfile(
+                                            controller.followingModel[index].id
+                                                .toString(),
+                                            controller.followingModel[index]
+                                                .isfollowing!.obs,
+                                            controller
+                                                .followingModel[index].name
+                                                .toString(),
+                                            controller
+                                                .followingModel[index].avtars
+                                                .toString())));
+                                  },
+                                  child: imgProfile(controller
+                                      .followingModel![index].avtars
+                                      .toString()),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        controller.followingModel[index].name
+                                            .toString(),
+                                        maxLines: 1,
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700),
                                       ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  userController.followUnfollowUser(
-                                    controller.followingModel[index].id!,
-                                    "unfollow",
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 10),
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: ColorManager.colorAccent),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: const Text(
-                                    "Following",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: ColorManager.colorAccent),
+                                      Text(
+                                        controller
+                                            .followingModel[index].username
+                                            .toString(),
+                                        maxLines: 1,
+                                        style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500),
+                                      )
+                                    ],
                                   ),
-                                ),
-                              )
-                            ],
+                                )
+                              ],
+                            ),
                           ),
-                        )),
-              ),
-        onLoading: loader(),
-        onEmpty: emptyListWidget());
+                          InkWell(
+                            onTap: () {
+                              if (isProfile.isTrue) {
+                                userController.followUnfollowUser(
+                                  controller.followingModel[index].id!,
+                                  "unfollow",
+                                );
+                              } else {
+                                usersController.followUnfollowUser(
+                                    controller.followersModel[index].id!,
+                                    controller.followersModel[index]
+                                                .isfollowing ==
+                                            0
+                                        ? "follow"
+                                        : "unfollow");
+                              }
+                            },
+                            child: isProfile.isTrue
+                                ? Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 10),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: ColorManager.colorAccent),
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
+                                    child: const Text(
+                                      "Following",
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: ColorManager.colorAccent),
+                                    ),
+                                  )
+                                : controller.followingModel[index]
+                                            .isfollowing ==
+                                        0
+                                    ? Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 10),
+                                        decoration: BoxDecoration(
+                                            color: ColorManager.colorAccent,
+                                            borderRadius:
+                                                BorderRadius.circular(20)),
+                                        child: const Text(
+                                          "Follow",
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white),
+                                        ),
+                                      )
+                                    : Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 10),
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color:
+                                                    ColorManager.colorAccent),
+                                            borderRadius:
+                                                BorderRadius.circular(20)),
+                                        child: const Text(
+                                          "Following",
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: ColorManager.colorAccent),
+                                        ),
+                                      ),
+                          )
+                        ],
+                      ),
+                    )),
+      onLoading: Flexible(child: loader()),
+    );
   }
 }
 
@@ -209,7 +260,7 @@ class Followers extends GetView<FollowersController> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return controller.obx(
-      (state) => state!.isEmpty
+      (state) => controller.followersModel.isEmpty
           ? emptyListWidget()
           : Wrap(
               children: List.generate(
@@ -217,16 +268,20 @@ class Followers extends GetView<FollowersController> {
                   (index) => InkWell(
                         onTap: () {
                           likedVideosController
-                              .getOthersLikedVideos(state[index].id!);
+                              .getOthersLikedVideos(state![index].id!);
                           userVideosController
                               .getOtherUserVideos(state[index].id!);
                           otherUsersController
                               .getOtherUserProfile(state[index].id!)
                               .then((value) => Get.to(ViewProfile(
-                                  state[index].id.toString(),
-                                  state[index].isfollowing!.obs,
-                                  state[index].name.toString(),
-                                  state[index].avtars.toString())));
+                                  controller.followersModel[index].id
+                                      .toString(),
+                                  controller
+                                      .followersModel[index].isfollowing!.obs,
+                                  controller.followersModel[index].name
+                                      .toString(),
+                                  controller.followersModel[index].avtars
+                                      .toString())));
                         },
                         child: Container(
                           width: Get.width,
@@ -238,7 +293,9 @@ class Followers extends GetView<FollowersController> {
                               Flexible(
                                 child: Row(
                                   children: [
-                                    imgProfile(state[index].avtars.toString()),
+                                    imgProfile(controller
+                                        .followersModel![index].avtars
+                                        .toString()),
                                     const SizedBox(
                                       width: 10,
                                     ),
@@ -249,7 +306,9 @@ class Followers extends GetView<FollowersController> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            state[index].name.toString(),
+                                            controller
+                                                .followersModel![index].name
+                                                .toString(),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
@@ -257,9 +316,9 @@ class Followers extends GetView<FollowersController> {
                                                 fontWeight: FontWeight.w700),
                                           ),
                                           Text(
-                                            state[index].name.toString() +
-                                                " | " +
-                                                state[index].rating.toString(),
+                                            controller
+                                                .followersModel[index].username
+                                                .toString(),
                                             style: const TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w500),
@@ -273,12 +332,16 @@ class Followers extends GetView<FollowersController> {
                               InkWell(
                                 onTap: () {
                                   usersController.followUnfollowUser(
-                                      state[index].id!,
-                                      state[index].isfollowing == 0
+                                      controller.followersModel[index].id!,
+                                      controller.followersModel[index]
+                                                  .isfollowing ==
+                                              0
                                           ? "follow"
                                           : "unfollow");
                                 },
-                                child: state[index].isfollowing == 0
+                                child: controller.followersModel[index]
+                                            .isfollowing ==
+                                        0
                                     ? Container(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 20, vertical: 10),
@@ -317,7 +380,7 @@ class Followers extends GetView<FollowersController> {
                         ),
                       )),
             ),
-      onLoading: loader(),
+      onLoading: Flexible(child: loader()),
     );
   }
 }

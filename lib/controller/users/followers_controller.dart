@@ -11,18 +11,19 @@ class FollowersController extends GetxController
   var followersModel = RxList<Followers>();
   var followingModel = RxList<Followers>();
   var dio = Dio(BaseOptions(
-      baseUrl: RestUrl.baseUrl,
-    ));
+    baseUrl: RestUrl.baseUrl,
+  ));
 
   getUserFollowers(int userId) async {
-   dio.options.headers = {"Authorization": "Bearer ${await GetStorage().read("token")}"};
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
     change(followersModel, status: RxStatus.loading());
     if (followersModel.isNotEmpty) followersModel.clear();
 
     dio
         .post('${RestUrl.baseUrl}/user/get-followers',
             queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 10))
         .then((result) {
           followersModel = FollowersModel.fromJson(result.data).data!.obs;
           change(followersModel, status: RxStatus.success());
@@ -30,18 +31,17 @@ class FollowersController extends GetxController
         .onError((error, stackTrace) {
           change(followersModel, status: RxStatus.error());
         });
-    if (followersModel.isEmpty) {
-       change(followersModel, status: RxStatus.empty());
-    }
   }
 
-  Future<void> getUserFollowing(int userId) async {
-        dio.options.headers = {"Authorization": "Bearer ${await GetStorage().read("token")}"};
+  getUserFollowing(int userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
     change(followingModel, status: RxStatus.loading());
+    if (followingModel.isNotEmpty) followersModel.clear();
 
     dio
         .post('/user/get-followings', queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 10))
         .then((result) {
           if (followingModel.isNotEmpty) {
             followingModel.value =
@@ -54,8 +54,5 @@ class FollowersController extends GetxController
         .onError((error, stackTrace) {
           change(followersModel, status: RxStatus.error());
         });
-    if (followingModel.isEmpty) {
-      change(followingModel, status: RxStatus.empty());
-    }
   }
 }

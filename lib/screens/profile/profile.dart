@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
@@ -12,7 +9,6 @@ import 'package:thrill/controller/videos/PrivateVideosController.dart';
 import 'package:thrill/controller/videos/UserVideosController.dart';
 import 'package:thrill/controller/videos/like_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
-import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/screens/following_and_followers.dart';
 import 'package:thrill/screens/screen.dart';
 import 'package:thrill/utils/util.dart';
@@ -29,20 +25,23 @@ class Profile extends StatelessWidget {
   var likedVideosController = Get.find<LikedVideosController>();
 
   var userDetailController = Get.find<UserDetailsController>();
+  var privateVideosController = Get.find<PrivateVideosController>();
   Profile({Key? key, this.isProfile}) : super(key: key);
 
   RxBool? isProfile = true.obs;
 
   @override
   Widget build(BuildContext context) {
+    print(userDetailController.storage.read("userId"));
+
     return Scaffold(
         backgroundColor: ColorManager.dayNight,
-        body: SizedBox(
-          height: Get.height,
-          width: Get.width,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
+        body: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxWidth: Get.width, maxHeight: Get.height),
+          child: SingleChildScrollView(
+            child: Flexible(
+                child: Column(children: [
               UserProfileDetails(),
               SizedBox(
                   height: Get.height,
@@ -96,7 +95,7 @@ class Profile extends StatelessWidget {
                       Obx(() => tabview()),
                     ],
                   ))
-            ],
+            ])),
           ),
         ));
   }
@@ -105,11 +104,8 @@ class Profile extends StatelessWidget {
     if (selectedTab.value == 0) {
       return feed();
     } else if (selectedTab.value == 1) {
-      Get.find<PrivateVideosController>().getUserPrivateVideos();
       return lock();
-    } else {
-      Get.find<LikedVideosController>()
-          .getOthersLikedVideos(GetStorage().read("userId"));
+    } else if (selectedTab.value == 2) {
       return fav();
     }
   }
@@ -123,105 +119,6 @@ class Profile extends StatelessWidget {
   }
 
   fav() => LikedVideos();
-
-  showDeleteVideoDialog(int videoID, List list, int index) {
-    showDialog(
-        context: Get.context!,
-        builder: (_) => Center(
-              child: Material(
-                type: MaterialType.transparency,
-                child: Container(
-                  width: getWidth(Get.context!) * .80,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          "Are you sure you want to delete this video ?",
-                          style: Theme.of(Get.context!).textTheme.headline3,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 25),
-                        child: Text(
-                          "This action will delete this video permanently and it cant be undone!",
-                          style: Theme.of(Get.context!)
-                              .textTheme
-                              .headline5!
-                              .copyWith(fontWeight: FontWeight.normal),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(Get.context!);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  primary: Colors.green,
-                                  fixedSize:
-                                      Size(getWidth(Get.context!) * .26, 40),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              child: const Text("No")),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          ElevatedButton(
-                              onPressed: () async {
-                                try {
-                                  Get.back();
-                                  //       progressDialogue(context);
-                                  var response =
-                                      await RestApi.deleteVideo(videoID);
-                                  var json = jsonDecode(response.body);
-                                  //  closeDialogue(context);
-                                  if (json['status']) {
-                                    list.removeAt(index);
-                                    showSuccessToast(Get.context!,
-                                        json['message'].toString());
-                                    await Get.find<VideosController>()
-                                        .getUserVideos();
-                                    await Get.find<VideosController>()
-                                        .getAllVideos();
-                                  } else {
-                                    showErrorToast(Get.context!,
-                                        json['message'].toString());
-                                  }
-                                } catch (e) {
-                                  closeDialogue(Get.context!);
-                                  showErrorToast(Get.context!, e.toString());
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  primary: Colors.red,
-                                  fixedSize:
-                                      Size(getWidth(Get.context!) * .26, 40),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              child: const Text("Yes"))
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ));
-  }
 
   showPrivate2PublicDialog(int videoID) {
     showDialog(
@@ -335,73 +232,166 @@ class UserVideos extends GetView<UserVideosController> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return controller.obx(
-        (state) => Flexible(
-              child: GridView.count(
-                padding: const EdgeInsets.all(10),
-                shrinkWrap: true,
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: Get.width / Get.height,
-                children: List.generate(
-                    state!.value.length,
-                    (index) => GestureDetector(
-                          onTap: () {
-                            Get.to(VideoPlayerScreen(
-                              isFav: false,
-                              isFeed: true,
-                              isLock: false,
-                              position: index,
-                              userVideos: state,
-                            ));
-                          },
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              imgNet(
-                                  '${RestUrl.gifUrl}${state.value[index].gifImage}'),
-                              Positioned(
-                                  bottom: 10,
-                                  left: 10,
-                                  right: 10,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                          text: TextSpan(
-                                        children: [
-                                          const WidgetSpan(
-                                            child: Icon(
-                                              Icons.play_circle,
-                                              size: 18,
-                                              color: ColorManager.colorAccent,
+        (state) => state!.isEmpty
+            ? Flexible(child: emptyListWidget())
+            : Flexible(
+                child: GridView.count(
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(10),
+                  shrinkWrap: true,
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: Get.width / Get.height,
+                  children: List.generate(
+                      state!.length,
+                      (index) => GestureDetector(
+                            onTap: () {
+                              Get.to(VideoPlayerScreen(
+                                isFav: false,
+                                isFeed: true,
+                                isLock: false,
+                                position: index,
+                                userVideos: state,
+                              ));
+                            },
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                imgNet(
+                                    '${RestUrl.gifUrl}${state.value[index].gifImage}'),
+                                Positioned(
+                                    bottom: 10,
+                                    left: 10,
+                                    right: 10,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        RichText(
+                                            text: TextSpan(
+                                          children: [
+                                            const WidgetSpan(
+                                              child: Icon(
+                                                Icons.play_circle,
+                                                size: 18,
+                                                color: ColorManager.colorAccent,
+                                              ),
                                             ),
-                                          ),
-                                          TextSpan(
-                                              text: " " +
-                                                  state.value[index].views
-                                                      .toString(),
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 16)),
-                                        ],
-                                      ))
-                                    ],
-                                  ))
-                            ],
-                          ),
-                        )),
+                                            TextSpan(
+                                                text: " " +
+                                                    state.value[index].views
+                                                        .toString(),
+                                                style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 16)),
+                                          ],
+                                        ))
+                                      ],
+                                    )),
+                                Positioned(
+                                  top: 5,
+                                  right: 5,
+                                  child: IconButton(
+                                      onPressed: () {
+                                        showDeleteVideoDialog(
+                                            state!.value[index].id!,
+                                            state!.value,
+                                            index);
+                                      },
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      color: Colors.red,
+                                      icon: const Icon(
+                                          Icons.delete_forever_outlined)),
+                                )
+                              ],
+                            ),
+                          )),
+                ),
               ),
-            ),
         onLoading: loader(),
-        onEmpty: SizedBox(
-          height: Get.height / 2,
-          child: Center(
-            child: loader(),
-          ),
-        ),
+        onEmpty: Flexible(child: emptyListWidget()),
         onError: (error) => emptyListWidget());
+  }
+
+  showDeleteVideoDialog(int videoID, List list, int index) {
+    showDialog(
+        context: Get.context!,
+        builder: (_) => Center(
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  width: getWidth(Get.context!) * .80,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          "Are you sure you want to delete this video ?",
+                          style: Theme.of(Get.context!).textTheme.headline3,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Text(
+                          "This action will delete this video permanently and it cant be undone!",
+                          style: Theme.of(Get.context!)
+                              .textTheme
+                              .headline5!
+                              .copyWith(fontWeight: FontWeight.normal),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(Get.context!);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.green,
+                                  fixedSize:
+                                      Size(getWidth(Get.context!) * .26, 40),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10))),
+                              child: const Text("No")),
+                          const SizedBox(
+                            width: 15,
+                          ),
+                          ElevatedButton(
+                              onPressed: () async {
+                                Get.back();
+                                controller.deleteVideo(videoID);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.red,
+                                  fixedSize:
+                                      Size(getWidth(Get.context!) * .26, 40),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10))),
+                              child: const Text("Yes"))
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ));
   }
 }
 
@@ -412,8 +402,11 @@ class PrivateVideos extends GetView<PrivateVideosController> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return controller.obx(
-        (state) => Flexible(
+      (state) => state!.isEmpty
+          ? Flexible(child: emptyListWidget())
+          : Flexible(
               child: GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(10),
                 shrinkWrap: true,
                 crossAxisCount: 3,
@@ -514,9 +507,9 @@ class PrivateVideos extends GetView<PrivateVideosController> {
                         )),
               ),
             ),
-        onLoading: loader(),
-        onEmpty: emptyListWidget(),
-        onError: (error) => emptyListWidget());
+      onLoading: loader(),
+      onEmpty: Flexible(child: emptyListWidget()),
+    );
   }
 }
 
@@ -531,6 +524,7 @@ class LikedVideos extends GetView<LikedVideosController> {
         (state) => Flexible(
                 child: GridView.count(
               padding: const EdgeInsets.all(10),
+              physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
@@ -581,22 +575,6 @@ class LikedVideos extends GetView<LikedVideosController> {
                                     )
                                   ],
                                 )),
-                            Positioned(
-                              top: 5,
-                              right: 5,
-                              child: IconButton(
-                                  onPressed: () {
-                                    // showDeleteVideoDialog(
-                                    //     state!.value[index].id!,
-                                    //     state!.value,
-                                    //     index);
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  color: Colors.red,
-                                  icon: const Icon(
-                                      Icons.delete_forever_outlined)),
-                            )
                           ],
                         ),
                       )),
@@ -621,21 +599,15 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      IconButton(
-                          onPressed: () => Get.back(),
-                          icon: Icon(
-                            Icons.person,
-                            color: ColorManager.dayNightText,
-                          )),
                       IconButton(
                           onPressed: () => Get.to(SettingAndPrivacy(
                               avatar: state!.value.avatar!,
                               name: state.value.name!,
-                              userName: state.value.name!)),
+                              userName: state.value.username!)),
                           icon: Icon(
-                            Icons.settings,
+                            Icons.more_vert_outlined,
                             color: ColorManager.dayNightText,
                           ))
                     ],
@@ -704,9 +676,8 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                             .getUserFollowers(state.value.id!)
                             .then((value) => followersController
                                 .getUserFollowing(state.value.id!)
-                                .then((value) => Get.to(FollowingAndFollowers(
-                                      isProfile: false.obs,
-                                    ))));
+                                .then((value) =>
+                                    Get.to(FollowingAndFollowers(true.obs))));
 
                         // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':1});
                       },
@@ -742,7 +713,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                             .then((value) => followersController
                                 .getUserFollowing(state.value.id!)
                                 .then((value) => Get.to(FollowingAndFollowers(
-                                      isProfile: false.obs,
+                                      true.obs,
                                     ))));
 
                         // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
@@ -981,6 +952,17 @@ class UserProfileDetails extends GetView<UserDetailsController> {
             ),
         onLoading: loader(),
         onEmpty: emptyListWidget(),
-        onError: (error) => emptyListWidget());
+        onError: (error) => SizedBox(
+              width: Get.width,
+              child: Center(
+                child: Text(
+                  "Oops nothing found",
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: ColorManager.dayNightText),
+                ),
+              ),
+            ));
   }
 }

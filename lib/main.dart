@@ -2,24 +2,24 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart' as transition;
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:path/path.dart';
-import 'package:showcaseview/showcaseview.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/bindings.dart';
+import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:thrill/web/web_home.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-import 'config/app_router.dart';
 import 'config/theme.dart';
 import 'screens/home/landing_page_getx.dart';
-import 'screens/screen.dart';
 
 List<CameraDescription> cameras = [];
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -27,16 +27,10 @@ GlobalKey key = GlobalKey();
 
 void main() async {
   Paint.enableDithering = true;
-  
+
   await GetStorage.init();
 
-
   WidgetsFlutterBinding.ensureInitialized();
-
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitDown,
-    DeviceOrientation.portraitUp,
-  ]);
 
   MobileAds.instance.initialize();
   if (Platform.isIOS) {
@@ -49,7 +43,8 @@ void main() async {
   } else {
     await Firebase.initializeApp();
   }
-  await FirebaseMessaging.instance.getToken();
+  var token = await FirebaseMessaging.instance.getToken();
+  print(token);
   CustomNotification.initialize();
 
   try {
@@ -62,6 +57,7 @@ void main() async {
   });
   getTempDirectory();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
   ThemeData _darkTheme = ThemeData(
       accentColor: ColorManager.colorAccent,
       fontFamily: "Urbanist",
@@ -81,15 +77,18 @@ void main() async {
         buttonColor: ColorManager.colorAccent,
         disabledColor: Colors.blueGrey,
       ));
+  final PendingDynamicLinkData? initialLink =
+      await FirebaseDynamicLinks.instance.getInitialLink();
 
   runApp(transition.GetMaterialApp(
-    theme: _lightTheme,
-    darkTheme: _darkTheme,
-    themeMode: ThemeMode.system,
-    debugShowCheckedModeBanner: false,
-    initialBinding: DataBindings(),
-    home: ShowCaseWidget(builder: Builder(builder: (context) => const MyApp())),
-  ));
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
+      themeMode: ThemeMode.system,
+      debugShowCheckedModeBanner: false,
+      initialBinding: DataBindings(),
+      home:LandingPageGetx(
+        initialLink: initialLink,
+      )));
 }
 
 class MyApp extends StatefulWidget {
@@ -114,11 +113,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Thrill',
-      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: theme(),
-      home: LandingPageGetx(),
-      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }

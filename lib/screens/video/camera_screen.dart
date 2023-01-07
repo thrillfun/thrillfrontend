@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/main.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/utils/custom_timer_painter.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/gradient_elevated_button.dart';
@@ -491,12 +492,38 @@ class _CameraScreenState extends State<CameraScreen>
                                                   source: ImageSource.gallery)
                                               .then((value) {
                                             if (value != null) {
+                                              int currentUnix = DateTime.now()
+                                                  .millisecondsSinceEpoch;
+
+                                              // videosController
+                                              //     .awsUploadVideo(
+                                              //         File(value.path),
+                                              //         currentUnix)
+                                              //     .then((_) => videosController
+                                              //         .postVideo(
+                                              //             userDetailsController.storage.read("userId"),
+                                              //             basename(value.path),
+                                              //             "",
+                                              //             "original",
+                                              //             "",
+                                              //             "testing",
+                                              //             'yes',
+                                              //             1,
+                                              //             "testing",
+                                              //             "",
+                                              //             "english",
+                                              //             "",
+                                              //             "1",
+                                              //             true,
+                                              //             true,
+                                              //             "",
+                                              //             true,
+                                              //             widget.id!));
                                               videosController.openEditor(
                                                   true,
                                                   value.path,
                                                   soundsController
-                                                          .selectedSoundPath
-                                                          .value ,
+                                                      .selectedSoundPath.value,
                                                   widget.id!,
                                                   widget.owner ?? "");
                                             }

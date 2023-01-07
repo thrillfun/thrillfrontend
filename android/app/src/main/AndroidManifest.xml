@@ -43,7 +43,10 @@
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
 
-        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="5CvFLdcfadcc201c94f62bd6b41ad1668908b"/>
+<!--2p8y5ccc015211dea4dd5b6a7bc87e9c19d64 release key truecaller -->
+<!--KImlN2daecc7755b14526b6651ad8e1e34362 debug key truecaller -->
+
+        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="KImlN2daecc7755b14526b6651ad8e1e34362 "/>
 
 
         <meta-data
@@ -79,8 +82,24 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
+     
             </intent-filter>
+
+            <intent-filter>
+    <action android:name="android.intent.action.VIEW"/>
+    <category android:name="android.intent.category.DEFAULT"/>
+    <category android:name="android.intent.category.BROWSABLE"/>
+    <data
+        android:host="thrill.fun"
+        android:scheme="https"/>
+</intent-filter>
         </activity>
+
+        <activity
+    android:name="com.yalantis.ucrop.UCropActivity"
+    android:screenOrientation="portrait"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

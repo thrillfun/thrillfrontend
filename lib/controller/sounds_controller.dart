@@ -60,10 +60,11 @@ class SoundsController extends GetxController with StateMixin<RxList<Sounds>> {
 
   downloadAudio(String soundName, String userName, int id) async {
     try {
+      var path = await getTemporaryDirectory();
       await fileSupport
           .downloadCustomLocation(
         url: "${RestUrl.awsSoundUrl}$soundName",
-        path: getTemporaryDirectory(),
+        path: path.path,
         filename: soundName.split('.').first,
         extension: ".${soundName.split('.').last}",
         progress: (progress) async {

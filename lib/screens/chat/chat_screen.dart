@@ -102,10 +102,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: StreamBuilder<List<ChatMsg>>(
                 stream: ChatController.getChatMsg(
-                  usersController.userProfile.value.id! >
-                      widget.inboxModel!.id!
-                      ? '${usersController.userProfile.value.id}_${widget.inboxModel!.id}'
-                      : '${widget.inboxModel!.id}_${usersController.userProfile.value.id}',
+                  '${widget.inboxModel!.id}_${usersController.userProfile.value.id}',
                 ),
                 builder: (context, snapshot) {
                   chats = snapshot.data ?? [];
@@ -197,10 +194,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               seen: false,
                             );
                             ChatController.sendMsg(
-                                usersController.userProfile.value.id! >
-                                    widget.inboxModel!.id!
-                                    ? '${usersController.userProfile.value.id}_${widget.inboxModel!.id}'
-                                    : '${widget.inboxModel!.id}_${usersController.userProfile.value.id}',
+                               '${widget.inboxModel!.id}_${usersController.userProfile.value.id}',
                                 message);
                             txtValue = '';
                             txtController.clear();

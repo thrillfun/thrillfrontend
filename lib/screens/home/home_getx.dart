@@ -2,31 +2,27 @@ import 'package:animated_segmented_tab_control/animated_segmented_tab_control.da
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconly/iconly.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/common/strings.dart';
-import 'package:thrill/controller/comments_controller.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
-import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos/Following_videos_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/video/camera_screen.dart';
 import 'package:thrill/utils/util.dart';
 
+import '../../controller/home/home_controller.dart';
+
 User user = GetStorage().read("user");
 
-class HomeGetx extends GetView<VideosController> {
+class HomeGetx extends GetView<HomeController> {
   HomeGetx({Key? key}) : super(key: key);
 
-  InterstitialAd? interstitialAd;
-
+  var videosController = Get.find<VideosController>();
   @override
   Widget build(BuildContext context) {
-    loadInterstitialAd();
+    controller.loadInterstitialAd();
     TabController? tabController =
         TabController(length: 2, vsync: Scaffold.of(context), initialIndex: 0);
     return Scaffold(
@@ -35,7 +31,7 @@ class HomeGetx extends GetView<VideosController> {
           fit: StackFit.expand,
           children: [
             TabBarView(
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 controller: tabController,
                 children: [
                   const RelatedVideos(),
@@ -62,14 +58,15 @@ class HomeGetx extends GetView<VideosController> {
                             flex: 1,
                             child: Center(
                               child: Container(
-                                margin: EdgeInsets.symmetric(horizontal: 20),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 20),
                                 child: SegmentedTabControl(
                                     height: 35,
                                     splashColor: ColorManager.colorAccent,
                                     splashHighlightColor:
                                         ColorManager.colorPrimaryLight,
-                                    radius: Radius.circular(10),
-                                    backgroundColor: Color(0xff1F2128),
+                                    radius: const Radius.circular(10),
+                                    backgroundColor: const Color(0xff1F2128),
                                     indicatorColor: ColorManager.colorAccent,
                                     tabTextColor: Colors.white,
                                     selectedTabTextColor: Colors.white,
@@ -86,11 +83,56 @@ class HomeGetx extends GetView<VideosController> {
                               margin: const EdgeInsets.only(right: 10),
                               child: InkWell(
                                   onTap: () {
+                                    // ImagePicker()
+                                    //     .pickVideo(source: ImageSource.gallery)
+                                    //     .then((value) {
+                                    //   if (value != null) {
+                                    //     int currentUnix = DateTime.now()
+                                    //         .millisecondsSinceEpoch;
+
+                                    //     // videosController
+                                    //     //     .awsUploadVideo(
+                                    //     //         File(value.path), currentUnix)
+                                    //     //     .then((_) =>
+                                    //     //         videosController.postVideo(
+                                    //     //             userDetailsController
+                                    //     //                 .storage
+                                    //     //                 .read("userId"),
+                                    //     //             basename(value.path),
+                                    //     //             "",
+                                    //     //             "original",
+                                    //     //             "",
+                                    //     //             "testing",
+                                    //     //             'yes',
+                                    //     //             1,
+                                    //     //             "testing",
+                                    //     //             "",
+                                    //     //             "english",
+                                    //     //             "",
+                                    //     //             "1",
+                                    //     //             true,
+                                    //     //             true,
+                                    //     //             "",
+                                    //     //             true,
+                                    //     //             userDetailsController
+                                    //     //                 .storage
+                                    //     //                 .read("userId")));
+                                    //     videosController.openEditor(
+                                    //         true,
+                                    //         value.path,
+                                    //         "",
+                                    //         userDetailsController.storage
+                                    //             .read("userId"),
+                                    //         "");
+                                    //   }
+                                    // });
                                     Get.to(CameraScreen(
                                       selectedSound: "",
-                                      id: usersController.storage
+                                      owner: userDetailsController
+                                              .userProfile.value.name ??
+                                          "",
+                                      id: userDetailsController.storage
                                           .read("userId"),
-                                      owner: "",
                                     ));
                                   },
                                   child: const Icon(
@@ -109,55 +151,27 @@ class HomeGetx extends GetView<VideosController> {
   relatedLayout() => const RelatedVideos();
 
   followingVideosLayout() => const FollowingVideos();
-
-  loadInterstitialAd() async {
-    InterstitialAd.load(
-      adUnitId: homeInterstitialAdUnit,
-      request: const AdRequest(),
-      adLoadCallback:
-          InterstitialAdLoadCallback(onAdLoaded: (InterstitialAd ad) {
-        interstitialAd = ad;
-      }, onAdFailedToLoad: (LoadAdError error) {
-        interstitialAd = null;
-      }),
-    );
-  }
-
-  showAd() async {
-    if (interstitialAd != null) {
-      interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-          onAdDismissedFullScreenContent: (InterstitialAd ad) {
-        ad.dispose();
-        interstitialAd = null;
-        loadInterstitialAd();
-      }, onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-        ad.dispose();
-        interstitialAd = null;
-        loadInterstitialAd();
-      });
-      interstitialAd!.show();
-    }
-  }
 }
 
 class RelatedVideos extends GetView<RelatedVideosController> {
   const RelatedVideos({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return controller.obx((relatedVideos) => controller.obx(
-        (state) => videoItemLayout(relatedVideos!),
-        onLoading: loader(),
-        onEmpty: emptyListWidget()));
+    return GetX<RelatedVideosController>(
+        builder: (controller) => controller.isLoading.isTrue
+            ? loader()
+            : videoItemLayout(controller.publicVideosList));
   }
 }
 
-class FollowingVideos extends GetView<FollowingVideosController> {
+class FollowingVideos extends GetView<RelatedVideosController> {
   const FollowingVideos({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return controller.obx(
-        (followingVideos) => videoItemLayout(followingVideos!),
-        onLoading: loader(),
-        onEmpty: emptyListWidget());
+    return GetX<RelatedVideosController>(
+        builder: (controller) => controller.isLoading.isTrue
+            ? loader()
+            : videoItemLayout(controller.followingVideosList));
   }
 }

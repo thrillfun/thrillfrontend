@@ -44,8 +44,6 @@ class AppRouter {
       case PushNotification.routeName:
         return PushNotification.route();
 
-      case Favourites.routeName:
-        return Favourites.route();
       case AddSound.routeName:
         return AddSound.route();
       case PaymentHistory.routeName:

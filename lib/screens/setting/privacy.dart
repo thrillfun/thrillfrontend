@@ -12,12 +12,9 @@ import '../../controller/privacy_and_conditions/privacy_and_conditions_controlle
 class Privacy extends GetView<PrivacyAndConditionsController> {
   const Privacy({Key? key}) : super(key: key);
 
- 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: controller.loadPrivacyPage("https://thrill.fun/terms-conditions") );
+        body: controller.loadPrivacyPage("https://thrill.fun/privacy-policy"));
   }
-
- 
 }

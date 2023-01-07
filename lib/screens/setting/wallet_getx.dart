@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
-import 'package:thrill/controller/wallet/wallet_currencies_controller.dart';
-import 'package:thrill/controller/wallet_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/dashedline_vertical_painter.dart';
@@ -92,7 +89,7 @@ class WalletGetx extends StatelessWidget {
   walletHistoryLayout() => const WalletHistory();
 }
 
-class WalletHistory extends GetView<WalletCurrenciesController> {
+class WalletHistory extends GetView<WalletBalanceController> {
   const WalletHistory({Key? key}) : super(key: key);
 
   @override
@@ -195,9 +192,7 @@ class WalletHistory extends GetView<WalletCurrenciesController> {
                                           child: Column(
                                             children: [
                                               Text(
-                                                state[index]
-                                                    .networks
-                                                    .toString(),
+                                                state[index].amount.toString(),
                                                 style: TextStyle(
                                                     color: ColorManager
                                                         .dayNightText,
@@ -229,55 +224,57 @@ class WalletBalance extends GetView<WalletBalanceController> {
 
   @override
   Widget build(BuildContext context) {
-    return controller.obx((state) => Container(
-          margin: const EdgeInsets.only(top: 10),
-          width: Get.width,
-          height: 180,
-          child: Stack(
-            alignment: Alignment.center,
-            fit: StackFit.loose,
-            children: [
-              SvgPicture.asset(
-                "assets/wallet_stars.svg",
-                fit: BoxFit.fill,
-              ),
-              Container(
+    return controller.obx(
+        (state) => Container(
+              margin: const EdgeInsets.only(top: 10),
+              width: Get.width,
+              height: 180,
+              child: Stack(
                 alignment: Alignment.center,
-                padding: EdgeInsets.only(top: 20),
-                child: Column(
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
+                fit: StackFit.loose,
+                children: [
+                  SvgPicture.asset(
+                    "assets/wallet_stars.svg",
+                    fit: BoxFit.fill,
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Column(
                       children: [
-                        Image.asset("assets/thrill_token.png"),
-                        Container(
-                          padding: EdgeInsets.only(bottom: 15),
+                        Stack(
                           alignment: Alignment.center,
-                          child: Image.asset(
-                            "assets/logo.png",
-                            width: 60,
-                            height: 40,
-                            fit: BoxFit.fill,
-                          ),
+                          children: [
+                            Image.asset("assets/thrill_token.png"),
+                            Container(
+                              padding: const EdgeInsets.only(bottom: 15),
+                              alignment: Alignment.center,
+                              child: Image.asset(
+                                "assets/logo.png",
+                                width: 60,
+                                height: 40,
+                                fit: BoxFit.fill,
+                              ),
+                            )
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          controller.balance.first.symbol.toString() +
+                              controller.balance.first.amount.toString(),
+                          style: TextStyle(
+                              color: ColorManager.dayNightText,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold),
                         )
                       ],
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      controller.balance.first.symbol.toString() +
-                          controller.balance.first.amount.toString(),
-                      style: TextStyle(
-                          color: ColorManager.dayNightText,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-        ));
+                  )
+                ],
+              ),
+            ),
+        onLoading: loader());
   }
 }

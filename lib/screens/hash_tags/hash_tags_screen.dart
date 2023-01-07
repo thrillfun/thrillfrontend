@@ -89,7 +89,7 @@ class HashTagsScreen extends StatelessWidget {
                                               " Videos"
                                           : controller
                                                   .hashTagsDetailsList.length
-                                                  .toString()! +
+                                                  .toString() +
                                               " Videos",
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w500,

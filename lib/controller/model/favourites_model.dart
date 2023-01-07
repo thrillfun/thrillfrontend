@@ -286,7 +286,7 @@ class Levels {
 }
 
 class FavouriteSounds {
-  int? id;
+   int? id;
   String? sound;
   int? userId;
   String? category;
@@ -294,19 +294,22 @@ class FavouriteSounds {
   String? thumbnail;
   String? createdAt;
   String? updatedAt;
+  User? user;
+
 
   FavouriteSounds(
-      {this.id,
-        this.sound,
-        this.userId,
-        this.category,
-        this.name,
-        this.thumbnail,
-        this.createdAt,
-        this.updatedAt});
+     {this.id,
+      this.sound,
+      this.userId,
+      this.category,
+      this.name,
+      this.thumbnail,
+      this.createdAt,
+      this.updatedAt,
+      this.user});
 
   FavouriteSounds.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+  id = json['id'];
     sound = json['sound'];
     userId = json['user_id'];
     category = json['category'];
@@ -314,6 +317,7 @@ class FavouriteSounds {
     thumbnail = json['thumbnail'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    user = json['user'] != null ? new User.fromJson(json['user']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -326,9 +330,100 @@ class FavouriteSounds {
     data['thumbnail'] = this.thumbnail;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    if (this.user != null) {
+      data['user'] = this.user!.toJson();
+    }
     return data;
   }
 }
+class User {
+  int? id;
+  String? name;
+  String? username;
+  Null? email;
+  String? dob;
+  String? phone;
+  Null? avatar;
+  String? socialLoginId;
+  String? socialLoginType;
+  String? firebaseToken;
+  String? referralCount;
+  String? following;
+  String? followers;
+  String? likes;
+  Levels? levels;
+  String? totalVideos;
+  String? boxTwo;
+  String? boxThree;
+
+  User(
+      {this.id,
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.phone,
+      this.avatar,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.firebaseToken,
+      this.referralCount,
+      this.following,
+      this.followers,
+      this.likes,
+      this.levels,
+      this.totalVideos,
+      this.boxTwo,
+      this.boxThree});
+
+  User.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    username = json['username'];
+    email = json['email'];
+    dob = json['dob'];
+    phone = json['phone'];
+    avatar = json['avatar'];
+    socialLoginId = json['social_login_id'];
+    socialLoginType = json['social_login_type'];
+    firebaseToken = json['firebase_token'];
+    referralCount = json['referral_count'];
+    following = json['following'];
+    followers = json['followers'];
+    likes = json['likes'];
+    levels =
+        json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
+    totalVideos = json['total_videos'];
+    boxTwo = json['box_two'];
+    boxThree = json['box_three'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['username'] = this.username;
+    data['email'] = this.email;
+    data['dob'] = this.dob;
+    data['phone'] = this.phone;
+    data['avatar'] = this.avatar;
+    data['social_login_id'] = this.socialLoginId;
+    data['social_login_type'] = this.socialLoginType;
+    data['firebase_token'] = this.firebaseToken;
+    data['referral_count'] = this.referralCount;
+    data['following'] = this.following;
+    data['followers'] = this.followers;
+    data['likes'] = this.likes;
+    if (this.levels != null) {
+      data['levels'] = this.levels!.toJson();
+    }
+    data['total_videos'] = this.totalVideos;
+    data['box_two'] = this.boxTwo;
+    data['box_three'] = this.boxThree;
+    return data;
+  }
+}
+
 
 class FavouriteHashTags {
   int? id;

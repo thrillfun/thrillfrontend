@@ -2,17 +2,25 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:iconly/iconly.dart';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/controller/image/image_controller.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
+import 'package:thrill/screens/home/bottom_navigation.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
 
+import '../../controller/image/image_controller.dart';
 import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
@@ -22,15 +30,18 @@ FocusNode nameNode = FocusNode();
 FocusNode lastNameNode = FocusNode();
 FocusNode bioNode = FocusNode();
 FocusNode urlNode = FocusNode();
+FocusNode locationNode = FocusNode();
+FocusNode emailNode = FocusNode();
+FocusNode mobileNode = FocusNode();
 
 class ManageAccount extends StatelessWidget {
+  var imageController = Get.find<ImageController>();
   ManageAccount({Key? key}) : super(key: key);
 
   var selectedGender = 'Male'.obs;
   var genderList = ["Male", "Female", "Other"];
-  ImagePicker _imagePicker = ImagePicker();
-  var imagePath = "".obs;
-  XFile image = XFile("");
+
+  var genderSelectIndex = 0.obs;
 
   var fbLink = "https://www.facebook.com/".obs;
   var instaLink = "https://www.instagram.com/".obs;
@@ -44,21 +55,33 @@ class ManageAccount extends StatelessWidget {
   var webSiteUrl = "".obs;
   var gender = "".obs;
   var bio = "".obs;
+  var dob = "".obs;
+  var email = "".obs;
+  var mobile = "".obs;
 
+  var location = "".obs;
   TextEditingController nameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
   TextEditingController webSiteController = TextEditingController();
   TextEditingController bioController = TextEditingController();
+  TextEditingController locationController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController mobileController = TextEditingController();
 
   var usersController = Get.find<UserDetailsController>();
 
   @override
   Widget build(BuildContext context) {
+    usersController.userProfile.value.gender == "Male"
+        ? genderSelectIndex.value = 0
+        : usersController.userProfile.value.gender == "Female"
+            ? genderSelectIndex.value = 1
+            : genderSelectIndex.value = 2;
     nameController.text =
-        usersController.userProfile.value.firstName.toString() == "null"
+        usersController.userProfile.value.name.toString() == "null"
             ? ""
-            : usersController.userProfile.value.firstName.toString();
+            : usersController.userProfile.value.name.toString();
     lastNameController.text =
         usersController.userProfile.value.lastName.toString() == "null"
             ? ""
@@ -75,6 +98,15 @@ class ManageAccount extends StatelessWidget {
         usersController.userProfile.value.bio.toString() == "null"
             ? ""
             : usersController.userProfile.value.bio.toString();
+    emailController.text =
+        usersController.userProfile.value.email.toString() == "null"
+            ? ""
+            : usersController.userProfile.value.email.toString();
+
+    mobileController.text =
+        usersController.userProfile.value.phone.toString() == "null"
+            ? ""
+            : usersController.userProfile.value.phone.toString();
     return Scaffold(
       backgroundColor: ColorManager.dayNight,
       body: Padding(
@@ -82,7 +114,6 @@ class ManageAccount extends StatelessWidget {
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Row(
                   children: [
@@ -92,19 +123,25 @@ class ManageAccount extends StatelessWidget {
                           Icons.arrow_back,
                           color: ColorManager.dayNightText,
                         )),
-                    Text(
-                      "Edit Profile",
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: ColorManager.dayNightText),
-                    )
+                    Flexible(
+                        child: Container(
+                      alignment: Alignment.center,
+                      width: Get.width,
+                      child: Text(
+                        "Edit Profile",
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: ColorManager.dayNightText),
+                      ),
+                    ))
                   ],
                 ),
-                profilePicLayout(),
-                Divider(
-                  color: ColorManager.dayNightText,
+                SizedBox(
+                  height: 10,
                 ),
+                profilePicLayout(),
+
                 updateFieldsLayout(),
                 submitButtonLayout()
                 // InkWell(onTap: ()=>Get.to(EditProfile(user: user,)),child:  mainTile(Carbon.person, 'Edit Profile'),)
@@ -122,8 +159,8 @@ class ManageAccount extends StatelessWidget {
             color: Colors.transparent,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(200))),
-      width: 120,
-      height: 120,
+      width: 100,
+      height: 100,
       child: InkWell(
         child: Stack(
           alignment: Alignment.center,
@@ -137,7 +174,7 @@ class ManageAccount extends StatelessWidget {
             Container(
                 height: 100,
                 width: 100,
-                child: Obx(() => imagePath.value.isEmpty
+                child: Obx(() => imageController.imagePath.value.isEmpty
                     ? usersController.userProfile.value.avatar!.isNotEmpty
                         ? ClipOval(
                             child: CachedNetworkImage(
@@ -165,60 +202,16 @@ class ManageAccount extends StatelessWidget {
                           )
                     : ClipOval(
                         child: Image.file(
-                          File(image.path),
+                          File(imageController.imagePath.value),
                           fit: BoxFit.fill,
                         ),
                       ))),
             Container(
               alignment: Alignment.bottomRight,
               child: InkWell(
-                onTap: () => Get.defaultDialog(
-                    title: "Update Profile Image",
-                    content: Container(
-                      margin: const EdgeInsets.all(20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () async => {
-                              image = (await _imagePicker.pickImage(
-                                  source: ImageSource.camera))!,
-                              imagePath.value = image.path,
-                            },
-                            child: Column(
-                              children: const [
-                                Icon(
-                                  Icons.camera,
-                                  color: ColorManager.colorAccent,
-                                ),
-                                Text('Take Picture',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold))
-                              ],
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async => {
-                              image = (await _imagePicker.pickImage(
-                                  source: ImageSource.gallery))!,
-                              imagePath.value = image.path
-                            },
-                            child: Column(
-                              children: const [
-                                Icon(Icons.image,
-                                    color: ColorManager.colorAccent),
-                                Text(
-                                  'Pick Image',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    )),
+                onTap: () => imageController.showSetImageDialog(),
                 child: Icon(
-                  Icons.camera,
+                  IconlyBold.editSquare,
                   color: ColorManager.dayNightIcon,
                   size: 30,
                 ),
@@ -232,7 +225,7 @@ class ManageAccount extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           TextFormField(
-            controller: nameController,
+            controller: userNameController,
             focusNode: userNode,
             style: TextStyle(color: ColorManager.dayNightText),
             onChanged: (value) {
@@ -260,15 +253,15 @@ class ManageAccount extends StatelessWidget {
                         color: Color(0xff2DCBC8),
                       )
                     : BorderSide(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: Colors.transparent.withOpacity(0.0),
                       ),
               ),
               filled: true,
               prefixIcon: Icon(
-                Icons.person_outline,
+                IconlyLight.profile,
                 color: userNode.hasFocus
                     ? ColorManager.colorAccent
-                    : Colors.grey.withOpacity(0.3),
+                    : ColorManager.dayNightText,
               ),
               hintText: "User name....",
               hintStyle: const TextStyle(
@@ -284,7 +277,7 @@ class ManageAccount extends StatelessWidget {
 
           TextFormField(
             focusNode: nameNode,
-            controller: userNameController,
+            controller: nameController,
             style: TextStyle(color: ColorManager.dayNightText),
             decoration: InputDecoration(
               focusColor: ColorManager.colorAccent,
@@ -313,10 +306,10 @@ class ManageAccount extends StatelessWidget {
               ),
               filled: true,
               prefixIcon: Icon(
-                Icons.person_outline,
+                IconlyLight.tick_square,
                 color: userNode.hasFocus
                     ? ColorManager.colorAccent
-                    : Colors.grey.withOpacity(0.3),
+                    : ColorManager.dayNightText,
               ),
               hintText: "full name....",
               hintStyle: const TextStyle(
@@ -331,56 +324,105 @@ class ManageAccount extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          TextFormField(
-            controller: lastNameController,
-            focusNode: lastNameNode,
-            style: TextStyle(color: ColorManager.dayNightText),
-            onChanged: (value) {
-              lastName.value = value;
-            },
-            decoration: InputDecoration(
-              focusColor: ColorManager.colorAccent,
-              fillColor: lastNameNode.hasFocus
-                  ? ColorManager.colorAccentTransparent
-                  : Colors.grey.withOpacity(0.1),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: lastNameNode.hasFocus
-                    ? const BorderSide(
-                        color: Color(0xff2DCBC8),
-                      )
-                    : const BorderSide(
-                        color: Color(0xffFAFAFA),
-                      ),
+          Visibility(
+            visible: usersController.userProfile.value.email!.isEmpty,
+            child: TextFormField(
+              controller: emailController,
+              focusNode: emailNode,
+              style: TextStyle(color: ColorManager.dayNightText),
+              onChanged: (value) {
+                email.value = value;
+              },
+              decoration: InputDecoration(
+                focusColor: ColorManager.colorAccent,
+                fillColor: emailNode.hasFocus
+                    ? ColorManager.colorAccentTransparent
+                    : Colors.grey.withOpacity(0.1),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: emailNode.hasFocus
+                      ? const BorderSide(
+                          color: Color(0xff2DCBC8),
+                        )
+                      : const BorderSide(
+                          color: Color(0xffFAFAFA),
+                        ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: emailNode.hasFocus
+                      ? const BorderSide(
+                          color: Color(0xff2DCBC8),
+                        )
+                      : BorderSide(
+                          color: Colors.grey.withOpacity(0.1),
+                        ),
+                ),
+                filled: true,
+                prefixIcon: Icon(
+                  IconlyLight.message,
+                  color: emailNode.hasFocus
+                      ? ColorManager.colorAccent
+                      : ColorManager.dayNightText,
+                ),
+                hintText: "Email....",
+                hintStyle: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey,
+                    fontSize: 14),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: lastNameNode.hasFocus
-                    ? const BorderSide(
-                        color: Color(0xff2DCBC8),
-                      )
-                    : BorderSide(
-                        color: Colors.grey.withOpacity(0.1),
-                      ),
-              ),
-              filled: true,
-              prefixIcon: Icon(
-                Icons.person_outline,
-                color: lastNameNode.hasFocus
-                    ? ColorManager.colorAccent
-                    : Colors.grey.withOpacity(0.3),
-              ),
-              hintText: "Last name....",
-              hintStyle: const TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                  fontSize: 14),
             ),
           ),
-          const SizedBox(
-            height: 10,
+
+          Visibility(
+            visible: usersController.userProfile.value.phone!.isEmpty,
+            child: TextFormField(
+              controller: mobileController,
+              focusNode: mobileNode,
+              style: TextStyle(color: ColorManager.dayNightText),
+              onChanged: (value) {
+                mobile.value = value;
+              },
+              decoration: InputDecoration(
+                focusColor: ColorManager.colorAccent,
+                fillColor: mobileNode.hasFocus
+                    ? ColorManager.colorAccentTransparent
+                    : Colors.grey.withOpacity(0.1),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: mobileNode.hasFocus
+                      ? const BorderSide(
+                          color: Color(0xff2DCBC8),
+                        )
+                      : const BorderSide(
+                          color: Color(0xffFAFAFA),
+                        ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: mobileNode.hasFocus
+                      ? const BorderSide(
+                          color: Color(0xff2DCBC8),
+                        )
+                      : BorderSide(
+                          color: Colors.grey.withOpacity(0.1),
+                        ),
+                ),
+                filled: true,
+                prefixIcon: Icon(
+                  Icons.mobile_friendly,
+                  color: mobileNode.hasFocus
+                      ? ColorManager.colorAccent
+                      : ColorManager.dayNightText,
+                ),
+                hintText: "Mobile....",
+                hintStyle: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey,
+                    fontSize: 14),
+              ),
+            ),
           ),
-          dropDownGender(),
           const SizedBox(
             height: 10,
           ),
@@ -416,10 +458,10 @@ class ManageAccount extends StatelessWidget {
               ),
               filled: true,
               prefixIcon: Icon(
-                Icons.person_outline,
+                CupertinoIcons.link,
                 color: urlNode.hasFocus
                     ? ColorManager.colorAccent
-                    : Colors.grey.withOpacity(0.3),
+                    : ColorManager.dayNightText,
               ),
               hintText: "Website URL....",
               hintStyle: const TextStyle(
@@ -438,8 +480,8 @@ class ManageAccount extends StatelessWidget {
           TextFormField(
             focusNode: bioNode,
             controller: bioController,
+            maxLength: 150,
             style: TextStyle(color: ColorManager.dayNightText),
-            maxLines: 10,
             decoration: InputDecoration(
               focusColor: ColorManager.colorAccent,
               fillColor: bioNode.hasFocus
@@ -471,11 +513,121 @@ class ManageAccount extends StatelessWidget {
                   fontStyle: FontStyle.italic,
                   color: Colors.grey,
                   fontSize: 14),
+              prefixIcon: Icon(
+                IconlyLight.info_square,
+                color: bioNode.hasFocus
+                    ? ColorManager.colorAccent
+                    : ColorManager.dayNightText,
+              ),
             ),
             onChanged: (value) {
               bio.value = value;
             },
           ),
+          const SizedBox(
+            height: 10,
+          ),
+          TextFormField(
+            focusNode: locationNode,
+            controller: locationController,
+            style: TextStyle(color: ColorManager.dayNightText),
+            decoration: InputDecoration(
+              focusColor: ColorManager.colorAccent,
+              fillColor: locationNode.hasFocus
+                  ? ColorManager.colorAccentTransparent
+                  : Colors.grey.withOpacity(0.1),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: bioNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : const BorderSide(
+                        color: Color(0xffFAFAFA),
+                      ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: bioNode.hasFocus
+                    ? const BorderSide(
+                        color: Color(0xff2DCBC8),
+                      )
+                    : BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                      ),
+              ),
+              filled: true,
+              hintText: "Location....",
+              hintStyle: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 14),
+              prefixIcon: Icon(
+                IconlyLight.location,
+                color: locationNode.hasFocus
+                    ? ColorManager.colorAccent
+                    : ColorManager.dayNightText,
+              ),
+            ),
+            onChanged: (value) {
+              location.value = value;
+            },
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          InkWell(
+            onTap: () {
+              DatePicker.showDatePicker(Get.context!,
+                  showTitleActions: true,
+                  minTime: DateTime(1920, 12, 12),
+                  maxTime: DateTime.now(), onChanged: (date) {
+                String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+                dob.value = formattedDate;
+              }, onConfirm: (date) {
+                String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+                dob.value = formattedDate;
+              }, currentTime: DateTime.now());
+
+              // Get.bottomSheet(
+              //     Container(
+              //       height: Get.height / 4,
+              //       child: CupertinoDatePicker(
+              //         minimumDate: DateTime(1920),
+              //         backgroundColor: ColorManager.dayNight,
+              //         mode: CupertinoDatePickerMode.date,
+              //         onDateTimeChanged: (value) {
+              //           dob.value = value.toString();
+              //         },
+              //         initialDateTime: DateTime.now(),
+              //         maximumDate: DateTime.now(),
+              //       ),
+              //     ),
+              //     backgroundColor: ColorManager.dayNight);
+            },
+            child: Container(
+              width: Get.width,
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.1),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(IconlyLight.calendar),
+                  Obx(() =>
+                      Text(usersController.userProfile.value.dob.toString()))
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          dropDownGender(),
           const SizedBox(
             height: 10,
           ),
@@ -492,24 +644,32 @@ class ManageAccount extends StatelessWidget {
       );
 
   submitButtonLayout() => InkWell(
-        onTap: () {
-          if (image.path.isNotEmpty) {
-            usersController.updateuserProfile(
-                profileImage: File(image.path),
+        onTap: () async {
+          if (imageController.imagePath.value.isNotEmpty) {
+            await usersController.updateuserProfile(
+                profileImage: File(imageController.imagePath.value),
                 fullName: nameController.text,
                 lastName: lastNameController.text,
                 userName: userNameController.text,
                 bio: bioController.text,
-                gender: selectedGender.value,
-                webSiteUrl: webSiteController.text);
+                gender: genderList[genderSelectIndex.value],
+                webSiteUrl: webSiteController.text,
+                dob: dob.value,
+                location: location.value,
+                phone: mobile.value,
+                email: email.value);
           } else {
-            usersController.updateuserProfile(
+            await usersController.updateuserProfile(
                 fullName: nameController.text,
                 lastName: lastNameController.text,
                 userName: userNameController.text,
                 bio: bioController.text,
-                gender: selectedGender.value,
-                webSiteUrl: webSiteController.text);
+                gender: genderList[genderSelectIndex.value],
+                webSiteUrl: webSiteController.text,
+                dob: dob.value,
+                location: location.value,
+                phone: mobile.value,
+                email: email.value);
           }
         },
         child: Container(
@@ -535,37 +695,66 @@ class ManageAccount extends StatelessWidget {
         ),
       );
 
-  dropDownGender() => Obx(() => selectedGender.value == ""
-      ? Container()
-      : Container(
-          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
-          width: Get.width,
-          decoration: BoxDecoration(
-              color: ColorManager.colorAccentTransparent,
-              border: Border.all(color: ColorManager.colorAccent),
-              borderRadius: const BorderRadius.all(Radius.circular(10))),
-          child: Theme(
-              data: Theme.of(Get.context!)
-                  .copyWith(canvasColor: const Color(0xff353841)),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton(
-                  icon: const Icon(
-                    Icons.keyboard_double_arrow_down,
-                  ),
-                  value: selectedGender.value,
-                  items: genderList
-                      .map((element) => DropdownMenuItem(
-                            child: Text(
-                              element,
-                            ),
-                            value: element,
-                          ))
-                      .toList(growable: true),
-                  onChanged: (value) {
-                    selectedGender.value = value!.toString();
+  dropDownGender() => Obx(() => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(
+            3,
+            (index) => InkWell(
+                  onTap: () {
+                    genderSelectIndex.value = index;
                   },
-                ),
-              ))));
+                  child: Container(
+                      margin: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color:
+                                  genderSelectIndex.value == index && index == 1
+                                      ? Colors.pink.shade100
+                                      : genderSelectIndex.value == index &&
+                                              index == 0
+                                          ? Colors.blue.shade100
+                                          : genderSelectIndex.value == index &&
+                                                  index == 2
+                                              ? ColorManager.colorAccent
+                                              : ColorManager.dayNightText)),
+                      child: Row(
+                        children: [
+                          Text(
+                            genderList[index],
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: genderSelectIndex.value == index &&
+                                        index == 1
+                                    ? Colors.pink.shade300
+                                    : genderSelectIndex.value == index &&
+                                            index == 0
+                                        ? Colors.blue.shade300
+                                        : genderSelectIndex.value == index &&
+                                                index == 2
+                                            ? ColorManager.colorAccent
+                                            : ColorManager.dayNightText),
+                          ),
+                          index == 0
+                              ? Icon(
+                                  Icons.male,
+                                  color: Colors.blue.shade300,
+                                )
+                              : index == 1
+                                  ? Icon(
+                                      Icons.female,
+                                      color: Colors.pink.shade300,
+                                    )
+                                  : Icon(
+                                      Icons.transgender,
+                                      color: ColorManager.colorAccent,
+                                    )
+                        ],
+                      )),
+                )),
+      ));
 
   layoutYoutube() => InkWell(
         onTap: () => Get.defaultDialog(

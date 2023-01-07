@@ -6,7 +6,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class PrivacyAndConditionsController extends GetxController
     with StateMixin<Rx<String>> {
-  var url = "https://thrill.fun/terms-conditions".obs;
 
   loadPrivacyPage(String url) => WebViewWidget(
       controller: WebViewController()

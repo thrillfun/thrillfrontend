@@ -39,12 +39,14 @@ class WheelController extends GetxController with StateMixin<dynamic> {
 
   WheelController() {
     getCounterData();
+    getWheelData();
+    getEarnedSpinData();
   }
 
   getCounterData() async {
     isCounterDataLoading.value = true;
     try {
-      change(probabilityCounter.value, status: RxStatus.loading());
+      change(probabilityCounter, status: RxStatus.loading());
 
       dio.options.headers['Authorization'] =
           "Bearer ${await GetStorage().read("token")}";
@@ -56,15 +58,14 @@ class WheelController extends GetxController with StateMixin<dynamic> {
         try {
           probabilityCounter.value =
               CounterDataModel.fromJson(response.data).data!;
-          change(probabilityCounter.value, status: RxStatus.success());
+          change(probabilityCounter, status: RxStatus.success());
         } on HttpException catch (e) {
-          change(probabilityCounter.value,
+          change(probabilityCounter,
               status: RxStatus.error(response.data['message']));
 
           errorToast(response.data['message']);
         } on Exception catch (e) {
-          change(probabilityCounter.value,
-              status: RxStatus.error(e.toString()));
+          change(probabilityCounter, status: RxStatus.error(e.toString()));
 
           errorToast(e.toString());
         }
@@ -165,9 +166,13 @@ class WheelController extends GetxController with StateMixin<dynamic> {
       dio.options.headers['Authorization'] =
           "Bearer ${await GetStorage().read("token")}";
       await dio.get("/spin-wheel/earned-spin").then((response) {
-        activityList =
-            EarnedSpinModel.fromJson(response.data).data!.activities!.obs;
-        change(wheelData, status: RxStatus.success());
+        if (response.data["status"] == true) {
+          activityList =
+              EarnedSpinModel.fromJson(response.data).data!.activities!.obs;
+          change(wheelData, status: RxStatus.success());
+        } else {
+          errorToast(response.data["message"]);
+        }
       }).onError((error, stackTrace) {
         change(wheelData, status: RxStatus.error(error.toString()));
       });

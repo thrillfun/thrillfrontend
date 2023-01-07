@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/dashedline_vertical_painter.dart';
@@ -14,7 +15,7 @@ class ReferalScreen extends StatelessWidget {
   var deepLink = ''.obs;
   var fullDeepLink = "".obs;
 
-  var usersController = Get.find<UserController>();
+  var usersController = Get.find<UserDetailsController>();
 
   @override
   Widget build(BuildContext context) {
@@ -314,10 +315,11 @@ class ReferalScreen extends StatelessWidget {
 
   createDynamicLink() async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: 'https://thrill.fun/',
-      link: Uri.parse('https://thrillvideo.s3.amazonaws.com/test/'),
-      androidParameters: AndroidParameters(
-        packageName: 'com.thrill',
+      uriPrefix: 'https://thrill.page.link/',
+      link: Uri.parse(
+          "https://thrill.fun/?id=${usersController.storage.read("userId").toString()}"),
+      androidParameters: const AndroidParameters(
+        packageName: 'com.thrill.media',
         minimumVersion: 1,
       ),
       // iosParameters: IosParameters(
@@ -326,7 +328,7 @@ class ReferalScreen extends StatelessWidget {
       //   appStoreId: 'your_app_store_id',
       // ),
     );
-    var dynamicUrl = await parameters.link;
+    var dynamicUrl = await FirebaseDynamicLinks.instance.buildLink(parameters);
     deepLink.value = dynamicUrl.toString();
     fullDeepLink.value = dynamicUrl.toString();
     if (deepLink.value.length > 18) {

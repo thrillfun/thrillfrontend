@@ -1,376 +1,382 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thrill/models/add_sound_model.dart';
-import 'package:thrill/models/hashtags_model.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:get/get.dart';
+import 'package:thrill/common/color.dart';
+import 'package:thrill/controller/Favourites/favourites_controller.dart';
+import 'package:thrill/controller/discover_controller.dart';
+import 'package:thrill/controller/hashtags/top_hashtags_controller.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
+import 'package:thrill/screens/sound/sound_details.dart';
 
-import '../common/color.dart';
-import '../common/strings.dart';
-import '../models/video_model.dart';
-import '../rest/rest_api.dart';
+import '../controller/model/public_videosModel.dart';
 import '../rest/rest_url.dart';
 import '../utils/util.dart';
+import '../widgets/video_item.dart';
+import 'hash_tags/hash_tags_screen.dart';
 
-class Favourites extends StatefulWidget {
-  const Favourites({Key? key}) : super(key: key);
-
-  @override
-  State<Favourites> createState() => _FavouritesState();
-
-  static const String routeName = '/favourites';
-
-  static Route route() {
-    return MaterialPageRoute(
-      settings: const RouteSettings(name: routeName),
-      builder: (context) => const Favourites(),
-    );
-  }
-}
-
-class _FavouritesState extends State<Favourites> {
-  int selectedTab = 0;
-  bool isLoading = true;
-  List<String> favId = List<String>.empty(growable: true);
-  List<HashtagModel> favHastag = List<HashtagModel>.empty(growable: true);
-  List<VideoModel> favVideo = List<VideoModel>.empty(growable: true);
-  List<AddSoundModel> favSound = List<AddSoundModel>.empty(growable: true);
-
-  @override
-  void initState() {
-    loadData();
-    super.initState();
-  }
-
+class Favourites extends GetView<FavouritesController> {
+  var selectedTab = 0.obs;
+  var discoverController = Get.find<DiscoverController>();
+  var topHashtagsController = Get.find<TopHashtagsController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        shadowColor: Colors.transparent,
-        shape: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
-        centerTitle: true,
-        title: const Text(
-          favourites,
-          style: TextStyle(color: Colors.black),
-        ),
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            color: Colors.black,
-            icon: const Icon(Icons.arrow_back_ios)),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            DefaultTabController(
-              length: 3,
-              initialIndex: selectedTab,
-              child: TabBar(
-                  onTap: (int index) {
-                    setState(() {
-                      selectedTab = index;
-                    });
-                  },
-                  indicatorColor: ColorManager.cyan,
-                  tabs: [
-                    Tab(
-                      child: Text(
-                        videos,
-                        style: TextStyle(
-                            fontSize: 17,
-                            color: selectedTab == 0
-                                ? ColorManager.cyan
-                                : Colors.grey),
-                      ),
-                    ),
-                    Tab(
-                      child: Text(
-                        sounds,
-                        style: TextStyle(
-                            fontSize: 17,
-                            color: selectedTab == 1
-                                ? ColorManager.cyan
-                                : Colors.grey),
-                      ),
-                    ),
-                    Tab(
-                      child: Text(
-                        hashTag,
-                        style: TextStyle(
-                            fontSize: 17,
-                            color: selectedTab == 2
-                                ? ColorManager.cyan
-                                : Colors.grey),
-                      ),
-                    )
-                  ]),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                        color: Colors.lightBlueAccent),
-                  )
-                : tabview()
-          ],
-        ),
+      backgroundColor: ColorManager.dayNight,
+      body: SizedBox(
+        height: Get.height,
+        width: Get.width,
+        child: controller.obx(
+            (state) => ListView(
+                  children: [
+                    favouritesTabbar(),
+                    Obx(() => favouritesTabView())
+                  ],
+                ),
+            onLoading: loader()),
       ),
     );
   }
 
-  tabview() {
-    if (selectedTab == 0) {
-      return video();
-    } else if (selectedTab == 1) {
-      return sound();
+  favouritesTabView() {
+    if (selectedTab.value == 0) {
+      return favouriteVideos();
+    }
+    if (selectedTab.value == 1) {
+      return favouriteSounds();
     } else {
-      return hashtag();
+      return favouritesHashtags();
     }
   }
 
-  Widget video() {
-    return favVideo.isEmpty
-        ? RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(children: [
-              TextSpan(
-                  text: whoops + '\n',
-                  style: TextStyle(color: Colors.grey.shade700, fontSize: 20)),
-              TextSpan(
-                  text: '\nThere is no favourite video so far.',
-                  style: TextStyle(color: Colors.grey.shade400, fontSize: 18)),
-            ]))
-        : GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, crossAxisSpacing: 1.8, mainAxisSpacing: 1.8),
-            itemCount: favVideo.length,
-            itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, '/', (route) => true,
-                      arguments: {'videoModel': favVideo[index]});
-                },
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CachedNetworkImage(
-                        placeholder: (a, b) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                        fit: BoxFit.cover,
-                        errorWidget: (a, b, c) => Image.network(
-                              '${RestUrl.thambUrl}thumb-not-available.png',
-                              fit: BoxFit.fill,
-                            ),
-                        imageUrl: favVideo[index].gif_image.isEmpty
-                            ? '${RestUrl.thambUrl}thumb-not-available.png'
-                            : '${RestUrl.gifUrl}${favVideo[index].gif_image}'),
-                    Positioned(
-                        bottom: 5,
-                        left: 5,
-                        right: 5,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            const Icon(
-                              Icons.visibility,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            Text(
-                              favVideo[index].views.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 13),
-                            ),
-                            const Icon(
-                              Icons.favorite,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            Text(
-                              favVideo[index].likes.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 13),
-                            ),
-                          ],
-                        ))
-                  ],
-                ),
-              );
-            });
-  }
+  favouritesTabbar() => DefaultTabController(
+      length: 3,
+      child: TabBar(
+          unselectedLabelColor:
+              Get.isPlatformDarkMode ? Colors.white : const Color(0xff9E9E9E),
+          indicatorColor: ColorManager.colorAccent,
+          labelColor: ColorManager.colorAccent,
+          labelStyle:
+              const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          automaticIndicatorColorAdjustment: true,
+          onTap: (int index) {
+            selectedTab.value = index;
+          },
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+          indicatorPadding: const EdgeInsets.symmetric(horizontal: 10),
+          tabs: const [
+            Tab(
+              text: "Videos",
+            ),
+            Tab(
+              text: "Sounds",
+            ),
+            Tab(
+              text: "Hashtags",
+            ),
+            // Tab(
+            //   text: "Local",
+            // ),
+          ]));
 
-  Widget sound() {
-    return favSound.isEmpty
-        ? RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(children: [
-              TextSpan(
-                  text: whoops + '\n',
-                  style: TextStyle(color: Colors.grey.shade700, fontSize: 20)),
-              TextSpan(
-                  text: '\nThere is no favourite sounds so far.',
-                  style: TextStyle(color: Colors.grey.shade400, fontSize: 18)),
-            ]))
-        : ListView.builder(
-            shrinkWrap: true,
-            itemCount: favSound.length,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (BuildContext context, int index) {
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                child: Row(
-                  children: [
-                    Container(
-                      height: 100,
-                      width: 100,
-                      color: ColorManager.cyan,
-                      alignment: Alignment.center,
-                      child: SvgPicture.asset(
-                        'assets/play.svg',
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            favSound[index].name,
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              InkWell(
-                                onTap: () async {
-                                  var result = await RestApi
-                                      .addAndRemoveFavariteSoundHastag(
-                                          favSound[index].id, "sound", 0);
-                                  var json = jsonDecode(result.body);
-                                  if (json['status']) {
-                                    favSound.removeAt(index);
-                                    showSuccessToast(context, json['message']);
-                                  } else {
-                                    showErrorToast(context, json['message']);
-                                  }
-                                  setState(() {});
-                                },
-                                child: Material(
-                                  borderRadius: BorderRadius.circular(50),
-                                  elevation: 10,
-                                  child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(50),
-                                          border: Border.all(
-                                              color: Colors.grey.shade300,
-                                              width: 1)),
-                                      child: const Icon(Icons.bookmark,
-                                          color: Colors.lightBlueAccent)),
+  favouriteSounds() => controller.obx(
+      (_) => SizedBox(
+            height: Get.height,
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: controller.favouriteSounds.length,
+                itemBuilder: (context, index) => InkWell(
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/Image.png",
+                                      height: 80,
+                                      width: 80,
+                                    ),
+                                    SizedBox(
+                                      height: 40,
+                                      width: 40,
+                                      child: imgProfile(controller
+                                          .favouriteSounds[index].thumbnail
+                                          .toString()),
+                                    )
+                                  ],
                                 ),
-                              ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      controller.favouriteSounds[index].sound
+                                          .toString(),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 18),
+                                    ),
+                                    Text(
+                                      controller.favouriteSounds[index].name
+                                          .toString(),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14),
+                                    ),
+                                    Text(
+                                      controller.favouriteSounds[index].name
+                                          .toString(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Text(
+                              controller.favouriteSounds[index].id.toString(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 14),
+                            )
+                          ],
+                        ),
+                      ),
+                      onTap: () => {
+                        Get.to(SoundDetails(
+                          map: {
+                            "sound": controller.favouriteSounds[index].sound,
+                            "user": controller
+                                    .favouriteSounds[index].user!.name!.isEmpty
+                                ? controller.favouriteSounds[index].user!.name!
+                                : "",
+                            "soundName":
+                                controller.favouriteSounds[index].sound,
+                            "title": controller.favouriteSounds[index].name,
+                            "id": controller.favouriteSounds[index].user!.id,
+                            "profile":
+                                controller.favouriteSounds[index].user!.avatar,
+                            "name":
+                                controller.favouriteSounds[index].user!.name,
+                            "sound_id": controller.favouriteSounds[index].id,
+                            "username": controller
+                                .favouriteSounds[index].user!.username,
+                            "isFollow": 0,
+                            "userProfile": controller
+                                    .favouriteSounds[index].user!.avatar
+                                    .toString()
+                                    .isEmpty
+                                ? controller.favouriteSounds[index].user!.avatar
+                                : RestUrl.placeholderImage
+                          },
+                        ))
+                      },
+                    )),
+          ),
+      onEmpty: emptyListWidget(),
+      onLoading: loader());
+  favouriteVideos() => controller.obx((_) => Container(
+        height: Get.height,
+        width: Get.width,
+        margin: const EdgeInsets.all(10),
+        child: GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          childAspectRatio: Get.width / Get.height,
+          mainAxisSpacing: 10,
+          children: List.generate(
+              controller.favouriteVideos.length,
+              (index) => InkWell(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Stack(
+                            alignment: Alignment.bottomLeft,
+                            fit: StackFit.loose,
+                            children: [
+                              imgNet(RestUrl.gifUrl +
+                                  controller.favouriteVideos[index].gifImage!),
+                              Container(
+                                margin: const EdgeInsets.all(10),
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      const WidgetSpan(
+                                        child: Icon(
+                                          Icons.play_circle,
+                                          size: 14,
+                                          color: ColorManager.colorAccent,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: "  " +
+                                            controller
+                                                .favouriteVideos[index].views
+                                                .toString(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
                             ],
                           ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              );
-            });
-  }
-
-  Widget hashtag() {
-    return favHastag.isEmpty
-        ? RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(children: [
-              TextSpan(
-                  text: whoops + '\n',
-                  style: TextStyle(color: Colors.grey.shade700, fontSize: 20)),
-              TextSpan(
-                  text: '\nThere is no favourite hashtag so far.',
-                  style: TextStyle(color: Colors.grey.shade400, fontSize: 18)),
-            ]))
-        : GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 1,
-              crossAxisSpacing: 1,
-              childAspectRatio: 1.5,
-            ),
-            itemCount: favHastag.length,
-            itemBuilder: (BuildContext context, int index) {
-              return SizedBox(
-                width: 150.0,
-                height: 65.0,
-                child: Card(
-                  color: Colors.grey,
-                  semanticContainer: true,
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  elevation: 5,
-                  margin: const EdgeInsets.all(10),
-                  child: Center(
-                    child: Text(
-                      '#${favHastag[index].name}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15.0,
-                      ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            ClipOval(
+                              child: CachedNetworkImage(
+                                imageUrl: controller
+                                            .favouriteVideos[index].user!.avatar
+                                            .toString()
+                                            .isEmpty ||
+                                        controller.favouriteVideos[index].user!
+                                                .avatar
+                                                .toString() ==
+                                            "null"
+                                    ? RestUrl.placeholderImage
+                                    : RestUrl.profileUrl +
+                                        controller
+                                            .favouriteVideos[index].user!.avatar
+                                            .toString(),
+                                height: 20,
+                                width: 20,
+                                fit: BoxFit.fill,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              controller.favouriteVideos[index].user!.name
+                                  .toString(),
+                              style: const TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w500),
+                            )
+                          ],
+                        )
+                      ],
                     ),
-                  ),
-                ),
-              );
-            },
-          );
-  }
-
-  void loadData() async {
-    var result = await RestApi.getFavriteItems();
-    var response = await RestApi.getFavVideos();
-    var json = jsonDecode(result.body);
-    var jsonV = jsonDecode(response.body);
-    if (json['status']) {
-      List jsonList = json['data']['hash_tags'] as List;
-      favHastag = jsonList.map((e) => HashtagModel.fromJson(e)).toList();
-
-      favId =
-          jsonList.map((e) => HashtagModel.fromJson(e).id.toString()).toList();
-
-      SharedPreferences pref = await SharedPreferences.getInstance();
-      pref.setStringList('favTag', favId);
-
-      // List jsonVideoList = json['data']['videos'] as List;
-      // favVideo = jsonVideoList.map((e) => VideoModel.fromJson(e)).toList();
-
-      List jsonSoundList = json['data']['sounds'] as List;
-      favSound = jsonSoundList.map((e) => AddSoundModel.fromJson(e)).toList();
-    }
-    if (jsonV['status']) {
-      List jsonVideoList = jsonV['data'] as List;
-      favVideo = jsonVideoList.map((e) => VideoModel.fromJson(e)).toList();
-    }
-    isLoading = false;
-    setState(() {});
-  }
+                    onTap: () {
+                      List<PublicVideos> videosList1 = [];
+                      controller.favouriteVideos.forEach((element) {
+                        var user = PublicUser(
+                          id: element.user?.id,
+                          name: element.user?.name,
+                          facebook: element.user?.facebook,
+                          firstName: element.user?.firstName,
+                          lastName: element.user?.lastName,
+                          username: element.user?.username,
+                          isfollow: 0,
+                        );
+                        videosList1.add(PublicVideos(
+                          id: element.id,
+                          video: element.video,
+                          description: element.description,
+                          sound: element.sound,
+                          soundName: element.soundName,
+                          soundCategoryName: element.soundCategoryName,
+                          // soundOwner: element.soundOwner,
+                          filter: element.filter,
+                          likes: element.likes,
+                          views: element.views,
+                          gifImage: element.gifImage,
+                          speed: element.speed,
+                          comments: element.comments,
+                          isDuet: "no",
+                          duetFrom: "",
+                          isCommentable: "yes",
+                          // videoLikeStatus: element.videoLikeStatus,
+                          user: user,
+                        ));
+                      });
+                      Get.to(VideoPlayerItem(
+                        videosList: videosList1,
+                        position: index,
+                      ));
+                    },
+                  )),
+        ),
+      ));
+  favouritesHashtags() => controller.obx(
+      (_) => SizedBox(
+            height: Get.height,
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: controller.favouriteHashtags.length,
+                itemBuilder: (context, index) => InkWell(
+                      onTap: () {
+                        discoverController
+                            .getVideosByHashTags(
+                                controller.favouriteHashtags[index].id!)
+                            .then((value) => HashTagsScreen(
+                                  tagName:
+                                      controller.favouriteHashtags[index].name,
+                                  videoCount:
+                                      controller.favouriteHashtags[index].id,
+                                ));
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 10),
+                                    decoration: BoxDecoration(
+                                        color: const Color.fromRGBO(
+                                            73, 204, 201, 0.08),
+                                        borderRadius:
+                                            BorderRadius.circular(50)),
+                                    child: const Icon(
+                                      Icons.numbers,
+                                      color: ColorManager.colorAccent,
+                                    )),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  controller.favouriteHashtags[index].name ==
+                                          null
+                                      ? ""
+                                      : controller
+                                          .favouriteHashtags[index].name!,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18),
+                                )
+                              ],
+                            ),
+                            Text(
+                              controller.favouriteHashtags.length == null
+                                  ? ""
+                                  : controller.favouriteHashtags.length
+                                      .toString()!,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+          ),
+      onEmpty: emptyListWidget(),
+      onLoading: loader());
 }

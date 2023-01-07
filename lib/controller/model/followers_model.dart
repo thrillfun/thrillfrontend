@@ -1,3 +1,5 @@
+import 'package:thrill/screens/sound/sound_details.dart';
+
 class FollowersModel {
   bool? status;
   bool? error;
@@ -52,6 +54,7 @@ class Followers {
   String? updatedAt;
   int? isVerified;
   int? isfollowing;
+  int? isfollow;
 
   Followers(
       {this.id,
@@ -73,7 +76,9 @@ class Followers {
       this.socialLoginType,
       this.createdAt,
       this.updatedAt,
-      this.isVerified,this.isfollowing});
+      this.isVerified,
+      this.isfollowing,
+      this.isfollow});
 
   Followers.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? "";
@@ -96,7 +101,8 @@ class Followers {
     createdAt = json['created_at'] ?? "";
     updatedAt = json['updated_at'] ?? "";
     isVerified = json['is_verified'] ?? "";
-    isfollowing = json["isfollowing"]??0;}
+    isfollowing = json["isFolling"] ?? 0;
+  }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -120,7 +126,7 @@ class Followers {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['is_verified'] = this.isVerified;
-    data['isfollowing'] = this.isfollowing;
+    data['isFolling'] = this.isfollowing ?? 0;
     return data;
   }
 }

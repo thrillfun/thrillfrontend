@@ -8,13 +8,16 @@ import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/common/color.dart';
+import 'package:thrill/controller/Favourites/favourites_controller.dart';
 import 'package:thrill/controller/InboxController.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/privacy_policy.dart';
 import 'package:thrill/screens/referal_screen.dart';
 import 'package:thrill/screens/screen.dart';
+import 'package:thrill/screens/setting/profile_details.dart';
 import 'package:thrill/screens/setting/qr_code.dart';
 import 'package:thrill/screens/setting/wallet_getx.dart';
 import 'package:thrill/screens/terms_of_service.dart';
@@ -23,6 +26,7 @@ import 'package:velocity_x/velocity_x.dart';
 
 import '../../common/strings.dart';
 import '../../rest/rest_url.dart';
+import '../../widgets/sound_list_bottom_sheet.dart';
 
 class SettingAndPrivacy extends StatelessWidget {
   SettingAndPrivacy(
@@ -32,8 +36,9 @@ class SettingAndPrivacy extends StatelessWidget {
   final name;
   final userName;
 
-  var userController = Get.find<UserController>();
+  var userController = Get.find<UserDetailsController>();
   var inboxController = Get.find<InboxController>();
+  var favouritesController = Get.find<FavouritesController>();
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +150,7 @@ class SettingAndPrivacy extends StatelessWidget {
               ),
               GestureDetector(
                   onTap: () {
-                    Get.to(ManageAccount());
+                    Get.to(ProfileDetails());
                     //        Navigator.pushNamed(context, '/manageAccount');
                   },
                   child: mainTile(Icons.person, manageAccount)),
@@ -156,20 +161,23 @@ class SettingAndPrivacy extends StatelessWidget {
                   child: mainTile(Icons.gif, "Referral")),
 
               GestureDetector(
-                  onTap: () {
-                    Get.to(const Favourites());
+                  onTap: () async {
+                    await favouritesController
+                        .getFavourites()
+                        .then((value) => Get.to(Favourites()));
+
                     //  Navigator.pushNamed(context, '/inbox');
                   },
                   child: mainTile(Icons.favorite, 'Favourite')),
-              // GestureDetector(
-              //     onTap: () async {
-              //       await inboxController
-              //           .getInbox()
-              //           .then((value) => Get.to(Inbox()));
-              //
-              //       //  Navigator.pushNamed(context, '/inbox');
-              //     },
-              //     child: mainTile(Ic.round_inbox, inbox)),
+              GestureDetector(
+                  onTap: () async {
+                    await inboxController
+                        .getInbox()
+                        .then((value) => Get.to(Inbox()));
+
+                    //  Navigator.pushNamed(context, '/inbox');
+                  },
+                  child: mainTile(Icons.message, inbox)),
               GestureDetector(
                   onTap: () {
                     Get.to(const Privacy());
@@ -204,42 +212,7 @@ class SettingAndPrivacy extends StatelessWidget {
                     //  Navigator.pushNamed(context, '/pushNotification');
                   },
                   child: mainTile(Icons.notifications, pushNotification)),
-              GestureDetector(
-                onTap: () {},
-                child: SizedBox(
-                  height: 25,
-                  child: ListTile(
-                    title: const Text(
-                      appLanguage,
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    leading: Card(
-                        margin: const EdgeInsets.only(right: 20),
-                        child: Container(
-                          padding: const EdgeInsets.all(5),
-                          child: const Icon(
-                            Icons.language,
-                            color: ColorManager.colorAccent,
-                            size: 20,
-                          ),
-                        )),
-                    trailing: const Text(
-                      english,
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    horizontalTitleGap: 0,
-                    minLeadingWidth: 30,
-                    minVerticalPadding: 0,
-                  ),
-                ),
-              ),
 
-              const SizedBox(
-                height: 10,
-              ),
               GestureDetector(
                   onTap: () {
                     Get.to(TermsOfService());
@@ -261,10 +234,7 @@ class SettingAndPrivacy extends StatelessWidget {
                             "This will also logout from other accounts!",
                         confirm: ElevatedButton(
                             onPressed: () async {
-                              await userController.storage.remove("token");
-                              await userController.storage.remove("user");
-
-                              await userController.signOut().then(
+                              await userController.signOutUser().then(
                                   (value) => Get.offAll(LandingPageGetx()));
                             },
                             child: const Text('Yes')),
@@ -273,7 +243,7 @@ class SettingAndPrivacy extends StatelessWidget {
                               Get.back();
                             },
                             child: const Text("No")));
-                       },
+                  },
                   child: mainTile(Icons.login, logout)),
               Card(
                 margin: const EdgeInsets.only(top: 20),

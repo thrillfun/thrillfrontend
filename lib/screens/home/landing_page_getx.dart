@@ -1,3 +1,4 @@
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -23,9 +24,14 @@ import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/home/discover_getx.dart';
 import 'package:thrill/screens/home/home_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
+import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/setting/wallet_getx.dart';
 import 'package:thrill/screens/spin/spin_the_wheel_getx.dart';
+import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/fab_items.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../controller/videos/PrivateVideosController.dart';
 
 var usersController = Get.find<UserController>();
 var videosController = Get.find<VideosController>();
@@ -37,19 +43,39 @@ var userDetailsController = Get.find<UserDetailsController>();
 var walletController = Get.find<WalletController>();
 var walletBalanceController = Get.find<WalletBalanceController>();
 var walletCurrencyController = Get.find<WalletCurrenciesController>();
+var privateVideosController = Get.find<PrivateVideosController>();
 
 var tophashtagsController = Get.find<TopHashtagsController>();
 
 class LandingPageGetx extends StatelessWidget {
-  LandingPageGetx({Key? key}) : super(key: key);
-
+  LandingPageGetx({this.initialLink});
+  PendingDynamicLinkData? initialLink;
   var selectedIndex = 0.obs;
   @override
   Widget build(BuildContext context) {
+    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
+      // launchUrl(Uri.parse(RestUrl.videoUrl + dynamicLinkData.link.path));
+
+      if (dynamicLinkData.link.queryParameters["type"] == "profile") {
+        userDetailsController
+            .getUserProfile(dynamicLinkData.link.queryParameters["id"])
+            .then((value) {
+          Get.to(ViewProfile(
+              dynamicLinkData.link.queryParameters["id"],
+              0.obs,
+              dynamicLinkData.link.queryParameters["name"],
+              dynamicLinkData.link.queryParameters["something"]));
+        });
+      } else if (dynamicLinkData.link.queryParameters["type"] == "video") {
+        successToast(dynamicLinkData.link.queryParameters["id"].toString());
+      }
+    }).onError((error) {
+      errorToast(error.toString());
+    });
     GlobalKey key = GlobalKey();
 
-    WidgetsBinding.instance.addPostFrameCallback(
-        (timeStamp) => ShowCaseWidget.of(context).startShowCase([key]));
+    // WidgetsBinding.instance.addPostFrameCallback(
+    //     (timeStamp) => ShowCaseWidget.of(context).startShowCase([key]));
 
     RxList<Widget> screens = [
       HomeGetx(),
@@ -154,6 +180,9 @@ class LandingPageGetx extends StatelessWidget {
                             color: selectedIndex.value == 0
                                 ? ColorManager.colorPrimaryLight
                                 : ColorManager.dayNightText),
+                      ),
+                      SizedBox(
+                        height: 5,
                       )
                     ],
                   ),
@@ -178,6 +207,9 @@ class LandingPageGetx extends StatelessWidget {
                             color: selectedIndex.value == 1
                                 ? ColorManager.colorPrimaryLight
                                 : ColorManager.dayNightText),
+                      ),
+                      SizedBox(
+                        height: 5,
                       )
                     ],
                   ),
@@ -220,6 +252,9 @@ class LandingPageGetx extends StatelessWidget {
                             color: selectedIndex.value == 2
                                 ? ColorManager.colorPrimaryLight
                                 : ColorManager.dayNightText),
+                      ),
+                      SizedBox(
+                        height: 5,
                       )
                     ],
                   ),
@@ -237,10 +272,14 @@ class LandingPageGetx extends StatelessWidget {
                               null) {
                             userVideosController.getOtherUserVideos(
                                 userDetailsController.storage.read("userId"));
+
                             userDetailsController
                                 .getUserProfile(userDetailsController.storage
                                     .read("userId"))
                                 .then((value) => selectedIndex.value = 3);
+                            likedVideosController.getOthersLikedVideos(
+                                userDetailsController.storage.read("userId"));
+                            privateVideosController.getUserPrivateVideos();
                           } else {
                             Get.to(LoginGetxScreen());
                           }
@@ -253,6 +292,9 @@ class LandingPageGetx extends StatelessWidget {
                             color: selectedIndex.value == 3
                                 ? ColorManager.colorPrimaryLight
                                 : ColorManager.dayNightText),
+                      ),
+                      SizedBox(
+                        height: 5,
                       )
                     ],
                   ),
@@ -310,7 +352,7 @@ class LandingPageGetx extends StatelessWidget {
       color: Colors.transparent.withOpacity(0.0),
       child: FABBottomAppBar(
         backgroundColor: Colors.green,
-        color: Color(0xffB2E3E3),
+        color: const Color(0xffB2E3E3),
         selectedColor: ColorManager.colorAccent,
         iconSize: 35,
         notchedShape: const CircularNotchedRectangle(),
@@ -346,6 +388,10 @@ class LandingPageGetx extends StatelessWidget {
       if (await GetStorage().read("token") != null) {
         await userVideosController
             .getOtherUserVideos(userDetailsController.storage.read("userId"));
+        await likedVideosController
+            .getOthersLikedVideos(userDetailsController.storage.read("userId"));
+
+        await privateVideosController.getUserPrivateVideos();
         await userDetailsController
             .getUserProfile(userDetailsController.storage.read("userId"));
         selectedIndex.value = 3;

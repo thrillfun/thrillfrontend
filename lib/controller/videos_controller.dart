@@ -116,7 +116,10 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
   postVideoView(int videoId) async {
     try {
-      dio.options.headers['Authorization'] = "Bearer $token";
+      dio.options.headers = {
+        "Authorization":
+            "Bearer ${await userDetailsController.storage.read("token")}"
+      };
       var response = await dio.post("/video/view",
           data: {"video_id": videoId}).timeout(const Duration(seconds: 10));
       print(response.data);
@@ -168,6 +171,10 @@ class VideosController extends GetxController with StateMixin<dynamic> {
   ].obs;
 
   Future<void> getAllVideos() async {
+    dio.options.headers = {
+      "Authorization":
+          "Bearer ${await userDetailsController.storage.read("token")}"
+    };
     dio.get("/video/list").then((value) {
       if (publicVideosList.isEmpty) {
         publicVideosList = PublicVideosModel.fromJson(value.data).data!.obs;
@@ -188,7 +195,10 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
   Future<void> getFollowingVideos() async {
     isFollowingLoading.value = true;
-
+    dio.options.headers = {
+      "Authorization":
+          "Bearer ${await userDetailsController.storage.read("token")}"
+    };
     await dio.get("/video/following").then((response) {
       followingVideosList =
           FollowingVideoModel.fromJson(response.data).data!.obs;
@@ -227,6 +237,10 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
   Future<void> getUserPrivateVideos() async {
     isUserVideosLoading.value = true;
+    dio.options.headers = {
+      "Authorization":
+          "Bearer ${await userDetailsController.storage.read("token")}"
+    };
     dio.get('/video/private').then((value) {
       privateVideosList.value =
           PrivateVideosModel.fromJson(value.data).data!.obs;
@@ -258,7 +272,10 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
   Future<void> getOthersLikedVideos(int userId) async {
     isLikedVideosLoading.value = true;
-
+    dio.options.headers = {
+      "Authorization":
+          "Bearer ${await userDetailsController.storage.read("token")}"
+    };
     dio
         .post('/user/user-liked-videos',
             queryParameters: {"user_id": "$userId"})
@@ -276,14 +293,27 @@ class VideosController extends GetxController with StateMixin<dynamic> {
     isLikedVideosLoading.value = false;
   }
 
-  Future<void> likeVideo(int isLike, int videoId) async {
+  Future<bool> likeVideo(int isLike, int videoId) async {
+    var isLiked = false;
+    dio.options.headers = {
+      "Authorization":
+          "Bearer ${await userDetailsController.storage.read("token")}"
+    };
     dio.post('${RestUrl.baseUrl}/video/like', queryParameters: {
       "video_id": "$videoId",
       "is_like": "$isLike"
-    }).then((value) {
-      relatedVideosController.getAllVideos();
-      followingVideosController.getFollowingVideos();
+    }).then((value) async {
+      await relatedVideosController.getAllVideos();
+      relatedVideosController.getFollowingVideos();
     }).onError((error, stackTrace) {});
+
+    if (isLike == 0) {
+      isLiked = false;
+    } else {
+      isLiked = true;
+    }
+
+    return isLiked;
   }
 
   Future<void> postVideo(
@@ -310,7 +340,10 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
     var response = await http.post(
       Uri.parse('${RestUrl.baseUrl}/video/post'),
-      headers: {"Authorization": "Bearer $token"},
+      headers: {
+        "Authorization":
+            "Bearer ${await userDetailsController.storage.read("token")}"
+      },
       body: {
         'user_id': userId,
         'video': videoUrl,
@@ -332,13 +365,11 @@ class VideosController extends GetxController with StateMixin<dynamic> {
         'sound_owner': soundOwnerId.toString(),
         "cover_image": coverImage
       },
-    ).timeout(const Duration(seconds: 10));
+    );
 
     try {
       if (response.statusCode == 200) {
         try {
-          // likedVideos =
-          //     VideoPostResponse.fromJson(json.decode(response.body)).data!.obs;
           successToast(VideoPostResponse.fromJson(json.decode(response.body))
               .message
               .toString());
@@ -427,16 +458,16 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       await simpleS3
           .uploadFile(
         file,
-        "thrillvideo",
-        "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-        AWSRegions.usEast1,
+        "thrillvideonew",
+        "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
+        AWSRegions.apSouth1,
         debugLog: true,
         fileName: "Thrill-$currentUnix.mp4",
         s3FolderPath: "test",
         accessControl: S3AccessControl.publicRead,
       )
           .then((value) {
-        debugPrint(value);
+        print(value);
         Get.back();
       });
     } on Exception catch (e) {

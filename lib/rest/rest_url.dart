@@ -13,7 +13,7 @@ class RestUrl {
   // static const String soundUrl = "http://thrill.fun/dev/";
   // static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
   static const String placeholderImage =
-      "https://ttensports.com/wp-content/uploads/1982/02/person-placeholder.jpg";
+      "https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg";
   // static const String awsSoundUrl =
   //     "https://thrillvideo.s3.amazonaws.com/sound/";
   // // static const String currencyUrl = "http://thrill.fun/dev/uploads/currency/";
@@ -22,19 +22,16 @@ class RestUrl {
   //
   // static const String baseUrl = "https://9starinfosolutions.com/thrill/api/";
   // static const String profileUrl = "https://9starinfosolutions.com/thrill/uploads/profile_images/";
-  static const String videoUrl = "https://d1cuxn87f1g3w1.cloudfront.net/test/";
-  static const String bannerUrl =
-      "https://thrill.fun/public/uploads/banners/";
-  static const String thambUrl =
-      "https://thrill.fun/public/uploads/videos/";
-  static const String soundUrl = "https://d1cuxn87f1g3w1.cloudfront.net/sound/";
-  static const String gifUrl = "https://d1cuxn87f1g3w1.cloudfront.net/gif/";
+  static const String videoUrl = "https://d2zmylomowcf1f.cloudfront.net/test/";
+  static const String bannerUrl = "https://thrill.fun/public/uploads/banners/";
+  static const String thambUrl = "https://thrill.fun/public/uploads/videos/";
+  static const String soundUrl = "https://d2zmylomowcf1f.cloudfront.net/sound/";
+  static const String gifUrl = "https://d2zmylomowcf1f.cloudfront.net/gif/";
   static const String awsSoundUrl =
-      "https://d1cuxn87f1g3w1.cloudfront.net/sound/";
+      "https://d2zmylomowcf1f.cloudfront.net/sound/";
   static const String currencyUrl =
       "https://thrill.fun/public/uploads/currency/";
-  static const String spinSound =
-      "https://thrill.fun/public/uploads/spins.wav";
+  static const String spinSound = "https://thrill.fun/public/uploads/spins.wav";
 
   static const String login = baseUrl + "login";
   static const String register = baseUrl + "register";

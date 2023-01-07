@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -11,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
+import 'package:thrill/screens/home/bottom_navigation.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 
 import '../../common/color.dart';
@@ -29,13 +32,13 @@ class QrCode extends StatefulWidget {
 class _QrCodeState extends State<QrCode> {
   var usersController = Get.find<UserDetailsController>();
 
-  String qrData = "";
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   User? userModel;
 
   @override
   void initState() {
-    getUserModel();
+    usersController.createDynamicLink(usersController.storage.read("userId").toString(),type:"profile",name: usersController.userProfile.value.name);
+
     super.initState();
   }
 
@@ -79,19 +82,19 @@ class _QrCodeState extends State<QrCode> {
               color: ColorManager.dayNight,
               borderRadius: BorderRadius.circular(45)),
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: QrImage(
-            eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle),
-            padding: const EdgeInsets.all(25),
-            dataModuleStyle:
-                QrDataModuleStyle(dataModuleShape: QrDataModuleShape.circle),
-            data: qrData,
-            foregroundColor: Colors.black,
-            version: QrVersions.auto,
-            embeddedImage: Image.asset(
-              "assets/logo.png",
-            ).image,
-            embeddedImageStyle: QrEmbeddedImageStyle(),
-          ),
+          child: Obx(() => QrImage(
+                eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle),
+                padding: const EdgeInsets.all(25),
+                dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.circle),
+                data: usersController.qrData.value,
+                foregroundColor: Colors.black,
+                version: QrVersions.auto,
+                embeddedImage: Image.asset(
+                  "assets/logo.png",
+                ).image,
+                embeddedImageStyle: QrEmbeddedImageStyle(),
+              )),
         ),
         const SizedBox(
           height: 30,
@@ -132,14 +135,16 @@ class _QrCodeState extends State<QrCode> {
                       await FlutterBarcodeScanner.scanBarcode(
                           "#ff6666", "Cancel", true, ScanMode.QR);
                   if (barcodeScanRes.isNotEmpty && barcodeScanRes != '-1') {
-                    int _id = int.parse(
-                        barcodeScanRes.split(':')[1].split('\n').first);
-                    await usersController.getUserProfile(_id).then((value) {
+
+                    final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getDynamicLink(Uri.parse(barcodeScanRes));
+
+
+                    await usersController.getUserProfile(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
                       Get.to(ViewProfile(
-                          usersController.userProfile.value.id.toString(),
+                          initialLink!.link.queryParameters["id"].toString(),
                           0.obs,
-                          usersController.userProfile.value.name,
-                          usersController.userProfile.value.avatar));
+                          initialLink!.link.queryParameters["name"].toString(),
+                          initialLink!.link.queryParameters["name"]));
                     });
                   }
                 },
@@ -157,12 +162,40 @@ class _QrCodeState extends State<QrCode> {
                       const SizedBox(
                         height: 5,
                       ),
-                      Text(
-                        scanQRCode,
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: ColorManager.dayNightIcon,
-                            fontWeight: FontWeight.bold),
+                      InkWell(
+                        onTap: () async {
+                          String barcodeScanRes =
+                              await FlutterBarcodeScanner.scanBarcode(
+                                  "#ff6666", "Cancel", true, ScanMode.QR);
+
+                          final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getDynamicLink(Uri.parse(barcodeScanRes));
+
+
+                           usersController.getUserProfile(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                             likedVideosController.getOthersLikedVideos(int.parse(initialLink.link.queryParameters["id"].toString())).then((value) {
+                               userVideosController.getOtherUserVideos(int.parse(initialLink.link.queryParameters["id"].toString())).then((value) {
+                                 Get.to(ViewProfile(
+                                     initialLink!.link.queryParameters["id"].toString(),
+                                     0.obs,
+                                     initialLink!.link.queryParameters["name"].toString(),
+                                     initialLink!.link.queryParameters["name"]));
+                               });
+                             });
+
+                          });
+                          showDialog(
+                              context: context,
+                              builder: (_) => Material(
+                                    child: Center(child: Text(barcodeScanRes)),
+                                  ));
+                        },
+                        child: Text(
+                          scanQRCode,
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: ColorManager.dayNightIcon,
+                              fontWeight: FontWeight.bold),
+                        ),
                       )
                     ],
                   ),
@@ -174,20 +207,22 @@ class _QrCodeState extends State<QrCode> {
   }
 
   saveQrCode() async {
-    var status = await Permission.storage.isGranted;
-    if (!status) {
-      Permission.storage.request();
-      return;
-    }
-    progressDialogue(context);
+    // var status = await Permission.storage.isGranted;
+    // if (!status) {
+    //   Permission.storage.request();
+    //   return;
+    // }
+    showLoadingDialog();
     try {
       DateTime dateTime = DateTime.now();
       File qrFile = File(
           '${saveDirectory}ThrillProfileQR-${dateTime.hour}${dateTime.minute}${dateTime.second}${dateTime.millisecond}.png');
       final qrValidationResult = QrValidator.validate(
-        data: qrData,
+        data: usersController.qrData.value,
         version: QrVersions.auto,
+        
         errorCorrectionLevel: QrErrorCorrectLevel.L,
+        
       );
       final qrCode = qrValidationResult.qrCode;
       final painter = QrPainter.withQr(
@@ -202,10 +237,10 @@ class _QrCodeState extends State<QrCode> {
       final buffer = picData!.buffer;
       await File(qrFile.path).writeAsBytes(
           buffer.asUint8List(picData.offsetInBytes, picData.lengthInBytes));
-      closeDialogue(context);
+      Get.back();
       showSuccessToast(context, "Successfully Saved QR Code!!");
     } catch (e) {
-      closeDialogue(context);
+      Get.back();
       showErrorToast(context, "Failed to Save QR Code\n$e}");
     }
   }
@@ -251,25 +286,10 @@ class _QrCodeState extends State<QrCode> {
             ));
   }
 
-  getUserModel() async {
-    setState(() {
-      qrData =
-          "Thrill User ID :${GetStorage().read("userId")}\nProfile: www.google.com";
-    });
-  }
-
-  Widget qr() {
+  Widget scanqQr() {
     return Center(
       child: ElevatedButton(
-        onPressed: () async {
-          String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-              "#ff6666", "Cancel", true, ScanMode.QR);
-          showDialog(
-              context: context,
-              builder: (_) => Material(
-                    child: Center(child: Text(barcodeScanRes)),
-                  ));
-        },
+        onPressed: () async {},
         child: const Text("scan"),
       ),
     );

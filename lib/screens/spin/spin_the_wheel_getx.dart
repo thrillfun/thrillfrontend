@@ -53,29 +53,30 @@ class SpinTheWheelGetx extends GetView<WheelController> {
         body: Stack(
           children: [
             controller.obx(
-                (state) => SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(top: 20),
-                            alignment: Alignment.center,
-                            child: titleLayout(),
-                          ),
-                          rewardLayout(),
-                          prizeLayout(),
-                          wheelLayout(),
-                          submitButtonLayout(),
-                          levelsLayout()
-                          //    lastRewardLayout()
-                        ],
-                      ),
+              (state) => SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 20),
+                      alignment: Alignment.center,
+                      child: titleLayout(),
                     ),
-                onLoading: Container(
-                  color: ColorManager.dayNight,
-                  child: loader(),
-                  height: Get.height,
-                  width: Get.width,
-                ))
+                    rewardLayout(),
+                    prizeLayout(),
+                    wheelLayout(),
+                    submitButtonLayout(),
+                    levelsLayout()
+                    //    lastRewardLayout()
+                  ],
+                ),
+              ),
+              onLoading: Container(
+                color: ColorManager.dayNight,
+                child: loader(),
+                height: Get.height,
+                width: Get.width,
+              ),
+            )
           ],
         ));
   }
@@ -232,10 +233,11 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                                   fit: BoxFit.cover,
                                 ),
                       Padding(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(25),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            const SizedBox(),
                             wheelController.wheelData.value.data!
                                         .wheelRewards![i].imagePath ==
                                     null
@@ -244,13 +246,13 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                                         .wheelRewards![i].currencySymbol
                                         .toString(),
                                     style: const TextStyle(
-                                        fontSize: 20,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.w700),
                                   )
                                 : CachedNetworkImage(
                                     fit: BoxFit.fill,
-                                    height: 30,
-                                    width: 30,
+                                    height: 20,
+                                    width: 20,
                                     imageUrl: RestUrl.profileUrl +
                                         wheelController.wheelData.value.data!
                                             .wheelRewards![i].imagePath
@@ -259,7 +261,7 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                               '${wheelController.wheelData.value.data!.wheelRewards![i].currencySymbol} ${wheelController.wheelData.value.data!.wheelRewards![i].amount} ',
                               style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 20,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold),
                             )
                           ],
@@ -315,131 +317,137 @@ class SpinTheWheelGetx extends GetView<WheelController> {
         ),
       );
 
-  levelsLayout() => GetX<WheelController>(
-      builder: (wheelController) => wheelController.isWheelDataLoading.value
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: wheelController.activityList.length,
-              itemBuilder: (context, index) => Container(
-                    margin: const EdgeInsets.all(10),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.black.withOpacity(0.3)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Levels for " +
-                              wheelController.activityList[index].name
-                                  .toString(),
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700),
-                        ),
-                        Text(
-                          wheelController.activityList[index].conditions
-                              .toString(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400),
-                        ),
-                        RichText(
-                            text: TextSpan(children: [
-                          const TextSpan(
-                            text: "Earned Spins: ",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          TextSpan(
-                              text: wheelController
-                                  .activityList[index].earnedSpins
-                                  .toString(),
-                              style: const TextStyle(
-                                  color: ColorManager.colorPrimaryLight,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400)),
-                          TextSpan(
-                              text: "/" +
-                                  wheelController.activityList[index].totalSpin
-                                      .toString(),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400))
-                        ])),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          children: [
-                            ClipOval(
-                              child: Container(
-                                alignment: Alignment.center,
-                                height: 30,
-                                width: 30,
-                                color: ColorManager.colorPrimaryLight,
-                                child: ClipOval(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    color: Colors.white,
-                                    width: 24,
-                                    height: 24,
-                                    child: Text(wheelController
-                                        .activityList[index].progress
-                                        .toString()),
-                                  ),
-                                ),
+  levelsLayout() => controller.obx((state) => ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: controller.activityList.length,
+      itemBuilder: (context, index) => Container(
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: ColorManager.dayNightText),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Levels for " +
+                      controller.activityList[index].name.toString(),
+                  style: TextStyle(
+                      color: ColorManager.dayNight,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  controller.activityList[index].conditions.toString(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: ColorManager.dayNight,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400),
+                ),
+                RichText(
+                    text: TextSpan(children: [
+                  const TextSpan(
+                    text: "Earned Spins: ",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  TextSpan(
+                      text:
+                          controller.activityList[index].currentView.toString(),
+                      style: const TextStyle(
+                          color: ColorManager.colorPrimaryLight,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400)),
+                  TextSpan(
+                      text: "/" +
+                          controller.activityList[index].totalView.toString(),
+                      style: TextStyle(
+                          color: ColorManager.dayNight,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400))
+                ])),
+                const SizedBox(
+                  height: 20,
+                ),
+                Divider(
+                  color: ColorManager.dayNight,
+                  thickness: 2,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 10, right: 10),
+                  child: Row(
+                    children: [
+                      ClipOval(
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 30,
+                          width: 30,
+                          color: ColorManager.colorPrimaryLight,
+                          child: ClipOval(
+                            child: Container(
+                              alignment: Alignment.center,
+                              color: ColorManager.dayNight,
+                              width: 24,
+                              height: 24,
+                              child: Text(
+                                controller.activityList[index].currentLevel
+                                    .toString(),
+                                style: TextStyle(
+                                    color: ColorManager.dayNightText,
+                                    fontWeight: FontWeight.w700),
                               ),
                             ),
-                            Expanded(
-                                child: LinearProgressIndicator(
-                              color: ColorManager.colorPrimaryLight,
-                              value: wheelController
-                                          .activityList[index].progress !=
-                                      null
-                                  ? wheelController
-                                      .activityList[index].progress!
-                                      .toDouble()
-                                  : 0.0,
-                              backgroundColor: Colors.grey,
-                            )),
-                            ClipOval(
-                              child: Container(
-                                alignment: Alignment.center,
-                                height: 30,
-                                width: 30,
-                                color: ColorManager.colorPrimaryLight,
-                                child: ClipOval(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    color: Colors.white,
-                                    width: 24,
-                                    height: 24,
-                                    child: Text(wheelController
-                                        .activityList[index].maxLevel
-                                        .toString()),
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
+                          ),
                         ),
-                        const SizedBox(
-                          height: 10,
+                      ),
+                      Expanded(
+                          child: LinearProgressIndicator(
+                        color: ColorManager.colorPrimaryLight,
+                        value: controller.activityList[index].totalView != null
+                            ? (controller.activityList[index].totalView!
+                                    .toDouble() /
+                                controller.activityList[index].currentView!
+                                    .toDouble())
+                            : 0.0,
+                        backgroundColor: Colors.grey,
+                      )),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      ClipOval(
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 30,
+                          width: 30,
+                          color: ColorManager.colorPrimaryLight,
+                          child: ClipOval(
+                            child: Container(
+                              alignment: Alignment.center,
+                              color: ColorManager.dayNight,
+                              width: 24,
+                              height: 24,
+                              child: Text(
+                                  controller.activityList[index].nextLevel
+                                      .toString(),
+                                  style: TextStyle(
+                                      color: ColorManager.dayNightText,
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  )));
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+              ],
+            ),
+          )));
 
   lastRewardLayout() => Container(
       width: Get.width,

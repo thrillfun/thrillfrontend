@@ -11,11 +11,12 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import 'package:iconly/iconly.dart';
+import 'package:like_button/like_button.dart';
 import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:thrill/common/color.dart';
-import 'package:thrill/controller/comments_controller.dart' as ucController;
 import 'package:thrill/controller/model/public_videosModel.dart';
+import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart' as uvController;
 import 'package:thrill/models/video_model.dart';
 import 'package:thrill/rest/rest_api.dart';
@@ -32,17 +33,19 @@ import 'package:thrill/utils/util.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../controller/comments/comments_controller.dart';
 import '../controller/users/other_users_controller.dart';
 import '../controller/users_controller.dart';
 import '../controller/videos/UserVideosController.dart';
 import '../controller/videos/like_videos_controller.dart';
 
 var videosController = Get.find<uvController.VideosController>();
-var commentsController = Get.find<ucController.CommentsController>();
+var commentsController = Get.find<CommentsController>();
 var usersController = Get.find<UserController>();
 var otherUsersController = Get.find<OtherUsersController>();
 var likedVideosController = Get.find<LikedVideosController>();
 var userVideosController = Get.find<UserVideosController>();
+var relatedVideosController = Get.find<RelatedVideosController>();
 
 class BetterReelsPlayer extends StatefulWidget {
   BetterReelsPlayer(
@@ -207,27 +210,55 @@ class _VideoAppState extends State<BetterReelsPlayer>
                         children: [
                           Container(
                             margin: const EdgeInsets.only(
-                                top: 10, bottom: 10, right: 10),
+                                top: 10, bottom: 10, right: 20),
                             child: Column(
                               children: [
-                                IconButton(
-                                    onPressed: () {},
-                                    icon: widget.videoLikeStatus == "0"
-                                        ? const Icon(
-                                            IconlyLight.heart,
-                                            color: Colors.white,
-                                          )
-                                        : const Icon(
-                                            CupertinoIcons.heart_fill,
-                                            color: Colors.red,
-                                          )),
-                                Text(
-                                  widget.like == null ? "0" : "${widget.like}",
-                                  style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                )
+                                LikeButton(
+                                  countPostion: CountPostion.bottom,
+                                  size: 28,
+                                  circleColor: CircleColor(
+                                      start: Colors.red.shade200,
+                                      end: Colors.red),
+                                  bubblesColor: BubblesColor(
+                                    dotPrimaryColor: Colors.red.shade200,
+                                    dotSecondaryColor: Colors.red,
+                                  ),
+                                  likeBuilder: (bool isLiked) {
+                                    widget.videoLikeStatus == "0"
+                                        ? isLiked = false
+                                        : isLiked = true;
+                                    return Icon(
+                                      isLiked
+                                          ? Icons.favorite
+                                          : Icons.favorite_outline,
+                                      color:
+                                          isLiked ? Colors.red : Colors.white,
+                                      size: 25,
+                                    );
+                                  },
+                                  likeCount: widget.like!.value,
+                                  countBuilder:
+                                      (int? count, bool isLiked, String text) {
+                                    var color =
+                                        isLiked ? Colors.white : Colors.white;
+                                    Widget result;
+                                    if (count == 0) {
+                                      result = Text(
+                                        "0",
+                                        style: TextStyle(color: color),
+                                      );
+                                    } else
+                                      result = Text(
+                                        text,
+                                        style: TextStyle(color: color),
+                                      );
+                                    return result;
+                                  },
+                                  onTap: (_) async =>
+                                      await relatedVideosController.likeVideo(
+                                          widget.videoLikeStatus == "0" ? 1 : 0,
+                                          widget.videoId),
+                                ),
                               ],
                             ),
                           ),
@@ -248,14 +279,15 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                           : showComments();
                                     },
                                     icon: const Icon(
-                                      Icons.add_comment,
+                                      IconlyLight.chat,
                                       color: Colors.white,
+                                      size: 25,
                                     )),
                                 Text(
                                   widget.commentsCount != null
                                       ? "${widget.commentsCount!.value}"
                                       : "0",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
@@ -276,6 +308,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                     icon: const Icon(
                                       Icons.share,
                                       color: Colors.white,
+                                      size: 22,
                                     )),
                                 const Text(
                                   "Share",
@@ -295,7 +328,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                 IconButton(
                                     onPressed: () {
                                       Get.bottomSheet(
-                                          Container(
+                                          Flexible(
+                                              child: Container(
+                                            height: 300,
                                             margin: const EdgeInsets.only(
                                                 left: 10, right: 10),
                                             child: Column(children: [
@@ -458,10 +493,21 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                         IconButton(
                                                             onPressed:
                                                                 () async {
-                                                              var deepLink =
-                                                                  await createDynamicLink(
-                                                                      widget
-                                                                          .videoUrl);
+                                                              var deepLink = await userDetailsController.createDynamicLink(
+                                                                  "${widget.pageIndex.value}",
+                                                                  type: 'video',
+                                                                  name:
+                                                                      "${widget.publicUser!.name}",
+                                                                  something:
+                                                                      "${widget.publicUser!.avatar}");
+                                                              //         +
+                                                              // widget.publicUser!
+                                                              //         .name
+                                                              //         .toString() +
+                                                              // widget
+                                                              //     .publicUser!
+                                                              //     .avatar
+                                                              //     .toString()
                                                               GetStorage().write(
                                                                   "deeplink",
                                                                   deepLink
@@ -545,9 +591,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                             .read("token") !=
                                                         null
                                                     ? showReportDialog(
-                                                        widget.videoId!,
+                                                        widget.videoId,
                                                         widget.userName.value,
-                                                        widget.UserId!)
+                                                        widget.UserId)
                                                     : showLoginAlert(),
                                                 child: Row(
                                                   children: const [
@@ -637,7 +683,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                               ),
                                               InkWell(
                                                 onTap: () {
-                                                  usersController
+                                                  userDetailsController
                                                       .followUnfollowUser(
                                                           widget.UserId,
                                                           widget.isfollow == 0
@@ -663,9 +709,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                       width: 10,
                                                     ),
                                                     Text(
-                                                      widget.isfollow! == 0
-                                                          ? "Follow..."
-                                                          : "Unfollow...",
+                                                      widget.isfollow == 0
+                                                          ? "Follow"
+                                                          : "Following",
                                                       style: const TextStyle(
                                                           fontWeight:
                                                               FontWeight.bold,
@@ -676,15 +722,18 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                 ),
                                               )
                                             ]),
-                                          ),
-                                          backgroundColor: Colors.white,
+                                          )),
+                                          backgroundColor:
+                                              ColorManager.dayNight,
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(15)));
+                                                  BorderRadius.circular(15)),
+                                          persistent: false);
                                     },
                                     icon: const Icon(
-                                      Icons.keyboard_option_key_sharp,
+                                      IconlyBold.more_circle,
                                       color: Colors.white,
+                                      size: 25,
                                     )),
                                 const Text(
                                   "More",
@@ -700,7 +749,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(bottom: 90),
+                      margin: const EdgeInsets.only(bottom: 90),
                       alignment: Alignment.bottomLeft,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -721,9 +770,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                         ? Get.to(Profile(isProfile: true.obs))
                                         : Get.to(ViewProfile(
                                             widget.UserId.toString(),
-                                            widget.isfollow == null
-                                                ? 0.obs
-                                                : widget.isfollow!.obs,
+                                            widget.isfollow!.obs,
                                             widget.userName.toString(),
                                             widget.publicUser!.avatar
                                                 .toString())));
@@ -754,7 +801,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                     imageUrl: widget.publicUser!.avatar ==
                                                 null ||
                                             widget.publicUser!.avatar!.isEmpty
-                                        ? "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png"
+                                        ? RestUrl.placeholderImage
                                         : RestUrl.profileUrl +
                                             widget.publicUser!.avatar
                                                 .toString(),
@@ -783,13 +830,14 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                         Visibility(
                                           child: InkWell(
                                               onTap: () {
-                                                if (usersController.storage
+                                                if (userDetailsController
+                                                        .storage
                                                         .read("token") ==
                                                     null) {
                                                   errorToast(
                                                       "login to continue");
                                                 } else {
-                                                  usersController
+                                                  userDetailsController
                                                       .followUnfollowUser(
                                                           widget.UserId,
                                                           widget.isfollow == 0
@@ -798,14 +846,15 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                 }
                                               },
                                               child: Container(
-                                                padding: EdgeInsets.symmetric(
-                                                    vertical: 5,
-                                                    horizontal: 10),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 5,
+                                                        horizontal: 10),
                                                 child: Text(
                                                   widget.isfollow == 0
                                                       ? "Follow"
                                                       : "Following",
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       fontSize: 10,
                                                       color: Colors.white),
                                                 ),
@@ -823,7 +872,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                         )
                                       ],
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       height: 5,
                                     ),
                                     Text(
@@ -842,7 +891,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                             height: 10,
                           ),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
                               widget.description.value,
                               style: const TextStyle(
@@ -855,14 +904,15 @@ class _VideoAppState extends State<BetterReelsPlayer>
                             visible: widget.hashtagsList.isNotEmpty,
                             child: Container(
                               height: 35,
-                              margin: EdgeInsets.symmetric(horizontal: 10),
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 10),
                               child: ListView.builder(
                                   itemCount: widget.hashtagsList.length,
                                   shrinkWrap: true,
                                   scrollDirection: Axis.horizontal,
                                   itemBuilder: (context, index) => InkWell(
-                                        onTap: () {
-                                          discoverController
+                                        onTap: () async {
+                                          await discoverController
                                               .getVideosByHashTags(widget
                                                   .hashtagsList[index].id!)
                                               .then((value) =>
@@ -907,12 +957,12 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                     : widget.soundOwner,
                                 "soundName": widget.soundName,
                                 "title": widget.soundOwner,
-                                "id": widget.UserId,
+                                "id": widget.videoId,
                                 "profile": widget.publicUser!.avatar,
                                 "name": widget.publicUser!.name,
                                 "sound_id": widget.publicVideos.id,
                                 "username": widget.publicUser!.username,
-                                "isFollow": widget.publicUser!.isfollow,
+                                "isFollow": widget.isfollow,
                                 "userProfile": widget.publicUser!.avatar != null
                                     ? widget.publicUser!.avatar
                                     : RestUrl.placeholderImage
@@ -1202,428 +1252,27 @@ class _VideoAppState extends State<BetterReelsPlayer>
   }
 
   showComments() {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) => GetX<
-                ucController.CommentsController>(
-            builder: (commentsController) => commentsController
-                    .isCommentsLoading.value
-                ? Center(
-                    child: SizedBox(
-                      height: 100,
-                      width: 100,
-                      child: loader(),
-                    ),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Text(
-                              "Comments",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              icon: const Icon(Icons.close))
-                        ],
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      ),
-                      Divider(
-                        thickness: 2,
-                      ),
-                      Flexible(
-                        child: commentsController.commentsModel.isEmpty
-                            ? const Center(
-                                child:
-                                    Text("No Comments Yet", style: TextStyle()),
-                              )
-                            : commentsController.isCommentsLoading.value
-                                ? Center(
-                                    child: loader(),
-                                  )
-                                : ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount:
-                                        commentsController.commentsModel.length,
-                                    itemBuilder: (context, index) => Container(
-                                        margin: const EdgeInsets.all(10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                InkWell(
-                                                  onTap: () async {
-                                                    if (GetStorage()
-                                                            .read("token") !=
-                                                        null) {
-                                                      widget.UserId ==
-                                                              userDetailsController
-                                                                  .storage
-                                                                  .read(
-                                                                      "userId")
-                                                          ? await userDetailsController
-                                                              .getUserProfile(
-                                                                  commentsController
-                                                                      .commentsModel[
-                                                                          index]
-                                                                      .userId!)
-                                                              .then((value) =>
-                                                                  Get.to(Profile(
-                                                                      isProfile: true
-                                                                          .obs)))
-                                                          : await otherUsersController
-                                                              .getOtherUserProfile(int.parse(commentsController.commentsModel[index].userId!.toString()))
-                                                              .then((value) => Get.to(ViewProfile(widget.UserId.toString(), widget.isfollow!.obs, widget.userName.toString(), widget.publicUser!.avatar.toString())));
-                                                    } else {
-                                                      Get.to(LoginGetxScreen());
-                                                    }
-                                                  },
-                                                  child: ClipOval(
-                                                    child: CachedNetworkImage(
-                                                      imageUrl: commentsController
-                                                                  .commentsModel[
-                                                                      index]
-                                                                  .avatar!
-                                                                  .isEmpty ||
-                                                              commentsController
-                                                                      .commentsModel[
-                                                                          index]
-                                                                      .avatar ==
-                                                                  null
-                                                          ? "https://www.kindpng.com/picc/m/252-2524695_dummy-profile-image-jpg-hd-png-download.png"
-                                                          : RestUrl.profileUrl +
-                                                              commentsController
-                                                                  .commentsModel[
-                                                                      index]
-                                                                  .avatar
-                                                                  .toString(),
-                                                      fit: BoxFit.cover,
-                                                      height: 48,
-                                                      width: 48,
-                                                    ),
-                                                  ),
-                                                ),
-                                                Container(
-                                                  margin: const EdgeInsets.only(
-                                                      left: 10),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        commentsController
-                                                            .commentsModel[
-                                                                index]
-                                                            .name
-                                                            .toString(),
-                                                        style: const TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w700),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                    child: Container(
-                                                  alignment:
-                                                      Alignment.bottomRight,
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      commentsController
-                                                          .likeComment(
-                                                              commentsController
-                                                                  .commentsModel[
-                                                                      index]
-                                                                  .id
-                                                                  .toString(),
-                                                              "1");
-                                                      Future.delayed(
-                                                              const Duration(
-                                                                  seconds: 1))
-                                                          .then((value) =>
-                                                              commentsController
-                                                                  .getComments(
-                                                                      widget
-                                                                          .videoId));
-                                                    },
-                                                    child: const Icon(
-                                                      IconlyLight.heart,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ))
-                                              ],
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              commentsController
-                                                  .commentsModel[index].comment
-                                                  .toString(),
-                                              maxLines: 4,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400),
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            Container(
-                                                alignment: Alignment.bottomLeft,
-                                                child: Row(
-                                                  children: [
-                                                    InkWell(
-                                                      onTap: () {
-                                                        commentsController
-                                                            .likeComment(
-                                                                commentsController
-                                                                    .commentsModel[
-                                                                        index]
-                                                                    .id
-                                                                    .toString(),
-                                                                "1");
-                                                        Future.delayed(
-                                                                const Duration(
-                                                                    seconds: 1))
-                                                            .then((value) =>
-                                                                commentsController
-                                                                    .getComments(
-                                                                        widget
-                                                                            .videoId));
-                                                      },
-                                                      child: const Icon(
-                                                        IconlyLight.heart,
-                                                        size: 20,
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Text(
-                                                      commentsController
-                                                              .commentsModel[
-                                                                  index]
-                                                              .commentLikeCounter
-                                                              .toString() +
-                                                          " Likes",
-                                                      style: const TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w500),
-                                                    ),
-                                                  ],
-                                                )),
-                                          ],
-                                        )),
-                                  ),
-                      ),
-                      const Divider(
-                        color: Colors.grey,
-                      ),
-                      Expanded(
-                        flex: 0,
-                        child: Container(
-                            margin: const EdgeInsets.all(15),
-                            child: GetStorage()
-                                        .read("token")
-                                        .toString()
-                                        .isEmpty ||
-                                    GetStorage().read("token") == null
-                                ? Container(
-                                    alignment: Alignment.center,
-                                    width: Get.width,
-                                    child: RichText(
-                                        text: TextSpan(children: [
-                                      TextSpan(
-                                          text: 'Login',
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              Get.back(closeOverlays: true);
-                                              Get.to(LoginGetxScreen());
-                                            },
-                                          style: const TextStyle(
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              color: ColorManager
-                                                  .colorPrimaryLight)),
-                                      const TextSpan(
-                                          text: " to post comments",
-                                          style: TextStyle(color: Colors.grey))
-                                    ])),
-                                  )
-                                : widget.isCommentAllowed.value
-                                    ? Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            child: Flexible(
-                                              child: TextFormField(
-                                                keyboardType:
-                                                    TextInputType.text,
-                                                focusNode: fieldNode,
-                                                enabled: widget
-                                                    .isCommentAllowed.value,
-                                                controller:
-                                                    _textEditingController,
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: fieldNode.hasFocus
-                                                        ? ColorManager
-                                                            .colorAccent
-                                                        : Colors.grey),
-                                                onChanged: (value) {
-                                                  comment.value = value;
-                                                },
-                                                decoration: InputDecoration(
-                                                  focusColor:
-                                                      ColorManager.colorAccent,
-                                                  fillColor: fieldNode.hasFocus
-                                                      ? ColorManager
-                                                          .colorAccentTransparent
-                                                      : Colors.grey
-                                                          .withOpacity(0.1),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                    borderSide:
-                                                        fieldNode.hasFocus
-                                                            ? const BorderSide(
-                                                                color: Color(
-                                                                    0xff2DCBC8),
-                                                              )
-                                                            : const BorderSide(
-                                                                color: Color(
-                                                                    0xffFAFAFA),
-                                                              ),
-                                                  ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                    borderSide: fieldNode
-                                                            .hasFocus
-                                                        ? const BorderSide(
-                                                            color: Color(
-                                                                0xff2DCBC8),
-                                                          )
-                                                        : BorderSide(
-                                                            color: Colors.grey
-                                                                .withOpacity(
-                                                                    0.1),
-                                                          ),
-                                                  ),
-                                                  filled: true,
-                                                  prefixIcon: Icon(
-                                                    Icons.message,
-                                                    color: fieldNode.hasFocus
-                                                        ? ColorManager
-                                                            .colorAccent
-                                                        : Colors.grey
-                                                            .withOpacity(0.3),
-                                                  ),
-                                                  prefixStyle: TextStyle(
-                                                      color: fieldNode.hasFocus
-                                                          ? const Color(
-                                                              0xff2DCBC8)
-                                                          : Colors.grey,
-                                                      fontSize: 14),
-                                                  hintText:
-                                                      "Type your message...",
-                                                  hintStyle: const TextStyle(
-                                                      fontStyle:
-                                                          FontStyle.italic,
-                                                      color: Colors.grey,
-                                                      fontSize: 14),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          ClipOval(
-                                            child: Container(
-                                              height: 56,
-                                              width: 56,
-                                              decoration: BoxDecoration(
-                                                  gradient:
-                                                      LinearGradient(colors: [
-                                                Color.fromRGBO(
-                                                    255, 77, 103, 0.12),
-                                                Color.fromRGBO(45, 203, 200, 1),
-                                              ])),
-                                              child: InkWell(
-                                                  onTap: () async {
-                                                    await commentsController
-                                                        .postComment(
-                                                            widget.videoId,
-                                                            userController
-                                                                .storage
-                                                                .read("userId")
-                                                                .toString(),
-                                                            comment.value)
-                                                        .then((value) async {
-                                                      await commentsController
-                                                          .getComments(
-                                                              widget.videoId);
-
-                                                      _textEditingController!
-                                                          .clear();
-                                                    });
-                                                  },
-                                                  child: const Icon(
-                                                    IconlyLight.send,
-                                                    size: 20,
-                                                  )),
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    : SizedBox(
-                                        width: Get.width,
-                                        child: const Text(
-                                          'Comments are disabled for this video',
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      )),
-                      )
-                    ],
-                  )));
-    // Get.bottomSheet(
-    //    ,
-    //     backgroundColor: Get.isPlatformDarkMode
-    //         ? Colors.black.withOpacity(0.8)
-    //         : Colors.white,
-    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)));15
+    // showModalBottomSheet(
+    //     context: context,
+    //     builder: (BuildContext context) => );
+    Get.bottomSheet(
+        CommentsScreen(
+          videoId: widget.videoId,
+          userId: widget.UserId,
+          isCommentAllowed: widget.isCommentAllowed,
+          isfollow: widget.isfollow,
+          userName: widget.userName.value,
+          avatar: widget.publicUser!.avatar,
+        ),
+        backgroundColor: ColorManager.dayNight,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)));
   }
 
   Future<Uri> createDynamicLink(String videoName) async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
       uriPrefix: 'https://thrill.page.link/',
-      link: Uri.parse('https://thrillvideo.s3.amazonaws.com/test/$videoName'),
+      link: Uri.parse('${RestUrl.videoUrl}$videoName'),
+      // ignore: prefer_const_constructors
       androidParameters: AndroidParameters(
         packageName: 'com.thrill',
         minimumVersion: 1,
@@ -1637,5 +1286,337 @@ class _VideoAppState extends State<BetterReelsPlayer>
     var dynamicUrl = await parameters.link;
     final Uri shortUrl = dynamicUrl;
     return shortUrl;
+  }
+}
+
+// ignore: must_be_immutable
+class CommentsScreen extends GetView<CommentsController> {
+  CommentsScreen(
+      {Key? key,
+      this.videoId,
+      this.userId,
+      this.isCommentAllowed,
+      this.isfollow,
+      this.userName,
+      this.avatar})
+      : super(key: key);
+  int? videoId, userId;
+  RxBool? isCommentAllowed;
+  int? isfollow;
+  String? userName, avatar;
+
+  FocusNode fieldNode = FocusNode();
+
+  final _textEditingController = TextEditingController();
+  RxString videoComment = "".obs;
+
+  @override
+  Widget build(BuildContext context) {
+    return controller.obx(
+      (state) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  "Comments",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.close))
+            ],
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ),
+          const Divider(
+            thickness: 2,
+          ),
+          Flexible(
+            child: state!.isEmpty
+                ? const Center(
+                    child: Text("No Comments Yet", style: TextStyle()),
+                  )
+                : ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    itemCount: state.length,
+                    itemBuilder: (context, index) => Container(
+                        margin: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                InkWell(
+                                  onTap: () async {
+                                    if (GetStorage().read("token") != null) {
+                                      userId == userDetailsController.storage.read("userId")
+                                          ? await userDetailsController.getUserProfile(state[index].userId!).then(
+                                              (value) => Get.to(
+                                                  Profile(isProfile: true.obs)))
+                                          : await otherUsersController
+                                              .getOtherUserProfile(int.parse(
+                                                  state[index]
+                                                      .userId!
+                                                      .toString()))
+                                              .then((value) => Get.to(ViewProfile(
+                                                  userId.toString(),
+                                                  isfollow!.obs,
+                                                  userName.toString(),
+                                                  avatar.toString())));
+                                    } else {
+                                      Get.to(LoginGetxScreen());
+                                    }
+                                  },
+                                  child: ClipOval(
+                                    child: CachedNetworkImage(
+                                      imageUrl: state[index].avatar!.isEmpty ||
+                                              state[index].avatar == null
+                                          ? "https://www.kindpng.com/picc/m/252-2524695_dummy-profile-image-jpg-hd-png-download.png"
+                                          : RestUrl.profileUrl +
+                                              state[index].avatar.toString(),
+                                      fit: BoxFit.cover,
+                                      height: 48,
+                                      width: 48,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.only(left: 10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        state[index].name.toString(),
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                    child: Container(
+                                  alignment: Alignment.bottomRight,
+                                  child: InkWell(
+                                    onTap: () {
+                                      controller.likeComment(
+                                          state[index].id.toString(), "1");
+                                      Future.delayed(const Duration(seconds: 1))
+                                          .then((value) => commentsController
+                                              .getComments(videoId!));
+                                    },
+                                    child: const Icon(
+                                      IconlyLight.heart,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ))
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              state[index].comment.toString(),
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w400),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                                alignment: Alignment.bottomLeft,
+                                child: Row(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        controller.likeComment(
+                                            state[index].id.toString(), "1");
+                                        Future.delayed(
+                                                const Duration(seconds: 1))
+                                            .then((value) => controller
+                                                .getComments(videoId!));
+                                      },
+                                      child: const Icon(
+                                        IconlyLight.heart,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      state[index]
+                                              .commentLikeCounter
+                                              .toString() +
+                                          " Likes",
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                )),
+                          ],
+                        )),
+                  ),
+          ),
+          const Divider(
+            color: Colors.grey,
+          ),
+          Expanded(
+            flex: 0,
+            child: Container(
+                margin: const EdgeInsets.all(15),
+                child: GetStorage().read("token").toString().isEmpty ||
+                        GetStorage().read("token") == null
+                    ? Container(
+                        alignment: Alignment.center,
+                        width: Get.width,
+                        child: RichText(
+                            text: TextSpan(children: [
+                          TextSpan(
+                              text: 'Login',
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Get.back(closeOverlays: true);
+                                  Get.to(LoginGetxScreen());
+                                },
+                              style: const TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  color: ColorManager.colorPrimaryLight)),
+                          const TextSpan(
+                              text: " to post comments",
+                              style: TextStyle(color: Colors.grey))
+                        ])),
+                      )
+                    : isCommentAllowed!.value
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                child: Flexible(
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.text,
+                                    focusNode: fieldNode,
+                                    enabled: isCommentAllowed?.value,
+                                    controller: _textEditingController,
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: fieldNode.hasFocus
+                                            ? ColorManager.colorAccent
+                                            : Colors.grey),
+                                    onChanged: (value) {
+                                      videoComment.value = value;
+                                    },
+                                    decoration: InputDecoration(
+                                      focusColor: ColorManager.colorAccent,
+                                      fillColor: fieldNode.hasFocus
+                                          ? ColorManager.colorAccentTransparent
+                                          : Colors.grey.withOpacity(0.1),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                        borderSide: fieldNode.hasFocus
+                                            ? const BorderSide(
+                                                color: Color(0xff2DCBC8),
+                                              )
+                                            : const BorderSide(
+                                                color: Color(0xffFAFAFA),
+                                              ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                        borderSide: fieldNode.hasFocus
+                                            ? const BorderSide(
+                                                color: Color(0xff2DCBC8),
+                                              )
+                                            : BorderSide(
+                                                color: Colors.grey
+                                                    .withOpacity(0.1),
+                                              ),
+                                      ),
+                                      filled: true,
+                                      prefixIcon: Icon(
+                                        Icons.message,
+                                        color: fieldNode.hasFocus
+                                            ? ColorManager.colorAccent
+                                            : Colors.grey.withOpacity(0.3),
+                                      ),
+                                      prefixStyle: TextStyle(
+                                          color: fieldNode.hasFocus
+                                              ? const Color(0xff2DCBC8)
+                                              : Colors.grey,
+                                          fontSize: 14),
+                                      hintText: "Type your message...",
+                                      hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.grey,
+                                          fontSize: 14),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              ClipOval(
+                                child: Container(
+                                  height: 56,
+                                  width: 56,
+                                  decoration: const BoxDecoration(
+                                      gradient: LinearGradient(colors: [
+                                    Color.fromRGBO(255, 77, 103, 0.12),
+                                    Color.fromRGBO(45, 203, 200, 1),
+                                  ])),
+                                  child: InkWell(
+                                      onTap: () async {
+                                        controller
+                                            .postComment(
+                                          videoId: videoId!,
+                                          userId: userDetailsController.storage
+                                              .read("userId")
+                                              .toString(),
+                                          comment: videoComment.value,
+                                        )
+                                            .then((value) async {
+                                          await controller
+                                              .getComments(videoId!);
+                                          _textEditingController.clear();
+                                        });
+                                      },
+                                      child: const Icon(
+                                        IconlyLight.send,
+                                        size: 20,
+                                      )),
+                                ),
+                              )
+                            ],
+                          )
+                        : SizedBox(
+                            width: Get.width,
+                            child: const Text(
+                              'Comments are disabled for this video',
+                              textAlign: TextAlign.center,
+                            ),
+                          )),
+          )
+        ],
+      ),
+      onLoading: loader(),
+    );
   }
 }

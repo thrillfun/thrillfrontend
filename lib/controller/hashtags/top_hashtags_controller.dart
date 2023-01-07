@@ -9,22 +9,25 @@ class TopHashtagsController extends GetxController
   RxList<HashTags> topHashtagsList = RxList();
 
   var dio = Dio(BaseOptions(
-      baseUrl: RestUrl.baseUrl,
-      ));
+    baseUrl: RestUrl.baseUrl,
+  ));
 
   getTopHashTags() async {
-        dio.options.headers = {"Authorization": "Bearer ${await GetStorage().read("token")}"};
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
     try {
       dio.get("/hashtag/top-hashtags-videos").then((value) {
         topHashtagsList = TopHastagVideosModel.fromJson(value.data).data!.obs;
         change(topHashtagsList, status: RxStatus.success());
       }).onError((error, stackTrace) {
-                change(topHashtagsList, status: RxStatus.error());
-
+        change(topHashtagsList, status: RxStatus.error());
       });
     } on Exception catch (e) {
-       change(topHashtagsList, status: RxStatus.error(e.toString()));
-
+      change(topHashtagsList, status: RxStatus.empty());
+    }
+    if (topHashtagsList.isEmpty) {
+      change(topHashtagsList, status: RxStatus.empty());
     }
   }
 }

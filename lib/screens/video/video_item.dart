@@ -8,7 +8,6 @@ import 'package:video_player/video_player.dart';
 var visible = false.obs;
 var isliked = false.obs;
 var commentsLikes = 0.obs;
-var controller = Get.find<DataController>();
 var isFollowing = '+ Follow'.obs;
 
 var checkNumber = '';

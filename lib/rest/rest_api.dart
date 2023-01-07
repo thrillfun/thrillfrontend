@@ -1187,12 +1187,10 @@ class RestApi {
 
   static Future<http.Response> deleteVideo(int videoId) async {
     http.Response response;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
     var result = await RestClient.postData(
       RestUrl.deleteVideo,
       headers: {
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${await GetStorage().read("token")}}',
       },
       body: {'video_id': videoId.toString()},
     );
