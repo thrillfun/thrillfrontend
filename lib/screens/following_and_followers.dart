@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
-import 'package:thrill/screens/home/discover_getx.dart';
+import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/search/search_getx.dart';
 import 'package:thrill/utils/util.dart';
@@ -98,6 +99,7 @@ class Followings extends GetView<FollowersController> {
   Followings(this.isProfile);
 
   var isProfile = false.obs;
+
   @override
   Widget build(BuildContext context) {
     return controller.obx(
@@ -120,25 +122,31 @@ class Followings extends GetView<FollowersController> {
                             child: Row(
                               children: [
                                 InkWell(
-                                  onTap: () {
-                                    likedVideosController.getOthersLikedVideos(
-                                        controller.followingModel![index].id!);
-                                    userVideosController.getOtherUserVideos(
-                                        controller.followingModel[index].id!);
-                                    otherUsersController
-                                        .getOtherUserProfile(controller
-                                            .followingModel[index].id!)
+                                  onTap: () async {
+                                    controller.followingModel![index].id == GetStorage().read("userId")
+                                        ? await likedVideosController.getUserLikedVideos()
+                                        :await likedVideosController
+                                        .getOthersLikedVideos(controller.followingModel![index].id!);
+
+                                    controller.followingModel![index].id == GetStorage().read("userId")
+                                    ?await userVideosController.getUserVideos()
+                                        :await userVideosController
+                                        .getOtherUserVideos(controller.followingModel![index].id!);
+                                    controller.followingModel![index].id == GetStorage().read("userId")
+                                    ? await userDetailsController
+                                        .getUserProfile()
+                                        .then((value) => Get.to(Profile()))
+                                        : await otherUsersController
+                                        .getOtherUserProfile(controller.followingModel![index].id!)
                                         .then((value) => Get.to(ViewProfile(
-                                            controller.followingModel[index].id
-                                                .toString(),
-                                            controller.followingModel[index]
-                                                .isfollowing!.obs,
-                                            controller
-                                                .followingModel[index].name
-                                                .toString(),
-                                            controller
-                                                .followingModel[index].avtars
-                                                .toString())));
+                                    controller.followingModel[index].id
+                                        .toString(),
+                                    controller.followingModel[index]
+                                        .isfollowing!.obs,
+                                    controller.followingModel[index].name
+                                        .toString(),
+                                    controller.followingModel[index].avtars
+                                        .toString())));
                                   },
                                   child: imgProfile(controller
                                       .followingModel![index].avtars
@@ -256,6 +264,7 @@ class Followings extends GetView<FollowersController> {
 class Followers extends GetView<FollowersController> {
   var userDetailsController = Get.find<UserDetailsController>();
   var usersController = Get.find<UserController>();
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -266,22 +275,31 @@ class Followers extends GetView<FollowersController> {
               children: List.generate(
                   controller.followersModel.length,
                   (index) => InkWell(
-                        onTap: () {
-                          likedVideosController
-                              .getOthersLikedVideos(state![index].id!);
-                          userVideosController
-                              .getOtherUserVideos(state[index].id!);
-                          otherUsersController
-                              .getOtherUserProfile(state[index].id!)
-                              .then((value) => Get.to(ViewProfile(
-                                  controller.followersModel[index].id
-                                      .toString(),
-                                  controller
-                                      .followersModel[index].isfollowing!.obs,
-                                  controller.followersModel[index].name
-                                      .toString(),
-                                  controller.followersModel[index].avtars
-                                      .toString())));
+                        onTap: ()async {
+                          state![index].id == GetStorage().read("userId")
+                              ? await likedVideosController.getUserLikedVideos()
+                              :await likedVideosController
+                                  .getOthersLikedVideos(state![index].id!);
+
+                          state![index].id == GetStorage().read("userId")
+                              ?await userVideosController.getUserVideos()
+                              :await userVideosController
+                                  .getOtherUserVideos(state[index].id!);
+                          state![index].id == GetStorage().read("userId")
+                              ? await userDetailsController
+                                  .getUserProfile()
+                                  .then((value) => Get.to(Profile()))
+                              : await otherUsersController
+                                  .getOtherUserProfile(state[index].id!)
+                                  .then((value) => Get.to(ViewProfile(
+                                      controller.followersModel[index].id
+                                          .toString(),
+                                      controller.followersModel[index]
+                                          .isfollowing!.obs,
+                                      controller.followersModel[index].name
+                                          .toString(),
+                                      controller.followersModel[index].avtars
+                                          .toString())));
                         },
                         child: Container(
                           width: Get.width,

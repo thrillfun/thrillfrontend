@@ -318,8 +318,7 @@ videoItemLayout(List<dynamic> list) {
 }
 
 emptyListWidget() => SizedBox(
-      height: Get.height,
-      width: Get.width,
+      height: 250,
       child: Center(
         child: Text(
           "Oops nothing found",

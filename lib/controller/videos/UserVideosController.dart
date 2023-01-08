@@ -9,6 +9,7 @@ import '../model/own_videos_model.dart';
 class UserVideosController extends GetxController
     with StateMixin<RxList<Videos>> {
   var otherUserVideos = RxList<Videos>();
+  var userVideos = RxList<Videos>();
 
   var storage = GetStorage();
   var userProfile = User().obs;
@@ -16,6 +17,24 @@ class UserVideosController extends GetxController
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
+
+  Future<void> getUserVideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    change(userVideos, status: RxStatus.loading());
+    dio
+        .post('/video/user-videos', queryParameters: {"user_id": "${await GetStorage().read("userId")}"})
+        .timeout(const Duration(seconds: 10))
+        .then((response) {
+      userVideos.clear();
+      userVideos = OwnVideosModel.fromJson(response.data).data!.obs;
+      change(userVideos, status: RxStatus.success());
+    })
+        .onError((error, stackTrace) {
+      change(userVideos, status: RxStatus.error());
+    });
+  }
 
   Future<void> getOtherUserVideos(int userId) async {
     dio.options.headers = {

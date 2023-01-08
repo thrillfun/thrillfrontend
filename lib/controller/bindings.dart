@@ -15,6 +15,7 @@ import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos/Following_videos_controller.dart';
 import 'package:thrill/controller/videos/UserVideosController.dart';
+import 'package:thrill/controller/videos/hashtags_videos_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
@@ -57,6 +58,8 @@ class DataBindings extends Bindings {
     Get.lazyPut(() => TopHashtagsController(), fenix: true);
     Get.lazyPut(() => DiscoverController(), fenix: true);
     Get.lazyPut(() => SearchHashtagsController(), fenix: true);
+    Get.lazyPut(() => HashtagVideosController(), fenix: true);
+
 
     //
     Get.lazyPut(() => WheelController(), fenix: true);

@@ -25,12 +25,13 @@ class UserDetailsController extends GetxController
     with StateMixin<Rx<authUser.User>> {
   var storage = GetStorage();
   var userProfile = authUser.User().obs;
+  var otherUserProfile = authUser.User().obs;
 
   var dio = client.Dio(client.BaseOptions(baseUrl: RestUrl.baseUrl));
   var qrData = "".obs;
 
   var isOtpSent = false.obs;
-  Future<void> getUserProfile(userId) async {
+  Future<void> getUserProfile() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -39,7 +40,7 @@ class UserDetailsController extends GetxController
         await storage.read("userId") == null) {
       Get.to(LoginGetxScreen());
     } else {
-      dio.post('/user/get-profile', queryParameters: {"id": userId}).then(
+      dio.post('/user/get-profile', queryParameters: {"id": "${GetStorage().read("userId")}"}).then(
           (result) {
         userProfile =
             authUser.UserDetailsModel.fromJson(result.data).data!.user!.obs;
@@ -48,6 +49,21 @@ class UserDetailsController extends GetxController
         change(userProfile, status: RxStatus.error(error.toString()));
       });
     }
+  }
+
+  Future<void> getOtherUserProfile(userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    change(userProfile, status: RxStatus.loading());
+    dio.post('/user/get-profile', queryParameters: {"id": userId}).then(
+            (result) {
+          otherUserProfile =
+              authUser.UserDetailsModel.fromJson(result.data).data!.user!.obs;
+          change(userProfile, status: RxStatus.success());
+        }).onError((error, stackTrace) {
+      change(userProfile, status: RxStatus.error(error.toString()));
+    });
   }
 
   followUnfollowUser(int userId, String action, {int? id}) async {
@@ -236,7 +252,7 @@ class UserDetailsController extends GetxController
         errorToast(error.toString());
       });
     }
-    getUserProfile(storage.read("userId"));
+    getUserProfile();
   }
 
   Future<void> signinTrueCaller(String social_login_id, String phone,

@@ -181,11 +181,15 @@ class HashtagsSuggestions extends GetView<TopHashtagsController> {
                             Border.all(color: Colors.white.withOpacity(0.4)),
                         color: ColorManager.colorAccent.withOpacity(0.5),
                         child: InkWell(
-                            onTap: () {
-                              discoverController
+                            onTap: ()async  {
+                              await hashtagVideosController
                                   .getVideosByHashTags(state[index].hashtagId!)
-                                  .then((value) => Get.to(() => HashTagsScreen(
-                                      tagName: state[index].hashtagName)));
+                                  .then((value) =>
+                                  Get.to(HashTagsScreen(
+                                    tagName: state[index].hashtagName
+                                        .toString()
+                                  )));
+
                             },
                             child: Container(
                                 alignment: Alignment.center,
@@ -234,9 +238,10 @@ class Tophashtags extends GetView<TopHashtagsController> {
                         child: Padding(
                           padding: const EdgeInsets.all(5),
                           child: InkWell(
-                              onTap: () {
-                                searchHashtagsController.searchHashtags("");
-                                Get.to(SearchGetx());
+                              onTap: ()async {
+                                await searchHashtagsController.searchHashtags("").then((value) {
+                                  Get.to(SearchGetx());
+                                });
                               },
                               child: const Icon(
                                 Icons.search,
@@ -276,17 +281,16 @@ class Tophashtags extends GetView<TopHashtagsController> {
                     itemBuilder: (context, index) => Column(
                           children: [
                             InkWell(
-                              onTap: () {
-                                discoverController
-                                    .getVideosByHashTags(discoverController
-                                        .searchList[0].hashtags![index].id!)
-                                    .then((value) => Get.to(HashTagsScreen(
-                                          tagName: state[index]
-                                              .hashtagName
-                                              .toString(),
-                                          videoCount: state[index].hashtagId,
-                                          videosList: state[index].videos,
-                                        )));
+                              onTap: () async {
+                                await hashtagVideosController
+                                    .getVideosByHashTags(state[index].hashtagId!)
+                                    .then((value) =>
+                                    Get.to(HashTagsScreen(
+                                      tagName: state[index].hashtagName,
+                                      videosList: state[index].videos,
+                                      videoCount: state.length,
+                                    )));
+
                               },
                               child: Container(
                                 margin: const EdgeInsets.symmetric(

@@ -10,14 +10,18 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/controller/users/other_users_controller.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
+import 'package:thrill/widgets/better_video_player.dart';
 
 import '../../common/color.dart';
 import '../../common/strings.dart';
+import '../../controller/videos/UserVideosController.dart';
+import '../../controller/videos/like_videos_controller.dart';
 import '../../rest/rest_url.dart';
 import '../../utils/util.dart';
 import 'package:get/get.dart';
@@ -31,7 +35,9 @@ class QrCode extends StatefulWidget {
 
 class _QrCodeState extends State<QrCode> {
   var usersController = Get.find<UserDetailsController>();
-
+  var likedVideosController = Get.find<LikedVideosController>();
+  var otherUsersController = Get.find<OtherUsersController>();
+  var userVideosController = Get.find<UserVideosController>();
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   User? userModel;
 
@@ -138,14 +144,29 @@ class _QrCodeState extends State<QrCode> {
 
                     final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getDynamicLink(Uri.parse(barcodeScanRes));
 
+                    if (initialLink!.link.queryParameters["type"] == "profile") {
+                      otherUsersController
+                          .getOtherUserProfile(initialLink!.link.queryParameters["id"])
+                          .then((value) {
+                        likedVideosController.getOthersLikedVideos(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                          userVideosController
+                              .getOtherUserVideos(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                            Get.to(ViewProfile(
+                                initialLink!.link.queryParameters["id"],
+                                0.obs,
+                                initialLink!.link.queryParameters["name"],
+                                initialLink!.link.queryParameters["something"]));
+                          });
 
-                    await usersController.getUserProfile(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
-                      Get.to(ViewProfile(
-                          initialLink!.link.queryParameters["id"].toString(),
-                          0.obs,
-                          initialLink!.link.queryParameters["name"].toString(),
-                          initialLink!.link.queryParameters["name"]));
-                    });
+                        });
+
+                      });
+                    } else if (initialLink!.link.queryParameters["type"] == "video") {
+                      successToast(initialLink!.link.queryParameters["id"].toString());
+                    }
+
+
+
                   }
                 },
                 borderRadius: BorderRadius.circular(10),
@@ -171,18 +192,28 @@ class _QrCodeState extends State<QrCode> {
                           final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getDynamicLink(Uri.parse(barcodeScanRes));
 
 
-                           usersController.getUserProfile(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
-                             likedVideosController.getOthersLikedVideos(int.parse(initialLink.link.queryParameters["id"].toString())).then((value) {
-                               userVideosController.getOtherUserVideos(int.parse(initialLink.link.queryParameters["id"].toString())).then((value) {
-                                 Get.to(ViewProfile(
-                                     initialLink!.link.queryParameters["id"].toString(),
-                                     0.obs,
-                                     initialLink!.link.queryParameters["name"].toString(),
-                                     initialLink!.link.queryParameters["name"]));
-                               });
-                             });
+                          if (initialLink!.link.queryParameters["type"] == "profile") {
+                            otherUsersController
+                                .getOtherUserProfile(initialLink!.link.queryParameters["id"])
+                                .then((value) {
+                              likedVideosController.getOthersLikedVideos(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                                userVideosController
+                                    .getOtherUserVideos(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                                  Get.to(ViewProfile(
+                                      initialLink!.link.queryParameters["id"],
+                                      0.obs,
+                                      initialLink!.link.queryParameters["name"],
+                                      initialLink!.link.queryParameters["something"]));
+                                });
 
-                          });
+                              });
+
+                            });
+                          } else if (initialLink!.link.queryParameters["type"] == "video") {
+                            successToast(initialLink!.link.queryParameters["id"].toString());
+                          }
+
+
                           showDialog(
                               context: context,
                               builder: (_) => Material(

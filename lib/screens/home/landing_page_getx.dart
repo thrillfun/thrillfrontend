@@ -32,6 +32,7 @@ import 'package:thrill/widgets/fab_items.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../controller/videos/PrivateVideosController.dart';
+import '../../widgets/better_video_player.dart';
 
 var usersController = Get.find<UserController>();
 var videosController = Get.find<VideosController>();
@@ -57,14 +58,21 @@ class LandingPageGetx extends StatelessWidget {
       // launchUrl(Uri.parse(RestUrl.videoUrl + dynamicLinkData.link.path));
 
       if (dynamicLinkData.link.queryParameters["type"] == "profile") {
-        userDetailsController
-            .getUserProfile(dynamicLinkData.link.queryParameters["id"])
+        otherUsersController
+            .getOtherUserProfile(dynamicLinkData.link.queryParameters["id"])
             .then((value) {
-          Get.to(ViewProfile(
-              dynamicLinkData.link.queryParameters["id"],
-              0.obs,
-              dynamicLinkData.link.queryParameters["name"],
-              dynamicLinkData.link.queryParameters["something"]));
+              likedVideosController.getOthersLikedVideos(int.parse(dynamicLinkData.link.queryParameters["id"].toString())).then((value) {
+                 userVideosController
+                    .getOtherUserVideos(int.parse(dynamicLinkData.link.queryParameters["id"].toString())).then((value) {
+                   Get.to(ViewProfile(
+                       dynamicLinkData.link.queryParameters["id"],
+                       0.obs,
+                       dynamicLinkData.link.queryParameters["name"],
+                       dynamicLinkData.link.queryParameters["something"]));
+                 });
+
+              });
+
         });
       } else if (dynamicLinkData.link.queryParameters["type"] == "video") {
         successToast(dynamicLinkData.link.queryParameters["id"].toString());
@@ -274,11 +282,10 @@ class LandingPageGetx extends StatelessWidget {
                                 userDetailsController.storage.read("userId"));
 
                             userDetailsController
-                                .getUserProfile(userDetailsController.storage
-                                    .read("userId"))
+                                .getUserProfile()
                                 .then((value) => selectedIndex.value = 3);
-                            likedVideosController.getOthersLikedVideos(
-                                userDetailsController.storage.read("userId"));
+                            likedVideosController.getUserLikedVideos(
+                                );
                             privateVideosController.getUserPrivateVideos();
                           } else {
                             Get.to(LoginGetxScreen());
@@ -393,7 +400,7 @@ class LandingPageGetx extends StatelessWidget {
 
         await privateVideosController.getUserPrivateVideos();
         await userDetailsController
-            .getUserProfile(userDetailsController.storage.read("userId"));
+            .getUserProfile();
         selectedIndex.value = 3;
       } else {
         Get.to(LoginGetxScreen());

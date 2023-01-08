@@ -110,6 +110,7 @@ class DiscoverController extends GetxController {
 
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
+
     dio.post("/hashtag/get-videos-by-hashtag",
         queryParameters: {"hashtag_id": "$hashTagId"}).then((value) {
       hashTagsDetailsList = HashTagVideosModel.fromJson(value.data).data!.obs;

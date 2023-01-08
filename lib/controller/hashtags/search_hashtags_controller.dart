@@ -13,17 +13,15 @@ class SearchHashtagsController extends GetxController
     baseUrl: RestUrl.baseUrl,
   ));
 
-  searchHashtags(String searchQuery) async {
+  Future<void> searchHashtags(String searchQuery) async {
     change(searchList, status: RxStatus.loading());
 
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
-    if (searchList.isNotEmpty) searchList.clear();
 
-    dio.get("/hashtag/search/", queryParameters: {'search': searchQuery}).then(
+    dio.get("/hashtag/search?search=$searchQuery").then(
         (value) {
-      change(searchList, status: RxStatus.loading());
       change(searchList, status: RxStatus.success());
       searchList = search.SearchHashTagsModel.fromJson(value.data).data!.obs;
     }).onError((error, stackTrace) {

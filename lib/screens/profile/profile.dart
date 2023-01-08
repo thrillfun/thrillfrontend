@@ -26,6 +26,7 @@ class Profile extends StatelessWidget {
 
   var userDetailController = Get.find<UserDetailsController>();
   var privateVideosController = Get.find<PrivateVideosController>();
+
   Profile({Key? key, this.isProfile}) : super(key: key);
 
   RxBool? isProfile = true.obs;
@@ -228,12 +229,24 @@ class UserVideos extends GetView<UserVideosController> {
   UserVideos({Key? key}) : super(key: key);
 
   var videosController = Get.find<VideosController>();
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return controller.obx(
-        (state) => state!.isEmpty
-            ? Flexible(child: emptyListWidget())
+        (_) => controller.userVideos.isEmpty
+            ? Flexible(
+                child: Center(
+                  heightFactor: Get.height/2,
+                  child: Text(
+                    "No videos yet",
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: ColorManager.dayNightText),
+                  ),
+                ),
+              )
             : Flexible(
                 child: GridView.count(
                   physics: const NeverScrollableScrollPhysics(),
@@ -244,7 +257,7 @@ class UserVideos extends GetView<UserVideosController> {
                   mainAxisSpacing: 10,
                   childAspectRatio: Get.width / Get.height,
                   children: List.generate(
-                      state!.length,
+                      controller.userVideos!.length,
                       (index) => GestureDetector(
                             onTap: () {
                               Get.to(VideoPlayerScreen(
@@ -252,14 +265,14 @@ class UserVideos extends GetView<UserVideosController> {
                                 isFeed: true,
                                 isLock: false,
                                 position: index,
-                                userVideos: state,
+                                userVideos: controller.userVideos,
                               ));
                             },
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
                                 imgNet(
-                                    '${RestUrl.gifUrl}${state.value[index].gifImage}'),
+                                    '${RestUrl.gifUrl}${controller.userVideos.value[index].gifImage}'),
                                 Positioned(
                                     bottom: 10,
                                     left: 10,
@@ -280,7 +293,8 @@ class UserVideos extends GetView<UserVideosController> {
                                             ),
                                             TextSpan(
                                                 text: " " +
-                                                    state.value[index].views
+                                                    controller.userVideos
+                                                        .value[index].views
                                                         .toString(),
                                                 style: const TextStyle(
                                                     color: Colors.white,
@@ -296,8 +310,9 @@ class UserVideos extends GetView<UserVideosController> {
                                   child: IconButton(
                                       onPressed: () {
                                         showDeleteVideoDialog(
-                                            state!.value[index].id!,
-                                            state!.value,
+                                            controller
+                                                .userVideos!.value[index].id!,
+                                            controller.userVideos!.value,
                                             index);
                                       },
                                       padding: EdgeInsets.zero,
@@ -312,8 +327,25 @@ class UserVideos extends GetView<UserVideosController> {
                 ),
               ),
         onLoading: loader(),
-        onEmpty: Flexible(child: emptyListWidget()),
-        onError: (error) => emptyListWidget());
+        onEmpty: Center(
+          child: Text(
+            "No videos yet",
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: ColorManager.dayNightText),
+          ),
+        ),
+        onError: (error) => Center(
+              child: Text(
+                "$error",
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: ColorManager.dayNightText),
+              ),
+            ));
+    ;
   }
 
   showDeleteVideoDialog(int videoID, List list, int index) {
@@ -403,7 +435,16 @@ class PrivateVideos extends GetView<PrivateVideosController> {
     // TODO: implement build
     return controller.obx(
       (state) => state!.isEmpty
-          ? Flexible(child: emptyListWidget())
+          ? Flexible(child: Center(
+        heightFactor: Get.height/2,
+        child: Text(
+          "No private videos",
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: ColorManager.dayNightText),
+        ),
+      ))
           : Flexible(
               child: GridView.count(
                 physics: const NeverScrollableScrollPhysics(),
@@ -521,7 +562,19 @@ class LikedVideos extends GetView<LikedVideosController> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return controller.obx(
-        (state) => Flexible(
+        (state) =>
+        controller.likedVideos.isEmpty?
+        Center(
+          heightFactor: Get.height/2,
+          child: Text(
+            "No videos yet",
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: ColorManager.dayNightText),
+          ),
+        ):
+            Flexible(
                 child: GridView.count(
               padding: const EdgeInsets.all(10),
               physics: const NeverScrollableScrollPhysics(),
@@ -531,7 +584,7 @@ class LikedVideos extends GetView<LikedVideosController> {
               crossAxisCount: 3,
               childAspectRatio: Get.width / Get.height,
               children: List.generate(
-                  state!.length,
+                  controller!.likedVideos.length,
                   (index) => GestureDetector(
                         onTap: () {
                           Get.to(VideoPlayerScreen(
@@ -539,13 +592,14 @@ class LikedVideos extends GetView<LikedVideosController> {
                             isFeed: false,
                             isLock: false,
                             position: index,
-                            likedVideos: state,
+                            likedVideos: controller!.likedVideos,
                           ));
                         },
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            imgNet('${RestUrl.gifUrl}${state[index].gifImage}'),
+                            imgNet(
+                                '${RestUrl.gifUrl}${controller!.likedVideos[index].gifImage}'),
                             Positioned(
                                 bottom: 10,
                                 left: 10,
@@ -565,7 +619,9 @@ class LikedVideos extends GetView<LikedVideosController> {
                                           ),
                                           TextSpan(
                                               text: " " +
-                                                  state[index].views.toString(),
+                                                  controller!
+                                                      .likedVideos[index].views
+                                                      .toString(),
                                               style: const TextStyle(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.w600,
@@ -580,8 +636,24 @@ class LikedVideos extends GetView<LikedVideosController> {
                       )),
             )),
         onLoading: loader(),
-        onEmpty: emptyListWidget(),
-        onError: (error) => emptyListWidget());
+        onEmpty: Center(
+          child: Text(
+            "No videos yet",
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: ColorManager.dayNightText),
+          ),
+        ),
+        onError: (error) => Center(
+              child: Text(
+                "$error",
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: ColorManager.dayNightText),
+              ),
+            ));
   }
 }
 

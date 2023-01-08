@@ -304,7 +304,7 @@ class OtherUserVideos extends GetView<UserVideosController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-      (state) => GridView.count(
+      (_) => GridView.count(
         padding: const EdgeInsets.all(10),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -313,7 +313,7 @@ class OtherUserVideos extends GetView<UserVideosController> {
         mainAxisSpacing: 10,
         childAspectRatio: Get.width / Get.height,
         children: List.generate(
-            state!.value.length,
+            controller.otherUserVideos.length,
             (index) => GestureDetector(
                   onTap: () {
                     Get.to(VideoPlayerScreen(
@@ -321,14 +321,14 @@ class OtherUserVideos extends GetView<UserVideosController> {
                       isFeed: true,
                       isLock: false,
                       position: index,
-                      userVideos: state,
+                      userVideos: controller.otherUserVideos,
                     ));
                   },
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       imgNet(
-                          '${RestUrl.gifUrl}${state!.value[index].gifImage}'),
+                          '${RestUrl.gifUrl}${controller.otherUserVideos[index].gifImage}'),
                       Positioned(
                           bottom: 10,
                           left: 10,
@@ -348,7 +348,7 @@ class OtherUserVideos extends GetView<UserVideosController> {
                                   ),
                                   TextSpan(
                                       text: " " +
-                                          state!.value[index].views.toString(),
+                                          controller.otherUserVideos[index].views.toString(),
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w600,
@@ -375,7 +375,7 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-      (state) => state!.isEmpty
+      (state) => controller!.othersLikedVideos!.isEmpty
           ? emptyListWidget()
           : GridView.count(
               physics: const NeverScrollableScrollPhysics(),
@@ -386,7 +386,7 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
               crossAxisCount: 3,
               childAspectRatio: Get.width / Get.height,
               children: List.generate(
-                  state!.value.length,
+                  controller!.othersLikedVideos.length,
                   (index) => GestureDetector(
                         onTap: () {
                           Get.to(VideoPlayerScreen(
@@ -394,14 +394,14 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
                             isFeed: false,
                             isLock: false,
                             position: index,
-                            likedVideos: state,
+                            likedVideos:  controller!.othersLikedVideos,
                           ));
                         },
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
                             imgNet(
-                                '${RestUrl.gifUrl}${state!.value[index].gifImage}'),
+                                '${RestUrl.gifUrl}${ controller!.othersLikedVideos[index].gifImage}'),
                             Positioned(
                                 bottom: 10,
                                 left: 10,
@@ -421,7 +421,7 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
                                           ),
                                           TextSpan(
                                               text: " " +
-                                                  state!.value[index].views
+                                                  controller!.othersLikedVideos[index].views
                                                       .toString(),
                                               style: const TextStyle(
                                                   color: Colors.white,
@@ -621,7 +621,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                       child: InkWell(
                         onTap: () {
                           userDetailsController.followUnfollowUser(
-                              int.parse(controller.userProfile.value.id.toString()),
+                              int.parse(controller.otherUserProfile.value.id.toString()),
                               isFollow!.value == 0 ? "follow" : "unfollow");
 
 
@@ -647,9 +647,9 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                         onTap: () {
                           Get.to(ChatScreen(
                               inboxModel: Inbox(
-                                  id: controller.userProfile.value.id,
-                                  userImage: controller.userProfile.value.avatar,
-                                  name: controller.userProfile.value.name)));
+                                  id: controller.otherUserProfile.value.id,
+                                  userImage: controller.otherUserProfile.value.avatar,
+                                  name: controller.otherUserProfile.value.name)));
                         },
                         child: const Text("Message",
                             style: TextStyle(

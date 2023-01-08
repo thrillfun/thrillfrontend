@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-
 import 'package:iconly/iconly.dart';
 import 'package:like_button/like_button.dart';
 import 'package:lottie/lottie.dart';
@@ -37,6 +36,7 @@ import '../controller/comments/comments_controller.dart';
 import '../controller/users/other_users_controller.dart';
 import '../controller/users_controller.dart';
 import '../controller/videos/UserVideosController.dart';
+import '../controller/videos/hashtags_videos_controller.dart';
 import '../controller/videos/like_videos_controller.dart';
 
 var videosController = Get.find<uvController.VideosController>();
@@ -46,6 +46,7 @@ var otherUsersController = Get.find<OtherUsersController>();
 var likedVideosController = Get.find<LikedVideosController>();
 var userVideosController = Get.find<UserVideosController>();
 var relatedVideosController = Get.find<RelatedVideosController>();
+var hashtagVideosController = Get.find<HashtagVideosController>();
 
 class BetterReelsPlayer extends StatefulWidget {
   BetterReelsPlayer(
@@ -494,8 +495,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                             onPressed:
                                                                 () async {
                                                               var deepLink = await userDetailsController.createDynamicLink(
-                                                                  "${widget.pageIndex.value}",
-                                                                  type: 'video',
+                                                                  "${widget.publicUser?.id}",
+                                                                  type:
+                                                                      'profile',
                                                                   name:
                                                                       "${widget.publicUser!.name}",
                                                                   something:
@@ -758,22 +760,37 @@ class _VideoAppState extends State<BetterReelsPlayer>
                           GestureDetector(
                             onTap: () async {
                               if (GetStorage().read("token") != null) {
-                                await userVideosController
-                                    .getOtherUserVideos(widget.UserId);
-                                await likedVideosController
-                                    .getOthersLikedVideos(widget.UserId);
-                                await otherUsersController
-                                    .getOtherUserProfile(widget.UserId)
-                                    .then((value) => widget.UserId ==
-                                            usersController.storage
-                                                .read("userId")
-                                        ? Get.to(Profile(isProfile: true.obs))
-                                        : Get.to(ViewProfile(
+                                widget.publicUser!.id ==
+                                        usersController.storage.read("userId")
+                                    ? await userVideosController.getUserVideos()
+                                    : await userVideosController
+                                        .getOtherUserVideos(
+                                            widget.publicUser!.id!);
+                                widget.publicUser!.id ==
+                                        usersController.storage.read("userId")
+                                    ? await likedVideosController
+                                        .getUserLikedVideos()
+                                    : await likedVideosController
+                                        .getOthersLikedVideos(
+                                            widget.publicUser!.id!);
+                                widget.publicUser!.id ==
+                                        usersController.storage.read("userId")
+                                    ? await userDetailsController
+                                        .getUserProfile()
+                                        .then((value) {
+                                        Get.to(Profile(isProfile: true.obs));
+                                      })
+                                    : await otherUsersController
+                                        .getOtherUserProfile(
+                                            widget.publicUser!.id!)
+                                        .then((value) {
+                                        Get.to(ViewProfile(
                                             widget.UserId.toString(),
                                             widget.isfollow!.obs,
                                             widget.userName.toString(),
                                             widget.publicUser!.avatar
-                                                .toString())));
+                                                .toString()));
+                                      });
                               } else {
                                 Get.to(LoginGetxScreen());
                               }
@@ -912,7 +929,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                   scrollDirection: Axis.horizontal,
                                   itemBuilder: (context, index) => InkWell(
                                         onTap: () async {
-                                          await discoverController
+                                          await hashtagVideosController
                                               .getVideosByHashTags(widget
                                                   .hashtagsList[index].id!)
                                               .then((value) =>
@@ -1359,19 +1376,21 @@ class CommentsScreen extends GetView<CommentsController> {
                                   onTap: () async {
                                     if (GetStorage().read("token") != null) {
                                       userId == userDetailsController.storage.read("userId")
-                                          ? await userDetailsController.getUserProfile(state[index].userId!).then(
-                                              (value) => Get.to(
+                                          ? await userDetailsController
+                                              .getUserProfile()
+                                              .then((value) => Get.to(
                                                   Profile(isProfile: true.obs)))
                                           : await otherUsersController
                                               .getOtherUserProfile(int.parse(
                                                   state[index]
                                                       .userId!
                                                       .toString()))
-                                              .then((value) => Get.to(ViewProfile(
-                                                  userId.toString(),
-                                                  isfollow!.obs,
-                                                  userName.toString(),
-                                                  avatar.toString())));
+                                              .then((value) => Get.to(
+                                                  ViewProfile(
+                                                      userId.toString(),
+                                                      isfollow!.obs,
+                                                      userName.toString(),
+                                                      avatar.toString())));
                                     } else {
                                       Get.to(LoginGetxScreen());
                                     }
