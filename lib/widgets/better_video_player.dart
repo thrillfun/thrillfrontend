@@ -29,6 +29,7 @@ import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/sound/sound_details.dart';
 import 'package:thrill/screens/video/duet.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:thrill/widgets/video_item.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -72,7 +73,7 @@ class BetterReelsPlayer extends StatefulWidget {
       this.isCommentAllowed,
       {this.like,
       this.isfollow,
-      this.commentsCount});
+      this.commentsCount,});
 
   String gifImage, sound, soundOwner;
   String videoLikeStatus;
@@ -96,6 +97,7 @@ class BetterReelsPlayer extends StatefulWidget {
   int? isfollow = 0;
   RxInt? commentsCount = 0.obs;
 
+
   @override
   State<BetterReelsPlayer> createState() => _VideoAppState();
 }
@@ -104,6 +106,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
     with WidgetsBindingObserver {
   AppLifecycleState? _lastLifecycleState;
   FocusNode fieldNode = FocusNode();
+  var currentDuration = Duration().obs;
 
   var userController = Get.find<UserController>();
   TextEditingController? _textEditingController;
@@ -129,10 +132,15 @@ class _VideoAppState extends State<BetterReelsPlayer>
     betterPlayerController = VideoPlayerController.network(
         RestUrl.videoUrl + widget.videoUrl,
         videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false))
-      ..setLooping(true)
+      ..setLooping(false)
       ..initialize().then((value) => setState(() {
             initialized.value = true;
           }));
+
+    currentDuration.value = betterPlayerController.value.position;
+
+
+
   }
 
   @override
@@ -140,7 +148,6 @@ class _VideoAppState extends State<BetterReelsPlayer>
     if (initialized.value) {
       betterPlayerController.dispose();
     }
-    videosController.postVideoView(widget.videoId);
 
     super.dispose();
   }
@@ -196,7 +203,14 @@ class _VideoAppState extends State<BetterReelsPlayer>
                             ? AspectRatio(
                                 aspectRatio:
                                     betterPlayerController.value.aspectRatio,
-                                child: VideoPlayer(betterPlayerController),
+                                child: ValueListenableBuilder(
+                                  valueListenable: betterPlayerController,
+                                builder: (context, VideoPlayerValue value,child) {
+                                    if(value.position==value.duration){
+                                      videosController.postVideoView(widget.videoId);
+                                    }
+                                    return VideoPlayer(betterPlayerController);
+                                },),
                               )
                             : CachedNetworkImage(
                                 height: Get.height,

@@ -8,6 +8,8 @@ import 'package:thrill/widgets/better_video_player.dart';
 import '../screens/profile/view_profile.dart';
 import '../utils/util.dart';
 
+ PageController? preloadPageController;
+
 class VideoPlayerItem extends StatefulWidget {
   VideoPlayerItem({this.videosList, this.position});
 
@@ -18,6 +20,7 @@ class VideoPlayerItem extends StatefulWidget {
 
   @override
   State<VideoPlayerItem> createState() => _VideoPlayerItemState();
+
 }
 
 class _VideoPlayerItemState extends State<VideoPlayerItem> {
@@ -33,7 +36,6 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   var initialPage = 0.obs;
 
-  PageController? preloadPageController;
 
   @override
   void initState() {

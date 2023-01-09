@@ -5,6 +5,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
+import 'package:thrill/controller/site_settings/site_settings_controller.dart';
 import 'package:thrill/controller/videos/Following_videos_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
@@ -20,6 +21,7 @@ class HomeGetx extends GetView<HomeController> {
   HomeGetx({Key? key}) : super(key: key);
 
   var videosController = Get.find<VideosController>();
+  var siteSettingsController = Get.find<SiteSettingsController>();
   @override
   Widget build(BuildContext context) {
     controller.loadInterstitialAd();
@@ -175,3 +177,4 @@ class FollowingVideos extends GetView<RelatedVideosController> {
             : videoItemLayout(controller.followingVideosList));
   }
 }
+

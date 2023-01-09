@@ -173,7 +173,9 @@ class VideoPlayerScreen extends StatelessWidget {
               return AspectRatio(
                 aspectRatio: MediaQuery.of(context).size.aspectRatio /
                     MediaQuery.of(context).size.aspectRatio,
-                child: Obx(() => BetterReelsPlayer(
+                child: Obx(() =>
+
+                    BetterReelsPlayer(
                       isFeed
                           ? userVideos![index].gifImage.toString()
                           : isFav
