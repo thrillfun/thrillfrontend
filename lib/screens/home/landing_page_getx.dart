@@ -77,6 +77,24 @@ class LandingPageGetx extends StatelessWidget {
       } else if (dynamicLinkData.link.queryParameters["type"] == "video") {
         successToast(dynamicLinkData.link.queryParameters["id"].toString());
       }
+      else if(dynamicLinkData.link.queryParameters["type"]=="referal"){
+        otherUsersController
+            .getOtherUserProfile(dynamicLinkData.link.queryParameters["id"])
+            .then((value) {
+          likedVideosController.getOthersLikedVideos(int.parse(dynamicLinkData.link.queryParameters["id"].toString())).then((value) {
+            userVideosController
+                .getOtherUserVideos(int.parse(dynamicLinkData.link.queryParameters["id"].toString())).then((value) {
+              Get.to(ViewProfile(
+                  dynamicLinkData.link.queryParameters["id"],
+                  0.obs,
+                  dynamicLinkData.link.queryParameters["name"],
+                  dynamicLinkData.link.queryParameters["something"]));
+            });
+
+          });
+
+        });
+      }
     }).onError((error) {
       errorToast(error.toString());
     });

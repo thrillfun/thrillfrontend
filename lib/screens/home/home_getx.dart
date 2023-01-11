@@ -167,11 +167,11 @@ class RelatedVideos extends GetView<RelatedVideosController> {
   }
 }
 
-class FollowingVideos extends GetView<RelatedVideosController> {
+class FollowingVideos extends GetView<FollowingVideosController> {
   const FollowingVideos({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return GetX<RelatedVideosController>(
+    return GetX<FollowingVideosController>(
         builder: (controller) => controller.isLoading.isTrue
             ? loader()
             : videoItemLayout(controller.followingVideosList));

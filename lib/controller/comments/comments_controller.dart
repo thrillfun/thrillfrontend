@@ -12,7 +12,7 @@ class CommentsController extends GetxController
   var dio = Dio(
       BaseOptions(baseUrl: RestUrl.baseUrl, responseType: ResponseType.json));
 
-  getComments(int videoId) async {
+  Future<void> getComments(int videoId) async {
     change(commentsList, status: RxStatus.loading());
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"

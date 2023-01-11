@@ -46,7 +46,7 @@
 <!--2p8y5ccc015211dea4dd5b6a7bc87e9c19d64 release key truecaller -->
 <!--KImlN2daecc7755b14526b6651ad8e1e34362 debug key truecaller -->
 
-        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="KImlN2daecc7755b14526b6651ad8e1e34362 "/>
+        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="KImlN2daecc7755b14526b6651ad8e1e34362"/>
 
 
         <meta-data

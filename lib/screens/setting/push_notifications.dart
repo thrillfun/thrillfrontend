@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:thrill/controller/settings/push_notifications_controller.dart';
 import 'package:thrill/rest/rest_api.dart';
 
 import '../../common/color.dart';
@@ -24,13 +26,9 @@ class PushNotification extends StatefulWidget {
 }
 
 class _PushNotificationState extends State<PushNotification> {
-  bool likesSwitch = true;
-  bool commentsSwitch = true;
-  bool newFollowerSwitch = true;
-  bool mentionSwitch = true;
-  bool followerVideoSwitch = true;
-  bool directMessageSwitch = true;
-  bool isLoading = true;
+
+
+  var pushNotificationsController = Get.find<PushNotificationsController>();
 
   @override
   void initState() {
@@ -59,253 +57,235 @@ class _PushNotificationState extends State<PushNotification> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: isLoading
+          child: Obx(()=>pushNotificationsController.isLoading.value
               ? const Center(child: CircularProgressIndicator())
               : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      interactions,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      children: [
-                        const Expanded(child: Text(likes)),
-                        FlutterSwitch(
-                          onToggle: (bool value) {
-                            setState(() {
-                              likesSwitch = value;
-                              changeSetting('likes', value ? 1 : 0);
-                            });
-                          },
-                          width: 45,
-                          height: 20,
-                          padding: 0,
-                          activeColor: ColorManager.cyan.withOpacity(0.40),
-                          toggleColor: ColorManager.cyan,
-                          inactiveToggleColor: Colors.black,
-                          inactiveColor: Colors.grey,
-                          value: likesSwitch,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text(
-                      chooseToReceivePushNotificationOnLike,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      children: [
-                        const Expanded(child: Text(comments)),
-                        FlutterSwitch(
-                          onToggle: (bool value) {
-                            setState(() {
-                              commentsSwitch = value;
-                              changeSetting('comments', value ? 1 : 0);
-                            });
-                          },
-                          width: 45,
-                          height: 20,
-                          padding: 0,
-                          activeColor: ColorManager.cyan.withOpacity(0.40),
-                          toggleColor: ColorManager.cyan,
-                          inactiveToggleColor: Colors.black,
-                          inactiveColor: Colors.grey,
-                          value: commentsSwitch,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text(
-                      chooseToReceivePushNotificationOnComment,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      children: [
-                        const Expanded(child: Text(newFollowers)),
-                        FlutterSwitch(
-                          onToggle: (bool value) {
-                            setState(() {
-                              newFollowerSwitch = value;
-                              changeSetting('new_followers', value ? 1 : 0);
-                            });
-                          },
-                          width: 45,
-                          height: 20,
-                          padding: 0,
-                          activeColor: ColorManager.cyan.withOpacity(0.40),
-                          toggleColor: ColorManager.cyan,
-                          inactiveToggleColor: Colors.black,
-                          inactiveColor: Colors.grey,
-                          value: newFollowerSwitch,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text(
-                      chooseToReceivePushNotificationNewFollower,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      children: [
-                        const Expanded(child: Text(mentions)),
-                        FlutterSwitch(
-                          onToggle: (bool value) {
-                            setState(() {
-                              mentionSwitch = value;
-                              changeSetting('mentions', value ? 1 : 0);
-                            });
-                          },
-                          width: 45,
-                          height: 20,
-                          padding: 0,
-                          activeColor: ColorManager.cyan.withOpacity(0.40),
-                          toggleColor: ColorManager.cyan,
-                          inactiveToggleColor: Colors.black,
-                          inactiveColor: Colors.grey,
-                          value: mentionSwitch,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text(
-                      chooseToReceivePushNotificationMentions,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const Divider(
-                      height: 50,
-                      color: Colors.grey,
-                      thickness: 2,
-                    ),
-                    const Text(
-                      message,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      children: [
-                        const Expanded(child: Text(directMessages)),
-                        FlutterSwitch(
-                          onToggle: (bool value) {
-                            setState(() {
-                              directMessageSwitch = value;
-                              changeSetting('direct_messages', value ? 1 : 0);
-                            });
-                          },
-                          width: 45,
-                          height: 20,
-                          padding: 0,
-                          activeColor: ColorManager.cyan.withOpacity(0.40),
-                          toggleColor: ColorManager.cyan,
-                          inactiveToggleColor: Colors.black,
-                          inactiveColor: Colors.grey,
-                          value: directMessageSwitch,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text(
-                      chooseToReceivePushNotificationDirectMessage,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const Divider(
-                      height: 50,
-                      color: Colors.grey,
-                      thickness: 2,
-                    ),
-                    const Text(
-                      videoUpdates,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      children: [
-                        const Expanded(child: Text(videoUpdates)),
-                        FlutterSwitch(
-                          onToggle: (bool value) {
-                            setState(() {
-                              followerVideoSwitch = value;
-                              changeSetting('video_from_accounts_you_follow',
-                                  value ? 1 : 0);
-                            });
-                          },
-                          width: 45,
-                          height: 20,
-                          padding: 0,
-                          activeColor: ColorManager.cyan.withOpacity(0.40),
-                          toggleColor: ColorManager.cyan,
-                          inactiveToggleColor: Colors.black,
-                          inactiveColor: Colors.grey,
-                          value: followerVideoSwitch,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text(
-                      chooseToReceivePushNotificationVideoUpdates,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                interactions,
+                style:
+                TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const Expanded(child: Text(likes)),
+                  FlutterSwitch(
+                    onToggle: (bool value) {
+                      setState(() {
+                        pushNotificationsController.likesSwitch.toggle();
+                        changeSetting('likes', value ? 1 : 0);
+                      });
+                    },
+                    width: 45,
+                    height: 20,
+                    padding: 0,
+                    activeColor: ColorManager.cyan.withOpacity(0.40),
+                    toggleColor: ColorManager.cyan,
+                    inactiveToggleColor: Colors.black,
+                    inactiveColor: Colors.grey,
+                    value: pushNotificationsController.likesSwitch.value,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                chooseToReceivePushNotificationOnLike,
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const Expanded(child: Text(comments)),
+                  FlutterSwitch(
+                    onToggle: (bool value) {
+                      setState(() {
+                        pushNotificationsController.commentsSwitch.toggle();
+                        changeSetting('comments', value ? 1 : 0);
+                      });
+                    },
+                    width: 45,
+                    height: 20,
+                    padding: 0,
+                    activeColor: ColorManager.cyan.withOpacity(0.40),
+                    toggleColor: ColorManager.cyan,
+                    inactiveToggleColor: Colors.black,
+                    inactiveColor: Colors.grey,
+                    value: pushNotificationsController.commentsSwitch.value,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                chooseToReceivePushNotificationOnComment,
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const Expanded(child: Text(newFollowers)),
+                  FlutterSwitch(
+                    onToggle: (bool value) {
+                      setState(() {
+                        pushNotificationsController.newFollowerSwitch.toggle();
+                        changeSetting('new_followers', value ? 1 : 0);
+                      });
+                    },
+                    width: 45,
+                    height: 20,
+                    padding: 0,
+                    activeColor: ColorManager.cyan.withOpacity(0.40),
+                    toggleColor: ColorManager.cyan,
+                    inactiveToggleColor: Colors.black,
+                    inactiveColor: Colors.grey,
+                    value: pushNotificationsController.newFollowerSwitch.value,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                chooseToReceivePushNotificationNewFollower,
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const Expanded(child: Text(mentions)),
+                  FlutterSwitch(
+                    onToggle: (bool value) {
+                      setState(() {
+                        pushNotificationsController.mentionSwitch.toggle();
+                        changeSetting('mentions', value ? 1 : 0);
+                      });
+                    },
+                    width: 45,
+                    height: 20,
+                    padding: 0,
+                    activeColor: ColorManager.cyan.withOpacity(0.40),
+                    toggleColor: ColorManager.cyan,
+                    inactiveToggleColor: Colors.black,
+                    inactiveColor: Colors.grey,
+                    value: pushNotificationsController.mentionSwitch.value,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                chooseToReceivePushNotificationMentions,
+                style: TextStyle(color: Colors.grey),
+              ),
+              const Divider(
+                height: 50,
+                color: Colors.grey,
+                thickness: 2,
+              ),
+              const Text(
+                message,
+                style:
+                TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const Expanded(child: Text(directMessages)),
+                  FlutterSwitch(
+                    onToggle: (bool value) {
+                      setState(() {
+                        pushNotificationsController.directMessageSwitch.toggle();
+                        changeSetting('direct_messages', value ? 1 : 0);
+                      });
+                    },
+                    width: 45,
+                    height: 20,
+                    padding: 0,
+                    activeColor: ColorManager.cyan.withOpacity(0.40),
+                    toggleColor: ColorManager.cyan,
+                    inactiveToggleColor: Colors.black,
+                    inactiveColor: Colors.grey,
+                    value: pushNotificationsController.directMessageSwitch.value,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                chooseToReceivePushNotificationDirectMessage,
+                style: TextStyle(color: Colors.grey),
+              ),
+              const Divider(
+                height: 50,
+                color: Colors.grey,
+                thickness: 2,
+              ),
+              const Text(
+                videoUpdates,
+                style:
+                TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const Expanded(child: Text(videoUpdates)),
+                  FlutterSwitch(
+                    onToggle: (bool value) {
+                      setState(() {
+                        pushNotificationsController.followerVideoSwitch.toggle();
+                        changeSetting('video_from_accounts_you_follow',
+                            value ? 1 : 0);
+                      });
+                    },
+                    width: 45,
+                    height: 20,
+                    padding: 0,
+                    activeColor: ColorManager.cyan.withOpacity(0.40),
+                    toggleColor: ColorManager.cyan,
+                    inactiveToggleColor: Colors.black,
+                    inactiveColor: Colors.grey,
+                    value: pushNotificationsController.followerVideoSwitch.value,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                chooseToReceivePushNotificationVideoUpdates,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),)
         ),
       ),
     );
   }
 
   void loadSetting() async {
-    var result = await RestApi.getNotificationSetting();
-    var json = jsonDecode(result.body);
-    if (json['status']) {
-      likesSwitch = int.parse(json['data']['likes']) == 1 ? true : false;
-      commentsSwitch = int.parse(json['data']['comments']) == 1 ? true : false;
-      newFollowerSwitch =
-          int.parse(json['data']['new_followers']) == 1 ? true : false;
-      mentionSwitch = int.parse(json['data']['mentions']) == 1 ? true : false;
-      followerVideoSwitch =
-          int.parse(json['data']['video_from_accounts_you_follow']) == 1
-              ? true
-              : false;
-      directMessageSwitch =
-          int.parse(json['data']['direct_messages']) == 1 ? true : false;
-    }
-    isLoading = false;
-    setState(() {});
+    await pushNotificationsController.getNotificationsSettings();
   }
 
-  Future<bool> changeSetting(String type, int action) async {
-    var result = await RestApi.setNotificationSetting(type, action);
-    var json = jsonDecode(result.body);
-    return json['status'];
+  Future<void> changeSetting(String type, int action) async {
+    await pushNotificationsController.changeNotificationSettings(type,action);
   }
 }

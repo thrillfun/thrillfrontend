@@ -208,3 +208,28 @@ const String successful = 'Successful!';
 const String chooseFromDevice = "Choose From Device";
 const String noSoundFound = "No Sound Found!";
 const String chooseMusic = "Choose Music";
+
+//video player strings
+const String gifImage = "gif_image";
+const String sound="sound";
+const String soundOwner = "sound_owner";
+const String soundName="sound_name";
+const String videoLikeStatus = "video_like_status";
+const String videoUrl = "video_url";
+const String pageIndex = "page_index";
+const String currentPageIndex = "current_page_index";
+const String isPaused="is_paused";
+const String isCommentAllowed = "is_comment_allowed";
+const String publicUser = "public_user";
+const String videoId = "video_id";
+const String isDuetable  = "is_duetable";
+const String publicVideos = "public_videos";
+const String userId = "user_id";
+const String userName ="user_name";
+const String description = "description";
+const String isHome = "is_home";
+const String hashtagsList = "hashtags_list";
+const String likeCounts  = "like_counts";
+const String isFollow = "is_follow";
+const String commentsCount = "comments_count";
+

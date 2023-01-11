@@ -85,38 +85,38 @@ class UserDetailsController extends GetxController
 
   Future<void> socialLoginRegister(var social_login_id, social_login_type,
       email, phone, firebase_token, name) async {
-    await createDynamicLink(storage.read("userId").toString()).then((value) =>
-        dio.post("/SocialLogin", queryParameters: {
-          "social_login_id": social_login_id,
-          "social_login_type": social_login_type,
-          "email": email,
-          // "phone": phone,
-          "firebase_token": firebase_token,
-          "name": name,
-          // "referral_code": qrData.value.isEmpty ? "" : qrData.value,
-        }).then((value) async {
-          userProfile =
-              authUser.UserDetailsModel.fromJson(value.data).data!.user!.obs;
+    dio.post("/SocialLogin", queryParameters: {
+      "social_login_id": social_login_id,
+      "social_login_type": social_login_type,
+      "email": email,
+      // "phone": phone,
+      "firebase_token": firebase_token,
+      "name": name,
+      "referral_code": await createDynamicLink(social_login_id,"referal",name,email),
+    }).then((value) async {
+      userProfile =
+          authUser.UserDetailsModel.fromJson(value.data).data!.user!.obs;
 
-          await storage.write("userId",
-              authUser.UserDetailsModel.fromJson(value.data).data!.user!.id!);
+      await storage.write("userId",
+          authUser.UserDetailsModel.fromJson(value.data).data!.user!.id!);
 
-          await storage.write(
-              "token",
-              authUser.UserDetailsModel.fromJson(value.data)
-                  .data!
-                  .token!
-                  .toString());
+      await storage.write(
+          "token",
+          authUser.UserDetailsModel.fromJson(value.data)
+              .data!
+              .token!
+              .toString());
 
-          change(userProfile, status: RxStatus.success());
+      change(userProfile, status: RxStatus.success());
 
-          await storage.write("user", userProfile).then((_) {
-            Get.forceAppUpdate();
-            Get.to(LandingPageGetx());
-          });
-        }).onError((error, stackTrace) {
-          change(userProfile, status: RxStatus.error(error.toString()));
-        }));
+      await storage.write("user", userProfile).then((_) {
+        Get.forceAppUpdate();
+        Get.to(LandingPageGetx());
+      });
+    }).onError((error, stackTrace) {
+      change(userProfile, status: RxStatus.error(error.toString()));
+    });
+
   }
 
   Future<void> signInWithGoogle() async {
@@ -164,17 +164,20 @@ class UserDetailsController extends GetxController
 
   Future<void> signOutUser() async {
     await storage.erase();
-    signOutFacebook();
-    signOutGoogle();
+    await signOutGoogle();
+    await signOutFacebook();
   }
 
   Future<void> signOutGoogle() async {
-    final GoogleSignIn googleUser = GoogleSignIn(scopes: <String>["email"]);
+    try{
+      final GoogleSignIn googleUser = GoogleSignIn(scopes: <String>["email"]);
 
-    if (googleUser.currentUser != null) {
       await GoogleSignIn().disconnect().catchError((e, stack) {});
       await FirebaseAuth.instance.signOut();
       googleUser.signOut();
+    }
+    on Exception catch(e){
+      errorToast(e.toString());
     }
   }
 
@@ -257,13 +260,14 @@ class UserDetailsController extends GetxController
 
   Future<void> signinTrueCaller(String social_login_id, String phone,
       String firebase_token, String name) async {
+
     dio.post("/SocialLogin", queryParameters: {
       "social_login_id": social_login_id,
       "social_login_type": "truecaller",
       "phone": phone,
       "firebase_token": firebase_token,
       "name": name,
-      //  "referral_code": qrData.value.isEmpty ? "" : qrData.value,
+       "referral_code": await createDynamicLink(social_login_id, "referal", name, firebase_token),
     }).then((value) async {
       try {
         if (value.data["status"] == true) {
@@ -293,6 +297,7 @@ class UserDetailsController extends GetxController
         print(e.toString());
       }
     }).onError((error, stackTrace) {});
+
   }
 
   Future<void> verifyOtp(String mobileNumber, String otp) async {
@@ -337,7 +342,7 @@ class UserDetailsController extends GetxController
   }
 
   Future<String> createDynamicLink(String id,
-      {String? type, String? name, String? something}) async {
+      String? type, String? name, String? something) async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
       uriPrefix: 'https://thrill.page.link/',
       link: Uri.parse(

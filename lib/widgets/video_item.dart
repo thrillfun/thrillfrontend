@@ -47,6 +47,12 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    preloadPageController!.dispose();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: StreamBuilder<PendingDynamicLinkData>(
@@ -104,7 +110,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                   widget.videosList![index].user!.username.toString().obs,
                   widget.videosList![index].description.toString().obs,
                   false.obs,
-                  widget.videosList![index].hashtags!,
+                  widget.videosList![index].hashtags??[],
                   // : hashTagVideos![index].hashtags!,
                   widget.videosList![index].sound.toString(),
                   widget.videosList![index].soundOwner.toString(),

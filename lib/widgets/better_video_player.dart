@@ -207,6 +207,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                   valueListenable: betterPlayerController,
                                 builder: (context, VideoPlayerValue value,child) {
                                     if(value.position==value.duration){
+                                      preloadPageController!.animateToPage(widget.pageIndex.value+1,
+                                          duration: Duration(milliseconds: 400),
+                                          curve: Curves.easeIn);
                                       videosController.postVideoView(widget.videoId);
                                     }
                                     return VideoPlayer(betterPlayerController);
@@ -510,11 +513,8 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                                 () async {
                                                               var deepLink = await userDetailsController.createDynamicLink(
                                                                   "${widget.publicUser?.id}",
-                                                                  type:
                                                                       'profile',
-                                                                  name:
                                                                       "${widget.publicUser!.name}",
-                                                                  something:
                                                                       "${widget.publicUser!.avatar}");
                                                               //         +
                                                               // widget.publicUser!
@@ -1062,9 +1062,12 @@ class _VideoAppState extends State<BetterReelsPlayer>
           ],
         ),
         onVisibilityChanged: (VisibilityInfo info) {
-          info.visibleFraction == 0
-              ? betterPlayerController.setVolume(0)
-              : betterPlayerController.setVolume(1);
+          if(initialized.isTrue){
+            info.visibleFraction == 0
+                ? betterPlayerController.setVolume(0)
+                : betterPlayerController.setVolume(1);
+          }
+
         });
   }
 

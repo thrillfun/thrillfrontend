@@ -3,13 +3,14 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:video_player/video_player.dart';
 
 import '../model/own_videos_model.dart';
 
-class UserVideosController extends GetxController
-    with StateMixin<RxList<Videos>> {
+class UserVideosController extends GetxController with StateMixin<RxList<Videos>> {
   var otherUserVideos = RxList<Videos>();
   var userVideos = RxList<Videos>();
+
 
   var storage = GetStorage();
   var userProfile = User().obs;
@@ -17,6 +18,11 @@ class UserVideosController extends GetxController
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
+
+
+  @override
+  void onInit() {
+  }
 
   Future<void> getUserVideos() async {
     dio.options.headers = {

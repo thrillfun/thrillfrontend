@@ -8,6 +8,7 @@ import 'package:thrill/controller/hashtags/top_hashtags_controller.dart';
 import 'package:thrill/controller/home/home_controller.dart';
 import 'package:thrill/controller/image/image_controller.dart';
 import 'package:thrill/controller/privacy_and_conditions/privacy_and_conditions_controller.dart';
+import 'package:thrill/controller/settings/push_notifications_controller.dart';
 import 'package:thrill/controller/site_settings/site_settings_controller.dart';
 import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/controller/users/followers_controller.dart';
@@ -77,7 +78,8 @@ class DataBindings extends Bindings {
     Get.lazyPut(() => PrivacyAndConditionsController(), fenix: true);
     //image
     Get.lazyPut(() => ImageController(), fenix: true);
-    //site settings
+    //settings
     Get.lazyPut(() => SiteSettingsController(),fenix: true);
+    Get.lazyPut(() => PushNotificationsController(),fenix: true);
   }
 }

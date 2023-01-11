@@ -12,341 +12,359 @@ import 'package:thrill/widgets/better_video_player.dart';
 
 import '../utils/util.dart';
 
-class VideoPlayerScreen extends StatelessWidget {
+class VideoPlayerScreen extends StatefulWidget {
+
   VideoPlayerScreen(
       {this.hashTagVideos,
-      this.position,
-      this.likedVideos,
-      this.userVideos,
-      required this.isFav,
-      required this.isFeed,
-      required this.isLock,
-      this.privateVideos,
-      this.videosList});
+        this.position,
+        this.likedVideos,
+        this.userVideos,
+        required this.isFav,
+        required this.isFeed,
+        required this.isLock,
+        this.privateVideos,
+        this.videosList});
 
   List<HashTagsDetails>? hashTagVideos;
   List<LikedVideos>? likedVideos;
   List<Videos>? userVideos;
   List<PrivateVideos>? privateVideos;
   List<VideosList>? videosList;
-  int? position;
   bool isFav = false;
   bool isLock = false;
   bool isFeed = false;
+  int? position;
 
-  var isOnPageTurning = false.obs;
-  var itemIndex = 0.obs;
 
   @override
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+}
+
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+
+  PageController? preloadPageController;
+  var isOnPageTurning = false.obs;
+  var itemIndex = 0.obs;
+  PublicVideos publicVideos = PublicVideos();
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    preloadPageController = PageController(initialPage: widget.position ?? 0);
+    preloadPageController!.addListener(scrollListener);
+
+    super.initState();
+  }
+  @override
   Widget build(BuildContext context) {
-    PageController preloadPageController =
-        PageController(initialPage: position ?? 0);
-    RxInt current = position!.obs;
-
-    void scrollListener() {
-      if (isOnPageTurning.value &&
-          preloadPageController.page ==
-              preloadPageController.page!.roundToDouble()) {
-        current.value = preloadPageController.page!.toInt();
-        isOnPageTurning.value = false;
-      } else if (!isOnPageTurning.value &&
-          current.value!.toDouble() != preloadPageController.page) {
-        if ((current.value!.toDouble() - preloadPageController.page!.toDouble())
-                .abs() >
-            0.1) {
-          isOnPageTurning.value = true;
-        }
-      }
-      Get.appUpdate();
-    }
-
-    preloadPageController.addListener(scrollListener);
-
-    PublicVideos publicVideos = PublicVideos();
-   
     return Scaffold(
         body: PageView.builder(
             controller: preloadPageController,
-            itemCount: isFeed
-                ? userVideos!.length
-                : isFav
-                    ? likedVideos!.length
-                    : isLock
-                        ? privateVideos!.length
-                        : hashTagVideos!.length,
+            itemCount: widget.isFeed
+                ? widget.userVideos!.length
+                : widget.isFav
+                ? widget.likedVideos!.length
+                : widget.isLock
+                ? widget.privateVideos!.length
+                : widget.hashTagVideos!.length,
             scrollDirection: Axis.vertical,
             itemBuilder: (context, index) {
               late PublicUser publicUser;
-              isFeed
-                  ? userVideos!.forEach((hashTagVideos) {
-                      publicUser = PublicUser(
-                          id: userVideos![index].user!.id,
-                          name: userVideos![index].user?.name.toString(),
-                          username: userVideos![index].user?.username,
-                          email: userVideos![index].user?.email,
-                          dob: userVideos![index].user?.dob,
-                          phone: userVideos![index].user?.phone,
-                          avatar: userVideos![index].user!.avatar,
-                          socialLoginType:
-                              userVideos![index].user?.socialLoginType,
-                          socialLoginId: userVideos![index].user?.socialLoginId,
-                          firstName: userVideos![index].user?.firstName,
-                          lastName: userVideos![index].user?.lastName,
-                          gender: userVideos![index].user?.gender,
-                          isfollow: userVideos![index].isfollow,
-                          likes: userVideos![index].likes.toString());
-                    })
-                  : isFav
-                      ? likedVideos!.forEach((hashTagVideos) {
-                          publicUser = PublicUser(
-                              id: likedVideos![index].user!.id,
-                              name: likedVideos![index].user?.name.toString(),
-                              username: likedVideos![index].user?.username,
-                              email: likedVideos![index].user?.email,
-                              dob: likedVideos![index].user?.dob,
-                              phone: likedVideos![index].user?.phone,
-                              avatar: likedVideos![index].user!.avatar,
-                              socialLoginType:
-                                  likedVideos![index].user?.socialLoginType,
-                              socialLoginId:
-                                  likedVideos![index].user?.socialLoginId,
-                              firstName: likedVideos![index].user?.firstName,
-                              lastName: likedVideos![index].user?.lastName,
-                              gender: likedVideos![index].user?.gender,
-                              isfollow: likedVideos![index].isfollow,
-                              likes: likedVideos![index].likes.toString());
-                        })
-                      : isLock
-                          ? privateVideos!.forEach((element) {
-                              publicUser = PublicUser(
-                                  id: privateVideos![index].user!.id,
-                                  name: privateVideos![index]
-                                      .user
-                                      ?.name
-                                      .toString(),
-                                  username:
-                                      privateVideos![index].user?.username,
-                                  email: privateVideos![index].user?.email,
-                                  dob: privateVideos![index].user?.dob,
-                                  phone: privateVideos![index].user?.phone,
-                                  avatar: privateVideos![index].user!.avatar,
-                                  socialLoginType: privateVideos![index]
-                                      .user
-                                      ?.socialLoginType,
-                                  socialLoginId:
-                                      privateVideos![index].user?.socialLoginId,
-                                  firstName:
-                                      privateVideos![index].user?.firstName,
-                                  lastName:
-                                      privateVideos![index].user?.lastName,
-                                  gender: privateVideos![index].user?.gender,
-                                  isfollow: privateVideos![index].isfollow,
-                                  likes:
-                                      privateVideos![index].likes.toString());
-                            })
-                          : hashTagVideos!.forEach((videos) {
-                              publicUser = PublicUser(
-                                  id: hashTagVideos![index].user!.id,
-                                  name: hashTagVideos![index]
-                                      .user
-                                      ?.name
-                                      .toString(),
-                                  username:
-                                      hashTagVideos![index].user?.username,
-                                  email: hashTagVideos![index].user?.email,
-                                  dob: hashTagVideos![index].user?.dob,
-                                  phone: hashTagVideos![index].user?.phone,
-                                  avatar: hashTagVideos![index].user!.avatar,
-                                  socialLoginType: hashTagVideos![index]
-                                      .user
-                                      ?.socialLoginType,
-                                  socialLoginId:
-                                      hashTagVideos![index].user?.socialLoginId,
-                                  firstName:
-                                      hashTagVideos![index].user?.firstName,
-                                  lastName:
-                                      hashTagVideos![index].user?.lastName,
-                                  gender: hashTagVideos![index].user?.gender,
-                                  isfollow: userVideos![index].isfollow,
-                                  likes: userVideos![index].likes.toString());
-                            });
+              widget.isFeed
+                  ? widget.userVideos!.forEach((hashTagVideos) {
+                publicUser = PublicUser(
+                    id: widget.userVideos![index].user!.id,
+                    name: widget.userVideos![index].user?.name.toString(),
+                    username: widget.userVideos![index].user?.username,
+                    email: widget.userVideos![index].user?.email,
+                    dob: widget.userVideos![index].user?.dob,
+                    phone: widget.userVideos![index].user?.phone,
+                    avatar: widget.userVideos![index].user!.avatar,
+                    socialLoginType:
+                    widget.userVideos![index].user?.socialLoginType,
+                    socialLoginId: widget.userVideos![index].user?.socialLoginId,
+                    firstName: widget.userVideos![index].user?.firstName,
+                    lastName: widget.userVideos![index].user?.lastName,
+                    gender:widget. userVideos![index].user?.gender,
+                    isfollow: widget.userVideos![index].isfollow,
+                    likes: widget.userVideos![index].likes.toString());
+              })
+                  : widget.isFav
+                  ? widget.likedVideos!.forEach((hashTagVideos) {
+                publicUser = PublicUser(
+                    id: widget.likedVideos![index].user!.id,
+                    name: widget.likedVideos![index].user?.name.toString(),
+                    username: widget.likedVideos![index].user?.username,
+                    email: widget.likedVideos![index].user?.email,
+                    dob: widget.likedVideos![index].user?.dob,
+                    phone: widget.likedVideos![index].user?.phone,
+                    avatar: widget.likedVideos![index].user!.avatar,
+                    socialLoginType:
+                    widget. likedVideos![index].user?.socialLoginType,
+                    socialLoginId:
+                    widget.likedVideos![index].user?.socialLoginId,
+                    firstName: widget.likedVideos![index].user?.firstName,
+                    lastName: widget.likedVideos![index].user?.lastName,
+                    gender: widget.likedVideos![index].user?.gender,
+                    isfollow: widget.likedVideos![index].isfollow,
+                    likes: widget.likedVideos![index].likes.toString());
+              })
+                  : widget.isLock
+                  ? widget.privateVideos!.forEach((element) {
+                publicUser = PublicUser(
+                    id: widget.privateVideos![index].user!.id,
+                    name: widget.privateVideos![index]
+                        .user
+                        ?.name
+                        .toString(),
+                    username:
+                    widget.privateVideos![index].user?.username,
+                    email: widget.privateVideos![index].user?.email,
+                    dob: widget.privateVideos![index].user?.dob,
+                    phone: widget.privateVideos![index].user?.phone,
+                    avatar: widget.privateVideos![index].user!.avatar,
+                    socialLoginType: widget.privateVideos![index]
+                        .user
+                        ?.socialLoginType,
+                    socialLoginId:
+                    widget.privateVideos![index].user?.socialLoginId,
+                    firstName:
+                    widget.privateVideos![index].user?.firstName,
+                    lastName:
+                    widget.privateVideos![index].user?.lastName,
+                    gender: widget.privateVideos![index].user?.gender,
+                    isfollow: widget.privateVideos![index].isfollow,
+                    likes:
+                    widget.privateVideos![index].likes.toString());
+              })
+                  : widget.hashTagVideos!.forEach((videos) {
+                publicUser = PublicUser(
+                    id: widget.hashTagVideos![index].user!.id,
+                    name: widget.hashTagVideos![index]
+                        .user
+                        ?.name
+                        .toString(),
+                    username:
+                    widget.hashTagVideos![index].user?.username,
+                    email: widget.hashTagVideos![index].user?.email,
+                    dob: widget.hashTagVideos![index].user?.dob,
+                    phone: widget.hashTagVideos![index].user?.phone,
+                    avatar: widget.hashTagVideos![index].user!.avatar,
+                    socialLoginType: widget.hashTagVideos![index]
+                        .user
+                        ?.socialLoginType,
+                    socialLoginId:
+                    widget.hashTagVideos![index].user?.socialLoginId,
+                    firstName:
+                    widget.hashTagVideos![index].user?.firstName,
+                    lastName:
+                    widget.hashTagVideos![index].user?.lastName,
+                    gender: widget.hashTagVideos![index].user?.gender,
+                    isfollow: widget.userVideos![index].isfollow,
+                    likes: widget.userVideos![index].likes.toString());
+              });
               return AspectRatio(
                 aspectRatio: MediaQuery.of(context).size.aspectRatio /
                     MediaQuery.of(context).size.aspectRatio,
                 child: Obx(() =>
 
                     BetterReelsPlayer(
-                      isFeed
-                          ? userVideos![index].gifImage.toString()
-                          : isFav
-                              ? likedVideos![index].gifImage.toString()
-                              : isLock
-                                  ? privateVideos![index].gifImage.toString()
-                                  : hashTagVideos![index].gifImage.toString(),
-                      isFeed
-                          ? userVideos![index].video.toString()
-                          : isFav
-                              ? likedVideos![index].video.toString()
-                              : isLock
-                                  ? privateVideos![index].gifImage.toString()
-                                  : hashTagVideos![index].video.toString(),
+                      widget. isFeed
+                          ? widget.userVideos![index].gifImage.toString()
+                          : widget.isFav
+                          ? widget.likedVideos![index].gifImage.toString()
+                          : widget.isLock
+                          ? widget.privateVideos![index].gifImage.toString()
+                          : widget.hashTagVideos![index].gifImage.toString(),
+                      widget.isFeed
+                          ? widget.userVideos![index].video.toString()
+                          : widget.isFav
+                          ? widget.likedVideos![index].video.toString()
+                          : widget.isLock
+                          ? widget.privateVideos![index].gifImage.toString()
+                          : widget.hashTagVideos![index].video.toString(),
                       index.obs,
-                      current,
+                      widget.position!.obs,
                       isOnPageTurning,
-                      () {
+                          () {
                         videosController.likeVideo(
                             1,
-                            isFeed
-                                ? userVideos![index].id!
-                                : isFav
-                                    ? likedVideos![index].id!
-                                    : isLock
-                                        ? privateVideos![index].id!
-                                        : hashTagVideos![index].id!);
+                            widget.isFeed
+                                ? widget.userVideos![index].id!
+                                : widget.isFav
+                                ? widget.likedVideos![index].id!
+                                : widget.isLock
+                                ? widget.privateVideos![index].id!
+                                : widget.hashTagVideos![index].id!);
                       },
                       publicUser,
-                      isFeed
-                          ? userVideos![index].id!.toInt()
-                          : isFav
-                              ? likedVideos![index].id!.toInt()
-                              : isLock
-                                  ? privateVideos![index].id!.toInt()
-                                  : hashTagVideos![index].id!.toInt(),
-                      isFeed
-                          ? userVideos![index].soundName.toString()
-                          : isFav
-                              ? likedVideos![index].soundName.toString()
-                              : isLock
-                                  ? privateVideos![index].soundName.toString()
-                                  : hashTagVideos![index].soundName.toString(),
+                      widget.isFeed
+                          ? widget.userVideos![index].id!.toInt()
+                          : widget.isFav
+                          ? widget.likedVideos![index].id!.toInt()
+                          : widget.isLock
+                          ? widget.privateVideos![index].id!.toInt()
+                          : widget.hashTagVideos![index].id!.toInt(),
+                      widget.isFeed
+                          ? widget.userVideos![index].soundName.toString()
+                          : widget.isFav
+                          ? widget.likedVideos![index].soundName.toString()
+                          : widget.isLock
+                          ? widget.privateVideos![index].soundName.toString()
+                          : widget.hashTagVideos![index].soundName.toString(),
                       true.obs,
                       publicVideos,
-                      isFeed
-                          ? userVideos![index].user!.id!
-                          : isFav
-                              ? likedVideos![index].user!.id!
-                              : isLock
-                                  ? privateVideos![index].user!.id!
-                                  : hashTagVideos![index].user!.id!,
-                      isFeed
-                          ? userVideos![index].user!.username.toString().obs
-                          : isFav
-                              ? likedVideos![index]
-                                  .user!
-                                  .username
-                                  .toString()
-                                  .obs
-                              : isLock
-                                  ? privateVideos![index]
-                                      .user!
-                                      .username
-                                      .toString()
-                                      .obs
-                                  : hashTagVideos![index]
-                                      .user!
-                                      .username
-                                      .toString()
-                                      .obs,
-                      isFeed
-                          ? userVideos![index].description.toString().obs
-                          : isFav
-                              ? likedVideos![index].description.toString().obs
-                              : isLock
-                                  ? privateVideos![index]
-                                      .description
-                                      .toString()
-                                      .obs
-                                  : hashTagVideos![index]
-                                      .description
-                                      .toString()
-                                      .obs,
+                      widget.isFeed
+                          ? widget.userVideos![index].user!.id!
+                          : widget.isFav
+                          ? widget.likedVideos![index].user!.id!
+                          : widget.isLock
+                          ? widget.privateVideos![index].user!.id!
+                          : widget.hashTagVideos![index].user!.id!,
+                      widget.isFeed
+                          ? widget.userVideos![index].user!.username.toString().obs
+                          : widget.isFav
+                          ? widget.likedVideos![index]
+                          .user!
+                          .username
+                          .toString()
+                          .obs
+                          : widget.isLock
+                          ? widget.privateVideos![index]
+                          .user!
+                          .username
+                          .toString()
+                          .obs
+                          : widget.hashTagVideos![index]
+                          .user!
+                          .username
+                          .toString()
+                          .obs,
+                      widget. isFeed
+                          ? widget.userVideos![index].description.toString().obs
+                          : widget.isFav
+                          ? widget.likedVideos![index].description.toString().obs
+                          :widget. isLock
+                          ?widget. privateVideos![index]
+                          .description
+                          .toString()
+                          .obs
+                          : widget.hashTagVideos![index]
+                          .description
+                          .toString()
+                          .obs,
                       false.obs,
-                      isFeed
+                      widget.isFeed
                           ? []
-                          : isFav
-                              ? []
-                              : isLock
-                                  ? []
-                                  : [],
+                          : widget.isFav
+                          ? []
+                          : widget.isLock
+                          ? []
+                          : [],
                       // : hashTagVideos![index].hashtags!,
-                      isFeed
-                          ? userVideos![index].sound.toString()
-                          : isFav
-                              ? likedVideos![index].sound.toString()
-                              : isLock
-                                  ? privateVideos![index].soundName.toString()
-                                  : hashTagVideos![index].sound.toString(),
-                      isFeed
-                          ? userVideos![index].soundOwner.toString()
-                          : isFav
-                              ? likedVideos![index].soundOwner.toString()
-                              : isLock
-                                  ? privateVideos![index].soundOwner.toString()
-                                  : hashTagVideos![index].soundOwner.toString(),
-                      isFeed
-                          ? userVideos![index]
-                                      .videoLikeStatus
-                                      .toString()
-                                      .isEmpty ||
-                                  userVideos![index]
-                                          .videoLikeStatus
-                                          .toString() ==
-                                      "null"
-                              ? "0"
-                              : userVideos![index].videoLikeStatus.toString()
-                          : isFav
-                              ? likedVideos![index]
-                                          .videoLikeStatus
-                                          .toString()
-                                          .isEmpty ||
-                                      likedVideos![index]
-                                              .videoLikeStatus
-                                              .toString() ==
-                                          "null"
-                                  ? "0"
-                                  : likedVideos![index]
-                                      .videoLikeStatus
-                                      .toString()
-                              : isLock
-                                  ? privateVideos![index]
-                                      .videoLikeStatus
-                                      .toString()
-                                  : "",
-                      isFeed
-                          ? userVideos != null &&
-                                  userVideos![index]
-                                          .isCommentable
-                                          .toString()
-                                          .toLowerCase() ==
-                                      "yes"
-                              ? true.obs
-                              : false.obs
-                          : isFav
-                              ? likedVideos != null &&
-                                      likedVideos![index]
-                                              .isCommentable
-                                              .toString()
-                                              .toLowerCase() ==
-                                          "yes"
-                                  ? true.obs
-                                  : false.obs
-                              : true.obs,
-                      isfollow: isFeed
-                          ? userVideos![index].isfollow
-                          : isFav
-                              ? likedVideos![index].isfollow
-                              : isLock
-                                  ? privateVideos![index].isfollow
-                                  : 0,
-                      like: isFeed
-                          ? userVideos![index].likes!.obs
-                          : isFav
-                              ? likedVideos![index].likes!.obs
-                              : isLock
-                                  ? privateVideos![index].likes!.obs
-                                  : 0.obs,
+                      widget.isFeed
+                          ? widget.userVideos![index].sound.toString()
+                          : widget.isFav
+                          ? widget.likedVideos![index].sound.toString()
+                          : widget.isLock
+                          ? widget.privateVideos![index].soundName.toString()
+                          : widget.hashTagVideos![index].sound.toString(),
+                      widget. isFeed
+                          ? widget.userVideos![index].soundOwner.toString()
+                          : widget.isFav
+                          ? widget.likedVideos![index].soundOwner.toString()
+                          :widget. isLock
+                          ?widget. privateVideos![index].soundOwner.toString()
+                          :widget. hashTagVideos![index].soundOwner.toString(),
+                      widget.isFeed
+                          ? widget.userVideos![index]
+                          .videoLikeStatus
+                          .toString()
+                          .isEmpty ||
+                          widget.userVideos![index]
+                              .videoLikeStatus
+                              .toString() ==
+                              "null"
+                          ? "0"
+                          : widget.userVideos![index].videoLikeStatus.toString()
+                          :widget. isFav
+                          ?widget. likedVideos![index]
+                          .videoLikeStatus
+                          .toString()
+                          .isEmpty ||
+                          widget.likedVideos![index]
+                              .videoLikeStatus
+                              .toString() ==
+                              "null"
+                          ? "0"
+                          : widget.likedVideos![index]
+                          .videoLikeStatus
+                          .toString()
+                          : widget.isLock
+                          ? widget.privateVideos![index]
+                          .videoLikeStatus
+                          .toString()
+                          : "",
+                      widget. isFeed
+                          ?widget. userVideos != null &&
+                          widget.userVideos![index]
+                              .isCommentable
+                              .toString()
+                              .toLowerCase() ==
+                              "yes"
+                          ? true.obs
+                          : false.obs
+                          : widget.isFav
+                          ?widget. likedVideos != null &&
+                          widget.likedVideos![index]
+                              .isCommentable
+                              .toString()
+                              .toLowerCase() ==
+                              "yes"
+                          ? true.obs
+                          : false.obs
+                          : true.obs,
+                      isfollow: widget.isFeed
+                          ? widget.userVideos![index].isfollow
+                          :widget. isFav
+                          ? widget.likedVideos![index].isfollow
+                          : widget.isLock
+                          ?widget. privateVideos![index].isfollow
+                          : 0,
+                      like: widget.isFeed
+                          ? widget.userVideos![index].likes!.obs
+                          : widget.isFav
+                          ? widget.likedVideos![index].likes!.obs
+                          : widget.isLock
+                          ? widget.privateVideos![index].likes!.obs
+                          : 0.obs,
                     )),
               );
             }));
   }
+
+
+  void scrollListener() {
+    if (isOnPageTurning.value &&
+        preloadPageController!.page ==
+            preloadPageController!.page!.roundToDouble()) {
+     setState(() {
+       widget.position = preloadPageController!.page!.toInt();
+       isOnPageTurning.value = false;
+     });
+    } else if (!isOnPageTurning.value &&
+        widget.position!.toDouble() != preloadPageController!.page) {
+      if ((widget.position!.toDouble() - preloadPageController!.page!.toDouble())
+          .abs() >
+          0.1) {
+        setState(() {
+          isOnPageTurning.value = true;
+        });
+      }
+    }
+    Get.appUpdate();
+  }
 }
+
+

@@ -14,6 +14,8 @@ class RelatedVideosController extends GetxController
   RxList<PublicVideos> publicVideosList = RxList();
     RxList<PublicVideos> followingVideosList = RxList();
   var isLoading = false.obs;
+  var isRelatedLoading = false.obs;
+
   var dio = Dio(
       BaseOptions(baseUrl: RestUrl.baseUrl, responseType: ResponseType.json));
   var followingVideosController = Get.find<FollowingVideosController>();
@@ -21,7 +23,6 @@ class RelatedVideosController extends GetxController
 
   RelatedVideosController() {
     getAllVideos();
-    getFollowingVideos();
   }
   Future<void> getAllVideos() async {
     dio.options.headers = {
@@ -38,6 +39,8 @@ class RelatedVideosController extends GetxController
         publicVideosList.value =
             PublicVideosModel.fromJson(value.data).data!.obs;
       }
+      getFollowingVideos();
+
       //  change(publicVideosList, status: RxStatus.success());
       isLoading.value = false;
     }).onError((error, stackTrace) {
@@ -53,7 +56,7 @@ class RelatedVideosController extends GetxController
     };
     dio.get("/video/following").then((response) {
       if (followingVideosList.isEmpty) {
-        isLoading.value = true;
+        isRelatedLoading.value = true;
         followingVideosList =
             PublicVideosModel.fromJson(response.data).data!.obs;
       } else {
@@ -61,9 +64,9 @@ class RelatedVideosController extends GetxController
             PublicVideosModel.fromJson(response.data).data!.obs;
       }
     }).onError((error, stackTrace) {
-      isLoading.value = false;
+      isRelatedLoading.value = false;
     });
-    isLoading.value = false;
+    isRelatedLoading.value = false;
   }
 
   Future<bool> likeVideo(int isLike, int videoId) async {
