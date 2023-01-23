@@ -7,21 +7,26 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hashtagable/hashtagable.dart';
+import 'package:logger/logger.dart';
+import 'package:path/path.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/model/video_fields_model.dart';
+import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/seperator.dart';
+import 'package:uri_to_file/uri_to_file.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 var lastChangedWord = "".obs;
 
+var usersController = Get.find<UserDetailsController>();
 class PostScreenGetx extends StatelessWidget {
   PostScreenGetx(this.postData, this.selectedSound, this.isFromGallery);
 
@@ -92,7 +97,7 @@ class PostScreenGetx extends StatelessWidget {
       };
 
   initPlayer() => videoPlayerController =
-      VideoPlayerController.file(File(postData!.newPath!.toString()))
+      VideoPlayerController.file(File(postData!.filePath!.toString()))
         ..initialize()
         ..setLooping(true)
         ..play().then((value) => isPlaying.value = true);
@@ -728,28 +733,34 @@ class PostScreenGetx extends StatelessWidget {
 
     int currentUnix = DateTime.now().millisecondsSinceEpoch;
     String videoId = 'Thrill-$currentUnix.mp4';
+    var gifName = "".obs;
     videoPlayerController!.pause();
-    var file = File(postData!.filePath);
+    var file = File(postData!.filePath.toString());
 
     try {
       GetStorage().write("videoPrivacy", selectedPrivacy.value);
       await videosController.createGIF(currentUnix, postData!.newPath!).then(
-          (value) async => {
-                await videosController
-                    .awsUploadThumbnail(currentUnix)
-                    .then((value) async {})
+          (value) async  {
+                var file = File(value);
+                if(file.existsSync()){
+                  // await videosController
+                  //     .awsUploadThumbnail(value)
+                  //     .then((value) async {});
+                }
               });
+
       await videosController
           .awsUploadVideo(file, currentUnix)
           .then((value) async {
+        var dir = await getTempDirectory();
         var audioFile = File(saveCacheDirectory + "originalAudio.mp3");
 
         if (postData!.addSoundModel!.sound.isNotEmpty) {
-          audioFile = File(postData!.addSoundModel!.sound);
+          audioFile = await toFile(postData!.addSoundModel!.sound);
         }
         if (selectedSound!.isEmpty) {
           await videosController
-              .awsUploadSound(audioFile, currentUnix.toString())
+              .awsUploadSound(audioFile.path, currentUnix.toString())
               .then((value) => {
                     videosController.postVideo(
                         usersController.storage.read("userId").toString(),
@@ -759,7 +770,7 @@ class PostScreenGetx extends StatelessWidget {
                             : postData!.addSoundModel == null
                                 ? ""
                                 : postData!.addSoundModel!.isSoundFromGallery
-                                    ? "Thrill-$currentUnix.mp3"
+                                    ? "$currentUnix.mp3"
                                     : postData!.addSoundModel!.sound
                                         .split('/')
                                         .last,
@@ -773,7 +784,7 @@ class PostScreenGetx extends StatelessWidget {
                             ? ''
                             : postData!.filterName,
                         "1",
-                        'Thrill-$currentUnix.png',
+                        '$currentUnix.gif',
                         postData!.speed,
                         allowDuets.value,
                         allowComments.value,
@@ -790,7 +801,7 @@ class PostScreenGetx extends StatelessWidget {
                   : postData!.addSoundModel == null
                       ? ""
                       : postData!.addSoundModel!.isSoundFromGallery
-                          ? "Thrill-$currentUnix.mp3"
+                          ? "$currentUnix.mp3"
                           : postData!.addSoundModel!.sound.split('/').last,
               postData!.addSoundModel?.name ?? "",
               "1",
@@ -800,7 +811,7 @@ class PostScreenGetx extends StatelessWidget {
               textEditingController.text,
               postData!.filterName.isEmpty ? '' : postData!.filterName,
               "1",
-              'Thrill-$currentUnix.png',
+              '$currentUnix.gif',
               postData!.speed,
               allowDuets.value,
               allowComments.value,
@@ -818,7 +829,7 @@ class PostScreenGetx extends StatelessWidget {
   }
 
   Future<void> createGIF(int currentUnix) async {
-    String outputPath = '$saveCacheDirectory${postData!.newName}.png';
+    String outputPath = '$saveCacheDirectory${postData!.newName}.gif';
     String filePath = postData!.isDuet
         ? postData!.newPath!.substring(7, postData!.newPath!.length)
         : postData!.newPath!.substring(7, postData!.newPath!.length);
@@ -830,21 +841,24 @@ class PostScreenGetx extends StatelessWidget {
       if (ReturnCode.isSuccess(returnCode)) {
         await _simpleS3
             .uploadFile(
-          File('$saveCacheDirectory${postData!.newName}.png'),
-          "thrillvideo",
-          "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-          AWSRegions.usEast1,
+          File('$saveCacheDirectory${postData!.newName}.gif'),
+          "thrillvideonew",
+          "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
+          AWSRegions.apSouth1,
           debugLog: true,
           s3FolderPath: "gif",
-          fileName: 'Thrill-$currentUnix.png',
+          fileName: '$currentUnix.gif',
           accessControl: S3AccessControl.publicRead,
         )
             .then((value) async {
           var file = File(postData!.addSoundModel!.sound);
+          Logger().wtf(file.path);
         });
         // print("============================> GIF Success!!!!");
       } else {
         // print("============================> GIF Error!!!!");
+        Logger().wtf("failed");
+
       }
     });
   }

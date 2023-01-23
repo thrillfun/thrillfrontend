@@ -12,7 +12,16 @@ class TopHashtagsController extends GetxController
     baseUrl: RestUrl.baseUrl,
   ));
 
+
+  @override
+  void onInit() {
+    super.onInit();
+    change(topHashtagsList,status: RxStatus.loading());
+
+  }
+
   getTopHashTags() async {
+
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };

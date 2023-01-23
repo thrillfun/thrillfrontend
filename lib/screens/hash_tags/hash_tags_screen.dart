@@ -52,7 +52,7 @@ class HashtagVideos extends GetView<HashtagVideosController>{
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return controller.obx((state) =>   Container(
+    return controller.obx((state) =>  state!.isEmpty?emptyListWidget(): Container(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,7 +283,7 @@ class HashtagVideos extends GetView<HashtagVideosController>{
               ))
         ],
       ),
-    ),onLoading: loader());
+    ),onLoading: loader(),onEmpty: emptyListWidget());
 
         // : StaggeredGridView.countBuilder(
         //     staggeredTileBuilder: (index) => index % 2 == 0

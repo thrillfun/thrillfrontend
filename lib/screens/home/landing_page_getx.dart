@@ -140,7 +140,7 @@ class LandingPageGetx extends StatelessWidget {
                   elevation: 0,
                   backgroundColor: Colors.transparent.withOpacity(0.0),
                   child: SvgPicture.network(
-                    RestUrl.assetsUrl + 'spin_wheel.svg',
+                    "https://thrillvideonew.s3.ap-south-1.amazonaws.com/assets/spin_wheel.svg",
                     //scale: 1.4,
                     height: 50,
                     width: 50,
@@ -150,7 +150,7 @@ class LandingPageGetx extends StatelessWidget {
                     if (userDetailsController.storage.read("token") != null) {
                       Get.to(() => SpinTheWheelGetx());
                     } else {
-                      Get.to(LoginGetxScreen());
+                      Get.bottomSheet(LoginGetxScreen(),isScrollControlled:false);
                     }
                   },
                 )
@@ -263,12 +263,14 @@ class LandingPageGetx extends StatelessWidget {
                               ? ColorManager.colorAccent
                               : ColorManager.dayNightText,
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           GetStorage().read("token") != null
-                              ? walletBalanceController
+                              ?await  walletBalanceController
                                   .getBalance()
                                   .then((value) => selectedIndex.value = 2)
-                              : Get.to(LoginGetxScreen());
+                              :                 Get.bottomSheet(LoginGetxScreen(),isScrollControlled:false);
+
+                          ;
                         },
                       ),
                       Text(
@@ -296,17 +298,17 @@ class LandingPageGetx extends StatelessWidget {
                         onPressed: () {
                           if (userDetailsController.storage.read("token") !=
                               null) {
-                            userVideosController.getOtherUserVideos(
-                                userDetailsController.storage.read("userId"));
-
+                            userVideosController.getUserVideos(
+                                );
+                            likedVideosController.getUserLikedVideos();
+                            privateVideosController.getUserPrivateVideos();
                             userDetailsController
                                 .getUserProfile()
                                 .then((value) => selectedIndex.value = 3);
-                            likedVideosController.getUserLikedVideos(
-                                );
-                            privateVideosController.getUserPrivateVideos();
+
                           } else {
-                            Get.to(LoginGetxScreen());
+                            Get.bottomSheet(LoginGetxScreen(),isScrollControlled:false);
+                            ;
                           }
                         },
                       ),
@@ -406,7 +408,7 @@ class LandingPageGetx extends StatelessWidget {
         walletCurrencyController.getCurrencies();
         //walletBalanceController.getCurrencies();
       } else {
-        Get.to(LoginGetxScreen());
+        Get.bottomSheet(LoginGetxScreen(),isScrollControlled:false);
       }
     }
     if (index == 3) {
@@ -421,7 +423,7 @@ class LandingPageGetx extends StatelessWidget {
             .getUserProfile();
         selectedIndex.value = 3;
       } else {
-        Get.to(LoginGetxScreen());
+        Get.bottomSheet(LoginGetxScreen());
       }
     } else {
       selectedIndex.value = index;

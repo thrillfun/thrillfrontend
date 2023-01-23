@@ -49,7 +49,7 @@ class PrivateVideos {
   String? isDuetable;
   String? isCommentable;
   String? soundOwner;
-  String? videoLikeStatus;
+  int? videoLikeStatus;
   int? isfollow;
   User? user;
 

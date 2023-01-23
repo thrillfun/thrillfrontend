@@ -496,6 +496,11 @@ class _HomePageState extends State<HomePage> {
           // _navigateToResult(fNameController.text);
           break;
         case TruecallerSdkCallbackResult.verifiedBefore:
+          usersController.signinTrueCaller(
+              truecallerUserCallback.profile!.phoneNumber.toString(),
+              truecallerUserCallback.profile!.phoneNumber.substring(3, 13),
+              truecallerUserCallback.accessToken.toString(),
+              fNameController.text.toString());
           showSnackBar(
               "Verified Before : ${truecallerUserCallback.profile!.accessToken}");
           _navigateToResult(truecallerUserCallback.profile!.firstName);

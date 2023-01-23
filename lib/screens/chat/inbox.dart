@@ -1,6 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:get/get.dart';
 import 'package:thrill/controller/InboxController.dart';
 import 'package:thrill/rest/rest_url.dart';
@@ -18,198 +19,122 @@ class Inbox extends GetView<InboxController> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: ColorManager.dayNight,
-        body: GetX<InboxController>(
-          builder: (inboxController) => inboxController.isInboxLoading.value
-              ? Center(
-                  child: loader(),
-                )
-              : inboxController.inboxList.isEmpty
-                  ? Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        const Center(
-                            child: Text(
-                          "No Chats yet!",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 24),
-                        )),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 10, top: 10),
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(70)),
-                            child: InkWell(
-                              onTap: () => Get.back(),
-                              child: const Icon(
-                                Icons.close,
-                                size: 20,
-                                color: Colors.white,
+        body: controller.obx((state) => Stack(
+              fit: StackFit.expand,
+              children: [
+                ListView.builder(
+                    itemCount: state!.length,
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    physics: const BouncingScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        onTap: () async {
+                          // Get.to(ChatScreen(
+                          //     inboxModel:
+                          //     state[index]));
+
+                          Get.to(ChatPage());
+                          // await Navigator.pushNamed(
+                          //     context, '/chatScreen',
+                          //     arguments:
+                          //     state[index])
+                          //     .then((value) {
+                          //   if (value != null) {
+                          //     Inbox _inboxModel = value as Inbox;
+                          //     for (Inbox im in state.value) {
+                          //       if (im.id == _inboxModel.id) {
+                          //         setState(() => inboxList.replaceRange(
+                          //             inboxList.indexOf(im),
+                          //             inboxList.indexOf(im) + 1,
+                          //             [_inboxModel]));
+                          //         break;
+                          //       }
+                          //     }
+                          //   }
+                          // });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 5, top: 10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin:
+                                    const EdgeInsets.only(top: 10, bottom: 10),
+                                padding: const EdgeInsets.all(2),
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: ColorManager.spinColorDivider)),
+                                child: ClipOval(
+                                    child: imgProfile(
+                                        '${RestUrl.profileUrl}${state[index].userImage}')),
                               ),
-                            ),
-                          ),
-                        )
-                      ],
-                    )
-                  : Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        ListView.builder(
-                            itemCount: controller.inboxList.length,
-                            padding: const EdgeInsets.only(left: 20, right: 20),
-                            physics: const BouncingScrollPhysics(),
-                            itemBuilder: (BuildContext context, int index) {
-                              return GestureDetector(
-                                onTap: () async {
-                                  Get.to(ChatScreen(
-                                      inboxModel:
-                                          inboxController.inboxList[index]));
-                                  await Navigator.pushNamed(
-                                          context, '/chatScreen',
-                                          arguments:
-                                              inboxController.inboxList[index])
-                                      .then((value) {
-                                    // if (value != null) {
-                                    //   InboxModel _inboxModel = value as InboxModel;
-                                    //   for (Inbox im in usersController.inboxList) {
-                                    //     if (im.id == _inboxModel.id) {
-                                    //       setState(() => inboxList.replaceRange(
-                                    //           inboxList.indexOf(im),
-                                    //           inboxList.indexOf(im) + 1,
-                                    //           [_inboxModel]));
-                                    //       break;
-                                    //     }
-                                    //   }
-                                    // }
-                                  });
-                                },
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
                                 child: Padding(
-                                  padding:
-                                      const EdgeInsets.only(bottom: 5, top: 10),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        margin: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        padding: const EdgeInsets.all(2),
-                                        height: 40,
-                                        width: 40,
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                                color: ColorManager
-                                                    .spinColorDivider)),
-                                        child: ClipOval(
-                                          child: inboxController
-                                                  .inboxList[index]
-                                                  .userImage!
-                                                  .isEmpty
-                                              ? SvgPicture.asset(
-                                                  'assets/profile.svg',
-                                                  width: 10,
-                                                  height: 10,
-                                                )
-                                              : CachedNetworkImage(
-                                                  fit: BoxFit.cover,
-                                                  errorWidget: (a, b, c) =>
-                                                      Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            15.0),
-                                                    child: SvgPicture.asset(
-                                                      'assets/profile.svg',
-                                                      width: 10,
-                                                      height: 10,
-                                                    ),
-                                                  ),
-                                                  imageUrl:
-                                                      '${RestUrl.profileUrl}${inboxController.inboxList[index].userImage}',
-                                                  placeholder: (a, b) =>
-                                                      const Center(
-                                                    child:
-                                                        CircularProgressIndicator(),
-                                                  ),
-                                                ),
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(
+                                          height: 5,
                                         ),
-                                      ),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Expanded(
-                                        child: Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 10),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const SizedBox(
-                                                  height: 5,
-                                                ),
-                                                Text(
-                                                  inboxController
-                                                      .inboxList[index].name
-                                                      .toString(),
-                                                  style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 14),
-                                                ),
-                                                Text(
-                                                  inboxController
-                                                      .inboxList[index]
-                                                      .message!,
-                                                  style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w200,
-                                                      fontSize: 12),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                )
-                                              ],
-                                            )),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 15),
-                                        child: Text(
-                                          getComparedTime(inboxController
-                                              .inboxList[index].time
-                                              .toString()),
+                                        Text(
+                                          state[index].name.toString(),
                                           style: const TextStyle(
-                                              color: Colors.grey, fontSize: 10),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 10, top: 10),
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(70)),
-                            child: InkWell(
-                              onTap: () => Get.back(),
-                              child: const Icon(
-                                Icons.close,
-                                size: 20,
-                                color: Colors.white,
+                                        Text(
+                                          state[index].message!,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w200,
+                                              fontSize: 12),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        )
+                                      ],
+                                    )),
                               ),
-                            ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 15),
+                                child: Text(
+                                  getComparedTime(state[index].time.toString()),
+                                  style: const TextStyle(
+                                      color: Colors.grey, fontSize: 10),
+                                ),
+                              ),
+                            ],
                           ),
-                        )
-                      ],
+                        ),
+                      );
+                    }),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 10, top: 10),
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(70)),
+                    child: InkWell(
+                      onTap: () => Get.back(),
+                      child: const Icon(
+                        Icons.close,
+                        size: 20,
+                        color: Colors.white,
+                      ),
                     ),
-        ));
+                  ),
+                )
+              ],
+            )));
   }
 
   String getComparedTime(String dateTime) {
@@ -248,5 +173,35 @@ class Inbox extends GetView<InboxController> {
         return ("${difference.inDays} ${prefix[4]}");
       }
     }
+  }
+}
+
+class UsersPage extends StatelessWidget {
+  const UsersPage({Key? key}) : super(key: key);
+  void _handlePressed(types.User otherUser, BuildContext context) async {
+    print(await FirebaseChatCore.instance.createRoom(otherUser));
+
+    // Navigate to the Chat screen
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamBuilder(
+        stream:FirebaseFirestore.instance
+            .collection("users")
+            .doc("84").snapshots(),
+         builder: (context,  AsyncSnapshot<DocumentSnapshot> snapshot)  {
+          Object? map = snapshot.data!.data();
+          return snapshot.data!=null
+              ? Wrap(
+                  children: List.generate(
+                      3,
+                      (index) => InkWell(onTap: ()=>_handlePressed(types.User(id: map.toString()), context),child: Text(snapshot.data!.data().toString()),)),
+                )
+              : Container(child: Center(child: InkWell(onTap:()=> _handlePressed(const types.User(id: "86"),context),child: Text("No chats yet!",style: TextStyle(fontSize: 18),),),),);
+          // ...
+        },
+      ),
+    );
   }
 }

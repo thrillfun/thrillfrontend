@@ -5,6 +5,16 @@ import 'package:deepar_flutter/deepar_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
+import 'package:open_file/open_file.dart';
+import 'package:thrill/controller/videos_controller.dart';
+import 'package:thrill/rest/rest_url.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
+import 'package:thrill/screens/video/post_screen.dart';
+import 'package:thrill/utils/util.dart';
+import 'package:video_editor_sdk/video_editor_sdk.dart';
+
+import '../../models/add_sound_model.dart';
+import '../../models/post_data.dart';
 
 class DeepArCamera extends StatefulWidget {
   DeepArCamera({Key? key}) : super(key: key);
@@ -19,13 +29,15 @@ class _DeepArCameraState extends State<DeepArCamera> {
   bool _isFaceMask = false;
   bool _isFilter = false;
 
+  var videosController = Get.find<VideosController>();
+
   final List<String> _effectsList = [];
   final List<String> _maskList = [];
   final List<String> _filterList = [];
   int _effectIndex = 0;
   int _maskIndex = 0;
   int _filterIndex = 0;
-  final String _assetEffectsPath = 'assets/effects';
+  final String _assetEffectsPath = 'assets/effects/';
 
   @override
   void didChangeDependencies() {
@@ -47,16 +59,48 @@ class _DeepArCameraState extends State<DeepArCamera> {
       iosLicenseKey: "",
     )
         .then((value) async {
-      setState(() {});
+      setState(() {
+        deepArController.switchEffect("assets/effects/horns.deepar");
+      });
     });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    deepArController.destroy();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
+        alignment: Alignment.bottomCenter,
         children: [
           DeepArPreview(deepArController),
+          Container(
+            margin: EdgeInsets.only(bottom: 80),
+            child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(
+                _effectsList.length,
+                    (index) => InkWell(
+                  onTap: () {
+                    deepArController.switchEffect(_effectsList[index]);
+                    setState(() {});
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                            image: NetworkImage(RestUrl.placeholderImage))),
+                    height: 80,
+                    width: 80,
+                    child: Text(''),
+                  ),
+                )),
+          ),),
           _topMediaOptions(),
           _bottomMediaOptions()
         ],
@@ -162,7 +206,36 @@ class _DeepArCameraState extends State<DeepArCamera> {
                 onPressed: () async {
                   if (deepArController.isRecording) {
                     File? file = await deepArController.stopVideoRecording();
-                    //   OpenFile.open(file.path);
+
+                   await VESDK.openEditor(Video(file.path)).then((value) {
+                     if (value != null) {
+                       var addSoundModel = AddSoundModel(
+                           0,
+                           0,
+                           0,
+                          "",
+                           "",
+                           '',
+                           '',
+                           true);
+                       PostData postData = PostData(
+                         speed: '1',
+                         newPath: value.video,
+                         filePath: value.video.substring(7, value.video.length),
+                         filterName: "",
+                         isDuet: false,
+                         isDefaultSound: true,
+                         isUploadedFromGallery: true,
+                         trimStart: 0,
+                         trimEnd: 0,
+                       );
+
+                       // Get.snackbar("path", value.video);
+                       Get.to(() => PostScreenGetx(postData, "", true));
+                     }
+                   });
+                    successToast(file.path);
+                   // OpenFile.open(file.path);
                   } else {
                     await deepArController.startVideoRecording();
                   }
@@ -211,15 +284,14 @@ class _DeepArCameraState extends State<DeepArCamera> {
   /// Add effects which are rendered via DeepAR sdk
   void _initEffects() {
     // Either get all effects
-  
 
     // OR
 
     // Only add specific effects
-    _effectsList.add(_assetEffectsPath+'burning_effect.deepar');
-    _effectsList.add(_assetEffectsPath+'flower_face.deepar');
-    _effectsList.add(_assetEffectsPath+'Hope.deepar');
-    _effectsList.add(_assetEffectsPath+'viking_helmet.deepar');
+    _effectsList.add(_assetEffectsPath + 'burning_effect.deepar');
+    _effectsList.add(_assetEffectsPath + 'flower_face.deepar');
+    _effectsList.add(_assetEffectsPath + 'Hope.deepar');
+    _effectsList.add(_assetEffectsPath + 'viking_helmet.deepar');
   }
 
   /// Get all deepar effects from assets

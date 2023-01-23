@@ -375,9 +375,7 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-      (state) => controller!.othersLikedVideos!.isEmpty
-          ? emptyListWidget()
-          : GridView.count(
+      (state) =>  GridView.count(
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(10),
               shrinkWrap: true,
@@ -394,7 +392,7 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
                             isFeed: false,
                             isLock: false,
                             position: index,
-                            likedVideos:  controller!.othersLikedVideos,
+                            likedVideos:  controller!.likedVideos,
                           ));
                         },
                         child: Stack(

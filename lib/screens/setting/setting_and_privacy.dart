@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gallery_saver/files.dart';
 import 'package:get/get.dart';
 
 import 'package:share_plus/share_plus.dart';
@@ -13,6 +15,7 @@ import 'package:thrill/controller/InboxController.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
+import 'package:thrill/screens/chat/chat_screen.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/privacy_policy.dart';
 import 'package:thrill/screens/referal_screen.dart';
@@ -171,9 +174,10 @@ class SettingAndPrivacy extends StatelessWidget {
                   child: mainTile(Icons.favorite, 'Favourite')),
               GestureDetector(
                   onTap: () async {
-                    await inboxController
-                        .getInbox()
-                        .then((value) => Get.to(Inbox()));
+                    Get.to(UsersPage());
+                    // await inboxController
+                    //     .getInbox()
+                    //     .then((value) => Get.to(Inbox()));
 
                     //  Navigator.pushNamed(context, '/inbox');
                   },
@@ -197,10 +201,17 @@ class SettingAndPrivacy extends StatelessWidget {
                   },
                   child: mainTile(Icons.qr_code, qrCode)),
               GestureDetector(
-                  onTap: () {
+                  onTap: () async{
                     //share();
-                    Share.share(
-                        'Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me.');
+                    await userController.createDynamicLink(
+                        userController.userProfile.value.id.toString(),
+                        "profile",
+                        userController.userProfile.value.username,
+                        userController.userProfile.value.avatar).then((value)async {
+                      Share.share(
+                          'Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me. $value');
+                    });
+
                   },
                   child: mainTile(Icons.share, shareProfile)),
 

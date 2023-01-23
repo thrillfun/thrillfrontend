@@ -16,8 +16,7 @@ class HomeController extends GetxController with StateMixin<dynamic> {
   }
 
   getAuthData() async {
-    token?.value = await GetStorage().read("token");
-    userId?.value = await GetStorage().read("userId");
+
   }
 
   loadInterstitialAd() async {

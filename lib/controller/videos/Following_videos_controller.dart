@@ -25,23 +25,13 @@ class FollowingVideosController extends GetxController
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     dio.get("/video/following").then((response) {
-      if (followingVideosList.isEmpty) {
-        isLoading.value = true;
-        if(response.data["status"]==200){
-          followingVideosList =
-              PublicVideosModel.fromJson(response.data).data!.obs;
-        }
-        errorToast(response.statusMessage.toString());
-
-      } else {
-        if(response.data["status"]==200){
-          followingVideosList.value =
-              PublicVideosModel.fromJson(response.data).data!.obs;
-        }
-        else{
-          errorToast(response.statusMessage.toString());
-        }
-
+      if(followingVideosList.isEmpty){
+        followingVideosList =
+            PublicVideosModel.fromJson(response.data).data!.obs;
+      }
+      else{
+        followingVideosList.value =
+            PublicVideosModel.fromJson(response.data).data!.obs;
       }
     }).onError((error, stackTrace) {
       print(error.toString());

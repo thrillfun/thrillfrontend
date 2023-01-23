@@ -49,7 +49,7 @@ class LikedVideos {
   String? isDuetable;
   String? isCommentable;
   String? soundOwner;
-  String? videoLikeStatus;
+  int? videoLikeStatus;
 
   int? isfollow;
   User? user;
@@ -97,7 +97,7 @@ class LikedVideos {
     isCommentable = json['is_commentable'];
     soundOwner = json['sound_owner'];
     isfollow=json['isfollow']??0;
-    videoLikeStatus = json["video_like_status"]??"0";
+    videoLikeStatus = json["video_like_status"]??0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
   }
 
@@ -151,8 +151,8 @@ class User {
   String? twitter;
   String? firebaseToken;
   String? referralCount;
-  String? following;
-  String? followers;
+  int? following;
+  int? followers;
   String? likes;
   Levels? levels;
   String? totalVideos;

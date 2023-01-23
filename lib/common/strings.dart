@@ -1,5 +1,5 @@
 String saveCacheDirectory =
-    "/data/user/0/com.thrill/cache/"; //sound will be downloaded here
+    "/data/data/com.thrill.media/cache/"; //sound will be downloaded here
 String saveDirectory =
     "/storage/emulated/0/Download/"; //unposted videos will be stored here (posted/draft videos gets deleted from device)
 const admobAppId =

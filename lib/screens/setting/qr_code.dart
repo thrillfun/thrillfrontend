@@ -43,6 +43,7 @@ class _QrCodeState extends State<QrCode> {
 
   @override
   void initState() {
+
     usersController.createDynamicLink(usersController.storage.read("userId").toString(),"profile", usersController.userProfile.value.name,"");
 
     super.initState();

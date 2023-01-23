@@ -6,12 +6,14 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:thrill/controller/model/comments_like_response.dart';
 import 'package:thrill/controller/model/comments_post_response.dart';
+import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 
 import 'model/comments_model.dart';
 
 class CommentsController extends GetxController {
+  var relatedVideosController = Get.find<RelatedVideosController>();
   var isLoading = false.obs;
   var isCommentsLoading = false.obs;
   var commentsModel = RxList<CommentData>();
@@ -42,7 +44,7 @@ class CommentsController extends GetxController {
     update();
   }
 
-  Future<void>postComment(int videoId, String userId, String comment) async {
+  Future<void> postComment(int videoId, String userId, String comment) async {
     isLoading.value = true;
 
     try {
@@ -57,6 +59,8 @@ class CommentsController extends GetxController {
       var result = jsonDecode(response.body);
       try {
         commentsPostResponse = CommentsPostResponse.fromJson(result).obs;
+       await getComments(videoId).then((value) => relatedVideosController.getAllVideos());
+        
         successToast(CommentsPostResponse.fromJson(result).message.toString());
       } catch (e) {
         errorToast(CommentsPostResponse.fromJson(result).message.toString());

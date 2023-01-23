@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:thrill/common/color.dart';
 
 class GradientElevatedButton extends StatelessWidget {
   final BorderRadiusGeometry? borderRadius;
@@ -18,9 +19,9 @@ class GradientElevatedButton extends StatelessWidget {
     this.height = 44.0,
     this.gradient = const LinearGradient(
         colors: [
-          Color(0xff145158),
-          Color(0xff193542),
-          Color(0xff1A2C41)
+          ColorManager.colorAccent,
+          ColorManager.colorAccent,
+          ColorManager.colorAccent,
         ]),
   }) : super(key: key);
 

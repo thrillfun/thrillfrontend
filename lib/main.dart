@@ -12,6 +12,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/bindings.dart';
+import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
@@ -43,46 +44,29 @@ void main() async {
   } else {
     await Firebase.initializeApp();
   }
+
   var token = await FirebaseMessaging.instance.getToken();
-  print(token);
+
   CustomNotification.initialize();
 
   try {
     cameras = await availableCameras();
   } on CameraException catch (_) {}
+
   FirebaseMessaging.onMessage.listen((event) {
     CustomNotification.showNormal(
         title: event.notification?.title ?? "",
         body: event.notification?.body ?? "");
   });
+
   getTempDirectory();
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-  ThemeData _darkTheme = ThemeData(
-      accentColor: ColorManager.colorAccent,
-      fontFamily: "Urbanist",
-      brightness: Brightness.dark,
-      primaryColor: ColorManager.colorPrimaryLight,
-      buttonTheme: const ButtonThemeData(
-        buttonColor: ColorManager.colorAccent,
-        disabledColor: Colors.blueGrey,
-      ));
-
-  ThemeData _lightTheme = ThemeData(
-      accentColor: ColorManager.colorAccent,
-      brightness: Brightness.light,
-      fontFamily: "Urbanist",
-      primaryColor: ColorManager.colorPrimaryLight,
-      buttonTheme: const ButtonThemeData(
-        buttonColor: ColorManager.colorAccent,
-        disabledColor: Colors.blueGrey,
-      ));
   final PendingDynamicLinkData? initialLink =
       await FirebaseDynamicLinks.instance.getInitialLink();
 
   runApp(transition.GetMaterialApp(
-      theme: _lightTheme,
-      darkTheme: _darkTheme,
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       initialBinding: DataBindings(),

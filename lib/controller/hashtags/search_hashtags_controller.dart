@@ -22,9 +22,10 @@ class SearchHashtagsController extends GetxController
 
     dio.get("/hashtag/search?search=$searchQuery").then(
         (value) {
-      change(searchList, status: RxStatus.success());
       searchList = search.SearchHashTagsModel.fromJson(value.data).data!.obs;
-    }).onError((error, stackTrace) {
+      change(searchList, status: RxStatus.success());
+
+        }).onError((error, stackTrace) {
       change(searchList, status: RxStatus.error(error.toString()));
     });
   }

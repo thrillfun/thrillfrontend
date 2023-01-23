@@ -76,7 +76,7 @@ class WheelData {
 
 class RecentRewards {
   String? username;
-  num? amount;
+  dynamic? amount;
   String? currency;
   String? currencySymbol;
 
@@ -101,13 +101,13 @@ class RecentRewards {
 }
 
 class WheelRewards {
-  num? id;
-  num? amount;
+  dynamic? id;
+  dynamic? amount;
   String? currency;
   String? currencySymbol;
-  num? probability;
-  num? probabilityCounter;
-  num? isImage;
+  dynamic? probability;
+  dynamic? probabilityCounter;
+  dynamic? isImage;
   String? imagePath;
   String? createdAt;
   String? updatedAt;

@@ -7,13 +7,13 @@ class RestUrl {
   //     "http://thrill.fun/public/dev/uploads/profile_images/profile_images1663598406.jpg";
   // static const String videoUrl = "https://thrillvideo.s3.amazonaws.com/test/";
   static const String assetsUrl =
-      "https://thrillvideo.s3.amazonaws.com/assets/";
+      "https://thrillvideonew.s3.ap-south-1.amazonaws.com/assets/";
   // static const String bannerUrl = "http://thrill.fun/dev/uploads/banners/";
   // static const String thambUrl = "http://thrill.fun/dev/uploads/videos/";
   // static const String soundUrl = "http://thrill.fun/dev/";
   // static const String gifUrl = "https://thrillvideo.s3.amazonaws.com/gif/";
   static const String placeholderImage =
-      "https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg";
+      "https://thrillvideonew.s3.ap-south-1.amazonaws.com/assets/user_placeholder.png";
   // static const String awsSoundUrl =
   //     "https://thrillvideo.s3.amazonaws.com/sound/";
   // // static const String currencyUrl = "http://thrill.fun/dev/uploads/currency/";

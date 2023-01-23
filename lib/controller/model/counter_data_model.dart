@@ -31,9 +31,9 @@ class CounterDataModel {
 }
 
 class CounterData {
-  num? id;
-  num? probabilityCounter;
-  num? probability;
+  dynamic? id;
+  dynamic? probabilityCounter;
+  dynamic? probability;
 
   CounterData({this.id, this.probabilityCounter, this.probability});
 

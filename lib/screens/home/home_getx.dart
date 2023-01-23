@@ -9,6 +9,7 @@ import 'package:thrill/controller/site_settings/site_settings_controller.dart';
 import 'package:thrill/controller/videos/Following_videos_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
+import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/video/camera_screen.dart';
 import 'package:thrill/utils/util.dart';
@@ -22,6 +23,7 @@ class HomeGetx extends GetView<HomeController> {
 
   var videosController = Get.find<VideosController>();
   var siteSettingsController = Get.find<SiteSettingsController>();
+
   @override
   Widget build(BuildContext context) {
     controller.loadInterstitialAd();
@@ -128,14 +130,21 @@ class HomeGetx extends GetView<HomeController> {
                                     //         "");
                                     //   }
                                     // });
-                                    Get.to(CameraScreen(
-                                      selectedSound: "",
-                                      owner: userDetailsController
-                                              .userProfile.value.name ??
-                                          "",
-                                      id: userDetailsController.storage
-                                          .read("userId"),
-                                    ));
+                                    userDetailsController.storage
+                                                .read("token") ==
+                                            null
+                                        ? Get.bottomSheet(LoginGetxScreen())
+                                        : Get.to(CameraScreen(
+                                            selectedSound: "",
+                                            owner: userDetailsController
+                                                    .userProfile.value.name ??
+                                                "",
+                                            id: userDetailsController.storage
+                                                .read("userId"),
+                                          ));
+                                    // Get.to(DeepArCamera(
+                                    //
+                                    // ));
                                   },
                                   child: const Icon(
                                     IconlyLight.camera,
@@ -160,6 +169,7 @@ class RelatedVideos extends GetView<RelatedVideosController> {
 
   @override
   Widget build(BuildContext context) {
+    controller.getAllVideos();
     return GetX<RelatedVideosController>(
         builder: (controller) => controller.isLoading.isTrue
             ? loader()
@@ -169,12 +179,14 @@ class RelatedVideos extends GetView<RelatedVideosController> {
 
 class FollowingVideos extends GetView<FollowingVideosController> {
   const FollowingVideos({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
+    controller.getFollowingVideos();
+
     return GetX<FollowingVideosController>(
         builder: (controller) => controller.isLoading.isTrue
             ? loader()
             : videoItemLayout(controller.followingVideosList));
   }
 }
-

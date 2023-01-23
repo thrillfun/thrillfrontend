@@ -1,6 +1,7 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:preload_page_view/preload_page_view.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/widgets/better_video_player.dart';
@@ -8,7 +9,7 @@ import 'package:thrill/widgets/better_video_player.dart';
 import '../screens/profile/view_profile.dart';
 import '../utils/util.dart';
 
- PageController? preloadPageController;
+ PreloadPageController? preloadPageController;
 
 class VideoPlayerItem extends StatefulWidget {
   VideoPlayerItem({this.videosList, this.position});
@@ -40,7 +41,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   void initState() {
     // TODO: implement initState
-    preloadPageController = PageController();
+    preloadPageController = PreloadPageController();
     preloadPageController!.addListener(scrollListener);
 
     super.initState();
@@ -61,7 +62,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
         if (snapshot.hasData && snapshot.data != null) {
          
         }
-        return PageView.builder(
+        return PreloadPageView.builder(
             controller: preloadPageController,
             itemCount: widget.videosList!.length,
             scrollDirection: Axis.vertical,

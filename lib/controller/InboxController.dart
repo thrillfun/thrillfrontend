@@ -32,7 +32,6 @@ class InboxController extends GetxController with StateMixin<RxList<Inbox>> {
 
     } );
     isInboxLoading.value = false;
-
     update();
   }
 }

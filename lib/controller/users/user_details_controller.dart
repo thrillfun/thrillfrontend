@@ -1,22 +1,21 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart' as client;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path/path.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:thrill/common/color.dart';
+import 'package:sim_data/sim_data.dart';
+import 'package:sim_data/sim_model.dart';
 import 'package:thrill/controller/model/user_details_model.dart' as authUser;
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
-import 'package:thrill/screens/auth/otp_verification.dart';
 import 'package:thrill/utils/util.dart';
 
 import '../../screens/home/landing_page_getx.dart';
@@ -26,11 +25,31 @@ class UserDetailsController extends GetxController
   var storage = GetStorage();
   var userProfile = authUser.User().obs;
   var otherUserProfile = authUser.User().obs;
+  var isSimCardAvailable = true.obs;
 
   var dio = client.Dio(client.BaseOptions(baseUrl: RestUrl.baseUrl));
   var qrData = "".obs;
 
+  @override
+  void onInit() async {
+    super.onInit();
+    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) async {
+      // launchUrl(Uri.parse(RestUrl.videoUrl + dynamicLinkData.link.path));
+      if (dynamicLinkData.link.queryParameters["type"] == "referal") {
+        await GetStorage().write(
+            "referal", dynamicLinkData.link.queryParameters["id"].toString());
+      }
+    }).onError((error) {
+      errorToast(error.toString());
+    });
+    isSimCardAvailable.value = await printSimCardsData();
+  }
+  printSimCardsData() async {
+    SimData simData = await SimDataPlugin.getSimData();
+    return simData.cards.length==0?  false : true;
+  }
   var isOtpSent = false.obs;
+
   Future<void> getUserProfile() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -40,8 +59,9 @@ class UserDetailsController extends GetxController
         await storage.read("userId") == null) {
       Get.to(LoginGetxScreen());
     } else {
-      dio.post('/user/get-profile', queryParameters: {"id": "${GetStorage().read("userId")}"}).then(
-          (result) {
+      dio.post('/user/get-profile', queryParameters: {
+        "id": "${GetStorage().read("userId")}"
+      }).then((result) {
         userProfile =
             authUser.UserDetailsModel.fromJson(result.data).data!.user!.obs;
         change(userProfile, status: RxStatus.success());
@@ -57,11 +77,11 @@ class UserDetailsController extends GetxController
     };
     change(userProfile, status: RxStatus.loading());
     dio.post('/user/get-profile', queryParameters: {"id": userId}).then(
-            (result) {
-          otherUserProfile =
-              authUser.UserDetailsModel.fromJson(result.data).data!.user!.obs;
-          change(userProfile, status: RxStatus.success());
-        }).onError((error, stackTrace) {
+        (result) {
+      otherUserProfile =
+          authUser.UserDetailsModel.fromJson(result.data).data!.user!.obs;
+      change(userProfile, status: RxStatus.success());
+    }).onError((error, stackTrace) {
       change(userProfile, status: RxStatus.error(error.toString()));
     });
   }
@@ -92,7 +112,9 @@ class UserDetailsController extends GetxController
       // "phone": phone,
       "firebase_token": firebase_token,
       "name": name,
-      "referral_code": await createDynamicLink(social_login_id,"referal",name,email),
+      "referral_code": GetStorage().read("referal") == null
+          ? ""
+          : GetStorage().read("referal").toString()
     }).then((value) async {
       userProfile =
           authUser.UserDetailsModel.fromJson(value.data).data!.user!.obs;
@@ -106,6 +128,17 @@ class UserDetailsController extends GetxController
               .data!
               .token!
               .toString());
+      await FirebaseChatCore.instance
+          .createUserInFirestore(
+            types.User(
+              firstName: userProfile.value.firstName,
+              id: userProfile.value.id.toString(),
+              // UID from Firebase Authentication
+              imageUrl: userProfile.value.avatar.toString(),
+              lastName: userProfile.value.lastName,
+            ),
+          )
+          .then((value) => print("Firebase result => success"));
 
       change(userProfile, status: RxStatus.success());
 
@@ -116,7 +149,6 @@ class UserDetailsController extends GetxController
     }).onError((error, stackTrace) {
       change(userProfile, status: RxStatus.error(error.toString()));
     });
-
   }
 
   Future<void> signInWithGoogle() async {
@@ -131,6 +163,7 @@ class UserDetailsController extends GetxController
       idToken: googleAuth.idToken,
     );
     // Once signed in, return the UserCredential
+
     await socialLoginRegister(googleUser.id, "google", googleUser.email, "",
         googleAuth.accessToken, googleUser.displayName ?? "");
   }
@@ -169,14 +202,13 @@ class UserDetailsController extends GetxController
   }
 
   Future<void> signOutGoogle() async {
-    try{
+    try {
       final GoogleSignIn googleUser = GoogleSignIn(scopes: <String>["email"]);
 
       await GoogleSignIn().disconnect().catchError((e, stack) {});
       await FirebaseAuth.instance.signOut();
       googleUser.signOut();
-    }
-    on Exception catch(e){
+    } on Exception catch (e) {
       errorToast(e.toString());
     }
   }
@@ -260,14 +292,15 @@ class UserDetailsController extends GetxController
 
   Future<void> signinTrueCaller(String social_login_id, String phone,
       String firebase_token, String name) async {
-
     dio.post("/SocialLogin", queryParameters: {
       "social_login_id": social_login_id,
       "social_login_type": "truecaller",
       "phone": phone,
       "firebase_token": firebase_token,
       "name": name,
-       "referral_code": await createDynamicLink(social_login_id, "referal", name, firebase_token),
+      "referral_code": GetStorage().read("referal") == null
+          ? ""
+          : GetStorage().read("referal").toString()
     }).then((value) async {
       try {
         if (value.data["status"] == true) {
@@ -297,7 +330,6 @@ class UserDetailsController extends GetxController
         print(e.toString());
       }
     }).onError((error, stackTrace) {});
-
   }
 
   Future<void> verifyOtp(String mobileNumber, String otp) async {
@@ -341,12 +373,12 @@ class UserDetailsController extends GetxController
     }).onError((error, stackTrace) {});
   }
 
-  Future<String> createDynamicLink(String id,
-      String? type, String? name, String? something) async {
+  Future<String> createDynamicLink(
+      String id, String? type, String? name, String? avatar) async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
       uriPrefix: 'https://thrill.page.link/',
       link: Uri.parse(
-          "https://thrill.fun?type=$type&id=$id&name=$name&something=$something"),
+          "https://thrill.fun?type=$type&id=$id&name=$name&something=$avatar"),
       androidParameters: const AndroidParameters(
         packageName: 'com.thrill.media',
         minimumVersion: 1,

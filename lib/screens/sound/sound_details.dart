@@ -564,7 +564,7 @@ class _SoundDetailsState extends State<SoundDetails>
                     child: InkWell(
                         onTap: () async {
                           soundsController.downloadAudio(widget.map["sound"],
-                              widget.map["user"].toString(), widget.map["id"]);
+                              widget.map["user"].toString(), widget.map["id"],widget.map["soundName"]);
                         },
                         child: RichText(
                           text: const TextSpan(

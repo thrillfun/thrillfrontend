@@ -49,17 +49,17 @@ class Data {
 }
 
 class Activities {
-  String? name;
-  String? currentLevel;
-  String? nextLevel;
-  String? conditions;
+  dynamic? name;
+  dynamic? currentLevel;
+  dynamic? nextLevel;
+  dynamic? conditions;
   dynamic? earnedSpins;
-  num? totalSpin;
+  dynamic? totalSpin;
   dynamic? maxLevel;
-  num? progress;
-  num? totalView;
-  num? currentView;
-  num? nextLvlView;
+  dynamic? progress;
+  dynamic? totalView;
+  dynamic? currentView;
+  dynamic? nextLvlView;
 
   Activities(
       {this.name,

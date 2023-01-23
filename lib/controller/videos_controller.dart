@@ -6,11 +6,13 @@ import 'package:external_path/external_path.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:flutter/cupertino.dart';
+
 // import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
+import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
@@ -337,14 +339,13 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       int soundOwnerId,
       {String coverImage = ""}) async {
     isLoading.value = true;
-
-    var response = await http.post(
-      Uri.parse('${RestUrl.baseUrl}/video/post'),
-      headers: {
-        "Authorization":
-            "Bearer ${await userDetailsController.storage.read("token")}"
-      },
-      body: {
+    dio.options.headers = {
+      "Authorization":
+          "Bearer ${await userDetailsController.storage.read("token")}"
+    };
+    await dio.post(
+      '/video/post',
+      queryParameters: {
         'user_id': userId,
         'video': videoUrl,
         'sound': sound,
@@ -365,26 +366,17 @@ class VideosController extends GetxController with StateMixin<dynamic> {
         'sound_owner': soundOwnerId.toString(),
         "cover_image": coverImage
       },
-    );
+    ).then((value) {
+      try {
+        successToast(VideoPostResponse.fromJson(value.data).message.toString());
 
-    try {
-      if (response.statusCode == 200) {
-        try {
-          successToast(VideoPostResponse.fromJson(json.decode(response.body))
-              .message
-              .toString());
-
-          Get.offAll(LandingPageGetx());
-        } catch (e) {
-          errorToast(VideoPostResponse.fromJson(json.decode(response.body))
-              .message
-              .toString());
-        }
+        Get.offAll(LandingPageGetx());
+      } catch (e) {
+        errorToast(VideoPostResponse.fromJson(value.data).message.toString());
       }
-    } on Exception catch (e) {
-      debugPrint(e.toString());
-    }
-
+    }).onError((error, stackTrace) {
+      errorToast(error.toString());
+    });
     isLoading.value = false;
     update();
   }
@@ -455,7 +447,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
         backgroundColor: ColorManager.dayNight);
 
     try {
-      await simpleS3
+      await SimpleS3()
           .uploadFile(
         file,
         "thrillvideonew",
@@ -468,15 +460,14 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       )
           .then((value) {
         print(value);
-        Get.back();
+        print("============================> Video Upload Success!!!!");
       });
     } on Exception catch (e) {
-      debugPrint(e.toString());
-      Get.back();
+      Logger().wtf(e);
     }
   }
 
-  Future<void> createGIF(int currentUnix, String filePath) async {
+  Future<String> createGIF(int currentUnix, String filePath) async {
     String outputPath = saveCacheDirectory + 'thumbnail.gif';
     String path = filePath.substring(7, filePath.length);
     FFmpegKit.execute(
@@ -486,68 +477,74 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
       if (ReturnCode.isSuccess(returnCode)) {
         Get.back();
-        print("============================> GIF Success!!!!");
+        print("============================> GIF Success!!!!" + outputPath);
       } else {
         print("============================> GIF Error!!!!");
       }
     });
+
+    return outputPath;
   }
 
-  Future<void> awsUploadThumbnail(int currentUnix) async {
+  Future<void> awsUploadThumbnail(String path) async {
+    int currentUnix = DateTime.now().millisecondsSinceEpoch;
+
     Get.defaultDialog(
         content: loader(),
         title: "Uploading Thumbnail",
         backgroundColor: ColorManager.dayNight);
     try {
-      var file = File(saveCacheDirectory + 'thumbnail.png');
-      await simpleS3
+      await SimpleS3()
           .uploadFile(
-        file,
-        "thrillvideo",
-        "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-        AWSRegions.usEast1,
+        File(path),
+        "thrillvideonew",
+        "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
+        AWSRegions.apSouth1,
         debugLog: true,
-        s3FolderPath: "gif",
-        fileName: 'Thrill-$currentUnix.png',
+        s3FolderPath:"gif",
+        fileName: 'Thrill-$currentUnix.gif',
         accessControl: S3AccessControl.publicRead,
       )
           .then((value) async {
-        debugPrint(value);
+        Logger().i(value);
         Get.back();
       });
+      Logger().w("============================> Thumbnail upload Success!!!!");
     } on Exception catch (e) {
       Get.back();
-      debugPrint(e.toString());
+      Logger().wtf(e);
+
     }
+    Get.back();
   }
 
-  Future<void> awsUploadSound(File file, String currentUnix) async {
+  Future<void> awsUploadSound(String file, String currentUnix) async {
     Get.defaultDialog(
         content: loader(),
         title: "Uploading Sound",
         backgroundColor: ColorManager.dayNight);
 
-    var userName = "";
-    try {
-      await simpleS3
-          .uploadFile(
-        file,
-        "thrillvideo",
-        "us-east-1:f16a909a-8482-4c7b-b0c7-9506e053d1f0",
-        AWSRegions.usEast1,
-        debugLog: true,
-        fileName: '$currentUnix.mp3',
-        s3FolderPath: "sound",
-        accessControl: S3AccessControl.publicRead,
-      )
-          .then((value) async {
-        Get.back();
-        debugPrint(value);
-      });
-    } on Exception catch (e) {
-      debugPrint(e.toString());
-      Get.back();
-    }
+   try{
+     await SimpleS3()
+         .uploadFile(
+       File(file),
+       "thrillvideonew",
+       "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
+       AWSRegions.apSouth1,
+       debugLog: true,
+       fileName: '$currentUnix.mp3',
+       s3FolderPath: "sound",
+       accessControl: S3AccessControl.publicRead,
+     )
+         .then((value) async {
+       Get.back();
+       Logger().w(value);
+     });
+   }
+   catch(e){
+     Logger().wtf(e);
+   }
+    Get.back();
   }
 
   Future<void> openEditor(bool isGallery, String path, String selectedSound,
@@ -570,7 +567,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       if (!isGallery) {
         await VESDK
             .openEditor(Video.composition(videos: videosList),
-                configuration: setConfig(albums, selectedSound, owner))
+                configuration: setConfig(albums, selectedSound, userDetailsController.userProfile.value.username))
             .then((value) async {
           Map<dynamic, dynamic> serializationData = await value?.serialization;
 
@@ -682,7 +679,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
               });
             } else {
               await FFmpegKit.execute(
-                      "-y -i ${value!.video} -map 0:a -acodec libmp3lame $saveCacheDirectory/originalAudio.mp3")
+                      "-y -i ${value!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
                   .then((audio) async {
                 var addSoundModel = AddSoundModel(
                     0,
@@ -737,24 +734,19 @@ class VideosController extends GetxController with StateMixin<dynamic> {
           var isOriginal = true.obs;
           var songPath = '';
           var songName = '';
-          operationData.forEach((element) {
-            Map<dynamic, dynamic> data = element['options'];
+          operationData.forEach((operation) {
+            Map<dynamic, dynamic> data = operation['options'];
             if (data.containsKey("clips")) {
               isOriginal.value = false;
+              albums.forEach((element) {
+                songPath = element.uri.toString();
+                songName = element.displayNameWOExt;
+              });
             }
           });
-          if (!isOriginal.value) {
+          if (isOriginal.isFalse) {
             operationData.forEach((operation) {
-              albums.forEach((element) {
-                if (operation['options']['type'] == 'audio') {
-                  if (element.title.contains(operation['options']['clips'][0]
-                          ['identifier']
-                      .toString())) {
-                    songPath = element.uri.toString();
-                    songName = element.title;
-                  }
-                }
-              });
+
             });
 
             if (value != null) {
@@ -762,10 +754,8 @@ class VideosController extends GetxController with StateMixin<dynamic> {
                   0,
                   id,
                   0,
-                  songPath.isNotEmpty
-                      ? songPath
-                      : "$saveCacheDirectory/originalAudio.mp3",
-                  songName.isNotEmpty ? songName : "original by $owner",
+                  songPath,
+                  "$songName by $owner",
                   '',
                   '',
                   true);
@@ -786,8 +776,9 @@ class VideosController extends GetxController with StateMixin<dynamic> {
               Get.to(() => PostScreenGetx(postData, selectedSound, true));
             }
           } else {
+            var dir = await getTempDirectory();
             await FFmpegKit.execute(
-                    "-y -i ${value!.video} -map 0:a -acodec libmp3lame $path")
+                    "-y -i ${value!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
                 .then((audio) async {
               var addSoundModel = AddSoundModel(
                   0,
@@ -795,7 +786,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
                   0,
                   songPath.isNotEmpty
                       ? songPath
-                      : "$saveCacheDirectory/originalAudio.mp3",
+                      : "${saveCacheDirectory}originalAudio.mp3",
                   songName.isNotEmpty ? songName : "original by $owner",
                   '',
                   '',
@@ -880,9 +871,9 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       video: imgly.VideoOptions(quality: 0.9, codec: codec[0]),
     );
 
-    imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
-        RestUrl.assetsUrl + "transparent_logo.png",
-        alignment: imgly.AlignmentMode.topLeft);
+    // imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
+    //     RestUrl.assetsUrl + "transparent_logo.png",
+    //     alignment: imgly.AlignmentMode.topLeft);
 
     var stickerList = [
       imgly.StickerCategory.giphy(
@@ -900,7 +891,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
           imgly.StickerOptions(personalStickers: true, categories: stickerList),
       audio: audioOptions,
       export: exportOptions,
-      watermark: waterMarkOptions,
+      // watermark: waterMarkOptions,
     );
 
     return configuration;

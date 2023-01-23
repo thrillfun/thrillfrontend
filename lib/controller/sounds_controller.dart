@@ -58,20 +58,20 @@ class SoundsController extends GetxController with StateMixin<RxList<Sounds>> {
     localSoundsList.value = await OnAudioQuery().querySongs();
   }
 
-  downloadAudio(String soundName, String userName, int id) async {
+  downloadAudio(String soundUrl, String userName, int id,String soundName) async {
     try {
+      Get.defaultDialog(
+          title: "Downloading audio",
+          content: Obx(() => Text(currentProgress.value)));
       var path = await getTemporaryDirectory();
       await fileSupport
           .downloadCustomLocation(
-        url: "${RestUrl.awsSoundUrl}$soundName",
+        url: "${RestUrl.awsSoundUrl}$soundUrl",
         path: path.path,
         filename: soundName.split('.').first,
         extension: ".${soundName.split('.').last}",
         progress: (progress) async {
           currentProgress.value = progress;
-          Get.defaultDialog(
-              title: "Downloading audio",
-              content: Obx(() => Text(currentProgress.value)));
         },
       )
           .then((value) {
@@ -80,6 +80,7 @@ class SoundsController extends GetxController with StateMixin<RxList<Sounds>> {
           selectedSound: value!.path,
           owner: userName,
           id: id,
+          soundName: soundName,
         ));
       }).onError((error, stackTrace) {
         errorToast(error.toString());

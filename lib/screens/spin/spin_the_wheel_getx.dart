@@ -63,7 +63,7 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                     ),
                     rewardLayout(),
                     prizeLayout(),
-                    wheelLayout(),
+                    controller.isWheelDataLoading.isTrue?loader():wheelLayout(),
                     submitButtonLayout(),
                     levelsLayout()
                     //    lastRewardLayout()

@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
@@ -22,7 +21,6 @@ import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/hash_tags/hash_tags_screen.dart';
-import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
@@ -51,29 +49,30 @@ var hashtagVideosController = Get.find<HashtagVideosController>();
 
 class BetterReelsPlayer extends StatefulWidget {
   BetterReelsPlayer(
-      this.gifImage,
-      this.videoUrl,
-      this.pageIndex,
-      this.currentPageIndex,
-      this.isPaused,
-      this.callback,
-      this.publicUser,
-      this.videoId,
-      this.soundName,
-      this.isDuetable,
-      this.publicVideos,
-      this.UserId,
-      this.userName,
-      this.description,
-      this.isHome,
-      this.hashtagsList,
-      this.sound,
-      this.soundOwner,
-      this.videoLikeStatus,
-      this.isCommentAllowed,
-      {this.like,
-      this.isfollow,
-      this.commentsCount,});
+    this.gifImage,
+    this.videoUrl,
+    this.pageIndex,
+    this.currentPageIndex,
+    this.isPaused,
+    this.callback,
+    this.publicUser,
+    this.videoId,
+    this.soundName,
+    this.isDuetable,
+    this.publicVideos,
+    this.UserId,
+    this.userName,
+    this.description,
+    this.isHome,
+    this.hashtagsList,
+    this.sound,
+    this.soundOwner,
+    this.videoLikeStatus,
+    this.isCommentAllowed, {
+    this.like,
+    this.isfollow,
+    this.commentsCount,
+  });
 
   String gifImage, sound, soundOwner;
   String videoLikeStatus;
@@ -96,7 +95,6 @@ class BetterReelsPlayer extends StatefulWidget {
   RxInt? like = 0.obs;
   int? isfollow = 0;
   RxInt? commentsCount = 0.obs;
-
 
   @override
   State<BetterReelsPlayer> createState() => _VideoAppState();
@@ -138,9 +136,6 @@ class _VideoAppState extends State<BetterReelsPlayer>
           }));
 
     currentDuration.value = betterPlayerController.value.position;
-
-
-
   }
 
   @override
@@ -205,15 +200,23 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                     betterPlayerController.value.aspectRatio,
                                 child: ValueListenableBuilder(
                                   valueListenable: betterPlayerController,
-                                builder: (context, VideoPlayerValue value,child) {
-                                    if(value.position==value.duration){
-                                      preloadPageController!.animateToPage(widget.pageIndex.value+1,
-                                          duration: Duration(milliseconds: 400),
-                                          curve: Curves.easeIn);
-                                      videosController.postVideoView(widget.videoId);
+                                  builder:
+                                      (context, VideoPlayerValue value, child) {
+                                    if (value.position == value.duration &&
+                                        value.position > Duration.zero &&
+                                        initialized.isTrue) {
+                                      // var nextPage = preloadPageController!.page!.toInt();
+                                      // nextPage++;
+                                      // preloadPageController!.animateToPage(
+                                      //     nextPage,
+                                      //     duration: Duration(milliseconds: 400),
+                                      //     curve: Curves.easeIn);
+                                      videosController
+                                          .postVideoView(widget.videoId);
                                     }
                                     return VideoPlayer(betterPlayerController);
-                                },),
+                                  },
+                                ),
                               )
                             : CachedNetworkImage(
                                 height: Get.height,
@@ -511,8 +514,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                         IconButton(
                                                             onPressed:
                                                                 () async {
-                                                              var deepLink = await userDetailsController.createDynamicLink(
-                                                                  "${widget.publicUser?.id}",
+                                                              var deepLink = await userDetailsController
+                                                                  .createDynamicLink(
+                                                                      "${widget.publicUser?.id}",
                                                                       'profile',
                                                                       "${widget.publicUser!.name}",
                                                                       "${widget.publicUser!.avatar}");
@@ -564,14 +568,20 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                               Get.back(
                                                                   closeOverlays:
                                                                       true);
-                                                              GallerySaver.saveVideo(
-                                                                      RestUrl.videoUrl +
-                                                                          widget
-                                                                              .videoUrl)
-                                                                  .then((value) =>
-                                                                      showSuccessToast(
-                                                                          context,
-                                                                          "Video Saved Successfully"));
+                                                              relatedVideosController.downloadAndProcessVideo(
+                                                                      widget
+                                                                          .videoUrl,
+                                                                  widget
+                                                                      .userName
+                                                                      .toString());
+                                                              // GallerySaver.saveVideo(
+                                                              //         RestUrl.videoUrl +
+                                                              //             widget
+                                                              //                 .videoUrl)
+                                                              //     .then((value) =>
+                                                              //         showSuccessToast(
+                                                              //             context,
+                                                              //             "Video Saved Successfully"));
                                                             },
                                                             icon: const Icon(
                                                               Icons.download,
@@ -1062,12 +1072,11 @@ class _VideoAppState extends State<BetterReelsPlayer>
           ],
         ),
         onVisibilityChanged: (VisibilityInfo info) {
-          if(initialized.isTrue){
+          if (initialized.isTrue) {
             info.visibleFraction == 0
-                ? betterPlayerController.setVolume(0)
-                : betterPlayerController.setVolume(1);
+                ? betterPlayerController.pause()
+                : betterPlayerController.play();
           }
-
         });
   }
 

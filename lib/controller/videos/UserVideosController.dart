@@ -20,9 +20,7 @@ class UserVideosController extends GetxController with StateMixin<RxList<Videos>
   ));
 
 
-  @override
-  void onInit() {
-  }
+
 
   Future<void> getUserVideos() async {
     dio.options.headers = {
@@ -49,14 +47,13 @@ class UserVideosController extends GetxController with StateMixin<RxList<Videos>
     change(otherUserVideos, status: RxStatus.loading());
     dio
         .post('/video/user-videos', queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 10))
         .then((response) {
           otherUserVideos.clear();
           otherUserVideos = OwnVideosModel.fromJson(response.data).data!.obs;
           change(otherUserVideos, status: RxStatus.success());
         })
         .onError((error, stackTrace) {
-          change(otherUserVideos, status: RxStatus.error());
+          change(otherUserVideos, status: RxStatus.error(error.toString()));
         });
   }
 

@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
-import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/dashedline_vertical_painter.dart';
 
@@ -270,10 +269,17 @@ class ReferalScreen extends StatelessWidget {
                         ColorManager.colorAccent
                       ])),
               child: IconButton(
-                onPressed: () {
-                  Clipboard.setData(
-                      ClipboardData(text: fullDeepLink.value.toString()));
-                  successToast("Link copied!");
+                onPressed: () async {
+                  await usersController.createDynamicLink(
+                      usersController.userProfile.value.referralCode.toString(),
+                      "referal",
+                      usersController.userProfile.value.username,
+                      usersController.userProfile.value.avatar).then((value) {
+                    Clipboard.setData(
+                        ClipboardData(text: value));
+                    successToast("Link copied!");
+                  });
+
                 },
                 icon: Icon(
                   Icons.copy,
