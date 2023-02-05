@@ -28,13 +28,14 @@ class DiscoverGetx extends GetView<TopHashtagsController> {
         backgroundColor: ColorManager.dayNight,
         body: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            child: controller.obx((_) => Tophashtags(), onLoading:  Container(
-              height: Get.height,
-              width: Get.width,
-              child: Center(
-                child: loader(),
-              ),
-            ))));
+            child: controller.obx((_) => Tophashtags(),
+                onLoading: Container(
+                  height: Get.height,
+                  width: Get.width,
+                  child: Center(
+                    child: loader(),
+                  ),
+                ))));
   }
 
 //   StaggeredGridView.countBuilder(
@@ -182,7 +183,7 @@ class HashtagsSuggestions extends GetView<TopHashtagsController> {
                       onTap: () async {
                         await hashtagVideosController
                             .getVideosByHashTags(state[index].hashtagId!)
-                            .then((value) => Get.to(HashTagsScreen(
+                            .then((value) => Get.to(() => HashTagsScreen(
                                 tagName: state[index].hashtagName.toString())));
                       },
                       child: Container(
@@ -202,7 +203,6 @@ class HashtagsSuggestions extends GetView<TopHashtagsController> {
                           ))),
                 ))),
       ),
-
     );
   }
 }
@@ -236,7 +236,7 @@ class Tophashtags extends GetView<TopHashtagsController> {
                           await searchHashtagsController
                               .searchHashtags("")
                               .then((value) {
-                            Get.to(SearchGetx());
+                            Get.to(() => SearchGetx());
                           });
                         },
                         child: const Icon(
@@ -282,7 +282,7 @@ class Tophashtags extends GetView<TopHashtagsController> {
                         onTap: () async {
                           await hashtagVideosController
                               .getVideosByHashTags(state[index].hashtagId!)
-                              .then((value) => Get.to(HashTagsScreen(
+                              .then((value) => Get.to(() => HashTagsScreen(
                                     tagName: state[index].hashtagName,
                                     videosList: state[index].videos,
                                     videoCount: state.length,
@@ -366,7 +366,7 @@ class Tophashtags extends GetView<TopHashtagsController> {
                           crossAxisCount: 3,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: Get.width / Get.height,
+                          childAspectRatio: 0.8,
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           children: List.generate(
@@ -384,7 +384,9 @@ class Tophashtags extends GetView<TopHashtagsController> {
                                             firstName: element.user?.firstName,
                                             lastName: element.user?.lastName,
                                             username: element.user?.username,
-                                            isfollow: 0,
+                                            isfollow: int.parse(element
+                                                .user!.following
+                                                .toString()),
                                           );
                                           videosList1.add(PublicVideos(
                                             id: element.id,
@@ -404,13 +406,15 @@ class Tophashtags extends GetView<TopHashtagsController> {
                                             isDuet: "no",
                                             duetFrom: "",
                                             isCommentable: "yes",
+                                            videoLikeStatus:
+                                                element.video_like_status,
                                             user: user,
                                           ));
                                         });
-                                        Get.to(VideoPlayerItem(
-                                          videosList: videosList1,
-                                          position: videoIndex,
-                                        ));
+                                        Get.to(() => VideoPlayerItem(
+                                              videosList: videosList1,
+                                              position: videoIndex,
+                                            ));
                                       },
                                       child: Stack(
                                         fit: StackFit.expand,

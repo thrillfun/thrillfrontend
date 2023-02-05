@@ -1,25 +1,19 @@
-import 'dart:io';
-
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
-import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart' as justAudio;
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
-import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/search/search_getx.dart';
-import 'package:thrill/screens/video/camera_screen.dart';
 import 'package:thrill/utils/page_manager.dart';
 import 'package:thrill/utils/util.dart';
 
 import '../common/color.dart';
 import '../controller/Favourites/favourites_controller.dart';
-
-var selectedTab = 0.obs;
+import '../rest/rest_url.dart';
+import '../screens/sound/sound_details.dart';
 
 justAudio.AudioPlayer audioPlayer = justAudio.AudioPlayer();
 var isPlaying = false.obs;
@@ -41,144 +35,137 @@ final progressNotifier = ValueNotifier<ProgressBarState>(
 
 class SoundListBottomSheet extends StatelessWidget {
   SoundListBottomSheet({Key? key}) : super(key: key);
+  var selectedTab = 0.obs;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [],
-          body: Container(
-            height: Get.height,
-            width: Get.width,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: 80,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                          onPressed: () => Get.back(),
-                          icon: const Icon(Icons.close)),
-                      Text(
-                        "Sounds",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: Get.isPlatformDarkMode
-                              ? Colors.white
-                              : Colors.black,
-                        ),
-                      ),
-                      const Icon(Icons.menu)
-                    ],
-                  ),
-                ),
-                searchBarLayout(discoverController),
-                tabBarLayout(),
-                Obx(() => tabview())
-              ],
+    return DefaultTabController(
+        length: 3,
+        child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+              automaticallyImplyLeading: true,
+              titleSpacing: 0,
+              backgroundColor: ColorManager.dayNight,
+              leading: IconButton(
+                  onPressed: () => Get.back(closeOverlays: true),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: ColorManager.dayNightText,
+                  )),
+              title: searchBarLayout(discoverController),
+              bottom: TabBar(
+                  unselectedLabelColor: Get.isPlatformDarkMode
+                      ? Colors.white
+                      : const Color(0xff9E9E9E),
+                  indicatorColor: ColorManager.colorAccent,
+                  labelColor: ColorManager.colorAccent,
+                  labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 16),
+                  automaticIndicatorColorAdjustment: true,
+                  onTap: (int index) {
+                    selectedTab.value = index;
+                  },
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                  indicatorPadding: const EdgeInsets.symmetric(horizontal: 10),
+                  tabs: const [
+                    Tab(
+                      text: "Discover",
+                    ),
+                    Tab(
+                      text: "Favourites",
+                    ),
+                    Tab(
+                      text: "Local",
+                    )
+                    // Tab(
+                    //   text: "Local",
+                    // ),
+                  ]),
             ),
-          ),
-        ));
-
+            body: TabBarView(
+              children: [
+                SoundListLayout(),
+                favouritesSoundsLayout(),
+                localSoundsLayout(),
+              ],
+            )));
     // SingleChildScrollView(
     //   child:
     // )
   }
 
-  tabBarLayout() => DefaultTabController(
-        length: 2,
-        initialIndex: selectedTab.value,
-        child: TabBar(
-            unselectedLabelColor:
-                Get.isPlatformDarkMode ? Colors.white : const Color(0xff9E9E9E),
-            indicatorColor: ColorManager.colorAccent,
-            labelColor: ColorManager.colorAccent,
-            labelStyle:
-                const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            automaticIndicatorColorAdjustment: true,
-            onTap: (int index) {
-              selectedTab.value = index;
-            },
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-            indicatorPadding: const EdgeInsets.symmetric(horizontal: 10),
-            tabs: const [
-              Tab(
-                text: "Discover",
+  sounds() => const SearchSounds();
+
+  localSoundsLayout() => GetX<SoundsController>(
+        builder: (soundsController) => soundsController.localSoundsList.isEmpty
+            ? Container(
+                height: Get.height,
+                child: const Center(
+                  child: Text(
+                    "Nothing to show",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              )
+            : Wrap(
+                children: List.generate(
+                    soundsController.localSoundsList.length,
+                    (index) => InkWell(
+                          onTap: () {
+                            soundsController.selectedSoundPath.value =
+                                soundsController.localSoundsList[index].uri!;
+                            Get.back();
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  "assets/spinning_disc.svg",
+                                  fit: BoxFit.fill,
+                                  width: 50,
+                                  height: 50,
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      soundsController
+                                          .localSoundsList[index].title,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      soundsController
+                                          .localSoundsList[index].artist
+                                          .toString(),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w400),
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        )),
               ),
-              Tab(
-                text: "Favourites",
-              ),
-              // Tab(
-              //   text: "Local",
-              // ),
-            ]),
       );
 
-  tabview() {
-    if (selectedTab.value == 0) {
-      return Expanded(child: sounds());
-    }
-    if (selectedTab.value == 1) {
-      return Expanded(child: favouritesSoundsLayout());
-    }
-    // else {
-    //   return localSoundsLayout();
-    // }
-  }
+  favouritesSoundsLayout() => const FavouriteSounds();
 
-  sounds() => const SearchSounds();
-  // localSoundsLayout() => GetX<SoundsController>(
-  //       builder: (soundsController) =>soundsController.localSoundsList.isEmpty?Container(
-  //         height: Get.height,
-  //         child: const Center(child: Text("Nothing to show",style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),),),): Wrap(
-  //         children: List.generate(
-  //             soundsController.localSoundsList.length,
-  //             (index) => Container(
-  //                   margin: const EdgeInsets.all(10),
-  //                   padding: const EdgeInsets.all(10),
-  //                   child: Row(
-  //                     crossAxisAlignment: CrossAxisAlignment.center,
-  //                     children: [
-  //                       SvgPicture.asset(
-  //                         "assets/spinning_disc.svg",
-  //                         fit: BoxFit.fill,
-  //                         width: 50,
-  //                         height: 50,
-  //                       ),
-  //                       const SizedBox(
-  //                         width: 10,
-  //                       ),
-  //                       Column(
-  //                         crossAxisAlignment: CrossAxisAlignment.start,
-  //                         children: [
-  //                           Text(
-  //                             soundsController.localSoundsList[index].title,
-  //                             style: const TextStyle(fontWeight: FontWeight.bold),
-  //                           ),
-  //                           Text(
-  //                             soundsController.localSoundsList[index].artist,
-  //                             style: const TextStyle(fontWeight: FontWeight.w400),
-  //                           )
-  //                         ],
-  //                       )
-  //                     ],
-  //                   ),
-  //                 )),
-  //       ),
-  //     );
-
-  favouritesSoundsLayout() => const Flexible(child: FavouriteSounds());
   searchBarLayout(DiscoverController discoverController) => Row(
         children: [
           Expanded(
             child: Container(
-              margin: const EdgeInsets.only(
-                  left: 10, right: 10, top: 10, bottom: 10),
+              margin:
+                  const EdgeInsets.only(left: 5, top: 10, bottom: 10, right: 5),
               width: Get.width,
               child: TextFormField(
                 onFieldSubmitted: (text) {
@@ -243,73 +230,184 @@ class SoundListBottomSheet extends StatelessWidget {
       ));
 }
 
-class FavouriteSounds extends GetView<FavouritesController> {
-  const FavouriteSounds({Key? key}) : super(key: key);
+class SoundListLayout extends GetView<SoundsController> {
+  const SoundListLayout({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-        (_) => Flexible(
-            child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: controller.favouriteHashtags.length,
-                itemBuilder: (context, index) => InkWell(
-                    child: Container(
-                      margin: const EdgeInsets.all(10),
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            "assets/Image.png",
-                            height: 80,
-                            width: 80,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                              child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+        (_) => Container(
+              height: Get.height,
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: controller.soundsList.length,
+                  itemBuilder: (context, index) => InkWell(
+                        child: Container(
+                          margin: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                controller.favouriteHashtags[index].name
-                                    .toString(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700, fontSize: 18),
+                              Row(
+                                children: [
+                                  Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Image.asset(
+                                        "assets/Image.png",
+                                        height: 80,
+                                        width: 80,
+                                      ),
+                                      Container(
+                                        height: 40,
+                                        width: 40,
+                                        child: imgProfile(controller
+                                                    .soundsList[index]
+                                                    .soundOwner !=
+                                                null
+                                            ? controller.soundsList[index]
+                                                .soundOwner!.avtars
+                                                .toString()
+                                            : RestUrl.placeholderImage),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        controller.soundsList[index].name
+                                            .toString(),
+                                        style: TextStyle(
+                                            color: ColorManager.dayNightText,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 18),
+                                      ),
+                                      Text(
+                                        controller
+                                            .soundsList[index].soundOwner!.name
+                                            .toString(),
+                                        style: TextStyle(
+                                            color: ColorManager.dayNightText,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14),
+                                      ),
+                                      Text(
+                                        controller
+                                            .soundsList[index].soundOwner!.name
+                                            .toString(),
+                                        style: TextStyle(
+                                          color: ColorManager.dayNightText,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ],
                               ),
                               Text(
-                                controller.favouriteHashtags[index].name
+                                controller.soundsList[index].soundOwner!
+                                    .followersCount
                                     .toString(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500, fontSize: 14),
-                              ),
-                              Text(
-                                controller.favouriteHashtags[index].name
-                                    .toString(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                ),
+                                style: TextStyle(
+                                    color: ColorManager.dayNightText,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14),
                               )
                             ],
-                          )),
-                          const Text(
-                            "0",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
+                        ),
+                        onTap: () => soundsController.downloadAudio(
+                            controller.soundsList[index].sound.toString(),
+                            controller.soundsList[index].soundOwner!.name
+                                .toString(),
+                            controller.soundsList[index].id!,
+                            controller.soundsList[index].name.toString(),
+                            true),
+                      )),
+            ),
+        onEmpty: emptyListWidget(),
+        onLoading: loader());
+  }
+}
+
+class FavouriteSounds extends GetView<FavouritesController> {
+  const FavouriteSounds({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return controller.obx(
+        (_) => ListView.builder(
+            shrinkWrap: true,
+            itemCount: controller.favouriteSounds.length,
+            itemBuilder: (context, index) => InkWell(
+                child: Container(
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        "assets/Image.png",
+                        height: 80,
+                        width: 80,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                          child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            controller.favouriteSounds[index].name.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 18),
+                          ),
+                          Text(
+                            controller.favouriteSounds[index].name.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w500, fontSize: 14),
+                          ),
+                          Text(
+                            controller.favouriteSounds[index].name.toString(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w400,
+                            ),
                           )
                         ],
-                      ),
-                    ),
-                    onTap: () {}
+                      )),
+                      const Text(
+                        "0",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 14),
+                      )
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  soundsController.downloadAudio(
+                      controller.favouriteSounds[index].sound.toString(),
+                      controller.favouriteSounds[index].user!.name.toString(),
+                      controller.favouriteSounds[index].id!,
+                      controller.favouriteSounds[index].name.toString(),
+                      true);
+                }
 
-                    // musicPlayerBottomSheet(discoverController
-                    //   .favouriteSounds[index].thumbnail
-                    //   .toString().obs, discoverController
-                    //   .favouriteSounds[index].name
-                    //   .toString().obs,discoverController
-                    //   .favouriteSounds[index].name
-                    //   .toString().obs),
-                    ))),
+                // musicPlayerBottomSheet(discoverController
+                //   .favouriteSounds[index].thumbnail
+                //   .toString().obs, discoverController
+                //   .favouriteSounds[index].name
+                //   .toString().obs,discoverController
+                //   .favouriteSounds[index].name
+                //   .toString().obs),
+                )),
         onLoading: loader(),
         onEmpty: emptyListWidget());
   }

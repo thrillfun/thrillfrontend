@@ -115,7 +115,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                   // : hashTagVideos![index].hashtags!,
                   widget.videosList![index].sound.toString(),
                   widget.videosList![index].soundOwner.toString(),
-                  widget.videosList![index].videoLikeStatus.toString(),
+                  widget.videosList![index].videoLikeStatus==null?"0":widget.videosList![index].videoLikeStatus.toString(),
                   widget.videosList != null &&
                           widget.videosList![index].isCommentable.obs
                                   .toString()
@@ -124,8 +124,9 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       ? true.obs
                       : false.obs,
                   like: widget.videosList![index].likes!.obs,
-                  isfollow: widget.videosList![index].isfollow,
+                  isfollow: widget.videosList![index].user?.isfollow,
                   commentsCount: widget.videosList![index].comments!.obs,
+                  soundId: widget.videosList![index].soundId,
                 ),
               );
             });

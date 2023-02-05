@@ -287,7 +287,7 @@ videoItemLayout(List<dynamic> list) {
         firstName: element.user?.firstName,
         lastName: element.user?.lastName,
         gender: element.user?.gender,
-        isfollow: element.isfollow ?? 0,
+        isfollow: element.user?.following ?? 0,
         likes: element.likes.toString());
     videosList1.add(PublicVideos(
         id: element.id,
@@ -297,6 +297,7 @@ videoItemLayout(List<dynamic> list) {
         soundName: element.soundName,
         soundCategoryName: element.soundCategoryName,
         soundOwner: element.soundOwner,
+        soundId: element.soundId,
         filter: element.filter,
         likes: element.likes,
         views: element.views,
@@ -509,6 +510,7 @@ showLoadingDialog() =>
 loader() => Container(
       height: 150,
       width: 150,
+      alignment: Alignment.center,
       color: Colors.transparent.withOpacity(0.0),
       child: Lottie.network(
           "https://assets10.lottiefiles.com/packages/lf20_dkz94xcg.json",

@@ -46,7 +46,7 @@ class HashTagsDetails {
   List<Hashtags>? hashtags;
   String? soundOwner;
   int? videoLikeStatus;
-
+  int? soundId;
   User? user;
 
   HashTagsDetails(
@@ -65,7 +65,7 @@ class HashTagsDetails {
       this.hashtags,
       this.soundOwner,
         this.videoLikeStatus,
-      this.user});
+      this.user,this.soundId});
 
   HashTagsDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -88,6 +88,7 @@ class HashTagsDetails {
     }    soundOwner = json['sound_owner'];
     videoLikeStatus = json['video_like_status']??0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    soundId = json["sound_id"];
   }
 
   Map<String, dynamic> toJson() {
@@ -111,6 +112,7 @@ class HashTagsDetails {
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
+    data["sound_id"]= this.soundId;
     return data;
   }
 }

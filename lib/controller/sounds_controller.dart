@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:file_support/file_support.dart';
@@ -10,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/model/sound_list_model.dart';
 import 'package:thrill/rest/rest_url.dart';
@@ -29,59 +29,56 @@ class SoundsController extends GetxController with StateMixin<RxList<Sounds>> {
 
   var currentProgress = "0".obs;
 
-  SoundsController() {
-    getAlbums();
-  }
-
-  getSoundsList() async {
-    change(soundsList, status: RxStatus.loading());
+  Future<void> getSoundsList() async {
     dio.options.headers["Authorization"] =
         "Bearer ${GetStorage().read("token")}";
-    try {
-      var response = await dio.post("/sound/list");
-      try {
-        soundsList = SoundListModel.fromJson(response.data).data!.obs;
-        change(soundsList, status: RxStatus.success());
-      } catch (e) {
-        change(soundsList, status: RxStatus.error());
 
-        errorToast(e.toString());
-      }
-    } on Exception catch (e) {
-      change(soundsList, status: RxStatus.error());
-      isSoundsLoading.value = false;
-      log(e.toString());
-    }
+    dio.post("/sound/list").then((value) {
+      soundsList = SoundListModel.fromJson(value.data).data!.obs;
+      change(soundsList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      errorToast(error.toString());
+    });
   }
 
   getAlbums() async {
-    localSoundsList.value = await OnAudioQuery().querySongs();
+    var storagePermission = await Permission.storage.status;
+    if (storagePermission.isGranted) {
+      localSoundsList.value = await OnAudioQuery().querySongs();
+    } else {
+      Permission.storage.request();
+    }
   }
 
-  downloadAudio(String soundUrl, String userName, int id,String soundName) async {
+  downloadAudio(String soundUrl, String userName, int id, String soundName,
+      bool isFavourites) async {
     try {
       Get.defaultDialog(
           title: "Downloading audio",
           content: Obx(() => Text(currentProgress.value)));
-      var path = await getTemporaryDirectory();
       await fileSupport
           .downloadCustomLocation(
         url: "${RestUrl.awsSoundUrl}$soundUrl",
-        path: path.path,
-        filename: soundName.split('.').first,
-        extension: ".${soundName.split('.').last}",
+        path: saveCacheDirectory,
+        filename: soundName,
+        extension: ".mp3",
         progress: (progress) async {
           currentProgress.value = progress;
         },
       )
           .then((value) {
         Get.back();
-        Get.to(CameraScreen(
-          selectedSound: value!.path,
-          owner: userName,
-          id: id,
-          soundName: soundName,
-        ));
+        if (!isFavourites) {
+          Get.to(CameraScreen(
+            selectedSound: value!.path,
+            owner: userName,
+            id: id,
+            soundName: soundName,
+          ));
+        } else {
+          selectedSoundPath.value = value!.path;
+          Get.back();
+        }
       }).onError((error, stackTrace) {
         errorToast(error.toString());
       });

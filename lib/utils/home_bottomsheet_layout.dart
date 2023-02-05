@@ -21,13 +21,7 @@ class BottomSheetHome extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.whatsapp_rounded,
-                      color: Colors.green,
-                      size: 50,
-                    )),
+
                 IconButton(
                   onPressed: () {},
                   icon: const Icon(

@@ -50,7 +50,7 @@ class LikedVideos {
   String? isCommentable;
   String? soundOwner;
   int? videoLikeStatus;
-
+  int? soundId;
   int? isfollow;
   User? user;
 
@@ -75,7 +75,8 @@ class LikedVideos {
         this.soundOwner,
         this.isfollow,
         this.videoLikeStatus,
-        this.user});
+        this.user,
+      this.soundId});
 
   LikedVideos.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -99,6 +100,7 @@ class LikedVideos {
     isfollow=json['isfollow']??0;
     videoLikeStatus = json["video_like_status"]??0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    soundId = json["sound_id"];
   }
 
   Map<String, dynamic> toJson() {
@@ -126,6 +128,7 @@ class LikedVideos {
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
+    data['sound_id'] = this.soundId;
     return data;
   }
 }

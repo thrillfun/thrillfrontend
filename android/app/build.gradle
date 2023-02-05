@@ -30,17 +30,12 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 // Comment out the modules you don't need, to save size.
 imglyConfig {
-
+    vesdk {
+        enabled(true)
+        licensePath("vesdk_android_license")
+    }
     modules {
-        include 'ui:text'
-        include 'ui:focus'
-        include 'ui:frame'
-        include 'ui:brush'
-        include 'ui:filter'
         include 'ui:sticker'
-        include 'ui:overlay'
-        include 'ui:transform'
-        include 'ui:adjustment'
         include 'ui:text-design'
         include 'ui:video-trim'
         include 'ui:video-library'
@@ -50,19 +45,13 @@ imglyConfig {
 
         // This module is big, remove the serializer if you don't need that feature.
         include 'backend:serializer'
-
         // Remove the asset packs you don't need, these are also big in size.
-        include 'assets:font-basic'
-        include 'assets:frame-basic'
-        include 'assets:filter-basic'
-        include 'assets:overlay-basic'
         include 'assets:sticker-shapes'
         include 'assets:sticker-emoticons'
         include 'assets:sticker-animated'
 
         include 'backend:sticker-animated'
         include 'backend:sticker-smart'
-        include 'backend:background-removal'
     }
 }
 
@@ -96,7 +85,7 @@ android {
         applicationId "com.thrill.media"
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 5
+        versionCode 6
         versionName '1.0'
     }
 

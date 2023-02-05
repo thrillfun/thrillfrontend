@@ -82,10 +82,12 @@ class ManageAccount extends StatelessWidget {
         usersController.userProfile.value.name.toString() == "null"
             ? ""
             : usersController.userProfile.value.name.toString();
+
     lastNameController.text =
         usersController.userProfile.value.lastName.toString() == "null"
             ? ""
             : usersController.userProfile.value.lastName.toString();
+
     userNameController.text =
         usersController.userProfile.value.username.toString() == "null"
             ? ""
@@ -107,6 +109,12 @@ class ManageAccount extends StatelessWidget {
         usersController.userProfile.value.phone.toString() == "null"
             ? ""
             : usersController.userProfile.value.phone.toString();
+
+    locationController.text =
+        usersController.userProfile.value.location.toString() == "null"
+            ? ""
+            : usersController.userProfile.value.location.toString();
+
     return Scaffold(
       backgroundColor: ColorManager.dayNight,
       body: Padding(
@@ -617,9 +625,14 @@ class ManageAccount extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(IconlyLight.calendar),
-                  Obx(() =>
-                      Text(usersController.userProfile.value.dob.toString()))
+                  Icon(
+                    IconlyLight.calendar,
+                    color: ColorManager.dayNightText,
+                  ),
+                  Obx(() => Text(
+                        "  " + usersController.userProfile.value.dob.toString(),
+                        style: TextStyle(color: ColorManager.dayNightText),
+                      ))
                 ],
               ),
             ),

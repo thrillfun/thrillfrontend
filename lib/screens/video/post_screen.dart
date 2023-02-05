@@ -18,6 +18,7 @@ import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/models/post_data.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/seperator.dart';
 import 'package:uri_to_file/uri_to_file.dart';
@@ -27,6 +28,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 var lastChangedWord = "".obs;
 
 var usersController = Get.find<UserDetailsController>();
+
 class PostScreenGetx extends StatelessWidget {
   PostScreenGetx(this.postData, this.selectedSound, this.isFromGallery);
 
@@ -68,9 +70,10 @@ class PostScreenGetx extends StatelessWidget {
     buildContext = context;
 
     return Scaffold(
+      backgroundColor: ColorManager.dayNight,
       appBar: AppBar(
         iconTheme: IconThemeData(color: ColorManager.dayNightText),
-        backgroundColor: Colors.transparent.withOpacity(0.0),
+        backgroundColor: ColorManager.dayNight,
         elevation: 0,
         title: Text(
           "Post",
@@ -80,15 +83,7 @@ class PostScreenGetx extends StatelessWidget {
               fontWeight: FontWeight.w700),
         ),
       ),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: videoLayout(),
-          )
-        ],
-      ),
+      body: videoLayout(),
     );
   }
 
@@ -105,50 +100,57 @@ class PostScreenGetx extends StatelessWidget {
   videoLayout() => Column(
         children: [
           Container(
-            margin: EdgeInsets.all(10),
-              height: Get.height/5,
+              margin: EdgeInsets.all(10),
+              height: Get.height / 5,
               child: Row(
                 children: [
                   Expanded(
-                    flex:2,
+                      flex: 2,
                       child: Container(
                         width: Get.width,
-                    decoration: const BoxDecoration(
-                        color: Color(0xff353841),
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    margin: const EdgeInsets.only(
-                        right: 10),
-                    child: descriptionLayout(),
-                  )),
+                        decoration: BoxDecoration(
+                            color: ColorManager.dayNight,
+                            border:
+                                Border.all(color: ColorManager.dayNightIcon),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                        margin: const EdgeInsets.only(right: 10),
+                        child: descriptionLayout(),
+                      )),
                   Expanded(
+                    flex: 1,
                     child: Container(
                       decoration: const BoxDecoration(
-                      color: Color(0xff353841),
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                          color: Color(0xff353841),
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
                       margin: const EdgeInsets.only(right: 10),
                       child: VisibilityDetector(
-                      key: Key("post"),
-                      child: InkWell(
-                        child: ClipRRect(
-                          child: AspectRatio(aspectRatio: videoPlayerController!.value.aspectRatio/Get.height,child: VideoPlayer(videoPlayerController!),),
-                          borderRadius: BorderRadius.circular(20),
-                          
-                       ),
-                        onTap: () {
-                          if (isPlaying.value) {
-                            videoPlayerController!.pause();
-                            isPlaying.value = false;
-                          } else {
-                            videoPlayerController!.play();
-                            isPlaying.value = true;
-                          }
-                        },
-                      ),
-                      onVisibilityChanged: (VisibilityInfo info) {
-                        info.visibleFraction == 0
-                            ? videoPlayerController!.pause
-                            : videoPlayerController!.play;
-                      }),
+                          key: Key("post"),
+                          child: InkWell(
+                            child: ClipRRect(
+                              child: AspectRatio(
+                                aspectRatio:
+                                    videoPlayerController!.value.aspectRatio /
+                                        Get.height,
+                                child: VideoPlayer(videoPlayerController!),
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            onTap: () {
+                              if (isPlaying.value) {
+                                videoPlayerController!.pause();
+                                isPlaying.value = false;
+                              } else {
+                                videoPlayerController!.play();
+                                isPlaying.value = true;
+                              }
+                            },
+                          ),
+                          onVisibilityChanged: (VisibilityInfo info) {
+                            info.visibleFraction == 0
+                                ? videoPlayerController!.pause
+                                : videoPlayerController!.play;
+                          }),
                     ),
                   ),
                 ],
@@ -237,13 +239,11 @@ class PostScreenGetx extends StatelessWidget {
         ],
       );
 
-  descriptionLayout() => Expanded(
-          child: Container(
+  descriptionLayout() => Container(
         margin: const EdgeInsets.all(10),
         child: Column(
           children: [
-            Expanded(
-                child: HashTagTextField(
+            HashTagTextField(
               controller: textEditingController,
               maxLines: 10,
               onChanged: (String txt) {
@@ -278,12 +278,12 @@ class PostScreenGetx extends StatelessWidget {
                   hintText: "Describe your video",
                   hintStyle: TextStyle(
                       fontStyle: FontStyle.italic,
-                      color: Colors.white.withOpacity(0.6))),
-            )),
+                      color: ColorManager.dayNightText)),
+            ),
           ],
         ),
         alignment: Alignment.topLeft,
-      ));
+      );
 
   hashTagLayout() => InkWell(
         onTap: () {
@@ -346,7 +346,7 @@ class PostScreenGetx extends StatelessWidget {
           padding: EdgeInsets.all(10),
           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           decoration: BoxDecoration(
-              border: Border.all(color: Color(0xff353841)),
+              border: Border.all(color: ColorManager.dayNightIcon),
               borderRadius: BorderRadius.all(Radius.circular(10))),
           child: Row(
             children: [
@@ -729,6 +729,9 @@ class PostScreenGetx extends StatelessWidget {
               ));
 
   postUpload() async {
+    videosController.showUploadSnackbar();
+    Get.offAll(LandingPageGetx());
+
     String tagList = jsonEncode(extractHashTags(textEditingController.text));
 
     int currentUnix = DateTime.now().millisecondsSinceEpoch;
@@ -739,20 +742,20 @@ class PostScreenGetx extends StatelessWidget {
 
     try {
       GetStorage().write("videoPrivacy", selectedPrivacy.value);
-      await videosController.createGIF(currentUnix, postData!.newPath!).then(
-          (value) async  {
-                var file = File(value);
-                if(file.existsSync()){
-                  // await videosController
-                  //     .awsUploadThumbnail(value)
-                  //     .then((value) async {});
-                }
-              });
+      await videosController
+          .createGIF(currentUnix, postData!.newPath!)
+          .then((value) async {
+        var file = File(value);
+        if (file.existsSync()) {
+          Future.delayed(Duration.zero);
+          await videosController.awsUploadThumbnail(
+              file, currentUnix.toString());
+        }
+      });
 
       await videosController
           .awsUploadVideo(file, currentUnix)
           .then((value) async {
-        var dir = await getTempDirectory();
         var audioFile = File(saveCacheDirectory + "originalAudio.mp3");
 
         if (postData!.addSoundModel!.sound.isNotEmpty) {
@@ -826,6 +829,8 @@ class PostScreenGetx extends StatelessWidget {
     } catch (e) {
       errorToast(e.toString());
     }
+    relatedVideosController.refreshVideoList();
+    Get.back(closeOverlays: true);
   }
 
   Future<void> createGIF(int currentUnix) async {
@@ -858,7 +863,6 @@ class PostScreenGetx extends StatelessWidget {
       } else {
         // print("============================> GIF Error!!!!");
         Logger().wtf("failed");
-
       }
     });
   }

@@ -39,6 +39,7 @@ class CommentsController extends GetxController
       try {
         successToast(value.data["message"]);
         change(commentsList, status: RxStatus.success());
+        getComments(videoId!);
       } catch (e) {
         errorToast(value.data["message"]);
         change(commentsList, status: RxStatus.error());

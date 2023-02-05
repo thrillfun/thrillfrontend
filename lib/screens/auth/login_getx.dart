@@ -35,54 +35,71 @@ class LoginGetxScreen extends StatelessWidget {
           child: Column(
             children: [
               loginLayout(),
-            const SizedBox(height: 10,),
-             Visibility(
-               visible: usersController.isSimCardAvailable.isTrue,
-               child:  InkWell(
-                 onTap: () {
-                   TruecallerSdk.initializeSDK(
-                       sdkOptions: TruecallerSdkScope.SDK_OPTION_WITH_OTP);
-                   TruecallerSdk.isUsable.then((isUsable) {
-                     if (isUsable) {
-                       TruecallerSdk.getProfile;
-                     } else {
-                       const GetSnackBar(title: "Truecaller not available",
-                           message: "You cannot use trucaller on this device").show();
-                     }
-                   });
-                 },
-                 child: Container(
-                     margin: const EdgeInsets.only(
-                         left: 20, right: 20, top: 40, bottom: 20),
-                     padding: const EdgeInsets.all(15),
-                     decoration: BoxDecoration(
-                         borderRadius: BorderRadius.circular(15),
-                         border: Border.all(color: Colors.grey)),
-                     child: Row(
-                       children: [
-                         Icon(BoxIcons.bx_phone,
-                           color: ColorManager.dayNightIcon,),
-                         Expanded(
-                             child: Text(
-                               "Login with phone",
-                               textAlign: TextAlign.center,
-                               style: TextStyle(
-                                   fontWeight: FontWeight.w700,
-                                   fontSize: 16,
-                                   color: ColorManager.dayNightText),
-                             ))
-                       ],
-                     ))),),
+              const SizedBox(
+                height: 10,
+              ),
+              Obx(() => Visibility(
+                    visible: usersController.isSimCardAvailable.isTrue,
+                    child: InkWell(
+                        onTap: () {
+                          TruecallerSdk.initializeSDK(
+                              consentMode:
+                                  TruecallerSdkScope.CONSENT_MODE_BOTTOMSHEET,
+                              sdkOptions:
+                                  TruecallerSdkScope.SDK_OPTION_WITH_OTP,
+                              termsOfServiceUrl: "www.google.com",
+                              privacyPolicyUrl: "www.google.com",
+                              buttonColor: 0xff2DCBC8,
+                              ctaTextPrefix: 0,
+                              loginTextPrefix: 0,
+                              consentTitleOptions: 1,
+                              footerType: 256);
+                          TruecallerSdk.isUsable.then((isUsable) {
+                            if (isUsable) {
+                              TruecallerSdk.getProfile;
+                            } else {
+                              const GetSnackBar(
+                                      title: "Truecaller not available",
+                                      message:
+                                          "You cannot use trucaller on this device")
+                                  .show();
+                            }
+                          });
+                        },
+                        child: Container(
+                            margin: const EdgeInsets.only(
+                                left: 20, right: 20, top: 40, bottom: 20),
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(color: Colors.grey)),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  BoxIcons.bx_phone,
+                                  color: ColorManager.dayNightIcon,
+                                ),
+                                Expanded(
+                                    child: Text(
+                                  "Login with phone",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                      color: ColorManager.dayNightText),
+                                ))
+                              ],
+                            ))),
+                  )),
               InkWell(
-                  onTap: () =>
-                  {
-                    Get.bottomSheet(
-                        Container(
-                          margin: const EdgeInsets.all(10),
-                          child: VerifyOtpLayout(),
-                        ),
-                        backgroundColor: ColorManager.dayNight)
-                  },
+                  onTap: () => {
+                        Get.bottomSheet(
+                            Container(
+                              margin: const EdgeInsets.all(10),
+                              child: VerifyOtpLayout(),
+                            ),
+                            backgroundColor: ColorManager.dayNight)
+                      },
                   child: Container(
                       margin: const EdgeInsets.only(
                           left: 20, right: 20, bottom: 20),
@@ -92,9 +109,12 @@ class LoginGetxScreen extends StatelessWidget {
                           border: Border.all(color: Colors.grey)),
                       child: Row(
                         children: [
-                          Icon(BoxIcons.bx_message,
-                            color: ColorManager.dayNightIcon,),
-                          Expanded(child: Container(
+                          Icon(
+                            BoxIcons.bx_message,
+                            color: ColorManager.dayNightIcon,
+                          ),
+                          Expanded(
+                              child: Container(
                             alignment: Alignment.center,
                             child: Text(
                               "Login via OTP",
@@ -102,7 +122,8 @@ class LoginGetxScreen extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                   color: ColorManager.dayNightText),
-                            ),))
+                            ),
+                          ))
                         ],
                       ))),
               InkWell(
@@ -118,7 +139,9 @@ class LoginGetxScreen extends StatelessWidget {
                   child: Row(
                     children: [
                       Icon(
-                        BoxIcons.bxl_google, color: ColorManager.dayNightIcon,),
+                        BoxIcons.bxl_google,
+                        color: ColorManager.dayNightIcon,
+                      ),
                       Flexible(
                         child: Container(
                           width: Get.width,
@@ -158,9 +181,7 @@ class LoginGetxScreen extends StatelessWidget {
     );
   }
 
-
-  loginLayout() =>
-      Column(
+  loginLayout() => Column(
         children: [
           Container(
             margin: const EdgeInsets.only(left: 20, top: 10),
@@ -168,7 +189,8 @@ class LoginGetxScreen extends StatelessWidget {
             child: Text(
               'Lets you in',
               textAlign: TextAlign.left,
-              style: TextStyle(fontSize: 48,
+              style: TextStyle(
+                  fontSize: 48,
                   fontWeight: FontWeight.bold,
                   color: ColorManager.dayNightText),
             ),
@@ -242,25 +264,24 @@ class LoginGetxScreen extends StatelessWidget {
       );
 
   // trueCallerLayout()=> ;
-  submitButtonLayout() =>
-      InkWell(
+  submitButtonLayout() => InkWell(
         child: Text(
           "Login via OTP",
-          style: TextStyle(fontSize: 24,
+          style: TextStyle(
+              fontSize: 24,
               fontWeight: FontWeight.w700,
               color: ColorManager.dayNightText),
         ),
-        onTap: () =>
-            Get.bottomSheet(
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  child: VerifyOtpLayout(),
-                ),
-                backgroundColor: ColorManager.dayNight),
+        onTap: () => Get.bottomSheet(
+            Container(
+              margin: const EdgeInsets.all(10),
+              child: VerifyOtpLayout(),
+            ),
+            backgroundColor: ColorManager.dayNight),
       );
 
   StreamSubscription streamSubscription =
-  TruecallerSdk.streamCallbackData.listen((truecallerSdkCallback) async {
+      TruecallerSdk.streamCallbackData.listen((truecallerSdkCallback) async {
     switch (truecallerSdkCallback.result) {
       case TruecallerSdkCallbackResult.success:
         String firstName = truecallerSdkCallback.profile!.firstName;
@@ -277,7 +298,8 @@ class LoginGetxScreen extends StatelessWidget {
         int errorCode = truecallerSdkCallback.error!.code;
         break;
       case TruecallerSdkCallbackResult.verification:
-        Get.to(const NonTcVerification());
+        
+        // Get.to(const NonTcVerification());
         break;
       default:
         print("Invalid result");
@@ -300,7 +322,8 @@ class VerifyOtpLayout extends GetView<UserDetailsController> {
       children: [
         Text(
           "Login via OTP",
-          style: TextStyle(fontSize: 24,
+          style: TextStyle(
+              fontSize: 24,
               fontWeight: FontWeight.w700,
               color: ColorManager.dayNightText),
         ),
@@ -320,21 +343,21 @@ class VerifyOtpLayout extends GetView<UserDetailsController> {
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: fieldNode.hasFocus
                     ? const BorderSide(
-                  color: Color(0xff2DCBC8),
-                )
+                        color: Color(0xff2DCBC8),
+                      )
                     : const BorderSide(
-                  color: Color(0xffFAFAFA),
-                ),
+                        color: Color(0xffFAFAFA),
+                      ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: fieldNode.hasFocus
                     ? const BorderSide(
-                  color: Color(0xff2DCBC8),
-                )
+                        color: Color(0xff2DCBC8),
+                      )
                     : BorderSide(
-                  color: Colors.grey.withOpacity(0.1),
-                ),
+                        color: Colors.grey.withOpacity(0.1),
+                      ),
               ),
               filled: true,
               prefixIcon: Icon(
@@ -378,36 +401,32 @@ class VerifyOtpLayout extends GetView<UserDetailsController> {
               phoneController.text.isEmpty
                   ? errorToast("field empty")
                   : phoneController.text.length != 10
-                  ? errorToast("please enter 10 digits")
-                  : errorToast("number is not correct");
+                      ? errorToast("please enter 10 digits")
+                      : errorToast("number is not correct");
             }
           },
         ),
-        Obx(() =>
-            Visibility(
-                visible: controller.isOtpSent.isTrue,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 20),
-                  child: PinFieldAutoFill(
-                      decoration: UnderlineDecoration(
-                          colorBuilder:
+        Obx(() => Visibility(
+            visible: controller.isOtpSent.isTrue,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: PinFieldAutoFill(
+                  decoration: UnderlineDecoration(
+                      colorBuilder:
                           FixedColorBuilder(ColorManager.dayNightText),
-                          textStyle: TextStyle(
-                              color: ColorManager.dayNightText)),
-                      onCodeSubmitted: ((p0) => {}), //code submitted callback
-                      onCodeChanged: ((p0) =>
+                      textStyle: TextStyle(color: ColorManager.dayNightText)),
+                  onCodeSubmitted: ((p0) => {}), //code submitted callback
+                  onCodeChanged: ((p0) =>
                       {otp.value = p0.toString()}), //code changed callback
-                      codeLength: 4 //code length, default 6
+                  codeLength: 4 //code length, default 6
                   ),
-                ))),
-        Obx(() =>
-            Visibility(
-                visible: controller.isOtpSent.isTrue,
-                child: GradientElevatedButton(
-                    onPressed: () async =>
-                        controller.verifyOtp(phoneController.text, otp.value),
-                    child: const Text("submit"))))
+            ))),
+        Obx(() => Visibility(
+            visible: controller.isOtpSent.isTrue,
+            child: GradientElevatedButton(
+                onPressed: () async =>
+                    controller.verifyOtp(phoneController.text, otp.value),
+                child: const Text("submit"))))
       ],
     );
   }

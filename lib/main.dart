@@ -7,19 +7,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart' as transition;
-import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/bindings.dart';
-import 'package:thrill/controller/videos/related_videos_controller.dart';
-import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
-import 'package:thrill/web/web_home.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
-import 'config/theme.dart';
 import 'screens/home/landing_page_getx.dart';
 
 List<CameraDescription> cameras = [];
@@ -27,8 +20,6 @@ GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 GlobalKey key = GlobalKey();
 
 void main() async {
-  Paint.enableDithering = true;
-
   await GetStorage.init();
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,32 +38,31 @@ void main() async {
 
   var token = await FirebaseMessaging.instance.getToken();
 
-  CustomNotification.initialize();
+  CustomNotification().initialize();
 
   try {
     cameras = await availableCameras();
   } on CameraException catch (_) {}
 
   FirebaseMessaging.onMessage.listen((event) {
-    CustomNotification.showNormal(
+    CustomNotification().showNormal(
         title: event.notification?.title ?? "",
         body: event.notification?.body ?? "");
   });
 
   getTempDirectory();
 
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   final PendingDynamicLinkData? initialLink =
       await FirebaseDynamicLinks.instance.getInitialLink();
 
-  runApp(transition.GetMaterialApp(
-      themeMode: ThemeMode.system,
-      debugShowCheckedModeBanner: false,
-      initialBinding: DataBindings(),
-      home:LandingPageGetx(
-        initialLink: initialLink,
-      )));
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -95,10 +85,12 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Thrill',
-      debugShowCheckedModeBanner: false,
-      theme: theme(),
-    );
+    return transition.GetMaterialApp(
+        darkTheme: ThemeData(brightness: Brightness.dark),
+        theme: ThemeData(brightness: Brightness.light),
+        themeMode: ThemeMode.system,
+        debugShowCheckedModeBanner: false,
+        initialBinding: DataBindings(),
+        home: LandingPageGetx());
   }
 }

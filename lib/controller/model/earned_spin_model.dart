@@ -56,10 +56,10 @@ class Activities {
   dynamic? earnedSpins;
   dynamic? totalSpin;
   dynamic? maxLevel;
-  dynamic? progress;
-  dynamic? totalView;
-  dynamic? currentView;
-  dynamic? nextLvlView;
+  int? progress;
+  int? totalView;
+  int? currentView;
+  int? nextLvlView;
 
   Activities(
       {this.name,

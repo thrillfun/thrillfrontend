@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,10 +12,11 @@ import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
+import 'package:thrill/controller/model/site_settings_model.dart';
+import 'package:thrill/controller/site_settings/site_settings_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart' as uvController;
 import 'package:thrill/models/video_model.dart';
-import 'package:thrill/rest/rest_api.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
 import 'package:thrill/screens/hash_tags/hash_tags_screen.dart';
@@ -49,30 +48,30 @@ var hashtagVideosController = Get.find<HashtagVideosController>();
 
 class BetterReelsPlayer extends StatefulWidget {
   BetterReelsPlayer(
-    this.gifImage,
-    this.videoUrl,
-    this.pageIndex,
-    this.currentPageIndex,
-    this.isPaused,
-    this.callback,
-    this.publicUser,
-    this.videoId,
-    this.soundName,
-    this.isDuetable,
-    this.publicVideos,
-    this.UserId,
-    this.userName,
-    this.description,
-    this.isHome,
-    this.hashtagsList,
-    this.sound,
-    this.soundOwner,
-    this.videoLikeStatus,
-    this.isCommentAllowed, {
-    this.like,
-    this.isfollow,
-    this.commentsCount,
-  });
+      this.gifImage,
+      this.videoUrl,
+      this.pageIndex,
+      this.currentPageIndex,
+      this.isPaused,
+      this.callback,
+      this.publicUser,
+      this.videoId,
+      this.soundName,
+      this.isDuetable,
+      this.publicVideos,
+      this.UserId,
+      this.userName,
+      this.description,
+      this.isHome,
+      this.hashtagsList,
+      this.sound,
+      this.soundOwner,
+      this.videoLikeStatus,
+      this.isCommentAllowed,
+      {this.like,
+      this.isfollow,
+      this.commentsCount,
+      this.soundId});
 
   String gifImage, sound, soundOwner;
   String videoLikeStatus;
@@ -95,6 +94,7 @@ class BetterReelsPlayer extends StatefulWidget {
   RxInt? like = 0.obs;
   int? isfollow = 0;
   RxInt? commentsCount = 0.obs;
+  int? soundId = 0;
 
   @override
   State<BetterReelsPlayer> createState() => _VideoAppState();
@@ -194,35 +194,27 @@ class _VideoAppState extends State<BetterReelsPlayer>
                     Container(
                         alignment: Alignment.center,
                         color: Colors.black,
-                        child: Obx(() => initialized.value
-                            ? AspectRatio(
-                                aspectRatio:
-                                    betterPlayerController.value.aspectRatio,
-                                child: ValueListenableBuilder(
-                                  valueListenable: betterPlayerController,
-                                  builder:
-                                      (context, VideoPlayerValue value, child) {
-                                    if (value.position == value.duration &&
-                                        value.position > Duration.zero &&
-                                        initialized.isTrue) {
-                                      // var nextPage = preloadPageController!.page!.toInt();
-                                      // nextPage++;
-                                      // preloadPageController!.animateToPage(
-                                      //     nextPage,
-                                      //     duration: Duration(milliseconds: 400),
-                                      //     curve: Curves.easeIn);
-                                      videosController
-                                          .postVideoView(widget.videoId);
-                                    }
-                                    return VideoPlayer(betterPlayerController);
-                                  },
-                                ),
-                              )
-                            : CachedNetworkImage(
-                                height: Get.height,
-                                width: Get.width,
-                                fit: BoxFit.fill,
-                                imageUrl: RestUrl.gifUrl + widget.gifImage))),
+                        child: AspectRatio(
+                          aspectRatio: betterPlayerController.value.aspectRatio,
+                          child: ValueListenableBuilder(
+                            valueListenable: betterPlayerController,
+                            builder: (context, VideoPlayerValue value, child) {
+                              if (value.position == value.duration &&
+                                  value.position > Duration.zero &&
+                                  initialized.isTrue) {
+                                var nextPage =
+                                    preloadPageController!.page!.toInt();
+
+                                preloadPageController!.animateToPage(
+                                    nextPage + 1,
+                                    duration: const Duration(milliseconds: 400),
+                                    curve: Curves.easeIn);
+                                videosController.postVideoView(widget.videoId);
+                              }
+                              return VideoPlayer(betterPlayerController);
+                            },
+                          ),
+                        )),
                     Container(
                       alignment: Alignment.centerRight,
                       child: Column(
@@ -349,8 +341,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                 IconButton(
                                     onPressed: () {
                                       Get.bottomSheet(
-                                          Flexible(
-                                              child: Container(
+                                          Container(
                                             height: 300,
                                             margin: const EdgeInsets.only(
                                                 left: 10, right: 10),
@@ -568,12 +559,13 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                               Get.back(
                                                                   closeOverlays:
                                                                       true);
-                                                              relatedVideosController.downloadAndProcessVideo(
+                                                              relatedVideosController
+                                                                  .downloadAndProcessVideo(
                                                                       widget
                                                                           .videoUrl,
-                                                                  widget
-                                                                      .userName
-                                                                      .toString());
+                                                                      widget
+                                                                          .userName
+                                                                          .toString());
                                                               // GallerySaver.saveVideo(
                                                               //         RestUrl.videoUrl +
                                                               //             widget
@@ -707,48 +699,55 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                              InkWell(
-                                                onTap: () {
-                                                  userDetailsController
-                                                      .followUnfollowUser(
-                                                          widget.UserId,
-                                                          widget.isfollow == 0
-                                                              ? "follow"
-                                                              : "unfollow");
-                                                },
-                                                child: Row(
-                                                  children: [
-                                                    widget.isfollow! == 0
-                                                        ? const Icon(
-                                                            Icons.add,
-                                                            color: ColorManager
-                                                                .colorAccent,
-                                                            size: 30,
-                                                          )
-                                                        : const Icon(
-                                                            Icons.add,
-                                                            color: ColorManager
-                                                                .colorAccent,
-                                                            size: 30,
-                                                          ),
-                                                    const SizedBox(
-                                                      width: 10,
+                                              Visibility(
+                                                  visible: userDetailsController
+                                                          .storage
+                                                          .read("token") !=
+                                                      null,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      userDetailsController
+                                                          .followUnfollowUser(
+                                                              widget.UserId,
+                                                              widget.isfollow ==
+                                                                      0
+                                                                  ? "follow"
+                                                                  : "unfollow");
+                                                      relatedVideosController
+                                                          .getAllVideos();
+                                                    },
+                                                    child: Row(
+                                                      children: [
+                                                        widget.isfollow! == 0
+                                                            ? const Icon(
+                                                                Icons.report,
+                                                                color: ColorManager
+                                                                    .colorAccent,
+                                                                size: 30,
+                                                              )
+                                                            : const Icon(
+                                                                Icons.report,
+                                                                color: ColorManager
+                                                                    .colorAccent,
+                                                                size: 30,
+                                                              ),
+                                                        const SizedBox(
+                                                          width: 10,
+                                                        ),
+                                                        Text(
+                                                          "Report Video",
+                                                          style: const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: ColorManager
+                                                                  .colorAccent),
+                                                        )
+                                                      ],
                                                     ),
-                                                    Text(
-                                                      widget.isfollow == 0
-                                                          ? "Follow"
-                                                          : "Following",
-                                                      style: const TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: ColorManager
-                                                              .colorAccent),
-                                                    )
-                                                  ],
-                                                ),
-                                              )
+                                                  ))
                                             ]),
-                                          )),
+                                          ),
                                           backgroundColor:
                                               ColorManager.dayNight,
                                           shape: RoundedRectangleBorder(
@@ -907,9 +906,12 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                         BorderRadius.circular(
                                                             5)),
                                               )),
-                                          visible: widget.UserId !=
-                                              usersController.storage
-                                                  .read("userId"),
+                                          visible: userDetailsController.storage
+                                                      .read("token") !=
+                                                  null &&
+                                              widget.UserId !=
+                                                  userDetailsController.storage
+                                                      .read("userId"),
                                         )
                                       ],
                                     ),
@@ -917,7 +919,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                       height: 5,
                                     ),
                                     Text(
-                                      widget.publicUser!.name.toString() ?? "",
+                                      widget.publicUser!.name ?? "",
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 14,
@@ -1001,7 +1003,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                 "id": widget.videoId,
                                 "profile": widget.publicUser!.avatar,
                                 "name": widget.publicUser!.name,
-                                "sound_id": widget.publicVideos.id,
+                                "sound_id": widget.soundId,
                                 "username": widget.publicUser!.username,
                                 "isFollow": widget.isfollow,
                                 "userProfile": widget.publicUser!.avatar != null
@@ -1024,7 +1026,8 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                 Text(
                                   widget.soundName.isEmpty
                                       ? "Original Sound"
-                                      : widget.soundName,
+                                      : widget.soundName +
+                                          " by ${widget.publicUser!.name}",
                                   style: const TextStyle(color: Colors.white),
                                 )
                               ],
@@ -1081,27 +1084,21 @@ class _VideoAppState extends State<BetterReelsPlayer>
   }
 
   showReportDialog(int videoId, String name, int id) async {
+    var siteSettingsController = Get.find<SiteSettingsController>();
     String dropDownValue = "Reason";
     List<String> dropDownValues = [
       "Reason",
     ];
     try {
-      var response = await RestApi.getSiteSettings();
-      var json = jsonDecode(response.body);
-      if (json['status']) {
-        List jsonList = json['data'] as List;
-        for (var element in jsonList) {
-          if (element['name'] == 'report_reason') {
-            List reasonList = element['value'].toString().split(',');
-            for (String reason in reasonList) {
-              dropDownValues.add(reason);
-            }
-            break;
+      List jsonList = siteSettingsController.siteSettings.value.data as List;
+      for (SiteSettings element in jsonList) {
+        if (element.name == 'report_reason') {
+          List reasonList = element.value.toString().split(',');
+          for (String reason in reasonList) {
+            dropDownValues.add(reason);
           }
+          break;
         }
-      } else {
-        showErrorToast(context, json['message'].toString());
-        return;
       }
     } catch (e) {
       closeDialogue(context);
@@ -1181,20 +1178,8 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                     ? null
                                     : () async {
                                         try {
-                                          var response =
-                                              await RestApi.reportVideo(
-                                                  videoId, id, dropDownValue);
-                                          var json = jsonDecode(response.body);
-                                          closeDialogue(context);
-                                          if (json['status']) {
-                                            //Navigator.pop(context);
-                                            showSuccessToast(context,
-                                                json['message'].toString());
-                                          } else {
-                                            //Navigator.pop(context);
-                                            showErrorToast(context,
-                                                json['message'].toString());
-                                          }
+                                          relatedVideosController.reportVideo(
+                                              videoId, id, dropDownValue);
                                         } catch (e) {
                                           closeDialogue(context);
                                           showErrorToast(context, e.toString());
@@ -1425,7 +1410,7 @@ class CommentsScreen extends GetView<CommentsController> {
                                     child: CachedNetworkImage(
                                       imageUrl: state[index].avatar!.isEmpty ||
                                               state[index].avatar == null
-                                          ? "https://www.kindpng.com/picc/m/252-2524695_dummy-profile-image-jpg-hd-png-download.png"
+                                          ? RestUrl.placeholderImage
                                           : RestUrl.profileUrl +
                                               state[index].avatar.toString(),
                                       fit: BoxFit.cover,
@@ -1638,8 +1623,8 @@ class CommentsScreen extends GetView<CommentsController> {
                                           comment: videoComment.value,
                                         )
                                             .then((value) async {
-                                          await controller
-                                              .getComments(videoId!);
+                                          relatedVideosController
+                                              .getAllVideos();
                                           _textEditingController.clear();
                                         });
                                       },

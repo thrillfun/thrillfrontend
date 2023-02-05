@@ -56,46 +56,51 @@ class ViewProfile extends StatelessWidget {
         iconTheme: IconThemeData(
             color: Get.isPlatformDarkMode ? Colors.white : Colors.black),
       ),
-      body: ListView(
+      body: Column(
         children: [
           OtherUserProfileDetails(isFollow!),
-          const SizedBox(
-            height: 20,
-          ),
-
-          Obx(() => DefaultTabController(
-              length: 2,
-              initialIndex: selectedTab.value,
-              child: TabBar(
-                  onTap: (int index) {
-                    selectedTab.value = index;
-                  },
-                  padding: const EdgeInsets.symmetric(horizontal: 50),
-                  indicatorColor: const Color(0XffB2E3E3),
-                  indicatorPadding: const EdgeInsets.symmetric(horizontal: 30),
-                  tabs: [
-                    Tab(
-                      icon: Icon(
-                        Icons.dashboard,
-                        color: selectedTab.value == 0
-                            ? ColorManager.colorAccent
-                            : Get.isPlatformDarkMode
-                                ? Colors.white
-                                : Colors.black,
-                      ),
-                    ),
-                    Tab(
-                      icon: Icon(
-                        Icons.favorite,
-                        color: selectedTab.value == 1
-                            ? ColorManager.colorAccent
-                            : Get.isPlatformDarkMode
-                                ? Colors.white
-                                : Colors.black,
-                      ),
-                    )
-                  ]))),
-          Obx(() => tabview())
+          Flexible(
+              child: Column(
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              Obx(() => DefaultTabController(
+                  length: 2,
+                  initialIndex: selectedTab.value,
+                  child: TabBar(
+                      onTap: (int index) {
+                        selectedTab.value = index;
+                      },
+                      padding: const EdgeInsets.symmetric(horizontal: 50),
+                      indicatorColor: const Color(0XffB2E3E3),
+                      indicatorPadding:
+                          const EdgeInsets.symmetric(horizontal: 30),
+                      tabs: [
+                        Tab(
+                          icon: Icon(
+                            Icons.dashboard,
+                            color: selectedTab.value == 0
+                                ? ColorManager.colorAccent
+                                : Get.isPlatformDarkMode
+                                    ? Colors.white
+                                    : Colors.black,
+                          ),
+                        ),
+                        Tab(
+                          icon: Icon(
+                            Icons.favorite,
+                            color: selectedTab.value == 1
+                                ? ColorManager.colorAccent
+                                : Get.isPlatformDarkMode
+                                    ? Colors.white
+                                    : Colors.black,
+                          ),
+                        )
+                      ]))),
+              Expanded(child: Obx(() => tabview()))
+            ],
+          ))
         ],
       ),
     );
@@ -133,7 +138,7 @@ class ViewProfile extends StatelessWidget {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                   crossAxisCount: 3,
-                  childAspectRatio: Get.width / Get.height,
+                  childAspectRatio: 0.8,
                   padding: const EdgeInsets.all(10),
                   children: List.generate(
                       videosController.otherUserVideos.length,
@@ -225,7 +230,7 @@ class ViewProfile extends StatelessWidget {
                   crossAxisCount: 3,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: Get.width / Get.height,
+                  childAspectRatio: 0.8,
                   padding: const EdgeInsets.all(10),
                   children: List.generate(
                       videosController.othersLikedVideos.length,
@@ -307,11 +312,10 @@ class OtherUserVideos extends GetView<UserVideosController> {
       (_) => GridView.count(
         padding: const EdgeInsets.all(10),
         shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 3,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: Get.width / Get.height,
+        childAspectRatio: 0.8,
         children: List.generate(
             controller.otherUserVideos.length,
             (index) => GestureDetector(
@@ -348,7 +352,9 @@ class OtherUserVideos extends GetView<UserVideosController> {
                                   ),
                                   TextSpan(
                                       text: " " +
-                                          controller.otherUserVideos[index].views.toString(),
+                                          controller
+                                              .otherUserVideos[index].views
+                                              .toString(),
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w600,
@@ -375,65 +381,65 @@ class OtherLikedVideos extends GetView<LikedVideosController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-      (state) =>  GridView.count(
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(10),
-              shrinkWrap: true,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              crossAxisCount: 3,
-              childAspectRatio: Get.width / Get.height,
-              children: List.generate(
-                  controller!.othersLikedVideos.length,
-                  (index) => GestureDetector(
-                        onTap: () {
-                          Get.to(VideoPlayerScreen(
-                            isFav: true,
-                            isFeed: false,
-                            isLock: false,
-                            position: index,
-                            likedVideos:  controller!.likedVideos,
-                          ));
-                        },
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            imgNet(
-                                '${RestUrl.gifUrl}${ controller!.othersLikedVideos[index].gifImage}'),
-                            Positioned(
-                                bottom: 10,
-                                left: 10,
-                                right: 10,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+      (state) => GridView.count(
+        padding: const EdgeInsets.all(10),
+        shrinkWrap: true,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        crossAxisCount: 3,
+        childAspectRatio: 0.8,
+        children: List.generate(
+            controller!.othersLikedVideos.length,
+            (index) => GestureDetector(
+                  onTap: () {
+                    Get.to(VideoPlayerScreen(
+                      isFav: true,
+                      isFeed: false,
+                      isLock: false,
+                      position: index,
+                      likedVideos: controller!.likedVideos,
+                    ));
+                  },
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      imgNet(
+                          '${RestUrl.gifUrl}${controller!.othersLikedVideos[index].gifImage}'),
+                      Positioned(
+                          bottom: 10,
+                          left: 10,
+                          right: 10,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              RichText(
+                                text: TextSpan(
                                   children: [
-                                    RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          const WidgetSpan(
-                                            child: Icon(
-                                              Icons.play_circle,
-                                              size: 18,
-                                              color: ColorManager.colorAccent,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                              text: " " +
-                                                  controller!.othersLikedVideos[index].views
-                                                      .toString(),
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 16)),
-                                        ],
+                                    const WidgetSpan(
+                                      child: Icon(
+                                        Icons.play_circle,
+                                        size: 18,
+                                        color: ColorManager.colorAccent,
                                       ),
-                                    )
+                                    ),
+                                    TextSpan(
+                                        text: " " +
+                                            controller!
+                                                .othersLikedVideos[index].views
+                                                .toString(),
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16)),
                                   ],
-                                )),
-                          ],
-                        ),
-                      )),
-            ),
+                                ),
+                              )
+                            ],
+                          )),
+                    ],
+                  ),
+                )),
+      ),
       onLoading: loader(),
       onEmpty: emptyListWidget(),
     );
@@ -452,23 +458,41 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
     return controller.obx(
       (state) => Column(
         children: [
-          Container(
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            height: 100,
-            width: 100,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-            ),
-            child: CachedNetworkImage(
-              fit: BoxFit.cover,
-              imageUrl: state!.value.avatar!.isEmpty
-                  ? 'https://static.vecteezy.com/system/resources/thumbnails/002/002/403/small/man-with-beard-avatar-character-isolated-icon-free-vector.jpg'
-                  : '${RestUrl.profileUrl}${state.value.avatar}',
-              placeholder: (a, b) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          ),
+          Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      "assets/profile_background.svg",
+                      fit: BoxFit.contain,
+                      width: Get.width,
+                    ),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          "assets/23.svg",
+                        ),
+                        Container(
+                            clipBehavior: Clip.antiAliasWithSaveLayer,
+                            height: 100,
+                            width: 100,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                            ),
+                            child: CachedNetworkImage(
+                              fit: BoxFit.fill,
+                              imageUrl: state!.value.avatar.toString().isEmpty
+                                  ? RestUrl.placeholderImage
+                                  : '${RestUrl.profileUrl}${state.value.avatar}',
+                              placeholder: (a, b) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            )),
+                      ],
+                    )
+                  ],
+                ),
+               
           const SizedBox(
             height: 10,
           ),
@@ -506,8 +530,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                       (value) => followersController
                           .getUserFollowing(state.value.id!)
                           .then((value) => Get.to(FollowingAndFollowers(
-                                false.obs,
-                              ))));
+                              false.obs, state.value.id!.obs))));
                   // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':1});
                 },
                 child: RichText(
@@ -545,8 +568,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                       (value) => followersController
                           .getUserFollowing(state.value.id!)
                           .then((value) => Get.to(FollowingAndFollowers(
-                              false.obs,
-                              ))));
+                              false.obs, state.value.id!.obs))));
 
                   // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
                 },
@@ -603,7 +625,6 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                   ])),
             ],
           ).w(MediaQuery.of(context).size.width * .80),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -619,17 +640,16 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                       child: InkWell(
                         onTap: () {
                           userDetailsController.followUnfollowUser(
-                              int.parse(controller.otherUserProfile.value.id.toString()),
+                              int.parse(controller.otherUserProfile.value.id
+                                  .toString()),
                               isFollow!.value == 0 ? "follow" : "unfollow");
-
-
                         },
                         child:
-                        Text(isFollow!.value == 0 ? "Follow" : "Following",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            )),
+                            Text(isFollow!.value == 0 ? "Follow" : "Following",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                )),
                       ))),
               Expanded(
                   child: Container(
@@ -646,8 +666,10 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                           Get.to(ChatScreen(
                               inboxModel: Inbox(
                                   id: controller.otherUserProfile.value.id,
-                                  userImage: controller.otherUserProfile.value.avatar,
-                                  name: controller.otherUserProfile.value.name)));
+                                  userImage:
+                                      controller.otherUserProfile.value.avatar,
+                                  name:
+                                      controller.otherUserProfile.value.name)));
                         },
                         child: const Text("Message",
                             style: TextStyle(

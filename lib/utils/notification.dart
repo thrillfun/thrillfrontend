@@ -2,10 +2,15 @@ import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CustomNotification {
-  static initialize() {
-    AwesomeNotifications().initialize(
+  RxInt id = Random().nextInt(111).obs;
+  AwesomeNotifications? awesomeNotifications;
+
+  initialize() {
+    awesomeNotifications = AwesomeNotifications();
+    awesomeNotifications?.initialize(
         'resource://drawable/icon',
         [
           NotificationChannel(
@@ -19,24 +24,29 @@ class CustomNotification {
         ],
         channelGroups: [
           NotificationChannelGroup(
-              channelGroupName: 'Normal group', channelGroupKey: 'normal_channel_group'),
+              channelGroupName: 'Normal group',
+              channelGroupKey: 'normal_channel_group'),
         ],
         debug: true);
   }
 
-  static showNormal({
+  showNormal({
     required String title,
     required String body,
   }) {
-    AwesomeNotifications().createNotification(
+    awesomeNotifications?.createNotification(
       content: NotificationContent(
-          id: Random().nextInt(111),
+          id: id.value,
           channelKey: 'normal_channel',
           title: title,
           body: body,
-          notificationLayout: NotificationLayout.Default,
+          notificationLayout: NotificationLayout.ProgressBar,
           autoDismissible: true,
           showWhen: true),
     );
+  }
+
+  hideNotification() {
+    awesomeNotifications?.dismiss(id.value);
   }
 }

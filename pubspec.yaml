@@ -66,7 +66,7 @@ dependencies:
   file_support:
   ffmpeg_kit_flutter_full_gpl:
   video_player:
-  qr_flutter:
+  qr_flutter: 
   flutter_svg:
   syncfusion_flutter_sliders:
   file_picker:
@@ -121,6 +121,8 @@ dependencies:
   logger: ^1.1.0
   sim_data: ^0.0.2
   uri_to_file: ^0.2.0
+  adaptive_theme: ^3.1.1
+  web_socket_channel: ^2.3.0
 
 
 dev_dependencies:

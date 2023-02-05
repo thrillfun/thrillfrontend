@@ -70,8 +70,10 @@ class SearchGetx extends GetView<DiscoverController> {
         child: TabBar(
             unselectedLabelColor:
                 Get.isPlatformDarkMode ? Colors.grey : Colors.black,
-            labelStyle:
-                const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            labelStyle: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: ColorManager.dayNightText),
             labelColor: ColorManager.colorPrimaryLight,
             onTap: (int index) {
               selectedTab.value = index;
@@ -198,7 +200,10 @@ class SearchGetx extends GetView<DiscoverController> {
           child: Center(
         child: Text(
           text,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: ColorManager.dayNightText),
         ),
       ));
 }
@@ -304,7 +309,8 @@ class SearchUsers extends GetView<SearchHashtagsController> {
                                     children: [
                                       Text(
                                         state[0].users![index].name.toString(),
-                                        style: const TextStyle(
+                                        style: TextStyle(
+                                            color: ColorManager.dayNightText,
                                             fontSize: 18,
                                             fontWeight: FontWeight.w700),
                                       ),
@@ -320,7 +326,9 @@ class SearchUsers extends GetView<SearchHashtagsController> {
                                                     .username
                                                     .toString() +
                                                 " | ",
-                                            style: const TextStyle(
+                                            style: TextStyle(
+                                                color:
+                                                    ColorManager.dayNightText,
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w500),
                                           ),
@@ -340,7 +348,9 @@ class SearchUsers extends GetView<SearchHashtagsController> {
                                                         .followers
                                                         .toString() +
                                                     " Followers",
-                                            style: const TextStyle(
+                                            style: TextStyle(
+                                                color:
+                                                    ColorManager.dayNightText,
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w400),
                                           )
@@ -356,12 +366,13 @@ class SearchUsers extends GetView<SearchHashtagsController> {
                                               color: ColorManager.colorAccent,
                                               borderRadius:
                                                   BorderRadius.circular(20)),
-                                          child: const Text(
+                                          child: Text(
                                             "Follow",
                                             style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
-                                                color: Colors.white),
+                                                color:
+                                                    ColorManager.dayNightText),
                                           ),
                                         )
                                       : Container(
@@ -450,9 +461,10 @@ class SearchHashtags extends GetView<SearchHashtagsController> {
                                       state[0].hashtags![index].name == null
                                           ? ""
                                           : state[0].hashtags![index].name!,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 18),
+                                          fontSize: 18,
+                                          color: ColorManager.dayNightText),
                                     )
                                   ],
                                 ),
@@ -463,7 +475,8 @@ class SearchHashtags extends GetView<SearchHashtagsController> {
                                           .hashtags![index]
                                           .total
                                           .toString()!,
-                                  style: const TextStyle(
+                                  style: TextStyle(
+                                      color: ColorManager.dayNightText,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14),
                                 ),
@@ -510,7 +523,16 @@ class SearchSounds extends GetView<SearchHashtagsController> {
                                         Container(
                                           height: 40,
                                           width: 40,
-                                          child: imgProfile(state[0].sounds![index].soundOwner!=null?state[0].sounds![index].soundOwner!.avtars.toString():RestUrl.placeholderImage),
+                                          child: imgProfile(state[0]
+                                                      .sounds![index]
+                                                      .soundOwner !=
+                                                  null
+                                              ? state[0]
+                                                  .sounds![index]
+                                                  .soundOwner!
+                                                  .avtars
+                                                  .toString()
+                                              : RestUrl.placeholderImage),
                                         )
                                       ],
                                     ),
@@ -528,7 +550,8 @@ class SearchSounds extends GetView<SearchHashtagsController> {
                                               .sounds![index]
                                               .sound
                                               .toString(),
-                                          style: const TextStyle(
+                                          style: TextStyle(
+                                              color: ColorManager.dayNightText,
                                               fontWeight: FontWeight.w700,
                                               fontSize: 18),
                                         ),
@@ -538,7 +561,8 @@ class SearchSounds extends GetView<SearchHashtagsController> {
                                               .soundOwner!
                                               .name
                                               .toString(),
-                                          style: const TextStyle(
+                                          style: TextStyle(
+                                              color: ColorManager.dayNightText,
                                               fontWeight: FontWeight.w500,
                                               fontSize: 14),
                                         ),
@@ -548,7 +572,8 @@ class SearchSounds extends GetView<SearchHashtagsController> {
                                               .soundOwner!
                                               .name
                                               .toString(),
-                                          style: const TextStyle(
+                                          style: TextStyle(
+                                            color: ColorManager.dayNightText,
                                             fontWeight: FontWeight.w400,
                                           ),
                                         )
@@ -562,7 +587,8 @@ class SearchSounds extends GetView<SearchHashtagsController> {
                                       .soundOwner!
                                       .followersCount
                                       .toString(),
-                                  style: const TextStyle(
+                                  style: TextStyle(
+                                      color: ColorManager.dayNightText,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14),
                                 )
@@ -610,7 +636,7 @@ class SearchVideos extends GetView<SearchHashtagsController> {
                 child: GridView.count(
                   crossAxisCount: 2,
                   crossAxisSpacing: 10,
-                  childAspectRatio: Get.width / Get.height,
+                  childAspectRatio: 0.8,
                   mainAxisSpacing: 10,
                   children: List.generate(
                       state![0].videos!.length,
@@ -692,7 +718,8 @@ class SearchVideos extends GetView<SearchHashtagsController> {
                                           .user!
                                           .name
                                           .toString(),
-                                      style: const TextStyle(
+                                      style: TextStyle(
+                                          color: ColorManager.dayNightText,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500),
                                     )
@@ -767,10 +794,12 @@ class SearchData extends GetView<SearchHashtagsController> {
                     child: Container(
                       margin: const EdgeInsets.symmetric(
                           vertical: 10, horizontal: 10),
-                      child: const Text(
+                      child: Text(
                         "Users",
                         style: TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 18),
+                            color: ColorManager.dayNightText,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18),
                       ),
                     ),
                   ),
@@ -888,7 +917,9 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                     .users![index]
                                                     .name
                                                     .toString(),
-                                                style: const TextStyle(
+                                                style: TextStyle(
+                                                    color: ColorManager
+                                                        .dayNightText,
                                                     fontSize: 18,
                                                     fontWeight:
                                                         FontWeight.w700),
@@ -905,7 +936,9 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                             .username
                                                             .toString() +
                                                         " | ",
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
+                                                        color: ColorManager
+                                                            .dayNightText,
                                                         fontSize: 14,
                                                         fontWeight:
                                                             FontWeight.w500),
@@ -929,7 +962,9 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                                 .followers
                                                                 .toString() +
                                                             " Followers",
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
+                                                        color: ColorManager
+                                                            .dayNightText,
                                                         fontSize: 12,
                                                         fontWeight:
                                                             FontWeight.w400),
@@ -964,13 +999,14 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(20)),
-                                                    child: const Text(
+                                                    child: Text(
                                                       "Follow",
                                                       style: TextStyle(
                                                           fontSize: 14,
                                                           fontWeight:
                                                               FontWeight.w600,
-                                                          color: Colors.white),
+                                                          color: ColorManager
+                                                              .dayNightText),
                                                     ),
                                                   )
                                                 : Container(
@@ -1003,10 +1039,12 @@ class SearchData extends GetView<SearchHashtagsController> {
                   Visibility(
                     visible: state[0].videos!.isNotEmpty,
                     child: Container(
-                      child: const Text(
+                      child: Text(
                         "Videos",
                         style: TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 18),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            color: ColorManager.dayNightText),
                       ),
                       margin: const EdgeInsets.symmetric(
                           vertical: 10, horizontal: 10),
@@ -1024,7 +1062,7 @@ class SearchData extends GetView<SearchHashtagsController> {
                           crossAxisCount: 3,
                           shrinkWrap: true,
                           crossAxisSpacing: 10,
-                          childAspectRatio: Get.width / Get.height,
+                          childAspectRatio: 0.8,
                           mainAxisSpacing: 10,
                           children: List.generate(
                               state[0].videos!.take(3).length,
@@ -1056,10 +1094,12 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                         ),
                                                       ),
                                                       TextSpan(
-                                                        style: const TextStyle(
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
+                                                        style: TextStyle(
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            color: ColorManager
+                                                                .dayNightText),
                                                         text: "  " +
                                                             state[0]
                                                                 .videos![index]
@@ -1129,10 +1169,12 @@ class SearchData extends GetView<SearchHashtagsController> {
                   Visibility(
                       visible: state[0].hashtags!.isNotEmpty,
                       child: Container(
-                        child: const Text(
+                        child: Text(
                           "Hashtags",
                           style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 18),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              color: ColorManager.dayNightText),
                         ),
                         margin: const EdgeInsets.symmetric(
                             vertical: 10, horizontal: 10),
@@ -1209,11 +1251,13 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                     : state[0]
                                                         .hashtags![index]
                                                         .name!,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                     fontWeight: FontWeight.w700,
-                                                    fontSize: 18),
+                                                    fontSize: 18,
+                                                    color: ColorManager
+                                                        .dayNightText),
                                               )
                                             ],
                                           ),
@@ -1225,9 +1269,11 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                     .hashtags![index]
                                                     .total
                                                     .toString()!,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 fontWeight: FontWeight.w600,
-                                                fontSize: 14),
+                                                fontSize: 14,
+                                                color:
+                                                    ColorManager.dayNightText),
                                           ),
                                         ],
                                       ),
@@ -1236,10 +1282,12 @@ class SearchData extends GetView<SearchHashtagsController> {
                   Visibility(
                       visible: state[0].sounds!.isNotEmpty,
                       child: Container(
-                        child: const Text(
+                        child: Text(
                           "Sounds",
                           style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 18),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              color: ColorManager.dayNightText),
                         ),
                         margin: const EdgeInsets.symmetric(
                             vertical: 10, horizontal: 10),
@@ -1272,13 +1320,16 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                   height: 40,
                                                   width: 40,
                                                   child: imgProfile(state[0]
-                                                      .sounds![index]
-                                                      .soundOwner!=null?
-                                                      state[0]
+                                                              .sounds![index]
+                                                              .soundOwner !=
+                                                          null
+                                                      ? state[0]
                                                           .sounds![index]
                                                           .soundOwner!
-                                                      .avtars
-                                                      .toString():RestUrl.placeholderImage),
+                                                          .avtars
+                                                          .toString()
+                                                      : RestUrl
+                                                          .placeholderImage),
                                                 )
                                               ],
                                             ),
@@ -1298,37 +1349,47 @@ class SearchData extends GetView<SearchHashtagsController> {
                                                       .sounds![index]
                                                       .sound
                                                       .toString(),
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.w700,
-                                                      fontSize: 18),
+                                                      fontSize: 18,
+                                                      color: ColorManager
+                                                          .dayNightText),
                                                 ),
                                                 Text(
                                                   state[0]
-                                                      .sounds![index]
-                                                      .soundOwner!=null?
-                                                  state[0]
-                                                      .sounds![index]
-                                                      .soundOwner!
-                                                      .name
-                                                      .toString():"",
-                                                  style: const TextStyle(
+                                                              .sounds![index]
+                                                              .soundOwner !=
+                                                          null
+                                                      ? state[0]
+                                                          .sounds![index]
+                                                          .soundOwner!
+                                                          .name
+                                                          .toString()
+                                                      : "",
+                                                  style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.w500,
-                                                      fontSize: 14),
+                                                      fontSize: 14,
+                                                      color: ColorManager
+                                                          .dayNightText),
                                                 ),
                                                 Text(
                                                   state[0]
-                                                      .sounds![index]
-                                                      .soundOwner!=null?
-                                                  state[0]
-                                                      .sounds![index]
-                                                      .soundOwner!
-                                                      .name
-                                                      .toString():"",
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
+                                                              .sounds![index]
+                                                              .soundOwner !=
+                                                          null
+                                                      ? state[0]
+                                                          .sounds![index]
+                                                          .soundOwner!
+                                                          .name
+                                                          .toString()
+                                                      : "",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: ColorManager
+                                                          .dayNightText),
                                                 )
                                               ],
                                             ))
@@ -1336,15 +1397,16 @@ class SearchData extends GetView<SearchHashtagsController> {
                                         ),
                                       ),
                                       Text(
-                                        state[0]
-                                            .sounds![index]
-                                            .soundOwner!=null?
-                                        state[0]
-                                            .sounds![index]
-                                            .soundOwner!
-                                            .followersCount
-                                            .toString():"0",
-                                        style: const TextStyle(
+                                        state[0].sounds![index].soundOwner !=
+                                                null
+                                            ? state[0]
+                                                .sounds![index]
+                                                .soundOwner!
+                                                .followersCount
+                                                .toString()
+                                            : "0",
+                                        style: TextStyle(
+                                            color: ColorManager.dayNightText,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 14),
                                       )
@@ -1353,42 +1415,44 @@ class SearchData extends GetView<SearchHashtagsController> {
                                 ),
                                 onTap: () => Get.to(SoundDetails(map: {
                                   "sound": state[0].sounds![index].sound,
-                                  "user":state[0]
-                                      .sounds![index]
-                                      .soundOwner!=null ?
-                                  state[0]
-                                      .sounds![index]
-                                      .soundOwner!
-                                      .name!
-                                      :
-                                  ""
-                                      ,
+                                  "user":
+                                      state[0].sounds![index].soundOwner != null
+                                          ? state[0]
+                                              .sounds![index]
+                                              .soundOwner!
+                                              .name!
+                                          : "",
                                   "soundName": state[0].sounds![index].sound,
-                                  "title": state[0]
-                                      .sounds![index]
-                                      .soundOwner!=null?
-                                  state[0]
-                                      .sounds![index]
-                                      .soundOwner!
-                                      .username:"",
-                                  "id": state[0].sounds![index].soundOwner!=null?state[0].sounds![index].soundOwner!.id:0,
+                                  "title":
+                                      state[0].sounds![index].soundOwner != null
+                                          ? state[0]
+                                              .sounds![index]
+                                              .soundOwner!
+                                              .username
+                                          : "",
+                                  "id": state[0].sounds![index].soundOwner !=
+                                          null
+                                      ? state[0].sounds![index].soundOwner!.id
+                                      : 0,
                                   "sound_id": state[0].sounds![index].id,
-                                  "profile": state[0]
-                                      .sounds![index]
-                                      .soundOwner!=null?
-                                  state[0]
-                                      .sounds![index]
-                                      .soundOwner!
-                                      .avtars:RestUrl.placeholderImage,
-                                  "name":
-                                      state[0].sounds![index].soundOwner!=null?state[0].sounds![index].soundOwner!.name:"",
-                                  "username": state[0]
-                                      .sounds![index]
-                                      .soundOwner!=null
-                                      ?state[0]
-                                      .sounds![index]
-                                      .soundOwner!
-                                      .username:"",
+                                  "profile":
+                                      state[0].sounds![index].soundOwner != null
+                                          ? state[0]
+                                              .sounds![index]
+                                              .soundOwner!
+                                              .avtars
+                                          : RestUrl.placeholderImage,
+                                  "name": state[0].sounds![index].soundOwner !=
+                                          null
+                                      ? state[0].sounds![index].soundOwner!.name
+                                      : "",
+                                  "username":
+                                      state[0].sounds![index].soundOwner != null
+                                          ? state[0]
+                                              .sounds![index]
+                                              .soundOwner!
+                                              .username
+                                          : "",
                                   "isFollow": 0,
                                 })),
                               )))

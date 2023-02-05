@@ -1,13 +1,16 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thrill/controller/model/user_details_model.dart';
 import 'package:thrill/controller/users/other_users_controller.dart';
@@ -17,6 +20,8 @@ import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/widgets/better_video_player.dart';
+import 'dart:ui' as ui;
+import 'package:path_provider/path_provider.dart';
 
 import '../../common/color.dart';
 import '../../common/strings.dart';
@@ -40,11 +45,15 @@ class _QrCodeState extends State<QrCode> {
   var userVideosController = Get.find<UserVideosController>();
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   User? userModel;
+  final GlobalKey previewContainer = new GlobalKey();
 
   @override
   void initState() {
-
-    usersController.createDynamicLink(usersController.storage.read("userId").toString(),"profile", usersController.userProfile.value.name,"");
+    usersController.createDynamicLink(
+        usersController.storage.read("userId").toString(),
+        "profile",
+        usersController.userProfile.value.name,
+        "");
 
     super.initState();
   }
@@ -80,28 +89,59 @@ class _QrCodeState extends State<QrCode> {
                           : RestUrl.placeholderImage))),
         ),
         Text(usersController.userProfile.value.name!,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 24)),
-        const Text("Scan QR Code to follow account",
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
-        Container(
-          height: 250,
-          decoration: BoxDecoration(
-              color: ColorManager.dayNight,
-              borderRadius: BorderRadius.circular(45)),
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Obx(() => QrImage(
-                eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle),
-                padding: const EdgeInsets.all(25),
-                dataModuleStyle: const QrDataModuleStyle(
-                    dataModuleShape: QrDataModuleShape.circle),
-                data: usersController.qrData.value,
-                foregroundColor: Colors.black,
-                version: QrVersions.auto,
-                embeddedImage: Image.asset(
-                  "assets/logo.png",
-                ).image,
-                embeddedImageStyle: QrEmbeddedImageStyle(),
-              )),
+            style: TextStyle(
+                color: ColorManager.dayNightText,
+                fontWeight: FontWeight.w700,
+                fontSize: 24)),
+        Text("Scan QR Code to follow account",
+            style: TextStyle(
+                color: ColorManager.dayNightText,
+                fontWeight: FontWeight.w700,
+                fontSize: 18)),
+        RepaintBoundary(
+          key: previewContainer,
+          child: Card(
+            elevation: 10,
+            color: ColorManager.dayNightText,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(45)),
+            child: Container(
+              height: 300,
+              decoration: BoxDecoration(
+                  color: ColorManager.dayNight,
+                  borderRadius: BorderRadius.circular(45)),
+              margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Obx(() => QrImage(
+                        eyeStyle: QrEyeStyle(
+                          eyeShape: QrEyeShape.circle,
+                          color: ColorManager.colorAccent,
+                        ),
+                        padding: const EdgeInsets.all(25),
+                        foregroundColor: Colors.black,
+                        dataModuleStyle: const QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.circle),
+                        data: usersController.qrData.value,
+                        version: QrVersions.auto,
+                        embeddedImageStyle: QrEmbeddedImageStyle(),
+                      )),
+                  Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    elevation: 10,
+                    child: Image.asset(
+                      'assets/logo2.png',
+                      fit: BoxFit.contain,
+                      height: 40,
+                      width: 50,
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
         ),
         const SizedBox(
           height: 30,
@@ -111,7 +151,7 @@ class _QrCodeState extends State<QrCode> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             InkWell(
-                onTap: saveQrCode,
+                onTap: _captureSocialPng,
                 borderRadius: BorderRadius.circular(10),
                 splashColor: ColorManager.colorAccentTransparent,
                 child: Padding(
@@ -142,32 +182,40 @@ class _QrCodeState extends State<QrCode> {
                       await FlutterBarcodeScanner.scanBarcode(
                           "#ff6666", "Cancel", true, ScanMode.QR);
                   if (barcodeScanRes.isNotEmpty && barcodeScanRes != '-1') {
+                    final PendingDynamicLinkData? initialLink =
+                        await FirebaseDynamicLinks.instance
+                            .getDynamicLink(Uri.parse(barcodeScanRes));
 
-                    final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getDynamicLink(Uri.parse(barcodeScanRes));
-
-                    if (initialLink!.link.queryParameters["type"] == "profile") {
+                    if (initialLink!.link.queryParameters["type"] ==
+                        "profile") {
                       otherUsersController
-                          .getOtherUserProfile(initialLink!.link.queryParameters["id"])
+                          .getOtherUserProfile(
+                              initialLink!.link.queryParameters["id"])
                           .then((value) {
-                        likedVideosController.getOthersLikedVideos(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                        likedVideosController
+                            .getOthersLikedVideos(int.parse(initialLink!
+                                .link.queryParameters["id"]
+                                .toString()))
+                            .then((value) {
                           userVideosController
-                              .getOtherUserVideos(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                              .getOtherUserVideos(int.parse(initialLink!
+                                  .link.queryParameters["id"]
+                                  .toString()))
+                              .then((value) {
                             Get.to(ViewProfile(
                                 initialLink!.link.queryParameters["id"],
                                 0.obs,
                                 initialLink!.link.queryParameters["name"],
-                                initialLink!.link.queryParameters["something"]));
+                                initialLink!
+                                    .link.queryParameters["something"]));
                           });
-
                         });
-
                       });
-                    } else if (initialLink!.link.queryParameters["type"] == "video") {
-                      successToast(initialLink!.link.queryParameters["id"].toString());
+                    } else if (initialLink!.link.queryParameters["type"] ==
+                        "video") {
+                      successToast(
+                          initialLink!.link.queryParameters["id"].toString());
                     }
-
-
-
                   }
                 },
                 borderRadius: BorderRadius.circular(10),
@@ -190,30 +238,41 @@ class _QrCodeState extends State<QrCode> {
                               await FlutterBarcodeScanner.scanBarcode(
                                   "#ff6666", "Cancel", true, ScanMode.QR);
 
-                          final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getDynamicLink(Uri.parse(barcodeScanRes));
+                          final PendingDynamicLinkData? initialLink =
+                              await FirebaseDynamicLinks.instance
+                                  .getDynamicLink(Uri.parse(barcodeScanRes));
 
-
-                          if (initialLink!.link.queryParameters["type"] == "profile") {
+                          if (initialLink!.link.queryParameters["type"] ==
+                              "profile") {
                             otherUsersController
-                                .getOtherUserProfile(initialLink!.link.queryParameters["id"])
+                                .getOtherUserProfile(
+                                    initialLink!.link.queryParameters["id"])
                                 .then((value) {
-                              likedVideosController.getOthersLikedVideos(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                              likedVideosController
+                                  .getOthersLikedVideos(int.parse(initialLink!
+                                      .link.queryParameters["id"]
+                                      .toString()))
+                                  .then((value) {
                                 userVideosController
-                                    .getOtherUserVideos(int.parse(initialLink!.link.queryParameters["id"].toString())).then((value) {
+                                    .getOtherUserVideos(int.parse(initialLink!
+                                        .link.queryParameters["id"]
+                                        .toString()))
+                                    .then((value) {
                                   Get.to(ViewProfile(
                                       initialLink!.link.queryParameters["id"],
                                       0.obs,
                                       initialLink!.link.queryParameters["name"],
-                                      initialLink!.link.queryParameters["something"]));
+                                      initialLink!
+                                          .link.queryParameters["something"]));
                                 });
-
                               });
-
                             });
-                          } else if (initialLink!.link.queryParameters["type"] == "video") {
-                            successToast(initialLink!.link.queryParameters["id"].toString());
+                          } else if (initialLink!
+                                  .link.queryParameters["type"] ==
+                              "video") {
+                            successToast(initialLink!.link.queryParameters["id"]
+                                .toString());
                           }
-
 
                           showDialog(
                               context: context,
@@ -238,6 +297,32 @@ class _QrCodeState extends State<QrCode> {
     );
   }
 
+  Future<void> _captureSocialPng() {
+    DateTime dateTime = DateTime.now();
+
+    List<String> imagePaths = [];
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    return Future.delayed(const Duration(milliseconds: 20), () async {
+      RenderRepaintBoundary? boundary = previewContainer.currentContext!
+          .findRenderObject() as RenderRepaintBoundary?;
+      ui.Image image = await boundary!.toImage();
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+      File imgFile = File(
+          '${saveDirectory}ThrillProfileQR-${dateTime.hour}${dateTime.minute}${dateTime.second}${dateTime.millisecond}.png');
+      imagePaths.add(imgFile.path);
+      imgFile.writeAsBytes(pngBytes).then((value) async {
+        await Share.shareFiles(imagePaths,
+            subject: 'Share',
+            text: 'Check this Out!',
+            sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
+      }).catchError((onError) {
+        print(onError);
+      });
+    });
+  }
+
   saveQrCode() async {
     // var status = await Permission.storage.isGranted;
     // if (!status) {
@@ -252,9 +337,7 @@ class _QrCodeState extends State<QrCode> {
       final qrValidationResult = QrValidator.validate(
         data: usersController.qrData.value,
         version: QrVersions.auto,
-        
         errorCorrectionLevel: QrErrorCorrectLevel.L,
-        
       );
       final qrCode = qrValidationResult.qrCode;
       final painter = QrPainter.withQr(

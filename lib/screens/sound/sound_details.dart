@@ -27,17 +27,6 @@ var audioBuffered = const Duration().obs;
 var isPlayerInit = false.obs;
 
 var isFollow = 0.obs;
-final progressNotifier = ValueNotifier<ProgressBarState>(
-  ProgressBarState(
-    current: Duration.zero,
-    buffered: Duration.zero,
-    total: Duration.zero,
-  ),
-);
-
-late AudioPlayer audioPlayer;
-late Duration duration;
-late PlayerController playerController;
 
 class SoundDetails extends StatefulWidget {
   SoundDetails({Key? key, required this.map}) : super(key: key);
@@ -49,6 +38,12 @@ class SoundDetails extends StatefulWidget {
 
 class _SoundDetailsState extends State<SoundDetails>
     with SingleTickerProviderStateMixin {
+    
+
+late AudioPlayer audioPlayer;
+late Duration duration;
+late PlayerController playerController;
+
   AnimationController? _controller;
   var isPlaying = false.obs;
   var isAudioLoading = true.obs;
@@ -68,6 +63,7 @@ class _SoundDetailsState extends State<SoundDetails>
 
   @override
   void initState() {
+     super.initState();
     playerController = PlayerController();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -81,10 +77,7 @@ class _SoundDetailsState extends State<SoundDetails>
       isFollow.value = 1;
     }
     setupAudioPlayer();
-
-    super.initState();
     getVideos();
-    try {} catch (_) {}
   }
 
   @override
@@ -564,7 +557,7 @@ class _SoundDetailsState extends State<SoundDetails>
                     child: InkWell(
                         onTap: () async {
                           soundsController.downloadAudio(widget.map["sound"],
-                              widget.map["user"].toString(), widget.map["id"],widget.map["soundName"]);
+                              widget.map["user"].toString(), widget.map["id"],widget.map["soundName"],false);
                         },
                         child: RichText(
                           text: const TextSpan(
@@ -625,7 +618,7 @@ class _SoundDetailsState extends State<SoundDetails>
       if (playerDuration == audioTotalDuration.value) {
         await playerController.seekTo(0);
         isPlaying.value = false;
-        setState(() async {});
+        setState(()  {});
       }
     });
   }

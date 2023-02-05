@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
+import 'package:file_support/file_support.dart';
 import 'package:flutter/cupertino.dart';
 
 // import 'package:flutter_audio_query/flutter_audio_query.dart';
@@ -14,6 +16,7 @@ import 'package:http/http.dart' as http;
 import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:path/path.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
@@ -35,7 +38,9 @@ import 'package:thrill/models/videos_post_response.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/video/post_screen.dart';
+import 'package:thrill/utils/notification.dart';
 import 'package:thrill/utils/util.dart';
+import 'package:uri_to_file/uri_to_file.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 
 var soundsController = Get.find<SoundsController>();
@@ -44,6 +49,7 @@ var followingVideosController = Get.find<FollowingVideosController>();
 
 class VideosController extends GetxController with StateMixin<dynamic> {
   RxBool on = false.obs; // our observable
+  var currentUploadStatus = "".obs;
   var token = GetStorage().read('token');
   var dio = Dio(BaseOptions(
       baseUrl: RestUrl.baseUrl,
@@ -113,6 +119,18 @@ class VideosController extends GetxController with StateMixin<dynamic> {
     //   ),
     // );
   }
+
+  showUploadSnackbar() => CustomNotification().showNormal(
+      title: "Uploading Video",
+      body: "Please wait while we upload ${currentUploadStatus.value}");
+  // Get.showSnackbar(GetSnackBar(
+  //     title: currentUploadStatus.value,
+  //     message: "uploading ${currentUploadStatus.value}",
+  //     snackPosition: SnackPosition.BOTTOM,
+  //     isDismissible: false,
+  //     duration: const Duration(days: 365),
+  //     backgroundColor: ColorManager.colorAccent,
+  //     showProgressIndicator: true));
 
   void toggle() => on.value = on.value ? false : true;
 
@@ -366,11 +384,17 @@ class VideosController extends GetxController with StateMixin<dynamic> {
         'sound_owner': soundOwnerId.toString(),
         "cover_image": coverImage
       },
-    ).then((value) {
+    ).then((value) async {
       try {
-        successToast(VideoPostResponse.fromJson(value.data).message.toString());
+        if (value.data["status"]) {
+          successToast(
+              VideoPostResponse.fromJson(value.data).message.toString());
 
-        Get.offAll(LandingPageGetx());
+          final directory =
+              await ExternalPath.getExternalStoragePublicDirectory(
+                  ExternalPath.DIRECTORY_PICTURES);
+          await Directory("$directory/thrill/videos").delete(recursive: true);
+        } else {}
       } catch (e) {
         errorToast(VideoPostResponse.fromJson(value.data).message.toString());
       }
@@ -378,6 +402,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       errorToast(error.toString());
     });
     isLoading.value = false;
+    CustomNotification().hideNotification();
     update();
   }
 
@@ -441,13 +466,10 @@ class VideosController extends GetxController with StateMixin<dynamic> {
   }
 
   Future<void> awsUploadVideo(File file, int currentUnix) async {
-    Get.defaultDialog(
-        content: loader(),
-        title: "Uploading Video",
-        backgroundColor: ColorManager.dayNight);
+    currentUploadStatus.value = "Video";
 
     try {
-      await SimpleS3()
+      await simpleS3
           .uploadFile(
         file,
         "thrillvideonew",
@@ -468,7 +490,9 @@ class VideosController extends GetxController with StateMixin<dynamic> {
   }
 
   Future<String> createGIF(int currentUnix, String filePath) async {
-    String outputPath = saveCacheDirectory + 'thumbnail.gif';
+    var thumbnailDirectory = await getTemporaryDirectory();
+
+    String outputPath = thumbnailDirectory.path + '/thumbnails/thumbnail.gif';
     String path = filePath.substring(7, filePath.length);
     FFmpegKit.execute(
             "-y -i $path -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath")
@@ -479,79 +503,73 @@ class VideosController extends GetxController with StateMixin<dynamic> {
         Get.back();
         print("============================> GIF Success!!!!" + outputPath);
       } else {
-        print("============================> GIF Error!!!!");
+        Logger().wtf("Gif error ${session.getReturnCode()}");
       }
     });
 
     return outputPath;
   }
 
-  Future<void> awsUploadThumbnail(String path) async {
-    int currentUnix = DateTime.now().millisecondsSinceEpoch;
-
-    Get.defaultDialog(
-        content: loader(),
-        title: "Uploading Thumbnail",
-        backgroundColor: ColorManager.dayNight);
+  Future<void> awsUploadThumbnail(File path, String name) async {
+    currentUploadStatus.value = "Thumbnail";
     try {
-      await SimpleS3()
+      await simpleS3
           .uploadFile(
-        File(path),
+        path,
         "thrillvideonew",
         "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
         AWSRegions.apSouth1,
         debugLog: true,
-        s3FolderPath:"gif",
-        fileName: 'Thrill-$currentUnix.gif',
+        s3FolderPath: "gif",
+        fileName: 'Thrill-$name.gif',
         accessControl: S3AccessControl.publicRead,
       )
-          .then((value) async {
-        Logger().i(value);
-        Get.back();
+          .onError((error, stackTrace) {
+        errorToast(error.toString());
+        return "$error";
       });
       Logger().w("============================> Thumbnail upload Success!!!!");
     } on Exception catch (e) {
       Get.back();
       Logger().wtf(e);
-
     }
     Get.back();
   }
 
   Future<void> awsUploadSound(String file, String currentUnix) async {
-    Get.defaultDialog(
-        content: loader(),
-        title: "Uploading Sound",
-        backgroundColor: ColorManager.dayNight);
+    currentUploadStatus.value = "Sound";
 
-   try{
-     await SimpleS3()
-         .uploadFile(
-       File(file),
-       "thrillvideonew",
-       "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
-       AWSRegions.apSouth1,
-       debugLog: true,
-       fileName: '$currentUnix.mp3',
-       s3FolderPath: "sound",
-       accessControl: S3AccessControl.publicRead,
-     )
-         .then((value) async {
-       Get.back();
-       Logger().w(value);
-     });
-   }
-   catch(e){
-     Logger().wtf(e);
-   }
+    try {
+      await simpleS3
+          .uploadFile(
+        File(file),
+        "thrillvideonew",
+        "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
+        AWSRegions.apSouth1,
+        debugLog: true,
+        fileName: '$currentUnix.mp3',
+        s3FolderPath: "sound",
+        accessControl: S3AccessControl.publicRead,
+      )
+          .then((value) async {
+        Get.back();
+        Logger().w(value);
+      }).onError((error, stackTrace) {
+        errorToast(error.toString());
+      });
+    } catch (e) {
+      Logger().wtf(e);
+    }
     Get.back();
   }
 
   Future<void> openEditor(bool isGallery, String path, String selectedSound,
       int id, String owner) async {
-    final directory = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_PICTURES);
-    final dir = Directory("$directory/thrill");
+    var tempDirectory = await getTemporaryDirectory();
+    final dir = Directory(tempDirectory.path + "/videos");
+    if (!await Directory(dir.path).exists()) {
+      await Directory(dir.path).create();
+    }
     final List<FileSystemEntity> entities = await dir.list().toList();
 
     List<String> videosList = <String>[];
@@ -567,11 +585,10 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       if (!isGallery) {
         await VESDK
             .openEditor(Video.composition(videos: videosList),
-                configuration: setConfig(albums, selectedSound, userDetailsController.userProfile.value.username))
+                configuration: setConfig(albums, selectedSound, owner))
             .then((value) async {
           Map<dynamic, dynamic> serializationData = await value?.serialization;
 
-          print("data=>" + serializationData.toString());
           var isOriginal = true.obs;
           var songPath = '';
           var songName = '';
@@ -616,7 +633,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
           // await dir.delete(recursive: true);
 
-          if (!isOriginal.value) {
+          if (isOriginal.isFalse) {
             selectedSound = "";
             if (value != null) {
               var addSoundModel = AddSoundModel(
@@ -624,7 +641,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
                   id,
                   0,
                   songPath.isNotEmpty ? songPath : path,
-                  songName.isNotEmpty ? songName : "original by $owner",
+                  songName.isNotEmpty ? songName : "original",
                   '',
                   '',
                   true);
@@ -636,7 +653,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
                 addSoundModel: addSoundModel,
                 isDuet: false,
                 isDefaultSound: true,
-                isUploadedFromGallery: true,
+                isUploadedFromGallery: false,
                 trimStart: 0,
                 trimEnd: 0,
               );
@@ -656,7 +673,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
                       id,
                       0,
                       songPath.isNotEmpty ? songPath : path,
-                      songName.isNotEmpty ? songName : "original by $owner",
+                      songName.isNotEmpty ? songName : "original",
                       '',
                       '',
                       true);
@@ -688,7 +705,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
                     songPath.isNotEmpty
                         ? songPath
                         : "$saveCacheDirectory/originalAudio.mp3",
-                    songName.isNotEmpty ? songName : "original by $owner",
+                    songName.isNotEmpty ? songName : "original",
                     '',
                     '',
                     true);
@@ -724,41 +741,30 @@ class VideosController extends GetxController with StateMixin<dynamic> {
           List<dynamic> operationData =
               serializationData['operations'].toList();
 
-          if (value == null) {
-            final dir = Directory("$directory/thrill");
-            dir.exists().then((value) => dir.delete(recursive: true));
-          }
-
-          // await dir.delete(recursive: true);
-
           var isOriginal = true.obs;
           var songPath = '';
           var songName = '';
-          operationData.forEach((operation) {
+          var file = await toFile(selectedSound);
+
+          operationData.forEach((operation) async {
             Map<dynamic, dynamic> data = operation['options'];
             if (data.containsKey("clips")) {
               isOriginal.value = false;
-              albums.forEach((element) {
-                songPath = element.uri.toString();
-                songName = element.displayNameWOExt;
-              });
+              songPath = file.path;
+              songName = basename(file.path);
+              // albums.forEach((element) {
+              //   if(element.displayNameWOExt!.contains(operation["options"]["clips"][0]["options"]["identifier"])) {
+              //     songPath = element.uri.toString();
+              //     songName = element.displayNameWOExt;
+              //
+              //   }
+              // });
             }
           });
-          if (isOriginal.isFalse) {
-            operationData.forEach((operation) {
-
-            });
-
+          if (!isOriginal.value) {
             if (value != null) {
-              var addSoundModel = AddSoundModel(
-                  0,
-                  id,
-                  0,
-                  songPath,
-                  "$songName by $owner",
-                  '',
-                  '',
-                  true);
+              var addSoundModel =
+                  AddSoundModel(0, id, 0, songPath, songName, '', '', true);
               PostData postData = PostData(
                 speed: '1',
                 newPath: value.video,
@@ -767,7 +773,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
                 addSoundModel: addSoundModel,
                 isDuet: false,
                 isDefaultSound: true,
-                isUploadedFromGallery: true,
+                isUploadedFromGallery: false,
                 trimStart: 0,
                 trimEnd: 0,
               );
@@ -787,7 +793,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
                   songPath.isNotEmpty
                       ? songPath
                       : "${saveCacheDirectory}originalAudio.mp3",
-                  songName.isNotEmpty ? songName : "original by $owner",
+                  songName.isNotEmpty ? songName : "original",
                   '',
                   '',
                   true);
@@ -811,12 +817,11 @@ class VideosController extends GetxController with StateMixin<dynamic> {
         });
       }
     }
+    await dir.delete(recursive: true);
   }
 
   imgly.Configuration setConfig(
       List<SongModel> albums, String selectedSound, String? userName) {
-    var fileUrl =
-        "https://samplelib.com/lib/preview/msetConfigp3/sample-15s.mp3";
     List<imgly.AudioClip> audioClips = [];
     List<imgly.AudioClip> selectedAudioClips = [];
 
@@ -836,8 +841,6 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       });
     }
 
-    late imgly.AudioClipCategory onlineCategory;
-
     if (soundsController.soundsList.isNotEmpty) {
       List<imgly.AudioClip> onlineAudioClips = [];
       soundsController.soundsList.forEach((element) {
@@ -845,9 +848,6 @@ class VideosController extends GetxController with StateMixin<dynamic> {
             RestUrl.soundUrl + element.sound.toString(),
             title: element.name));
       });
-      onlineCategory = imgly.AudioClipCategory("online_cat", "online",
-          thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png",
-          items: onlineAudioClips);
     }
 
     List<imgly.AudioClipCategory> audioClipCategories = [];
@@ -881,7 +881,9 @@ class VideosController extends GetxController with StateMixin<dynamic> {
     ];
 
     var trimOptions = imgly.TrimOptions(
-        maximumDuration: 60, forceMode: imgly.ForceTrimMode.always);
+        minimumDuration: 5,
+        maximumDuration: 60,
+        forceMode: imgly.ForceTrimMode.always);
     List<imgly.Tool> tools = [imgly.Tool.audio];
     final configuration = imgly.Configuration(
       // tools:tools ,

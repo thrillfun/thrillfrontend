@@ -8,12 +8,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
@@ -46,7 +43,7 @@
         <!--2p8y5ccc015211dea4dd5b6a7bc87e9c19d64 release key truecaller -->
         <!--KImlN2daecc7755b14526b6651ad8e1e34362 debug key truecaller -->
 
-        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="KImlN2daecc7755b14526b6651ad8e1e34362"/>
+        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="2p8y5ccc015211dea4dd5b6a7bc87e9c19d64"/>
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"

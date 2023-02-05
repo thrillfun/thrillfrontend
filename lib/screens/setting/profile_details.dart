@@ -88,15 +88,14 @@ class ProfileDetails extends GetView<UserDetailsController> {
             placeholder: (a, b) => Center(
                   child: loader(),
                 ),
-            fit: BoxFit.contain,
             height: 160,
             width: 160,
             imageBuilder: (context, imageProvider) => Container(
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    image:
-                        DecorationImage(image: imageProvider, fit: BoxFit.fill),
+                    image: DecorationImage(
+                        image: imageProvider, fit: BoxFit.contain),
                   ),
                 ),
             errorWidget: (context, string, dynamic) => CachedNetworkImage(
@@ -108,7 +107,7 @@ class ProfileDetails extends GetView<UserDetailsController> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                            image: imageProvider, fit: BoxFit.fill),
+                            image: imageProvider, fit: BoxFit.contain),
                       ),
                     ),
                 imageUrl: RestUrl.placeholderImage),
@@ -118,9 +117,12 @@ class ProfileDetails extends GetView<UserDetailsController> {
   aboutYouLayout() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "About You",
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+            style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+                color: ColorManager.dayNightText),
           ),
           const SizedBox(
             height: 10,
@@ -134,9 +136,12 @@ class ProfileDetails extends GetView<UserDetailsController> {
               const SizedBox(
                 width: 10,
               ),
-              const Text(
+              Text(
                 "Name",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    color: ColorManager.dayNightText),
               ),
               Flexible(
                   child: Container(
@@ -147,8 +152,10 @@ class ProfileDetails extends GetView<UserDetailsController> {
                         children: [
                           Text(
                             controller.userProfile.value.name.toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                                color: ColorManager.dayNightText),
                           ),
                           const SizedBox(
                             width: 10,
@@ -170,9 +177,12 @@ class ProfileDetails extends GetView<UserDetailsController> {
               const SizedBox(
                 width: 10,
               ),
-              const Text(
+              Text(
                 "Username",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    color: ColorManager.dayNightText),
               ),
               Flexible(
                   child: Container(
@@ -185,8 +195,10 @@ class ProfileDetails extends GetView<UserDetailsController> {
                             "@" +
                                 controller.userProfile.value.username
                                     .toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                                color: ColorManager.dayNightText),
                           ),
                           const SizedBox(
                             width: 10,
@@ -208,12 +220,12 @@ class ProfileDetails extends GetView<UserDetailsController> {
               const SizedBox(
                 width: 10,
               ),
-              const Text(
+              Text(
                 "Bio",
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
-                ),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    color: ColorManager.dayNightText),
               ),
               Flexible(
                   child: Container(
@@ -229,8 +241,10 @@ class ProfileDetails extends GetView<UserDetailsController> {
                                 : controller.userProfile.value.bio.toString(),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
+                            style: TextStyle(
+                                color: ColorManager.dayNightText,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18),
                           )),
                           const SizedBox(
                             width: 10,
@@ -252,9 +266,12 @@ class ProfileDetails extends GetView<UserDetailsController> {
               const SizedBox(
                 width: 10,
               ),
-              const Text(
+              Text(
                 "DOB",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                style: TextStyle(
+                    color: ColorManager.dayNightText,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18),
               ),
               Flexible(
                   child: Container(
@@ -267,8 +284,10 @@ class ProfileDetails extends GetView<UserDetailsController> {
                             controller.userProfile.value.dob.toString().isEmpty
                                 ? "N/A"
                                 : controller.userProfile.value.dob.toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
+                            style: TextStyle(
+                                color: ColorManager.dayNightText,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18),
                           ),
                           const SizedBox(
                             width: 10,
@@ -290,9 +309,12 @@ class ProfileDetails extends GetView<UserDetailsController> {
               const SizedBox(
                 width: 10,
               ),
-              const Text(
+              Text(
                 "Gender",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                style: TextStyle(
+                    color: ColorManager.dayNightText,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18),
               ),
               Flexible(
                   child: Container(
@@ -308,8 +330,10 @@ class ProfileDetails extends GetView<UserDetailsController> {
                                 ? "N/A"
                                 : controller.userProfile.value.gender
                                     .toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
+                            style: TextStyle(
+                                color: ColorManager.dayNightText,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18),
                           ),
                           const SizedBox(
                             width: 10,
@@ -331,9 +355,12 @@ class ProfileDetails extends GetView<UserDetailsController> {
               const SizedBox(
                 width: 10,
               ),
-              const Text(
+              Text(
                 "Email",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                style: TextStyle(
+                    color: ColorManager.dayNightText,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18),
               ),
               Flexible(
                   child: Container(
@@ -348,8 +375,10 @@ class ProfileDetails extends GetView<UserDetailsController> {
                                     .isEmpty
                                 ? "N/A"
                                 : controller.userProfile.value.email.toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
+                            style: TextStyle(
+                                color: ColorManager.dayNightText,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18),
                           ),
                           const SizedBox(
                             width: 10,
@@ -371,9 +400,12 @@ class ProfileDetails extends GetView<UserDetailsController> {
               const SizedBox(
                 width: 10,
               ),
-              const Text(
+              Text(
                 "Mobile",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                style: TextStyle(
+                    color: ColorManager.dayNightText,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18),
               ),
               Flexible(
                   child: Container(
@@ -388,8 +420,10 @@ class ProfileDetails extends GetView<UserDetailsController> {
                                     .isEmpty
                                 ? "N/A"
                                 : controller.userProfile.value.phone.toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
+                            style: TextStyle(
+                                color: ColorManager.dayNightText,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18),
                           ),
                           const SizedBox(
                             width: 10,

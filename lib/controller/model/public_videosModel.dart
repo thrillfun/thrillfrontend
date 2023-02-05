@@ -51,6 +51,7 @@ class PublicVideos {
   String? soundOwner;
   int? videoLikeStatus;
   int? isfollow;
+  int? soundId;
 
   PublicUser? user;
 
@@ -75,7 +76,8 @@ class PublicVideos {
       this.soundOwner,
       this.videoLikeStatus,
       this.isfollow,
-      this.user});
+      this.user,
+      this.soundId});
 
   PublicVideos.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? "";
@@ -104,6 +106,7 @@ class PublicVideos {
     videoLikeStatus = json["video_like_status"] ?? 0;
     isfollow = json["isfollow"] ?? 0;
     user = json['user'] != null ? new PublicUser.fromJson(json['user']) : null;
+    soundId = json['sound_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -133,6 +136,7 @@ class PublicVideos {
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
+    data['sound_id'] =this.soundId;
     return data;
   }
 }

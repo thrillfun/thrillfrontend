@@ -340,10 +340,10 @@ class User {
   int? id;
   String? name;
   String? username;
-  Null? email;
+  String? email;
   String? dob;
   String? phone;
-  Null? avatar;
+  String? avatar;
   String? socialLoginId;
   String? socialLoginType;
   String? firebaseToken;

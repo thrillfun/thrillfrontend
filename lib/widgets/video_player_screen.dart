@@ -339,6 +339,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                           : widget.isLock
                           ? widget.privateVideos![index].likes!.obs
                           : 0.obs,
+                      soundId: widget. isFeed
+                          ? widget.userVideos![index].soundId
+                          : widget.isFav
+                          ? widget.likedVideos![index].soundId
+                          : widget.isLock
+                          ? widget.privateVideos![index].soundId
+                          : widget.hashTagVideos![index].soundId,
                     )),
               );
             }));

@@ -82,6 +82,7 @@ class HashTagVideos {
   String? soundOwner;
   int? isfollow;
   HashTagUser? user;
+  int? video_like_status;
 
   HashTagVideos(
       {this.id,
@@ -103,7 +104,7 @@ class HashTagVideos {
       this.isCommentable,
       this.soundOwner,
         this.isfollow,
-      this.user});
+      this.user,this.video_like_status});
 
   HashTagVideos.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? "";
@@ -131,6 +132,7 @@ class HashTagVideos {
     soundOwner = json['sound_owner'] ?? "";
     isfollow = json["isfollow"]??0;
     user = json['user'] != null ? new HashTagUser.fromJson(json['user']) : null;
+    video_like_status = json["video_like_status"]??0;
   }
 
   Map<String, dynamic> toJson() {
@@ -159,6 +161,7 @@ class HashTagVideos {
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
+    data["video_like_status"] = this.video_like_status;
     return data;
   }
 }

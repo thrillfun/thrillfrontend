@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
@@ -7,6 +10,9 @@ import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/dashedline_vertical_painter.dart';
+import 'package:velocity_x/velocity_x.dart';
+import 'package:web_socket_channel/io.dart';
+
 
 class WalletGetx extends StatelessWidget {
   const WalletGetx({Key? key}) : super(key: key);
@@ -16,12 +22,12 @@ class WalletGetx extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorManager.dayNight,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           backgroundWallet(),
           const SizedBox(
             height: 20,
           ),
-          walletOptionslayout(),
           const SizedBox(
             height: 20,
           ),
@@ -55,34 +61,38 @@ class WalletGetx extends StatelessWidget {
       );
 
   walletOptionsButton(IconData icon, String text, VoidCallback callback) =>
-      InkWell(
-        onTap: callback,
-        child: Column(
-          children: [
-            ClipOval(
-              child: Container(
-                height: 40,
-                width: 40,
-                child: Icon(
-                  icon,
-                  color: ColorManager.dayNightText,
+      Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20), color: Colors.white),
+        child: InkWell(
+          onTap: callback,
+          child: Column(
+            children: [
+              ClipOval(
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  child: Icon(
+                    icon,
+                    color: ColorManager.dayNightText,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Text(
-              text,
-              style: TextStyle(
-                  fontSize: 16,
-                  color: ColorManager.dayNightText,
-                  fontWeight: FontWeight.w400),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-          ],
+              const SizedBox(
+                height: 5,
+              ),
+              Text(
+                text,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: ColorManager.dayNightText,
+                    fontWeight: FontWeight.w400),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
         ),
       );
 
@@ -121,7 +131,7 @@ class WalletHistory extends GetView<WalletBalanceController> {
                             fontSize: 25,
                             color: ColorManager.dayNightText),
                       ),
-                      Icon(Icons.book),
+                      const Icon(Icons.book),
                     ],
                   ),
                   const SizedBox(
@@ -129,7 +139,6 @@ class WalletHistory extends GetView<WalletBalanceController> {
                   ),
                   Expanded(
                       child: ListView.builder(
-                          shrinkWrap: true,
                           physics: const BouncingScrollPhysics(),
                           itemCount: state!.length,
                           itemBuilder: (context, index) => Container(
@@ -148,7 +157,7 @@ class WalletHistory extends GetView<WalletBalanceController> {
                                                   fit: BoxFit.fill,
                                                   height: 30,
                                                   width: 30,
-                                                  imageUrl: state[index]
+                                                  imageUrl: state![index]
                                                               .image
                                                               .toString()
                                                               .isEmpty ||
@@ -165,31 +174,40 @@ class WalletHistory extends GetView<WalletBalanceController> {
                                         const SizedBox(
                                           width: 10,
                                         ),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Text(
-                                              state[index].code.toString(),
-                                              style: TextStyle(
-                                                  color:
-                                                      ColorManager.dayNightText,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w700),
-                                            ),
-                                            Text(state[index].code.toString(),
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                (state[index].code!).toString(),
+                                                textAlign: TextAlign.start,
                                                 style: TextStyle(
                                                     color: ColorManager
                                                         .dayNightText,
                                                     fontSize: 16,
                                                     fontWeight:
-                                                        FontWeight.w400))
-                                          ],
+                                                        FontWeight.w700),
+                                              ),
+                                              Text(
+                                                state[index].symbol.toString(),
+                                                style: TextStyle(
+                                                    color: ColorManager
+                                                        .dayNightText,
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         Expanded(
-                                            child: Container(
-                                          alignment: Alignment.centerRight,
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
                                             children: [
                                               Text(
                                                 state[index].amount.toString(),
@@ -200,9 +218,59 @@ class WalletHistory extends GetView<WalletBalanceController> {
                                                     fontWeight:
                                                         FontWeight.w700),
                                               ),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                      "${index == 0 ? controller.thrillPrice.value : index == 1 ? controller.btcPrice.value : index == 2 ? controller.ethPrice.value : index == 3 ? controller.bnbPrice.value : index == 4 ? controller.shibPrice.value : index == 5 ? controller.dogePrice.value : index == 6 ? controller.luncPrice.value : controller.thrillPrice.value} ",
+                                                      style: TextStyle(
+                                                          color: ColorManager
+                                                              .dayNightText,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w400)),
+                                                  Obx(() => Text(
+                                                        "(${index == 0 ? controller.thrillPer.value + " %" : index == 1 ? controller.btcPer.value + " %" : index == 2 ? controller.ethPer.value + " %" : index == 3 ? controller.bnbPer.value + " %" : index == 4 ? controller.shibPer.value + " %" : index == 5 ? controller.dogePer.value + " %" : index == 6 ? controller.luncPer.value + " %" : controller.thrillPer.value + " %"}) ",
+                                                        style: TextStyle(
+                                                            color: index == 0 &&
+                                                                    controller
+                                                                        .thrillPer
+                                                                        .value
+                                                                        .contains(
+                                                                            "-")
+                                                                ? Colors.red
+                                                                : index == 1 &&
+                                                                        controller
+                                                                            .btcPer
+                                                                            .value
+                                                                            .contains(
+                                                                                "-")
+                                                                    ? Colors.red
+                                                                    : index == 2 &&
+                                                                            controller.ethPer.value.contains(
+                                                                                "-")
+                                                                        ? Colors
+                                                                            .red
+                                                                        : index == 3 &&
+                                                                                controller.bnbPer.value.contains("-")
+                                                                            ? Colors.red
+                                                                            : index == 4 && controller.shibPer.value.contains("-")
+                                                                                ? Colors.red
+                                                                                : index == 5 && controller.dogePer.value.contains("-")
+                                                                                    ? Colors.red
+                                                                                    : index == 6 && controller.luncPer.value.contains("-")
+                                                                                        ? Colors.red
+                                                                                        : Colors.white,
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight.w700),
+                                                      ))
+                                                ],
+                                              )
                                             ],
                                           ),
-                                        ))
+                                        )
                                       ],
                                     ),
                                     Container(
@@ -224,57 +292,138 @@ class WalletBalance extends GetView<WalletBalanceController> {
 
   @override
   Widget build(BuildContext context) {
+    var isTextVisible = true.obs;
+
     return controller.obx(
         (state) => Container(
-              margin: const EdgeInsets.only(top: 10),
+              decoration: const BoxDecoration(
+                  gradient: ColorManager.walletGradient,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20))),
               width: Get.width,
-              height: 180,
-              child: Stack(
-                alignment: Alignment.center,
-                fit: StackFit.loose,
+              height: Get.height / 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SvgPicture.asset(
-                    "assets/wallet_stars.svg",
-                    fit: BoxFit.fill,
+                  const SizedBox(
+                    height: 20,
                   ),
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Column(
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
+                  Expanded(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 10, bottom: 10, right: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Image.asset("assets/thrill_token.png"),
-                            Container(
-                              padding: const EdgeInsets.only(bottom: 15),
-                              alignment: Alignment.center,
-                              child: Image.asset(
-                                "assets/logo.png",
-                                width: 60,
-                                height: 40,
-                                fit: BoxFit.fill,
-                              ),
+                            Text(
+                              "Your total available balance",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontWeight: FontWeight.w400),
+                            ),
+                            InkWell(
+                              onTap: () => isTextVisible.toggle(),
+                              child: Obx(() => isTextVisible.isTrue
+                                  ? Icon(Icons.visibility_off,color: Colors.white.withOpacity(0.4),)
+                                  : Icon(
+                                      Icons.visibility,
+                                      color: Colors.white.withOpacity(0.4),
+                                    )),
                             )
                           ],
                         ),
-                        const SizedBox(
-                          height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Obx(() => TextFormField(
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                hintText: '',
+                              ),
+                              controller: textEditingController,
+                              obscuringCharacter: '*',
+                              obscureText: isTextVisible.value,
+                              style: const TextStyle(
+                                  fontSize: 30,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700),
+                            )),
+                      ),
+                    ],
+                  )),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                          child: InkWell(
+                        onTap: () => null,
+                        child: Card(
+                          elevation: 10,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          margin: const EdgeInsets.only(
+                              left: 5, right: 5, bottom: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 20, bottom: 20),
+                            child: Column(
+                              children: const [
+                                Icon(Icons.money),
+                                Text("Deposit")
+                              ],
+                            ),
+                          ),
                         ),
-                        Text(
-                          controller.balance.first.symbol.toString() +
-                              controller.balance.first.amount.toString(),
-                          style: TextStyle(
-                              color: ColorManager.dayNightText,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
+                      )),
+                      Expanded(
+                          child: InkWell(
+                        onTap: () => null,
+                        child: Card(
+                          elevation: 10,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          margin: const EdgeInsets.only(
+                              left: 5, right: 5, bottom: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 20, bottom: 20),
+                            child: Column(
+                              children: const [
+                                Icon(Icons.book),
+                                Text("Withdraw")
+                              ],
+                            ),
+                          ),
+                        ),
+                      )),
+                      Expanded(
+                          child: InkWell(
+                        onTap: () => null,
+                        child: Card(
+                          elevation: 10,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          margin: const EdgeInsets.only(
+                              left: 5, right: 5, bottom: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 20, bottom: 20),
+                            child: Column(
+                              children: const [
+                                Icon(Icons.card_giftcard),
+                                Text("Earn")
+                              ],
+                            ),
+                          ),
+                        ),
+                      ))
+                    ],
                   )
                 ],
               ),
             ),
-        onLoading: loader());
+        onLoading: Center(child: loader(),));
   }
 }

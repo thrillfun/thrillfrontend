@@ -120,23 +120,25 @@ class Favourites extends GetView<FavouritesController> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      controller.favouriteSounds[index].sound
+                                      controller.favouriteSounds[index].name
                                           .toString(),
-                                      style: const TextStyle(
+                                      style: TextStyle(
+                                          color: ColorManager.dayNightText,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 18),
                                     ),
                                     Text(
-                                      controller.favouriteSounds[index].name
+                                      controller.favouriteSounds[index].sound
                                           .toString(),
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w500,
                                           fontSize: 14),
                                     ),
                                     Text(
-                                      controller.favouriteSounds[index].name
+                                      controller.favouriteSounds[index].sound
                                           .toString(),
-                                      style: const TextStyle(
+                                      style: TextStyle(
+                                        color: ColorManager.dayNightText,
                                         fontWeight: FontWeight.w400,
                                       ),
                                     )
@@ -263,8 +265,10 @@ class Favourites extends GetView<FavouritesController> {
                             Text(
                               controller.favouriteVideos[index].user!.name
                                   .toString(),
-                              style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                  color: ColorManager.dayNightText,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500),
                             )
                           ],
                         )
@@ -358,7 +362,8 @@ class Favourites extends GetView<FavouritesController> {
                                       ? ""
                                       : controller
                                           .favouriteHashtags[index].name!,
-                                  style: const TextStyle(
+                                  style: TextStyle(
+                                      color: ColorManager.dayNightText,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 18),
                                 )

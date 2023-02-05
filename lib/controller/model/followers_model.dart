@@ -101,7 +101,7 @@ class Followers {
     createdAt = json['created_at'] ?? "";
     updatedAt = json['updated_at'] ?? "";
     isVerified = json['is_verified'] ?? "";
-    isfollowing = json["isFollow"] ?? 0;
+    isfollowing = json["isFolling"] ?? 0;
   }
 
   Map<String, dynamic> toJson() {

@@ -117,6 +117,7 @@ class VideosList {
   String? soundOwner;
   int? videoLikeStatus;
   int? totalview;
+  int? soundId;
   UsersList? user;
 
   VideosList(
@@ -140,7 +141,8 @@ class VideosList {
         this.soundOwner,
         this.videoLikeStatus,
         this.totalview,
-        this.user});
+        this.user,
+      this.soundId});
 
   VideosList.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -169,6 +171,7 @@ class VideosList {
     videoLikeStatus = json['video_like_status'];
     totalview = json['totalview'];
     user = json['user'] != null ? new UsersList.fromJson(json['user']) : null;
+    soundId = json["sound_id"];
   }
 
   Map<String, dynamic> toJson() {
@@ -198,6 +201,7 @@ class VideosList {
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
+    data["sound_id"] = this.soundId;
     return data;
   }
 }

@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:external_path/external_path.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:file_support/file_support.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/videos/Following_videos_controller.dart';
@@ -46,6 +50,25 @@ class RelatedVideosController extends GetxController
             PublicVideosModel.fromJson(value.data).data!.obs;
       }
       getFollowingVideos();
+
+      //  change(publicVideosList, status: RxStatus.success());
+      isLoading.value = false;
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
+      //   change(publicVideosList, status: RxStatus.error());
+    });
+    isLoading.value = false;
+  }
+ Future<void> refreshVideoList() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+
+    //change(publicVideosList, status: RxStatus.loading());
+
+    dio.get("/video/list").then((value) {
+      publicVideosList = PublicVideosModel.fromJson(value.data).data!.obs;
+     getFollowingVideos();
 
       //  change(publicVideosList, status: RxStatus.success());
       isLoading.value = false;
@@ -100,43 +123,73 @@ class RelatedVideosController extends GetxController
 
   downloadAndProcessVideo(String videoUrl, String videoName) async {
     Get.defaultDialog(title: "Loading", content: loader());
-    var path = await getTemporaryDirectory();
+    final directory = await ExternalPath.getExternalStoragePublicDirectory(
+        ExternalPath.DIRECTORY_PICTURES);
+    if (await Directory('$directory/thrill/downloads').exists() == true) {
+      print('Yes this directory Exists');
+    } else {
+      print('creating new Directory');
+      await Directory('$directory/thrill/downloads').create();
+    }
+    var path = await Directory('$directory/thrill/downloads');
+    var dir = await getApplicationSupportDirectory();
+
     await fileSupport
         .downloadCustomLocation(
       url: "https://thrillvideonew.s3.ap-south-1.amazonaws.com/test/$videoUrl",
-      path: path.path,
-      filename:"/$videoName",
+      path: dir.path,
+      filename: "/$videoName",
       extension: ".mp4",
       progress: (progress) async {
-      Logger().i(progress);
+        Logger().i(progress);
       },
-    ).then((video) async {
+    )
+        .then((video) async {
       await fileSupport
           .downloadCustomLocation(
               url:
-              "https://thrillvideonew.s3.ap-south-1.amazonaws.com/assets/logo.png",
+                  "https://thrillvideonew.s3.ap-south-1.amazonaws.com/assets/logo.png",
               filename: '/logo',
               extension: ".png",
-              progress: (progress)=>Logger().w(progress),
+              progress: (progress) => Logger().w(progress),
               path: path.path)
           .then((logo) async {
-            Logger().wtf(logo!.path);
-        FFmpegKit.execute(
-            "-y -i ${video!.path}.mp4 -i ${logo!.path}.png -filter_complex overlay=10:10 -codec:a copy ${path.path}/output/video.mp4")
+        await FFmpegKit.execute(
+                "-y -i ${video!.path} -i ${logo!.path} -filter_complex overlay=10:10 -codec:a copy ${path.path}/$videoName.mp4")
             .then((session) async {
           var logs = await session.getReturnCode();
+          Logger().wtf(dir.path);
           if (logs!.isValueSuccess()) {
+            Get.back();
             successToast("Video Downloaded successfully!");
           } else if (logs.isValueError()) {
             Logger().wtf(logs.getValue());
+            Get.back();
           }
         }).onError((error, stackTrace) => errorToast(error.toString()));
       });
     }).onError((error, stackTrace) {
       errorToast(error.toString());
       Get.back();
-
     });
-    Get.back();
+  }
+
+  Future<void> reportVideo(int VideoId, int reportedId, String reason) async {
+    dio.options.headers = {
+      "Authorization":
+          "Bearer ${await userDetailsController.storage.read("token")}"
+    };
+
+    dio.post("/video/report", queryParameters: {
+      "video_id": "$videoId",
+      "reported_by": "$reportedId",
+      "reason": reason
+    }).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {});
   }
 }

@@ -65,7 +65,7 @@ class UserVideosController extends GetxController with StateMixin<RxList<Videos>
         queryParameters: {'video_id': videoId.toString()}).then((value) async {
       successToast(value.data["message"]);
       int id = await GetStorage().read("userId");
-      getOtherUserVideos(id);
+      getUserVideos();
     }).onError((error, stackTrace) {
       change(otherUserVideos, status: RxStatus.error());
     });

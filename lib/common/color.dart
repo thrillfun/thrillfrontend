@@ -6,7 +6,7 @@ class ColorManager {
   static const Color cyan = Color(0xff2DCBC8);
   static const Color orange = Color(0xffFF9933);
   static const Color red = Color(0xfff64a4a);
-  static const Color colorPrimaryLight = Color(0xff2DCBC8);
+  static const Color colorPrimaryLight = Color(0xff0A8381);
 
   static const Color spinColorOne = Color(0xffB9E2E2);
   static const Color spinColorTwo = Color(0xffC8ECEC);
@@ -15,7 +15,7 @@ class ColorManager {
   static const Color spinColorBorderTwo = Color(0xff20244C);
   static const Color spinColorDivider = Color(0xffC8CACA);
 
-  static const Color colorAccent = Color(0xff2DCBC8);
+  static const Color colorAccent = Color(0xff0A8381);
   static Color dayNight = Get.isPlatformDarkMode ? Colors.black : Colors.white;
   static Color dayNightText =
       Get.isPlatformDarkMode ? Colors.white : Colors.black;
@@ -23,4 +23,16 @@ class ColorManager {
       Get.isPlatformDarkMode ? colorPrimaryLight : colorAccent;
 
   static const Color colorAccentTransparent = Color(0x2f2dcbc8);
+
+  static const LinearGradient walletGradient= LinearGradient(colors: [
+    Color(0xff348375),
+    Color(0xff317E70),
+    Color(0xff2F786D),
+    Color(0xff2B7268),
+    Color(0xff287065),
+    Color(0xff24695E),
+    Color(0xff1F6259),
+    Color(0xff1D5855),
+
+  ]);
 }

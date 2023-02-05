@@ -15,9 +15,7 @@ class HomeController extends GetxController with StateMixin<dynamic> {
     getAuthData();
   }
 
-  getAuthData() async {
-
-  }
+  getAuthData() async {}
 
   loadInterstitialAd() async {
     InterstitialAd.load(
@@ -31,6 +29,8 @@ class HomeController extends GetxController with StateMixin<dynamic> {
       }),
     );
   }
+
+  Future<void> refreshAllData() async {}
 
   showAd() async {
     if (interstitialAd != null) {

@@ -61,38 +61,43 @@ class LandingPageGetx extends StatelessWidget {
         otherUsersController
             .getOtherUserProfile(dynamicLinkData.link.queryParameters["id"])
             .then((value) {
-              likedVideosController.getOthersLikedVideos(int.parse(dynamicLinkData.link.queryParameters["id"].toString())).then((value) {
-                 userVideosController
-                    .getOtherUserVideos(int.parse(dynamicLinkData.link.queryParameters["id"].toString())).then((value) {
-                   Get.to(ViewProfile(
-                       dynamicLinkData.link.queryParameters["id"],
-                       0.obs,
-                       dynamicLinkData.link.queryParameters["name"],
-                       dynamicLinkData.link.queryParameters["something"]));
-                 });
-
-              });
-
-        });
-      } else if (dynamicLinkData.link.queryParameters["type"] == "video") {
-        successToast(dynamicLinkData.link.queryParameters["id"].toString());
-      }
-      else if(dynamicLinkData.link.queryParameters["type"]=="referal"){
-        otherUsersController
-            .getOtherUserProfile(dynamicLinkData.link.queryParameters["id"])
-            .then((value) {
-          likedVideosController.getOthersLikedVideos(int.parse(dynamicLinkData.link.queryParameters["id"].toString())).then((value) {
+          likedVideosController
+              .getOthersLikedVideos(int.parse(
+                  dynamicLinkData.link.queryParameters["id"].toString()))
+              .then((value) {
             userVideosController
-                .getOtherUserVideos(int.parse(dynamicLinkData.link.queryParameters["id"].toString())).then((value) {
+                .getOtherUserVideos(int.parse(
+                    dynamicLinkData.link.queryParameters["id"].toString()))
+                .then((value) {
               Get.to(ViewProfile(
                   dynamicLinkData.link.queryParameters["id"],
                   0.obs,
                   dynamicLinkData.link.queryParameters["name"],
                   dynamicLinkData.link.queryParameters["something"]));
             });
-
           });
-
+        });
+      } else if (dynamicLinkData.link.queryParameters["type"] == "video") {
+        successToast(dynamicLinkData.link.queryParameters["id"].toString());
+      } else if (dynamicLinkData.link.queryParameters["type"] == "referal") {
+        otherUsersController
+            .getOtherUserProfile(dynamicLinkData.link.queryParameters["id"])
+            .then((value) {
+          likedVideosController
+              .getOthersLikedVideos(int.parse(
+                  dynamicLinkData.link.queryParameters["id"].toString()))
+              .then((value) {
+            userVideosController
+                .getOtherUserVideos(int.parse(
+                    dynamicLinkData.link.queryParameters["id"].toString()))
+                .then((value) {
+              Get.to(ViewProfile(
+                  dynamicLinkData.link.queryParameters["id"],
+                  0.obs,
+                  dynamicLinkData.link.queryParameters["name"],
+                  dynamicLinkData.link.queryParameters["something"]));
+            });
+          });
         });
       }
     }).onError((error) {
@@ -150,7 +155,10 @@ class LandingPageGetx extends StatelessWidget {
                     if (userDetailsController.storage.read("token") != null) {
                       Get.to(() => SpinTheWheelGetx());
                     } else {
-                      Get.bottomSheet(LoginGetxScreen(),isScrollControlled:false);
+                      userDetailsController.printSimCardsData().then((value) {
+                        Get.bottomSheet(LoginGetxScreen(),
+                            isScrollControlled: false);
+                      });
                     }
                   },
                 )
@@ -265,12 +273,15 @@ class LandingPageGetx extends StatelessWidget {
                         ),
                         onPressed: () async {
                           GetStorage().read("token") != null
-                              ?await  walletBalanceController
+                              ? await walletBalanceController
                                   .getBalance()
                                   .then((value) => selectedIndex.value = 2)
-                              :                 Get.bottomSheet(LoginGetxScreen(),isScrollControlled:false);
-
-                          ;
+                              : userDetailsController
+                                  .printSimCardsData()
+                                  .then((value) {
+                                  Get.bottomSheet(LoginGetxScreen(),
+                                      isScrollControlled: false);
+                                });
                         },
                       ),
                       Text(
@@ -298,17 +309,19 @@ class LandingPageGetx extends StatelessWidget {
                         onPressed: () {
                           if (userDetailsController.storage.read("token") !=
                               null) {
-                            userVideosController.getUserVideos(
-                                );
+                            userVideosController.getUserVideos();
                             likedVideosController.getUserLikedVideos();
                             privateVideosController.getUserPrivateVideos();
                             userDetailsController
                                 .getUserProfile()
                                 .then((value) => selectedIndex.value = 3);
-
                           } else {
-                            Get.bottomSheet(LoginGetxScreen(),isScrollControlled:false);
-                            ;
+                            userDetailsController
+                                .printSimCardsData()
+                                .then((value) {
+                              Get.bottomSheet(LoginGetxScreen(),
+                                  isScrollControlled: false);
+                            });
                           }
                         },
                       ),
@@ -408,7 +421,9 @@ class LandingPageGetx extends StatelessWidget {
         walletCurrencyController.getCurrencies();
         //walletBalanceController.getCurrencies();
       } else {
-        Get.bottomSheet(LoginGetxScreen(),isScrollControlled:false);
+        userDetailsController.printSimCardsData().then((value) {
+          Get.bottomSheet(LoginGetxScreen(), isScrollControlled: false);
+        });
       }
     }
     if (index == 3) {
@@ -419,11 +434,12 @@ class LandingPageGetx extends StatelessWidget {
             .getOthersLikedVideos(userDetailsController.storage.read("userId"));
 
         await privateVideosController.getUserPrivateVideos();
-        await userDetailsController
-            .getUserProfile();
+        await userDetailsController.getUserProfile();
         selectedIndex.value = 3;
       } else {
-        Get.bottomSheet(LoginGetxScreen());
+        userDetailsController.printSimCardsData().then((value) {
+          Get.bottomSheet(LoginGetxScreen(), isScrollControlled: false);
+        });
       }
     } else {
       selectedIndex.value = index;

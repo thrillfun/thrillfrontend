@@ -44,10 +44,12 @@ class UserDetailsController extends GetxController
     });
     isSimCardAvailable.value = await printSimCardsData();
   }
-  printSimCardsData() async {
+
+  Future<bool> printSimCardsData() async {
     SimData simData = await SimDataPlugin.getSimData();
-    return simData.cards.length==0?  false : true;
+    return simData.cards.isEmpty ? false : true;
   }
+
   var isOtpSent = false.obs;
 
   Future<void> getUserProfile() async {
@@ -142,9 +144,9 @@ class UserDetailsController extends GetxController
 
       change(userProfile, status: RxStatus.success());
 
-      await storage.write("user", userProfile).then((_) {
-        Get.forceAppUpdate();
-        Get.to(LandingPageGetx());
+      await storage.write("user", userProfile).then((_) async {
+        await Get.forceAppUpdate();
+        Get.back(closeOverlays: true);
       });
     }).onError((error, stackTrace) {
       change(userProfile, status: RxStatus.error(error.toString()));
