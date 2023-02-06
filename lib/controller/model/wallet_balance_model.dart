@@ -32,7 +32,7 @@ class WalletBalanceModel {
 
 class Balance {
   String? code;
-  String? amount;
+  num? amount;
   String? symbol;
   String? image;
   int? isActive;

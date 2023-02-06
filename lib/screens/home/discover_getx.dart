@@ -29,13 +29,7 @@ class DiscoverGetx extends GetView<TopHashtagsController> {
         body: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: controller.obx((_) => Tophashtags(),
-                onLoading: Container(
-                  height: Get.height,
-                  width: Get.width,
-                  child: Center(
-                    child: loader(),
-                  ),
-                ))));
+                onLoading: loader())));
   }
 
 //   StaggeredGridView.countBuilder(
@@ -203,6 +197,7 @@ class HashtagsSuggestions extends GetView<TopHashtagsController> {
                           ))),
                 ))),
       ),
+      onLoading: loader()
     );
   }
 }
@@ -469,7 +464,7 @@ class Tophashtags extends GetView<TopHashtagsController> {
                     ],
                   )))
         ],
-      ),
+      ),onLoading: loader()
     );
   }
 }

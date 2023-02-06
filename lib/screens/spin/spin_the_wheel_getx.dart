@@ -25,7 +25,6 @@ class SpinTheWheelGetx extends GetView<WheelController> {
   ScrollController _controller = ScrollController();
 
   SpinTheWheelGetx({Key? key}) : super(key: key);
-  StreamController<int> _streamController = StreamController<int>();
   WheelDetails? wheelDetails;
 
   var isSpinning = false.obs;
@@ -188,7 +187,7 @@ class SpinTheWheelGetx extends GetView<WheelController> {
           child: FortuneWheel(
             duration: const Duration(seconds: 10),
             animateFirst: false,
-            selected: _streamController.stream,
+            selected: controller.streamController.stream,
             indicators: <FortuneIndicator>[
               FortuneIndicator(
                   alignment: Alignment.topCenter,
@@ -350,6 +349,7 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                   const TextSpan(
                     text: "Earned Spins: ",
                     style: TextStyle(
+                      
                         color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w400),
@@ -406,11 +406,9 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                       Expanded(
                           child: LinearProgressIndicator(
                         color: ColorManager.colorPrimaryLight,
-                        value: controller.activityList[index].totalView != null
-                            ? (controller.activityList[index].totalView!
-                                    .toDouble() /
-                                controller.activityList[index].currentView!
-                                    .toDouble())
+                        value: controller.activityList[index].progress != null
+                            ?controller.activityList[index].progress!
+                                    .toDouble()
                             : 0.0,
                         backgroundColor: Colors.grey,
                       )),
@@ -578,7 +576,7 @@ class SpinTheWheelGetx extends GetView<WheelController> {
       //
 
       //await player.resume();
-      _streamController.add(selectedInt.value - 1);
+      controller.streamController.add(selectedInt.value - 1);
     } else {
       isSpin.value = true;
     }

@@ -24,15 +24,12 @@ class ColorManager {
 
   static const Color colorAccentTransparent = Color(0x2f2dcbc8);
 
-  static const LinearGradient walletGradient= LinearGradient(colors: [
-    Color(0xff348375),
-    Color(0xff317E70),
-    Color(0xff2F786D),
-    Color(0xff2B7268),
-    Color(0xff287065),
-    Color(0xff24695E),
-    Color(0xff1F6259),
-    Color(0xff1D5855),
-
-  ]);
+  static const LinearGradient walletGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xff0A8381),
+        Color(0xff1D5855),
+        Colors.black,
+      ]);
 }
