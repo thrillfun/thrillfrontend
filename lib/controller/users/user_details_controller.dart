@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart' as client;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
@@ -12,7 +13,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path/path.dart';
 import 'package:sim_data/sim_data.dart';
 import 'package:sim_data/sim_model.dart';
+import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/model/user_details_model.dart' as authUser;
+import 'package:thrill/controller/notifications/notifications_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
@@ -29,7 +32,7 @@ class UserDetailsController extends GetxController
 
   var dio = client.Dio(client.BaseOptions(baseUrl: RestUrl.baseUrl));
   var qrData = "".obs;
-
+  var notificationsController = Get.find<NotificationsController>();
   @override
   void onInit() async {
     super.onInit();
@@ -42,12 +45,17 @@ class UserDetailsController extends GetxController
     }).onError((error) {
       errorToast(error.toString());
     });
-    isSimCardAvailable.value = await printSimCardsData();
+    printSimCardsData();
   }
 
-  Future<bool> printSimCardsData() async {
+  Future<void> printSimCardsData() async {
     SimData simData = await SimDataPlugin.getSimData();
-    return simData.cards.isEmpty ? false : true;
+    if (simData.cards.isEmpty) {
+      isSimCardAvailable.value = false;
+    } else {
+      isSimCardAvailable.value = true;
+    }
+    Get.forceAppUpdate();
   }
 
   var isOtpSent = false.obs;
@@ -88,25 +96,36 @@ class UserDetailsController extends GetxController
     });
   }
 
-  followUnfollowUser(int userId, String action, {int? id}) async {
+  followUnfollowUser(int userId, String action,
+      {int? id, String token = ""}) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     dio.post("/user/follow-unfollow-user", queryParameters: {
       "publisher_user_id": userId,
       "action": action
-    }).then((value) {
+    }).then((value) async {
       if (value.data["status"] == true) {
         relatedVideosController.getAllVideos();
         successToast(value.data["message"]);
+        if (action == "follow") {
+          await notificationsController.sendFcmNotification(token.toString(),
+              body:
+                  "${await GetStorage().read("user")["username"]} started following you ",
+              title: "New Follower!",
+              image: RestUrl.profileUrl +
+                  await GetStorage().read("user")["avatar"].toString());
+          //   notificationsController.sendChatNotifcations(userId, "${await GetStorage().read("user")["username"]}");
+        }
       } else {
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {});
   }
 
-  Future<void> socialLoginRegister(var social_login_id, social_login_type,
-      email, phone, firebase_token, name) async {
+  Future<void> socialLoginRegister(
+      var social_login_id, social_login_type, email, phone, name) async {
+    var firebase_token = await FirebaseMessaging.instance.getToken();
     dio.post("/SocialLogin", queryParameters: {
       "social_login_id": social_login_id,
       "social_login_type": social_login_type,
@@ -165,9 +184,8 @@ class UserDetailsController extends GetxController
       idToken: googleAuth.idToken,
     );
     // Once signed in, return the UserCredential
-
     await socialLoginRegister(googleUser.id, "google", googleUser.email, "",
-        googleAuth.accessToken, googleUser.displayName ?? "");
+        googleUser.displayName ?? "");
   }
 
   Future<void> signInWithFacebook() async {
@@ -187,7 +205,7 @@ class UserDetailsController extends GetxController
         fields: "name,email,picture.width(200),id,birthday,friends,gender,link",
       );
       await socialLoginRegister(userData["id"], "facebook", userData["email"],
-          "", accessToken, userData["name"] ?? "");
+          accessToken, userData["name"] ?? "");
     } else {
       print(result.status);
       print(result.message);
@@ -335,9 +353,12 @@ class UserDetailsController extends GetxController
   }
 
   Future<void> verifyOtp(String mobileNumber, String otp) async {
+    var firebase_token = await FirebaseMessaging.instance.getToken();
+
     dio.post("/verify-otp", queryParameters: {
       "phone": mobileNumber,
       "otp": otp,
+      "firebase_token": firebase_token
     }).then((value) async {
       if (value.data["status"] == true) {
         successToast(value.data["message"]);

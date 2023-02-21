@@ -57,7 +57,7 @@ class AppRouter {
       case RequestVerification.routeName:
         return RequestVerification.route();
       case PaymentRequest.routeName:
-        return PaymentRequest.route(settings.arguments as List<WalletBalance>);
+        return PaymentRequest.route();
 
       case PrivacyPolicy.routeName:
         return PrivacyPolicy.route();

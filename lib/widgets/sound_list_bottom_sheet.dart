@@ -6,6 +6,7 @@ import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/sounds_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
+import 'package:thrill/screens/home/bottom_navigation.dart';
 import 'package:thrill/screens/search/search_getx.dart';
 import 'package:thrill/utils/page_manager.dart';
 import 'package:thrill/utils/util.dart';
@@ -25,6 +26,7 @@ var usersController = Get.find<UserController>();
 FocusNode fieldNode = FocusNode();
 var discoverController = Get.find<DiscoverController>();
 var soundsController = Get.find<SoundsController>();
+var favouritesController = Get.find<FavouritesController>();
 final progressNotifier = ValueNotifier<ProgressBarState>(
   ProgressBarState(
     current: Duration.zero,
@@ -42,13 +44,14 @@ class SoundListBottomSheet extends StatelessWidget {
     return DefaultTabController(
         length: 3,
         child: Scaffold(
+            backgroundColor: ColorManager.dayNight,
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
               automaticallyImplyLeading: true,
               titleSpacing: 0,
               backgroundColor: ColorManager.dayNight,
               leading: IconButton(
-                  onPressed: () => Get.back(closeOverlays: true),
+                  onPressed: () => Get.back(),
                   icon: Icon(
                     Icons.arrow_back,
                     color: ColorManager.dayNightText,
@@ -65,6 +68,12 @@ class SoundListBottomSheet extends StatelessWidget {
                   automaticIndicatorColorAdjustment: true,
                   onTap: (int index) {
                     selectedTab.value = index;
+                    if (index == 0) {
+                      soundsController.getSoundsList();
+                    }
+                    if (index == 1) {
+                      favouritesController.getFavourites();
+                    }
                   },
                   padding:
                       const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
@@ -231,7 +240,8 @@ class SoundListBottomSheet extends StatelessWidget {
 }
 
 class SoundListLayout extends GetView<SoundsController> {
-  const SoundListLayout({Key? key}) : super(key: key);
+  SoundListLayout({Key? key}) : super(key: key);
+  var userController = Get.find<UserController>();
 
   @override
   Widget build(BuildContext context) {
@@ -311,14 +321,31 @@ class SoundListLayout extends GetView<SoundsController> {
                                   ),
                                 ],
                               ),
-                              Text(
-                                controller.soundsList[index].soundOwner!
-                                    .followersCount
-                                    .toString(),
-                                style: TextStyle(
-                                    color: ColorManager.dayNightText,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14),
+                              InkWell(
+                                child: controller.soundsList[index]
+                                            .isFavouriteSoundCount ==
+                                        0
+                                    ? const Icon(
+                                        Icons.bookmark_add_outlined,
+                                      )
+                                    : const Icon(
+                                        Icons.bookmark,
+                                      ),
+                                onTap: () => controller.soundsList[index]
+                                            .isFavouriteSoundCount ==
+                                        0
+                                    ? userController.addToFavourites(
+                                        controller.soundsList[index].id!,
+                                        "sound",
+                                        1)
+                                    : userController
+                                        .addToFavourites(
+                                            controller.soundsList[index].id!,
+                                            "sound",
+                                            0)
+                                        .then((value) {
+                                        controller.getSoundsList();
+                                      }),
                               )
                             ],
                           ),

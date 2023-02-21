@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CustomNotification {
-  RxInt id = Random().nextInt(111).obs;
   AwesomeNotifications? awesomeNotifications;
 
   initialize() {
@@ -36,17 +35,17 @@ class CustomNotification {
   }) {
     awesomeNotifications?.createNotification(
       content: NotificationContent(
-          id: id.value,
+          id: Random().nextInt(111),
           channelKey: 'normal_channel',
           title: title,
           body: body,
           notificationLayout: NotificationLayout.ProgressBar,
-          autoDismissible: true,
+          autoDismissible: false,
           showWhen: true),
     );
   }
 
   hideNotification() {
-    awesomeNotifications?.dismiss(id.value);
+    awesomeNotifications?.dismiss(Random().nextInt(111));
   }
 }

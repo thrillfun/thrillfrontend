@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +63,9 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                     ),
                     rewardLayout(),
                     prizeLayout(),
-                    controller.isWheelDataLoading.isTrue?loader():wheelLayout(),
+                    controller.isWheelDataLoading.isTrue
+                        ? loader()
+                        : wheelLayout(),
                     submitButtonLayout(),
                     levelsLayout()
                     //    lastRewardLayout()
@@ -178,7 +181,7 @@ class SpinTheWheelGetx extends GetView<WheelController> {
         decoration: const BoxDecoration(
             color: ColorManager.colorAccent, shape: BoxShape.circle),
         margin: const EdgeInsets.only(top: 40, bottom: 10),
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         height: Get.height / 2,
         child: Container(
           decoration: BoxDecoration(
@@ -328,45 +331,56 @@ class SpinTheWheelGetx extends GetView<WheelController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(
+                  height: 10,
+                ),
                 Text(
                   "Levels for " +
                       controller.activityList[index].name.toString(),
                   style: TextStyle(
                       color: ColorManager.dayNight,
-                      fontSize: 18,
+                      fontSize: 24,
                       fontWeight: FontWeight.w700),
                 ),
-                Text(
-                  controller.activityList[index].conditions.toString(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: ColorManager.dayNight,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400),
+                const SizedBox(
+                  height: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    controller.activityList[index].conditions.toString(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: ColorManager.dayNight,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
                 ),
                 RichText(
                     text: TextSpan(children: [
                   const TextSpan(
                     text: "Earned Spins: ",
                     style: TextStyle(
-                      
                         color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700),
                   ),
                   TextSpan(
                       text:
                           controller.activityList[index].currentView.toString(),
                       style: const TextStyle(
                           color: ColorManager.colorPrimaryLight,
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: FontWeight.w400)),
                   TextSpan(
                       text: "/" +
                           controller.activityList[index].totalView.toString(),
                       style: TextStyle(
                           color: ColorManager.dayNight,
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: FontWeight.w400))
                 ])),
                 const SizedBox(
@@ -377,62 +391,81 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                   thickness: 2,
                 ),
                 Padding(
-                  padding: EdgeInsets.only(left: 10, right: 10),
-                  child: Row(
+                  padding: const EdgeInsets.only(left: 10, right: 10),
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      ClipOval(
-                        child: Container(
-                          alignment: Alignment.center,
-                          height: 30,
-                          width: 30,
-                          color: ColorManager.colorPrimaryLight,
-                          child: ClipOval(
-                            child: Container(
-                              alignment: Alignment.center,
-                              color: ColorManager.dayNight,
-                              width: 24,
-                              height: 24,
-                              child: Text(
-                                controller.activityList[index].currentLevel
-                                    .toString(),
-                                style: TextStyle(
-                                    color: ColorManager.dayNightText,
-                                    fontWeight: FontWeight.w700),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Expanded(
+                            child: FAProgressBar(
+                          currentValue:
+                              controller.activityList[index].progress != null
+                                  ? controller.activityList[index].progress!
+                                      .toDouble()
+                                  : 0.0,
+                          size: 7,
+                          maxValue: 100,
+                          changeColorValue: 100,
+                          changeProgressColor: ColorManager.colorPrimaryLight,
+                          backgroundColor: Colors.grey,
+                          progressColor: ColorManager.colorPrimaryLight,
+                          animatedDuration: const Duration(milliseconds: 300),
+                          direction: Axis.horizontal,
+                          verticalDirection: VerticalDirection.up,
+                          formatValueFixed: 2,
+                        )),
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: ClipOval(
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 30,
+                            width: 30,
+                            color: ColorManager.colorPrimaryLight,
+                            child: ClipOval(
+                              child: Container(
+                                alignment: Alignment.center,
+                                color: ColorManager.dayNight,
+                                width: 24,
+                                height: 24,
+                                child: Text(
+                                  controller.activityList[index].currentLevel
+                                      .toString(),
+                                  style: TextStyle(
+                                      color: ColorManager.dayNightText,
+                                      fontWeight: FontWeight.w700),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                      Expanded(
-                          child: LinearProgressIndicator(
-                        color: ColorManager.colorPrimaryLight,
-                        value: controller.activityList[index].progress != null
-                            ?controller.activityList[index].progress!
-                                    .toDouble()
-                            : 0.0,
-                        backgroundColor: Colors.grey,
-                      )),
                       const SizedBox(
                         height: 10,
                       ),
-                      ClipOval(
-                        child: Container(
-                          alignment: Alignment.center,
-                          height: 30,
-                          width: 30,
-                          color: ColorManager.colorPrimaryLight,
-                          child: ClipOval(
-                            child: Container(
-                              alignment: Alignment.center,
-                              color: ColorManager.dayNight,
-                              width: 24,
-                              height: 24,
-                              child: Text(
-                                  controller.activityList[index].nextLevel
-                                      .toString(),
-                                  style: TextStyle(
-                                      color: ColorManager.dayNightText,
-                                      fontWeight: FontWeight.w700)),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ClipOval(
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 30,
+                            width: 30,
+                            color: ColorManager.colorPrimaryLight,
+                            child: ClipOval(
+                              child: Container(
+                                alignment: Alignment.center,
+                                color: ColorManager.dayNight,
+                                width: 24,
+                                height: 24,
+                                child: Text(
+                                    controller.activityList[index].nextLevel
+                                        .toString(),
+                                    style: TextStyle(
+                                        color: ColorManager.dayNightText,
+                                        fontWeight: FontWeight.w700)),
+                              ),
                             ),
                           ),
                         ),

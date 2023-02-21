@@ -7,6 +7,7 @@ import 'package:thrill/controller/discover_controller.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/screens/home/bottom_navigation.dart';
+import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/profile/profile.dart';
 import 'package:thrill/screens/profile/view_profile.dart';
 import 'package:thrill/screens/search/search_getx.dart';
@@ -14,10 +15,8 @@ import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/better_video_player.dart';
 
 import '../controller/users/followers_controller.dart';
-
-var selectedTabIndex = 0.obs;
-var usersController = Get.find<UserController>();
-var discoverController = Get.find<DiscoverController>();
+import '../controller/videos/UserVideosController.dart';
+import '../controller/videos/like_videos_controller.dart';
 
 class FollowingAndFollowers extends GetView<UserController> {
   var usersController = Get.find<UserController>();
@@ -27,70 +26,78 @@ class FollowingAndFollowers extends GetView<UserController> {
 
   var isProfile = false.obs;
   var userId = 0.obs;
+  var selectedTabIndex = 0.obs;
+  var discoverController = Get.find<DiscoverController>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: ColorManager.dayNight,
-        appBar: AppBar(
-          actions: [
-            IconButton(
-                onPressed: () => Get.to(SearchGetx()),
-                icon: Icon(
-                  Icons.search,
-                  color: ColorManager.dayNightText,
-                ))
-          ],
-          iconTheme: IconThemeData(color: ColorManager.dayNightText),
-          backgroundColor: Colors.transparent.withOpacity(0.0),
-          elevation: 0,
-          title: Text(
-            usersController.userProfile.value.name ?? "",
-            style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: ColorManager.dayNightText),
-          ),
-        ),
-        body: ListView(
-          shrinkWrap: true,
-          children: [
-            Obx(() => DefaultTabController(
-                length: 2,
-                initialIndex: selectedTab.value,
-                child: TabBar(
-                    onTap: (int index) {
-                      selectedTab.value = index;
-                    },
-                    padding: const EdgeInsets.symmetric(horizontal: 50),
-                    indicatorColor: const Color(0XffB2E3E3),
-                    labelColor: ColorManager.colorAccent,
-                    indicatorPadding:
-                        const EdgeInsets.symmetric(horizontal: 30),
-                    labelStyle: TextStyle(
-                        color: ColorManager.dayNightText,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18),
-                    tabs: const [
-                      Tab(
-                        text: "Followers",
-                      ),
-                      Tab(
-                        text: "Following",
-                      ),
-                    ]))),
-            Obx(() => tabview())
-          ],
-        ));
+    return DefaultTabController(
+        length: 2,
+        child: Scaffold(
+            backgroundColor: ColorManager.dayNight,
+            appBar: AppBar(
+              bottom: TabBar(
+                  unselectedLabelColor: Get.isPlatformDarkMode
+                      ? Colors.white
+                      : const Color(0xff9E9E9E),
+                  indicatorColor: ColorManager.colorAccent,
+                  labelColor: ColorManager.colorAccent,
+                  labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 16),
+                  automaticIndicatorColorAdjustment: true,
+                  onTap: (int index) {
+                    if (isProfile.isTrue) {
+                      if (index == 0) {
+                        controller.getUserFollowers(
+                            controller.storage.read("userId"));
+                      } else {
+                        controller.getUserFollowing(
+                            controller.storage.read("userId"));
+                      }
+                    } else {
+                      if (index == 0) {
+                        controller.getUserFollowers(userId.value);
+                      } else {
+                        controller.getUserFollowing(userId.value);
+                      }
+                    }
+                    selectedTab.value = index;
+                  },
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                  indicatorPadding: const EdgeInsets.symmetric(horizontal: 10),
+                  tabs: const [
+                    Tab(
+                      text: "Followers",
+                    ),
+                    Tab(
+                      text: "Following",
+                    )
+                  ]),
+              actions: [
+                IconButton(
+                    onPressed: () => Get.to(SearchGetx()),
+                    icon: Icon(
+                      Icons.search,
+                      color: ColorManager.dayNightText,
+                    ))
+              ],
+              iconTheme: IconThemeData(color: ColorManager.dayNightText),
+              backgroundColor: Colors.transparent.withOpacity(0.0),
+              elevation: 0,
+              title: Text(
+                usersController.userProfile.value.name ?? "",
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: ColorManager.dayNightText),
+              ),
+            ),
+            body:
+                TabBarView(children: [followersLayout(), followingLayout()])));
   }
 
-  tabview() {
-    if (selectedTab.value == 0) {
-      return followersLayout();
-    } else if (selectedTab.value == 1) {
-      return followingLayout();
-    }
-  }
+
 
   followingLayout() => Followings(isProfile, userId.value);
 
@@ -102,6 +109,8 @@ class FollowingAndFollowers extends GetView<UserController> {
 class Followings extends GetView<FollowersController> {
   var userDetailsController = Get.find<UserDetailsController>();
   var usersController = Get.find<UserController>();
+  var likedVideosController = Get.find<LikedVideosController>();
+  var userVideosController = Get.find<UserVideosController>();
 
   Followings(this.isProfile, this.userid);
 
@@ -110,173 +119,182 @@ class Followings extends GetView<FollowersController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-      (_) => controller.followingModel.isEmpty
-          ? emptyListWidget()
-          : ListView.builder(
-              itemCount: controller.followingModel!.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) => controller.followingModel.isEmpty
-                  ? emptyListWidget()
-                  : Container(
-                      width: Get.width,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Row(
-                              children: [
-                                InkWell(
-                                  onTap: () async {
-                                    controller.followingModel![index].id ==
-                                            GetStorage().read("userId")
-                                        ? await likedVideosController
-                                            .getUserLikedVideos()
-                                        : await likedVideosController
-                                            .getOthersLikedVideos(controller
-                                                .followingModel![index].id!);
+        (_) => controller.followingModel.isEmpty
+            ? Column(
+                children: [emptyListWidget()],
+              )
+            : ListView.builder(
+                itemCount: controller.followingModel!.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) => controller
+                        .followingModel.isEmpty
+                    ? emptyListWidget()
+                    : Container(
+                        width: Get.width,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () async {
+                                      controller.followingModel![index].id ==
+                                              GetStorage().read("userId")
+                                          ? await likedVideosController
+                                              .getUserLikedVideos()
+                                          : await likedVideosController
+                                              .getOthersLikedVideos(controller
+                                                  .followingModel![index].id!);
 
-                                    controller.followingModel![index].id ==
-                                            GetStorage().read("userId")
-                                        ? await userVideosController
-                                            .getUserVideos()
-                                        : await userVideosController
-                                            .getOtherUserVideos(controller
-                                                .followingModel![index].id!);
-                                    controller.followingModel![index].id ==
-                                            GetStorage().read("userId")
-                                        ? await userDetailsController
-                                            .getUserProfile()
-                                            .then((value) => Get.to(Profile()))
-                                        : await otherUsersController
-                                            .getOtherUserProfile(controller
-                                                .followingModel![index].id!)
-                                            .then((value) => Get.to(ViewProfile(
-                                                controller.followingModel[index].id
-                                                    .toString(),
-                                                controller.followingModel[index]
-                                                    .isfollowing!.obs,
-                                                controller.followingModel[index].name
-                                                    .toString(),
-                                                controller.followingModel[index].avtars
-                                                    .toString())));
-                                  },
-                                  child: imgProfile(controller
-                                      .followingModel![index].avtars
-                                      .toString()),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Flexible(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        controller.followingModel[index].name
-                                            .toString(),
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                            color: ColorManager.dayNightText,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700),
-                                      ),
-                                      Text(
-                                        controller
-                                            .followingModel[index].username
-                                            .toString(),
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                            color: ColorManager.dayNightText,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500),
-                                      )
-                                    ],
+                                      controller.followingModel![index].id ==
+                                              GetStorage().read("userId")
+                                          ? await userVideosController
+                                              .getUserVideos()
+                                          : await userVideosController
+                                              .getOtherUserVideos(controller
+                                                  .followingModel![index].id!);
+                                      controller.followingModel![index].id ==
+                                              GetStorage().read("userId")
+                                          ? await userDetailsController
+                                              .getUserProfile()
+                                              .then(
+                                                  (value) => Get.to(Profile()))
+                                          : await otherUsersController
+                                              .getOtherUserProfile(controller
+                                                  .followingModel![index].id!)
+                                              .then((value) => Get.to(ViewProfile(
+                                                  controller.followingModel[index].id
+                                                      .toString(),
+                                                  controller
+                                                      .followingModel[index]
+                                                      .isFolling!
+                                                      .obs,
+                                                  controller.followingModel[index].name.toString(),
+                                                  controller.followingModel[index].avtars.toString())));
+                                    },
+                                    child: imgProfile(controller
+                                        .followingModel![index].avtars
+                                        .toString()),
                                   ),
-                                )
-                              ],
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              if (isProfile.isTrue) {
-                                userController.followUnfollowUser(
-                                  controller.followingModel[index].id!,
-                                  "unfollow",
-                                );
-                              } else {
-                                usersController.followUnfollowUser(
-                                    controller.followersModel[index].id!,
-                                    controller.followersModel[index]
-                                                .isfollowing ==
-                                            0
-                                        ? "follow"
-                                        : "unfollow");
-                              }
-                              controller.getUserFollowing(this.userid);
-                              ;
-                            },
-                            child: isProfile.isTrue
-                                ? Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 10),
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: ColorManager.colorAccent),
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    child: const Text(
-                                      "Following",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: ColorManager.colorAccent),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Flexible(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          controller.followingModel[index].name
+                                              .toString(),
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                              color: ColorManager.dayNightText,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                        Text(
+                                          controller
+                                              .followingModel[index].username
+                                              .toString(),
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                              color: ColorManager.dayNightText,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500),
+                                        )
+                                      ],
                                     ),
                                   )
-                                : controller.followingModel[index]
-                                            .isfollowing ==
-                                        0
-                                    ? Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20, vertical: 10),
-                                        decoration: BoxDecoration(
-                                            color: ColorManager.colorAccent,
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        child: const Text(
-                                          "Follow",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white),
-                                        ),
-                                      )
-                                    : Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20, vertical: 10),
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
+                                ],
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                if (isProfile.isTrue) {
+                                  userController.followUnfollowUser(
+                                    controller.followingModel[index].id!,
+                                    "unfollow",
+                                  );
+                                } else {
+                                  usersController.followUnfollowUser(
+                                      controller.followersModel[index].id!,
+                                      controller.followersModel[index]
+                                                  .isFolling ==
+                                              0
+                                          ? "follow"
+                                          : "unfollow");
+                                }
+                                controller.getUserFollowing(this.userid);
+                                ;
+                              },
+                              child: isProfile.isTrue
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: ColorManager.colorAccent),
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                      child: const Text(
+                                        "Following",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: ColorManager.colorAccent),
+                                      ),
+                                    )
+                                  : controller.followingModel[index]
+                                              .isFolling ==
+                                          0
+                                      ? Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 10),
+                                          decoration: BoxDecoration(
+                                              color: ColorManager.colorAccent,
+                                              borderRadius:
+                                                  BorderRadius.circular(20)),
+                                          child: const Text(
+                                            "Follow",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.white),
+                                          ),
+                                        )
+                                      : Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 10),
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color:
+                                                      ColorManager.colorAccent),
+                                              borderRadius:
+                                                  BorderRadius.circular(20)),
+                                          child: const Text(
+                                            "Following",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
                                                 color:
                                                     ColorManager.colorAccent),
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        child: const Text(
-                                          "Following",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: ColorManager.colorAccent),
+                                          ),
                                         ),
-                                      ),
-                          )
-                        ],
-                      ),
-                    )),
-      onLoading: Flexible(child: loader()),
-    );
+                            )
+                          ],
+                        ),
+                      )),
+        onLoading: Column(
+          children: [Expanded(child: loader())],
+        ),
+        onEmpty: Column(
+          children: [emptyListWidget()],
+        ));
   }
 }
 
@@ -284,13 +302,18 @@ class Followers extends GetView<FollowersController> {
   Followers(this.userId);
   var userDetailsController = Get.find<UserDetailsController>();
   var usersController = Get.find<UserController>();
+
+  var likedVideosController = Get.find<LikedVideosController>();
+  var userVideosController = Get.find<UserVideosController>();
   var userId = 0;
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return controller.obx(
       (state) => controller.followersModel.isEmpty
-          ? emptyListWidget()
+          ? Column(
+              children: [emptyListWidget()],
+            )
           : Wrap(
               children: List.generate(
                   controller.followersModel.length,
@@ -314,8 +337,8 @@ class Followers extends GetView<FollowersController> {
                                   .then((value) => Get.to(ViewProfile(
                                       controller.followersModel[index].id
                                           .toString(),
-                                      controller.followersModel[index]
-                                          .isfollowing!.obs,
+                                      controller
+                                          .followersModel[index].isFolling!.obs,
                                       controller.followersModel[index].name
                                           .toString(),
                                       controller.followersModel[index].avtars
@@ -376,15 +399,15 @@ class Followers extends GetView<FollowersController> {
                                   usersController.followUnfollowUser(
                                       controller.followersModel[index].id!,
                                       controller.followersModel[index]
-                                                  .isfollowing ==
+                                                  .isFolling ==
                                               0
                                           ? "follow"
                                           : "unfollow");
 
                                   controller.getUserFollowers(userId);
                                 },
-                                child: controller.followersModel[index]
-                                            .isfollowing ==
+                                child: controller
+                                            .followersModel[index].isFolling ==
                                         0
                                     ? Container(
                                         padding: const EdgeInsets.symmetric(
@@ -424,7 +447,9 @@ class Followers extends GetView<FollowersController> {
                         ),
                       )),
             ),
-      onLoading: Flexible(child: loader()),
+      onLoading: Column(
+        children: [Expanded(child: loader())],
+      ),
     );
   }
 }

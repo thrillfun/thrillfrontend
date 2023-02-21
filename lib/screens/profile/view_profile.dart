@@ -59,48 +59,43 @@ class ViewProfile extends StatelessWidget {
       body: Column(
         children: [
           OtherUserProfileDetails(isFollow!),
-          Flexible(
-              child: Column(
-            children: [
-              const SizedBox(
-                height: 20,
-              ),
-              Obx(() => DefaultTabController(
-                  length: 2,
+          Expanded(
+              child: DefaultTabController(
                   initialIndex: selectedTab.value,
-                  child: TabBar(
-                      onTap: (int index) {
-                        selectedTab.value = index;
-                      },
-                      padding: const EdgeInsets.symmetric(horizontal: 50),
-                      indicatorColor: const Color(0XffB2E3E3),
-                      indicatorPadding:
-                          const EdgeInsets.symmetric(horizontal: 30),
-                      tabs: [
-                        Tab(
-                          icon: Icon(
-                            Icons.dashboard,
-                            color: selectedTab.value == 0
-                                ? ColorManager.colorAccent
-                                : Get.isPlatformDarkMode
-                                    ? Colors.white
-                                    : Colors.black,
-                          ),
-                        ),
-                        Tab(
-                          icon: Icon(
-                            Icons.favorite,
-                            color: selectedTab.value == 1
-                                ? ColorManager.colorAccent
-                                : Get.isPlatformDarkMode
-                                    ? Colors.white
-                                    : Colors.black,
-                          ),
-                        )
-                      ]))),
-              Expanded(child: Obx(() => tabview()))
-            ],
-          ))
+                  length: 2,
+                  child: Scaffold(
+                    backgroundColor: ColorManager.dayNight,
+                    appBar: AppBar(
+                        toolbarHeight: 10,
+                        backgroundColor: ColorManager.dayNight,
+                        bottom: TabBar(
+                            onTap: (int index) {
+                              selectedTab.value = index;
+                            },
+                            indicatorColor: ColorManager.colorAccent,
+                            indicatorPadding:
+                                const EdgeInsets.symmetric(horizontal: 30),
+                            tabs: [
+                              Obx(() => Tab(
+                                    icon: Icon(
+                                      Icons.dashboard,
+                                      color: selectedTab.value == 0
+                                          ? ColorManager.colorAccent
+                                          : ColorManager.colorAccentTransparent,
+                                    ),
+                                  )),
+                              Obx(() => Tab(
+                                    icon: Icon(
+                                      Icons.favorite,
+                                      color: selectedTab.value == 1
+                                          ? ColorManager.colorAccent
+                                          : ColorManager.colorAccentTransparent,
+                                    ),
+                                  ))
+                            ])),
+                    body: TabBarView(
+                        children: [OtherUserVideos(), OtherLikedVideos()]),
+                  )))
         ],
       ),
     );
@@ -459,40 +454,41 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
       (state) => Column(
         children: [
           Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      "assets/profile_background.svg",
-                      fit: BoxFit.contain,
-                      width: Get.width,
-                    ),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          "assets/23.svg",
+            alignment: Alignment.center,
+            children: [
+              SvgPicture.asset(
+                "assets/profile_background.svg",
+                fit: BoxFit.contain,
+                width: Get.width,
+              ),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SvgPicture.asset(
+                    "assets/23.svg",
+                    height: 100,
+                    width: 100,
+                  ),
+                  Container(
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      height: 80,
+                      width: 80,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                      child: CachedNetworkImage(
+                        fit: BoxFit.fill,
+                        imageUrl: state!.value.avatar.toString().isEmpty
+                            ? RestUrl.placeholderImage
+                            : '${RestUrl.profileUrl}${state.value.avatar}',
+                        placeholder: (a, b) => const Center(
+                          child: CircularProgressIndicator(),
                         ),
-                        Container(
-                            clipBehavior: Clip.antiAliasWithSaveLayer,
-                            height: 100,
-                            width: 100,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                            child: CachedNetworkImage(
-                              fit: BoxFit.fill,
-                              imageUrl: state!.value.avatar.toString().isEmpty
-                                  ? RestUrl.placeholderImage
-                                  : '${RestUrl.profileUrl}${state.value.avatar}',
-                              placeholder: (a, b) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            )),
-                      ],
-                    )
-                  ],
-                ),
-               
+                      )),
+                ],
+              )
+            ],
+          ),
           const SizedBox(
             height: 10,
           ),
@@ -500,7 +496,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '@${state.value.username}',
+                '${state.value.name}',
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
               ),
@@ -515,11 +511,11 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
             ],
           ),
           Text(
-            '@${state.value.name}',
+            '@${state.value.username}',
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -543,7 +539,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                               color: Get.isPlatformDarkMode
                                   ? Colors.white
                                   : Colors.black,
-                              fontSize: 24,
+                              fontSize: 18,
                               fontWeight: FontWeight.w700)),
                       TextSpan(
                           text: following,
@@ -556,7 +552,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                     ])),
               ),
               const SizedBox(
-                height: 53,
+                height: 45,
                 child: VerticalDivider(
                   thickness: 1,
                   width: 1,
@@ -579,7 +575,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                           text: '${state.value.followers}'
                               '\n',
                           style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 18,
                               color: Get.isPlatformDarkMode
                                   ? Colors.white
                                   : Colors.black,
@@ -595,7 +591,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                     ])),
               ),
               Container(
-                height: 53,
+                height: 45,
                 child: const VerticalDivider(
                   thickness: 1,
                   width: 1,
@@ -612,7 +608,7 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                             color: Get.isPlatformDarkMode
                                 ? Colors.white
                                 : Colors.black,
-                            fontSize: 24,
+                            fontSize: 18,
                             fontWeight: FontWeight.w700)),
                     TextSpan(
                         text: likes,
@@ -625,6 +621,9 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                   ])),
             ],
           ).w(MediaQuery.of(context).size.width * .80),
+          SizedBox(
+            height: 10,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -642,14 +641,18 @@ class OtherUserProfileDetails extends GetView<OtherUsersController> {
                           userDetailsController.followUnfollowUser(
                               int.parse(controller.otherUserProfile.value.id
                                   .toString()),
-                              isFollow!.value == 0 ? "follow" : "unfollow");
+                              isFollow!.value == 0 ? "follow" : "unfollow",
+                              token: controller
+                                  .otherUserProfile.value.firebaseToken
+                                  .toString());
+                          userDetailsController.getOtherUserProfile(userId);
                         },
-                        child:
+                        child: Obx(() =>
                             Text(isFollow!.value == 0 ? "Follow" : "Following",
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                )),
+                                ))),
                       ))),
               Expanded(
                   child: Container(

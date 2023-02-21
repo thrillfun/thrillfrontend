@@ -284,7 +284,7 @@ class Favourites extends GetView<FavouritesController> {
                           firstName: element.user?.firstName,
                           lastName: element.user?.lastName,
                           username: element.user?.username,
-                          isfollow: 0,
+                          isFollow: 0,
                         );
                         videosList1.add(PublicVideos(
                           id: element.id,

@@ -14,7 +14,7 @@ class FollowersController extends GetxController
     baseUrl: RestUrl.baseUrl,
   ));
 
-  getUserFollowers(int userId) async {
+  Future<void> getUserFollowers(int userId) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };

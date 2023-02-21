@@ -42,19 +42,17 @@ class WheelController extends GetxController with StateMixin<dynamic> {
   @override
   void onInit() {
     super.onInit();
+
     streamController = StreamController<int>();
+    getCounterData();
+    getWheelData();
+    getEarnedSpinData();
   }
 
   @override
   void dispose() {
     streamController.sink.close();
     super.dispose();
-  }
-
-  WheelController() {
-    getCounterData();
-    getWheelData();
-    getEarnedSpinData();
   }
 
   getCounterData() async {

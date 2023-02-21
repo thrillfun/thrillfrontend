@@ -280,7 +280,7 @@ class Tophashtags extends GetView<TopHashtagsController> {
                               .then((value) => Get.to(() => HashTagsScreen(
                                     tagName: state[index].hashtagName,
                                     videosList: state[index].videos,
-                                    videoCount: state.length,
+                                    videoCount: state[index].hashtagId,
                                   )));
                         },
                         child: Container(
@@ -379,7 +379,7 @@ class Tophashtags extends GetView<TopHashtagsController> {
                                             firstName: element.user?.firstName,
                                             lastName: element.user?.lastName,
                                             username: element.user?.username,
-                                            isfollow: int.parse(element
+                                            isFollow: int.parse(element
                                                 .user!.following
                                                 .toString()),
                                           );

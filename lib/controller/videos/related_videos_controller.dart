@@ -10,6 +10,7 @@ import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thrill/common/strings.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
+import 'package:thrill/controller/notifications/notifications_controller.dart';
 import 'package:thrill/controller/users/user_details_controller.dart';
 import 'package:thrill/controller/videos/Following_videos_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
@@ -24,7 +25,7 @@ class RelatedVideosController extends GetxController
   var isRelatedLoading = false.obs;
   var fileSupport = FileSupport();
   var downloadFilePath = "".obs;
-
+  var notificationsController = Get.find<NotificationsController>();
   var dio = Dio(
       BaseOptions(baseUrl: RestUrl.baseUrl, responseType: ResponseType.json));
   var followingVideosController = Get.find<FollowingVideosController>();
@@ -43,11 +44,15 @@ class RelatedVideosController extends GetxController
 
     dio.get("/video/list").then((value) {
       if (publicVideosList.isEmpty) {
+        change(publicVideosList, status: RxStatus.loading());
+
         isLoading.value = true;
         publicVideosList = PublicVideosModel.fromJson(value.data).data!.obs;
+        change(publicVideosList, status: RxStatus.success());
       } else {
         publicVideosList.value =
             PublicVideosModel.fromJson(value.data).data!.obs;
+        change(publicVideosList, status: RxStatus.success());
       }
       getFollowingVideos();
 
@@ -59,7 +64,8 @@ class RelatedVideosController extends GetxController
     });
     isLoading.value = false;
   }
- Future<void> refreshVideoList() async {
+
+  Future<void> refreshVideoList() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -68,7 +74,7 @@ class RelatedVideosController extends GetxController
 
     dio.get("/video/list").then((value) {
       publicVideosList = PublicVideosModel.fromJson(value.data).data!.obs;
-     getFollowingVideos();
+      getFollowingVideos();
 
       //  change(publicVideosList, status: RxStatus.success());
       isLoading.value = false;
@@ -98,7 +104,8 @@ class RelatedVideosController extends GetxController
     isRelatedLoading.value = false;
   }
 
-  Future<bool> likeVideo(int isLike, int videoId) async {
+  Future<bool> likeVideo(int isLike, int videoId,
+      {int userId = 0, String? token}) async {
     var isLiked = false;
     dio.options.headers = {
       "Authorization":
@@ -110,6 +117,16 @@ class RelatedVideosController extends GetxController
     }).then((value) async {
       await getAllVideos();
       getFollowingVideos();
+      if (isLike == 1) {
+        await notificationsController.sendFcmNotification(token.toString(),
+            title:
+                "${await GetStorage().read("user")["username"]} liked you video",
+            body: "Enjoy",
+            image: RestUrl.profileUrl +
+                await GetStorage().read("user")["avatar"].toString());
+        // await notificationsController.sendChatNotifcations(userId,
+        //     "${await GetStorage().read("user")["username"]} liked your video!");
+      }
     }).onError((error, stackTrace) {});
 
     if (isLike == 0) {

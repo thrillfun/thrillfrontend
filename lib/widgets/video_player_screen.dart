@@ -83,11 +83,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     avatar: widget.userVideos![index].user!.avatar,
                     socialLoginType:
                     widget.userVideos![index].user?.socialLoginType,
+                                        firebaseToken: widget.userVideos![index].user!.firebaseToken,
+
                     socialLoginId: widget.userVideos![index].user?.socialLoginId,
                     firstName: widget.userVideos![index].user?.firstName,
                     lastName: widget.userVideos![index].user?.lastName,
                     gender:widget. userVideos![index].user?.gender,
-                    isfollow: widget.userVideos![index].isfollow,
+                    isFollow: widget.userVideos![index].isfollow,
                     likes: widget.userVideos![index].likes.toString());
               })
                   : widget.isFav
@@ -104,10 +106,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     widget. likedVideos![index].user?.socialLoginType,
                     socialLoginId:
                     widget.likedVideos![index].user?.socialLoginId,
+                                        firebaseToken: widget.likedVideos![index].user!.firebaseToken,
+
                     firstName: widget.likedVideos![index].user?.firstName,
                     lastName: widget.likedVideos![index].user?.lastName,
                     gender: widget.likedVideos![index].user?.gender,
-                    isfollow: widget.likedVideos![index].isfollow,
+                    isFollow: widget.likedVideos![index].isfollow,
                     likes: widget.likedVideos![index].likes.toString());
               })
                   : widget.isLock
@@ -131,10 +135,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     widget.privateVideos![index].user?.socialLoginId,
                     firstName:
                     widget.privateVideos![index].user?.firstName,
+                                        firebaseToken: widget.privateVideos![index].user!.firebaseToken,
+
                     lastName:
                     widget.privateVideos![index].user?.lastName,
                     gender: widget.privateVideos![index].user?.gender,
-                    isfollow: widget.privateVideos![index].isfollow,
+                    isFollow: widget.privateVideos![index].isfollow,
                     likes:
                     widget.privateVideos![index].likes.toString());
               })
@@ -151,6 +157,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     dob: widget.hashTagVideos![index].user?.dob,
                     phone: widget.hashTagVideos![index].user?.phone,
                     avatar: widget.hashTagVideos![index].user!.avatar,
+                    firebaseToken: widget.hashTagVideos![index].user!.firebaseToken,
                     socialLoginType: widget.hashTagVideos![index]
                         .user
                         ?.socialLoginType,
@@ -161,7 +168,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     lastName:
                     widget.hashTagVideos![index].user?.lastName,
                     gender: widget.hashTagVideos![index].user?.gender,
-                    isfollow: widget.userVideos![index].isfollow,
+                    isFollow: widget.userVideos![index].isfollow,
                     likes: widget.userVideos![index].likes.toString());
               });
               return AspectRatio(

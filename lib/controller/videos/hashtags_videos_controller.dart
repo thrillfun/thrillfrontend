@@ -13,21 +13,17 @@ class HashtagVideosController extends GetxController
   ));
 
   Future<void> getVideosByHashTags(int hashTagId) async {
-    if (hashTagsDetailsList.isNotEmpty) {
-      hashTagsDetailsList.clear();
-    }
-    change(hashTagsDetailsList,status: RxStatus.loading());
+    change(hashTagsDetailsList, status: RxStatus.loading());
+   
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
 
     dio.post("/hashtag/get-videos-by-hashtag",
         queryParameters: {"hashtag_id": "$hashTagId"}).then((value) {
       hashTagsDetailsList = HashTagVideosModel.fromJson(value.data).data!.obs;
-      change(hashTagsDetailsList,status: RxStatus.success());
-
+      change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {
-      change(hashTagsDetailsList,status: RxStatus.error());
-
+      change(hashTagsDetailsList, status: RxStatus.error());
     });
   }
 }

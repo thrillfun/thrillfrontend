@@ -31,7 +31,7 @@ class SoundListModel {
 }
 
 class Sounds {
-  int? id;
+    int? id;
   String? sound;
   int? userId;
   String? category;
@@ -40,24 +40,25 @@ class Sounds {
   String? createdAt;
   String? updatedAt;
   int? soundUsedCount;
-  int? isFavorite;
+  int? isFavouriteSoundCount;
   SoundOwner? soundOwner;
+
 
   Sounds(
       {this.id,
-        this.sound,
-        this.userId,
-        this.category,
-        this.name,
-        this.thumbnail,
-        this.createdAt,
-        this.updatedAt,
-        this.soundUsedCount,
-        this.isFavorite,
-        this.soundOwner});
+      this.sound,
+      this.userId,
+      this.category,
+      this.name,
+      this.thumbnail,
+      this.createdAt,
+      this.updatedAt,
+      this.soundUsedCount,
+      this.isFavouriteSoundCount,
+      this.soundOwner});
 
   Sounds.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+   id = json['id'];
     sound = json['sound'];
     userId = json['user_id'];
     category = json['category'];
@@ -66,14 +67,14 @@ class Sounds {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     soundUsedCount = json['sound_used_count'];
-    isFavorite = json['is_favorite'];
+    isFavouriteSoundCount = json['is_favourite_sound_count'];
     soundOwner = json['sound_owner'] != null
         ? new SoundOwner.fromJson(json['sound_owner'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+   final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['sound'] = this.sound;
     data['user_id'] = this.userId;
@@ -83,7 +84,7 @@ class Sounds {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['sound_used_count'] = this.soundUsedCount;
-    data['is_favorite'] = this.isFavorite;
+    data['is_favourite_sound_count'] = this.isFavouriteSoundCount;
     if (this.soundOwner != null) {
       data['sound_owner'] = this.soundOwner!.toJson();
     }
@@ -93,7 +94,7 @@ class Sounds {
 
 }
 class SoundOwner {
-  int? id;
+   int? id;
   String? name;
   String? username;
   String? email;
@@ -101,6 +102,7 @@ class SoundOwner {
   String? emailVerifiedAt;
   String? phone;
   String? avtars;
+  String? location;
   String? coverImage;
   String? rating;
   String? notification;
@@ -110,6 +112,9 @@ class SoundOwner {
   int? role;
   String? socialLoginId;
   String? socialLoginType;
+  String? referralCode;
+  String? firebaseToken;
+  int? systemActive;
   String? createdAt;
   String? updatedAt;
   int? isVerified;
@@ -117,30 +122,34 @@ class SoundOwner {
   int? followersCount;
   bool? isfollowExists;
 
-  SoundOwner(
+ SoundOwner(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.emailVerifiedAt,
-        this.phone,
-        this.avtars,
-        this.coverImage,
-        this.rating,
-        this.notification,
-        this.twoFAToggle,
-        this.status,
-        this.deactivationRequest,
-        this.role,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.createdAt,
-        this.updatedAt,
-        this.isVerified,
-        this.followingCount,
-        this.followersCount,
-        this.isfollowExists});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.emailVerifiedAt,
+      this.phone,
+      this.avtars,
+      this.location,
+      this.coverImage,
+      this.rating,
+      this.notification,
+      this.twoFAToggle,
+      this.status,
+      this.deactivationRequest,
+      this.role,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.referralCode,
+      this.firebaseToken,
+      this.systemActive,
+      this.createdAt,
+      this.updatedAt,
+      this.isVerified,
+      this.followingCount,
+      this.followersCount,
+      this.isfollowExists});
 
   SoundOwner.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -151,6 +160,7 @@ class SoundOwner {
     emailVerifiedAt = json['email_verified_at'];
     phone = json['phone'];
     avtars = json['avtars'];
+    location = json['location'];
     coverImage = json['cover_image'];
     rating = json['rating'];
     notification = json['notification'];
@@ -160,6 +170,9 @@ class SoundOwner {
     role = json['role'];
     socialLoginId = json['social_login_id'];
     socialLoginType = json['social_login_type'];
+    referralCode = json['referral_code'];
+    firebaseToken = json['firebase_token'];
+    systemActive = json['system_active'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     isVerified = json['is_verified'];
@@ -167,7 +180,6 @@ class SoundOwner {
     followersCount = json['followers_count'];
     isfollowExists = json['isfollow_exists'];
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
@@ -178,6 +190,7 @@ class SoundOwner {
     data['email_verified_at'] = this.emailVerifiedAt;
     data['phone'] = this.phone;
     data['avtars'] = this.avtars;
+    data['location'] = this.location;
     data['cover_image'] = this.coverImage;
     data['rating'] = this.rating;
     data['notification'] = this.notification;
@@ -187,6 +200,9 @@ class SoundOwner {
     data['role'] = this.role;
     data['social_login_id'] = this.socialLoginId;
     data['social_login_type'] = this.socialLoginType;
+    data['referral_code'] = this.referralCode;
+    data['firebase_token'] = this.firebaseToken;
+    data['system_active'] = this.systemActive;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['is_verified'] = this.isVerified;

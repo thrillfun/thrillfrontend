@@ -31,6 +31,7 @@ import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../controller/comments/comments_controller.dart';
+import '../controller/notifications/notifications_controller.dart';
 import '../controller/users/other_users_controller.dart';
 import '../controller/users_controller.dart';
 import '../controller/videos/UserVideosController.dart';
@@ -114,6 +115,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
   var isVideoPaused = false.obs;
 
   late VideoPlayerController betterPlayerController;
+  var notificationsController = Get.find<NotificationsController>();
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -151,15 +153,13 @@ class _VideoAppState extends State<BetterReelsPlayer>
   Widget build(BuildContext context) {
     if (initialized.value &&
         widget.pageIndex.value == widget.currentPageIndex.value &&
-        !widget.isPaused.value) {
+        widget.isPaused.isFalse) {
       setState(() {
         betterPlayerController.play();
-        isVideoPaused.value = false;
       });
     } else {
       setState(() {
         betterPlayerController.pause();
-        isVideoPaused.value = true;
       });
     }
 
@@ -202,14 +202,19 @@ class _VideoAppState extends State<BetterReelsPlayer>
                               if (value.position == value.duration &&
                                   value.position > Duration.zero &&
                                   initialized.isTrue) {
-                                var nextPage =
-                                    preloadPageController!.page!.toInt();
+                                // var nextPage =
+                                //     preloadPageController!.page!.toInt();
 
-                                preloadPageController!.animateToPage(
-                                    nextPage + 1,
-                                    duration: const Duration(milliseconds: 400),
-                                    curve: Curves.easeIn);
-                                videosController.postVideoView(widget.videoId);
+                                videosController
+                                    .postVideoView(widget.videoId)
+                                    .then((value) => preloadPageController!
+                                        .animateToPage(
+                                            preloadPageController!.page!
+                                                    .toInt() +
+                                                1,
+                                            duration: const Duration(
+                                                milliseconds: 400),
+                                            curve: Curves.easeIn));
                               }
                               return VideoPlayer(betterPlayerController);
                             },
@@ -270,7 +275,10 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                   onTap: (_) async =>
                                       await relatedVideosController.likeVideo(
                                           widget.videoLikeStatus == "0" ? 1 : 0,
-                                          widget.videoId),
+                                          widget.videoId,
+                                          userId: widget.UserId,
+                                          token:
+                                              widget.publicUser!.firebaseToken),
                                 ),
                               ],
                             ),
@@ -712,7 +720,11 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                               widget.isfollow ==
                                                                       0
                                                                   ? "follow"
-                                                                  : "unfollow");
+                                                                  : "unfollow",
+                                                              token: widget
+                                                                  .publicUser!
+                                                                  .firebaseToken
+                                                                  .toString());
                                                       relatedVideosController
                                                           .getAllVideos();
                                                     },
@@ -815,7 +827,10 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                 .toString()));
                                       });
                               } else {
-                                Get.to(LoginGetxScreen());
+                                Get.bottomSheet(LoginGetxScreen(),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)));
                               }
                             },
                             child: Row(
@@ -882,7 +897,11 @@ class _VideoAppState extends State<BetterReelsPlayer>
                                                           widget.UserId,
                                                           widget.isfollow == 0
                                                               ? "follow"
-                                                              : "unfollow");
+                                                              : "unfollow",
+                                                          token: widget
+                                                              .publicUser!
+                                                              .firebaseToken
+                                                              .toString());
                                                 }
                                               },
                                               child: Container(
@@ -1075,11 +1094,9 @@ class _VideoAppState extends State<BetterReelsPlayer>
           ],
         ),
         onVisibilityChanged: (VisibilityInfo info) {
-          if (initialized.isTrue) {
-            info.visibleFraction == 0
-                ? betterPlayerController.pause()
-                : betterPlayerController.play();
-          }
+          info.visibleFraction == 0
+              ? betterPlayerController.pause()
+              : betterPlayerController.play();
         });
   }
 
@@ -1319,6 +1336,8 @@ class _VideoAppState extends State<BetterReelsPlayer>
 
 // ignore: must_be_immutable
 class CommentsScreen extends GetView<CommentsController> {
+  var notificationsController = Get.find<NotificationsController>();
+
   CommentsScreen(
       {Key? key,
       this.videoId,
@@ -1427,7 +1446,8 @@ class CommentsScreen extends GetView<CommentsController> {
                                     children: [
                                       Text(
                                         state[index].name.toString(),
-                                        style: const TextStyle(
+                                        style: TextStyle(
+                                            color: ColorManager.dayNightText,
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700),
                                       ),
@@ -1460,8 +1480,10 @@ class CommentsScreen extends GetView<CommentsController> {
                               state[index].comment.toString(),
                               maxLines: 4,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w400),
+                              style: TextStyle(
+                                  color: ColorManager.dayNightText,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400),
                             ),
                             const SizedBox(
                               height: 10,
@@ -1626,6 +1648,10 @@ class CommentsScreen extends GetView<CommentsController> {
                                           relatedVideosController
                                               .getAllVideos();
                                           _textEditingController.clear();
+
+                                          await notificationsController
+                                              .sendChatNotifcations(userId!,
+                                                  "${await GetStorage().read("user")['username']} commented on your post!");
                                         });
                                       },
                                       child: const Icon(

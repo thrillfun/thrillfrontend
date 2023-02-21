@@ -47,62 +47,59 @@ class Profile extends StatelessWidget {
               BoxConstraints(maxWidth: Get.width, maxHeight: Get.height),
           child: Column(children: [
             UserProfileDetails(),
-            Flexible(
-                child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Obx(() => DefaultTabController(
+            Expanded(
+                child: DefaultTabController(
                     length: 3,
-                    initialIndex: selectedTab.value,
-                    child: TabBar(
-                        onTap: (int index) {
-                          selectedTab.value = index;
-                        },
-                        padding: const EdgeInsets.symmetric(horizontal: 50),
-                        indicatorColor: const Color(0XffB2E3E3),
-                        indicatorPadding:
-                            const EdgeInsets.symmetric(horizontal: 30),
-                        tabs: [
-                          Tab(
-                            icon: Icon(
-                              Icons.dashboard,
-                              color: selectedTab.value == 0
-                                  ? ColorManager.colorAccent
-                                  : ColorManager.colorAccentTransparent,
-                            ),
-                          ),
-                          Tab(
-                            icon: Icon(
-                              Icons.lock,
-                              color: selectedTab.value == 1
-                                  ? ColorManager.colorAccent
-                                  : ColorManager.colorAccentTransparent,
-                            ),
-                          ),
-                          Tab(
-                            icon: Icon(
-                              Icons.favorite,
-                              color: selectedTab.value == 2
-                                  ? ColorManager.colorAccent
-                                  : ColorManager.colorAccentTransparent,
-                            ),
-                          )
-                        ]))),
-                Obx(() => tabview()),
-              ],
-            ))
+                    child: Scaffold(
+                      backgroundColor: ColorManager.dayNight,
+                      appBar: AppBar(
+                        toolbarHeight: 10,
+                        backgroundColor: ColorManager.dayNight,
+                        bottom: TabBar(
+                            onTap: (int index) {
+                              if (index == 1) {
+                                userVideosController.getUserVideos();
+                              } else if (index == 1) {
+                                privateVideosController.getUserPrivateVideos();
+                              } else {
+                                likedVideosController.getUserLikedVideos();
+                              }
+                              selectedTab.value = index;
+                            },
+                            indicatorColor: ColorManager.colorAccent,
+                            indicatorPadding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            tabs: [
+                              Obx(() => Tab(
+                                    icon: Icon(
+                                      Icons.dashboard,
+                                      color: selectedTab.value == 0
+                                          ? ColorManager.colorAccent
+                                          : ColorManager.colorAccentTransparent,
+                                    ),
+                                  )),
+                              Obx(() => Tab(
+                                    icon: Icon(
+                                      Icons.lock,
+                                      color: selectedTab.value == 1
+                                          ? ColorManager.colorAccent
+                                          : ColorManager.colorAccentTransparent,
+                                    ),
+                                  )),
+                              Obx(() => Tab(
+                                    icon: Icon(
+                                      Icons.favorite,
+                                      color: selectedTab.value == 2
+                                          ? ColorManager.colorAccent
+                                          : ColorManager.colorAccentTransparent,
+                                    ),
+                                  ))
+                            ]),
+                      ),
+                      body: TabBarView(children: [feed(), lock(), fav()]),
+                    )))
           ]),
         ));
-  }
-
-  tabview() {
-    if (selectedTab.value == 0) {
-      return feed();
-    } else if (selectedTab.value == 1) {
-      return lock();
-    } else if (selectedTab.value == 2) {
-      return fav();
-    }
   }
 
   feed() {
@@ -110,7 +107,7 @@ class Profile extends StatelessWidget {
   }
 
   lock() {
-    return PrivateVideos();
+    return const PrivateVideos();
   }
 
   fav() => LikedVideos();
@@ -229,109 +226,113 @@ class UserVideos extends GetView<UserVideosController> {
     // TODO: implement build
     return controller.obx(
       (_) => controller.userVideos.isEmpty
-          ? Center(
-              child: Text(
-                "No videos yet",
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: ColorManager.dayNightText),
-              ),
+          ? Column(
+              children: [emptyListWidget()],
             )
-          : Expanded(
-              child: Padding(
-              padding: EdgeInsets.only(bottom: 80),
-              child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.8,
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  shrinkWrap: true,
-                  itemCount: controller.userVideos!.length,
-                  itemBuilder: (context, index) => GestureDetector(
-                        onTap: () {
-                          Get.to(VideoPlayerScreen(
-                            isFav: false,
-                            isFeed: true,
-                            isLock: false,
-                            position: index,
-                            userVideos: controller.userVideos,
-                          ));
-                        },
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            imgNet(
-                                '${RestUrl.gifUrl}${controller.userVideos.value[index].gifImage}'),
-                            Positioned(
-                                bottom: 10,
-                                left: 10,
-                                right: 10,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    RichText(
-                                        text: TextSpan(
+          : Column(
+              children: [
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 0.8,
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      shrinkWrap: true,
+                      itemCount: controller.userVideos.length,
+                      itemBuilder: (context, index) => GestureDetector(
+                            onTap: () {
+                              Get.to(VideoPlayerScreen(
+                                isFav: false,
+                                isFeed: true,
+                                isLock: false,
+                                position: index,
+                                userVideos: controller.userVideos,
+                              ));
+                            },
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                imgNet(
+                                    '${RestUrl.gifUrl}${controller.userVideos.value[index].gifImage}'),
+                                Positioned(
+                                    bottom: 10,
+                                    left: 10,
+                                    right: 10,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
-                                        const WidgetSpan(
-                                          child: Icon(
-                                            Icons.play_circle,
-                                            size: 18,
-                                            color: ColorManager.colorAccent,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                            text: " " +
-                                                controller.userVideos
-                                                    .value[index].views
-                                                    .toString(),
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 16)),
+                                        RichText(
+                                            text: TextSpan(
+                                          children: [
+                                            const WidgetSpan(
+                                              child: Icon(
+                                                Icons.play_circle,
+                                                size: 18,
+                                                color: ColorManager.colorAccent,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                                text: " " +
+                                                    controller.userVideos
+                                                        .value[index].views
+                                                        .toString(),
+                                                style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 16)),
+                                          ],
+                                        ))
                                       ],
-                                    ))
-                                  ],
-                                )),
-                            Positioned(
-                              top: 5,
-                              right: 5,
-                              child: IconButton(
-                                  onPressed: () {
-                                    showDeleteVideoDialog(
-                                        controller.userVideos!.value[index].id!,
-                                        controller.userVideos!.value,
-                                        index);
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  color: Colors.red,
-                                  icon: const Icon(
-                                      Icons.delete_forever_outlined)),
-                            )
-                          ],
-                        ),
-                      )),
-            )),
-      onLoading: loader(),
-      onEmpty: Center(
-        child: Text(
-          "No videos yet",
-          style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: ColorManager.dayNightText),
-        ),
+                                    )),
+                                Positioned(
+                                  top: 5,
+                                  right: 5,
+                                  child: IconButton(
+                                      onPressed: () {
+                                        showDeleteVideoDialog(
+                                            controller
+                                                .userVideos.value[index].id!,
+                                            controller.userVideos.value,
+                                            index);
+                                      },
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      color: Colors.red,
+                                      icon: const Icon(
+                                          Icons.delete_forever_outlined)),
+                                )
+                              ],
+                            ),
+                          )),
+                ))
+              ],
+            ),
+      onLoading: Column(
+        children: [
+          Expanded(
+            child: loader(),
+          )
+        ],
+      ),
+      onError: (error) => Column(
+        children: [emptyListWidget()],
+      ),
+      onEmpty: Column(
+        children: [emptyListWidget()],
       ),
     );
   }
 
   showDeleteVideoDialog(int videoID, List list, int index) {
     Get.defaultDialog(
-      content: Text("Are you sure you want to delete this video ?"),
+      content: const Text("Are you sure you want to delete this video ?"),
       cancel: ElevatedButton(
           onPressed: () {
             Navigator.pop(Get.context!);
@@ -364,107 +365,126 @@ class PrivateVideos extends GetView<PrivateVideosController> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return controller.obx(
-      (state) => Flexible(
-          child: Padding(
-        padding: EdgeInsets.only(bottom: 80),
-        child: GridView.count(
-          padding: const EdgeInsets.all(10),
-          shrinkWrap: true,
-          crossAxisCount: 3,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 0.8,
-          children: List.generate(
-              state!.length,
-              (index) => GestureDetector(
-                    onTap: () {
-                      Get.to(VideoPlayerScreen(
-                        isFav: false,
-                        isFeed: false,
-                        isLock: true,
-                        position: index,
-                        privateVideos: state.value,
-                      ));
-                      // Navigator.pushReplacementNamed(context, '/',
-                      //     arguments: {'videoModel': privateList[index]});
-                    },
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // CachedNetworkImage(
-                        //     placeholder: (a, b) => const Center(
-                        //       child: CircularProgressIndicator(),
-                        //     ),
-                        //     fit: BoxFit.cover,
-                        //     imageUrl:privateList[index].gif_image.isEmpty
-                        //         ? '${RestUrl.thambUrl}thumb-not-available.png'
-                        //         : '${RestUrl.gifUrl}${privateList[index].gif_image}'),
-                        imgNet('${RestUrl.gifUrl}${state[index].gifImage}'),
-                        Positioned(
-                            bottom: 5,
-                            left: 5,
-                            right: 5,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      const WidgetSpan(
-                                        child: Icon(
-                                          Icons.play_circle,
-                                          size: 18,
-                                          color: ColorManager.colorAccent,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                          text: " " +
-                                              state[index].views.toString(),
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16)),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            )),
-                        Positioned(
-                          top: 5,
-                          right: 5,
-                          child: IconButton(
-                              onPressed: () {
-                                // showDeleteVideoDialog(
-                                //     videosController
-                                //         .privateVideosList![index].id!,
-                                //     videosController.privateVideosList,
-                                //     index);
-                              },
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              color: Colors.red,
-                              icon: const Icon(Icons.delete_forever_outlined)),
-                        ),
-                        Positioned(
-                          top: 5,
-                          left: 5,
-                          child: IconButton(
-                              onPressed: () {
-                                // showPrivate2PublicDialog(privateList[index].id);
-                              },
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              color: Colors.green,
-                              icon: const Icon(
-                                  Icons.published_with_changes_outlined)),
-                        )
-                      ],
+        (state) => state!.isEmpty
+            ? Column(
+                children: [emptyListWidget()],
+              )
+            : Column(
+                children: [
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    child: GridView.count(
+                      padding: const EdgeInsets.all(10),
+                      shrinkWrap: true,
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.8,
+                      children: List.generate(
+                          state.length,
+                          (index) => GestureDetector(
+                                onTap: () {
+                                  Get.to(VideoPlayerScreen(
+                                    isFav: false,
+                                    isFeed: false,
+                                    isLock: true,
+                                    position: index,
+                                    privateVideos: state.value,
+                                  ));
+                                  // Navigator.pushReplacementNamed(context, '/',
+                                  //     arguments: {'videoModel': privateList[index]});
+                                },
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    // CachedNetworkImage(
+                                    //     placeholder: (a, b) => const Center(
+                                    //       child: CircularProgressIndicator(),
+                                    //     ),
+                                    //     fit: BoxFit.cover,
+                                    //     imageUrl:privateList[index].gif_image.isEmpty
+                                    //         ? '${RestUrl.thambUrl}thumb-not-available.png'
+                                    //         : '${RestUrl.gifUrl}${privateList[index].gif_image}'),
+                                    imgNet(
+                                        '${RestUrl.gifUrl}${state[index].gifImage}'),
+                                    Positioned(
+                                        bottom: 5,
+                                        left: 5,
+                                        right: 5,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  const WidgetSpan(
+                                                    child: Icon(
+                                                      Icons.play_circle,
+                                                      size: 18,
+                                                      color: ColorManager
+                                                          .colorAccent,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                      text: " " +
+                                                          state[index]
+                                                              .views
+                                                              .toString(),
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 16)),
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        )),
+                                    Positioned(
+                                      top: 5,
+                                      right: 5,
+                                      child: IconButton(
+                                          onPressed: () {
+                                            // showDeleteVideoDialog(
+                                            //     videosController
+                                            //         .privateVideosList![index].id!,
+                                            //     videosController.privateVideosList,
+                                            //     index);
+                                          },
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          color: Colors.red,
+                                          icon: const Icon(
+                                              Icons.delete_forever_outlined)),
+                                    ),
+                                    Positioned(
+                                      top: 5,
+                                      left: 5,
+                                      child: IconButton(
+                                          onPressed: () {
+                                            // showPrivate2PublicDialog(privateList[index].id);
+                                          },
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          color: Colors.green,
+                                          icon: const Icon(Icons
+                                              .published_with_changes_outlined)),
+                                    )
+                                  ],
+                                ),
+                              )),
                     ),
-                  )),
+                  ))
+                ],
+              ),
+        onLoading: Column(
+          children: [Expanded(child: loader())],
         ),
-      )),
-      onLoading: loader(),
-    );
+        onEmpty: Column(
+          children: [Expanded(child: emptyListWidget())],
+        ));
   }
 }
 
@@ -480,170 +500,172 @@ class LikedVideos extends GetView<LikedVideosController> {
     // TODO: implement build
     return controller.obx(
       (state) => controller.likedVideos.isEmpty
-          ? Center(
-              heightFactor: Get.height / 2,
-              child: Text(
-                "No videos yet",
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: ColorManager.dayNightText),
-              ),
+          ? Column(
+              children: [emptyListWidget()],
             )
-          : Flexible(
-              child: Padding(
-              padding: EdgeInsets.only(bottom: 80),
-              child: GridView.count(
-                padding: const EdgeInsets.all(10),
-                shrinkWrap: true,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                crossAxisCount: 3,
-                childAspectRatio: 0.8,
-                children: List.generate(
-                    controller!.likedVideos.length,
-                    (index) => GestureDetector(
-                          onTap: () {
-                            PublicUser publicUser = PublicUser(
-                                id: controller.likedVideos[index].user!.id,
-                                name: controller.likedVideos[index].user?.name
-                                    .toString(),
-                                username: controller
-                                    .likedVideos[index].user?.username,
-                                email:
-                                    controller.likedVideos[index].user?.email,
-                                dob: controller.likedVideos[index].user?.dob,
-                                phone:
-                                    controller.likedVideos[index].user?.phone,
-                                avatar:
-                                    controller.likedVideos[index].user!.avatar,
-                                socialLoginType: controller
-                                    .likedVideos[index].user?.socialLoginType,
-                                socialLoginId: controller
-                                    .likedVideos[index].user?.socialLoginId,
-                                firstName: controller
-                                    .likedVideos[index].user?.firstName,
-                                lastName: controller
-                                    .likedVideos[index].user?.lastName,
-                                gender:
-                                    controller.likedVideos[index].user?.gender,
-                                isfollow:
-                                    controller.likedVideos[index].isfollow);
+          : Column(
+              children: [
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  child: GridView.count(
+                    padding: const EdgeInsets.all(10),
+                    shrinkWrap: true,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    crossAxisCount: 3,
+                    childAspectRatio: 0.8,
+                    children: List.generate(
+                        controller.likedVideos.length,
+                        (index) => GestureDetector(
+                              onTap: () {
+                                PublicUser publicUser = PublicUser(
+                                    id: controller.likedVideos[index].user!.id,
+                                    name: controller
+                                        .likedVideos[index].user?.name
+                                        .toString(),
+                                    username: controller
+                                        .likedVideos[index].user?.username,
+                                    email: controller
+                                        .likedVideos[index].user?.email,
+                                    dob:
+                                        controller.likedVideos[index].user?.dob,
+                                    phone: controller
+                                        .likedVideos[index].user?.phone,
+                                    avatar: controller
+                                        .likedVideos[index].user!.avatar,
+                                    socialLoginType: controller
+                                        .likedVideos[index]
+                                        .user
+                                        ?.socialLoginType,
+                                    socialLoginId: controller
+                                        .likedVideos[index].user?.socialLoginId,
+                                    firstName: controller
+                                        .likedVideos[index].user?.firstName,
+                                    lastName: controller
+                                        .likedVideos[index].user?.lastName,
+                                    gender: controller
+                                        .likedVideos[index].user?.gender,
+                                    isFollow:
+                                        controller.likedVideos[index].isfollow);
 
-                            Get.to(VideoPlayerScreen(
-                              isFeed: false,
-                              isFav: true,
-                              isLock: false,
-                              likedVideos: controller.likedVideos,
-                              position: index,
-                              hashTagVideos: [],
-                              videosList: [],
-                              privateVideos: [],
-                            ));
-                            // Get.to(UserLikedVideoPlayer({
-                            //   strings.gifImage:
-                            //   controller.likedVideos[index].gifImage,
-                            //   strings.videoLikeStatus:
-                            //   controller.likedVideos[index].videoLikeStatus,
-                            //   strings.sound:
-                            //   controller.likedVideos[index].sound,
-                            //   strings.soundOwner:
-                            //   controller.likedVideos[index].soundOwner,
-                            //   strings.videoUrl:
-                            //   controller.likedVideos[index].video,
-                            //   strings.isCommentAllowed:
-                            //   controller.likedVideos[index].isCommentable ==
-                            //       "yes"
-                            //       ? true.obs
-                            //       : false.obs,
-                            //   strings.publicUser: publicUser,
-                            //   strings.videoId: controller.likedVideos[index].id,
-                            //   strings.soundName:
-                            //   controller.likedVideos[index].soundName,
-                            //   strings.isDuetable:
-                            //   controller.likedVideos[index].isDuetable ==
-                            //       "yes"
-                            //       ? true.obs
-                            //       : false.obs,
-                            //   //   strings.publicVideos:controller.likedVideos
-                            //   //   PublicVideos publicVideos;
-                            //   strings.description:
-                            //   controller.likedVideos[index].description,
-                            //   strings.hashtagsList: (controller
-                            //       .likedVideos[index]
-                            //       .hashtags as List<dynamic>),
-                            //   strings.likes:
-                            //   controller.likedVideos[index].likes,
-                            //   strings.isFollow:
-                            //   controller.likedVideos[index].isfollow,
-                            //   strings.commentsCount:
-                            //   controller.likedVideos[index].comments
-                            // }));
-                          },
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              imgNet(
-                                  '${RestUrl.gifUrl}${controller!.likedVideos[index].gifImage}'),
-                              Positioned(
-                                  bottom: 10,
-                                  left: 10,
-                                  right: 10,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          children: [
-                                            const WidgetSpan(
-                                              child: Icon(
-                                                Icons.play_circle,
-                                                size: 18,
-                                                color: ColorManager.colorAccent,
-                                              ),
+                                Get.to(VideoPlayerScreen(
+                                  isFeed: false,
+                                  isFav: true,
+                                  isLock: false,
+                                  likedVideos: controller.likedVideos,
+                                  position: index,
+                                  hashTagVideos: [],
+                                  videosList: [],
+                                  privateVideos: [],
+                                ));
+                                // Get.to(UserLikedVideoPlayer({
+                                //   strings.gifImage:
+                                //   controller.likedVideos[index].gifImage,
+                                //   strings.videoLikeStatus:
+                                //   controller.likedVideos[index].videoLikeStatus,
+                                //   strings.sound:
+                                //   controller.likedVideos[index].sound,
+                                //   strings.soundOwner:
+                                //   controller.likedVideos[index].soundOwner,
+                                //   strings.videoUrl:
+                                //   controller.likedVideos[index].video,
+                                //   strings.isCommentAllowed:
+                                //   controller.likedVideos[index].isCommentable ==
+                                //       "yes"
+                                //       ? true.obs
+                                //       : false.obs,
+                                //   strings.publicUser: publicUser,
+                                //   strings.videoId: controller.likedVideos[index].id,
+                                //   strings.soundName:
+                                //   controller.likedVideos[index].soundName,
+                                //   strings.isDuetable:
+                                //   controller.likedVideos[index].isDuetable ==
+                                //       "yes"
+                                //       ? true.obs
+                                //       : false.obs,
+                                //   //   strings.publicVideos:controller.likedVideos
+                                //   //   PublicVideos publicVideos;
+                                //   strings.description:
+                                //   controller.likedVideos[index].description,
+                                //   strings.hashtagsList: (controller
+                                //       .likedVideos[index]
+                                //       .hashtags as List<dynamic>),
+                                //   strings.likes:
+                                //   controller.likedVideos[index].likes,
+                                //   strings.isFollow:
+                                //   controller.likedVideos[index].isfollow,
+                                //   strings.commentsCount:
+                                //   controller.likedVideos[index].comments
+                                // }));
+                              },
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  imgNet(
+                                      '${RestUrl.gifUrl}${controller.likedVideos[index].gifImage}'),
+                                  Positioned(
+                                      bottom: 10,
+                                      left: 10,
+                                      right: 10,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                const WidgetSpan(
+                                                  child: Icon(
+                                                    Icons.play_circle,
+                                                    size: 18,
+                                                    color: ColorManager
+                                                        .colorAccent,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                    text: " " +
+                                                        controller
+                                                            .likedVideos[index]
+                                                            .views
+                                                            .toString(),
+                                                    style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 16)),
+                                              ],
                                             ),
-                                            TextSpan(
-                                                text: " " +
-                                                    controller!
-                                                        .likedVideos[index]
-                                                        .views
-                                                        .toString(),
-                                                style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 16)),
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  )),
-                            ],
-                          ),
-                        )),
-              ),
-            )),
-      onLoading: loader(),
-      onEmpty: Center(
-        child: Text(
-          "No videos yet",
-          style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: ColorManager.dayNightText),
-        ),
+                                          )
+                                        ],
+                                      )),
+                                ],
+                              ),
+                            )),
+                  ),
+                ))
+              ],
+            ),
+      onLoading: Column(
+        children: [
+          Expanded(child: loader()),
+        ],
+      ),
+      onEmpty: Column(
+        children: [emptyListWidget()],
       ),
     );
   }
 
   void scrollListener() {
     if (isOnPageTurning.value &&
-        preloadPageController!.page ==
-            preloadPageController!.page!.roundToDouble()) {
-      current.value = preloadPageController!.page!.toInt();
+        preloadPageController.page ==
+            preloadPageController.page!.roundToDouble()) {
+      current.value = preloadPageController.page!.toInt();
       isOnPageTurning.value = false;
     } else if (!isOnPageTurning.value &&
-        current.toDouble() != preloadPageController!.page) {
-      if ((current.toDouble() - preloadPageController!.page!.toDouble()).abs() >
+        current.toDouble() != preloadPageController.page) {
+      if ((current.toDouble() - preloadPageController.page!.toDouble()).abs() >
           0.1) {
         isOnPageTurning.value = true;
       }
@@ -680,7 +702,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                   ),
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 Stack(
                   alignment: Alignment.center,
@@ -695,11 +717,13 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                       children: [
                         SvgPicture.asset(
                           "assets/23.svg",
+                          height: 100,
+                          width: 100,
                         ),
                         Container(
                             clipBehavior: Clip.antiAliasWithSaveLayer,
-                            height: 100,
-                            width: 100,
+                            height: 80,
+                            width: 80,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                             ),
@@ -723,7 +747,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '@${state.value.username}',
+                      '${state.value.name}',
                       style: TextStyle(
                           color: ColorManager.dayNightText,
                           fontSize: 20,
@@ -740,7 +764,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                   ],
                 ),
                 Text(
-                  '@${state.value.name}',
+                  '@${state.value.username}',
                   style: TextStyle(
                       color: ColorManager.dayNightText,
                       fontSize: 14,
@@ -771,7 +795,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                                     '\n',
                                 style: TextStyle(
                                     color: ColorManager.dayNightText,
-                                    fontSize: 24,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.w700)),
                             TextSpan(
                                 text: following,
@@ -782,7 +806,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                           ])),
                     ),
                     const SizedBox(
-                      height: 53,
+                      height: 45,
                       child: VerticalDivider(
                         thickness: 1,
                         width: 1,
@@ -806,7 +830,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                                 text: '${state.value.followers}'
                                     '\n',
                                 style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 18,
                                     color: ColorManager.dayNightText,
                                     fontWeight: FontWeight.w700)),
                             TextSpan(
@@ -818,7 +842,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                           ])),
                     ),
                     const SizedBox(
-                      height: 53,
+                      height: 45,
                       child: VerticalDivider(
                         thickness: 1,
                         width: 1,
@@ -833,7 +857,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                                   '\n',
                               style: TextStyle(
                                   color: ColorManager.dayNightText,
-                                  fontSize: 24,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w700)),
                           TextSpan(
                               text: likes,
@@ -845,16 +869,13 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                   ],
                 ).w(MediaQuery.of(context).size.width * .80),
                 const SizedBox(
-                  height: 20,
-                ),
-                const SizedBox(
                   height: 10,
                 ),
                 Visibility(
                   visible: state.value.bio.toString().isNotEmpty ||
                       state.value.bio.toString() != "null",
                   child: Container(
-                    margin: EdgeInsets.only(left: 10),
+                    margin: const EdgeInsets.only(left: 10),
                     alignment: Alignment.centerLeft,
                     width: MediaQuery.of(context).size.width,
                     child: Row(
@@ -891,7 +912,7 @@ class UserProfileDetails extends GetView<UserDetailsController> {
                   ),
                 ),
                 const SizedBox(
-                  height: 25,
+                  height: 10,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1034,7 +1055,9 @@ class UserProfileDetails extends GetView<UserDetailsController> {
               ],
             ),
         onLoading: loader(),
-        onEmpty: emptyListWidget(),
+        onEmpty: Column(
+          children: [emptyListWidget()],
+        ),
         onError: (error) => SizedBox(
               width: Get.width,
               child: Center(

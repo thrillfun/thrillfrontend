@@ -38,11 +38,9 @@ class SoundDetails extends StatefulWidget {
 
 class _SoundDetailsState extends State<SoundDetails>
     with SingleTickerProviderStateMixin {
-    
-
-late AudioPlayer audioPlayer;
-late Duration duration;
-late PlayerController playerController;
+  late AudioPlayer audioPlayer;
+  late Duration duration;
+  late PlayerController playerController;
 
   AnimationController? _controller;
   var isPlaying = false.obs;
@@ -63,7 +61,7 @@ late PlayerController playerController;
 
   @override
   void initState() {
-     super.initState();
+    super.initState();
     playerController = PlayerController();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -351,7 +349,7 @@ late PlayerController playerController;
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
                       physics: const NeverScrollableScrollPhysics(),
-                      childAspectRatio: Get.width / Get.height,
+                      childAspectRatio: 0.8,
                       children: List.generate(
                           videoList.length,
                           (index) => Container(
@@ -368,7 +366,7 @@ late PlayerController playerController;
                                         firstName: element.user?.firstName,
                                         lastName: element.user?.lastName,
                                         username: element.user?.username,
-                                        isfollow: widget.map["isFollow"],
+                                        isFollow: widget.map["isFollow"],
                                       );
                                       videosList1.add(PublicVideos(
                                           id: element.id,
@@ -400,31 +398,9 @@ late PlayerController playerController;
                                     fit: StackFit.expand,
                                     alignment: Alignment.center,
                                     children: [
-                                      CachedNetworkImage(
-                                        placeholder: (a, b) => const Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                        fit: BoxFit.fill,
-                                        errorWidget: (a, b, c) => Image.network(
-                                          '${RestUrl.thambUrl}thumb-not-available.png',
-                                          fit: BoxFit.fill,
-                                        ),
-                                        imageUrl: videoList[index]
-                                                .gif_image
-                                                .isEmpty
-                                            ? '${RestUrl.thambUrl}thumb-not-available.png'
-                                            : '${RestUrl.gifUrl}${videoList[index].gif_image}',
-                                        imageBuilder:
-                                            (context, imageProvider) =>
-                                                Container(
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              image: DecorationImage(
-                                                  image: imageProvider,
-                                                  fit: BoxFit.fill)),
-                                        ),
-                                      ),
+                                      imgNet(videoList[index].gif_image.isEmpty
+                                          ? '${RestUrl.thambUrl}thumb-not-available.png'
+                                          : '${RestUrl.gifUrl}${videoList[index].gif_image}'),
                                       Container(
                                           height: Get.height,
                                           alignment: Alignment.bottomLeft,
@@ -556,8 +532,12 @@ late PlayerController playerController;
                         borderRadius: BorderRadius.circular(50)),
                     child: InkWell(
                         onTap: () async {
-                          soundsController.downloadAudio(widget.map["sound"],
-                              widget.map["user"].toString(), widget.map["id"],widget.map["soundName"],false);
+                          soundsController.downloadAudio(
+                              widget.map["sound"],
+                              widget.map["user"].toString(),
+                              widget.map["id"],
+                              widget.map["soundName"],
+                              false);
                         },
                         child: RichText(
                           text: const TextSpan(
@@ -591,8 +571,7 @@ late PlayerController playerController;
 
   setupAudioPlayer() async {
     audioPlayer = AudioPlayer();
-    duration = (await audioPlayer
-        .setUrl(RestUrl.soundUrl + widget.map["sound"].toString()))!;
+    duration = (await audioPlayer.setUrl(RestUrl.soundUrl + widget.map["sound"].toString()))!;
 
     audioTotalDuration.value = duration;
 
@@ -618,7 +597,7 @@ late PlayerController playerController;
       if (playerDuration == audioTotalDuration.value) {
         await playerController.seekTo(0);
         isPlaying.value = false;
-        setState(()  {});
+        setState(() {});
       }
     });
   }

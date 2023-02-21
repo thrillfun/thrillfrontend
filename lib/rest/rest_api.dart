@@ -1219,8 +1219,7 @@ class RestApi {
 
   static Future<http.Response> getCurrencyDeatils() async {
     http.Response response;
-    var instance = await SharedPreferences.getInstance();
-    var token = instance.getString('currentToken');
+    var token = await GetStorage().read("token");
     var result = await RestClient.getData(
       RestUrl.currencyDetails,
       headers: {

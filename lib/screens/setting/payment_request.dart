@@ -9,19 +9,17 @@ import '../../rest/rest_api.dart';
 import '../../utils/util.dart';
 
 class PaymentRequest extends StatefulWidget {
-  const PaymentRequest({Key? key, required this.balanceList}) : super(key: key);
-  final List<WalletBalance> balanceList;
+  const PaymentRequest({Key? key,}) : super(key: key);
 
   @override
   State<PaymentRequest> createState() => _PaymentRequestState();
 
   static const String routeName = '/paymentRequest';
 
-  static Route route(List<WalletBalance> listBalance) {
+  static Route route() {
     return MaterialPageRoute(
       settings: const RouteSettings(name: routeName),
       builder: (context) => PaymentRequest(
-        balanceList: listBalance,
       ),
     );
   }
@@ -29,6 +27,7 @@ class PaymentRequest extends StatefulWidget {
 
 class _PaymentRequestState extends State<PaymentRequest> {
   bool isLoading = true;
+
   int adminCommission = 0;
 
   TextEditingController feeCtr = TextEditingController();
@@ -244,7 +243,7 @@ class _PaymentRequestState extends State<PaymentRequest> {
                                 text: TextSpan(children: [
                                   const TextSpan(text: "Available Amount\n\n"),
                                   TextSpan(
-                                      text: getAvailableAmount(),
+                                      text: "getAvailableAmount()",
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold))
                                 ])),
@@ -386,14 +385,5 @@ class _PaymentRequestState extends State<PaymentRequest> {
         ));
   }
 
-  String getAvailableAmount() {
-    String avBal = '';
-    for (var element in widget.balanceList) {
-      if (element.code == model!.code) {
-        avBal = "${element.amount} ${element.code}";
-        break;
-      }
-    }
-    return avBal;
-  }
+
 }

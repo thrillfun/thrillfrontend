@@ -49,8 +49,6 @@ var privateVideosController = Get.find<PrivateVideosController>();
 var tophashtagsController = Get.find<TopHashtagsController>();
 
 class LandingPageGetx extends StatelessWidget {
-  LandingPageGetx({this.initialLink});
-  PendingDynamicLinkData? initialLink;
   var selectedIndex = 0.obs;
   @override
   Widget build(BuildContext context) {
@@ -157,7 +155,9 @@ class LandingPageGetx extends StatelessWidget {
                     } else {
                       userDetailsController.printSimCardsData().then((value) {
                         Get.bottomSheet(LoginGetxScreen(),
-                            isScrollControlled: false);
+                            isScrollControlled: false,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)));
                       });
                     }
                   },
@@ -280,7 +280,10 @@ class LandingPageGetx extends StatelessWidget {
                                   .printSimCardsData()
                                   .then((value) {
                                   Get.bottomSheet(LoginGetxScreen(),
-                                      isScrollControlled: false);
+                                      isScrollControlled: false,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)));
                                 });
                         },
                       ),
@@ -320,7 +323,9 @@ class LandingPageGetx extends StatelessWidget {
                                 .printSimCardsData()
                                 .then((value) {
                               Get.bottomSheet(LoginGetxScreen(),
-                                  isScrollControlled: false);
+                                  isScrollControlled: false,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20)));
                             });
                           }
                         },
@@ -422,7 +427,10 @@ class LandingPageGetx extends StatelessWidget {
         //walletBalanceController.getCurrencies();
       } else {
         userDetailsController.printSimCardsData().then((value) {
-          Get.bottomSheet(LoginGetxScreen(), isScrollControlled: false);
+          Get.bottomSheet(LoginGetxScreen(),
+              isScrollControlled: false,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)));
         });
       }
     }
@@ -438,7 +446,10 @@ class LandingPageGetx extends StatelessWidget {
         selectedIndex.value = 3;
       } else {
         userDetailsController.printSimCardsData().then((value) {
-          Get.bottomSheet(LoginGetxScreen(), isScrollControlled: false);
+          Get.bottomSheet(LoginGetxScreen(),
+              isScrollControlled: false,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)));
         });
       }
     } else {

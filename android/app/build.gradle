@@ -30,10 +30,7 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 // Comment out the modules you don't need, to save size.
 imglyConfig {
-    vesdk {
-        enabled(true)
-        licensePath("vesdk_android_license")
-    }
+
     modules {
         include 'ui:sticker'
         include 'ui:text-design'

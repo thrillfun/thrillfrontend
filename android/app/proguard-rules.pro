@@ -9,3 +9,7 @@
 -keepclassmembers class ai.deepar.ar.DeepAR { *; }
 -keepclassmembers class ai.deepar.ar.core.videotexture.VideoTextureAndroidJava { *; }
 -keep class ai.deepar.ar.core.videotexture.VideoTextureAndroidJava
+-dontwarn me.pushy.**
+-keep class me.pushy.** { *; }
+-keep class androidx.core.app.** { *; }
+-keep class android.support.v4.app.** { *; }

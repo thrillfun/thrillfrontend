@@ -133,7 +133,10 @@ class HomeGetx extends GetView<HomeController> {
                                     userDetailsController.storage
                                                 .read("token") ==
                                             null
-                                        ? Get.bottomSheet(LoginGetxScreen())
+                                        ? Get.bottomSheet(LoginGetxScreen(),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20)))
                                         : Get.to(CameraScreen(
                                             selectedSound: "",
                                             owner: userDetailsController
@@ -186,7 +189,15 @@ class FollowingVideos extends GetView<FollowingVideosController> {
 
     return GetX<FollowingVideosController>(
         builder: (controller) => controller.isLoading.isTrue
-            ? loader()
-            : videoItemLayout(controller.followingVideosList));
+            ? Column(
+                children: [loader()],
+              )
+            : controller.followingVideosList.isEmpty
+                ? Column(
+                    children: [
+                      emptyListWidget(data: "You are not following anybody!")
+                    ],
+                  )
+                : videoItemLayout(controller.followingVideosList));
   }
 }

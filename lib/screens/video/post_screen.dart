@@ -9,6 +9,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:hashtagable/hashtagable.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
@@ -742,16 +743,18 @@ class PostScreenGetx extends StatelessWidget {
 
     try {
       GetStorage().write("videoPrivacy", selectedPrivacy.value);
-      await videosController
-          .createGIF(currentUnix, postData!.newPath!)
-          .then((value) async {
-        var file = File(value);
-        if (file.existsSync()) {
-          Future.delayed(Duration.zero);
-          await videosController.awsUploadThumbnail(
-              file, currentUnix.toString());
-        }
-      });
+      if (await Permission.storage.isGranted == false) {
+        await Permission.storage.request().then((value) async {
+          await createGIF(currentUnix).then((value) async {
+         
+          });
+        });
+      } else {
+        await createGIF(currentUnix)
+            .then((value) async {
+         
+        });
+      }
 
       await videosController
           .awsUploadVideo(file, currentUnix)
@@ -825,15 +828,15 @@ class PostScreenGetx extends StatelessWidget {
       });
 
       // Get.offAll(BottomNavigation());
-      //  videosController.getAllVideos();
+      relatedVideosController.refreshVideoList();
     } catch (e) {
       errorToast(e.toString());
     }
-    relatedVideosController.refreshVideoList();
+    Get.forceAppUpdate();
     Get.back(closeOverlays: true);
   }
 
-  Future<void> createGIF(int currentUnix) async {
+  Future<String> createGIF(int currentUnix) async {
     String outputPath = '$saveCacheDirectory${postData!.newName}.gif';
     String filePath = postData!.isDuet
         ? postData!.newPath!.substring(7, postData!.newPath!.length)
@@ -865,5 +868,6 @@ class PostScreenGetx extends StatelessWidget {
         Logger().wtf("failed");
       }
     });
+    return outputPath;
   }
 }

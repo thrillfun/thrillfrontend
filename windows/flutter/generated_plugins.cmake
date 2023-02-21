@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
   awesome_notifications
   flutter_secure_storage_windows
+  network_info_plus
   permission_handler_windows
   url_launcher_windows
 )

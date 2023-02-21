@@ -10,6 +10,7 @@ import 'package:flutter_advanced_networkimage_2/provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:lottie/lottie.dart';
 import 'package:simple_s3/simple_s3.dart';
@@ -284,10 +285,11 @@ videoItemLayout(List<dynamic> list) {
         avatar: element.user!.avatar,
         socialLoginType: element.user?.socialLoginType,
         socialLoginId: element.user?.socialLoginId,
+        firebaseToken: element.user?.firebaseToken,
         firstName: element.user?.firstName,
         lastName: element.user?.lastName,
         gender: element.user?.gender,
-        isfollow: element.user?.following ?? 0,
+        isFollow: element.user?.isFollow ?? 0,
         likes: element.likes.toString());
     videosList1.add(PublicVideos(
         id: element.id,
@@ -306,10 +308,9 @@ videoItemLayout(List<dynamic> list) {
         comments: element.comments,
         isDuet: "no",
         duetFrom: "",
-        isCommentable: "yes",
+        isCommentable: element.isCommentable,
         videoLikeStatus: element.videoLikeStatus,
         user: publicUser,
-        isfollow: element.user?.isfollow ?? 0,
         hashtags: element.hashtags));
   });
 
@@ -318,15 +319,14 @@ videoItemLayout(List<dynamic> list) {
   );
 }
 
-
-emptyListWidget() => SizedBox(
-      height: 250,
+emptyListWidget({String data = "Oops Nothing Found"}) => Expanded(
       child: Center(
         child: Text(
-          "Oops nothing found",
+          data,
+          textAlign: TextAlign.center,
           style: TextStyle(
               fontSize: 24,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: ColorManager.dayNightText),
         ),
       ),
@@ -356,36 +356,34 @@ void seek(Duration position) {
 }
 
 Widget imgNet(String imgPath) {
-  return Container(
-    child: CachedNetworkImage(
-        placeholder: (a, b) => const Center(
-              child: CircularProgressIndicator(),
+  return CachedNetworkImage(
+      placeholder: (a, b) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+      fit: BoxFit.cover,
+      imageBuilder: (context, imageProvider) => Container(
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              shape: BoxShape.rectangle,
+              image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
             ),
-        fit: BoxFit.fill,
-        imageBuilder: (context, imageProvider) => Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                shape: BoxShape.rectangle,
-                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+          ),
+      errorWidget: (context, string, dynamic) => CachedNetworkImage(
+          placeholder: (a, b) => const Center(
+                child: CircularProgressIndicator(),
               ),
-            ),
-        errorWidget: (context, string, dynamic) => CachedNetworkImage(
-            placeholder: (a, b) => const Center(
-                  child: CircularProgressIndicator(),
+          fit: BoxFit.cover,
+          imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  shape: BoxShape.rectangle,
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
                 ),
-            fit: BoxFit.fill,
-            imageBuilder: (context, imageProvider) => Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    shape: BoxShape.rectangle,
-                    image:
-                        DecorationImage(image: imageProvider, fit: BoxFit.fill),
-                  ),
-                ),
-            imageUrl: '${RestUrl.thambUrl}thumb-not-available.png'),
-        imageUrl: imgPath),
-  );
+              ),
+          imageUrl: '${RestUrl.thambUrl}thumb-not-available.png'),
+      imageUrl: imgPath);
 }
 
 Widget imgProfile(String imagePath) => Container(
@@ -589,3 +587,19 @@ showWinDialog(String msg) => Get.defaultDialog(
         ],
       ),
     );
+
+convertUTC(String format) {
+  var str = format;
+  var newStr = str.substring(0, 10) + ' ' + str.substring(11, 23);
+  DateTime dt = DateTime.parse(newStr);
+  return DateFormat("dd-MM-yyyy").format(dt).toString();
+}
+
+extension Unique<E, Id> on List<E> {
+  List<E> unique([Id Function(E element)? id, bool inplace = true]) {
+    final ids = Set();
+    var list = inplace ? this : List<E>.from(this);
+    list.retainWhere((x) => ids.add(id != null ? id(x) : x as Id));
+    return list;
+  }
+}

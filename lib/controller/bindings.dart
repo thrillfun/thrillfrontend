@@ -7,6 +7,7 @@ import 'package:thrill/controller/hashtags/search_hashtags_controller.dart';
 import 'package:thrill/controller/hashtags/top_hashtags_controller.dart';
 import 'package:thrill/controller/home/home_controller.dart';
 import 'package:thrill/controller/image/image_controller.dart';
+import 'package:thrill/controller/notifications/notifications_controller.dart';
 import 'package:thrill/controller/privacy_and_conditions/privacy_and_conditions_controller.dart';
 import 'package:thrill/controller/settings/push_notifications_controller.dart';
 import 'package:thrill/controller/site_settings/site_settings_controller.dart';
@@ -20,6 +21,7 @@ import 'package:thrill/controller/videos/UserVideosController.dart';
 import 'package:thrill/controller/videos/hashtags_videos_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
+import 'package:thrill/controller/wallet/transactions_controller.dart';
 import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
 import 'package:thrill/controller/wallet/wallet_currencies_controller.dart';
 import 'package:thrill/controller/wallet_controller.dart';
@@ -33,7 +35,7 @@ class DataBindings extends Bindings {
   @override
   void dependencies() {
     //home
-    Get.lazyPut(() => HomeController(), fenix: true);
+    Get.lazyPut(() => HomeController());
     //users
     Get.lazyPut(() => UserController(), fenix: true);
     Get.lazyPut(() => FollowersController(), fenix: true);
@@ -62,7 +64,6 @@ class DataBindings extends Bindings {
     Get.lazyPut(() => SearchHashtagsController(), fenix: true);
     Get.lazyPut(() => HashtagVideosController(), fenix: true);
 
-
     //
     Get.lazyPut(() => WheelController(), fenix: true);
 
@@ -79,7 +80,11 @@ class DataBindings extends Bindings {
     //image
     Get.lazyPut(() => ImageController(), fenix: true);
     //settings
-    Get.lazyPut(() => SiteSettingsController(),fenix: true);
-    Get.lazyPut(() => PushNotificationsController(),fenix: true);
+    Get.lazyPut(() => SiteSettingsController(), fenix: true);
+    Get.lazyPut(() => PushNotificationsController(), fenix: true);
+    //notifications
+    Get.lazyPut(() => NotificationsController(), fenix: true);
+    //transations
+    Get.lazyPut(() => TransactionsController(), fenix: true);
   }
 }

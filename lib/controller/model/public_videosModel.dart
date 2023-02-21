@@ -50,7 +50,6 @@ class PublicVideos {
   String? isCommentable;
   String? soundOwner;
   int? videoLikeStatus;
-  int? isfollow;
   int? soundId;
 
   PublicUser? user;
@@ -75,7 +74,6 @@ class PublicVideos {
       this.isCommentable,
       this.soundOwner,
       this.videoLikeStatus,
-      this.isfollow,
       this.user,
       this.soundId});
 
@@ -104,7 +102,6 @@ class PublicVideos {
     isCommentable = json['is_commentable'] ?? "";
     soundOwner = json['sound_owner'] ?? "";
     videoLikeStatus = json["video_like_status"] ?? 0;
-    isfollow = json["isfollow"] ?? 0;
     user = json['user'] != null ? new PublicUser.fromJson(json['user']) : null;
     soundId = json['sound_id'];
   }
@@ -132,7 +129,6 @@ class PublicVideos {
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
     data["video_like_status"] = this.videoLikeStatus;
-    data["isfollow"] = this.isfollow;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
@@ -183,7 +179,7 @@ class PublicUser {
   String? referralCount;
   int? following;
   int? followers;
-  int? isfollow;
+  int? isFollow;
   String? likes;
   PublicLevels? levels;
   String? totalVideos;
@@ -213,7 +209,7 @@ class PublicUser {
       this.referralCount,
       this.following,
       this.followers,
-      this.isfollow,
+      this.isFollow,
       this.likes,
       this.levels,
       this.totalVideos,
@@ -243,7 +239,7 @@ class PublicUser {
     referralCount = json['referral_count'] ?? "";
     following = json['following'] ?? "";
     followers = json['followers'] ?? "";
-    isfollow = json['isfollow'] ?? 0;
+    isFollow = json['isfollow'] ?? 0;
     likes = json['likes'] ?? "";
     levels = json['levels'] != null
         ? new PublicLevels.fromJson(json['levels'])

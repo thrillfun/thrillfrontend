@@ -9,7 +9,7 @@ import 'package:thrill/widgets/better_video_player.dart';
 import '../screens/profile/view_profile.dart';
 import '../utils/util.dart';
 
- PreloadPageController? preloadPageController;
+PreloadPageController? preloadPageController;
 
 class VideoPlayerItem extends StatefulWidget {
   VideoPlayerItem({this.videosList, this.position});
@@ -21,7 +21,6 @@ class VideoPlayerItem extends StatefulWidget {
 
   @override
   State<VideoPlayerItem> createState() => _VideoPlayerItemState();
-
 }
 
 class _VideoPlayerItemState extends State<VideoPlayerItem> {
@@ -36,7 +35,6 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   var isOnPageTurning = false.obs;
 
   var initialPage = 0.obs;
-
 
   @override
   void initState() {
@@ -53,15 +51,14 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     preloadPageController!.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: StreamBuilder<PendingDynamicLinkData>(
       stream: FirebaseDynamicLinks.instance.onLink,
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data != null) {
-         
-        }
+        if (snapshot.hasData && snapshot.data != null) {}
         return PreloadPageView.builder(
             controller: preloadPageController,
             itemCount: widget.videosList!.length,
@@ -80,12 +77,14 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       avatar: widget.videosList![index].user!.avatar,
                       socialLoginType:
                           widget.videosList![index].user?.socialLoginType,
+                      firebaseToken:
+                          widget.videosList![index].user!.firebaseToken,
                       socialLoginId:
                           widget.videosList![index].user?.socialLoginId,
                       firstName: widget.videosList![index].user?.firstName,
                       lastName: widget.videosList![index].user?.lastName,
                       gender: widget.videosList![index].user?.gender,
-                      isfollow: widget.videosList![index].isfollow);
+                      isFollow: widget.videosList![index].user?.isFollow);
                 }
               });
               return AspectRatio(
@@ -111,11 +110,13 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                   widget.videosList![index].user!.username.toString().obs,
                   widget.videosList![index].description.toString().obs,
                   false.obs,
-                  widget.videosList![index].hashtags??[],
+                  widget.videosList![index].hashtags ?? [],
                   // : hashTagVideos![index].hashtags!,
                   widget.videosList![index].sound.toString(),
                   widget.videosList![index].soundOwner.toString(),
-                  widget.videosList![index].videoLikeStatus==null?"0":widget.videosList![index].videoLikeStatus.toString(),
+                  widget.videosList![index].videoLikeStatus == null
+                      ? "0"
+                      : widget.videosList![index].videoLikeStatus.toString(),
                   widget.videosList != null &&
                           widget.videosList![index].isCommentable.obs
                                   .toString()
@@ -124,7 +125,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       ? true.obs
                       : false.obs,
                   like: widget.videosList![index].likes!.obs,
-                  isfollow: widget.videosList![index].user?.isfollow,
+                  isfollow: widget.videosList![index].user?.isFollow,
                   commentsCount: widget.videosList![index].comments!.obs,
                   soundId: widget.videosList![index].soundId,
                 ),

@@ -41,6 +41,7 @@ class Followers {
   String? emailVerifiedAt;
   String? phone;
   String? avtars;
+  String? location;
   String? coverImage;
   String? rating;
   String? notification;
@@ -50,11 +51,13 @@ class Followers {
   int? role;
   String? socialLoginId;
   String? socialLoginType;
+  String? referralCode;
+  String? firebaseToken;
+  int? systemActive;
   String? createdAt;
   String? updatedAt;
   int? isVerified;
-  int? isfollowing;
-  int? isfollow;
+  int? isFolling;
 
   Followers(
       {this.id,
@@ -65,6 +68,7 @@ class Followers {
       this.emailVerifiedAt,
       this.phone,
       this.avtars,
+      this.location,
       this.coverImage,
       this.rating,
       this.notification,
@@ -74,34 +78,40 @@ class Followers {
       this.role,
       this.socialLoginId,
       this.socialLoginType,
+      this.referralCode,
+      this.firebaseToken,
+      this.systemActive,
       this.createdAt,
       this.updatedAt,
       this.isVerified,
-      this.isfollowing,
-      this.isfollow});
+      this.isFolling});
 
   Followers.fromJson(Map<String, dynamic> json) {
-    id = json['id'] ?? "";
-    name = json['name'] ?? "";
-    username = json['username'] ?? "";
-    email = json['email'] ?? "";
-    dob = json['dob'] ?? "";
-    emailVerifiedAt = json['email_verified_at'] ?? "";
-    phone = json['phone'] ?? "";
-    avtars = json['avtars'] ?? "";
-    coverImage = json['cover_image'] ?? "";
-    rating = json['rating'] ?? "";
-    notification = json['notification'] ?? "";
-    twoFAToggle = json['two_FA_toggle'] ?? "";
-    status = json['status'] ?? "";
-    deactivationRequest = json['deactivation_request'] ?? "";
-    role = json['role'] ?? "";
-    socialLoginId = json['social_login_id'] ?? "";
-    socialLoginType = json['social_login_type'] ?? "";
-    createdAt = json['created_at'] ?? "";
-    updatedAt = json['updated_at'] ?? "";
-    isVerified = json['is_verified'] ?? "";
-    isfollowing = json["isFolling"] ?? 0;
+    id = json['id'];
+    name = json['name'];
+    username = json['username'];
+    email = json['email'];
+    dob = json['dob'];
+    emailVerifiedAt = json['email_verified_at'];
+    phone = json['phone'];
+    avtars = json['avtars'];
+    location = json['location'];
+    coverImage = json['cover_image'];
+    rating = json['rating'];
+    notification = json['notification'];
+    twoFAToggle = json['two_FA_toggle'];
+    status = json['status'];
+    deactivationRequest = json['deactivation_request'];
+    role = json['role'];
+    socialLoginId = json['social_login_id'];
+    socialLoginType = json['social_login_type'];
+    referralCode = json['referral_code'];
+    firebaseToken = json['firebase_token'];
+    systemActive = json['system_active'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    isVerified = json['is_verified'];
+    isFolling = json['isFolling'];
   }
 
   Map<String, dynamic> toJson() {
@@ -114,6 +124,7 @@ class Followers {
     data['email_verified_at'] = this.emailVerifiedAt;
     data['phone'] = this.phone;
     data['avtars'] = this.avtars;
+    data['location'] = this.location;
     data['cover_image'] = this.coverImage;
     data['rating'] = this.rating;
     data['notification'] = this.notification;
@@ -123,10 +134,13 @@ class Followers {
     data['role'] = this.role;
     data['social_login_id'] = this.socialLoginId;
     data['social_login_type'] = this.socialLoginType;
+    data['referral_code'] = this.referralCode;
+    data['firebase_token'] = this.firebaseToken;
+    data['system_active'] = this.systemActive;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['is_verified'] = this.isVerified;
-    data['isFolling'] = this.isfollowing ?? 0;
+    data['isFolling'] = this.isFolling;
     return data;
   }
 }

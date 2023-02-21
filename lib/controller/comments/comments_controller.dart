@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:get/get.dart';
 import 'package:get/state_manager.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../rest/rest_url.dart';
 import '../../utils/util.dart';
 import '../model/comments_model.dart';
+import '../notifications/notifications_controller.dart';
 
 class CommentsController extends GetxController
     with StateMixin<RxList<CommentData>> {
@@ -39,6 +41,7 @@ class CommentsController extends GetxController
       try {
         successToast(value.data["message"]);
         change(commentsList, status: RxStatus.success());
+
         getComments(videoId!);
       } catch (e) {
         errorToast(value.data["message"]);

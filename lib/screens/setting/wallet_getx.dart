@@ -1,17 +1,14 @@
-import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/controller/wallet/wallet_balance_controller.dart';
 import 'package:thrill/rest/rest_url.dart';
+import 'package:thrill/screens/screen.dart';
+import 'package:thrill/screens/setting/transactions_history.dart';
 import 'package:thrill/utils/util.dart';
 import 'package:thrill/widgets/dashedline_vertical_painter.dart';
-import 'package:velocity_x/velocity_x.dart';
-import 'package:web_socket_channel/io.dart';
 
 class WalletGetx extends StatelessWidget {
   const WalletGetx({Key? key}) : super(key: key);
@@ -130,7 +127,7 @@ class WalletHistory extends GetView<WalletBalanceController> {
                             fontSize: 25,
                             color: ColorManager.dayNightText),
                       ),
-                      const Icon(Icons.book),
+                       InkWell(child: const Icon(Icons.book),onTap: ()=>Get.to(TransactionsHistory()),),
                     ],
                   ),
                   const SizedBox(
@@ -353,7 +350,7 @@ class WalletBalance extends GetView<WalletBalanceController> {
                                 border: InputBorder.none,
                                 hintText: '',
                               ),
-                              controller: textEditingController,
+                              controller: textEditingController.value,
                               obscuringCharacter: '*',
                               obscureText: isTextVisible.value,
                               style: const TextStyle(
@@ -397,7 +394,7 @@ class WalletBalance extends GetView<WalletBalanceController> {
                       )),
                       Expanded(
                           child: InkWell(
-                        onTap: () => null,
+                        onTap: () => Get.to(PaymentRequest()),
                         child: Card(
                           color: ColorManager.dayNight,
                           elevation: 10,

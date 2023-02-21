@@ -48,6 +48,8 @@ const String referMoreEarnMoreDialog =
 const String yourReferralCode = "Your Referral Code";
 const String iAgreeToThe = "I agree to the ";
 const String privacyPolicy = "Privacy Policy";
+const String privacyPolicyUrl = "https://thrill.fun/privacy-policy";
+
 const String earnSpins = "Earn Spins";
 const String levelForCreators = "Level for Creators";
 const String levelForViewers = "Level for Viewers";
@@ -104,6 +106,7 @@ const String cacheAndCellularData = "CACHE & CELLULAR DATA";
 const String about = "ABOUT";
 const String freeUpSpace = "Free up space";
 const String termsOfService = "Terms of Service";
+const String termsOfServiceUrl ="https://thrill.fun/terms-conditions";
 const String technicalSupport = "Technical Support";
 const String switchAccount = "Switch Account";
 const String logout = "Logout";

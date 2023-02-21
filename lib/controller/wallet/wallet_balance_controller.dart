@@ -16,7 +16,7 @@ var dio = Dio(BaseOptions(
   baseUrl: RestUrl.baseUrl,
 ));
 
-TextEditingController textEditingController = TextEditingController();
+var textEditingController = TextEditingController().obs;
 
 class WalletBalanceController extends GetxController
     with StateMixin<RxList<Balance>> {
@@ -159,11 +159,11 @@ class WalletBalanceController extends GetxController
                   double.parse(cryptoData[4].lastPrice.toString()) +
               double.parse(balance.value[6].amount.toString()) *
                   double.parse(cryptoData[5].lastPrice.toString())));
-      textEditingController.text =String.fromCharCode(8383)+
-          (totalAmount / double.parse(cryptoData[0].lastPrice.toString()))
-              .toStringAsFixed(6);
 
-      totalbalance.value ="  =\$" +totalAmount.toStringAsFixed(2);
+      textEditingController.value.text = String.fromCharCode(8383) +
+          (totalAmount / double.parse(btcPrice.toString())).toStringAsFixed(6);
+
+      totalbalance.value = "  =\$" + totalAmount.toStringAsFixed(2);
 
       Logger().wtf(cryptoData);
     }).onError((error, stackTrace) {

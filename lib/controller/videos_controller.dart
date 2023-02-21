@@ -8,6 +8,7 @@ import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:path/path.dart' as p;
 
 // import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,7 @@ import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path/path.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/common/color.dart';
 import 'package:thrill/common/strings.dart';
@@ -28,7 +30,9 @@ import 'package:thrill/controller/model/private_videos_model.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/model/user_details_model.dart' as user;
 import 'package:thrill/controller/model/video_fields_model.dart' as videoFields;
+import 'package:thrill/controller/notifications/notifications_controller.dart';
 import 'package:thrill/controller/sounds_controller.dart';
+import 'package:thrill/controller/users/followers_controller.dart';
 import 'package:thrill/controller/users_controller.dart';
 import 'package:thrill/controller/videos/Following_videos_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
@@ -62,6 +66,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
   // swap true/false & save it to observable
 
   var usersController = Get.lazyPut(() => UserController());
+  var notificationController = Get.find<NotificationsController>();
 
   var isLoading = false.obs;
   var isLikedVideosLoading = true.obs;
@@ -82,7 +87,11 @@ class VideosController extends GetxController with StateMixin<dynamic> {
   var likedVideos = RxList<LikedVideos>();
   RxList<LikedVideos> othersLikedVideos = RxList<LikedVideos>();
 
+  var followersController = Get.find<FollowersController>();
+
   user.User? userData = user.User();
+
+  var customNotification = CustomNotification();
 
   VideosController() {
     // snackBar = GetSnackBar(
@@ -112,7 +121,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
     //       Get.back();
     //     },
     //     icon: const Icon(Icons.close),
-    //   ),
+    //   ),f
     //   icon: const Icon(
     //     Icons.error,
     //     color: Colors.green,
@@ -120,28 +129,25 @@ class VideosController extends GetxController with StateMixin<dynamic> {
     // );
   }
 
-  showUploadSnackbar() => CustomNotification().showNormal(
-      title: "Uploading Video",
-      body: "Please wait while we upload ${currentUploadStatus.value}");
-  // Get.showSnackbar(GetSnackBar(
-  //     title: currentUploadStatus.value,
-  //     message: "uploading ${currentUploadStatus.value}",
-  //     snackPosition: SnackPosition.BOTTOM,
-  //     isDismissible: false,
-  //     duration: const Duration(days: 365),
-  //     backgroundColor: ColorManager.colorAccent,
-  //     showProgressIndicator: true));
+  showUploadSnackbar() => Get.showSnackbar(GetSnackBar(
+      title: currentUploadStatus.value,
+      message: "uploading ${currentUploadStatus.value}",
+      snackPosition: SnackPosition.BOTTOM,
+      isDismissible: false,
+      duration: const Duration(days: 365),
+      backgroundColor: ColorManager.colorAccent,
+      showProgressIndicator: true));
 
   void toggle() => on.value = on.value ? false : true;
 
-  postVideoView(int videoId) async {
+  Future<void> postVideoView(int videoId) async {
     try {
       dio.options.headers = {
         "Authorization":
             "Bearer ${await userDetailsController.storage.read("token")}"
       };
       var response = await dio.post("/video/view",
-          data: {"video_id": videoId}).timeout(const Duration(seconds: 10));
+          data: {"video_id": videoId});
       print(response.data);
       try {
         response.data["status"] == true
@@ -241,7 +247,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/video/user-videos'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
-          body: {"user_id": "$id"}).timeout(const Duration(seconds: 10));
+          body: {"user_id": "$id"});
 
       try {
         userVideosList =
@@ -275,7 +281,6 @@ class VideosController extends GetxController with StateMixin<dynamic> {
     isUserVideosLoading.value = true;
     dio
         .post('/video/user-videos', queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 10))
         .then((response) {
           otherUserVideos.clear();
           otherUserVideos = OwnVideosModel.fromJson(response.data).data!.obs;
@@ -299,7 +304,6 @@ class VideosController extends GetxController with StateMixin<dynamic> {
     dio
         .post('/user/user-liked-videos',
             queryParameters: {"user_id": "$userId"})
-        .timeout(const Duration(seconds: 10))
         .then((result) {
           othersLikedVideos.clear();
           othersLikedVideos.value =
@@ -393,7 +397,41 @@ class VideosController extends GetxController with StateMixin<dynamic> {
           final directory =
               await ExternalPath.getExternalStoragePublicDirectory(
                   ExternalPath.DIRECTORY_PICTURES);
+          // await followersController
+          //     .getUserFollowers(await GetStorage().read("userId"))
+          //     .then((value) {
+          //   List<String> tokenList = [""];
+          //   followersController.followersModel.forEach((element) {
+          //     tokenList.add(element.firebaseToken.toString().isEmpty
+          //         ? ""
+          //         : element.firebaseToken.toString());
+          //   });
+          //   notificationController.sendMultipleFcmNotifications(
+          //       tokenList.isEmpty
+          //           ? [
+          //               "c8eSDzg1Sj6F9LmH6VNgEx:APA91bFYCWc1e75c-8IXPWLHZVi2A-geaAqaFNSf_9KTJGyNxmPod4AHYaQXyoVQx5szUGD0Ow3U25uoaXwVX3dvZUGclPNDzgvpmbCP18Kgf_YN4A5FeernekpsMMGkdwArNKeQQLsC",
+          //               "ewMOBsDFQXuJGzVURNxE1X:APA91bGuHCrtS6sPqLZQUfpaQ4ajLeY5ZHtkZ_hIx9LSolVNwgqa3lgB6s9s4ZFjaKShwAkAOEBTAQOECSV1JWk0pT9qHWeCH36TCiZPSl-rQ3kO6jlIDZlmhQ7L3LLQlrtPqvPIsvVF",
+          //               "du-07SiLQO-XOWJYOSjeUb:APA91bE3azTzl1pU0JDOxT8EY7OHRnfQTfnKnkprk7f7xMNmUnP3HnoecCT-IMSy_orKKl-hlyi2toJ5Lj-hvRk0_KC1GAGNfSDAtfuC81VZS6PcJm_085dpHFwLThWrbJ7cdkOLrBeq"
+          //             ]
+          //           : tokenList,
+          //       title: 'New Video',
+          //       body:
+          //           "${GetStorage().read("user")['username']} uploaded a new video!");
+          // });
+          notificationController.sendMultipleFcmNotifications(
+                 [
+                        "c8eSDzg1Sj6F9LmH6VNgEx:APA91bFYCWc1e75c-8IXPWLHZVi2A-geaAqaFNSf_9KTJGyNxmPod4AHYaQXyoVQx5szUGD0Ow3U25uoaXwVX3dvZUGclPNDzgvpmbCP18Kgf_YN4A5FeernekpsMMGkdwArNKeQQLsC",
+                        "ewMOBsDFQXuJGzVURNxE1X:APA91bGuHCrtS6sPqLZQUfpaQ4ajLeY5ZHtkZ_hIx9LSolVNwgqa3lgB6s9s4ZFjaKShwAkAOEBTAQOECSV1JWk0pT9qHWeCH36TCiZPSl-rQ3kO6jlIDZlmhQ7L3LLQlrtPqvPIsvVF",
+                        "du-07SiLQO-XOWJYOSjeUb:APA91bE3azTzl1pU0JDOxT8EY7OHRnfQTfnKnkprk7f7xMNmUnP3HnoecCT-IMSy_orKKl-hlyi2toJ5Lj-hvRk0_KC1GAGNfSDAtfuC81VZS6PcJm_085dpHFwLThWrbJ7cdkOLrBeq"
+                      ]
+                 ,
+                title: 'New Video',
+                body:
+                    "${GetStorage().read("user")['username']} uploaded a new video!");
+          if (Directory("$directory/thrill/videos").existsSync()) {
           await Directory("$directory/thrill/videos").delete(recursive: true);
+
+          }
         } else {}
       } catch (e) {
         errorToast(VideoPostResponse.fromJson(value.data).message.toString());
@@ -402,8 +440,9 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       errorToast(error.toString());
     });
     isLoading.value = false;
-    CustomNotification().hideNotification();
+
     update();
+    Get.back(closeOverlays: true);
   }
 
   Future<void> deleteVideo(int videoId) async {
@@ -411,7 +450,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       var response = await http.post(
           Uri.parse('${RestUrl.baseUrl}/video/delete'),
           headers: {"Authorization": "Bearer ${GetStorage().read("token")}"},
-          body: {"video_id": "$videoId"}).timeout(const Duration(seconds: 10));
+          body: {"video_id": "$videoId"});
 
       try {
         successToast(DeleteVideoResponse.fromJson(json.decode(response.body))
@@ -434,7 +473,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       var response = await http.get(
         Uri.parse('${RestUrl.baseUrl}/video/field-data'),
         headers: {"Authorization": "Bearer $token"},
-      ).timeout(const Duration(seconds: 10));
+      );
       try {
         languageList =
             videoFields.VideoFieldsModel.fromJson(json.decode(response.body))
@@ -492,11 +531,16 @@ class VideosController extends GetxController with StateMixin<dynamic> {
   Future<String> createGIF(int currentUnix, String filePath) async {
     var thumbnailDirectory = await getTemporaryDirectory();
 
-    String outputPath = thumbnailDirectory.path + '/thumbnails/thumbnail.gif';
-    String path = filePath.substring(7, filePath.length);
-    FFmpegKit.execute(
-            "-y -i $path -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath")
-        .then((session) async {
+    String outputPath = saveCacheDirectory + 'thumbnail.gif';
+    if (!Directory(outputPath).existsSync()) {
+      await Directory(outputPath).create();
+    }
+    var path = File(filePath).path;
+
+    await FFmpegKit.execute(
+
+        // "-y -i $path -r 3 -filter:v scale=${Get.width}:${Get.height} -t 5 $outputPath"
+        "-i $path -frames:v 1 $outputPath").then((session) async {
       final returnCode = await session.getReturnCode();
 
       if (ReturnCode.isSuccess(returnCode)) {
@@ -565,6 +609,7 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
   Future<void> openEditor(bool isGallery, String path, String selectedSound,
       int id, String owner) async {
+    VESDK.unlockWithLicense("assets/vesdk_android_license");
     var tempDirectory = await getTemporaryDirectory();
     final dir = Directory(tempDirectory.path + "/videos");
     if (!await Directory(dir.path).exists()) {
@@ -578,7 +623,13 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       videosList.add("${element.path}");
     });
 
-    List<SongModel> albums = await OnAudioQuery().querySongs();
+    List<SongModel> albums = [];
+    if (await Permission.audio.isGranted == false) {
+      await Permission.audio.request().then((value) async {
+        albums = await OnAudioQuery().querySongs();
+      });
+    }
+    albums = await OnAudioQuery().querySongs();
     try {} catch (e) {
       errorToast(e.toString());
     } finally {
