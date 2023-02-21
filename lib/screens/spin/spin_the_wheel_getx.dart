@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +46,7 @@ class SpinTheWheelGetx extends GetView<WheelController> {
   @override
   Widget build(BuildContext context) {
     _controller.addListener(_scrollListener);
-    wheelController.getEarnedSpinData();
-    wheelController.getWheelData();
+
     setSpinSound();
     return Scaffold(
         backgroundColor: ColorManager.dayNight,
@@ -334,13 +334,9 @@ class SpinTheWheelGetx extends GetView<WheelController> {
                 const SizedBox(
                   height: 10,
                 ),
-                Text(
-                  "Levels for " +
+                Html(
+                  data: "Levels for " +
                       controller.activityList[index].name.toString(),
-                  style: TextStyle(
-                      color: ColorManager.dayNight,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(
                   height: 10,

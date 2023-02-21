@@ -141,26 +141,11 @@ class VideosController extends GetxController with StateMixin<dynamic> {
   void toggle() => on.value = on.value ? false : true;
 
   Future<void> postVideoView(int videoId) async {
-    try {
-      dio.options.headers = {
-        "Authorization":
-            "Bearer ${await userDetailsController.storage.read("token")}"
-      };
-      var response = await dio.post("/video/view",
-          data: {"video_id": videoId});
-      print(response.data);
-      try {
-        response.data["status"] == true
-            ? debugPrint(response.data["message"])
-            : debugPrint(response.data["message"]);
-      } catch (e) {
-        errorToast(PublicVideosModel.fromJson(json.decode(response.data))
-            .message
-            .toString());
-      }
-    } on Exception catch (e) {
-      debugPrint(e.toString());
-    }
+    dio.options.headers = {
+      "Authorization":
+          "Bearer ${await userDetailsController.storage.read("token")}"
+    };
+    await dio.post("/video/view", queryParameters: {"video_id": videoId});
   }
 
   RxList<int> adIndexes = [
@@ -279,16 +264,14 @@ class VideosController extends GetxController with StateMixin<dynamic> {
 
   Future<void> getOtherUserVideos(int userId) async {
     isUserVideosLoading.value = true;
-    dio
-        .post('/video/user-videos', queryParameters: {"user_id": "$userId"})
-        .then((response) {
-          otherUserVideos.clear();
-          otherUserVideos = OwnVideosModel.fromJson(response.data).data!.obs;
-          change(otherUserVideos, status: RxStatus.success());
-        })
-        .onError((error, stackTrace) {
-          change(otherUserVideos, status: RxStatus.error());
-        });
+    dio.post('/video/user-videos',
+        queryParameters: {"user_id": "$userId"}).then((response) {
+      otherUserVideos.clear();
+      otherUserVideos = OwnVideosModel.fromJson(response.data).data!.obs;
+      change(otherUserVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(otherUserVideos, status: RxStatus.error());
+    });
     if (otherUserVideos.isEmpty)
       change(otherUserVideos, status: RxStatus.empty());
 
@@ -301,19 +284,15 @@ class VideosController extends GetxController with StateMixin<dynamic> {
       "Authorization":
           "Bearer ${await userDetailsController.storage.read("token")}"
     };
-    dio
-        .post('/user/user-liked-videos',
-            queryParameters: {"user_id": "$userId"})
-        .then((result) {
-          othersLikedVideos.clear();
-          othersLikedVideos.value =
-              LikedVideosModel.fromJson(result.data).data!;
-          change(otherUserVideos, status: RxStatus.success());
-        })
-        .onError((error, stackTrace) {
-          print(error);
-          change(otherUserVideos, status: RxStatus.error());
-        });
+    dio.post('/user/user-liked-videos',
+        queryParameters: {"user_id": "$userId"}).then((result) {
+      othersLikedVideos.clear();
+      othersLikedVideos.value = LikedVideosModel.fromJson(result.data).data!;
+      change(otherUserVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      print(error);
+      change(otherUserVideos, status: RxStatus.error());
+    });
     isLikedVideosLoading.value = false;
   }
 
@@ -418,19 +397,16 @@ class VideosController extends GetxController with StateMixin<dynamic> {
           //       body:
           //           "${GetStorage().read("user")['username']} uploaded a new video!");
           // });
-          notificationController.sendMultipleFcmNotifications(
-                 [
-                        "c8eSDzg1Sj6F9LmH6VNgEx:APA91bFYCWc1e75c-8IXPWLHZVi2A-geaAqaFNSf_9KTJGyNxmPod4AHYaQXyoVQx5szUGD0Ow3U25uoaXwVX3dvZUGclPNDzgvpmbCP18Kgf_YN4A5FeernekpsMMGkdwArNKeQQLsC",
-                        "ewMOBsDFQXuJGzVURNxE1X:APA91bGuHCrtS6sPqLZQUfpaQ4ajLeY5ZHtkZ_hIx9LSolVNwgqa3lgB6s9s4ZFjaKShwAkAOEBTAQOECSV1JWk0pT9qHWeCH36TCiZPSl-rQ3kO6jlIDZlmhQ7L3LLQlrtPqvPIsvVF",
-                        "du-07SiLQO-XOWJYOSjeUb:APA91bE3azTzl1pU0JDOxT8EY7OHRnfQTfnKnkprk7f7xMNmUnP3HnoecCT-IMSy_orKKl-hlyi2toJ5Lj-hvRk0_KC1GAGNfSDAtfuC81VZS6PcJm_085dpHFwLThWrbJ7cdkOLrBeq"
-                      ]
-                 ,
-                title: 'New Video',
-                body:
-                    "${GetStorage().read("user")['username']} uploaded a new video!");
+          notificationController.sendMultipleFcmNotifications([
+            "c8eSDzg1Sj6F9LmH6VNgEx:APA91bFYCWc1e75c-8IXPWLHZVi2A-geaAqaFNSf_9KTJGyNxmPod4AHYaQXyoVQx5szUGD0Ow3U25uoaXwVX3dvZUGclPNDzgvpmbCP18Kgf_YN4A5FeernekpsMMGkdwArNKeQQLsC",
+            "ewMOBsDFQXuJGzVURNxE1X:APA91bGuHCrtS6sPqLZQUfpaQ4ajLeY5ZHtkZ_hIx9LSolVNwgqa3lgB6s9s4ZFjaKShwAkAOEBTAQOECSV1JWk0pT9qHWeCH36TCiZPSl-rQ3kO6jlIDZlmhQ7L3LLQlrtPqvPIsvVF",
+            "du-07SiLQO-XOWJYOSjeUb:APA91bE3azTzl1pU0JDOxT8EY7OHRnfQTfnKnkprk7f7xMNmUnP3HnoecCT-IMSy_orKKl-hlyi2toJ5Lj-hvRk0_KC1GAGNfSDAtfuC81VZS6PcJm_085dpHFwLThWrbJ7cdkOLrBeq"
+          ],
+              title: 'New Video',
+              body:
+                  "${GetStorage().read("user")['username']} uploaded a new video!");
           if (Directory("$directory/thrill/videos").existsSync()) {
-          await Directory("$directory/thrill/videos").delete(recursive: true);
-
+            await Directory("$directory/thrill/videos").delete(recursive: true);
           }
         } else {}
       } catch (e) {

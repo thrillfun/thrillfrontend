@@ -15,7 +15,7 @@ class HomeController extends FullLifeCycleController with StateMixin<dynamic> {
   RxString? token = "".obs;
   RxInt? userId;
   final info = NetworkInfo();
-  var dio  = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   @override
   void onDetached() {
     print('HomeController - onDetached called');
@@ -26,6 +26,7 @@ class HomeController extends FullLifeCycleController with StateMixin<dynamic> {
     super.onInit();
     pushUserLoginCount(getIpAddress().toString(), getMacAddress().toString());
   }
+
   // Mandatory
   @override
   void onInactive() {
@@ -44,22 +45,27 @@ class HomeController extends FullLifeCycleController with StateMixin<dynamic> {
     print('HomeController - onResumed called');
   }
 
-
-
-  getMacAddress()async=>await GetMac.macAddress;
+  getMacAddress() async => await GetMac.macAddress;
   getIpAddress() async => await info.getWifiIP();
   HomeController() {
     getAuthData();
   }
-    
-  pushUserLoginCount(String ip,String mac) async{
-    dio.options.headers={"Authorization":"Bearer ${await GetStorage().read("token")}"};
-    
-    dio.post("/user_login_history",queryParameters: {
+
+  pushUserLoginCount(String ip, String mac) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+
+    dio.post("/user_login_history", queryParameters: {
       "ip": ip,
       "mac": mac,
-    } ).then((value) {}).onError((error, stackTrace) {});
+    }).then((value) {
+      print(value.data);
+    }).onError((error, stackTrace) {
+      print(error.toString());
+    });
   }
+
   getAuthData() async {}
 
   loadInterstitialAd() async {

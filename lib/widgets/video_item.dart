@@ -5,6 +5,7 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/widgets/better_video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../screens/profile/view_profile.dart';
 import '../utils/util.dart';
@@ -38,11 +39,9 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
     preloadPageController = PreloadPageController();
     preloadPageController!.addListener(scrollListener);
-
-    super.initState();
   }
 
   @override
@@ -87,49 +86,60 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       isFollow: widget.videosList![index].user?.isFollow);
                 }
               });
-              return AspectRatio(
-                aspectRatio: MediaQuery.of(context).size.aspectRatio /
-                    MediaQuery.of(context).size.aspectRatio,
-                child: BetterReelsPlayer(
-                  widget.videosList![index].gifImage.toString(),
-                  widget.videosList![index].video.toString(),
-                  index.obs,
-                  current,
-                  isOnPageTurning,
-                  () {
-                    videosController.likeVideo(
-                        widget.videosList![index].videoLikeStatus == 0 ? 1 : 0,
-                        widget.videosList![index].id!);
-                  },
-                  publicUser,
-                  widget.videosList![index].id!.toInt(),
-                  widget.videosList![index].soundName.toString(),
-                  true.obs,
-                  publicVideos,
-                  widget.videosList![index].user!.id!,
-                  widget.videosList![index].user!.username.toString().obs,
-                  widget.videosList![index].description.toString().obs,
-                  false.obs,
-                  widget.videosList![index].hashtags ?? [],
-                  // : hashTagVideos![index].hashtags!,
-                  widget.videosList![index].sound.toString(),
-                  widget.videosList![index].soundOwner.toString(),
-                  widget.videosList![index].videoLikeStatus == null
-                      ? "0"
-                      : widget.videosList![index].videoLikeStatus.toString(),
-                  widget.videosList != null &&
-                          widget.videosList![index].isCommentable.obs
-                                  .toString()
-                                  .toLowerCase() ==
-                              "yes"
-                      ? true.obs
-                      : false.obs,
-                  like: widget.videosList![index].likes!.obs,
-                  isfollow: widget.videosList![index].user?.isFollow,
-                  commentsCount: widget.videosList![index].comments!.obs,
-                  soundId: widget.videosList![index].soundId,
-                ),
-              );
+              return VisibilityDetector(
+                  key: Key("key"),
+                  child: AspectRatio(
+                    aspectRatio: MediaQuery.of(context).size.aspectRatio /
+                        MediaQuery.of(context).size.aspectRatio,
+                    child: BetterReelsPlayer(
+                      widget.videosList![index].gifImage.toString(),
+                      widget.videosList![index].video.toString(),
+                      index.obs,
+                      current,
+                      isOnPageTurning,
+                      () {
+                        videosController.likeVideo(
+                            widget.videosList![index].videoLikeStatus == 0
+                                ? 1
+                                : 0,
+                            widget.videosList![index].id!);
+                      },
+                      publicUser,
+                      widget.videosList![index].id!.toInt(),
+                      widget.videosList![index].soundName.toString(),
+                      true.obs,
+                      publicVideos,
+                      widget.videosList![index].user!.id!,
+                      widget.videosList![index].user!.username.toString().obs,
+                      widget.videosList![index].description.toString().obs,
+                      false.obs,
+                      widget.videosList![index].hashtags ?? [],
+                      // : hashTagVideos![index].hashtags!,
+                      widget.videosList![index].sound.toString(),
+                      widget.videosList![index].soundOwner.toString(),
+                      widget.videosList![index].videoLikeStatus == null
+                          ? "0"
+                          : widget.videosList![index].videoLikeStatus
+                              .toString(),
+                      widget.videosList != null &&
+                              widget.videosList![index].isCommentable.obs
+                                      .toString()
+                                      .toLowerCase() ==
+                                  "yes"
+                          ? true.obs
+                          : false.obs,
+                      like: widget.videosList![index].likes!.obs,
+                      isfollow: widget.videosList![index].user?.isFollow,
+                      commentsCount: widget.videosList![index].comments!.obs,
+                      soundId: widget.videosList![index].soundId,
+                    ),
+                  ),
+                  onVisibilityChanged: (VisibilityInfo info) {
+                    info.visibleFraction == 0
+                        ? isOnPageTurning.value = true
+                        : isOnPageTurning.value = false;
+                    setState(() {});
+                  });
             });
       },
     ));

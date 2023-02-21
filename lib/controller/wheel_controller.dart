@@ -60,8 +60,9 @@ class WheelController extends GetxController with StateMixin<dynamic> {
     try {
       change(probabilityCounter, status: RxStatus.loading());
 
-      dio.options.headers['Authorization'] =
-          "Bearer ${await GetStorage().read("token")}";
+      dio.options.headers = {
+        "'Authorization'": "Bearer ${await GetStorage().read("token")}"
+      };
       var response = await dio.get("/spin-wheel/counter-data");
 
       print(response.data);
