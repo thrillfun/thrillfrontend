@@ -121,6 +121,9 @@ dependencies:
   network_info_plus: ^3.0.2
   mac_address: ^1.0.0
   flutter_html: ^3.0.0-alpha.6
+  better_player:
+    git:
+      url: https://github.com/tintran-dev/betterplayer.git
 
 
 dev_dependencies:

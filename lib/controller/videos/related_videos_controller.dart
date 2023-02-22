@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:file_support/file_support.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
@@ -30,7 +32,9 @@ class RelatedVideosController extends GetxController
       BaseOptions(baseUrl: RestUrl.baseUrl, responseType: ResponseType.json));
   var followingVideosController = Get.find<FollowingVideosController>();
   var userDetailsController = Get.find<UserDetailsController>();
-
+  var betterPlayercontroller = BetterPlayerListVideoPlayerController();
+  var pageViewController = PageController(keepPage: false);
+  BetterPlayerEvent? eventType;
   RelatedVideosController() {
     getAllVideos();
   }

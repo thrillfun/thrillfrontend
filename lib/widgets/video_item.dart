@@ -1,6 +1,7 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:thrill/controller/model/public_videosModel.dart';
 import 'package:thrill/controller/videos_controller.dart';
@@ -132,6 +133,18 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                       isfollow: widget.videosList![index].user?.isFollow,
                       commentsCount: widget.videosList![index].comments!.obs,
                       soundId: widget.videosList![index].soundId,
+                      onVideoEnd: () {
+                        videosController
+                            .postVideoView(
+                                widget.videosList![index].id!.toInt())
+                            .then((value) {
+                          Logger().wtf("this is a message");
+                        });
+                        var nextPage = preloadPageController!.page!.toInt();
+                        preloadPageController!.animateToPage(index+1,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeIn);
+                      },
                     ),
                   ),
                   onVisibilityChanged: (VisibilityInfo info) {

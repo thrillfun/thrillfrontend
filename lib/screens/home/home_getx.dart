@@ -10,6 +10,7 @@ import 'package:thrill/controller/videos/Following_videos_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
+import 'package:thrill/screens/home/home_video_player.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/video/camera_screen.dart';
 import 'package:thrill/utils/util.dart';
@@ -176,7 +177,7 @@ class RelatedVideos extends GetView<RelatedVideosController> {
     return GetX<RelatedVideosController>(
         builder: (controller) => controller.isLoading.isTrue
             ? loader()
-            : videoItemLayout(controller.publicVideosList));
+            : HomeVideoPlayer());
   }
 }
 

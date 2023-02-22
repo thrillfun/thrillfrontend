@@ -73,7 +73,8 @@ class BetterReelsPlayer extends StatefulWidget {
       {this.like,
       this.isfollow,
       this.commentsCount,
-      this.soundId});
+      this.soundId,
+      this.onVideoEnd});
 
   String gifImage, sound, soundOwner;
   String videoLikeStatus;
@@ -97,6 +98,7 @@ class BetterReelsPlayer extends StatefulWidget {
   int? isfollow = 0;
   RxInt? commentsCount = 0.obs;
   int? soundId = 0;
+  VoidCallback? onVideoEnd;
 
   @override
   State<BetterReelsPlayer> createState() => _VideoAppState();
@@ -104,9 +106,7 @@ class BetterReelsPlayer extends StatefulWidget {
 
 class _VideoAppState extends State<BetterReelsPlayer>
     with WidgetsBindingObserver {
-  AppLifecycleState? _lastLifecycleState;
   FocusNode fieldNode = FocusNode();
-  var currentDuration = Duration().obs;
 
   var userController = Get.find<UserController>();
   TextEditingController? _textEditingController;
@@ -118,12 +118,6 @@ class _VideoAppState extends State<BetterReelsPlayer>
   late VideoPlayerController betterPlayerController;
   var notificationsController = Get.find<NotificationsController>();
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _lastLifecycleState = state;
-    });
-  }
 
   @override
   void initState() {
@@ -138,17 +132,14 @@ class _VideoAppState extends State<BetterReelsPlayer>
             initialized.value = true;
           }));
 
-    currentDuration.value = betterPlayerController.value.position;
   }
 
   @override
   void dispose() {
     if (initialized.value) {
+      betterPlayerController.removeListener(() {});
       betterPlayerController.dispose();
     }
-    videosController.postVideoView(widget.videoId).then((value) {
-      Logger().wtf("this is a message");
-    });
     super.dispose();
   }
 
@@ -159,26 +150,15 @@ class _VideoAppState extends State<BetterReelsPlayer>
         widget.isPaused.isFalse) {
       setState(() {
         betterPlayerController.play();
-        betterPlayerController.addListener(() async {
-          var nextPage = preloadPageController!.page!.toInt() + 1;
-
-          if (betterPlayerController.value.position ==
-                  betterPlayerController.value.duration &&
-              betterPlayerController.value.duration > Duration.zero) {
-            setState(() {
-              preloadPageController!.animateToPage(nextPage,
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeIn);
-            });
-          }
-        });
       });
-    } else {
-      setState(() {
-        betterPlayerController.pause();
+      betterPlayerController.addListener(() async {
+        if (betterPlayerController.value.position ==
+                betterPlayerController.value.duration &&
+            betterPlayerController.value.duration > Duration.zero) {
+          widget.onVideoEnd!();
+        }
       });
     }
-
     return Stack(
       children: [
         GestureDetector(
@@ -196,11 +176,6 @@ class _VideoAppState extends State<BetterReelsPlayer>
               }
               setState(() {
                 betterPlayerController.setVolume(volume.value);
-              });
-            },
-            onLongPressStart: (_) {
-              setState(() {
-                widget.isPaused = true.obs;
               });
             },
             child: Stack(
@@ -1262,6 +1237,7 @@ class _VideoAppState extends State<BetterReelsPlayer>
     return shortUrl;
   }
 }
+
 
 // ignore: must_be_immutable
 class CommentsScreen extends GetView<CommentsController> {

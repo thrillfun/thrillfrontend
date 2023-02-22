@@ -1,6 +1,7 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:thrill/controller/model/hashtag_videos_model.dart';
 import 'package:thrill/controller/model/liked_videos_model.dart';
@@ -353,6 +354,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                           : widget.isLock
                           ? widget.privateVideos![index].soundId
                           : widget.hashTagVideos![index].soundId,
+
+                          onVideoEnd: () =>   videosController.postVideoView(widget.isFeed
+                                ? widget.userVideos![index].id!
+                                : widget.isFav
+                                ? widget.likedVideos![index].id!
+                                : widget.isLock
+                                ? widget.privateVideos![index].id!
+                                : widget.hashTagVideos![index].id!).then((value) {
+        Logger().wtf("this is a message");
+      }),
                     )),
               );
             }));
