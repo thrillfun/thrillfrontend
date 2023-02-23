@@ -32,7 +32,6 @@ class RelatedVideosController extends GetxController
       BaseOptions(baseUrl: RestUrl.baseUrl, responseType: ResponseType.json));
   var followingVideosController = Get.find<FollowingVideosController>();
   var userDetailsController = Get.find<UserDetailsController>();
-  var betterPlayercontroller = BetterPlayerListVideoPlayerController();
   var pageViewController = PageController(keepPage: false);
   BetterPlayerEvent? eventType;
   RelatedVideosController() {

@@ -22,7 +22,7 @@ import 'package:file_support/file_support.dart';
 class FollowingVideosController extends GetxController
     with StateMixin<RxList<PublicVideos>> {
   var betterPlayercontroller = BetterPlayerListVideoPlayerController();
-  var pageViewController = PageController(keepPage: false);
+  var pageViewController = PageController();
   var dio = Dio(
       BaseOptions(baseUrl: RestUrl.baseUrl, responseType: ResponseType.json));
   var isLoading = false.obs;
