@@ -1367,7 +1367,7 @@ class CommentsScreen extends GetView<CommentsController> {
                                       controller.likeComment(
                                           state[index].id.toString(), "1");
                                       Future.delayed(const Duration(seconds: 1))
-                                          .then((value) => commentsController
+                                          .then((value) => controller
                                               .getComments(videoId!));
                                     },
                                     child: const Icon(

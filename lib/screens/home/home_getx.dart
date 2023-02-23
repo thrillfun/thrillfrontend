@@ -10,7 +10,8 @@ import 'package:thrill/controller/videos/Following_videos_controller.dart';
 import 'package:thrill/controller/videos/related_videos_controller.dart';
 import 'package:thrill/controller/videos_controller.dart';
 import 'package:thrill/screens/auth/login_getx.dart';
-import 'package:thrill/screens/home/home_video_player.dart';
+import 'package:thrill/screens/video_players/following_video_player.dart';
+import 'package:thrill/screens/video_players/home_video_player.dart';
 import 'package:thrill/screens/home/landing_page_getx.dart';
 import 'package:thrill/screens/video/camera_screen.dart';
 import 'package:thrill/utils/util.dart';
@@ -199,6 +200,6 @@ class FollowingVideos extends GetView<FollowingVideosController> {
                       emptyListWidget(data: "You are not following anybody!")
                     ],
                   )
-                : videoItemLayout(controller.followingVideosList));
+                : FollowingVideoPlayer());
   }
 }

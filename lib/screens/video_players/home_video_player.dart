@@ -183,9 +183,7 @@ class HomeVideoPlayer extends GetView<RelatedVideosController> {
                                       ),
                                     ),
                                     Container(
-                                      // margin: widget.isHome.value
-                                      //     ? const EdgeInsets.only(right: 10)
-                                      //     : const EdgeInsets.only(right: 10),10
+                                       margin:  const EdgeInsets.only(right: 10),
                                       child: Column(
                                         children: [
                                           IconButton(
@@ -852,12 +850,12 @@ class HomeVideoPlayer extends GetView<RelatedVideosController> {
                                           "user": state[index].soundOwner.toString().isEmpty
                                               ? state[index].user!.username.toString()
                                               : state[index].soundOwner,
-                                          "soundName": state[index]..soundName,
-                                          "title": state[index]..soundOwner,
+                                          "soundName": state[index].soundName,
+                                          "title": state[index].soundOwner,
                                           "id": state[index].id,
                                           "profile": state[index].user!.avatar,
                                           "name": state[index].user!.name,
-                                          "sound_id": state[index]..soundId,
+                                          "sound_id": state[index].soundId,
                                           "username": state[index].user!.username,
                                           "isFollow": state[index].user!.isFollow,
                                           "userProfile": state[index].user!.avatar != null
@@ -929,6 +927,8 @@ class HomeVideoPlayer extends GetView<RelatedVideosController> {
                   )
 
                 ),
+          onLoading: Container(child: loader(),height: Get.height,width: Get.width,
+          alignment: Alignment.center,)
         ),
       ),
     );
