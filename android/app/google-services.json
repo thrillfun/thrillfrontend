@@ -15,15 +15,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "882291140458-d1bavq76rtg7qipnhg497dn57qvf666s.apps.googleusercontent.com",
+          "client_id": "882291140458-ca00kdpilm63do28hie7dggs3u7pr8n3.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.thrill.media",
-            "certificate_hash": "8564a7cac0803cc98e8f99b1009e4e93e295a379"
+            "certificate_hash": "1bcc6d88d6ef4cdfa8e93d6b859400c8cdd9ab2d"
           }
         },
         {
-          "client_id": "882291140458-vrouitl973stj817h6vj5s1q6h4c6clh.apps.googleusercontent.com",
+          "client_id": "882291140458-pvjtrj1cnh22qpqodt2mu31figoabb8m.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.thrill.media",

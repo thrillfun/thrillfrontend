@@ -11,31 +11,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:get/get.dart' as transition;
+import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:thrill/common/strings.dart';
-import 'package:thrill/controller/bindings.dart';
-import 'package:thrill/controller/model/inbox_model.dart';
-import 'package:thrill/firebase_options.dart';
-import 'package:thrill/screens/auth/login_getx.dart';
-import 'package:thrill/screens/chat/chat_screen.dart';
-import 'package:thrill/screens/hash_tags/hash_tags_screen.dart';
-import 'package:thrill/screens/home/discover_getx.dart';
-import 'package:thrill/screens/home/home_getx.dart';
-import 'package:thrill/screens/profile/profile.dart';
-import 'package:thrill/screens/profile/view_profile.dart';
-import 'package:thrill/screens/screen.dart';
-import 'package:thrill/screens/search/search_getx.dart';
-import 'package:thrill/screens/setting/profile_details.dart';
-import 'package:thrill/screens/setting/qr_code.dart';
-import 'package:thrill/screens/setting/wallet_getx.dart';
-import 'package:thrill/utils/notification.dart';
-import 'package:thrill/utils/util.dart';
-import 'package:video_editor_sdk/video_editor_sdk.dart';
+import 'package:thrill/app/modules/home/app_bindings.dart';
 
-import 'screens/home/landing_page_getx.dart';
+import 'app/routes/app_pages.dart';
+import 'firebase_options.dart';
+
 
 List<CameraDescription> cameras = [];
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -43,9 +28,8 @@ GlobalKey key = GlobalKey();
 AwesomeNotifications? awesomeNotifications;
 
 void main() async {
-  await GetStorage.init();
 
-  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
 
   if (await Permission.notification.isGranted == false ||
       await Permission.notification.isDenied) {
@@ -93,7 +77,6 @@ void main() async {
     cameras = await availableCameras();
   } on CameraException catch (_) {}
 
-  getTempDirectory();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -103,37 +86,15 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   final PendingDynamicLinkData? initialLink =
-      await FirebaseDynamicLinks.instance.getInitialLink();
+  await FirebaseDynamicLinks.instance.getInitialLink();
 
-  runApp(MyApp());
+
+  runApp( GetMaterialApp(
+    title: "Application",
+    darkTheme: ThemeData.dark(),
+    initialBinding: AppBindings(),
+    initialRoute: AppPages.INITIAL,
+    getPages: AppPages.routes,
+  ),);
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return transition.GetMaterialApp(
-        darkTheme: ThemeData(brightness: Brightness.dark),
-        theme: ThemeData(brightness: Brightness.light),
-        themeMode: ThemeMode.system,
-        debugShowCheckedModeBanner: false,
-        initialBinding: DataBindings(),
-        home: LandingPageGetx());
-  }
-}
