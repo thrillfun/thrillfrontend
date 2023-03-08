@@ -276,10 +276,10 @@ emptyListWidget({String data = "Oops Nothing Found"}) => Expanded(
     child: Text(
       data,
       textAlign: TextAlign.center,
-      style: TextStyle(
+      style:const  TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: ColorManager.dayNightText),
+          ),
     ),
   ),
 );
@@ -287,7 +287,6 @@ musicPlayerBottomSheet(
     RxString profilePic, RxString soundName, RxString soundUrl) =>
     Get.bottomSheet(
         Container(
-            color: ColorManager.dayNight,
             padding: const EdgeInsets.all(10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -554,4 +553,25 @@ extension Unique<E, Id> on List<E> {
     list.retainWhere((x) => ids.add(id != null ? id(x) : x as Id));
     return list;
   }
+}
+
+
+class DashedLineVerticalPainter extends CustomPainter {
+  DashedLineVerticalPainter(this.color){}
+  Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double dashHeight = 5, dashSpace = 3, startY = 0;
+    final paint = Paint()
+      ..color = color!
+      ..strokeWidth = 1;
+    while (startY < size.height) {
+      canvas.drawLine(Offset(0, startY), Offset(0, startY + dashHeight), paint);
+      startY += dashHeight + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

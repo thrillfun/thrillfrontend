@@ -16,11 +16,11 @@ import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:thrill/app/modules/home/app_bindings.dart';
+import 'package:thrill/app/modules/bindings/app_bindings.dart';
+import 'package:thrill/app/utils/color_manager.dart';
 
 import 'app/routes/app_pages.dart';
 import 'firebase_options.dart';
-
 
 List<CameraDescription> cameras = [];
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -28,6 +28,7 @@ GlobalKey key = GlobalKey();
 AwesomeNotifications? awesomeNotifications;
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
   await GetStorage.init();
 
@@ -77,7 +78,6 @@ void main() async {
     cameras = await availableCameras();
   } on CameraException catch (_) {}
 
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -86,15 +86,38 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   final PendingDynamicLinkData? initialLink =
-  await FirebaseDynamicLinks.instance.getInitialLink();
+      await FirebaseDynamicLinks.instance.getInitialLink();
 
-
-  runApp( GetMaterialApp(
-    title: "Application",
-    darkTheme: ThemeData.dark(),
-    initialBinding: AppBindings(),
-    initialRoute: AppPages.INITIAL,
-    getPages: AppPages.routes,
-  ),);
+  runApp(
+    GetMaterialApp(
+      title: "Thrill",
+      darkTheme: ThemeData(
+        dialogBackgroundColor: Colors.black,
+        appBarTheme: const AppBarTheme(color: Colors.black),
+        scaffoldBackgroundColor: Colors.black,
+        cardColor: Colors.black,
+        tabBarTheme: const TabBarTheme(indicatorColor: ColorManager.colorAccent),
+        progressIndicatorTheme:
+            const ProgressIndicatorThemeData(color: ColorManager.colorAccent),
+        colorScheme: const ColorScheme.dark(background: Colors.black),
+        primaryColor: Colors.black,
+      ),
+      theme: ThemeData(
+        dialogBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: Colors.white,
+        textTheme: const TextTheme(button: TextStyle(color: Colors.white)),
+        tabBarTheme: const TabBarTheme(
+            indicatorColor: ColorManager.colorAccent,
+            labelColor: Colors.black,
+            dividerColor: ColorManager.colorAccent),
+        appBarTheme: const AppBarTheme(
+            color: Colors.white,
+            titleTextStyle: TextStyle(color: Colors.black),
+            iconTheme: IconThemeData(color: Colors.black)),
+      ),
+      initialBinding: AppBindings(),
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
+    ),
+  );
 }
-
