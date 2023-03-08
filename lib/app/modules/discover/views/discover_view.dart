@@ -1,0 +1,325 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:thrill/app/rest/rest_urls.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:thrill/app/routes/app_pages.dart';
+
+import '../../../utils/color_manager.dart';
+import '../../../utils/utils.dart';
+import '../controllers/discover_controller.dart';
+
+class DiscoverView extends GetView<DiscoverController> {
+  const DiscoverView({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: controller.obx((state) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                const SizedBox(
+                  width: 10,
+                  height: 5,
+                ),
+                GlassContainer(
+                  color: ColorManager.colorAccent.withOpacity(0.5),
+                  blur: 5,
+                  border: Border.all(color: Colors.white.withOpacity(0.4)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: InkWell(
+                        onTap: () async {
+                          Get.toNamed(Routes.SEARCH);
+                        },
+                        child: const Icon(
+                          Icons.search,
+                          color: Colors.white,
+                        )),
+                  ),
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                // GridView.builder(
+                //     physics: NeverScrollableScrollPhysics(),
+                //     gridDelegate:
+                //         const SliverGridDelegateWithFixedCrossAxisCount(
+                //       crossAxisCount: 2,
+                //       crossAxisSpacing: 5.0,
+                //       mainAxisSpacing: 5.0,
+                //     ),
+                //     itemCount: controller.hasTagsList.length,
+                //     scrollDirection: Axis.vertical,
+                //     shrinkWrap: true,
+                //     itemBuilder: ((context, index) => CachedNetworkImage(
+                //         height: 250,
+                //         width: 250,
+                //         fit: BoxFit.cover,
+                //         imageUrl: RestUrl.gifUrl +
+                //             controller.hashTagsVideos[index].gifImage
+                //                 .toString())))
+                Wrap(
+                  runSpacing: 10,
+                  children: List.generate(
+                      state!.length,
+                          (index) => Padding(
+                          padding: const EdgeInsets.only(
+                              left: 5, right: 5, top: 20, bottom: 20),
+                          child: GlassContainer(
+                            blur: 10,
+                            shadowColor: Colors.transparent,
+                            border: Border.all(color: Colors.white.withOpacity(0.4)),
+                            color: ColorManager.colorAccent.withOpacity(0.5),
+                            child: InkWell(
+                                onTap: () async {
+                                  await GetStorage()
+                                      .write("hashtagId", state[index].hashtagId);
+                                  Get.toNamed(Routes.HASH_TAGS_DETAILS,
+                                      arguments: {
+                                        "hashtag_name":
+                                        "${state[index].hashtagName}"
+                                      });
+                                },
+                                child: Container(
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.only(
+                                        left: 5, right: 5, top: 10, bottom: 10),
+                                    margin: const EdgeInsets.only(
+                                      left: 5,
+                                      right: 5,
+                                    ),
+                                    child: Text(
+                                      state[index].hashtagName.toString(),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                      ),
+                                    ))),
+                          ))),
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: state!.length,
+                itemBuilder: (context, index) => Visibility(
+                    visible: state[index].videos!.isNotEmpty,
+                    child: Column(
+                      children: [
+                        InkWell(
+                          onTap: () async {
+                            await GetStorage()
+                                .write("hashtagId", state[index].hashtagId);
+                            Get.toNamed(Routes.HASH_TAGS_DETAILS,
+                                arguments: {
+                                  "hashtag_name":
+                                  "${state[index].hashtagName}"
+                                });
+                            // await hashtagVideosController
+                            //     .getVideosByHashTags(state[index].hashtagId!)
+                            //     .then((value) => Get.to(() => HashTagsScreen(
+                            //   tagName: state[index].hashtagName,
+                            //   videosList: state[index].videos,
+                            //   videoCount: state[index].hashtagId,
+                            // )));
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 10),
+                                        decoration: BoxDecoration(
+                                            color: ColorManager
+                                                .colorAccentTransparent,
+                                            borderRadius:
+                                            BorderRadius.circular(50)),
+                                        child: const Icon(
+                                          Icons.numbers,
+                                          color: ColorManager.colorAccent,
+                                        )),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          state[index].hashtagName == null
+                                              ? ""
+                                              : state[index].hashtagName!,
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 18),
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          "Trending Hashtag",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14),
+                                        )
+                                      ],
+                                    )
+                                  ],
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      state[index].videoCount == null
+                                          ? ""
+                                          : state[index].videoCount.toString()!,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14),
+                                    ),
+                                    const Icon(
+                                      Icons.keyboard_arrow_right,
+                                      color: ColorManager.colorAccent,
+                                      size: 25,
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 10),
+                          child: GridView.count(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: 0.8,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: List.generate(
+                                state[index].videos!.take(3).length,
+                                    (videoIndex) => InkWell(
+                                  onTap: () {},
+                                  child: InkWell(
+                                    onTap: () {
+                                      // List<PublicVideos> videosList1 = [];
+                                      // state[index].videos!.forEach((element) {
+                                      //   var user = PublicUser(
+                                      //     id: element.user?.id,
+                                      //     name: element.user?.name,
+                                      //     facebook: element.user?.facebook,
+                                      //     firstName: element.user?.firstName,
+                                      //     lastName: element.user?.lastName,
+                                      //     username: element.user?.username,
+                                      //     isFollow: int.parse(element
+                                      //         .user!.following
+                                      //         .toString()),
+                                      //   );
+                                      //   videosList1.add(PublicVideos(
+                                      //     id: element.id,
+                                      //     video: element.video,
+                                      //     description: element.description,
+                                      //     sound: element.sound,
+                                      //     soundName: element.soundName,
+                                      //     soundCategoryName:
+                                      //     element.soundCategoryName,
+                                      //     soundOwner: element.soundOwner,
+                                      //     filter: element.filter,
+                                      //     likes: element.likes,
+                                      //     views: element.views,
+                                      //     gifImage: element.gifImage,
+                                      //     speed: element.speed,
+                                      //     comments: element.comments,
+                                      //     isDuet: "no",
+                                      //     duetFrom: "",
+                                      //     isCommentable: "yes",
+                                      //     videoLikeStatus:
+                                      //     element.video_like_status,
+                                      //     user: user,
+                                      //   ));
+                                      // });
+                                      // Get.to(() => VideoPlayerItem(
+                                      //   videosList: videosList1,
+                                      //   position: videoIndex,
+                                      // ));
+                                    },
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+
+                                        imgNet(RestUrl.gifUrl +
+                                            state[index]
+                                                .videos![videoIndex]
+                                                .gifImage
+                                                .toString()),
+                                        Positioned(
+                                            bottom: 10,
+                                            left: 10,
+                                            right: 10,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              children: [
+                                                RichText(
+                                                  text: TextSpan(
+                                                    children: [
+                                                      const WidgetSpan(
+                                                        child: Icon(
+                                                          Icons.play_circle,
+                                                          size: 18,
+                                                          color: ColorManager
+                                                              .colorAccent,
+                                                        ),
+                                                      ),
+                                                      TextSpan(
+                                                          text: " " +
+                                                              state[index]
+                                                                  .videos![
+                                                              videoIndex]
+                                                                  .views
+                                                                  .toString(),
+                                                          style: const TextStyle(
+                                                              fontWeight:
+                                                              FontWeight
+                                                                  .w600,
+                                                              fontSize: 16)),
+                                                    ],
+                                                  ),
+                                                )
+                                              ],
+                                            ))
+                                      ],
+                                    ),
+                                  ),
+                                )),
+                          ),
+                        )
+                      ],
+                    ))),
+          )
+        ],
+
+      ),
+          onError: (error)=>Container(child: imgNet("https://cutle.fish/static/d03563f9204af840c0071afa89f5d0be/497c6/1*SlxKpmInca2alYuNow606w.png"),),
+          onLoading: Container(
+            height: Get.height,
+            width: Get.height,
+            alignment: Alignment.center,
+            child: loader(),))
+    );
+  }
+}
