@@ -35,11 +35,12 @@ class UserVideosController extends GetxController with StateMixin<RxList<Videos>
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     change(userVideos, status: RxStatus.loading());
+    userVideos.clear();
+
     dio
         .post('/video/user-videos', queryParameters: {"user_id": "${await GetStorage().read("userId")}"})
         .timeout(const Duration(seconds: 10))
         .then((response) {
-      userVideos.clear();
       userVideos = UserVideosModel.fromJson(response.data).data!.obs;
       change(userVideos, status: RxStatus.success());
     })

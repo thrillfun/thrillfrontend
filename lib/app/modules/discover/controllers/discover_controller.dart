@@ -12,7 +12,6 @@ class DiscoverController extends GetxController with StateMixin<dynamic> {
   @override
   void onInit() {
     getTopHashTagVideos();
-
     super.onInit();
   }
 

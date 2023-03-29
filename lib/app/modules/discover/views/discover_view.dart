@@ -216,47 +216,9 @@ class DiscoverView extends GetView<DiscoverController> {
                                   onTap: () {},
                                   child: InkWell(
                                     onTap: () {
-                                      // List<PublicVideos> videosList1 = [];
-                                      // state[index].videos!.forEach((element) {
-                                      //   var user = PublicUser(
-                                      //     id: element.user?.id,
-                                      //     name: element.user?.name,
-                                      //     facebook: element.user?.facebook,
-                                      //     firstName: element.user?.firstName,
-                                      //     lastName: element.user?.lastName,
-                                      //     username: element.user?.username,
-                                      //     isFollow: int.parse(element
-                                      //         .user!.following
-                                      //         .toString()),
-                                      //   );
-                                      //   videosList1.add(PublicVideos(
-                                      //     id: element.id,
-                                      //     video: element.video,
-                                      //     description: element.description,
-                                      //     sound: element.sound,
-                                      //     soundName: element.soundName,
-                                      //     soundCategoryName:
-                                      //     element.soundCategoryName,
-                                      //     soundOwner: element.soundOwner,
-                                      //     filter: element.filter,
-                                      //     likes: element.likes,
-                                      //     views: element.views,
-                                      //     gifImage: element.gifImage,
-                                      //     speed: element.speed,
-                                      //     comments: element.comments,
-                                      //     isDuet: "no",
-                                      //     duetFrom: "",
-                                      //     isCommentable: "yes",
-                                      //     videoLikeStatus:
-                                      //     element.video_like_status,
-                                      //     user: user,
-                                      //   ));
-                                      // });
-                                      // Get.to(() => VideoPlayerItem(
-                                      //   videosList: videosList1,
-                                      //   position: videoIndex,
-                                      // ));
-                                    },
+                                      Get.toNamed(Routes.DISCOVER_VIDEO_PLAYER,arguments: {"discover_videos":state[index].videos,"init_page":index});
+
+                                                                        },
                                     child: Stack(
                                       fit: StackFit.expand,
                                       children: [
@@ -314,7 +276,6 @@ class DiscoverView extends GetView<DiscoverController> {
         ],
 
       ),
-          onError: (error)=>Container(child: imgNet("https://cutle.fish/static/d03563f9204af840c0071afa89f5d0be/497c6/1*SlxKpmInca2alYuNow606w.png"),),
           onLoading: Container(
             height: Get.height,
             width: Get.height,

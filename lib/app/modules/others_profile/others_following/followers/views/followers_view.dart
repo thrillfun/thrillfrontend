@@ -69,7 +69,7 @@ class FollowersView extends GetView<OtherFollowersController> {
                         onTap: () {
                           controller.followUnfollowUser(
                               state[index].id!,
-                              state[index].isFolling == 0
+                              state[index].isFollowing == 0
                                   ? "follow"
                                   : "unfollow");
                           // usersController.followUnfollowUser(
@@ -82,7 +82,7 @@ class FollowersView extends GetView<OtherFollowersController> {
                           //
                           // controller.getUserFollowers(userId);
                         },
-                        child:state[index].isFolling ==
+                        child:state[index].isFollowing ==
                             0
                             ? Container(
                           padding: const EdgeInsets.symmetric(

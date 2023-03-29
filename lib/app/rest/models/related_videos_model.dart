@@ -37,8 +37,8 @@ class RelatedVideos {
   int? soundId;
   String? sound;
   String? soundName;
-  Null? soundCategoryName;
-  Null? filter;
+  String? soundCategoryName;
+  String? filter;
   int? likes;
   int? views;
   String? gifImage;
@@ -46,7 +46,7 @@ class RelatedVideos {
   int? comments;
   List<Hashtags>? hashtags;
   String? isDuet;
-  Null? duetFrom;
+  String? duetFrom;
   String? isDuetable;
   String? isCommentable;
   String? soundOwner;
@@ -165,15 +165,15 @@ class User {
   String? avatar;
   String? socialLoginId;
   String? socialLoginType;
-  Null? firstName;
-  Null? lastName;
+  String? firstName;
+  String? lastName;
   String? gender;
   String? websiteUrl;
   String? bio;
-  Null? youtube;
-  Null? facebook;
-  Null? instagram;
-  Null? twitter;
+  String? youtube;
+  String? facebook;
+  String? instagram;
+  String? twitter;
   String? firebaseToken;
   String? referralCount;
   int? following;
@@ -216,35 +216,35 @@ class User {
         this.boxThree});
 
   User.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    username = json['username'];
-    email = json['email'];
-    dob = json['dob'];
-    phone = json['phone'];
-    avatar = json['avatar'];
-    socialLoginId = json['social_login_id'];
-    socialLoginType = json['social_login_type'];
-    firstName = json['first_name'];
-    lastName = json['last_name'];
-    gender = json['gender'];
-    websiteUrl = json['website_url'];
-    bio = json['bio'];
-    youtube = json['youtube'];
-    facebook = json['facebook'];
-    instagram = json['instagram'];
-    twitter = json['twitter'];
-    firebaseToken = json['firebase_token'];
-    referralCount = json['referral_count'];
-    following = json['following'];
-    followers = json['followers'];
-    isfollow = json['isfollow'];
-    likes = json['likes'];
+    id = json['id']??0;
+    name = json['name']??"";
+    username = json['username']??"";
+    email = json['email']??"";
+    dob = json['dob']??"";
+    phone = json['phone']??"";
+    avatar = json['avatar']??"";
+    socialLoginId = json['social_login_id']??"";
+    socialLoginType = json['social_login_type']??"";
+    firstName = json['first_name']??"";
+    lastName = json['last_name']??"";
+    gender = json['gender']??"";
+    websiteUrl = json['website_url']??"";
+    bio = json['bio']??"";
+    youtube = json['youtube']??"";
+    facebook = json['facebook']??"";
+    instagram = json['instagram']??"";
+    twitter = json['twitter']??"";
+    firebaseToken = json['firebase_token']??"";
+    referralCount = json['referral_count']??"";
+    following = json['following']??"";
+    followers = json['followers']??"";
+    isfollow = json['isfollow']??0;
+    likes = json['likes']??"";
     levels =
     json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
-    totalVideos = json['total_videos'];
-    boxTwo = json['box_two'];
-    boxThree = json['box_three'];
+    totalVideos = json['total_videos']??"";
+    boxTwo = json['box_two']??"";
+    boxThree = json['box_three']??"";
   }
 
   Map<String, dynamic> toJson() {

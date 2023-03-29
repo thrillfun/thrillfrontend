@@ -16,30 +16,7 @@ class FollowersView extends GetView<FollowersController> {
             state!.length,
                 (index) => InkWell(
               onTap: () async {
-                // state![index].id == GetStorage().read("userId")
-                //     ? await likedVideosController.getUserLikedVideos()
-                //     : await likedVideosController
-                //     .getOthersLikedVideos(state![index].id!);
-                //
-                // state![index].id == GetStorage().read("userId")
-                //     ? await userVideosController.getUserVideos()
-                //     : await userVideosController
-                //     .getOtherUserVideos(state[index].id!);
-                // state![index].id == GetStorage().read("userId")
-                //     ? await userDetailsController
-                //     .getUserProfile()
-                //     .then((value) => Get.to(Profile()))
-                //     : await otherUsersController
-                //     .getOtherUserProfile(state[index].id!)
-                //     .then((value) => Get.to(ViewProfile(
-                //     controller.followersModel[index].id
-                //         .toString(),
-                //     controller
-                //         .followersModel[index].isFolling!.obs,
-                //     controller.followersModel[index].name
-                //         .toString(),
-                //     controller.followersModel[index].avtars
-                //         .toString())));
+
               },
               child: Container(
                 width: Get.width,
@@ -92,7 +69,7 @@ class FollowersView extends GetView<FollowersController> {
                       onTap: () {
                         controller.followUnfollowUser(
                             state[index].id!,
-                            state[index].isFolling == 0
+                            state[index].isFollowing == 0
                                 ? "follow"
                                 : "unfollow");
                         // usersController.followUnfollowUser(
@@ -105,7 +82,7 @@ class FollowersView extends GetView<FollowersController> {
                         //
                         // controller.getUserFollowers(userId);
                       },
-                      child:state[index].isFolling ==
+                      child:state[index].isFollowing ==
                           0
                           ? Container(
                         padding: const EdgeInsets.symmetric(

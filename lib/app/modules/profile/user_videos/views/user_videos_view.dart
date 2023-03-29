@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../rest/rest_urls.dart';
+import '../../../../routes/app_pages.dart';
 import '../../../../utils/color_manager.dart';
 import '../../../../utils/utils.dart';
 import '../controllers/user_videos_controller.dart';
@@ -30,13 +31,8 @@ class UserVideosView extends GetView<UserVideosController> {
                 itemCount: state!.length,
                 itemBuilder: (context, index) => GestureDetector(
                       onTap: () {
-                        // Get.to(VideoPlayerScreen(
-                        //   isFav: false,
-                        //   isFeed: true,
-                        //   isLock: false,
-                        //   position: index,
-                        //   userVideos: controller.userVideos,
-                        // ));
+                        Get.toNamed(Routes.PROFILE_VIDEOS,
+                            arguments: {"video_list": state,"init_page":index});
                       },
                       child: Stack(
                         fit: StackFit.expand,
@@ -89,7 +85,7 @@ class UserVideosView extends GetView<UserVideosController> {
                                           padding: EdgeInsets.all(10),
                                         ),
                                         onTap: () => controller
-                                            .deleteUserVideo(state[index].id!),
+                                            .deleteUserVideo(state[index].id!).then((value) => Get.back()),
                                       ),
                                       cancel: InkWell(
                                         child: Container(
@@ -114,10 +110,10 @@ class UserVideosView extends GetView<UserVideosController> {
         ],
       ),
       onLoading: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            child: loader(),
-          )
+          loader()
         ],
       ),
       onError: (error) => Column(

@@ -8,14 +8,15 @@ import '../../../rest/models/user_details_model.dart';
 import '../../../rest/rest_urls.dart';
 import '../../../utils/utils.dart';
 
-class ProfileController extends GetxController   with StateMixin<Rx<User>> {
+class ProfileController extends GetxController with StateMixin<Rx<User>> {
   var storage = GetStorage();
   var userProfile = User().obs;
   var otherUserProfile = User().obs;
   var isSimCardAvailable = true.obs;
 
-  var dio =Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var qrData = "".obs;
+
   @override
   void onInit() {
     getUserProfile();
@@ -40,6 +41,7 @@ class ProfileController extends GetxController   with StateMixin<Rx<User>> {
   void onClose() {
     super.onClose();
   }
+
   Future<void> getUserProfile() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -52,14 +54,12 @@ class ProfileController extends GetxController   with StateMixin<Rx<User>> {
       dio.post('/user/get-profile', queryParameters: {
         "id": "${GetStorage().read("userId")}"
       }).then((result) {
-        userProfile =
-            UserDetailsModel.fromJson(result.data).data!.user!.obs;
+        userProfile = UserDetailsModel.fromJson(result.data).data!.user!.obs;
         change(userProfile, status: RxStatus.success());
+        update();
       }).onError((error, stackTrace) {
         change(userProfile, status: RxStatus.error(error.toString()));
       });
     }
   }
-
-
 }

@@ -14,7 +14,6 @@ import '../../../rest/models/wallet_balance_model.dart';
 import '../../../rest/rest_urls.dart';
 
 class WalletController extends GetxController with StateMixin<RxList<Balance>> {
-
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
@@ -62,11 +61,11 @@ class WalletController extends GetxController with StateMixin<RxList<Balance>> {
 
   final IOWebSocketChannel thrillusdChannel = IOWebSocketChannel.connect(
       "wss://stream.binance.com:9443/ws/xrpusdt@ticker");
+
   @override
   void onInit() {
     super.onInit();
     getBalance();
-
   }
 
   @override
@@ -75,11 +74,13 @@ class WalletController extends GetxController with StateMixin<RxList<Balance>> {
     ethusdChannel.stream.listen((event) {
       ethPer.value = double.parse(jsonDecode(event)['P']).toStringAsFixed(2);
       ethPrice.value =
-      (double.parse(jsonDecode(event)['c']).toStringAsFixed(6));
+          (double.parse(jsonDecode(event)['c']).toStringAsFixed(6));
     });
     btcusdtChannel.stream.listen((event) {
       btcPer.value = double.parse(jsonDecode(event)['P']).toStringAsFixed(2);
-      btcPrice.value = double.parse(jsonDecode(event)['c']).toStringAsFixed(6);
+      btcPrice = double.parse(jsonDecode(event)['c']).toStringAsFixed(6).obs;
+      getDatafromBinance();
+
     });
     bnbusdtChannel.stream.listen((event) {
       bnbPer.value = double.parse(jsonDecode(event)['P']).toStringAsFixed(2);
@@ -121,10 +122,9 @@ class WalletController extends GetxController with StateMixin<RxList<Balance>> {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     change(balance, status: RxStatus.loading());
-    dio.get("/wallet/balance").then((value) {
+   await dio.get("/wallet/balance").then((value) async{
       balance = WalletBalanceModel.fromJson(value.data).data!.obs;
       //  textEditingController.text = balance.first.amount.toString();
-      getDatafromBinance();
       change(balance, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(balance, status: RxStatus.error());
@@ -149,9 +149,9 @@ class WalletController extends GetxController with StateMixin<RxList<Balance>> {
           (value.data as List).map((x) => CryptoModel.fromJson(x)).toList();
 
       var totalAmount = ((double.parse(balance.value[1].amount.toString()) *
-          double.parse(cryptoData[0].lastPrice.toString())) +
+              double.parse(cryptoData[0].lastPrice.toString())) +
           (double.parse(balance.value[2].amount.toString()) *
-              double.parse(cryptoData[1].lastPrice.toString()) +
+                  double.parse(cryptoData[1].lastPrice.toString()) +
               double.parse(balance.value[3].amount.toString()) *
                   double.parse(cryptoData[2].lastPrice.toString()) +
               double.parse(balance.value[4].amount.toString()) *
@@ -161,24 +161,21 @@ class WalletController extends GetxController with StateMixin<RxList<Balance>> {
               double.parse(balance.value[6].amount.toString()) *
                   double.parse(cryptoData[5].lastPrice.toString())));
 
-      if(btcPrice.value.isEmpty){
+      if (btcPrice.value.isEmpty) {
+        textEditingController.value.text = "0.0";
+      } else {
         textEditingController.value.text =
-
-                "0.0";
+            (totalAmount / double.parse(btcPrice.toString()))
+                .toStringAsFixed(6);
       }
-      else{
-        textEditingController.value.text =
-                (totalAmount / double.parse(btcPrice.toString())).toStringAsFixed(6);
-      }
-
 
       totalbalance.value = "= \$" + totalAmount.toStringAsFixed(2);
 
-      textDollarController.value
-      .text = totalbalance.value;
+      textDollarController.value.text = totalbalance.value;
 
       Logger().wtf(cryptoData);
     }).onError((error, stackTrace) {
       Logger().wtf(error);
     });
-  }}
+  }
+}

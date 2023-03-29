@@ -6,9 +6,6 @@ import '../../../../rest/models/user_liked_videos_model.dart';
 import '../../../../rest/rest_urls.dart';
 
 class UserLikedVideosController extends GetxController with StateMixin<RxList<LikedVideos>> {
-  //TODO: Implement UserLikedVideosController
-  var storage = GetStorage();
-
   RxList<LikedVideos> likedVideos = RxList<LikedVideos>();
 
   var dio = Dio(BaseOptions(

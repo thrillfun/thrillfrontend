@@ -35,15 +35,11 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.5
-  velocity_x: ^3.6.0
-  shared_preferences: ^2.0.15
   cached_network_image: ^3.2.3
   carousel_slider: ^4.2.1
   intl: ^0.17.0
   http: ^0.13.5
   google_fonts: ^3.0.1
-  flutter_bloc: ^8.1.1
-  equatable: ^2.0.5
   firebase_messaging: ^14.1.4
   firebase_core: ^2.4.0
   firebase_auth: ^4.2.0
@@ -59,7 +55,7 @@ dependencies:
   file_support:
   ffmpeg_kit_flutter_full_gpl:
   video_player:
-  qr_flutter: 
+  qr_flutter:
   flutter_svg:
   syncfusion_flutter_sliders:
   file_picker:
@@ -98,7 +94,7 @@ dependencies:
   path: ^1.8.2
   on_audio_query: ^2.6.1
   flutter_switch: ^0.3.2
-  webview_flutter: ^4.0.0
+  webview_flutter: ^4.0.6
   audio_waveforms: ^0.1.5+1
   image_cropper: ^3.0.1
   otp_autofill: ^2.1.0
@@ -124,6 +120,7 @@ dependencies:
     git:
       url: https://github.com/tintran-dev/betterplayer.git
   animated_bottom_navigation_bar: ^1.1.0+1
+  amazon_cognito_identity_dart_2: ^3.2.0
 
 
 dev_dependencies:
@@ -166,12 +163,12 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-     - family: Urbanist
-       fonts:
-         - asset: fonts/Urbanist.ttf
-         - asset: fonts/Urbanist-Thin.ttf
-         - asset: fonts/Urbanist-Bold.ttf
-         - asset: fonts/Urbanist-Italic.ttf
+    - family: Urbanist
+      fonts:
+        - asset: fonts/Urbanist.ttf
+        - asset: fonts/Urbanist-Thin.ttf
+        - asset: fonts/Urbanist-Bold.ttf
+        - asset: fonts/Urbanist-Italic.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

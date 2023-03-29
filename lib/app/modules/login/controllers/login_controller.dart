@@ -27,16 +27,6 @@ class LoginController extends GetxController with StateMixin<dynamic> {
   @override
   void onInit() {
     super.onInit();
-    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) async {
-      // launchUrl(Uri.parse(RestUrl.videoUrl + dynamicLinkData.link.path));
-      if (dynamicLinkData.link.queryParameters["type"] == "referal") {
-        await GetStorage().write(
-            "referal", dynamicLinkData.link.queryParameters["id"].toString());
-      }
-    }).onError((error) {
-      errorToast(error.toString());
-    });
-    printSimCardsData();
   }
   Future<void> printSimCardsData() async {
     SimData simData = await SimDataPlugin.getSimData();
@@ -66,16 +56,21 @@ class LoginController extends GetxController with StateMixin<dynamic> {
       // "phone": phone,
       "firebase_token": firebase_token,
       "name": name,
-      "referral_code": GetStorage().read("referal") == null
+      "referral_code": GetStorage().read("referral_code") == null
           ? ""
-          : GetStorage().read("referal").toString()
+          : GetStorage().read("referral_code").toString()
     }).then((value) async {
       userProfile =
           UserDetailsModel.fromJson(value.data).data!.user!;
 
       await storage.write("userId",
           UserDetailsModel.fromJson(value.data).data!.user!.id!);
-
+      await storage.write("name",
+          UserDetailsModel.fromJson(value.data).data!.user!.name!);
+      await storage.write("avatar",
+          UserDetailsModel.fromJson(value.data).data!.user!.avatar!);
+      await storage.write("username",
+          UserDetailsModel.fromJson(value.data).data!.user!.username!);
       await storage.write(
           "token",
           UserDetailsModel.fromJson(value.data)

@@ -8,6 +8,7 @@ import '../controllers/others_following_controller.dart';
 
 class OthersFollowingView extends GetView<OtherssFollowingController> {
   const OthersFollowingView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -17,7 +18,7 @@ class OthersFollowingView extends GetView<OtherssFollowingController> {
         appBar: AppBar(
           bottom: TabBar(
             onTap: (index) => {},
-            tabs:const  [
+            tabs: const [
               Tab(
                 text: "Following",
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:thrill/app/routes/app_pages.dart';
 
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/color_manager.dart';
@@ -104,8 +105,7 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
                           child: GridView.count(
                         crossAxisCount: 3,
                         shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        childAspectRatio: Get.width / Get.height,
+                            childAspectRatio: 0.8,
                         mainAxisSpacing: 5,
                         children: List.generate(
                             state!.length,
@@ -113,6 +113,7 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
                                   children: [
                                     InkWell(
                                         onTap: () {
+                                          Get.toNamed(Routes.HASH_TAGS_VIDEO_PLAYER,arguments: {"hash_tags_videos":state,"init_page":videoIndex});
                                           // List<PublicVideos> videosList1 = [
                                           // ];
                                           // state!.forEach((element) {
@@ -226,8 +227,7 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
               alignment: Alignment.center,
             ),
             onEmpty: emptyListWidget(data: "No videos for this hashtag"),
-            onError: (error) =>
-                emptyListWidget(data: "No videos for this hashtag"))
+          )
 
         // : StaggeredGridView.countBuilder(
         //     staggeredTileBuilder: (index) => index % 2 == 0

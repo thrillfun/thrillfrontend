@@ -15,11 +15,5 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
-    <!-- Theme for IMG.LY editors. -->
-    <style name="CUSTOM_THEME" parent="Theme.Imgly">
-        <item name="imgly_background_color">#ffffff</item>
-        <item name="imgly_optionToolBar_background_color">#ffffff</item>
-        <item name="imgly_actionBar_background_color">#ffffff</item>
-        <item name="imgly_highlight_color">#ffffff</item>
-    </style>
+
 </resources>

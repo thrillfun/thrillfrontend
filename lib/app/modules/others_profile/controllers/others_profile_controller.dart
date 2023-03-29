@@ -14,6 +14,7 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
   var isSimCardAvailable = true.obs;
 
   var dio =Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+
   @override
   void onInit() {
     getUserProfile();
@@ -29,6 +30,7 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
   void onClose() {
     super.onClose();
   }
+
   Future<void> getUserProfile() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"

@@ -22,7 +22,9 @@ import 'package:truecaller_sdk/truecaller_sdk.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LoginView extends GetView<LoginController> {
-  LoginView({Key? key}) : super(key: key);
+  LoginView(this.isPhoneAvailable);
+
+  var isPhoneAvailable=true.obs;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +41,7 @@ class LoginView extends GetView<LoginController> {
               height: 10,
             ),
             Visibility(
-              visible: controller.isSimCardAvailable.isTrue,
+              visible: isPhoneAvailable.value,
               child: InkWell(
                   onTap: () {
                     TruecallerSdk.initializeSDK(
@@ -93,7 +95,6 @@ class LoginView extends GetView<LoginController> {
                 onTap: ()  {
                   if(Get.isBottomSheetOpen!){
                     Get.back();
-
                   }
                   Get.bottomSheet(
                       OtpverifyView(),

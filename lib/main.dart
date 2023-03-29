@@ -11,15 +11,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:get/get.dart' as transition;
+import 'package:get/get.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sim_data/sim_data.dart';
+import 'package:sim_data/sim_model.dart';
 import 'package:thrill/app/modules/bindings/app_bindings.dart';
 import 'package:thrill/app/utils/color_manager.dart';
+import 'package:video_editor_sdk/video_editor_sdk.dart';
 
+import 'app/modules/login/views/login_view.dart';
 import 'app/routes/app_pages.dart';
+import 'app/utils/utils.dart';
 import 'firebase_options.dart';
 
 List<CameraDescription> cameras = [];
@@ -85,25 +91,126 @@ void main() async {
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-  final PendingDynamicLinkData? initialLink =
-      await FirebaseDynamicLinks.instance.getInitialLink();
+  FirebaseDynamicLinks.instance.onLink.listen(
+    (pendingDynamicLinkData) async {
+      // Set up the `onLink` event listener next as it may be received here
+      if (pendingDynamicLinkData!.link.queryParameters["type"] == "profile") {
+        await GetStorage()
+            .write("profileId",
+                pendingDynamicLinkData!.link.queryParameters["id"].toString())
+            .then((value) {
+          Get.toNamed(Routes.OTHERS_PROFILE);
+        });
+      } else if (pendingDynamicLinkData!.link.queryParameters["type"] ==
+          "video") {
+        successToast(
+            pendingDynamicLinkData!.link.queryParameters["id"].toString());
+      } else if (pendingDynamicLinkData!.link.queryParameters["type"] ==
+          "referal") {
+        await GetStorage()
+            .write(
+                "referral_code",
+                pendingDynamicLinkData!.link.queryParameters["referal"]
+                    .toString())
+            .then((value) async {
+          if (GetStorage().read("token") == null) {
+            if (await Permission.phone.isGranted) {
+              await SimDataPlugin.getSimData().then((value) =>
+                  value.cards.isEmpty
+                      ? Get.bottomSheet(LoginView(false.obs))
+                      : Get.bottomSheet(LoginView(true.obs)));
+            } else {
+              await Permission.phone.request().then((value) async =>
+                  await SimDataPlugin.getSimData().then((value) =>
+                      value.cards.isEmpty
+                          ? Get.bottomSheet(LoginView(false.obs))
+                          : Get.bottomSheet(LoginView(true.obs))));
+            }
+          }
+          // await GetStorage()
+          //     .write("profileId",
+          //         pendingDynamicLinkData!.link.queryParameters["id"].toString())
+          //     .then((value) {
+          //   Get.toNamed(Routes.OTHERS_PROFILE);
+          // });
+        });
+        // successToast(pendingDynamicLinkData!.link.queryParameters["id"].toString());
+      }
+    },
+  );
+  VESDK.unlockWithLicense("assets/vesdk_android_license");
 
   runApp(
     GetMaterialApp(
       title: "Thrill",
+      debugShowCheckedModeBanner: false,
       darkTheme: ThemeData(
+        bottomSheetTheme: BottomSheetThemeData(
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10))),
+        hintColor: Colors.white.withOpacity(0.3),
+        indicatorColor: ColorManager.colorAccent,
+        focusColor: ColorManager.colorAccent,
+        backgroundColor: Colors.black,
+        textSelectionTheme:
+            TextSelectionThemeData(cursorColor: ColorManager.colorAccent),
+        inputDecorationTheme: InputDecorationTheme(
+            prefixIconColor: ColorManager.colorAccent,
+            focusColor: ColorManager.colorAccent,
+            fillColor: Colors.grey.withOpacity(0.1),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: const BorderSide(
+                color: Color(0xffFAFAFA),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide(
+                color: Colors.grey.withOpacity(0.1),
+              ),
+            )),
         dialogBackgroundColor: Colors.black,
         appBarTheme: const AppBarTheme(color: Colors.black),
         scaffoldBackgroundColor: Colors.black,
         cardColor: Colors.black,
-        tabBarTheme: const TabBarTheme(indicatorColor: ColorManager.colorAccent),
+        tabBarTheme:
+            const TabBarTheme(indicatorColor: ColorManager.colorAccent),
         progressIndicatorTheme:
             const ProgressIndicatorThemeData(color: ColorManager.colorAccent),
         colorScheme: const ColorScheme.dark(background: Colors.black),
-        primaryColor: Colors.black,
+        primaryColor: ColorManager.colorAccent,
       ),
       theme: ThemeData(
+        bottomSheetTheme: BottomSheetThemeData(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10))),
+        hintColor: Colors.black.withOpacity(0.3),
+        indicatorColor: ColorManager.colorAccent,
+        focusColor: ColorManager.colorAccent,
         dialogBackgroundColor: Colors.white,
+        progressIndicatorTheme:
+            ProgressIndicatorThemeData(color: ColorManager.colorAccent),
+        textSelectionTheme:
+            TextSelectionThemeData(cursorColor: ColorManager.colorAccent),
+        inputDecorationTheme: InputDecorationTheme(
+            prefixIconColor: ColorManager.colorAccent,
+            focusColor: ColorManager.colorAccent,
+            fillColor: Colors.grey.withOpacity(0.1),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: const BorderSide(
+                color: Color(0xffFAFAFA),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide(
+                color: Colors.grey.withOpacity(0.1),
+              ),
+            )),
         scaffoldBackgroundColor: Colors.white,
         textTheme: const TextTheme(button: TextStyle(color: Colors.white)),
         tabBarTheme: const TabBarTheme(
@@ -114,6 +221,7 @@ void main() async {
             color: Colors.white,
             titleTextStyle: TextStyle(color: Colors.black),
             iconTheme: IconThemeData(color: Colors.black)),
+        primaryColor: ColorManager.colorAccent,
       ),
       initialBinding: AppBindings(),
       initialRoute: AppPages.INITIAL,

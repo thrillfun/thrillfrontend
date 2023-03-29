@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:thrill/app/routes/app_pages.dart';
 
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/color_manager.dart';
@@ -14,7 +15,8 @@ class UserPrivateVideosView extends GetView<UserPrivateVideosController> {
     return controller.obx(
             (state) => state!.isEmpty
             ? Column(
-          children: [emptyListWidget()],
+              mainAxisAlignment: MainAxisAlignment.center,
+          children: [Icon(Icons.lock_clock)],
         )
             : Column(
           children: [
@@ -32,15 +34,7 @@ class UserPrivateVideosView extends GetView<UserPrivateVideosController> {
                         state.length,
                             (index) => GestureDetector(
                           onTap: () {
-                            // Get.to(VideoPlayerScreen(
-                            //   isFav: false,
-                            //   isFeed: false,
-                            //   isLock: true,
-                            //   position: index,
-                            //   privateVideos: state.value,
-                            // ));
-                            // Navigator.pushReplacementNamed(context, '/',
-                            //     arguments: {'videoModel': privateList[index]});
+                           Get.toNamed(Routes.PRIVATE_VIDEOS_PLAYER,arguments: {"private_videos":state,"init_page":index});
                           },
                           child: Stack(
                             fit: StackFit.expand,

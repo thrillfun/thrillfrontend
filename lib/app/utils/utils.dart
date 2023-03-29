@@ -228,11 +228,11 @@ uploadingToast(SimpleS3 _simpleS3) async {
         builder: (context, snapshot) {
           return snapshot.data != null
               ? LinearProgressIndicator(
-            value: (snapshot.data as int).toDouble(),
-          )
+                  value: (snapshot.data as int).toDouble(),
+                )
               : const LinearProgressIndicator(
-            value: 0,
-          );
+                  value: 0,
+                );
         }),
     isDismissible: false,
     mainButton: IconButton(
@@ -270,21 +270,21 @@ closeDialogue(BuildContext context) {
   // Navigator.pop(context);
 }
 
-
 emptyListWidget({String data = "Oops Nothing Found"}) => Expanded(
-  child: Center(
-    child: Text(
-      data,
-      textAlign: TextAlign.center,
-      style:const  TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
+      child: Center(
+        child: Text(
+          data,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
           ),
-    ),
-  ),
-);
+        ),
+      ),
+    );
+
 musicPlayerBottomSheet(
-    RxString profilePic, RxString soundName, RxString soundUrl) =>
+        RxString profilePic, RxString soundName, RxString soundUrl) =>
     Get.bottomSheet(
         Container(
             padding: const EdgeInsets.all(10),
@@ -309,69 +309,69 @@ void seek(Duration position) {
 Widget imgNet(String imgPath) {
   return CachedNetworkImage(
       placeholder: (a, b) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-      fit: BoxFit.cover,
-      imageBuilder: (context, imageProvider) => Container(
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          shape: BoxShape.rectangle,
-          image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
-        ),
-      ),
-      errorWidget: (context, string, dynamic) => CachedNetworkImage(
-          placeholder: (a, b) => const Center(
             child: CircularProgressIndicator(),
           ),
-          fit: BoxFit.cover,
-          imageBuilder: (context, imageProvider) => Container(
+      fit: BoxFit.cover,
+      imageBuilder: (context, imageProvider) => Container(
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               shape: BoxShape.rectangle,
-              image:
-              DecorationImage(image: imageProvider, fit: BoxFit.cover),
+              image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
             ),
           ),
+      errorWidget: (context, string, dynamic) => CachedNetworkImage(
+          placeholder: (a, b) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+          fit: BoxFit.cover,
+          imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  shape: BoxShape.rectangle,
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
+              ),
           imageUrl: '${RestUrl.thambUrl}thumb-not-available.png'),
       imageUrl: imgPath);
 }
 
 Widget imgProfile(String imagePath) => Container(
-  child: CachedNetworkImage(
-      placeholder: (a, b) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-      fit: BoxFit.fill,
-      height: 60,
-      width: 60,
-      imageBuilder: (context, imageProvider) => Container(
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(60),
-          shape: BoxShape.rectangle,
-          image:
-          DecorationImage(image: imageProvider, fit: BoxFit.cover),
-        ),
-      ),
-      errorWidget: (context, string, dynamic) => CachedNetworkImage(
+      child: CachedNetworkImage(
           placeholder: (a, b) => const Center(
-            child: CircularProgressIndicator(),
-          ),
+                child: CircularProgressIndicator(),
+              ),
           fit: BoxFit.fill,
           height: 60,
           width: 60,
           imageBuilder: (context, imageProvider) => Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(60),
-              shape: BoxShape.rectangle,
-              image: DecorationImage(
-                  image: imageProvider, fit: BoxFit.fill),
-            ),
-          ),
-          imageUrl: RestUrl.placeholderImage),
-      imageUrl: RestUrl.profileUrl + imagePath),
-);
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(60),
+                  shape: BoxShape.rectangle,
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
+              ),
+          errorWidget: (context, string, dynamic) => CachedNetworkImage(
+              placeholder: (a, b) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+              fit: BoxFit.fill,
+              height: 60,
+              width: 60,
+              imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(60),
+                      shape: BoxShape.rectangle,
+                      image: DecorationImage(
+                          image: imageProvider, fit: BoxFit.fill),
+                    ),
+                  ),
+              imageUrl: RestUrl.placeholderImage),
+          imageUrl: RestUrl.profileUrl + imagePath),
+    );
 
 getTempDirectory() async {
   var directoryIOS = await getApplicationDocumentsDirectory();
@@ -404,9 +404,9 @@ extension StringExtension on String {
 }
 
 loadLocalSvg(String name) => SvgPicture.asset(
-  "assets/$name",
-  fit: BoxFit.fill,
-);
+      "assets/$name",
+      fit: BoxFit.fill,
+    );
 
 loadSvgCacheImage(String url) {
   return FittedBox(
@@ -414,7 +414,7 @@ loadSvgCacheImage(String url) {
     child: SvgPicture(
       AdvancedNetworkSvg(
         RestUrl.assetsUrl + url,
-            (theme) => (bytes, colorFilter, key) {
+        (theme) => (bytes, colorFilter, key) {
           return svg.svgPictureDecoder(
             bytes ?? Uint8List.fromList(const []),
             false,
@@ -430,10 +430,10 @@ loadSvgCacheImage(String url) {
 }
 
 errorWidget() => CachedNetworkImage(
-  fit: BoxFit.fill,
-  imageUrl:
-  "https://cdn.dribbble.com/users/463734/screenshots/2016807/404_error_shot.png",
-);
+      fit: BoxFit.fill,
+      imageUrl:
+          "https://cdn.dribbble.com/users/463734/screenshots/2016807/404_error_shot.png",
+    );
 
 showLoginAlert() {
   Get.defaultDialog(
@@ -457,87 +457,87 @@ showLoadingDialog() =>
     Get.defaultDialog(title: "Please Wait", content: loader());
 
 loader() => Container(
-  height: 150,
-  width: 150,
-  alignment: Alignment.center,
-  color: Colors.transparent.withOpacity(0.0),
-  child: Lottie.network(
-      "https://assets10.lottiefiles.com/packages/lf20_dkz94xcg.json",
       height: 150,
-      width: 150),
-);
+      width: 150,
+      alignment: Alignment.center,
+      color: Colors.transparent.withOpacity(0.0),
+      child: Lottie.network(
+          "https://assets10.lottiefiles.com/packages/lf20_dkz94xcg.json",
+          height: 150,
+          width: 150),
+    );
 
 showWinDialog(String msg) => Get.defaultDialog(
-  backgroundColor: Colors.transparent,
-  title: "",
-  content: Stack(
-    children: [
-      Container(
-        height: 250,
-        margin: const EdgeInsets.only(top: 50),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-        ),
-        width: Get.width,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            const Text(
-              "Successful",
-              style: TextStyle(
-                  color: ColorManager.colorPrimaryLight,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w700),
+      backgroundColor: Colors.transparent,
+      title: "",
+      content: Stack(
+        children: [
+          Container(
+            height: 250,
+            margin: const EdgeInsets.only(top: 50),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
             ),
-            Text(
-              msg,
-              style: const TextStyle(
-                  color: Color(0xff1C1E24),
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400),
-            ),
-            InkWell(
-              onTap: () {
-                Get.back();
-              },
-              child: Container(
-                width: Get.width,
-                margin: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 20),
-                padding: const EdgeInsets.all(10),
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
-                    gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          ColorManager.colorPrimaryLight,
-                          ColorManager.colorAccent
-                        ])),
-                child: const Text(
-                  "Excellent!",
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+            width: Get.width,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Text(
+                  "Successful",
+                  style: TextStyle(
+                      color: ColorManager.colorPrimaryLight,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w700),
                 ),
-              ),
-            )
-          ],
-        ),
+                Text(
+                  msg,
+                  style: const TextStyle(
+                      color: Color(0xff1C1E24),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400),
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Container(
+                    width: Get.width,
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+                    padding: const EdgeInsets.all(10),
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              ColorManager.colorPrimaryLight,
+                              ColorManager.colorAccent
+                            ])),
+                    child: const Text(
+                      "Excellent!",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            width: Get.width,
+            child: CachedNetworkImage(
+                fit: BoxFit.contain,
+                height: 150,
+                width: 150,
+                imageUrl: RestUrl.assetsUrl + "you_won_logo.png"),
+          )
+        ],
       ),
-      SizedBox(
-        width: Get.width,
-        child: CachedNetworkImage(
-            fit: BoxFit.contain,
-            height: 150,
-            width: 150,
-            imageUrl: RestUrl.assetsUrl + "you_won_logo.png"),
-      )
-    ],
-  ),
-);
+    );
 
 convertUTC(String format) {
   var str = format;
@@ -555,9 +555,8 @@ extension Unique<E, Id> on List<E> {
   }
 }
 
-
 class DashedLineVerticalPainter extends CustomPainter {
-  DashedLineVerticalPainter(this.color){}
+  DashedLineVerticalPainter(this.color) {}
   Color color;
 
   @override

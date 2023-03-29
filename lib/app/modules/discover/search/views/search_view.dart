@@ -36,6 +36,7 @@ class SearchView extends GetView<SearchController> {
     return DefaultTabController(
         length: 5,
         child: Scaffold(
+            resizeToAvoidBottomInset: false,
             appBar: AppBar(
               title: searchBarLayout(),
               bottom: TabBar(
@@ -51,7 +52,7 @@ class SearchView extends GetView<SearchController> {
                       const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                   indicatorPadding: const EdgeInsets.symmetric(horizontal: 10),
                   tabs: const [
-                    Tab(text: "Overview"),
+                    Tab(text: "All"),
                     Tab(text: "Videos"),
                     Tab(text: "Sounds"),
                     Tab(text: "Hashtags"),
@@ -67,73 +68,46 @@ class SearchView extends GetView<SearchController> {
                 ]))));
   }
 
-  searchBarLayout() => Expanded(
-        child: Row(
-          children: [
-            Flexible(
-              child: Container(
-                height: 55,
-                margin: const EdgeInsets.only(
-                    left: 10, right: 10, top: 10, bottom: 10),
-                width: Get.width,
-                child: TextFormField(
-                  controller: _controller,
-                  onEditingComplete: () {
-                    controller.searchHashtags(_controller.text);
-                  },
+  searchBarLayout() => Row(
+        children: [
+          Flexible(
+            child: Container(
+              height: 55,
+              margin: const EdgeInsets.only(
+                  left: 10, right: 10, top: 10, bottom: 10),
+              width: Get.width,
+              child: TextFormField(
+                controller: _controller,
+                onChanged: (value) {
+                  controller.searchHashtags(_controller.text);
+                },
+                // onEditingComplete: () {
+                //   controller.searchHashtags(_controller.text);
+                // },
 
-                  onFieldSubmitted: (text) {
-                    controller.searchHashtags(text);
-                  },
-                  // initialValue: user.username,
-                  decoration: InputDecoration(
-                    focusColor: ColorManager.colorAccent,
-                    fillColor: fieldNode.hasFocus
-                        ? ColorManager.colorAccentTransparent
-                        : Colors.grey.withOpacity(0.1),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: fieldNode.hasFocus
-                          ? const BorderSide(
-                              color: Color(0xff2DCBC8),
-                            )
-                          : const BorderSide(
-                              color: Color(0xffFAFAFA),
-                            ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: fieldNode.hasFocus
-                          ? const BorderSide(
-                              color: Color(0xff2DCBC8),
-                            )
-                          : BorderSide(
-                              color: Colors.grey.withOpacity(0.1),
-                            ),
-                    ),
-                    filled: true,
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: fieldNode.hasFocus
-                          ? ColorManager.colorAccent
-                          : Colors.grey.withOpacity(0.3),
-                    ),
-                    hintText: "Search",
-                    hintStyle: const TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey,
-                        fontSize: 14),
+                onFieldSubmitted: (text) {
+                  controller.searchHashtags(text);
+                },
+                // initialValue: user.username,
+                decoration: InputDecoration(
+                  filled: true,
+                  prefixIcon: Icon(
+                    Icons.search,
                   ),
+                  hintText: "Search",
                 ),
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       );
 
   searchUsers() => controller.obx(
-      (state) => state!.isEmpty
-          ? emptyListWidget()
+      (state) => state![0].users!.isEmpty
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Icon(Icons.person_off_sharp)],
+            )
           : Container(
               height: Get.height,
               child: ListView(
@@ -243,7 +217,8 @@ class SearchView extends GetView<SearchController> {
                                         state[0].users![index].id!,
                                         state[0].users![index].isfollow == 0
                                             ? "follow"
-                                            : "unfollow")
+                                            : "unfollow",
+                                        searchQuery: _controller.text)
                                   },
                                   child: state[0].users![index].isfollow == 0
                                       ? Container(
@@ -290,8 +265,12 @@ class SearchView extends GetView<SearchController> {
       onLoading: loader());
 
   searchVideos() => controller.obx(
-      (state) => state!.isEmpty
-          ? emptyListWidget()
+      (state) => state!.isEmpty || state[0].videos!.isEmpty
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Icon(Icons.fiber_smart_record_sharp)],
+            )
           : GridView.count(
               crossAxisCount: 2,
               crossAxisSpacing: 10,
@@ -381,42 +360,10 @@ class SearchView extends GetView<SearchController> {
                           ],
                         ),
                         onTap: () {
-                          // List<Videos> videosList1 = [];
-                          // state[0].videos!.forEach((element) {
-                          //   var user = PublicUser(
-                          //     id: element.user?.id,
-                          //     name: element.user?.name,
-                          //     facebook: element.user?.facebook,
-                          //     firstName: element.user?.firstName,
-                          //     lastName: element.user?.lastName,
-                          //     username: element.user?.username,
-                          //     isFollow: element.user?.isfollow,
-                          //   );
-                          //   videosList1.add(PublicVideos(
-                          //     id: element.id,
-                          //     video: element.video,
-                          //     description: element.description,
-                          //     sound: element.sound,
-                          //     soundName: element.soundName,
-                          //     soundCategoryName: element.soundCategoryName,
-                          //     soundOwner: element.soundOwner,
-                          //     filter: element.filter,
-                          //     likes: element.likes,
-                          //     views: element.views,
-                          //     gifImage: element.gifImage,
-                          //     speed: element.speed,
-                          //     comments: element.comments,
-                          //     isDuet: "no",
-                          //     duetFrom: "",
-                          //     isCommentable: "yes",
-                          //     videoLikeStatus: element.videoLikeStatus,
-                          //     user: user,
-                          //   ));
-                          // });
-                          // Get.to(VideoPlayerItem(
-                          //   videosList: videosList1,
-                          //   position: index,
-                          // ));
+                          Get.toNamed(Routes.SEARCH_VIDEOS_PLAYER, arguments: {
+                            "search_videos": state[0].videos,
+                            "init_page": index
+                          });
                         },
                       )),
             ),
@@ -426,8 +373,11 @@ class SearchView extends GetView<SearchController> {
       ));
 
   searchHashtags() => controller.obx(
-      (state) => state!.isEmpty
-          ? emptyListWidget()
+      (state) => state![0].hashtags!.isEmpty
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Icon(Icons.confirmation_num)],
+            )
           : Container(
               height: Get.height,
               child: ListView.builder(
@@ -435,7 +385,8 @@ class SearchView extends GetView<SearchController> {
                   itemCount: state![0].hashtags!.length,
                   itemBuilder: (context, index) => InkWell(
                         onTap: () async {
-                          await GetStorage().write("hashtagId", state[0].id);
+                          await GetStorage()
+                              .write("hashtagId", state[0].hashtags![index].id);
                           Get.toNamed(Routes.HASH_TAGS_DETAILS, arguments: {
                             "hashtag_name": "${state[0].hashtags![index].name}"
                           });
@@ -493,8 +444,11 @@ class SearchView extends GetView<SearchController> {
       onLoading: loader());
 
   searchSounds() => controller.obx(
-      (state) => state!.isEmpty
-          ? emptyListWidget()
+      (state) => state![0].sounds!.isEmpty
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Icon(Icons.volume_mute)],
+            )
           : Container(
               height: Get.height,
               child: ListView.builder(
@@ -552,21 +506,27 @@ class SearchView extends GetView<SearchController> {
                                             fontSize: 18),
                                       ),
                                       Text(
-                                        state[0]
-                                            .sounds![index]
-                                            .soundOwner!
-                                            .name
-                                            .toString(),
+                                        state[0].sounds![index].soundOwner ==
+                                                null
+                                            ? ""
+                                            : state[0]
+                                                .sounds![index]
+                                                .soundOwner!
+                                                .name
+                                                .toString(),
                                         style: TextStyle(
                                             fontWeight: FontWeight.w500,
                                             fontSize: 14),
                                       ),
                                       Text(
-                                        state[0]
-                                            .sounds![index]
-                                            .soundOwner!
-                                            .name
-                                            .toString(),
+                                        state[0].sounds![index].soundOwner ==
+                                                null
+                                            ? ""
+                                            : state[0]
+                                                .sounds![index]
+                                                .soundOwner!
+                                                .name
+                                                .toString(),
                                         style: TextStyle(
                                           fontWeight: FontWeight.w400,
                                         ),
@@ -578,8 +538,7 @@ class SearchView extends GetView<SearchController> {
                               Text(
                                 state[0]
                                     .sounds![index]
-                                    .soundOwner!
-                                    .followersCount
+                                    .sound_used_inweek_count
                                     .toString(),
                                 style: TextStyle(
                                     fontWeight: FontWeight.w600, fontSize: 14),
@@ -589,21 +548,13 @@ class SearchView extends GetView<SearchController> {
                         ),
                         onTap: () async {
                           await GetStorage().write(
-                              "sound_url", state[0].sounds![index].sound);
-                          await GetStorage().write(
-                              "sound_name", state[0].sounds![index].sound);
-                          await GetStorage().write(
-                              "is_follow", state[0].users![index].isfollow);
+                              "profileId", state[0].sounds![index].userId);
 
                           Get.toNamed(Routes.SOUNDS, arguments: {
-                            "profile": state[0].users![index].avatar == null
-                                ? ""
-                                : "${RestUrl.profileUrl + state[0].users![index].avatar.toString()}",
                             "sound_name":
-                                "${state[0].sounds![index].sound.toString()}",
-                            "profile_name": "${state[0].users![index].name}",
-                            "user_name": "${state[0].users![index].username}",
-                            "is_follow": state[0].users![index].isfollow.obs
+                                state[0].sounds![index].name.toString(),
+                            "sound_url":
+                                state[0].sounds![index].sound.toString(),
                           });
                         },
                       )),
@@ -612,7 +563,10 @@ class SearchView extends GetView<SearchController> {
       onLoading: Expanded(child: loader()));
 
   searchOverview() => controller.obx(
-      (state) => state!.isEmpty
+      (state) => state![0].sounds!.isEmpty &&
+              state![0].videos!.isEmpty &&
+              state![0].hashtags!.isEmpty &&
+              state![0].users!.isEmpty
           ? Column(
               children: [emptyListWidget()],
             )
@@ -881,49 +835,11 @@ class SearchView extends GetView<SearchController> {
                                     ],
                                   ),
                                   onTap: () {
-                                    // List<PublicVideos> videosList1 = [];
-                                    // state[0].videos!.forEach((element) {
-                                    //   var user = PublicUser(
-                                    //     id: element.user?.id,
-                                    //     name: element.user?.name,
-                                    //     facebook: element.user?.facebook,
-                                    //     firstName: element.user?.firstName,
-                                    //     lastName: element.user?.lastName,
-                                    //     username: element.user?.username,
-                                    //     isFollow: element.user?.isfollow,
-                                    //   );
-                                    //   videosList1.add(PublicVideos(
-                                    //     id: element.id,
-                                    //     video: element.video,
-                                    //     description: element.description,
-                                    //     sound: element.sound,
-                                    //     soundName: element.soundName,
-                                    //     soundCategoryName:
-                                    //     element.soundCategoryName,
-                                    //     soundOwner: element.soundOwner,
-                                    //     filter: element.filter,
-                                    //     likes: element.likes,
-                                    //     views: element.views,
-                                    //     gifImage: element.gifImage,
-                                    //     speed: element.speed,
-                                    //     comments: element.comments,
-                                    //     isDuet: "no",
-                                    //     duetFrom: "",
-                                    //     isCommentable: "yes",
-                                    //     videoLikeStatus:
-                                    //     element.videoLikeStatus,
-                                    //     user: user,
-                                    //   ));
-                                    // });
-                                    // Get.to(VideoPlayerItem(
-                                    //   videosList: videosList1,
-                                    //   position: index,
-                                    // ));
-                                    // Get.to(VideoPlayerScreen(
-                                    //   isFav: false,
-                                    //   isFeed: false,
-                                    //   isLock: false,
-                                    // ));
+                                    Get.toNamed(Routes.SEARCH_VIDEOS_PLAYER,
+                                        arguments: {
+                                          "search_videos": state[0].videos,
+                                          "init_page": index
+                                        });
                                   },
                                 )),
                       ),
@@ -950,8 +866,8 @@ class SearchView extends GetView<SearchController> {
                             itemCount: state[0].hashtags!.take(4).length,
                             itemBuilder: (context, index) => InkWell(
                                   onTap: () async {
-                                    await GetStorage()
-                                        .write("hashtagId", state[0].id);
+                                    await GetStorage().write("hashtagId",
+                                        state[0].hashtags![index].id);
                                     Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                         arguments: {
                                           "hashtag_name":
@@ -1128,13 +1044,10 @@ class SearchView extends GetView<SearchController> {
                                       ),
                                     ),
                                     Text(
-                                      state[0].sounds![index].soundOwner != null
-                                          ? state[0]
-                                              .sounds![index]
-                                              .soundOwner!
-                                              .followersCount
-                                              .toString()
-                                          : "0",
+                                      state[0]
+                                          .sounds![index]
+                                          .sound_used_inweek_count
+                                          .toString(),
                                       style: TextStyle(
                                           fontWeight: FontWeight.w600,
                                           fontSize: 14),
@@ -1149,20 +1062,19 @@ class SearchView extends GetView<SearchController> {
                                     state[0].sounds![index].sound);
                                 await GetStorage().write("is_follow",
                                     state[0].users![index].isfollow);
+                                await GetStorage().write(
+                                    "soundId", state[0].sounds![index].id);
+                                await GetStorage().write("profileId",
+                                    state[0].sounds![index].userId);
+
+                                await GetStorage().write(
+                                    "profileId", state[0].sounds![index].userId);
 
                                 Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "profile": state[0].users![index].avatar ==
-                                          null
-                                      ? ""
-                                      : "${RestUrl.profileUrl + state[0].users![index].avatar.toString()}",
                                   "sound_name":
-                                      "${state[0].sounds![index].sound.toString()}",
-                                  "profile_name":
-                                      "${state[0].users![index].name}",
-                                  "user_name":
-                                      "${state[0].users![index].username}",
-                                  "is_follow":
-                                      state[0].users![index].isfollow.obs
+                                  state[0].sounds![index].name.toString(),
+                                  "sound_url":
+                                  state[0].sounds![index].sound.toString(),
                                 });
                                 // Get.to(SoundDetails(map: {
                                 //   "sound": state[0].sounds![index].sound,

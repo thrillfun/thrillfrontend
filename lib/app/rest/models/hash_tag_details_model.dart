@@ -68,27 +68,27 @@ class HashtagRelatedVideos {
         this.user,this.soundId});
 
   HashtagRelatedVideos.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    video = json['video'];
-    description = json['description'];
-    sound = json['sound'];
-    soundName = json['sound_name'];
-    soundCategoryName = json['sound_category_name'];
-    filter = json['filter'];
-    likes = json['likes'];
-    views = json['views'];
-    gifImage = json['gif_image'];
-    speed = json['speed'];
-    comments = json['comments'];
+    id = json['id']??0;
+    video = json['video']??"";
+    description = json['description']??"";
+    sound = json['sound']??"";
+    soundName = json['sound_name']??"";
+    soundCategoryName = json['sound_category_name']??"";
+    filter = json['filter']??"";
+    likes = json['likes']??"";
+    views = json['views']??"";
+    gifImage = json['gif_image']??"";
+    speed = json['speed']??"";
+    comments = json['comments']??"";
     if (json['hashtags'] != null) {
       hashtags = <Hashtags>[];
       json['hashtags'].forEach((v) {
         hashtags!.add(new Hashtags.fromJson(v));
       });
-    }    soundOwner = json['sound_owner'];
+    }    soundOwner = json['sound_owner']??"";
     videoLikeStatus = json['video_like_status']??0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
-    soundId = json["sound_id"];
+    soundId = json["sound_id"]??0;
   }
 
   Map<String, dynamic> toJson() {

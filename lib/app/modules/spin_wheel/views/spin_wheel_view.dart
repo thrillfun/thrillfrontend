@@ -235,7 +235,7 @@ class SpinWheelView extends GetView<SpinWheelController> {
        //
 
        //await player.resume();
-       controller.streamController!.add(selectedInt.value - 1);
+       controller.streamController!.add(selectedInt.value);
      } else {
        isSpin.value = true;
      }

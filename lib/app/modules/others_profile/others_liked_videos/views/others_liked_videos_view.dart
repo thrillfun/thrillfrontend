@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../rest/models/user_details_model.dart';
 import '../../../../rest/rest_urls.dart';
+import '../../../../routes/app_pages.dart';
 import '../../../../utils/color_manager.dart';
 import '../../../../utils/utils.dart';
 import '../controllers/others_liked_videos_controller.dart';
@@ -29,74 +30,8 @@ class OthersLikedVideosView extends GetView<OthersLikedVideosController> {
                       state!.length,
                           (index) => GestureDetector(
                         onTap: () {
-                          User publicUser = User(
-                            id:state[index].user!.id,
-                            name: state[index].user?.name
-                                .toString(),
-                            username: state[index].user?.username,
-                            email: state[index].user?.email,
-                            dob:
-                            state[index].user?.dob,
-                            phone: state[index].user?.phone,
-                            avatar: state[index].user!.avatar,
-                            socialLoginType: state[index]
-                                .user
-                                ?.socialLoginType,
-                            socialLoginId: state[index].user?.socialLoginId,
-                            firstName: state[index].user?.firstName,
-                            lastName: state[index].user?.lastName,
-                            gender: state[index].user?.gender,
-                          );
+                          Get.toNamed(Routes.OTHERS_LIKED_VIDEOS_PLAYER,arguments: {"liked_videos":state,"init_page":index});
 
-                          // Get.to(VideoPlayerScreen(
-                          //   isFeed: false,
-                          //   isFav: true,
-                          //   isLock: false,
-                          //   likedVideos: controller.likedVideos,
-                          //   position: index,
-                          //   hashTagVideos: [],
-                          //   videosList: [],
-                          //   privateVideos: [],
-                          // ));
-                          // Get.to(UserLikedVideoPlayer({
-                          //   strings.gifImage:
-                          //   controller.likedVideos[index].gifImage,
-                          //   strings.videoLikeStatus:
-                          //   controller.likedVideos[index].videoLikeStatus,
-                          //   strings.sound:
-                          //   controller.likedVideos[index].sound,
-                          //   strings.soundOwner:
-                          //   controller.likedVideos[index].soundOwner,
-                          //   strings.videoUrl:
-                          //   controller.likedVideos[index].video,
-                          //   strings.isCommentAllowed:
-                          //   controller.likedVideos[index].isCommentable ==
-                          //       "yes"
-                          //       ? true.obs
-                          //       : false.obs,
-                          //   strings.publicUser: publicUser,
-                          //   strings.videoId: controller.likedVideos[index].id,
-                          //   strings.soundName:
-                          //   controller.likedVideos[index].soundName,
-                          //   strings.isDuetable:
-                          //   controller.likedVideos[index].isDuetable ==
-                          //       "yes"
-                          //       ? true.obs
-                          //       : false.obs,
-                          //   //   strings.publicVideos:controller.likedVideos
-                          //   //   PublicVideos publicVideos;
-                          //   strings.description:
-                          //   controller.likedVideos[index].description,
-                          //   strings.hashtagsList: (controller
-                          //       .likedVideos[index]
-                          //       .hashtags as List<dynamic>),
-                          //   strings.likes:
-                          //   controller.likedVideos[index].likes,
-                          //   strings.isFollow:
-                          //   controller.likedVideos[index].isfollow,
-                          //   strings.commentsCount:
-                          //   controller.likedVideos[index].comments
-                          // }));
                         },
                         child: Stack(
                           fit: StackFit.expand,

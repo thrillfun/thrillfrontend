@@ -48,7 +48,9 @@ class SpinWheelController extends GetxController with StateMixin<SpinWheelDataMo
 
 
   getWheelData() async {
-    change(wheelData,status:RxStatus.loading());
+    if(wheelRewardsList.isEmpty){
+      change(wheelData,status:RxStatus.loading());
+    }
     dio.options.headers['Authorization'] =
     "Bearer ${await GetStorage().read("token")}";
     var response = await dio.get("/spin-wheel/data");
@@ -59,7 +61,6 @@ class SpinWheelController extends GetxController with StateMixin<SpinWheelDataMo
       if (response.statusCode == 200) {
         try {
           wheelData = SpinWheelDataModel.fromJson(response.data);
-          change(wheelData,status:RxStatus.success());
 
           recentRewardsList.value =
           SpinWheelDataModel.fromJson(response.data).data!.recentRewards!;
@@ -74,13 +75,14 @@ class SpinWheelController extends GetxController with StateMixin<SpinWheelDataMo
 
           lastReward.value =
               wheelData.data!.lastReward.toString();
+          change(wheelData,status:RxStatus.success());
+
         } on HttpException catch (e) {
           change(wheelData,status:RxStatus.error(e.toString()));
 
           errorToast(response.data['message']);
         } on Exception catch (e) {
           change(wheelData,status:RxStatus.error(e.toString()));
-
           errorToast(e.toString());
         }
       } else {
