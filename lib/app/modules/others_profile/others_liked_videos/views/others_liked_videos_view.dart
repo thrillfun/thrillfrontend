@@ -11,27 +11,31 @@ import '../controllers/others_liked_videos_controller.dart';
 
 class OthersLikedVideosView extends GetView<OthersLikedVideosController> {
   const OthersLikedVideosView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return  controller.obx(
-          (state) =>  Column(
+    return controller.obx(
+      (state) => Column(
         children: [
           Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 80),
-                child: GridView.count(
-                  padding: const EdgeInsets.all(10),
-                  shrinkWrap: true,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  crossAxisCount: 3,
-                  childAspectRatio: 0.8,
-                  children: List.generate(
-                      state!.length,
-                          (index) => GestureDetector(
+            padding: const EdgeInsets.only(bottom: 0),
+            child: GridView.count(
+              padding: const EdgeInsets.all(10),
+              shrinkWrap: true,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              crossAxisCount: 3,
+              childAspectRatio: 0.8,
+              children: List.generate(
+                  state!.length,
+                  (index) => GestureDetector(
                         onTap: () {
-                          Get.toNamed(Routes.OTHERS_LIKED_VIDEOS_PLAYER,arguments: {"liked_videos":state,"init_page":index});
-
+                          Get.toNamed(Routes.OTHERS_LIKED_VIDEOS_PLAYER,
+                              arguments: {
+                                "liked_videos": state,
+                                "init_page": index
+                              });
                         },
                         child: Stack(
                           fit: StackFit.expand,
@@ -43,8 +47,7 @@ class OthersLikedVideosView extends GetView<OthersLikedVideosController> {
                                 left: 10,
                                 right: 10,
                                 child: Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     RichText(
                                       text: TextSpan(
@@ -53,20 +56,17 @@ class OthersLikedVideosView extends GetView<OthersLikedVideosController> {
                                             child: Icon(
                                               Icons.play_circle,
                                               size: 18,
-                                              color: ColorManager
-                                                  .colorAccent,
+                                              color: ColorManager.colorAccent,
                                             ),
                                           ),
                                           TextSpan(
                                               text: " " +
                                                   controller
-                                                      .likedVideos[index]
-                                                      .views
+                                                      .likedVideos[index].views
                                                       .toString(),
                                               style: const TextStyle(
                                                   color: Colors.white,
-                                                  fontWeight:
-                                                  FontWeight.w600,
+                                                  fontWeight: FontWeight.w600,
                                                   fontSize: 16)),
                                         ],
                                       ),
@@ -76,8 +76,8 @@ class OthersLikedVideosView extends GetView<OthersLikedVideosController> {
                           ],
                         ),
                       )),
-                ),
-              ))
+            ),
+          ))
         ],
       ),
       onLoading: Column(

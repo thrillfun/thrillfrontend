@@ -11,27 +11,27 @@ import '../controllers/wallet_controller.dart';
 
 class WalletView extends GetView<WalletController> {
   const WalletView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          backgroundWallet(),
-          const SizedBox(
-            height: 20,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Expanded(child: walletHistoryLayout())
-        ],
-      )
-    );
-
+        body: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        backgroundWallet(),
+        const SizedBox(
+          height: 20,
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        Expanded(child: walletHistoryLayout())
+      ],
+    ));
   }
+
   backgroundWallet() => const WalletBalance();
+
   walletOptionsButton(IconData icon, String text, VoidCallback callback) =>
       Container(
         decoration: BoxDecoration(
@@ -54,9 +54,8 @@ class WalletView extends GetView<WalletController> {
               ),
               Text(
                 text,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               ),
               const SizedBox(
                 height: 10,
@@ -75,184 +74,179 @@ class WalletHistory extends GetView<WalletController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-            (state) => Container(
-          padding: const EdgeInsets.only(left: 10, right: 10),
-          width: Get.width,
-          height: Get.height,
-          decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20))),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 15,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        (state) => Container(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              width: Get.width,
+              height: Get.height,
+              decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Portfolio",
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 25,
-                        ),
+                  const SizedBox(
+                    height: 15,
                   ),
-                  InkWell(child: const Icon(Icons.book),onTap: (){
-                    Get.toNamed(Routes.WALLET_TRASACTIONS);
-                  },),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Portfolio",
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 25,
+                        ),
+                      ),
+                      InkWell(
+                        child: const Icon(Icons.book),
+                        onTap: () {
+                          Get.toNamed(Routes.WALLET_TRASACTIONS);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Expanded(
+                      child: ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: state!.length,
+                          itemBuilder: (context, index) => Container(
+                                margin: const EdgeInsets.all(10),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          height: 30,
+                                          width: 30,
+                                          decoration: const BoxDecoration(
+                                              shape: BoxShape.circle),
+                                          child: ClipOval(
+                                            child: CachedNetworkImage(
+                                                fit: BoxFit.contain,
+                                                imageUrl: state![index]
+                                                            .image
+                                                            .toString()
+                                                            .isEmpty ||
+                                                        state[index].image ==
+                                                            null
+                                                    ? "https://cdn1.iconfinder.com/data/icons/cryptocurrency-set-2018/375/Asset_1480-512.png"
+                                                    : RestUrl.currencyUrl +
+                                                        state[index]
+                                                            .image
+                                                            .toString()),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                (state[index].code!).toString(),
+                                                textAlign: TextAlign.start,
+                                                style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                              Text(
+                                                state[index].symbol.toString(),
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              Text(
+                                                state[index].amount.toString(),
+                                                style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                              index == 0
+                                                  ? const Text("Coming soon",
+                                                      style: TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w400))
+                                                  : Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      children: [
+                                                        Obx(() => Text(
+                                                            "\$${index == 0 ? controller.thrillPrice.value : index == 1 ? controller.btcPrice.value : index == 2 ? controller.ethPrice.value : index == 3 ? controller.bnbPrice.value : index == 4 ? controller.shibPrice.value : index == 5 ? controller.dogePrice.value : index == 6 ? controller.luncPrice.value : controller.thrillPrice.value} ",
+                                                            style: const TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400))),
+                                                        Obx(() => Text(
+                                                              "(${index == 0 ? controller.thrillPer.value + " %" : index == 1 ? controller.btcPer.value + " %" : index == 2 ? controller.ethPer.value + " %" : index == 3 ? controller.bnbPer.value + " %" : index == 4 ? controller.shibPer.value + " %" : index == 5 ? controller.dogePer.value + " %" : index == 6 ? controller.luncPer.value + " %" : controller.thrillPer.value + " %"}) ",
+                                                              style: TextStyle(
+                                                                  color: index ==
+                                                                              0 &&
+                                                                          controller
+                                                                              .thrillPer
+                                                                              .value
+                                                                              .contains(
+                                                                                  "-")
+                                                                      ? Colors
+                                                                          .red
+                                                                      : index == 1 &&
+                                                                              controller.btcPer.value.contains("-")
+                                                                          ? Colors.red
+                                                                          : index == 2 && controller.ethPer.value.contains("-")
+                                                                              ? Colors.red
+                                                                              : index == 3 && controller.bnbPer.value.contains("-")
+                                                                                  ? Colors.red
+                                                                                  : index == 4 && controller.shibPer.value.contains("-")
+                                                                                      ? Colors.red
+                                                                                      : index == 5 && controller.dogePer.value.contains("-")
+                                                                                          ? Colors.red
+                                                                                          : index == 6 && controller.luncPer.value.contains("-")
+                                                                                              ? Colors.red
+                                                                                              : Colors.green,
+                                                                  fontSize: 12,
+                                                                  fontWeight: FontWeight.w700),
+                                                            ))
+                                                      ],
+                                                    )
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 10),
+                                      child: const Divider(),
+                                    ),
+                                  ],
+                                ),
+                              )))
                 ],
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              Expanded(
-                  child: ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: state!.length,
-                      itemBuilder: (context, index) => Container(
-                        margin: const EdgeInsets.all(10),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  height: 30,
-                                  width: 30,
-                                  decoration: const BoxDecoration(
-                                      shape: BoxShape.circle),
-                                  child: ClipOval(
-                                    child: CachedNetworkImage(
-                                        fit: BoxFit.contain,
-                                        imageUrl: state![index]
-                                            .image
-                                            .toString()
-                                            .isEmpty ||
-                                            state[index].image ==
-                                                null
-                                            ? "https://cdn1.iconfinder.com/data/icons/cryptocurrency-set-2018/375/Asset_1480-512.png"
-                                            : RestUrl.currencyUrl +
-                                            state[index]
-                                                .image
-                                                .toString()),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Container(
-                                  alignment: Alignment.centerLeft,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        (state[index].code!).toString(),
-                                        textAlign: TextAlign.start,
-                                        style: const TextStyle(
-
-                                            fontSize: 16,
-                                            fontWeight:
-                                            FontWeight.w700),
-                                      ),
-                                      Text(
-                                        state[index].symbol.toString(),
-                                        style: const TextStyle(
-
-                                            fontSize: 12,
-                                            fontWeight:
-                                            FontWeight.w400),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.end,
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Text(
-                                        state[index].amount.toString(),
-                                        style: const TextStyle(
-
-                                            fontSize: 16,
-                                            fontWeight:
-                                            FontWeight.w700),
-                                      ),
-                                      index==0?const Text(
-                                          "Coming soon",
-                                          style: TextStyle(
-
-                                              fontSize: 12,
-                                              fontWeight: FontWeight
-                                                  .w400)): Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.end,
-                                        children: [
-                                          Obx(() => Text(
-                                              "\$${index == 0 ? controller.thrillPrice.value : index == 1 ? controller.btcPrice.value : index == 2 ? controller.ethPrice.value : index == 3 ? controller.bnbPrice.value : index == 4 ? controller.shibPrice.value : index == 5 ? controller.dogePrice.value : index == 6 ? controller.luncPrice.value : controller.thrillPrice.value} ",
-                                              style: const TextStyle(
-
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight
-                                                      .w400))),
-                                          Obx(() => Text(
-                                            "(${index == 0 ? controller.thrillPer.value + " %" : index == 1 ? controller.btcPer.value + " %" : index == 2 ? controller.ethPer.value + " %" : index == 3 ? controller.bnbPer.value + " %" : index == 4 ? controller.shibPer.value + " %" : index == 5 ? controller.dogePer.value + " %" : index == 6 ? controller.luncPer.value + " %" : controller.thrillPer.value + " %"}) ",
-                                            style: TextStyle(
-                                                color: index == 0 &&
-                                                    controller
-                                                        .thrillPer
-                                                        .value
-                                                        .contains(
-                                                        "-")
-                                                    ? Colors.red
-                                                    : index == 1 &&
-                                                    controller
-                                                        .btcPer
-                                                        .value
-                                                        .contains(
-                                                        "-")
-                                                    ? Colors.red
-                                                    : index == 2 &&
-                                                    controller.ethPer.value.contains(
-                                                        "-")
-                                                    ? Colors
-                                                    .red
-                                                    : index == 3 &&
-                                                    controller.bnbPer.value.contains("-")
-                                                    ? Colors.red
-                                                    : index == 4 && controller.shibPer.value.contains("-")
-                                                    ? Colors.red
-                                                    : index == 5 && controller.dogePer.value.contains("-")
-                                                    ? Colors.red
-                                                    : index == 6 && controller.luncPer.value.contains("-")
-                                                    ? Colors.red
-                                                    : Colors.green,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w700),
-                                          ))
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                            Container(
-                              margin: const EdgeInsets.only(top: 10),
-                              child: const Divider(),
-                            ),
-                          ],
-                        ),
-                      )))
-            ],
-          ),
-        ),
+            ),
         onLoading: loader());
   }
 }
@@ -265,23 +259,22 @@ class WalletBalance extends GetView<WalletController> {
     var isTextVisible = true.obs;
 
     return controller.obx(
-            (state) => Container(
-          decoration: const BoxDecoration(
-
-              gradient: ColorManager.walletGradient,
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20))),
-          width: Get.width,
-          height: Get.height / 3,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 40,
-              ),
-              Expanded(
-                  child: Column(
+        (state) => Container(
+              decoration: const BoxDecoration(
+                  gradient: ColorManager.walletGradient,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20))),
+              width: Get.width,
+              height: Get.height / 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  Expanded(
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
@@ -301,60 +294,59 @@ class WalletBalance extends GetView<WalletController> {
                               onTap: () => isTextVisible.toggle(),
                               child: Obx(() => isTextVisible.isTrue
                                   ? Icon(
-                                Icons.visibility_off,
-                                color: Colors.white.withOpacity(0.6),
-                              )
+                                      Icons.visibility_off,
+                                      color: Colors.white.withOpacity(0.6),
+                                    )
                                   : Icon(
-                                Icons.visibility,
-                                color: Colors.white.withOpacity(0.6),
-                              )),
+                                      Icons.visibility,
+                                      color: Colors.white.withOpacity(0.6),
+                                    )),
                             )
                           ],
                         ),
                       ),
-
                       Padding(
                         padding: const EdgeInsets.only(left: 10),
                         child: Obx(() => TextFormField(
-                          enabled: false,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: '',
-                          ),
-                          controller: controller.textEditingController.value,
-                          obscuringCharacter: '*',
-                          obscureText: isTextVisible.value,
-                          style: const TextStyle(
-                              fontSize: 30,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700),
-                        )),
+                              enabled: false,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                hintText: '',
+                              ),
+                              controller:
+                                  controller.textEditingController.value,
+                              obscuringCharacter: '*',
+                              obscureText: isTextVisible.value,
+                              style: const TextStyle(
+                                  fontSize: 30,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700),
+                            )),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 10),
                         child: Obx(() => TextFormField(
-                          enabled: false,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: '',
-                          ),
-                          controller: controller.textDollarController.value,
-                          obscuringCharacter: '*',
-                          obscureText: isTextVisible.value,
-                          style:  TextStyle(
-                              fontSize: 24,
-                              color: Colors.white.withOpacity(0.5),
-                              fontWeight: FontWeight.w700),
-                        )),
-                      )
-                     ,
+                              enabled: false,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                hintText: '',
+                              ),
+                              controller: controller.textDollarController.value,
+                              obscuringCharacter: '*',
+                              obscureText: isTextVisible.value,
+                              style: TextStyle(
+                                  fontSize: 24,
+                                  color: Colors.white.withOpacity(0.5),
+                                  fontWeight: FontWeight.w700),
+                            )),
+                      ),
                     ],
                   )),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                      child: InkWell(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                          child: InkWell(
                         onTap: () => null,
                         child: Card(
                           elevation: 10,
@@ -373,8 +365,8 @@ class WalletBalance extends GetView<WalletController> {
                           ),
                         ),
                       )),
-                  Expanded(
-                      child: InkWell(
+                      Expanded(
+                          child: InkWell(
                         onTap: () {
                           // Get.to(PaymentRequest());
                         },
@@ -395,8 +387,8 @@ class WalletBalance extends GetView<WalletController> {
                           ),
                         ),
                       )),
-                  Expanded(
-                      child: InkWell(
+                      Expanded(
+                          child: InkWell(
                         onTap: () => null,
                         child: Card(
                           elevation: 10,
@@ -415,11 +407,11 @@ class WalletBalance extends GetView<WalletController> {
                           ),
                         ),
                       ))
+                    ],
+                  )
                 ],
-              )
-            ],
-          ),
-        ),
+              ),
+            ),
         onLoading: Center(
           child: loader(),
         ));

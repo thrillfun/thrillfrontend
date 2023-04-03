@@ -23,7 +23,9 @@ class OthersProfileView extends GetView<OthersProfileController> {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(height: 20,),
+          SizedBox(
+            height: 20,
+          ),
           controller.obx(
             (state) => Column(
               children: [
@@ -97,8 +99,11 @@ class OthersProfileView extends GetView<OthersProfileController> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        Get.toNamed(Routes.OTHERS_FOLLOWERS,arguments: {"index":0});
-                        },
+                        Get.toNamed(Routes.OTHERS_FOLLOWERS, arguments: {
+                          "index": 0,
+                          "profileId": "${state.value.id}"
+                        });
+                      },
                       child: RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(children: [
@@ -130,7 +135,10 @@ class OthersProfileView extends GetView<OthersProfileController> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Get.toNamed(Routes.OTHERS_FOLLOWERS,arguments: {"index":1});
+                        Get.toNamed(Routes.OTHERS_FOLLOWERS, arguments: {
+                          "index": 1,
+                          "profileId": "${state.value.id}"
+                        });
 
                         // followersController
                         //     .getUserFollowers(state.value.id!)
@@ -224,12 +232,12 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                 // userDetailsController
                                 //     .getOtherUserProfile(userId);
                               },
-                              child: Text(
-                                  isFollow == 0 ? "Follow" : "Following",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  )),
+                              child:
+                                  Text(isFollow == 0 ? "Follow" : "Following",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      )),
                             ))),
                     Expanded(
                         child: Container(
@@ -300,6 +308,67 @@ class OthersProfileView extends GetView<OthersProfileController> {
                 const SizedBox(
                   height: 10,
                 ),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List.generate(
+                          controller.followersModel.length,
+                          (index) => InkWell(
+                                onTap: () => Get.offNamed(Routes.OTHERS_PROFILE,
+                                    arguments: {
+                                      "profileId":
+                                          controller.followersModel[index].id
+                                    }),
+                                child: Container(
+                                  margin: EdgeInsets.all(10),
+                                  child: Column(
+                                    children: [
+                                      Stack(
+                                        alignment: Alignment.bottomRight,
+                                        children: [
+                                          imgProfile(controller
+                                              .followersModel[index].avtars
+                                              .toString()),
+                                          InkWell(
+                                            onTap: ()=>controller.followUnfollowUser(controller.userProfile.value.id!, controller.followersModel[index].isFollowing==0?"follow":"unfollow"),
+                                            child: Container(
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: ColorManager
+                                                    .colorPrimaryLight
+                                                    .withOpacity(0.5)),
+                                            child: Icon(
+                                              Icons.add,
+                                              color: Colors.white,
+                                            ),
+                                          ),)
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        controller.followersModel[index].name
+                                                .toString()
+                                                .isEmpty
+                                            ? controller
+                                                .followersModel[index].username
+                                                .toString()
+                                            : controller
+                                                .followersModel[index].name
+                                                .toString(),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w700),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              )),
+                    ),
+                  ),
+                )
               ],
             ),
             onLoading: loader(),
@@ -311,28 +380,28 @@ class OthersProfileView extends GetView<OthersProfileController> {
               child: Scaffold(
                 appBar: AppBar(
                   toolbarHeight: 10,
-
                   titleSpacing: 0,
                   automaticallyImplyLeading: false,
-                  bottom:
-                      TabBar(onTap: (index) => selectedTab.value = index, tabs: [
-                    Obx(() => Tab(
-                          icon: Icon(
-                            Icons.dashboard,
-                            color: selectedTab.value == 0
-                                ? ColorManager.colorAccent
-                                : ColorManager.colorAccentTransparent,
-                          ),
-                        )),
-                    Obx(() => Tab(
-                          icon: Icon(
-                            Icons.favorite,
-                            color: selectedTab.value == 1
-                                ? ColorManager.colorAccent
-                                : ColorManager.colorAccentTransparent,
-                          ),
-                        ))
-                  ]),
+                  bottom: TabBar(
+                      onTap: (index) => selectedTab.value = index,
+                      tabs: [
+                        Obx(() => Tab(
+                              icon: Icon(
+                                Icons.dashboard,
+                                color: selectedTab.value == 0
+                                    ? ColorManager.colorAccent
+                                    : ColorManager.colorAccentTransparent,
+                              ),
+                            )),
+                        Obx(() => Tab(
+                              icon: Icon(
+                                Icons.favorite,
+                                color: selectedTab.value == 1
+                                    ? ColorManager.colorAccent
+                                    : ColorManager.colorAccentTransparent,
+                              ),
+                            ))
+                      ]),
                 ),
                 body: const TabBarView(
                   children: [OtherUserVideosView(), OthersLikedVideosView()],

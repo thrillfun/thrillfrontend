@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
+import '../../../../../routes/app_pages.dart';
 import '../../../../../utils/color_manager.dart';
 import '../../../../../utils/utils.dart';
 import '../controllers/followings_controller.dart';
@@ -11,12 +13,14 @@ class FollowingsView extends GetView<FollowingsController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-            (state) => Wrap(
+            (state) =>state!.isEmpty?Icon(Icons.person): Wrap(
           children: List.generate(
               state!.length,
                   (index) => InkWell(
                 onTap: () async {
-
+                  Get.toNamed(Routes.OTHERS_PROFILE,arguments: {
+                    "profileId":state[index].id
+                  });
                 },
                 child: Container(
                   width: Get.width,
@@ -69,9 +73,7 @@ class FollowingsView extends GetView<FollowingsController> {
                         onTap: () {
                           controller.followUnfollowUser(
                               state[index].id!,
-                              state[index].isFolling == 0
-                                  ? "follow"
-                                  : "unfollow");
+                              "unfollow");
                           // usersController.followUnfollowUser(
                           //     controller.followersModel[index].id!,
                           //     controller.followersModel[index]
@@ -82,38 +84,21 @@ class FollowingsView extends GetView<FollowingsController> {
                           //
                           // controller.getUserFollowers(userId);
                         },
-                        child:state[index].isFolling ==
-                            0
-                            ? Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          decoration: BoxDecoration(
-                              color: ColorManager.colorAccent,
-                              borderRadius:
-                              BorderRadius.circular(20)),
-                          child: const Text(
-                            "Follow",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white),
-                          ),
-                        )
-                            : Container(
+                        child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           decoration: BoxDecoration(
                               border: Border.all(
                                   color:
-                                  ColorManager.colorAccent),
+                                  Colors.red.shade600),
                               borderRadius:
                               BorderRadius.circular(20)),
-                          child: const Text(
-                            "Following",
+                          child:  Text(
+                            "Unfollow",
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: ColorManager.colorAccent),
+                                color: Colors.red.shade600),
                           ),
                         ),
                       )

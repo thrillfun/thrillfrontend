@@ -74,7 +74,8 @@ class SoundsView extends GetView<SoundsController> {
                           Get.arguments["sound_name"]
                               .toString()
                               .toLowerCase()
-                              .contains("original")
+                              .contains("original") ||  Get.arguments["sound_name"]
+                              .toString().isEmpty
                               ? Get.arguments["sound_name"] +
                               " by " +
                               (controller.userProfile.value.name.toString().isEmpty?controller.userProfile.value.username:controller.userProfile.value.name.toString())

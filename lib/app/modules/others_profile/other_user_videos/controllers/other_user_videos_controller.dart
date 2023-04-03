@@ -32,7 +32,7 @@ class OtherUserVideosController extends GetxController with StateMixin<RxList<Vi
     };
     change(userVideos, status: RxStatus.loading());
     dio
-        .post('/video/user-videos', queryParameters: {"user_id": "${await GetStorage().read("profileId")}"})
+        .post('/video/user-videos', queryParameters: {"user_id": "${Get.arguments["profileId"]}"})
         .timeout(const Duration(seconds: 10))
         .then((response) {
       userVideos.clear();

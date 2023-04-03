@@ -37,7 +37,7 @@ class OthersLikedVideosController extends GetxController   with StateMixin<RxLis
     };
     change(likedVideos, status: RxStatus.loading());
     dio.post('/user/user-liked-videos',
-        queryParameters: {"user_id": "${await GetStorage().read("profileId")}"}).then((result) {
+        queryParameters: {"user_id": "${Get.arguments["profileId"]}"}).then((result) {
       likedVideos = UserLikedVideosModel.fromJson(result.data).data!.obs;
       change(likedVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {

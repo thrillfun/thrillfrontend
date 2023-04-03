@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -104,6 +105,8 @@ class RelatedVideosController extends GetxController {
     }).then((value) async {
       getAllVideos();
       if (isLike == 1) {
+
+        sendNotification(token.toString(),title: "Someone liked your video!");
         // await notificationsController.sendFcmNotification(token.toString(),
         //     title:
         //     "${await GetStorage().read("user")["username"]} liked you video",
@@ -295,5 +298,32 @@ class RelatedVideosController extends GetxController {
         await FirebaseDynamicLinks.instance.buildLink(parameters);
 
     return dynamicLink.toString();
+  }
+
+  Future<void> sendNotification(String fcmToken,
+      {String? body = "", String? title = "", String? image = ""}) async {
+    var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
+    dio.options.headers = {
+      "Authorization":
+          "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+    };
+    final data = {
+      "to": fcmToken,
+      "notification": {"body": body, "title": title, "image": image},
+      "priority": "high",
+      "image": image,
+      "data": {
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        "id": "1",
+        "status": "done",
+        "image":
+            "https://scontent.fbom19-2.fna.fbcdn.net/v/t39.30808-6/271720827_4979339162088555_3028905257532289818_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=HMgk-tDtBcQAX9uJheY&_nc_ht=scontent.fbom19-2.fna&oh=00_AfCVE7nSsxVGPTfTa8FCyff4jOzTKWi_JvTXpDWm7WrVjg&oe=63E84FB2"
+      }
+    };
+    dio.post("/send", data: jsonEncode(data)).then((value) {
+      Logger().wtf(value);
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
   }
 }

@@ -39,7 +39,7 @@ class OthersFollowingController extends GetxController
     if (followersModel.isNotEmpty) followersModel.clear();
 
     dio.post('user/get-followings', queryParameters: {
-      "user_id": "${await GetStorage().read("profileId")}"
+      "user_id": "${Get.arguments["profileId"]}"
     }).then((result) {
       followersModel = FollowersModel.fromJson(result.data).data!.obs;
       change(followersModel, status: RxStatus.success());

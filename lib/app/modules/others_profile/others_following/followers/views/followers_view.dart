@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:thrill/app/modules/others_profile/others_following/followers/controllers/others_followers_controller.dart';
 
+import '../../../../../routes/app_pages.dart';
 import '../../../../../utils/color_manager.dart';
 import '../../../../../utils/utils.dart';
 
@@ -11,12 +13,14 @@ class FollowersView extends GetView<OtherFollowersController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-            (state) => Wrap(
+            (state) =>state!.isEmpty?Icon(Icons.person): Wrap(
           children: List.generate(
               state!.length,
                   (index) => InkWell(
                 onTap: () async {
-
+                  Get.toNamed(Routes.OTHERS_PROFILE,arguments: {
+                    "profileId":state[index].id
+                  });
                 },
                 child: Container(
                   width: Get.width,
@@ -65,55 +69,58 @@ class FollowersView extends GetView<OtherFollowersController> {
                           ],
                         ),
                       ),
-                      InkWell(
-                        onTap: () {
-                          controller.followUnfollowUser(
-                              state[index].id!,
-                              state[index].isFollowing == 0
-                                  ? "follow"
-                                  : "unfollow");
-                          // usersController.followUnfollowUser(
-                          //     controller.followersModel[index].id!,
-                          //     controller.followersModel[index]
-                          //         .isFolling ==
-                          //         0
-                          //         ? "follow"
-                          //         : "unfollow");
-                          //
-                          // controller.getUserFollowers(userId);
-                        },
-                        child:state[index].isFollowing ==
-                            0
-                            ? Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          decoration: BoxDecoration(
-                              color: ColorManager.colorAccent,
-                              borderRadius:
-                              BorderRadius.circular(20)),
-                          child: const Text(
-                            "Follow",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white),
-                          ),
-                        )
-                            : Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color:
-                                  ColorManager.colorAccent),
-                              borderRadius:
-                              BorderRadius.circular(20)),
-                          child: const Text(
-                            "Following",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: ColorManager.colorAccent),
+                      Visibility(
+                        visible: state[index].id!=GetStorage().read("userId"),
+                        child: InkWell(
+                          onTap: () {
+                            controller.followUnfollowUser(
+                                state[index].id!,
+                                state[index].isFollowing == 0
+                                    ? "follow"
+                                    : "unfollow");
+                            // usersController.followUnfollowUser(
+                            //     controller.followersModel[index].id!,
+                            //     controller.followersModel[index]
+                            //         .isFolling ==
+                            //         0
+                            //         ? "follow"
+                            //         : "unfollow");
+                            //
+                            // controller.getUserFollowers(userId);
+                          },
+                          child:state[index].isFollowing ==
+                              0
+                              ? Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            decoration: BoxDecoration(
+                                color: ColorManager.colorAccent,
+                                borderRadius:
+                                BorderRadius.circular(20)),
+                            child: const Text(
+                              "Follow",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white),
+                            ),
+                          )
+                              : Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color:
+                                    ColorManager.colorAccent),
+                                borderRadius:
+                                BorderRadius.circular(20)),
+                            child: const Text(
+                              "Following",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: ColorManager.colorAccent),
+                            ),
                           ),
                         ),
                       )

@@ -1,3 +1,4 @@
+import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -25,9 +26,10 @@ class HomeController extends GetxController {
   var pageController = PageController();
   var homeScreens = [];
   final info = NetworkInfo();
-
+  BetterPlayerEventType? eventType;
   final count = 0.obs;
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  var playerController = BetterPlayerListVideoPlayerController();
 
   @override
   void onInit() {
@@ -41,54 +43,58 @@ class HomeController extends GetxController {
               : Stack(
                   children: [
                     PageView.builder(
+                        onPageChanged: (page) {},
                         itemCount: controller.relatedVideosList.length,
                         scrollDirection: Axis.vertical,
                         controller: pageController,
-                        itemBuilder: (context, index) => RelatedVideosView(
-                              videoUrl: controller
-                                  .relatedVideosList[index].video
-                                  .toString(),
-                              pageController: pageController!,
-                              nextPage: index + 1,
-                              videoId: controller.relatedVideosList[index].id!,
-                              gifImage:
-                                  controller.relatedVideosList[index].gifImage,
-                              publicUser:
-                                  controller.relatedVideosList[index].user,
-                              soundName:
-                                  controller.relatedVideosList[index].soundName,
-                              UserId:
-                                  controller.relatedVideosList[index].user!.id,
-                              userName: controller
-                                  .relatedVideosList[index].user!.username!.obs,
-                              description: controller
-                                  .relatedVideosList[index].description!.obs,
-                              hashtagsList:
-                                  controller.relatedVideosList[index].hashtags??[],
-                              soundOwner: controller
-                                  .relatedVideosList[index].soundOwner,
-                              sound: controller.relatedVideosList[index].sound,
-                              videoLikeStatus: controller
-                                  .relatedVideosList[index].videoLikeStatus
-                                  .toString(),
-                              isCommentAllowed: controller
-                                          .relatedVideosList[index]
-                                          .isCommentable ==
-                                      "Yes"
-                                  ? true.obs
-                                  : false.obs,
-                              like: controller
-                                  .relatedVideosList[index].likes!.obs,
-                              isfollow: controller
-                                  .relatedVideosList[index].user!.isfollow!,
-                              commentsCount: controller
-                                  .relatedVideosList[index].comments!.obs,
-                              soundId:
-                                  controller.relatedVideosList[index].soundId,
-                          avatar: controller
-                              .relatedVideosList[index].user!.avatar,
-                          currentPageIndex: index.obs,
-                            )),
+                        itemBuilder: (context, index) =>
+                          RelatedVideosView(
+                            videoUrl: controller
+                                .relatedVideosList[index].video
+                                .toString(),
+                            pageController: pageController!,
+                            nextPage: index + 1,
+                            videoId: controller.relatedVideosList[index].id!,
+                            gifImage:
+                                controller.relatedVideosList[index].gifImage,
+                            publicUser:
+                                controller.relatedVideosList[index].user,
+                            soundName:
+                                controller.relatedVideosList[index].soundName,
+                            UserId:
+                                controller.relatedVideosList[index].user!.id,
+                            userName: controller
+                                .relatedVideosList[index].user!.username!.obs,
+                            description: controller
+                                .relatedVideosList[index].description!.obs,
+                            hashtagsList:
+                                controller.relatedVideosList[index].hashtags??[],
+                            soundOwner: controller
+                                .relatedVideosList[index].soundOwner,
+                            sound: controller.relatedVideosList[index].sound,
+                            videoLikeStatus: controller
+                                .relatedVideosList[index].videoLikeStatus
+                                .toString(),
+                            isCommentAllowed: controller
+                                        .relatedVideosList[index]
+                                        .isCommentable ==
+                                    "Yes"
+                                ? true.obs
+                                : false.obs,
+                            like: controller
+                                .relatedVideosList[index].likes!.obs,
+                            isfollow: controller
+                                .relatedVideosList[index].user!.isfollow!,
+                            commentsCount: controller
+                                .relatedVideosList[index].comments!.obs,
+                            soundId:
+                                controller.relatedVideosList[index].soundId,
+                        avatar: controller
+                            .relatedVideosList[index].user!.avatar,
+                        currentPageIndex: index.obs,
+                        fcmToken: controller.relatedVideosList[index].user!.firebaseToken,
+                          )
+                        ),
                     Align(
                       child: IconButton(
                           onPressed: () async {

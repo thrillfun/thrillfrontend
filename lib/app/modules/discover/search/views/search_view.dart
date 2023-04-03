@@ -116,11 +116,7 @@ class SearchView extends GetView<SearchController> {
                     state![0].users!.length,
                     (index) => InkWell(
                           onTap: () async {
-                            await GetStorage()
-                                .write("profileId", state[0].users![index].id)
-                                .then((value) {
-                              Get.toNamed(Routes.OTHERS_PROFILE);
-                            });
+                            Get.toNamed(Routes.OTHERS_PROFILE,arguments: {"profileId":state[0].users![index].id});
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),

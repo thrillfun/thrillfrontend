@@ -24,6 +24,7 @@ import '../../../rest/models/site_settings_model.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/color_manager.dart';
 import '../../../utils/utils.dart';
+import '../../home/controllers/home_controller.dart';
 import '../../login/views/login_view.dart';
 import '../controllers/related_videos_controller.dart';
 
@@ -57,9 +58,10 @@ class RelatedVideosView extends StatefulWidget {
     this.isfollow,
     this.commentsCount,
     this.soundId,
-    this.avatar});
+    this.avatar,
+    this.fcmToken});
 
-  String? videoUrl;
+  String? videoUrl, fcmToken;
   PageController? pageController;
   int? nextPage;
   int? videoId;
@@ -90,6 +92,8 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
     with SingleTickerProviderStateMixin {
   late VideoPlayerController videoPlayerController;
   var relatedVideosController = Get.find<RelatedVideosController>();
+  var homeController = Get.find<HomeController>();
+
   var commentsController = Get.find<CommentsController>();
   late AnimationController _controller;
 
@@ -113,7 +117,6 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
       })
       ..play();
 
-
     videoPlayerController.addListener(() {
       if (videoPlayerController.value.duration ==
           videoPlayerController.value.position &&
@@ -126,20 +129,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
       }
     });
 
-    setState(() {
-      FirebaseDynamicLinks.instance.onLink.listen(
-            (pendingDynamicLinkData) async {
-          // Set up the `onLink` event listener next as it may be received here
-          if (pendingDynamicLinkData!.link.queryParameters["type"] == "video") {
-            widget.pageController!.animateToPage(
-                int.parse(pendingDynamicLinkData!.link.queryParameters["id"]
-                    .toString()),
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.bounceIn);
-          }
-        },
-      );
-    });
+    setState(() {});
   }
 
   @override
@@ -189,8 +179,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                   if (videoPlayerController.value.isPlaying) {
                     videoPlayerController.pause();
                     _controller.stop();
-                  }
-                  else {
+                  } else {
                     videoPlayerController.play();
                     _controller.repeat();
                   }
@@ -199,27 +188,39 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  //AspectRatio(aspectRatio: videoPlayerController.value.aspectRatio,child: VideoPlayer(videoPlayerController),)
                   Center(
                     child:
                     Obx(() =>
                     relatedVideosController.isInitialised.isFalse
                         ? loader()
-                        : FittedBox(
-                      fit: videoPlayerController.value.aspectRatio <
-                          1.5
-                          ? BoxFit.cover
-                          : BoxFit.contain,
-                      child: SizedBox(
-                          height:
-                          videoPlayerController.value.size.height,
-                          width:
-                          videoPlayerController.value.size.width,
-                          child: VideoPlayer(videoPlayerController)),
-                    )),
+                        : SizedBox(
+                        height:
+                        videoPlayerController.value.aspectRatio <
+                            1.5 ?
+                        Get.height : Get.height / 4,
+                        width:
+                        videoPlayerController.value.aspectRatio >
+                            1.5 ?
+                        videoPlayerController.value.size.width : Get.width,
+                        child: VideoPlayer(videoPlayerController))),
                   ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      height: Get.height/2,
+                      decoration: BoxDecoration( boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 50.0,
+                          spreadRadius: 50, //New
+                        )
+                      ],),),
+                  ),
+                  //AspectRatio(aspectRatio: videoPlayerController.value.aspectRatio,child: VideoPlayer(videoPlayerController),)
+
 
                   Container(
+
                     alignment: Alignment.centerRight,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -273,8 +274,9 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                   },
                                   onTap: (_) async {
                                     relatedVideosController.likeVideo(
-                                        widget.videoLikeStatus == 0 ? 1 : 0,
-                                        widget.videoId!);
+                                        widget.videoLikeStatus == "0" ? 1 : 0,
+                                        widget.videoId!,
+                                        token: widget.fcmToken);
                                   }),
                             ],
                           ),
@@ -289,14 +291,14 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                         .getComments(widget.videoId!)
                                         .then((value) {
                                       Get.bottomSheet(CommentsView(
-                                        videoId: widget.videoId!,
-                                        userId: widget.UserId,
-                                        isCommentAllowed:
-                                        widget.isCommentAllowed,
-                                        isfollow: widget.isfollow,
-                                        userName: widget.userName!.value,
-                                        avatar: widget.avatar ?? "",
-                                      ));
+                                          videoId: widget.videoId!,
+                                          userId: widget.UserId,
+                                          isCommentAllowed:
+                                          widget.isCommentAllowed,
+                                          isfollow: widget.isfollow,
+                                          userName: widget.userName!.value,
+                                          avatar: widget.avatar ?? "",
+                                          fcmToken: widget.fcmToken));
                                     });
                                     // GetStorage().read("videoPrivacy") ==
                                     //     "Private"
@@ -1040,11 +1042,14 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                             LoginView(true.obs))));
                               }
                             } else {
-                              await GetStorage()
-                                  .write("profileId", widget.UserId)
-                                  .then((value) {
-                                Get.toNamed(Routes.OTHERS_PROFILE);
-                              });
+                              if(widget.UserId==GetStorage().read("userId")){
+                                homeController.bottomNavIndex.value = 3;
+                              }
+                              else{
+                                Get.toNamed(Routes.OTHERS_PROFILE,arguments: {"profileId":widget.UserId});
+
+                              }
+
                             }
                           },
                           child: Row(
@@ -1240,26 +1245,26 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                         ),
                         GestureDetector(
                           onTap: () async {
-                            await GetStorage().write(
-                                "profileId", widget.UserId);
+                            await GetStorage()
+                                .write("profileId", widget.UserId);
 
                             Get.toNamed(Routes.SOUNDS, arguments: {
-                              "sound_name":
-                              widget.soundName.toString(),
-                              "sound_url":
-                              widget.sound,
+                              "sound_name": widget.soundName.toString(),
+                              "sound_url": widget.sound,
                             });
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.all(0),
+                                padding: const EdgeInsets.all(10),
                                 child: RotationTransition(
-                                  turns: Tween(begin: 0.0, end: 1.0).animate(
-                                      _controller),
+                                  turns: Tween(begin: 0.0, end: 1.0)
+                                      .animate(_controller),
                                   child: SvgPicture.asset(
-                                    "assets/spinning_disc.svg", height: 30,),
+                                    "assets/spinning_disc.svg",
+                                    height: 30,
+                                  ),
                                 ),
 
                                 // Lottie.network(
@@ -1281,7 +1286,9 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                         ),
                       ],
                     ),
-                  )
+                  ),
+
+
                 ],
               )),
           IgnorePointer(
@@ -1319,7 +1326,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                         ),
                       )),
                 ))),
-          )
+          ),
         ],
       ),
     );

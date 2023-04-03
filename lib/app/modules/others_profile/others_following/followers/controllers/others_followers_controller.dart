@@ -38,7 +38,7 @@ class OtherFollowersController extends GetxController  with StateMixin<RxList<Fo
     if (followersModel.isNotEmpty) followersModel.clear();
 
     dio.post('user/get-followers', queryParameters: {
-      "user_id": "${await GetStorage().read("profileId")}"
+      "user_id": "${Get.arguments["profileId"]}"
     }).then((result) {
       followersModel = FollowersModel.fromJson(result.data).data!.obs;
       change(followersModel, status: RxStatus.success());

@@ -75,13 +75,14 @@ class UserVideosView extends GetView<UserVideosController> {
                                       content: const Text(
                                           "you want to delete this video?"),
                                       title: "Are your sure?",
+                                      titleStyle: TextStyle(fontWeight: FontWeight.w700),
                                       confirm: InkWell(
                                         child: Container(
                                           width: Get.width,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Colors.red.shade400),
 
-                                          child: Text("Yes"),
+                                          child: Text("Yes",style: TextStyle(fontWeight: FontWeight.w700,color: Colors.white),),
                                           padding: EdgeInsets.all(10),
                                         ),
                                         onTap: () => controller
@@ -91,7 +92,7 @@ class UserVideosView extends GetView<UserVideosController> {
                                         child: Container(
                                           width: Get.width,
                                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Colors.green),
-                                          child: Text("Cancel"),alignment: Alignment.center,
+                                          child: Text("Cancel",style: TextStyle(fontWeight: FontWeight.w700,color: Colors.white)),alignment: Alignment.center,
                                           padding: EdgeInsets.all(10),
                                         ),
                                         onTap: () => Get.back(),
@@ -101,7 +102,7 @@ class UserVideosView extends GetView<UserVideosController> {
                                 constraints: const BoxConstraints(),
                                 color: Colors.red,
                                 icon:
-                                    const Icon(Icons.delete_forever_outlined)),
+                                    const Icon(Icons.more_vert_outlined)),
                           )
                         ],
                       ),

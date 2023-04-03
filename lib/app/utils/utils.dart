@@ -373,6 +373,7 @@ Widget imgProfile(String imagePath) => Container(
           imageUrl: RestUrl.profileUrl + imagePath),
     );
 
+
 getTempDirectory() async {
   var directoryIOS = await getApplicationDocumentsDirectory();
   var directoryANDROID = await getTemporaryDirectory();

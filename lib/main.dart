@@ -48,9 +48,15 @@ void main() async {
   } else {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
   }
+  MobileAds.instance.initialize();
+  if (Platform.isIOS) {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
+  } else {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
+  }
   awesomeNotifications = AwesomeNotifications();
   awesomeNotifications?.initialize(
-      'resource://drawable/icon',
+      'resource://drawable/icon.png',
       [
         NotificationChannel(
             channelGroupKey: 'normal_channel_group',
@@ -79,7 +85,6 @@ void main() async {
           showWhen: true),
     );
   });
-
   try {
     cameras = await availableCameras();
   } on CameraException catch (_) {}
@@ -145,6 +150,8 @@ void main() async {
       title: "Thrill",
       debugShowCheckedModeBanner: false,
       darkTheme: ThemeData(
+        dividerColor: ColorManager.colorAccentTransparent,
+        fontFamily: ('Urbanist'),
         bottomSheetTheme: BottomSheetThemeData(
             backgroundColor: Colors.black,
             shape: RoundedRectangleBorder(
@@ -183,6 +190,8 @@ void main() async {
         primaryColor: ColorManager.colorAccent,
       ),
       theme: ThemeData(
+        dividerColor: Colors.grey,
+        fontFamily: ('Urbanist'),
         bottomSheetTheme: BottomSheetThemeData(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(

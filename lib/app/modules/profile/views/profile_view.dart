@@ -292,15 +292,16 @@ class UserProfileDetails extends GetView<ProfileController> {
                             arguments: {"index": 0});
                         // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':1});
                       },
-                      child:Column(children: [  Text(
-                          '${state.value.following}'
-                             ,
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w700)),
-                        Text(
-                            following,
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w500))],),
+                      child: Column(
+                        children: [
+                          Text('${state.value.following}',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w700)),
+                          Text(following,
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500))
+                        ],
+                      ),
                     ),
                     const SizedBox(
                       height: 45,
@@ -322,15 +323,16 @@ class UserProfileDetails extends GetView<ProfileController> {
 
                         // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
                       },
-                      child: Column(children: [  Text(
-                          '${state.value.followers}'
-                          ,
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w700)),
-                        Text(
-                            followers,
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w500))],),
+                      child: Column(
+                        children: [
+                          Text('${state.value.followers}',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w700)),
+                          Text(followers,
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500))
+                        ],
+                      ),
                     ),
                     const SizedBox(
                       height: 45,
@@ -339,16 +341,17 @@ class UserProfileDetails extends GetView<ProfileController> {
                         width: 1,
                       ),
                     ),
-                    Column(children: [  Text(
-                        '${state.value.likes == null || state.value.likes!.isEmpty ? 0 : state.value.likes}'
-                        ,
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w700)),
-                      Text(
-                          likes,
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w500))],)
-                    ,
+                    Column(
+                      children: [
+                        Text(
+                            '${state.value.likes == null || state.value.likes!.isEmpty ? 0 : state.value.likes}',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w700)),
+                        Text(likes,
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w500))
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(
@@ -396,6 +399,78 @@ class UserProfileDetails extends GetView<ProfileController> {
                 const SizedBox(
                   height: 10,
                 ),
+                Obx(() =>controller.followersLoading.isTrue?loader(): Container(
+                  alignment: Alignment.centerLeft,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: controller.obx((state) => Row(
+                      children: List.generate(
+                          controller.followersModel.length,
+                              (index) => InkWell(
+                            onTap: () => Get.toNamed(Routes.OTHERS_PROFILE,
+                                arguments: {
+                                  "profileId":
+                                  controller.followersModel[index].id
+                                }),
+                            child: Container(
+                              margin: EdgeInsets.all(10),
+                              child: Column(
+                                children: [
+                                  Stack(
+                                    alignment: Alignment.bottomRight,
+                                    children: [
+                                      imgProfile(controller
+                                          .followersModel[index].avtars
+                                          .toString()),
+                                      InkWell(
+                                        onTap: () =>
+                                            controller.followUnfollowUser(
+                                                controller
+                                                    .userProfile.value.id!,
+                                                controller
+                                                    .followersModel[
+                                                index]
+                                                    .isFolling ==
+                                                    0
+                                                    ? "follow"
+                                                    : "unfollow"),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: ColorManager
+                                                  .colorPrimaryLight
+                                                  .withOpacity(0.5)),
+                                          child: Icon(
+                                            Icons.add,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    controller.followersModel[index].name
+                                        .toString()
+                                        .isEmpty
+                                        ? controller
+                                        .followersModel[index].username
+                                        .toString()
+                                        : controller
+                                        .followersModel[index].name
+                                        .toString(),
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w700),
+                                  )
+                                ],
+                              ),
+                            ),
+                          )),
+                    )),
+                  ),
+                )),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

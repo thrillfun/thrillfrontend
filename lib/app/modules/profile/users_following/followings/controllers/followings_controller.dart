@@ -43,9 +43,8 @@ Future<void> getFollowings() async {
   }).then((result) {
 
     followersModel = FollowersModel.fromJson(result.data).data!.obs;
-    change(followersModel, status: RxStatus.success());
-
-  }).onError((error, stackTrace) {
+      change(followersModel, status: RxStatus.success());
+    }).onError((error, stackTrace) {
 
     change(followersModel, status: RxStatus.error());
 
