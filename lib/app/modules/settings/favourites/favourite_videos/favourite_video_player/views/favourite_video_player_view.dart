@@ -206,7 +206,9 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                         fcmToken: (Get
                                             .arguments["favourite_videos"] as List<
                                             FavouriteVideos>)[index].user!
-                                            .firebaseToken));
+                                            .firebaseToken,description:(Get
+                                        .arguments["favourite_videos"] as List<
+                                        FavouriteVideos>)[index].description));
                                   });
                                   // GetStorage().read("videoPrivacy") ==
                                   //     "Private"

@@ -105,8 +105,7 @@ class RelatedVideosController extends GetxController {
     }).then((value) async {
       getAllVideos();
       if (isLike == 1) {
-
-        sendNotification(token.toString(),title: "Someone liked your video!");
+        sendNotification(token.toString(), title: "Someone liked your video!");
         // await notificationsController.sendFcmNotification(token.toString(),
         //     title:
         //     "${await GetStorage().read("user")["username"]} liked you video",
@@ -276,7 +275,21 @@ class RelatedVideosController extends GetxController {
 
     return isVideoReported.value;
   }
-
+  Future<void> favUnfavVideo(int videoId, String action) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/do-fav-unfav", queryParameters: {
+      "video_id": "$videoId",
+      "action": action
+    }).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {});
+  }
   Future<String> createDynamicLink(
       String id, String? type, String? name, String? avatar,
       {String? referal}) async {

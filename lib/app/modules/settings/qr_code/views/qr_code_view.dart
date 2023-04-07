@@ -1,6 +1,7 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -28,8 +29,8 @@ class QrCodeView extends GetView<QrCodeController> {
                   shape: BoxShape.circle,
                   border: Border.all(),
                   image: DecorationImage(
-                      image: NetworkImage(GetStorage().read("avatar") != null
-                          ? RestUrl.profileUrl + GetStorage().read("avatar")
+                      image: NetworkImage(Get.arguments["avatar"] != null
+                          ? RestUrl.profileUrl + Get.arguments["avatar"]
                           : RestUrl.placeholderImage))),
             ),
             Text(GetStorage().read("name")??"",
@@ -42,12 +43,17 @@ class QrCodeView extends GetView<QrCodeController> {
                     fontSize: 18)),
             RepaintBoundary(
               key: controller.previewContainer,
-              child: Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(45)),
+              child: Neumorphic(
+                margin: EdgeInsets.all(20),
+                style: NeumorphicStyle(
+
+                  surfaceIntensity: 10,
+                  lightSource: LightSource.top,
+                  intensity: 10,
+                  depth: 10,
+                  color: Colors.white
+                ),
                 child: Container(
-                  height: 300,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(45)),
                   margin:

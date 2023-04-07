@@ -208,7 +208,9 @@ class LikedVideoPlayerView extends GetView<LikedVideoPlayerController> {
                                       fcmToken: (Get
                                           .arguments["liked_videos"] as List<
                                           LikedVideos>)[index].user!
-                                          .firebaseToken));
+                                          .firebaseToken,description: (Get
+                                      .arguments["liked_videos"] as List<
+                                      LikedVideos>)[index].description,));
                                 });
                                 // GetStorage().read("videoPrivacy") ==
                                 //     "Private"

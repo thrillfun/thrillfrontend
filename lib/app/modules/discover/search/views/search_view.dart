@@ -547,8 +547,9 @@ class SearchView extends GetView<SearchController> {
                               "profileId", state[0].sounds![index].userId);
 
                           Get.toNamed(Routes.SOUNDS, arguments: {
+
                             "sound_name":
-                                state[0].sounds![index].name.toString(),
+                                state[0].sounds![index].sound.toString(),
                             "sound_url":
                                 state[0].sounds![index].sound.toString(),
                           });
@@ -588,16 +589,11 @@ class SearchView extends GetView<SearchController> {
                             vertical: 10, horizontal: 10),
                         child: ListView.builder(
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: state![0].users!.length,
+                            itemCount: state![0].users!.take(4).length,
                             shrinkWrap: true,
                             itemBuilder: (context, index) => InkWell(
                                   onTap: () async {
-                                    await GetStorage()
-                                        .write("profileId",
-                                            state[0].users![index].id)
-                                        .then((value) {
-                                      Get.toNamed(Routes.OTHERS_PROFILE);
-                                    });
+                                    Get.toNamed(Routes.OTHERS_PROFILE,arguments: {"profileId":state[0].users![index].id});
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(10),
@@ -1068,7 +1064,7 @@ class SearchView extends GetView<SearchController> {
 
                                 Get.toNamed(Routes.SOUNDS, arguments: {
                                   "sound_name":
-                                  state[0].sounds![index].name.toString(),
+                                  state[0].sounds![index].sound.toString(),
                                   "sound_url":
                                   state[0].sounds![index].sound.toString(),
                                 });

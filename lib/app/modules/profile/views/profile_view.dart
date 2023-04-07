@@ -70,7 +70,7 @@ class ProfileView extends GetView<ProfileController> {
                               ))
                         ]),
                   ),
-                  body: TabBarView(children: [
+                  body: const TabBarView(children: [
                     UserVideosView(),
                     UserPrivateVideosView(),
                     UserLikedVideosView()
@@ -188,294 +188,226 @@ class UserProfileDetails extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return controller.obx(
-        (state) => Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        onPressed: () =>
-                            Get.toNamed(Routes.SETTINGS, arguments: {
+        (state) => Stack(children: [
+        Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          IconButton(
+            onPressed: () =>
+                Get.back(),
+            icon: const Icon(
+              Icons.arrow_back,
+            ),
+          )
+        ],
+      ),
+    ),Column(
+          children: [
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: () =>
+                        Get.toNamed(Routes.SETTINGS, arguments: {
                           "username":
-                              "${controller.userProfile.value.username}",
+                          "${controller.userProfile.value.username}",
                           "avatar": "${controller.userProfile.value.avatar}",
                           "name": controller.userProfile.value.name
                         }),
-                        icon: Icon(
-                          Icons.more_vert_outlined,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
+                    icon: const Icon(
+                      Icons.more_vert_outlined,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SvgPicture.asset(
+                  "assets/profile_background.svg",
+                  fit: BoxFit.contain,
+                  width: Get.width,
                 ),
                 Stack(
                   alignment: Alignment.center,
                   children: [
                     SvgPicture.asset(
-                      "assets/profile_background.svg",
-                      fit: BoxFit.contain,
-                      width: Get.width,
+                      "assets/23.svg",
+                      height: 100,
+                      width: 100,
                     ),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          "assets/23.svg",
-                          height: 100,
-                          width: 100,
+                    Container(
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        height: 80,
+                        width: 80,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
                         ),
-                        Container(
-                            clipBehavior: Clip.antiAliasWithSaveLayer,
-                            height: 80,
-                            width: 80,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                            child: CachedNetworkImage(
-                              fit: BoxFit.fill,
-                              imageUrl: state!.value.avatar.toString().isEmpty
-                                  ? RestUrl.placeholderImage
-                                  : '${RestUrl.profileUrl}${state.value.avatar}',
-                              placeholder: (a, b) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            )),
-                      ],
-                    )
+                        child: CachedNetworkImage(
+                          fit: BoxFit.fill,
+                          imageUrl: state!.value.avatar.toString().isEmpty
+                              ? RestUrl.placeholderImage
+                              : '${RestUrl.profileUrl}${state.value.avatar}',
+                          placeholder: (a, b) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )),
                   ],
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${state.value.name}',
+                  style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(
-                  height: 10,
+                  width: 5,
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                Visibility(
+                    visible: state.value.isVerified == 'true',
+                    child: SvgPicture.asset(
+                      'assets/verified.svg',
+                    ))
+              ],
+            ),
+            Text(
+              '@${state.value.username}',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: () {
+
+                    Get.toNamed(Routes.USERS_FOLLOWING,
+                        arguments: {"index": 0});
+                  },
+                  child: Column(
+                    children: [
+                      Text('${state.value.following}',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w700)),
+                      const Text(following,
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w500))
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 45,
+                  child: VerticalDivider(
+                    thickness: 1,
+                    width: 1,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+
+                    Get.toNamed(Routes.USERS_FOLLOWING,
+                        arguments: {"index": 1});
+
+                  },
+                  child: Column(
+                    children: [
+                      Text('${state.value.followers}',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w700)),
+                      const Text(followers,
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w500))
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 45,
+                  child: VerticalDivider(
+                    thickness: 1,
+                    width: 1,
+                  ),
+                ),
+                Column(
                   children: [
                     Text(
-                      '${state.value.name}',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                        '${state.value.likes == null || state.value.likes!.isEmpty ? 0 : state.value.likes}',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w700)),
+                    const Text(likes,
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w500))
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Visibility(
+              visible: state.value.bio.toString().isNotEmpty ||
+                  state.value.bio.toString() != "null",
+              child: Container(
+                margin: const EdgeInsets.only(left: 10),
+                alignment: Alignment.centerLeft,
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.link,
                     ),
                     const SizedBox(
                       width: 5,
                     ),
-                    Visibility(
-                        visible: state.value.isVerified == 'true',
-                        child: SvgPicture.asset(
-                          'assets/verified.svg',
-                        ))
+                    InkWell(
+                      onTap: () {
+                        Uri openInBrowser = Uri(
+                          scheme: 'https',
+                          path: "${state.value.bio}",
+                        );
+                        launchUrl(openInBrowser,
+                            mode: LaunchMode.externalApplication);
+                      },
+                      child: Text(
+                        state.value.bio.toString(),
+                        maxLines: 3,
+                        textAlign: TextAlign.start,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    )
                   ],
                 ),
-                Text(
-                  '@${state.value.username}',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // followersController
-                        //     .getUserFollowers(state.value.id!)
-                        //     .then((value) => followersController
-                        //     .getUserFollowing(state.value.id!)
-                        //     .then((value) => Get.to(FollowingAndFollowers(
-                        //     true.obs, state.value.id!.obs))));
-                        Get.toNamed(Routes.USERS_FOLLOWING,
-                            arguments: {"index": 0});
-                        // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':1});
-                      },
-                      child: Column(
-                        children: [
-                          Text('${state.value.following}',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w700)),
-                          Text(following,
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500))
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 45,
-                      child: VerticalDivider(
-                        thickness: 1,
-                        width: 1,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        // followersController
-                        //     .getUserFollowers(state.value.id!)
-                        //     .then((value) => followersController
-                        //     .getUserFollowing(state.value.id!)
-                        //     .then((value) => Get.to(FollowingAndFollowers(
-                        //     true.obs, state.value.id!.obs))));
-                        Get.toNamed(Routes.USERS_FOLLOWING,
-                            arguments: {"index": 1});
-
-                        // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
-                      },
-                      child: Column(
-                        children: [
-                          Text('${state.value.followers}',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w700)),
-                          Text(followers,
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500))
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 45,
-                      child: VerticalDivider(
-                        thickness: 1,
-                        width: 1,
-                      ),
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                            '${state.value.likes == null || state.value.likes!.isEmpty ? 0 : state.value.likes}',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w700)),
-                        Text(likes,
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w500))
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Visibility(
-                  visible: state.value.bio.toString().isNotEmpty ||
-                      state.value.bio.toString() != "null",
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 10),
-                    alignment: Alignment.centerLeft,
-                    width: MediaQuery.of(context).size.width,
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.link,
-                        ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Uri openInBrowser = Uri(
-                              scheme: 'https',
-                              path: "${state.value.bio}",
-                            );
-                            launchUrl(openInBrowser,
-                                mode: LaunchMode.externalApplication);
-                          },
-                          child: Text(
-                            state.value.bio.toString(),
-                            maxLines: 3,
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Obx(() =>controller.followersLoading.isTrue?loader(): Container(
-                  alignment: Alignment.centerLeft,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: controller.obx((state) => Row(
-                      children: List.generate(
-                          controller.followersModel.length,
-                              (index) => InkWell(
-                            onTap: () => Get.toNamed(Routes.OTHERS_PROFILE,
-                                arguments: {
-                                  "profileId":
-                                  controller.followersModel[index].id
-                                }),
-                            child: Container(
-                              margin: EdgeInsets.all(10),
-                              child: Column(
-                                children: [
-                                  Stack(
-                                    alignment: Alignment.bottomRight,
-                                    children: [
-                                      imgProfile(controller
-                                          .followersModel[index].avtars
-                                          .toString()),
-                                      InkWell(
-                                        onTap: () =>
-                                            controller.followUnfollowUser(
-                                                controller
-                                                    .userProfile.value.id!,
-                                                controller
-                                                    .followersModel[
-                                                index]
-                                                    .isFolling ==
-                                                    0
-                                                    ? "follow"
-                                                    : "unfollow"),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: ColorManager
-                                                  .colorPrimaryLight
-                                                  .withOpacity(0.5)),
-                                          child: Icon(
-                                            Icons.add,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    controller.followersModel[index].name
-                                        .toString()
-                                        .isEmpty
-                                        ? controller
-                                        .followersModel[index].username
-                                        .toString()
-                                        : controller
-                                        .followersModel[index].name
-                                        .toString(),
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w700),
-                                  )
-                                ],
-                              ),
-                            ),
-                          )),
-                    )),
-                  ),
-                )),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                        child: InkWell(
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                    child: InkWell(
                       onTap: () async {
                         Get.toNamed(Routes.EDIT_PROFILE, arguments: {
                           "avatar": controller.state!.value.avatar,
@@ -520,116 +452,21 @@ class UserProfileDetails extends GetView<ProfileController> {
                             ),
                           )),
                     )),
-                    // Expanded(child: Container(
-                    //     margin: EdgeInsets.symmetric(horizontal: 10),
-                    //     alignment: Alignment.center,
-                    //     decoration: BoxDecoration(
-                    //       borderRadius:
-                    //       BorderRadius.circular(20),
-                    //       border: Border.all(color: ColorManager.colorAccent),
-                    //     ),
-                    //     padding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
-                    //
-                    //     child: InkWell(
-                    //       onTap: () {
-                    //         // Inbox inboxModel = InboxModel(
-                    //         //     id: user.isProfileLoading
-                    //         //         .value
-                    //         //         ? 0
-                    //         //         : user
-                    //         //         .userProfile
-                    //         //         .value
-                    //         //         .data!
-                    //         //         .user!
-                    //         //         .id!,
-                    //         //     userImage: user
-                    //         //         .isProfileLoading
-                    //         //         .value
-                    //         //         ? ""
-                    //         //         : user
-                    //         //         .userProfile
-                    //         //         .value
-                    //         //         .data!
-                    //         //         .user!
-                    //         //         .avatar,
-                    //         //     message: "",
-                    //         //     msgDate: "",
-                    //         //     name: user
-                    //         //         .isProfileLoading
-                    //         //         .value
-                    //         //         ? ""
-                    //         //         : user
-                    //         //         .userProfile
-                    //         //         .value
-                    //         //         .data!
-                    //         //         .user!
-                    //         //         .name!);
-                    //         // Get.to(ChatScreen(
-                    //         //     inboxModel:
-                    //         //     inboxModel));
-                    //       },
-                    //       child: const Text("Message",
-                    //           style: TextStyle(
-                    //             fontSize: 14,
-                    //             fontWeight: FontWeight.w600,
-                    //           )),
-                    //     ))),
-                    // ClipOval(
-                    //   child: InkWell(
-                    //       onTap: () {
-                    //         Navigator.pushNamed(
-                    //             context, '/referral');
-                    //       },
-                    //       child: Container(
-                    //           margin: EdgeInsets.symmetric(horizontal: 10),
-                    //           decoration:
-                    //           BoxDecoration(
-                    //               borderRadius: BorderRadius.circular(50),
-                    //               color: Color.fromRGBO(73, 204, 201, 0.08)
-                    //           ),
-                    //
-                    //           padding:
-                    //           const EdgeInsets.all(15),
-                    //           child: const Iconify(
-                    //             Carbon.logo_instagram,
-                    //             size: 16,
-                    //           ))),
-                    // ),
-                    // ClipOval(
-                    //   child: InkWell(
-                    //       onTap: () {
-                    //         Navigator.pushNamed(
-                    //             context, '/referral');
-                    //       },
-                    //       child: Container(
-                    //           margin: EdgeInsets.symmetric(horizontal: 10),
-                    //           decoration:
-                    //           BoxDecoration(
-                    //               borderRadius: BorderRadius.circular(50),
-                    //               color: Color.fromRGBO(73, 204, 201, 0.08)
-                    //           ),
-                    //
-                    //           padding:
-                    //           const EdgeInsets.all(15),
-                    //           child: const Iconify(
-                    //             Carbon.bookmark,
-                    //             size: 16,
-                    //           ))),
-                    // ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
               ],
             ),
+            const SizedBox(
+              height: 10,
+            ),
+          ],
+        )],)
+            ,
         onLoading: loader(),
         onEmpty: Column(
           children: [emptyListWidget()],
         ),
         onError: (error) => SizedBox(
               width: Get.width,
-              child: Center(
+              child: const Center(
                 child: Text(
                   "Oops nothing found",
                   style: TextStyle(

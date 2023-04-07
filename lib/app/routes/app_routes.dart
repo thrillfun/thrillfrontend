@@ -77,6 +77,9 @@ abstract class Routes {
   static const SELECT_SOUND = _Paths.CAMERA + _Paths.SELECT_SOUND;
   static const POST_SCREEN = _Paths.CAMERA + _Paths.POST_SCREEN;
   static const COMMENTS = _Paths.COMMENTS;
+  static const FOLLOWING_VIDEOS = _Paths.FOLLOWING_VIDEOS;
+  static const TRENDING_VIDEOS = _Paths.TRENDING_VIDEOS;
+  static const HOME_VIDEOS_PLAYER = _Paths.HOME + _Paths.HOME_VIDEOS_PLAYER;
 }
 
 abstract class _Paths {
@@ -133,4 +136,7 @@ abstract class _Paths {
   static const SELECT_SOUND = '/select-sound';
   static const POST_SCREEN = '/post-screen';
   static const COMMENTS = '/comments';
+  static const FOLLOWING_VIDEOS = '/following-videos';
+  static const TRENDING_VIDEOS = '/trending-videos';
+  static const HOME_VIDEOS_PLAYER = '/home-videos-player';
 }

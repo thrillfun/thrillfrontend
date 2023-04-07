@@ -48,25 +48,21 @@ class HashTagsDetailsController extends GetxController
   Future<void> addHashtagToFavourite() async {
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
-    dio
-        .post(
-          "favorite/add-to-favorite",
-          queryParameters: {
-            "id": "${await GetStorage().read("hashtagId")}",
-            "type": "hashtag",
-            "action": "1"
-          },
-        )
-        .then((value) {
-          if(value.data["status"]){
-            successToast(value.data["message"]);
-          }
-          else{
-            errorToast(value.data["message"]);
-          }
-    })
-        .onError((error, stackTrace) {
-          errorToast(error.toString());
-        });
+    dio.post(
+      "favorite/add-to-favorite",
+      queryParameters: {
+        "id": "${await GetStorage().read("hashtagId")}",
+        "type": "hashtag",
+        "action": "1"
+      },
+    ).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {
+      errorToast(error.toString());
+    });
   }
 }

@@ -122,6 +122,7 @@ dependencies:
   animated_bottom_navigation_bar: ^1.1.0+1
   amazon_cognito_identity_dart_2: ^3.2.0
   double_back_to_close: ^2.0.0
+  flutter_neumorphic: ^3.2.0
 
 
 dev_dependencies:

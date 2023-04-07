@@ -25,1144 +25,1269 @@ import '../controllers/hash_tags_video_player_controller.dart';
 
 class HashTagsVideoPlayerView extends GetView<HashTagsVideoPlayerController> {
   const HashTagsVideoPlayerView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     var commentsController = Get.find<CommentsController>();
     late AnimationController _controller;
 
-    var pageViewController = PageController(initialPage: Get.arguments["init_page"]);
+    var pageViewController = PageController(
+        initialPage: Get.arguments["init_page"]);
     var playerController = BetterPlayerListVideoPlayerController();
     return Scaffold(
       backgroundColor: Colors.black,
       body: PageView.builder(
-        itemCount: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>).length,
-        scrollDirection: Axis.vertical,
-        controller: pageViewController,
-        itemBuilder: (context, index){
-          _controller = AnimationController(vsync: Scaffold.of(context));
-          return  Stack(children: [InkWell(
-            onTapDown: (istap) {
-              playerController.pause();
-            },
-            onTapUp: (istap) {
-              if (controller.eventType == BetterPlayerEventType.play) {
+          itemCount: (Get.arguments["hash_tags_videos"] as List<
+              HashtagRelatedVideos>).length,
+          scrollDirection: Axis.vertical,
+          controller: pageViewController,
+          itemBuilder: (context, index) {
+            _controller = AnimationController(vsync: Scaffold.of(context));
+            return Stack(children: [InkWell(
+              onTapDown: (istap) {
                 playerController.pause();
-              }
-              else {
-                playerController.play();
-              }
-            },
-            onTap: () {},
-            onDoubleTap: () {},
-            child: BetterPlayerListVideoPlayer(
-              BetterPlayerDataSource.network(RestUrl.videoUrl +
-                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].video!),
-              betterPlayerListVideoPlayerController: playerController,
-              configuration: BetterPlayerConfiguration(
-                  autoPlay: true,
-                  aspectRatio: Get.size.aspectRatio,
-                  fit: Get.size.aspectRatio <
-                      1.5 ? BoxFit.contain : BoxFit.fill,
-                  eventListener: (eventListener) async {
-
-                    controller.eventType = eventListener.betterPlayerEventType;
-                    if (eventListener.betterPlayerEventType ==
-                        BetterPlayerEventType.finished && eventListener.betterPlayerEventType!=BetterPlayerEventType.pause &&eventListener.betterPlayerEventType !=
-                        BetterPlayerEventType.play) {
-                      playerController.seekTo(Duration.zero);
-
-                      if (Get.isBottomSheetOpen == false) {
+              },
+              onTapUp: (istap) {
+                if (controller.eventType == BetterPlayerEventType.play) {
+                  playerController.pause();
+                }
+                else {
+                  playerController.play();
+                }
+              },
+              onTap: () {},
+              onDoubleTap: () {},
+              child: BetterPlayerListVideoPlayer(
+                BetterPlayerDataSource.network(RestUrl.videoUrl +
+                    (Get.arguments["hash_tags_videos"] as List<
+                        HashtagRelatedVideos>)[index].video!),
+                betterPlayerListVideoPlayerController: playerController,
+                configuration: BetterPlayerConfiguration(
+                    autoPlay: true,
+                    aspectRatio: Get.size.aspectRatio,
+                    fit: Get.size.aspectRatio <
+                        1.5 ? BoxFit.contain : BoxFit.fill,
+                    eventListener: (eventListener) async {
+                      controller.eventType =
+                          eventListener.betterPlayerEventType;
+                      if (eventListener.betterPlayerEventType ==
+                          BetterPlayerEventType.finished &&
+                          eventListener.betterPlayerEventType !=
+                              BetterPlayerEventType.pause &&
+                          eventListener.betterPlayerEventType !=
+                              BetterPlayerEventType.play) {
                         playerController.seekTo(Duration.zero);
 
-                        pageViewController.animateToPage(index + 1,
-                            duration: Duration(seconds: 1),
-                            curve: Curves.easeIn);
+                        if (Get.isBottomSheetOpen == false) {
+                          playerController.seekTo(Duration.zero);
+
+                          pageViewController.animateToPage(index + 1,
+                              duration: Duration(seconds: 1),
+                              curve: Curves.easeIn);
+                        }
+                        // videosController
+                        //     .postVideoView(state[index].id!)
+                        //     .then((value) {
+                        //
+                        // });
+
+
                       }
-                      // videosController
-                      //     .postVideoView(state[index].id!)
-                      //     .then((value) {
-                      //
-                      // });
-
-
-                    }
-                  },
-                  controlsConfiguration:
-                  const BetterPlayerControlsConfiguration(showControls: false)),
+                    },
+                    controlsConfiguration:
+                    const BetterPlayerControlsConfiguration(
+                        showControls: false)),
+              ),
             ),
-          ),
-            Container(
-              alignment: Alignment.bottomRight,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(
-                        top: 10, bottom: 10, right: 20),
-                    child: Column(
-                      children: [
-                        LikeButton(
-                            countPostion: CountPostion.bottom,
-                            size: 28,
-                            circleColor: CircleColor(
-                                start: Colors.red.shade200,
-                                end: Colors.red),
-                            bubblesColor: BubblesColor(
-                              dotPrimaryColor: Colors.red.shade200,
-                              dotSecondaryColor: Colors.red,
-                            ),
-                            likeBuilder: (bool isLiked) {
-                              (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].videoLikeStatus == 0
-                                  ? isLiked = false
-                                  : isLiked = true;
-                              return Icon(
-                                isLiked
-                                    ? Icons.favorite
-                                    : Icons.favorite_outline,
-                                color:
-                                isLiked ? Colors.red : Colors.white,
-                                size: 25,
-                              );
-                            },
-                            likeCount: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].videoLikeStatus,
-                            countBuilder:
-                                (int? count, bool isLiked, String text) {
-                              var color =
-                              isLiked ? Colors.white : Colors.white;
-                              Widget result;
-                              if (count == 0) {
-                                result = Text(
-                                  "0",
-                                  style: TextStyle(color: color),
+              Container(
+                alignment: Alignment.bottomRight,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(
+                          top: 10, bottom: 10, right: 20),
+                      child: Column(
+                        children: [
+                          LikeButton(
+                              countPostion: CountPostion.bottom,
+                              size: 28,
+                              circleColor: CircleColor(
+                                  start: Colors.red.shade200,
+                                  end: Colors.red),
+                              bubblesColor: BubblesColor(
+                                dotPrimaryColor: Colors.red.shade200,
+                                dotSecondaryColor: Colors.red,
+                              ),
+                              likeBuilder: (bool isLiked) {
+                                (Get.arguments["hash_tags_videos"] as List<
+                                    HashtagRelatedVideos>)[index]
+                                    .videoLikeStatus == 0
+                                    ? isLiked = false
+                                    : isLiked = true;
+                                return Icon(
+                                  isLiked
+                                      ? Icons.favorite
+                                      : Icons.favorite_outline,
+                                  color:
+                                  isLiked ? Colors.red : Colors.white,
+                                  size: 25,
                                 );
-                              } else
-                                result = Text(
-                                  text,
-                                  style: TextStyle(color: color),
-                                );
-                              return result;
-                            },
-                            onTap: (_) async {
-                              controller.likeVideo(
-                                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].videoLikeStatus == 0
-                                      ? 1
-                                      : 0,
-                                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].id!,
-                                  token: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.firebaseToken);
-                            }),
-                      ],
+                              },
+                              likeCount: (Get
+                                  .arguments["hash_tags_videos"] as List<
+                                  HashtagRelatedVideos>)[index].videoLikeStatus,
+                              countBuilder:
+                                  (int? count, bool isLiked, String text) {
+                                var color =
+                                isLiked ? Colors.white : Colors.white;
+                                Widget result;
+                                if (count == 0) {
+                                  result = Text(
+                                    "0",
+                                    style: TextStyle(color: color),
+                                  );
+                                } else
+                                  result = Text(
+                                    text,
+                                    style: TextStyle(color: color),
+                                  );
+                                return result;
+                              },
+                              onTap: (_) async {
+                                controller.likeVideo(
+                                    (Get.arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index]
+                                        .videoLikeStatus == 0
+                                        ? 1
+                                        : 0,
+                                    (Get.arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].id!,
+                                    token: (Get
+                                        .arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].user!
+                                        .firebaseToken);
+                              }),
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    child: Column(
-                      children: [
-                        IconButton(
-                            onPressed: () async {
-                              commentsController
-                                  .getComments(
-                                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].id!)
-                                  .then((value) {
-                                Get.bottomSheet(CommentsView(
-                                    videoId: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].id,
-                                    userId: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.id,
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: Column(
+                        children: [
+                          IconButton(
+                              onPressed: () async {
+                                commentsController
+                                    .getComments(
+                                    (Get.arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].id!)
+                                    .then((value) {
+                                  Get.bottomSheet(CommentsView(
+                                    videoId: (Get
+                                        .arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].id,
+                                    userId: (Get
+                                        .arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].user!.id,
                                     isCommentAllowed:
                                     true.obs,
                                     // (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].isCommentable ==
                                     //     "Yes"
                                     //     ? true.obs
                                     //     : false.obs
-                                    isfollow: int.parse((Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.following
+                                    isfollow: int.parse((Get
+                                        .arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].user!
+                                        .following
                                         .toString()),
-                                    userName: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.username,
-                                    avatar: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.avatar ?? "",
-                                    fcmToken: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!
-                                        .firebaseToken));
-                              });
-                              // GetStorage().read("videoPrivacy") ==
-                              //     "Private"
-                              //     ? showErrorToast(
-                              //     context, "this video is private!")
-                              //     : showComments();
-                            },
-                            icon: const Icon(
-                              IconlyLight.chat,
-                              color: Colors.white,
-                              size: 25,
-                            )),
-                        Text(
-                          (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].comments != null
-                              ? "${(Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].comments}"
-                              : "0",
-                          style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
+                                    userName: (Get
+                                        .arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].user!
+                                        .username,
+                                    avatar: (Get
+                                        .arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].user!
+                                        .avatar ?? "",
+                                    fcmToken: (Get
+                                        .arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].user!
+                                        .firebaseToken,
+                                    description: (Get
+                                        .arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index]
+                                        .toString(),));
+                                });
+                                // GetStorage().read("videoPrivacy") ==
+                                //     "Private"
+                                //     ? showErrorToast(
+                                //     context, "this video is private!")
+                                //     : showComments();
+                              },
+                              icon: const Icon(
+                                IconlyLight.chat,
+                                color: Colors.white,
+                                size: 25,
+                              )),
+                          Text(
+                            (Get.arguments["hash_tags_videos"] as List<
+                                HashtagRelatedVideos>)[index].comments != null
+                                ? "${(Get.arguments["hash_tags_videos"] as List<
+                                HashtagRelatedVideos>)[index].comments}"
+                                : "0",
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(
-                        right: 10, top: 10, bottom: 10),
-                    child: Column(
-                      children: [
-                        IconButton(
-                            onPressed: () {
-                              Share.share(
-                                  'You need to watch this awesome video only on Thrill!!!');
-                            },
-                            icon: const Icon(
-                              Icons.share,
-                              color: Colors.white,
-                              size: 22,
-                            )),
-                        const Text(
-                          "Share",
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
+                    Container(
+                      margin: const EdgeInsets.only(
+                          right: 10, top: 10, bottom: 10),
+                      child: Column(
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                Share.share(
+                                    'You need to watch this awesome video only on Thrill!!!');
+                              },
+                              icon: const Icon(
+                                Icons.share,
+                                color: Colors.white,
+                                size: 22,
+                              )),
+                          const Text(
+                            "Share",
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(
-                        right: 10, top: 10, bottom: 10),
-                    child: Column(
-                      children: [
-                        IconButton(
-                            onPressed: () {
-                              Get.bottomSheet(
+                    Container(
+                      margin: const EdgeInsets.only(
+                          right: 10, top: 10, bottom: 10),
+                      child: Column(
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                Get.bottomSheet(
 
-                                Scaffold(body: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .spaceBetween,
-                                          children: [
-                                            Container(
-                                              margin:
-                                              const EdgeInsets.only(
-                                                  right: 10),
-                                              child: Column(
-                                                children: [
-                                                  IconButton(
-                                                    onPressed: () {
-                                                      // VideoModel videModel = VideoModel(
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .id!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .comments!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .video!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .description!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .likes!,
-                                                      //     null,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .filter!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .gifImage!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .sound!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .soundName!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .soundCategoryName!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .views!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .speed!,
-                                                      //     [],
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .isDuet!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .duetFrom!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .isDuetable!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .isCommentable!,
-                                                      //     widget
-                                                      //         .publicVideos
-                                                      //         .soundOwner!);
-                                                      // Get.to(RecordDuet(
-                                                      //     videoModel:
-                                                      //     videModel));
-                                                    },
-                                                    icon: const Icon(
-                                                      IconlyLight.plus,
+                                  Scaffold(body: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment
+                                                .spaceBetween,
+                                            children: [
+                                              Container(
+                                                margin:
+                                                const EdgeInsets.only(
+                                                    right: 10),
+                                                child: Column(
+                                                  children: [
+                                                    IconButton(
+                                                      onPressed: () {
+                                                        // VideoModel videModel = VideoModel(
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .id!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .comments!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .video!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .description!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .likes!,
+                                                        //     null,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .filter!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .gifImage!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .sound!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .soundName!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .soundCategoryName!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .views!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .speed!,
+                                                        //     [],
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .isDuet!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .duetFrom!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .isDuetable!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .isCommentable!,
+                                                        //     widget
+                                                        //         .publicVideos
+                                                        //         .soundOwner!);
+                                                        // Get.to(RecordDuet(
+                                                        //     videoModel:
+                                                        //     videModel));
+                                                      },
+                                                      icon: const Icon(
+                                                        IconlyLight.plus,
+                                                        color: ColorManager
+                                                            .colorAccent,
+                                                        size: 30,
+                                                      ),
+                                                    ),
+                                                    const Text(
+                                                      "Duet",
+                                                      style: TextStyle(
+                                                          color: ColorManager
+                                                              .colorAccent,
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                margin:
+                                                const EdgeInsets.only(
+                                                    right: 10),
+                                                child: Column(
+                                                  children: [
+                                                    IconButton(
+                                                        onPressed:
+                                                            () async {
+                                                          if ((Get
+                                                              .arguments["hash_tags_videos"] as List<
+                                                              HashtagRelatedVideos>)[index]
+                                                              .user!.id ==
+                                                              GetStorage()
+                                                                  .read(
+                                                                  "userId")) {
+                                                            Get
+                                                                .defaultDialog(
+                                                                content:
+                                                                const Text(
+                                                                    "you want to delete this video?"),
+                                                                title:
+                                                                "Are your sure?",
+                                                                confirm:
+                                                                InkWell(
+                                                                  child:
+                                                                  Container(
+                                                                    width:
+                                                                    Get
+                                                                        .width,
+                                                                    alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                    decoration:
+                                                                    BoxDecoration(
+                                                                        borderRadius: BorderRadius
+                                                                            .circular(
+                                                                            10),
+                                                                        color: Colors
+                                                                            .red
+                                                                            .shade400),
+                                                                    child:
+                                                                    const Text(
+                                                                        "Yes"),
+                                                                    padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        10),
+                                                                  ),
+                                                                  onTap: () =>
+                                                                      controller
+                                                                          .deleteUserVideo(
+                                                                          (Get
+                                                                              .arguments["hash_tags_videos"] as List<
+                                                                              HashtagRelatedVideos>)[index]
+                                                                              .user!
+                                                                              .id!)
+                                                                          .then((
+                                                                          value) =>
+                                                                          Get
+                                                                              .back()),
+                                                                ),
+                                                                cancel:
+                                                                InkWell(
+                                                                  child:
+                                                                  Container(
+                                                                    width:
+                                                                    Get
+                                                                        .width,
+                                                                    decoration:
+                                                                    BoxDecoration(
+                                                                        borderRadius: BorderRadius
+                                                                            .circular(
+                                                                            10),
+                                                                        color: Colors
+                                                                            .green),
+                                                                    child:
+                                                                    const Text(
+                                                                        "Cancel"),
+                                                                    alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                    padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        10),
+                                                                  ),
+                                                                  onTap: () =>
+                                                                      Get
+                                                                          .back(),
+                                                                ));
+
+                                                            //  showDeleteDialog();
+                                                          }
+                                                        },
+                                                        icon: (Get
+                                                            .arguments["hash_tags_videos"] as List<
+                                                            HashtagRelatedVideos>)[index]
+                                                            .user!.id
+                                                            ==
+                                                            GetStorage()
+                                                                .read(
+                                                                "userId")
+                                                            ? const Icon(
+                                                          Icons
+                                                              .delete,
+                                                          color:
+                                                          ColorManager
+                                                              .red,
+                                                        )
+                                                            : const Icon(
+                                                          Icons.save,
+                                                          color: ColorManager
+                                                              .colorAccent,
+                                                        )),
+                                                    (Get
+                                                        .arguments["hash_tags_videos"] as List<
+                                                        HashtagRelatedVideos>)[index]
+                                                        .user!.id ==
+                                                        GetStorage()
+                                                            .read(
+                                                            "userId")
+                                                        ? const Text(
+                                                      "Delete",
+                                                      style: TextStyle(
+                                                          color:
+                                                          ColorManager
+                                                              .red,
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold),
+                                                    )
+                                                        : const Text(
+                                                      "Save",
+                                                      style: TextStyle(
+                                                          color: ColorManager
+                                                              .colorAccent,
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                margin:
+                                                const EdgeInsets.only(
+                                                    right: 10),
+                                                child: Column(
+                                                  children: [
+                                                    IconButton(
+                                                        onPressed:
+                                                            () async {
+                                                          Clipboard.setData(
+                                                              ClipboardData(
+                                                                  text: await controller
+                                                                      .createDynamicLink(
+                                                                      index
+                                                                          .toString(),
+                                                                      "video",
+                                                                      (Get
+                                                                          .arguments["hash_tags_videos"] as List<
+                                                                          HashtagRelatedVideos>)[index]
+                                                                          .user!
+                                                                          .username
+                                                                          .toString(),
+                                                                      (Get
+                                                                          .arguments["hash_tags_videos"] as List<
+                                                                          HashtagRelatedVideos>)[index]
+                                                                          .user!
+                                                                          .avatar
+                                                                          .toString())));
+
+                                                          successToast(
+                                                              "link copied successfully");
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.link,
+                                                          color: ColorManager
+                                                              .colorAccent,
+                                                        )),
+                                                    const Text(
+                                                      "Link",
+                                                      style: TextStyle(
+                                                          color: ColorManager
+                                                              .colorAccent,
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                margin:
+                                                const EdgeInsets.only(
+                                                    right: 10),
+                                                child: Column(
+                                                  children: [
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          Get.back(
+                                                              closeOverlays:
+                                                              true);
+                                                          controller
+                                                              .downloadAndProcessVideo(
+                                                              (Get
+                                                                  .arguments["hash_tags_videos"] as List<
+                                                                  HashtagRelatedVideos>)[index]
+                                                                  .video!,
+                                                              (Get
+                                                                  .arguments["hash_tags_videos"] as List<
+                                                                  HashtagRelatedVideos>)[index]
+                                                                  .user!
+                                                                  .username
+                                                                  .toString());
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.download,
+                                                          color: ColorManager
+                                                              .colorAccent,
+                                                        )),
+                                                    const Text(
+                                                      "Download",
+                                                      style: TextStyle(
+                                                          color: ColorManager
+                                                              .colorAccent,
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Divider(
+                                            color: Colors.black
+                                                .withOpacity(0.3),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          InkWell(
+                                            onTap: () async {
+                                              if (await GetStorage()
+                                                  .read("token") ==
+                                                  null) {
+                                                if (await Permission
+                                                    .phone.isGranted) {
+                                                  await SimDataPlugin
+                                                      .getSimData()
+                                                      .then((value) =>
+                                                  value
+                                                      .cards.isEmpty
+                                                      ? Get.bottomSheet(
+                                                      LoginView(
+                                                          false
+                                                              .obs))
+                                                      : Get.bottomSheet(
+                                                      LoginView(true
+                                                          .obs)));
+                                                } else {
+                                                  await Permission.phone
+                                                      .request()
+                                                      .then((value) async =>
+                                                  await SimDataPlugin
+                                                      .getSimData()
+                                                      .then((value) =>
+                                                  value
+                                                      .cards
+                                                      .isEmpty
+                                                      ? Get.bottomSheet(
+                                                      LoginView(
+                                                          false
+                                                              .obs))
+                                                      : Get.bottomSheet(
+                                                      LoginView(
+                                                          true.obs))));
+                                                }
+                                              } else {
+                                                await controller
+                                                    .checkIfVideoReported(
+                                                    (Get
+                                                        .arguments["hash_tags_videos"] as List<
+                                                        HashtagRelatedVideos>)[index]
+                                                        .id!,
+                                                    await GetStorage()
+                                                        .read("userId"))
+                                                    .then((value) async {
+                                                  if (value == true) {
+                                                    errorToast(
+                                                        "video is already reported");
+                                                  } else {
+                                                    await controller
+                                                        .getSiteSettings()
+                                                        .then((_) =>
+                                                        showReportDialog(
+                                                            (Get
+                                                                .arguments["hash_tags_videos"] as List<
+                                                                HashtagRelatedVideos>)[index]
+                                                                .user!.id!,
+                                                            (Get
+                                                                .arguments["hash_tags_videos"] as List<
+                                                                HashtagRelatedVideos>)[index]
+                                                                .user!
+                                                                .username!,
+                                                            (Get
+                                                                .arguments["hash_tags_videos"] as List<
+                                                                HashtagRelatedVideos>)[index]
+                                                                .user!
+                                                                .id!));
+                                                  }
+                                                });
+                                              }
+                                            },
+                                            child: Row(
+                                              children: const [
+                                                Icon(
+                                                  Icons.chat,
+                                                  color: Color(0xffFF2400),
+                                                  size: 30,
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                  "Report...",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                      FontWeight.bold,
+                                                      color: Color(
+                                                          0xffFF2400)),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          const Divider(),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          InkWell(
+                                            onTap: () async {
+                                              if (await GetStorage()
+                                                  .read("token") ==
+                                                  null) {
+                                                if (await Permission
+                                                    .phone.isGranted) {
+                                                  await SimDataPlugin
+                                                      .getSimData()
+                                                      .then((value) =>
+                                                  value
+                                                      .cards.isEmpty
+                                                      ? Get.bottomSheet(
+                                                      LoginView(
+                                                          false
+                                                              .obs))
+                                                      : Get.bottomSheet(
+                                                      LoginView(true
+                                                          .obs)));
+                                                } else {
+                                                  await Permission.phone
+                                                      .request()
+                                                      .then((value) async =>
+                                                  await SimDataPlugin
+                                                      .getSimData()
+                                                      .then((value) =>
+                                                  value
+                                                      .cards
+                                                      .isEmpty
+                                                      ? Get.bottomSheet(
+                                                      LoginView(
+                                                          false
+                                                              .obs))
+                                                      : Get.bottomSheet(
+                                                      LoginView(
+                                                          true.obs))));
+                                                }
+                                              } else {
+                                                await controller
+                                                    .checkUserBlocked(
+                                                    (Get
+                                                        .arguments["hash_tags_videos"] as List<
+                                                        HashtagRelatedVideos>)[index]
+                                                        .user!.id!)
+                                                    .then((value) async =>
+                                                await controller
+                                                    .blockUnblockUser(
+                                                    (Get
+                                                        .arguments["hash_tags_videos"] as List<
+                                                        HashtagRelatedVideos>)[index]
+                                                        .user!.id!,
+                                                    value));
+                                              }
+                                              // if (
+                                              //     GetStorage().read(
+                                              //         "token") !=
+                                              //         null) {
+                                              //   usersController
+                                              //       .isUserBlocked(
+                                              //       widget.UserId);
+                                              //   Future.delayed(
+                                              //       const Duration(
+                                              //           seconds: 1))
+                                              //       .then((value) =>
+                                              //   usersController
+                                              //       .userBlocked.value
+                                              //       ? usersController
+                                              //       .blockUnblockUser(
+                                              //       widget.UserId,
+                                              //       "Unblock")
+                                              //       : usersController
+                                              //       .blockUnblockUser(
+                                              //       widget.UserId,
+                                              //       "Block"));
+                                              // } else {
+                                              //   showLoginAlert();
+                                              // }
+                                            },
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.block,
+                                                  color: ColorManager
+                                                      .colorAccent,
+                                                  size: 30,
+                                                ),
+                                                const SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Obx(() =>
+                                                    Text(
+                                                      controller
+                                                          .isUserBlocked
+                                                          .isFalse
+                                                          ? "Block User..."
+                                                          : "Unblock User...",
+                                                      style: const TextStyle(
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold,
+                                                          color: ColorManager
+                                                              .colorAccent),
+                                                    ))
+                                              ],
+                                            ),
+                                          ),
+                                          const Divider(),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Visibility(
+                                              visible: GetStorage()
+                                                  .read("token") !=
+                                                  null,
+                                              child: InkWell(
+                                                onTap: () async {
+                                                  if (await GetStorage()
+                                                      .read("token") ==
+                                                      null) {
+                                                    if (await Permission
+                                                        .phone.isGranted) {
+                                                      await SimDataPlugin
+                                                          .getSimData()
+                                                          .then((value) =>
+                                                      value
+                                                          .cards
+                                                          .isEmpty
+                                                          ? Get.bottomSheet(
+                                                          LoginView(
+                                                              false
+                                                                  .obs))
+                                                          : Get.bottomSheet(
+                                                          LoginView(
+                                                              true.obs)));
+                                                    } else {
+                                                      await Permission.phone
+                                                          .request().then((
+                                                          value) async =>
+                                                      await SimDataPlugin
+                                                          .getSimData()
+                                                          .then((value) =>
+                                                      value
+                                                          .cards
+                                                          .isEmpty
+                                                          ? Get.bottomSheet(
+                                                          LoginView(false
+                                                              .obs))
+                                                          : Get.bottomSheet(
+                                                          LoginView(
+                                                              true.obs))));
+                                                    }
+                                                  } else {
+                                                    controller
+                                                        .followUnfollowUser(
+                                                        (Get
+                                                            .arguments["hash_tags_videos"] as List<
+                                                            HashtagRelatedVideos>)[index]
+                                                            .user!.id!,
+                                                        int.parse((Get
+                                                            .arguments["hash_tags_videos"] as List<
+                                                            HashtagRelatedVideos>)[index]
+                                                            .user!.following
+                                                            .toString()) ==
+                                                            0
+                                                            ? "follow"
+                                                            : "unfollow");
+                                                  }
+                                                  // userDetailsController
+                                                  //     .followUnfollowUser(
+                                                  //     widget.UserId,
+                                                  //     widget.isfollow == 0
+                                                  //         ? "follow"
+                                                  //         : "unfollow",
+                                                  //     token: widget
+                                                  //         .publicUser!
+                                                  //         .firebaseToken
+                                                  //         .toString());
+                                                  // relatedVideosController
+                                                  //     .getAllVideos();
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    int.parse((Get
+                                                        .arguments["hash_tags_videos"] as List<
+                                                        HashtagRelatedVideos>)[index]
+                                                        .user!.following
+                                                        .toString()) == 0
+                                                        ? const Icon(
+                                                      Icons.report,
+                                                      color: ColorManager
+                                                          .colorAccent,
+                                                      size: 30,
+                                                    )
+                                                        : const Icon(
+                                                      Icons.report,
                                                       color: ColorManager
                                                           .colorAccent,
                                                       size: 30,
                                                     ),
-                                                  ),
-                                                  const Text(
-                                                    "Duet",
-                                                    style: TextStyle(
-                                                        color: ColorManager
-                                                            .colorAccent,
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .bold),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              margin:
-                                              const EdgeInsets.only(
-                                                  right: 10),
-                                              child: Column(
-                                                children: [
-                                                  IconButton(
-                                                      onPressed:
-                                                          () async {
-                                                        if ((Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                            .user!.id ==
-                                                            GetStorage()
-                                                                .read(
-                                                                "userId")) {
-                                                          Get
-                                                              .defaultDialog(
-                                                              content:
-                                                              const Text(
-                                                                  "you want to delete this video?"),
-                                                              title:
-                                                              "Are your sure?",
-                                                              confirm:
-                                                              InkWell(
-                                                                child:
-                                                                Container(
-                                                                  width:
-                                                                  Get
-                                                                      .width,
-                                                                  alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                                  decoration:
-                                                                  BoxDecoration(
-                                                                      borderRadius: BorderRadius
-                                                                          .circular(
-                                                                          10),
-                                                                      color: Colors
-                                                                          .red
-                                                                          .shade400),
-                                                                  child:
-                                                                  const Text(
-                                                                      "Yes"),
-                                                                  padding:
-                                                                  const EdgeInsets
-                                                                      .all(
-                                                                      10),
-                                                                ),
-                                                                onTap: () =>
-                                                                    controller
-                                                                        .deleteUserVideo(
-                                                                        (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                                            .user!
-                                                                            .id!)
-                                                                        .then((
-                                                                        value) =>
-                                                                        Get
-                                                                            .back()),
-                                                              ),
-                                                              cancel:
-                                                              InkWell(
-                                                                child:
-                                                                Container(
-                                                                  width:
-                                                                  Get
-                                                                      .width,
-                                                                  decoration:
-                                                                  BoxDecoration(
-                                                                      borderRadius: BorderRadius
-                                                                          .circular(
-                                                                          10),
-                                                                      color: Colors
-                                                                          .green),
-                                                                  child:
-                                                                  const Text(
-                                                                      "Cancel"),
-                                                                  alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                                  padding:
-                                                                  const EdgeInsets
-                                                                      .all(
-                                                                      10),
-                                                                ),
-                                                                onTap: () =>
-                                                                    Get
-                                                                        .back(),
-                                                              ));
-
-                                                          //  showDeleteDialog();
-                                                        }
-                                                      },
-                                                      icon: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                          .user!.id
-                                                          ==
-                                                          GetStorage()
-                                                              .read(
-                                                              "userId")
-                                                          ? const Icon(
-                                                        Icons
-                                                            .delete,
-                                                        color:
-                                                        ColorManager
-                                                            .red,
-                                                      )
-                                                          : const Icon(
-                                                        Icons.save,
-                                                        color: ColorManager
-                                                            .colorAccent,
-                                                      )),
-                                                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                      .user!.id ==
-                                                      GetStorage()
-                                                          .read(
-                                                          "userId")
-                                                      ? const Text(
-                                                    "Delete",
-                                                    style: TextStyle(
-                                                        color:
-                                                        ColorManager
-                                                            .red,
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .bold),
-                                                  )
-                                                      : const Text(
-                                                    "Save",
-                                                    style: TextStyle(
-                                                        color: ColorManager
-                                                            .colorAccent,
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .bold),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              margin:
-                                              const EdgeInsets.only(
-                                                  right: 10),
-                                              child: Column(
-                                                children: [
-                                                  IconButton(
-                                                      onPressed:
-                                                          () async {
-                                                        Clipboard.setData(
-                                                            ClipboardData(
-                                                                text: await controller
-                                                                    .createDynamicLink(
-                                                                    index
-                                                                        .toString(),
-                                                                    "video",
-                                                                    (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                                        .user!
-                                                                        .username
-                                                                        .toString(),
-                                                                    (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                                        .user!
-                                                                        .avatar
-                                                                        .toString())));
-
-                                                        successToast(
-                                                            "link copied successfully");
-                                                      },
-                                                      icon: const Icon(
-                                                        Icons.link,
-                                                        color: ColorManager
-                                                            .colorAccent,
-                                                      )),
-                                                  const Text(
-                                                    "Link",
-                                                    style: TextStyle(
-                                                        color: ColorManager
-                                                            .colorAccent,
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .bold),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              margin:
-                                              const EdgeInsets.only(
-                                                  right: 10),
-                                              child: Column(
-                                                children: [
-                                                  IconButton(
-                                                      onPressed: () {
-                                                        Get.back(
-                                                            closeOverlays:
-                                                            true);
-                                                        controller
-                                                            .downloadAndProcessVideo(
-                                                            (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                                .video!,
-                                                            (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                                .user!
-                                                                .username
-                                                                .toString());
-                                                      },
-                                                      icon: const Icon(
-                                                        Icons.download,
-                                                        color: ColorManager
-                                                            .colorAccent,
-                                                      )),
-                                                  const Text(
-                                                    "Download",
-                                                    style: TextStyle(
-                                                        color: ColorManager
-                                                            .colorAccent,
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .bold),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Divider(
-                                          color: Colors.black
-                                              .withOpacity(0.3),
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        InkWell(
-                                          onTap: () async {
-                                            if (await GetStorage()
-                                                .read("token") ==
-                                                null) {
-                                              if (await Permission
-                                                  .phone.isGranted) {
-                                                await SimDataPlugin
-                                                    .getSimData()
-                                                    .then((value) =>
-                                                value
-                                                    .cards.isEmpty
-                                                    ? Get.bottomSheet(
-                                                    LoginView(
-                                                        false
-                                                            .obs))
-                                                    : Get.bottomSheet(
-                                                    LoginView(true
-                                                        .obs)));
-                                              } else {
-                                                await Permission.phone
-                                                    .request()
-                                                    .then((value) async =>
-                                                await SimDataPlugin
-                                                    .getSimData()
-                                                    .then((value) =>
-                                                value
-                                                    .cards
-                                                    .isEmpty
-                                                    ? Get.bottomSheet(
-                                                    LoginView(
-                                                        false
-                                                            .obs))
-                                                    : Get.bottomSheet(
-                                                    LoginView(
-                                                        true.obs))));
-                                              }
-                                            } else {
-                                              await controller
-                                                  .checkIfVideoReported(
-                                                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].id!,
-                                                  await GetStorage()
-                                                      .read("userId"))
-                                                  .then((value) async {
-                                                if (value == true) {
-                                                  errorToast(
-                                                      "video is already reported");
-                                                } else {
-                                                  await controller
-                                                      .getSiteSettings()
-                                                      .then((_) =>
-                                                      showReportDialog(
-                                                          (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                              .user!.id!,
-                                                          (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                              .user!
-                                                              .username!,
-                                                          (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                              .user!
-                                                              .id!));
-                                                }
-                                              });
-                                            }
-                                          },
-                                          child: Row(
-                                            children: const [
-                                              Icon(
-                                                Icons.chat,
-                                                color: Color(0xffFF2400),
-                                                size: 30,
-                                              ),
-                                              SizedBox(
-                                                width: 10,
-                                              ),
-                                              Text(
-                                                "Report...",
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                    FontWeight.bold,
-                                                    color: Color(
-                                                        0xffFF2400)),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        const Divider(),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        InkWell(
-                                          onTap: () async {
-                                            if (await GetStorage()
-                                                .read("token") ==
-                                                null) {
-                                              if (await Permission
-                                                  .phone.isGranted) {
-                                                await SimDataPlugin
-                                                    .getSimData()
-                                                    .then((value) =>
-                                                value
-                                                    .cards.isEmpty
-                                                    ? Get.bottomSheet(
-                                                    LoginView(
-                                                        false
-                                                            .obs))
-                                                    : Get.bottomSheet(
-                                                    LoginView(true
-                                                        .obs)));
-                                              } else {
-                                                await Permission.phone
-                                                    .request()
-                                                    .then((value) async =>
-                                                await SimDataPlugin
-                                                    .getSimData()
-                                                    .then((value) =>
-                                                value
-                                                    .cards
-                                                    .isEmpty
-                                                    ? Get.bottomSheet(
-                                                    LoginView(
-                                                        false
-                                                            .obs))
-                                                    : Get.bottomSheet(
-                                                    LoginView(
-                                                        true.obs))));
-                                              }
-                                            } else {
-                                              await controller
-                                                  .checkUserBlocked(
-                                                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                      .user!.id!)
-                                                  .then((value) async =>
-                                              await controller
-                                                  .blockUnblockUser(
-                                                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                      .user!.id!,
-                                                  value));
-                                            }
-                                            // if (
-                                            //     GetStorage().read(
-                                            //         "token") !=
-                                            //         null) {
-                                            //   usersController
-                                            //       .isUserBlocked(
-                                            //       widget.UserId);
-                                            //   Future.delayed(
-                                            //       const Duration(
-                                            //           seconds: 1))
-                                            //       .then((value) =>
-                                            //   usersController
-                                            //       .userBlocked.value
-                                            //       ? usersController
-                                            //       .blockUnblockUser(
-                                            //       widget.UserId,
-                                            //       "Unblock")
-                                            //       : usersController
-                                            //       .blockUnblockUser(
-                                            //       widget.UserId,
-                                            //       "Block"));
-                                            // } else {
-                                            //   showLoginAlert();
-                                            // }
-                                          },
-                                          child: Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.block,
-                                                color: ColorManager
-                                                    .colorAccent,
-                                                size: 30,
-                                              ),
-                                              const SizedBox(
-                                                width: 10,
-                                              ),
-                                              Obx(() =>
-                                                  Text(
-                                                    controller
-                                                        .isUserBlocked
-                                                        .isFalse
-                                                        ? "Block User..."
-                                                        : "Unblock User...",
-                                                    style: const TextStyle(
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .bold,
-                                                        color: ColorManager
-                                                            .colorAccent),
-                                                  ))
-                                            ],
-                                          ),
-                                        ),
-                                        const Divider(),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Visibility(
-                                            visible: GetStorage()
-                                                .read("token") !=
-                                                null,
-                                            child: InkWell(
-                                              onTap: () async {
-                                                if (await GetStorage()
-                                                    .read("token") ==
-                                                    null) {
-                                                  if (await Permission
-                                                      .phone.isGranted) {
-                                                    await SimDataPlugin
-                                                        .getSimData()
-                                                        .then((value) =>
-                                                    value
-                                                        .cards
-                                                        .isEmpty
-                                                        ? Get.bottomSheet(
-                                                        LoginView(
-                                                            false
-                                                                .obs))
-                                                        : Get.bottomSheet(
-                                                        LoginView(
-                                                            true.obs)));
-                                                  } else {
-                                                    await Permission.phone
-                                                        .request().then((
-                                                        value) async =>
-                                                    await SimDataPlugin
-                                                        .getSimData()
-                                                        .then((value) =>
-                                                    value
-                                                        .cards
-                                                        .isEmpty
-                                                        ? Get.bottomSheet(
-                                                        LoginView(false
-                                                            .obs))
-                                                        : Get.bottomSheet(
-                                                        LoginView(
-                                                            true.obs))));
-                                                  }
-                                                } else {
-                                                  controller
-                                                      .followUnfollowUser(
-                                                      (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                          .user!.id!,
-                                                      int.parse((Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                          .user!.following
-                                                          .toString()) ==
-                                                          0
-                                                          ? "follow"
-                                                          : "unfollow");
-                                                }
-                                                // userDetailsController
-                                                //     .followUnfollowUser(
-                                                //     widget.UserId,
-                                                //     widget.isfollow == 0
-                                                //         ? "follow"
-                                                //         : "unfollow",
-                                                //     token: widget
-                                                //         .publicUser!
-                                                //         .firebaseToken
-                                                //         .toString());
-                                                // relatedVideosController
-                                                //     .getAllVideos();
-                                              },
-                                              child: Row(
-                                                children: [
-                                                  int.parse((Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                                      .user!.following
-                                                      .toString()) == 0
-                                                      ? const Icon(
-                                                    Icons.report,
-                                                    color: ColorManager
-                                                        .colorAccent,
-                                                    size: 30,
-                                                  )
-                                                      : const Icon(
-                                                    Icons.report,
-                                                    color: ColorManager
-                                                        .colorAccent,
-                                                    size: 30,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  const Text(
-                                                    "Report Video",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .bold,
-                                                        color: ColorManager
-                                                            .colorAccent),
-                                                  )
-                                                ],
-                                              ),
-                                            ))
-                                      ]),
-                                ),),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(15)),
-                              );
-                            },
-                            icon: const Icon(
-                              IconlyBold.more_circle,
-                              color: Colors.white,
-                              size: 25,
-                            )),
-                        const Text(
-                          "More",
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              alignment: Alignment.bottomLeft,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      if (await GetStorage().read("token") == null) {
-                        if (await Permission.phone.isGranted) {
-                          await SimDataPlugin.getSimData().then((value) =>
-                          value.cards.isEmpty
-                              ? Get.bottomSheet(LoginView(false.obs))
-                              : Get.bottomSheet(LoginView(true.obs)));
-                        } else {
-                          await Permission.phone.request().then(
-                                  (value) async =>
-                              await SimDataPlugin.getSimData().then(
-                                      (value) =>
-                                  value.cards.isEmpty
-                                      ? Get.bottomSheet(
-                                      LoginView(false.obs))
-                                      : Get.bottomSheet(
-                                      LoginView(true.obs))));
-                        }
-                      } else {
-                        if ((Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.id ==
-                            GetStorage().read("userId")) {
-                          Get.toNamed(Routes.PROFILE);
-                        }
-                        else {
-                          Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
-                            "profileId": (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.id
-                          });
-                        }
-                      }
-                    },
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(left: 8),
-                          alignment: Alignment.bottomLeft,
-                          width: 60,
-                          height: 60,
-                          child: CachedNetworkImage(
-                            imageBuilder: (context, imageProvider) =>
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover),
-                                  ),
-                                ),
-                            imageUrl: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.avatar == null ||
-                                (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.avatar!.isEmpty
-                                ? RestUrl.placeholderImage
-                                : RestUrl.profileUrl +
-                                (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.avatar.toString(),
-                            fit: BoxFit.fill,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.username ?? "",
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                  width: 10,
-                                ),
-                                Visibility(
-                                  child: InkWell(
-                                      onTap: () async {
-                                        if (await GetStorage()
-                                            .read("token") ==
-                                            null) {
-                                          if (await Permission
-                                              .phone.isGranted) {
-                                            await SimDataPlugin
-                                                .getSimData()
-                                                .then((value) =>
-                                            value
-                                                .cards.isEmpty
-                                                ? Get.bottomSheet(
-                                                LoginView(
-                                                    false.obs))
-                                                : Get.bottomSheet(
-                                                LoginView(
-                                                    true.obs)));
-                                          } else {
-                                            await Permission.phone
-                                                .request()
-                                                .then((value) async =>
-                                            await SimDataPlugin
-                                                .getSimData()
-                                                .then((value) =>
-                                            value
-                                                .cards.isEmpty
-                                                ? Get.bottomSheet(
-                                                LoginView(
-                                                    false
-                                                        .obs))
-                                                : Get.bottomSheet(
-                                                LoginView(true.obs))));
-                                          }
-                                        } else {
-                                          controller
-                                              .followUnfollowUser(
-                                            (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.id!,
-                                            int.parse((Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!
-                                                .following.toString()) == 0
-                                                ? "follow"
-                                                : "unfollow",
-                                          );
-                                        }
-                                      },
-                                      child: Container(
-                                        padding:
-                                        const EdgeInsets.symmetric(
-                                            vertical: 5,
-                                            horizontal: 10),
-                                        child: Text(
-                                          int.parse((Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!
-                                              .following
-                                              .toString()) == 0
-                                              ? "Follow"
-                                              : "Following",
-                                          style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.white),
-                                        ),
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: ColorManager
-                                                    .colorAccent),
-                                            borderRadius:
-                                            BorderRadius.circular(5)),
-                                      )),
-                                  visible: GetStorage().read("token") !=
-                                      null &&
-                                      (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.id !=
-                                          GetStorage().read("userId"),
-                                )
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.name ?? "",
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].description.toString(),
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  Visibility(
-                    visible: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].hashtags!.isNotEmpty,
-                    child: Container(
-                      height: 35,
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      child: ListView.builder(
-                          itemCount: (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].hashtags?.length,
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, hashtagIndex) =>
-                              InkWell(
-                                onTap: () async {
-                                  await GetStorage().write("hashtagId",
-                                      (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                          .hashtags![hashtagIndex].id);
-                                  Get.toNamed(Routes.HASH_TAGS_DETAILS,
-                                      arguments: {
-                                        "hashtag_name":
-                                        "${(Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                            .hashtags![hashtagIndex].name}"
-                                      });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: ColorManager.colorAccent,
-                                      border: Border.all(
-                                          color: Colors.transparent),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    const Text(
+                                                      "Report Video",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold,
+                                                          color: ColorManager
+                                                              .colorAccent),
+                                                    )
+                                                  ],
+                                                ),
+                                              ))
+                                        ]),
+                                  ),),
+                                  shape: RoundedRectangleBorder(
                                       borderRadius:
-                                      const BorderRadius.all(
-                                          Radius.circular(5))),
-                                  margin: const EdgeInsets.only(
-                                      right: 5, top: 5, bottom: 5),
-                                  padding: const EdgeInsets.all(5),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index]
-                                        .hashtags![hashtagIndex].name
-                                        .toString(),
+                                      BorderRadius.circular(15)),
+                                );
+                              },
+                              icon: const Icon(
+                                IconlyBold.more_circle,
+                                color: Colors.white,
+                                size: 25,
+                              )),
+                          const Text(
+                            "More",
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                alignment: Alignment.bottomLeft,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        if (await GetStorage().read("token") == null) {
+                          if (await Permission.phone.isGranted) {
+                            await SimDataPlugin.getSimData().then((value) =>
+                            value.cards.isEmpty
+                                ? Get.bottomSheet(LoginView(false.obs))
+                                : Get.bottomSheet(LoginView(true.obs)));
+                          } else {
+                            await Permission.phone.request().then(
+                                    (value) async =>
+                                await SimDataPlugin.getSimData().then(
+                                        (value) =>
+                                    value.cards.isEmpty
+                                        ? Get.bottomSheet(
+                                        LoginView(false.obs))
+                                        : Get.bottomSheet(
+                                        LoginView(true.obs))));
+                          }
+                        } else {
+                          if ((Get.arguments["hash_tags_videos"] as List<
+                              HashtagRelatedVideos>)[index].user!.id ==
+                              GetStorage().read("userId")) {
+                            Get.toNamed(Routes.PROFILE);
+                          }
+                          else {
+                            Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
+                              "profileId": (Get
+                                  .arguments["hash_tags_videos"] as List<
+                                  HashtagRelatedVideos>)[index].user!.id
+                            });
+                          }
+                        }
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(left: 8),
+                            alignment: Alignment.bottomLeft,
+                            width: 60,
+                            height: 60,
+                            child: CachedNetworkImage(
+                              imageBuilder: (context, imageProvider) =>
+                                  Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
+                              imageUrl: (Get
+                                  .arguments["hash_tags_videos"] as List<
+                                  HashtagRelatedVideos>)[index].user!.avatar ==
+                                  null ||
+                                  (Get.arguments["hash_tags_videos"] as List<
+                                      HashtagRelatedVideos>)[index].user!
+                                      .avatar!.isEmpty
+                                  ? RestUrl.placeholderImage
+                                  : RestUrl.profileUrl +
+                                  (Get.arguments["hash_tags_videos"] as List<
+                                      HashtagRelatedVideos>)[index].user!.avatar
+                                      .toString(),
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    (Get.arguments["hash_tags_videos"] as List<
+                                        HashtagRelatedVideos>)[index].user!
+                                        .username ?? "",
                                     style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 10),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700),
                                   ),
-                                ),
-                              )),
+                                  const SizedBox(
+                                    height: 5,
+                                    width: 10,
+                                  ),
+                                  Visibility(
+                                    child: InkWell(
+                                        onTap: () async {
+                                          if (await GetStorage()
+                                              .read("token") ==
+                                              null) {
+                                            if (await Permission
+                                                .phone.isGranted) {
+                                              await SimDataPlugin
+                                                  .getSimData()
+                                                  .then((value) =>
+                                              value
+                                                  .cards.isEmpty
+                                                  ? Get.bottomSheet(
+                                                  LoginView(
+                                                      false.obs))
+                                                  : Get.bottomSheet(
+                                                  LoginView(
+                                                      true.obs)));
+                                            } else {
+                                              await Permission.phone
+                                                  .request()
+                                                  .then((value) async =>
+                                              await SimDataPlugin
+                                                  .getSimData()
+                                                  .then((value) =>
+                                              value
+                                                  .cards.isEmpty
+                                                  ? Get.bottomSheet(
+                                                  LoginView(
+                                                      false
+                                                          .obs))
+                                                  : Get.bottomSheet(
+                                                  LoginView(true.obs))));
+                                            }
+                                          } else {
+                                            controller
+                                                .followUnfollowUser(
+                                              (Get
+                                                  .arguments["hash_tags_videos"] as List<
+                                                  HashtagRelatedVideos>)[index]
+                                                  .user!.id!,
+                                              int.parse((Get
+                                                  .arguments["hash_tags_videos"] as List<
+                                                  HashtagRelatedVideos>)[index]
+                                                  .user!
+                                                  .following.toString()) == 0
+                                                  ? "follow"
+                                                  : "unfollow",
+                                            );
+                                          }
+                                        },
+                                        child: Container(
+                                          padding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 5,
+                                              horizontal: 10),
+                                          child: Text(
+                                            int.parse((Get
+                                                .arguments["hash_tags_videos"] as List<
+                                                HashtagRelatedVideos>)[index]
+                                                .user!
+                                                .following
+                                                .toString()) == 0
+                                                ? "Follow"
+                                                : "Following",
+                                            style: const TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white),
+                                          ),
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: ColorManager
+                                                      .colorAccent),
+                                              borderRadius:
+                                              BorderRadius.circular(5)),
+                                        )),
+                                    visible: GetStorage().read("token") !=
+                                        null &&
+                                        (Get
+                                            .arguments["hash_tags_videos"] as List<
+                                            HashtagRelatedVideos>)[index].user!
+                                            .id !=
+                                            GetStorage().read("userId"),
+                                  )
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                (Get.arguments["hash_tags_videos"] as List<
+                                    HashtagRelatedVideos>)[index].user!.name ??
+                                    "",
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      await GetStorage()
-                          .write("profileId", (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.id);
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        (Get.arguments["hash_tags_videos"] as List<
+                            HashtagRelatedVideos>)[index].description
+                            .toString(),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    Visibility(
+                      visible: (Get.arguments["hash_tags_videos"] as List<
+                          HashtagRelatedVideos>)[index].hashtags!.isNotEmpty,
+                      child: Container(
+                        height: 35,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        child: ListView.builder(
+                            itemCount: (Get
+                                .arguments["hash_tags_videos"] as List<
+                                HashtagRelatedVideos>)[index].hashtags?.length,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, hashtagIndex) =>
+                                InkWell(
+                                  onTap: () async {
+                                    await GetStorage().write("hashtagId",
+                                        (Get
+                                            .arguments["hash_tags_videos"] as List<
+                                            HashtagRelatedVideos>)[index]
+                                            .hashtags![hashtagIndex].id);
+                                    Get.toNamed(Routes.HASH_TAGS_DETAILS,
+                                        arguments: {
+                                          "hashtag_name":
+                                          "${(Get
+                                              .arguments["hash_tags_videos"] as List<
+                                              HashtagRelatedVideos>)[index]
+                                              .hashtags![hashtagIndex].name}"
+                                        });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: ColorManager.colorAccent,
+                                        border: Border.all(
+                                            color: Colors.transparent),
+                                        borderRadius:
+                                        const BorderRadius.all(
+                                            Radius.circular(5))),
+                                    margin: const EdgeInsets.only(
+                                        right: 5, top: 5, bottom: 5),
+                                    padding: const EdgeInsets.all(5),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      (Get
+                                          .arguments["hash_tags_videos"] as List<
+                                          HashtagRelatedVideos>)[index]
+                                          .hashtags![hashtagIndex].name
+                                          .toString(),
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10),
+                                    ),
+                                  ),
+                                )),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        await GetStorage()
+                            .write("profileId", (Get
+                            .arguments["hash_tags_videos"] as List<
+                            HashtagRelatedVideos>)[index].user!.id);
 
-                      Get.toNamed(Routes.SOUNDS, arguments: {
-                        "sound_name": (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].soundName.toString(),
-                        "sound_url": (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].sound,
-                      });
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: RotationTransition(
-                            turns: Tween(begin: 0.0, end: 1.0)
-                                .animate(_controller),
-                            child: SvgPicture.asset(
-                              "assets/spinning_disc.svg",
-                              height: 30,
+                        Get.toNamed(Routes.SOUNDS, arguments: {
+                          "sound_name": (Get
+                              .arguments["hash_tags_videos"] as List<
+                              HashtagRelatedVideos>)[index].soundName
+                              .toString(),
+                          "sound_url": (Get
+                              .arguments["hash_tags_videos"] as List<
+                              HashtagRelatedVideos>)[index].sound,
+                        });
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: RotationTransition(
+                              turns: Tween(begin: 0.0, end: 1.0)
+                                  .animate(_controller),
+                              child: SvgPicture.asset(
+                                "assets/spinning_disc.svg",
+                                height: 30,
+                              ),
                             ),
-                          ),
 
-                          // Lottie.network(
-                          //     "https://assets2.lottiefiles.com/packages/lf20_e3odbuvw.json",
-                          //     height: 50),
-                        ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Text(
-                          (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].soundName!.isEmpty
-                              ? "Original Sound"
-                              : (Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].soundName! +
-                              " by ${(Get.arguments["hash_tags_videos"] as List<HashtagRelatedVideos>)[index].user!.name}",
-                          style: const TextStyle(color: Colors.white),
-                        )
-                      ],
+                            // Lottie.network(
+                            //     "https://assets2.lottiefiles.com/packages/lf20_e3odbuvw.json",
+                            //     height: 50),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            (Get.arguments["hash_tags_videos"] as List<
+                                HashtagRelatedVideos>)[index].soundName!.isEmpty
+                                ? "Original Sound"
+                                : (Get.arguments["hash_tags_videos"] as List<
+                                HashtagRelatedVideos>)[index].soundName! +
+                                " by ${(Get
+                                    .arguments["hash_tags_videos"] as List<
+                                    HashtagRelatedVideos>)[index].user!.name}",
+                            style: const TextStyle(color: Colors.white),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            )],);
-        }),);
+                  ],
+                ),
+              )
+            ],);
+          }),);
   }
+
   showReportDialog(int videoId, String name, int id) async {
     var dropDownValue = "Reason".obs;
     List<String> dropDownValues = [

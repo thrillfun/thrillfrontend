@@ -18,7 +18,7 @@ class UserVideosView extends GetView<UserVideosController> {
         children: [
           Expanded(
               child: Padding(
-            padding: const EdgeInsets.only(bottom: 80),
+            padding: const EdgeInsets.only(bottom: 0),
             child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
@@ -31,8 +31,10 @@ class UserVideosView extends GetView<UserVideosController> {
                 itemCount: state!.length,
                 itemBuilder: (context, index) => GestureDetector(
                       onTap: () {
-                        Get.toNamed(Routes.PROFILE_VIDEOS,
-                            arguments: {"video_list": state,"init_page":index});
+                        Get.toNamed(Routes.PROFILE_VIDEOS, arguments: {
+                          "video_list": state,
+                          "init_page": index
+                        });
                       },
                       child: Stack(
                         fit: StackFit.expand,
@@ -71,38 +73,133 @@ class UserVideosView extends GetView<UserVideosController> {
                             right: 5,
                             child: IconButton(
                                 onPressed: () {
-                                  Get.defaultDialog(
-                                      content: const Text(
-                                          "you want to delete this video?"),
-                                      title: "Are your sure?",
-                                      titleStyle: TextStyle(fontWeight: FontWeight.w700),
-                                      confirm: InkWell(
-                                        child: Container(
-                                          width: Get.width,
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Colors.red.shade400),
-
-                                          child: Text("Yes",style: TextStyle(fontWeight: FontWeight.w700,color: Colors.white),),
-                                          padding: EdgeInsets.all(10),
+                                  Get.bottomSheet(Scaffold(
+                                    body: Container(
+                                      margin: EdgeInsets.all(10),
+                                      child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        InkWell(
+                                          child: Text("Delete Video",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700),),
+                                          onTap: () {
+                                            Get.defaultDialog(
+                                                content: const Text(
+                                                    "you want to delete this video?"),
+                                                title: "Are your sure?",
+                                                titleStyle: TextStyle(
+                                                    fontWeight:
+                                                    FontWeight.w700),
+                                                confirm: InkWell(
+                                                  child: Container(
+                                                    width: Get.width,
+                                                    alignment: Alignment.center,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                        BorderRadius
+                                                            .circular(10),
+                                                        color: Colors
+                                                            .red.shade400),
+                                                    child: Text(
+                                                      "Yes",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                          FontWeight.w700,
+                                                          color: Colors.white),
+                                                    ),
+                                                    padding: EdgeInsets.all(10),
+                                                  ),
+                                                  onTap: () => controller
+                                                      .deleteUserVideo(
+                                                      state[index].id!)
+                                                      .then((value) =>
+                                                      Get.back()),
+                                                ),
+                                                cancel: InkWell(
+                                                  child: Container(
+                                                    width: Get.width,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                        BorderRadius
+                                                            .circular(10),
+                                                        color: Colors.green),
+                                                    child: Text("Cancel",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                            FontWeight.w700,
+                                                            color:
+                                                            Colors.white)),
+                                                    alignment: Alignment.center,
+                                                    padding: EdgeInsets.all(10),
+                                                  ),
+                                                  onTap: () => Get.back(),
+                                                ));
+                                          },
                                         ),
-                                        onTap: () => controller
-                                            .deleteUserVideo(state[index].id!).then((value) => Get.back()),
-                                      ),
-                                      cancel: InkWell(
-                                        child: Container(
-                                          width: Get.width,
-                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Colors.green),
-                                          child: Text("Cancel",style: TextStyle(fontWeight: FontWeight.w700,color: Colors.white)),alignment: Alignment.center,
-                                          padding: EdgeInsets.all(10),
-                                        ),
-                                        onTap: () => Get.back(),
-                                      ));
+                                        SizedBox(height: 10,),
+                                        InkWell(
+                                          child: Text("Make video private",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700)),
+                                          onTap: () {
+                                            Get.defaultDialog(
+                                                content: const Text(
+                                                    "you want to private this video?"),
+                                                title: "Are your sure?",
+                                                titleStyle: TextStyle(
+                                                    fontWeight:
+                                                    FontWeight.w700),
+                                                confirm: InkWell(
+                                                  child: Container(
+                                                    width: Get.width,
+                                                    alignment: Alignment.center,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                        BorderRadius
+                                                            .circular(10),
+                                                        color: Colors
+                                                            .red.shade400),
+                                                    child: Text(
+                                                      "Yes",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                          FontWeight.w700,
+                                                          color: Colors.white),
+                                                    ),
+                                                    padding: EdgeInsets.all(10),
+                                                  ),
+                                                  onTap: () => controller
+                                                      .makeVideoPrivateOrPublic(
+                                                      state[index].id!,"Private")
+                                                      .then((value) =>
+                                                      Get.back()),
+                                                ),
+                                                cancel: InkWell(
+                                                  child: Container(
+                                                    width: Get.width,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                        BorderRadius
+                                                            .circular(10),
+                                                        color: Colors.green),
+                                                    child: Text("Cancel",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                            FontWeight.w700,
+                                                            color:
+                                                            Colors.white)),
+                                                    alignment: Alignment.center,
+                                                    padding: EdgeInsets.all(10),
+                                                  ),
+                                                  onTap: () => Get.back(),
+                                                ));
+                                          },
+                                        )
+                                      ],
+                                    ),),
+                                  ));
                                 },
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                                 color: Colors.red,
-                                icon:
-                                    const Icon(Icons.more_vert_outlined)),
+                                icon: const Icon(Icons.more_vert_outlined)),
                           )
                         ],
                       ),
@@ -113,9 +210,7 @@ class UserVideosView extends GetView<UserVideosController> {
       onLoading: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          loader()
-        ],
+        children: [loader()],
       ),
       onError: (error) => Column(
         children: [emptyListWidget()],

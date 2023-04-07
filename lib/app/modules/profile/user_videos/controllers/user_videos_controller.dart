@@ -5,12 +5,15 @@ import 'package:thrill/app/rest/models/user_videos_model.dart';
 import 'package:thrill/app/rest/rest_urls.dart';
 import 'package:thrill/app/utils/utils.dart';
 
+import '../../user_private_videos/controllers/user_private_videos_controller.dart';
+
 
 class UserVideosController extends GetxController with StateMixin<RxList<Videos>>  {
   //TODO: Implement UserVideosController
 
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var userVideos = RxList<Videos>();
+  var userPrivateVideoController = Get.find<UserPrivateVideosController>();
 
   var isInitialised = false.obs;
 
@@ -67,6 +70,26 @@ class UserVideosController extends GetxController with StateMixin<RxList<Videos>
       errorToast(error.toString());
     });
 
+  }
+
+  Future<void> makeVideoPrivateOrPublic(int videoId,String visibility)async{
+    dio.options.headers={"Authorization":"Bearer ${await GetStorage().read("token")}"};
+    dio.post("video/change-visibility",queryParameters: {
+      "video_id":videoId,
+      "visibility":visibility
+    }).then((value) {
+
+      if(value.data["status"]){
+        successToast(value.data["message"]);
+        getUserVideos();
+        userPrivateVideoController.getUserPrivateVideos();
+      }
+      else{
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {
+      errorToast(error.toString());
+    });
   }
 
 }

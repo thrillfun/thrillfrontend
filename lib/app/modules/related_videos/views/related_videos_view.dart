@@ -19,6 +19,7 @@ import 'package:thrill/app/rest/models/related_videos_model.dart';
 import 'package:thrill/app/rest/rest_urls.dart';
 import 'package:thrill/app/utils/strings.dart';
 import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../rest/models/site_settings_model.dart';
 import '../../../routes/app_pages.dart';
@@ -33,33 +34,34 @@ var comment = "".obs;
 var isVideoPaused = false.obs;
 
 class RelatedVideosView extends StatefulWidget {
-  RelatedVideosView({this.videoUrl,
-    this.pageController,
-    this.nextPage,
-    this.videoId,
-    this.gifImage,
-    this.pageIndex,
-    this.currentPageIndex,
-    this.isPaused,
-    this.callback,
-    this.publicUser,
-    this.soundName,
-    this.isDuetable,
-    this.UserId,
-    this.userName,
-    this.description,
-    this.isHome,
-    this.hashtagsList,
-    this.sound,
-    this.soundOwner,
-    this.videoLikeStatus,
-    this.isCommentAllowed,
-    this.like,
-    this.isfollow,
-    this.commentsCount,
-    this.soundId,
-    this.avatar,
-    this.fcmToken});
+  RelatedVideosView(
+      {this.videoUrl,
+      this.pageController,
+      this.nextPage,
+      this.videoId,
+      this.gifImage,
+      this.pageIndex,
+      this.currentPageIndex,
+      this.isPaused,
+      this.callback,
+      this.publicUser,
+      this.soundName,
+      this.isDuetable,
+      this.UserId,
+      this.userName,
+      this.description,
+      this.isHome,
+      this.hashtagsList,
+      this.sound,
+      this.soundOwner,
+      this.videoLikeStatus,
+      this.isCommentAllowed,
+      this.like,
+      this.isfollow,
+      this.commentsCount,
+      this.soundId,
+      this.avatar,
+      this.fcmToken});
 
   String? videoUrl, fcmToken;
   PageController? pageController;
@@ -107,19 +109,19 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
       vsync: this,
     );
     videoPlayerController =
-    VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
-      ..setLooping(false)
-      ..initialize().then((value) {
-        relatedVideosController.isInitialised.value = true;
-        _controller.repeat();
+        VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
+          ..setLooping(false)
+          ..initialize().then((value) {
+            relatedVideosController.isInitialised.value = true;
+            _controller.repeat();
 
-        setState(() {});
-      })
-      ..play();
+            setState(() {});
+          })
+          ..play();
 
     videoPlayerController.addListener(() {
       if (videoPlayerController.value.duration ==
-          videoPlayerController.value.position &&
+              videoPlayerController.value.position &&
           videoPlayerController.value.position > Duration.zero) {
         setState(() {
           widget.pageController!.animateToPage(widget.nextPage!,
@@ -134,15 +136,20 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     videoPlayerController.dispose();
 
     if (videoPlayerController.value.duration ==
-        videoPlayerController.value.position &&
+            videoPlayerController.value.position &&
         videoPlayerController.value.position > Duration.zero) {
       relatedVideosController.postVideoView(widget.videoId!).then((value) {});
     }
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    videoPlayerController.pause();
+    super.deactivate();
   }
 
   @override
@@ -156,71 +163,70 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                 relatedVideosController.likeVideo(
                     widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!);
               },
-              onLongPressEnd: (_) {
-                setState(() {
-                  videoPlayerController.play();
-                  _controller.repeat();
-                });
-              },
-              onLongPressStart: (_) {
-                setState(() {
-                  videoPlayerController.pause();
-                  _controller.stop();
-                });
-              },
-              onTap: () {
-                if (volume.value == 1) {
-                  volume.value = 0;
-                } else {
-                  volume.value = 1;
-                }
+              onTapUp: (onTap) {
                 setState(() {
                   // videoPlayerController.setVolume(volume.value);
-                  if (videoPlayerController.value.isPlaying) {
-                    videoPlayerController.pause();
-                    _controller.stop();
-                  } else {
+                  if (!videoPlayerController.value.isPlaying &&
+                      videoPlayerController.value.isInitialized) {
                     videoPlayerController.play();
                     _controller.repeat();
                   }
                 });
               },
+              onTapDown: (onTap) {
+                if (videoPlayerController.value.isPlaying &&
+                    videoPlayerController.value.isInitialized) {
+                  videoPlayerController.pause();
+                  _controller.stop();
+                }
+              },
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   Center(
-                    child:
-                    Obx(() =>
-                    relatedVideosController.isInitialised.isFalse
-                        ? loader()
-                        : SizedBox(
-                        height:
-                        videoPlayerController.value.aspectRatio <
-                            1.5 ?
-                        Get.height : Get.height / 4,
-                        width:
-                        videoPlayerController.value.aspectRatio >
-                            1.5 ?
-                        videoPlayerController.value.size.width : Get.width,
-                        child: VideoPlayer(videoPlayerController))),
+                    child: VisibilityDetector(
+                      onVisibilityChanged: (info) {
+                        if (info.visibleFraction == 0 &&
+                            videoPlayerController.value.isPlaying) {
+                          videoPlayerController.pause();
+                        } else {
+                          videoPlayerController.play();
+                        }
+                      },
+                      key: const Key("unique key"),
+                      child: Obx(() => relatedVideosController
+                              .isInitialised.isFalse
+                          ? loader()
+                          : SizedBox(
+                              height:
+                                  videoPlayerController.value.aspectRatio < 1.5
+                                      ? Get.height
+                                      : Get.height / 4,
+                              width:
+                                  videoPlayerController.value.aspectRatio > 1.5
+                                      ? videoPlayerController.value.size.width
+                                      : Get.width,
+                              child: VideoPlayer(videoPlayerController))),
+                    ),
                   ),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
-                      height: Get.height/2,
-                      decoration: BoxDecoration( boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 50.0,
-                          spreadRadius: 50, //New
-                        )
-                      ],),),
+                      height: Get.height / 2,
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 50.0,
+                            spreadRadius: 50, //New
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                   //AspectRatio(aspectRatio: videoPlayerController.value.aspectRatio,child: VideoPlayer(videoPlayerController),)
 
-
                   Container(
-
                     alignment: Alignment.centerRight,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -250,7 +256,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                           ? Icons.favorite
                                           : Icons.favorite_outline,
                                       color:
-                                      isLiked ? Colors.red : Colors.white,
+                                          isLiked ? Colors.red : Colors.white,
                                       size: 25,
                                     );
                                   },
@@ -258,7 +264,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                   countBuilder:
                                       (int? count, bool isLiked, String text) {
                                     var color =
-                                    isLiked ? Colors.white : Colors.white;
+                                        isLiked ? Colors.white : Colors.white;
                                     Widget result;
                                     if (count == 0) {
                                       result = Text(
@@ -294,11 +300,11 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                           videoId: widget.videoId!,
                                           userId: widget.UserId,
                                           isCommentAllowed:
-                                          widget.isCommentAllowed,
+                                              widget.isCommentAllowed,
                                           isfollow: widget.isfollow,
                                           userName: widget.userName!.value,
                                           avatar: widget.avatar ?? "",
-                                          fcmToken: widget.fcmToken));
+                                          fcmToken: widget.fcmToken,description: widget.description?.value,));
                                     });
                                     // GetStorage().read("videoPrivacy") ==
                                     //     "Private"
@@ -359,382 +365,343 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                       context: context,
                                       builder: (BuildContext context) =>
                                           Padding(
-                                            padding: const EdgeInsets.all(10),
-                                            child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
+                                        padding: const EdgeInsets.all(10),
+                                        child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
                                                     MainAxisAlignment
                                                         .spaceBetween,
-                                                    children: [
-                                                      Container(
-                                                        margin:
+                                                children: [
+                                                  Container(
+                                                    margin:
                                                         const EdgeInsets.only(
                                                             right: 10),
-                                                        child: Column(
-                                                          children: [
-                                                            IconButton(
-                                                              onPressed: () {
-                                                                // VideoModel videModel = VideoModel(
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .id!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .comments!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .video!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .description!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .likes!,
-                                                                //     null,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .filter!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .gifImage!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .sound!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .soundName!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .soundCategoryName!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .views!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .speed!,
-                                                                //     [],
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .isDuet!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .duetFrom!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .isDuetable!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .isCommentable!,
-                                                                //     widget
-                                                                //         .publicVideos
-                                                                //         .soundOwner!);
-                                                                // Get.to(RecordDuet(
-                                                                //     videoModel:
-                                                                //     videModel));
-                                                              },
-                                                              icon: const Icon(
-                                                                IconlyLight
-                                                                    .plus,
-                                                                color: ColorManager
-                                                                    .colorAccent,
-                                                                size: 30,
-                                                              ),
-                                                            ),
-                                                            const Text(
-                                                              "Duet",
-                                                              style: TextStyle(
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                  fontWeight:
+                                                    child: Column(
+                                                      children: [
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            // VideoModel videModel = VideoModel(
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .id!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .comments!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .video!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .description!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .likes!,
+                                                            //     null,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .filter!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .gifImage!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .sound!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .soundName!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .soundCategoryName!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .views!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .speed!,
+                                                            //     [],
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .isDuet!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .duetFrom!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .isDuetable!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .isCommentable!,
+                                                            //     widget
+                                                            //         .publicVideos
+                                                            //         .soundOwner!);
+                                                            // Get.to(RecordDuet(
+                                                            //     videoModel:
+                                                            //     videModel));
+                                                          },
+                                                          icon: const Icon(
+                                                            IconlyLight.plus,
+                                                            color: ColorManager
+                                                                .colorAccent,
+                                                            size: 30,
+                                                          ),
+                                                        ),
+                                                        const Text(
+                                                          "Duet",
+                                                          style: TextStyle(
+                                                              color: ColorManager
+                                                                  .colorAccent,
+                                                              fontWeight:
                                                                   FontWeight
                                                                       .bold),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Container(
-                                                        margin:
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    margin:
                                                         const EdgeInsets.only(
                                                             right: 10),
-                                                        child: Column(
-                                                          children: [
-                                                            IconButton(
-                                                                onPressed:
-                                                                    () async {
-                                                                  if (widget
+                                                    child: Column(
+                                                      children: [
+                                                        IconButton(
+                                                            onPressed:
+                                                                () async {
+                                                              if (widget
                                                                       .UserId ==
-                                                                      GetStorage()
-                                                                          .read(
-                                                                          "userId")) {
-                                                                    Get
-                                                                        .defaultDialog(
+                                                                  GetStorage().read(
+                                                                      "userId")) {
+                                                                Get
+                                                                    .defaultDialog(
                                                                         content:
-                                                                        const Text(
-                                                                            "you want to delete this video?"),
-                                                                        title:
-                                                                        "Are your sure?",
-                                                                        confirm:
-                                                                        InkWell(
-                                                                          child:
-                                                                          Container(
-                                                                            width:
-                                                                            Get
-                                                                                .width,
-                                                                            alignment:
-                                                                            Alignment
-                                                                                .center,
-                                                                            decoration:
-                                                                            BoxDecoration(
-                                                                                borderRadius: BorderRadius
-                                                                                    .circular(
-                                                                                    10),
-                                                                                color: Colors
-                                                                                    .red
-                                                                                    .shade400),
-                                                                            child:
                                                                             const Text(
-                                                                                "Yes"),
+                                                                                "you want to delete this video?"),
+                                                                        title:
+                                                                            "Are your sure?",
+                                                                        confirm:
+                                                                            InkWell(
+                                                                          child:
+                                                                              Container(
+                                                                            width:
+                                                                                Get.width,
+                                                                            alignment:
+                                                                                Alignment.center,
+                                                                            decoration:
+                                                                                BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.red.shade400),
+                                                                            child:
+                                                                                const Text("Yes"),
                                                                             padding:
-                                                                            const EdgeInsets
-                                                                                .all(
-                                                                                10),
+                                                                                const EdgeInsets.all(10),
                                                                           ),
-                                                                          onTap: () =>
-                                                                              relatedVideosController
-                                                                                  .deleteUserVideo(
-                                                                                  widget
-                                                                                      .videoId!)
-                                                                                  .then((
-                                                                                  value) =>
-                                                                                  Get
-                                                                                      .back()),
+                                                                          onTap: () => relatedVideosController
+                                                                              .deleteUserVideo(widget.videoId!)
+                                                                              .then((value) => Get.back()),
                                                                         ),
                                                                         cancel:
-                                                                        InkWell(
+                                                                            InkWell(
                                                                           child:
-                                                                          Container(
+                                                                              Container(
                                                                             width:
-                                                                            Get
-                                                                                .width,
+                                                                                Get.width,
                                                                             decoration:
-                                                                            BoxDecoration(
-                                                                                borderRadius: BorderRadius
-                                                                                    .circular(
-                                                                                    10),
-                                                                                color: Colors
-                                                                                    .green),
+                                                                                BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.green),
                                                                             child:
-                                                                            const Text(
-                                                                                "Cancel"),
+                                                                                const Text("Cancel"),
                                                                             alignment:
-                                                                            Alignment
-                                                                                .center,
+                                                                                Alignment.center,
                                                                             padding:
-                                                                            const EdgeInsets
-                                                                                .all(
-                                                                                10),
+                                                                                const EdgeInsets.all(10),
                                                                           ),
                                                                           onTap: () =>
-                                                                              Get
-                                                                                  .back(),
+                                                                              Get.back(),
                                                                         ));
 
-                                                                    //  showDeleteDialog();
-                                                                  }
-                                                                },
-                                                                icon: widget
-                                                                    .UserId ==
+                                                                //  showDeleteDialog();
+                                                              }
+                                                              else{
+                                                                relatedVideosController.favUnfavVideo(widget.videoId!, "fav");
+                                                              }
+                                                            },
+                                                            icon: widget.UserId ==
                                                                     GetStorage()
                                                                         .read(
-                                                                        "userId")
-                                                                    ? const Icon(
-                                                                  Icons
-                                                                      .delete,
-                                                                  color:
-                                                                  ColorManager
-                                                                      .red,
-                                                                )
-                                                                    : const Icon(
-                                                                  Icons.save,
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                )),
-                                                            widget.UserId ==
+                                                                            "userId")
+                                                                ? const Icon(
+                                                                    Icons
+                                                                        .delete,
+                                                                    color:
+                                                                        ColorManager
+                                                                            .red,
+                                                                  )
+                                                                : const Icon(
+                                                                    Icons.save,
+                                                                    color: ColorManager
+                                                                        .colorAccent,
+                                                                  )),
+                                                        widget.UserId ==
                                                                 GetStorage()
                                                                     .read(
-                                                                    "userId")
-                                                                ? const Text(
-                                                              "Delete",
-                                                              style: TextStyle(
-                                                                  color:
-                                                                  ColorManager
-                                                                      .red,
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                            )
-                                                                : const Text(
-                                                              "Save",
-                                                              style: TextStyle(
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Container(
-                                                        margin:
+                                                                        "userId")
+                                                            ? const Text(
+                                                                "Delete",
+                                                                style: TextStyle(
+                                                                    color:
+                                                                        ColorManager
+                                                                            .red,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              )
+                                                            : const Text(
+                                                                "Save",
+                                                                style: TextStyle(
+                                                                    color: ColorManager
+                                                                        .colorAccent,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    margin:
                                                         const EdgeInsets.only(
                                                             right: 10),
-                                                        child: Column(
-                                                          children: [
-                                                            IconButton(
-                                                                onPressed:
-                                                                    () async {
-                                                                  Clipboard
-                                                                      .setData(
-                                                                      ClipboardData(
-                                                                          text: await relatedVideosController
-                                                                              .createDynamicLink(
-                                                                              widget
-                                                                                  .currentPageIndex!
-                                                                                  .value
-                                                                                  .toString(),
-                                                                              "video",
-                                                                              widget
-                                                                                  .userName
-                                                                                  .toString(),
-                                                                              widget
-                                                                                  .avatar
-                                                                                  .toString())));
+                                                    child: Column(
+                                                      children: [
+                                                        IconButton(
+                                                            onPressed:
+                                                                () async {
+                                                              Clipboard.setData(ClipboardData(
+                                                                  text: await relatedVideosController.createDynamicLink(
+                                                                      widget
+                                                                          .currentPageIndex!
+                                                                          .value
+                                                                          .toString(),
+                                                                      "video",
+                                                                      widget
+                                                                          .userName
+                                                                          .toString(),
+                                                                      widget
+                                                                          .avatar
+                                                                          .toString())));
 
-                                                                  successToast(
-                                                                      "link copied successfully");
-                                                                },
-                                                                icon: const Icon(
-                                                                  Icons.link,
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                )),
-                                                            const Text(
-                                                              "Link",
-                                                              style: TextStyle(
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                  fontWeight:
+                                                              successToast(
+                                                                  "link copied successfully");
+                                                            },
+                                                            icon: const Icon(
+                                                              Icons.link,
+                                                              color: ColorManager
+                                                                  .colorAccent,
+                                                            )),
+                                                        const Text(
+                                                          "Link",
+                                                          style: TextStyle(
+                                                              color: ColorManager
+                                                                  .colorAccent,
+                                                              fontWeight:
                                                                   FontWeight
                                                                       .bold),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Container(
-                                                        margin:
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    margin:
                                                         const EdgeInsets.only(
                                                             right: 10),
-                                                        child: Column(
-                                                          children: [
-                                                            IconButton(
-                                                                onPressed: () {
-                                                                  Get.back(
-                                                                      closeOverlays:
+                                                    child: Column(
+                                                      children: [
+                                                        IconButton(
+                                                            onPressed: () {
+                                                              Get.back(
+                                                                  closeOverlays:
                                                                       true);
-                                                                  relatedVideosController
-                                                                      .downloadAndProcessVideo(
+                                                              relatedVideosController
+                                                                  .downloadAndProcessVideo(
                                                                       widget
                                                                           .videoUrl!,
                                                                       widget
                                                                           .userName
                                                                           .toString());
-                                                                },
-                                                                icon: const Icon(
-                                                                  Icons
-                                                                      .download,
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                )),
-                                                            const Text(
-                                                              "Download",
-                                                              style: TextStyle(
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                  fontWeight:
+                                                            },
+                                                            icon: const Icon(
+                                                              Icons.download,
+                                                              color: ColorManager
+                                                                  .colorAccent,
+                                                            )),
+                                                        const Text(
+                                                          "Download",
+                                                          style: TextStyle(
+                                                              color: ColorManager
+                                                                  .colorAccent,
+                                                              fontWeight:
                                                                   FontWeight
                                                                       .bold),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
+                                                        )
+                                                      ],
+                                                    ),
                                                   ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Divider(
-                                                    color: Colors.black
-                                                        .withOpacity(0.3),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  InkWell(
-                                                    onTap: () async {
-                                                      if (await GetStorage()
+                                                ],
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              Divider(
+                                                color: Colors.black
+                                                    .withOpacity(0.3),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              InkWell(
+                                                onTap: () async {
+                                                  if (await GetStorage()
                                                           .read("token") ==
-                                                          null) {
-                                                        if (await Permission
-                                                            .phone.isGranted) {
-                                                          await SimDataPlugin
+                                                      null) {
+                                                    if (await Permission
+                                                        .phone.isGranted) {
+                                                      await SimDataPlugin
                                                               .getSimData()
-                                                              .then((value) =>
-                                                          value
-                                                              .cards.isEmpty
+                                                          .then((value) => value
+                                                                  .cards.isEmpty
                                                               ? Get.bottomSheet(
-                                                              LoginView(
-                                                                  false
-                                                                      .obs))
+                                                                  LoginView(
+                                                                      false
+                                                                          .obs))
                                                               : Get.bottomSheet(
-                                                              LoginView(true
-                                                                  .obs)));
-                                                        } else {
-                                                          await Permission.phone
-                                                              .request()
-                                                              .then((
-                                                              value) async =>
-                                                          await SimDataPlugin
-                                                              .getSimData()
-                                                              .then((value) =>
-                                                          value
-                                                              .cards
-                                                              .isEmpty
-                                                              ? Get.bottomSheet(
-                                                              LoginView(
-                                                                  false
-                                                                      .obs))
-                                                              : Get.bottomSheet(
-                                                              LoginView(
-                                                                  true.obs))));
-                                                        }
+                                                                  LoginView(true
+                                                                      .obs)));
+                                                    } else {
+                                                      await Permission.phone
+                                                          .request()
+                                                          .then((value) async => await SimDataPlugin
+                                                                  .getSimData()
+                                                              .then((value) => value
+                                                                      .cards
+                                                                      .isEmpty
+                                                                  ? Get.bottomSheet(
+                                                                      LoginView(
+                                                                          false
+                                                                              .obs))
+                                                                  : Get.bottomSheet(
+                                                                      LoginView(true.obs))));
+                                                    }
+                                                  } else {
+                                                    await relatedVideosController
+                                                        .checkIfVideoReported(
+                                                            widget.videoId!,
+                                                            widget.UserId!)
+                                                        .then((value) async {
+                                                      if (value) {
+                                                        errorToast(
+                                                            "video is already reported");
                                                       } else {
                                                         await relatedVideosController
-                                                            .checkIfVideoReported(
-                                                            widget.videoId!,
-                                                            await GetStorage()
-                                                                .read("userId"))
-                                                            .then((
-                                                            value) async {
-                                                          if (value == true) {
-                                                            errorToast(
-                                                                "video is already reported");
-                                                          } else {
-                                                            await relatedVideosController
-                                                                .getSiteSettings()
-                                                                .then((_) =>
+                                                            .getSiteSettings()
+                                                            .then((_) =>
                                                                 showReportDialog(
                                                                     widget
                                                                         .videoId!,
@@ -743,258 +710,231 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                                         .value,
                                                                     widget
                                                                         .UserId!));
-                                                          }
-                                                        });
                                                       }
-                                                    },
-                                                    child: Row(
-                                                      children: const [
-                                                        Icon(
-                                                          Icons.chat,
-                                                          color: Color(
-                                                              0xffFF2400),
-                                                          size: 30,
-                                                        ),
-                                                        SizedBox(
-                                                          width: 10,
-                                                        ),
-                                                        Text(
-                                                          "Report...",
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                              FontWeight.bold,
-                                                              color: Color(
-                                                                  0xffFF2400)),
-                                                        )
-                                                      ],
+                                                    });
+                                                  }
+                                                },
+                                                child: Row(
+                                                  children: const [
+                                                    Icon(
+                                                      Icons.chat,
+                                                      color: Color(0xffFF2400),
+                                                      size: 30,
                                                     ),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  const Divider(),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  InkWell(
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      "Report...",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Color(
+                                                              0xffFF2400)),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              const Divider(),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              InkWell(
+                                                onTap: () async {
+                                                  if (await GetStorage()
+                                                          .read("token") ==
+                                                      null) {
+                                                    if (await Permission
+                                                        .phone.isGranted) {
+                                                      await SimDataPlugin
+                                                              .getSimData()
+                                                          .then((value) => value
+                                                                  .cards.isEmpty
+                                                              ? Get.bottomSheet(
+                                                                  LoginView(
+                                                                      false
+                                                                          .obs))
+                                                              : Get.bottomSheet(
+                                                                  LoginView(true
+                                                                      .obs)));
+                                                    } else {
+                                                      await Permission.phone
+                                                          .request()
+                                                          .then((value) async => await SimDataPlugin
+                                                                  .getSimData()
+                                                              .then((value) => value
+                                                                      .cards
+                                                                      .isEmpty
+                                                                  ? Get.bottomSheet(
+                                                                      LoginView(
+                                                                          false
+                                                                              .obs))
+                                                                  : Get.bottomSheet(
+                                                                      LoginView(true.obs))));
+                                                    }
+                                                  } else {
+                                                    await relatedVideosController
+                                                        .checkUserBlocked(
+                                                            widget.UserId!)
+                                                        .then((value) async =>
+                                                            await relatedVideosController
+                                                                .blockUnblockUser(
+                                                                    widget
+                                                                        .UserId!,
+                                                                    value));
+                                                  }
+                                                  // if (
+                                                  //     GetStorage().read(
+                                                  //         "token") !=
+                                                  //         null) {
+                                                  //   usersController
+                                                  //       .isUserBlocked(
+                                                  //       widget.UserId);
+                                                  //   Future.delayed(
+                                                  //       const Duration(
+                                                  //           seconds: 1))
+                                                  //       .then((value) =>
+                                                  //   usersController
+                                                  //       .userBlocked.value
+                                                  //       ? usersController
+                                                  //       .blockUnblockUser(
+                                                  //       widget.UserId,
+                                                  //       "Unblock")
+                                                  //       : usersController
+                                                  //       .blockUnblockUser(
+                                                  //       widget.UserId,
+                                                  //       "Block"));
+                                                  // } else {
+                                                  //   showLoginAlert();
+                                                  // }
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.block,
+                                                      color: ColorManager
+                                                          .colorAccent,
+                                                      size: 30,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Obx(() => Text(
+                                                          relatedVideosController
+                                                                  .isUserBlocked
+                                                                  .isFalse
+                                                              ? "Block User..."
+                                                              : "Unblock User...",
+                                                          style: const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: ColorManager
+                                                                  .colorAccent),
+                                                        ))
+                                                  ],
+                                                ),
+                                              ),
+                                              const Divider(),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              Visibility(
+                                                  visible: GetStorage()
+                                                          .read("token") !=
+                                                      null,
+                                                  child: InkWell(
                                                     onTap: () async {
                                                       if (await GetStorage()
-                                                          .read("token") ==
+                                                              .read("token") ==
                                                           null) {
                                                         if (await Permission
                                                             .phone.isGranted) {
                                                           await SimDataPlugin
-                                                              .getSimData()
-                                                              .then((value) =>
-                                                          value
-                                                              .cards.isEmpty
-                                                              ? Get.bottomSheet(
-                                                              LoginView(
-                                                                  false
-                                                                      .obs))
-                                                              : Get.bottomSheet(
-                                                              LoginView(true
-                                                                  .obs)));
+                                                                  .getSimData()
+                                                              .then((value) => value
+                                                                      .cards
+                                                                      .isEmpty
+                                                                  ? Get.bottomSheet(
+                                                                      LoginView(
+                                                                          false
+                                                                              .obs))
+                                                                  : Get.bottomSheet(
+                                                                      LoginView(
+                                                                          true.obs)));
                                                         } else {
-                                                          await Permission.phone
-                                                              .request()
-                                                              .then((
-                                                              value) async =>
-                                                          await SimDataPlugin
-                                                              .getSimData()
-                                                              .then((value) =>
-                                                          value
-                                                              .cards
-                                                              .isEmpty
-                                                              ? Get.bottomSheet(
-                                                              LoginView(
-                                                                  false
-                                                                      .obs))
-                                                              : Get.bottomSheet(
-                                                              LoginView(
-                                                                  true.obs))));
+                                                          await Permission.phone.request().then((value) async => await SimDataPlugin
+                                                                  .getSimData()
+                                                              .then((value) => value
+                                                                      .cards
+                                                                      .isEmpty
+                                                                  ? Get.bottomSheet(
+                                                                      LoginView(false
+                                                                          .obs))
+                                                                  : Get.bottomSheet(
+                                                                      LoginView(
+                                                                          true.obs))));
                                                         }
                                                       } else {
-                                                        await relatedVideosController
-                                                            .checkUserBlocked(
-                                                            widget.UserId!)
-                                                            .then((
-                                                            value) async =>
-                                                        await relatedVideosController
-                                                            .blockUnblockUser(
-                                                            widget
-                                                                .UserId!,
-                                                            value));
+                                                        relatedVideosController
+                                                            .followUnfollowUser(
+                                                                widget.UserId!,
+                                                                widget.isfollow ==
+                                                                        0
+                                                                    ? "follow"
+                                                                    : "unfollow");
                                                       }
-                                                      // if (
-                                                      //     GetStorage().read(
-                                                      //         "token") !=
-                                                      //         null) {
-                                                      //   usersController
-                                                      //       .isUserBlocked(
-                                                      //       widget.UserId);
-                                                      //   Future.delayed(
-                                                      //       const Duration(
-                                                      //           seconds: 1))
-                                                      //       .then((value) =>
-                                                      //   usersController
-                                                      //       .userBlocked.value
-                                                      //       ? usersController
-                                                      //       .blockUnblockUser(
-                                                      //       widget.UserId,
-                                                      //       "Unblock")
-                                                      //       : usersController
-                                                      //       .blockUnblockUser(
-                                                      //       widget.UserId,
-                                                      //       "Block"));
-                                                      // } else {
-                                                      //   showLoginAlert();
-                                                      // }
+                                                      // userDetailsController
+                                                      //     .followUnfollowUser(
+                                                      //     widget.UserId,
+                                                      //     widget.isfollow == 0
+                                                      //         ? "follow"
+                                                      //         : "unfollow",
+                                                      //     token: widget
+                                                      //         .publicUser!
+                                                      //         .firebaseToken
+                                                      //         .toString());
+                                                      // relatedVideosController
+                                                      //     .getAllVideos();
                                                     },
                                                     child: Row(
                                                       children: [
-                                                        const Icon(
-                                                          Icons.block,
-                                                          color: ColorManager
-                                                              .colorAccent,
-                                                          size: 30,
-                                                        ),
+                                                        widget.isfollow! == 0
+                                                            ? const Icon(
+                                                                Icons.report,
+                                                                color: ColorManager
+                                                                    .colorAccent,
+                                                                size: 30,
+                                                              )
+                                                            : const Icon(
+                                                                Icons.report,
+                                                                color: ColorManager
+                                                                    .colorAccent,
+                                                                size: 30,
+                                                              ),
                                                         const SizedBox(
                                                           width: 10,
                                                         ),
-                                                        Obx(() =>
-                                                            Text(
-                                                              relatedVideosController
-                                                                  .isUserBlocked
-                                                                  .isFalse
-                                                                  ? "Block User..."
-                                                                  : "Unblock User...",
-                                                              style: const TextStyle(
-                                                                  fontWeight:
+                                                        const Text(
+                                                          "Report Video",
+                                                          style: TextStyle(
+                                                              fontWeight:
                                                                   FontWeight
                                                                       .bold,
-                                                                  color: ColorManager
-                                                                      .colorAccent),
-                                                            ))
+                                                              color: ColorManager
+                                                                  .colorAccent),
+                                                        )
                                                       ],
                                                     ),
-                                                  ),
-                                                  const Divider(),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Visibility(
-                                                      visible: GetStorage()
-                                                          .read("token") !=
-                                                          null,
-                                                      child: InkWell(
-                                                        onTap: () async {
-                                                          if (await GetStorage()
-                                                              .read("token") ==
-                                                              null) {
-                                                            if (await Permission
-                                                                .phone
-                                                                .isGranted) {
-                                                              await SimDataPlugin
-                                                                  .getSimData()
-                                                                  .then((
-                                                                  value) =>
-                                                              value
-                                                                  .cards
-                                                                  .isEmpty
-                                                                  ? Get
-                                                                  .bottomSheet(
-                                                                  LoginView(
-                                                                      false
-                                                                          .obs))
-                                                                  : Get
-                                                                  .bottomSheet(
-                                                                  LoginView(
-                                                                      true
-                                                                          .obs)));
-                                                            } else {
-                                                              await Permission
-                                                                  .phone
-                                                                  .request()
-                                                                  .then((
-                                                                  value) async =>
-                                                              await SimDataPlugin
-                                                                  .getSimData()
-                                                                  .then((
-                                                                  value) =>
-                                                              value
-                                                                  .cards
-                                                                  .isEmpty
-                                                                  ? Get
-                                                                  .bottomSheet(
-                                                                  LoginView(
-                                                                      false
-                                                                          .obs))
-                                                                  : Get
-                                                                  .bottomSheet(
-                                                                  LoginView(
-                                                                      true
-                                                                          .obs))));
-                                                            }
-                                                          } else {
-                                                            relatedVideosController
-                                                                .followUnfollowUser(
-                                                                widget.UserId!,
-                                                                widget
-                                                                    .isfollow ==
-                                                                    0
-                                                                    ? "follow"
-                                                                    : "unfollow");
-                                                          }
-                                                          // userDetailsController
-                                                          //     .followUnfollowUser(
-                                                          //     widget.UserId,
-                                                          //     widget.isfollow == 0
-                                                          //         ? "follow"
-                                                          //         : "unfollow",
-                                                          //     token: widget
-                                                          //         .publicUser!
-                                                          //         .firebaseToken
-                                                          //         .toString());
-                                                          // relatedVideosController
-                                                          //     .getAllVideos();
-                                                        },
-                                                        child: Row(
-                                                          children: [
-                                                            widget.isfollow! ==
-                                                                0
-                                                                ? const Icon(
-                                                              Icons.report,
-                                                              color: ColorManager
-                                                                  .colorAccent,
-                                                              size: 30,
-                                                            )
-                                                                : const Icon(
-                                                              Icons.report,
-                                                              color: ColorManager
-                                                                  .colorAccent,
-                                                              size: 30,
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 10,
-                                                            ),
-                                                            const Text(
-                                                              "Report Video",
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                                  color: ColorManager
-                                                                      .colorAccent),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ))
-                                                ]),
-                                          ),
+                                                  ))
+                                            ]),
+                                      ),
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
-                                          BorderRadius.circular(15)),
+                                              BorderRadius.circular(15)),
                                     );
                                   },
                                   icon: const Icon(
@@ -1027,29 +967,27 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                             if (await GetStorage().read("token") == null) {
                               if (await Permission.phone.isGranted) {
                                 await SimDataPlugin.getSimData().then((value) =>
-                                value.cards.isEmpty
-                                    ? Get.bottomSheet(LoginView(false.obs))
-                                    : Get.bottomSheet(LoginView(true.obs)));
+                                    value.cards.isEmpty
+                                        ? Get.bottomSheet(LoginView(false.obs))
+                                        : Get.bottomSheet(LoginView(true.obs)));
                               } else {
                                 await Permission.phone.request().then(
-                                        (value) async =>
-                                    await SimDataPlugin.getSimData().then(
-                                            (value) =>
-                                        value.cards.isEmpty
-                                            ? Get.bottomSheet(
-                                            LoginView(false.obs))
-                                            : Get.bottomSheet(
-                                            LoginView(true.obs))));
+                                    (value) async =>
+                                        await SimDataPlugin.getSimData().then(
+                                            (value) => value.cards.isEmpty
+                                                ? Get.bottomSheet(
+                                                    LoginView(false.obs))
+                                                : Get.bottomSheet(
+                                                    LoginView(true.obs))));
                               }
                             } else {
-                              if(widget.UserId==GetStorage().read("userId")){
+                              if (widget.UserId ==
+                                  GetStorage().read("userId")) {
                                 homeController.bottomNavIndex.value = 3;
+                              } else {
+                                Get.toNamed(Routes.OTHERS_PROFILE,
+                                    arguments: {"profileId": widget.UserId});
                               }
-                              else{
-                                Get.toNamed(Routes.OTHERS_PROFILE,arguments: {"profileId":widget.UserId});
-
-                              }
-
                             }
                           },
                           child: Row(
@@ -1063,20 +1001,20 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                 child: CachedNetworkImage(
                                   imageBuilder: (context, imageProvider) =>
                                       Container(
-                                        width: 60,
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          image: DecorationImage(
-                                              image: imageProvider,
-                                              fit: BoxFit.cover),
-                                        ),
-                                      ),
+                                    width: 60,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
                                   imageUrl: widget.publicUser!.avatar == null ||
-                                      widget.publicUser!.avatar!.isEmpty
+                                          widget.publicUser!.avatar!.isEmpty
                                       ? RestUrl.placeholderImage
                                       : RestUrl.profileUrl +
-                                      widget.publicUser!.avatar.toString(),
+                                          widget.publicUser!.avatar.toString(),
                                   fit: BoxFit.fill,
                                 ),
                               ),
@@ -1103,36 +1041,33 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                         child: InkWell(
                                             onTap: () async {
                                               if (await GetStorage()
-                                                  .read("token") ==
+                                                      .read("token") ==
                                                   null) {
                                                 if (await Permission
                                                     .phone.isGranted) {
                                                   await SimDataPlugin
-                                                      .getSimData()
-                                                      .then((value) =>
-                                                  value
-                                                      .cards.isEmpty
-                                                      ? Get.bottomSheet(
-                                                      LoginView(
-                                                          false.obs))
-                                                      : Get.bottomSheet(
-                                                      LoginView(
-                                                          true.obs)));
+                                                          .getSimData()
+                                                      .then((value) => value
+                                                              .cards.isEmpty
+                                                          ? Get.bottomSheet(
+                                                              LoginView(
+                                                                  false.obs))
+                                                          : Get.bottomSheet(
+                                                              LoginView(
+                                                                  true.obs)));
                                                 } else {
                                                   await Permission.phone
                                                       .request()
-                                                      .then((value) async =>
-                                                  await SimDataPlugin
-                                                      .getSimData()
-                                                      .then((value) =>
-                                                  value
-                                                      .cards.isEmpty
-                                                      ? Get.bottomSheet(
-                                                      LoginView(
-                                                          false
-                                                              .obs))
-                                                      : Get.bottomSheet(
-                                                      LoginView(true.obs))));
+                                                      .then((value) async => await SimDataPlugin
+                                                              .getSimData()
+                                                          .then((value) => value
+                                                                  .cards.isEmpty
+                                                              ? Get.bottomSheet(
+                                                                  LoginView(
+                                                                      false
+                                                                          .obs))
+                                                              : Get.bottomSheet(
+                                                                  LoginView(true.obs))));
                                                 }
                                               } else {
                                                 relatedVideosController
@@ -1146,9 +1081,9 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                             },
                                             child: Container(
                                               padding:
-                                              const EdgeInsets.symmetric(
-                                                  vertical: 5,
-                                                  horizontal: 10),
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 5,
+                                                      horizontal: 10),
                                               child: Text(
                                                 widget.isfollow == 0
                                                     ? "Follow"
@@ -1162,10 +1097,10 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                       color: ColorManager
                                                           .colorAccent),
                                                   borderRadius:
-                                                  BorderRadius.circular(5)),
+                                                      BorderRadius.circular(5)),
                                             )),
                                         visible: GetStorage().read("token") !=
-                                            null &&
+                                                null &&
                                             widget.UserId !=
                                                 GetStorage().read("userId"),
                                       )
@@ -1208,16 +1143,14 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                 itemCount: widget.hashtagsList?.length,
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) =>
-                                    InkWell(
+                                itemBuilder: (context, index) => InkWell(
                                       onTap: () async {
                                         await GetStorage().write("hashtagId",
                                             widget.hashtagsList![index].id);
                                         Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                             arguments: {
                                               "hashtag_name":
-                                              "${widget.hashtagsList![index]
-                                                  .name}"
+                                                  "${widget.hashtagsList![index].name}"
                                             });
                                       },
                                       child: Container(
@@ -1226,8 +1159,8 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                             border: Border.all(
                                                 color: Colors.transparent),
                                             borderRadius:
-                                            const BorderRadius.all(
-                                                Radius.circular(5))),
+                                                const BorderRadius.all(
+                                                    Radius.circular(5))),
                                         margin: const EdgeInsets.only(
                                             right: 5, top: 5, bottom: 5),
                                         padding: const EdgeInsets.all(5),
@@ -1278,7 +1211,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                 widget.soundName!.isEmpty
                                     ? "Original Sound"
                                     : widget.soundName! +
-                                    " by ${widget.publicUser!.name}",
+                                        " by ${widget.publicUser!.name}",
                                 style: const TextStyle(color: Colors.white),
                               )
                             ],
@@ -1287,44 +1220,40 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                       ],
                     ),
                   ),
-
-
                 ],
               )),
           IgnorePointer(
-            child: Obx((() =>
-                Visibility(
-                  visible: volume.value <= 0,
-                  child: Center(
-                      child: ClipOval(
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          color: ColorManager.colorAccent.withOpacity(0.5),
-                          child: const Icon(
-                            IconlyLight.volume_off,
-                            size: 25,
-                            color: Colors.white,
-                          ),
-                        ),
-                      )),
-                ))),
+            child: Visibility(
+              visible: !videoPlayerController.value.isPlaying,
+              child: Center(
+                  child: ClipOval(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  color: ColorManager.colorAccent.withOpacity(0.5),
+                  child: const Icon(
+                    IconlyLight.play,
+                    size: 25,
+                    color: Colors.white,
+                  ),
+                ),
+              )),
+            ),
           ),
           IgnorePointer(
-            child: Obx((() =>
-                Visibility(
+            child: Obx((() => Visibility(
                   visible: isVideoPaused.value,
                   child: Center(
                       child: ClipOval(
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          color: ColorManager.colorAccent.withOpacity(0.5),
-                          child: const Icon(
-                            IconlyLight.play,
-                            size: 25,
-                            color: Colors.white,
-                          ),
-                        ),
-                      )),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      color: ColorManager.colorAccent.withOpacity(0.5),
+                      child: const Icon(
+                        IconlyLight.play,
+                        size: 25,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )),
                 ))),
           ),
         ],
@@ -1374,13 +1303,12 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
               ),
               Container(
                 padding:
-                const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                    const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                 margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 0),
                 decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(5)),
-                child: Obx(() =>
-                    DropdownButton(
+                child: Obx(() => DropdownButton(
                       value: dropDownValue.value,
                       underline: Container(),
                       isExpanded: true,
@@ -1403,26 +1331,25 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
               const SizedBox(
                 height: 15,
               ),
-              Obx(() =>
-                  ElevatedButton(
-                      onPressed: dropDownValue.value == "Reason"
-                          ? null
-                          : () async {
-                        try {
-                          relatedVideosController.reportVideo(
-                              videoId, id, dropDownValue.value);
-                        } catch (e) {
-                          closeDialogue(context);
-                          showErrorToast(context, e.toString());
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                          primary: Colors.red,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 5)),
-                      child: const Text("Report")))
+              Obx(() => ElevatedButton(
+                  onPressed: dropDownValue.value == "Reason"
+                      ? null
+                      : () async {
+                          try {
+                            relatedVideosController.reportVideo(
+                                videoId, id, dropDownValue.value);
+                          } catch (e) {
+                            closeDialogue(context);
+                            showErrorToast(context, e.toString());
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 5)),
+                  child: const Text("Report")))
             ],
           )),
     );

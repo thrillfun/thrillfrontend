@@ -77,9 +77,7 @@ class ProfileController extends GetxController with StateMixin<Rx<User>> {
     }).then((result) {
       followersLoading.value = false;
       followersModel = FollowersModel.fromJson(result.data).data!.obs;
-    }).onError((error, stackTrace) {
-      followersLoading.value = false;
-    });
+    }).onError((error, stackTrace) {});
     followersLoading.value = false;
   }
 

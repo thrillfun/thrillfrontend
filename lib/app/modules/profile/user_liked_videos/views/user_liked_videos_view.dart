@@ -18,7 +18,7 @@ class UserLikedVideosView extends GetView<UserLikedVideosController> {
         children: [
           Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 80),
+                padding: const EdgeInsets.only(bottom: 0),
                 child: GridView.count(
                   padding: const EdgeInsets.all(10),
                   shrinkWrap: true,

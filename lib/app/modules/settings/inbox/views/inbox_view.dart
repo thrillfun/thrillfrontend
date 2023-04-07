@@ -10,8 +10,9 @@ class InboxView extends GetView<InboxController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('InboxView'),
-        centerTitle: true,
+        titleTextStyle:
+        TextStyle(color: Colors.black, fontWeight: FontWeight.w700,fontSize: 24),
+        title: const Text('Your Inbox'),
       ),
       body: Center(
         child: Text(

@@ -210,7 +210,9 @@ class DiscoverVideoPlayerView extends GetView<DiscoverVideoPlayerController> {
                                         fcmToken: (Get
                                             .arguments["discover_videos"] as List<
                                             Videos>)[index].user!
-                                            .firebaseToken));
+                                            .firebaseToken,description:(Get
+                                        .arguments["discover_videos"] as List<
+                                        Videos>)[index].description ,));
                                   });
                                   // GetStorage().read("videoPrivacy") ==
                                   //     "Private"

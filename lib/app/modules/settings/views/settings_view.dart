@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -28,57 +31,66 @@ class SettingsView extends GetView<SettingsController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                      alignment: Alignment.center,
-                      width: 60,
-                      height: 60,
-                      child: SizedBox(
-                          height: 60,
-                          width: 60,
-                          child: imgProfile(
-                              '${GetStorage().read("avatar").toString()}'))),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        Get.arguments["name"].toString(),
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+              controller.obx(
+                  (state) => Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          InkWell(
+                            onTap: () => Get.toNamed(Routes.PROFILE),
+                            child: Container(
+                                alignment: Alignment.center,
+                                width: 60,
+                                height: 60,
+                                child: SizedBox(
+                                    height: 60,
+                                    width: 60,
+                                    child: imgProfile(
+                                        state!.value.avatar.toString()))),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                              child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                state!.value.name.toString(),
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "@${state!.value.username}",
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.normal),
+                              )
+                            ],
+                          )),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    border: Border.all(),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(200))),
+                                width: 30,
+                                height: 30,
+                                child: Icon(
+                                  Icons.rotate_90_degrees_ccw,
+                                  size: 20,
+                                )),
+                          )
+                        ],
                       ),
-                      Text(
-                        "@${Get.arguments["username"].toString()}",
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.normal),
-                      )
-                    ],
+                  onLoading: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [loader()],
                   )),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(200))),
-                        width: 30,
-                        height: 30,
-                        child: Icon(
-                          Icons.rotate_90_degrees_ccw,
-                          size: 20,
-                        )),
-                  )
-                ],
-              ),
               Divider(
                 color: Colors.white.withOpacity(0.5),
               ),
@@ -99,7 +111,7 @@ class SettingsView extends GetView<SettingsController> {
                   onTap: () {
                     Get.toNamed(Routes.REFERAL);
                   },
-                  child: mainTile(Icons.gif, "Referral")),
+                  child: mainTile(IconlyBroken.user_3, "Referral")),
 
               GestureDetector(
                   onTap: () async {
@@ -135,7 +147,9 @@ class SettingsView extends GetView<SettingsController> {
                   child: mainTile(IconlyBroken.wallet, wallet)),
               GestureDetector(
                   onTap: () {
-                    Get.toNamed(Routes.QR_CODE);
+                    Get.toNamed(Routes.QR_CODE, arguments: {
+                      "avatar": controller.userProfile.value.avatar
+                    });
                     //  Navigator.pushNamed(context, '/qrcode');
                   },
                   child: mainTile(IconlyBroken.scan, qrCode)),
@@ -146,9 +160,19 @@ class SettingsView extends GetView<SettingsController> {
                         .createDynamicLink(
                             GetStorage().read("userId").toString(),
                             "profile",
-                            Get.arguments["username"].toString(),
-                            Get.arguments["avatar"].toString())
+                            controller.userProfile.value.username,
+                            controller.userProfile.value.avatar)
                         .then((value) async {
+                      // var dio = Dio();
+                      // dio.download(
+                      //         "https://thrillvideonew.s3.ap-south-1.amazonaws.com/assets/logo.png",
+                      //         saveCacheDirectory + "/logo.png")
+                      //     .then((response) async {
+                      //   await Share.shareFiles(
+                      //       [saveCacheDirectory + "/logo.png"],
+                      //       text: 'Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me. $value');
+                      // });
+
                       Share.share(
                           'Hi, I am using Thrill to share and view great & entertaining Reels. Come and join to follow me. $value');
                     });
@@ -180,15 +204,19 @@ class SettingsView extends GetView<SettingsController> {
                   onTap: () async {
                     Get.defaultDialog(
                         title: "Logout?",
+                        titleStyle: TextStyle(fontWeight: FontWeight.w700,fontSize: 24),
                         middleText:
                             "This will also logout from other accounts!",
+                        middleTextStyle: TextStyle(fontWeight: FontWeight.w600),
                         confirm: ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                             onPressed: () async {
                               await controller.signOutUser().then(
                                   (value) => Get.offAllNamed(Routes.HOME));
                             },
                             child: const Text('Yes')),
                         cancel: ElevatedButton(
+
                             onPressed: () {
                               Get.back();
                             },
@@ -197,7 +225,7 @@ class SettingsView extends GetView<SettingsController> {
                   child: mainTile(IconlyBroken.logout, logout)),
               Card(
                 shape: RoundedRectangleBorder(
-                  side: BorderSide(color: ColorManager.colorPrimaryLight),
+                    side: BorderSide(color: ColorManager.colorPrimaryLight),
                     borderRadius: BorderRadius.circular(10)),
                 margin: const EdgeInsets.only(top: 20),
                 elevation: 10,
@@ -212,7 +240,7 @@ class SettingsView extends GetView<SettingsController> {
                         title: const Text(
                           "Technical Support",
                           style: TextStyle(
-                              fontSize: 20,fontWeight: FontWeight.w700),
+                              fontSize: 20, fontWeight: FontWeight.w700),
                         ),
                         leading: Card(
                           elevation: 0,
@@ -252,7 +280,7 @@ class SettingsView extends GetView<SettingsController> {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: 20,fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
           ),
           Icon(IconlyBroken.arrow_right_2)

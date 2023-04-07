@@ -16,6 +16,7 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
   var isSimCardAvailable = true.obs;
   var followersModel = RxList<Followers>();
   var followersLoading = false.obs;
+  var isFollowingVisible = false.obs;
   var dio =Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
 
   @override
@@ -46,7 +47,7 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
         getFollowings();
       }
       else{
-        errorToast("sorry an error has occurred");
+        errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {});
   }

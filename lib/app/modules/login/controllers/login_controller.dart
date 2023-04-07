@@ -24,10 +24,12 @@ class LoginController extends GetxController with StateMixin<dynamic> {
   var isSimCardAvailable = true.obs;
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var qrData = "".obs;
+
   @override
   void onInit() {
     super.onInit();
   }
+
   Future<void> printSimCardsData() async {
     SimData simData = await SimDataPlugin.getSimData();
     if (simData.cards.isEmpty) {
@@ -37,6 +39,7 @@ class LoginController extends GetxController with StateMixin<dynamic> {
     }
     Get.forceAppUpdate();
   }
+
   @override
   void onReady() {
     super.onReady();
@@ -46,6 +49,7 @@ class LoginController extends GetxController with StateMixin<dynamic> {
   void onClose() {
     super.onClose();
   }
+
   Future<void> socialLoginRegister(
       var social_login_id, social_login_type, email, phone, name) async {
     var firebase_token = await FirebaseMessaging.instance.getToken();
@@ -60,41 +64,48 @@ class LoginController extends GetxController with StateMixin<dynamic> {
           ? ""
           : GetStorage().read("referral_code").toString()
     }).then((value) async {
-      userProfile =
-          UserDetailsModel.fromJson(value.data).data!.user!;
+      if(Get.isBottomSheetOpen!){
+        Get.back();
+        Get.defaultDialog(title: "Signing you in Please wait",content: loader(),middleText: "");
+      }
+      if(value.data["status"]){
+        userProfile = UserDetailsModel.fromJson(value.data).data!.user!;
 
-      await storage.write("userId",
-          UserDetailsModel.fromJson(value.data).data!.user!.id!);
-      await storage.write("name",
-          UserDetailsModel.fromJson(value.data).data!.user!.name!);
-      await storage.write("avatar",
-          UserDetailsModel.fromJson(value.data).data!.user!.avatar!);
-      await storage.write("username",
-          UserDetailsModel.fromJson(value.data).data!.user!.username!);
-      await storage.write(
-          "token",
-          UserDetailsModel.fromJson(value.data)
-              .data!
-              .token!
-              .toString());
-      await FirebaseChatCore.instance
-          .createUserInFirestore(
-        types.User(
-          firstName: userProfile.firstName,
-          id: userProfile.id.toString(),
-          // UID from Firebase Authentication
-          imageUrl: userProfile.avatar.toString(),
-          lastName: userProfile.lastName,
-        ),
-      )
-          .then((value) => print("Firebase result => success"));
+        await storage.write(
+            "userId", UserDetailsModel.fromJson(value.data).data!.user!.id!);
+        await storage.write(
+            "name", UserDetailsModel.fromJson(value.data).data!.user!.name!);
+        await storage.write(
+            "avatar", UserDetailsModel.fromJson(value.data).data!.user!.avatar!);
+        await storage.write("username",
+            UserDetailsModel.fromJson(value.data).data!.user!.username!);
+        await storage.write("token",
+            UserDetailsModel.fromJson(value.data).data!.token!.toString());
+        // await FirebaseChatCore.instance
+        //     .createUserInFirestore(
+        //   types.User(
+        //     firstName: userProfile.firstName,
+        //     id: userProfile.id.toString(),
+        //     // UID from Firebase Authentication
+        //     imageUrl: userProfile.avatar.toString(),
+        //     lastName: userProfile.lastName,
+        //   ),
+        // )
+        //     .then((value) => print("Firebase result => success"));
 
-      change(userProfile, status: RxStatus.success());
+        change(userProfile, status: RxStatus.success());
 
-      await storage.write("user", userProfile).then((_) async {
-        await Get.forceAppUpdate();
-        Get.back(closeOverlays: true);
-      });
+        await storage.write("user", userProfile).then((_) async {
+          await Get.forceAppUpdate();
+          Get.back(closeOverlays: true);
+        });
+
+        successToast(value.data["message"]);
+      }
+      else{
+        errorToast(value.data["message"]);
+      }
+
     }).onError((error, stackTrace) {
       change(userProfile, status: RxStatus.error(error.toString()));
     });
@@ -102,10 +113,10 @@ class LoginController extends GetxController with StateMixin<dynamic> {
 
   Future<void> signInWithGoogle() async {
     GoogleSignInAccount? googleUser =
-    await GoogleSignIn(scopes: <String>["email"]).signIn();
+        await GoogleSignIn(scopes: <String>["email"]).signIn();
     // fetch the auth details from the request made earlier
     final GoogleSignInAuthentication googleAuth =
-    await googleUser!.authentication;
+        await googleUser!.authentication;
     // Create a new credential for signing in with google
     final credential = user.GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
@@ -115,7 +126,6 @@ class LoginController extends GetxController with StateMixin<dynamic> {
     await socialLoginRegister(googleUser.id, "google", googleUser.email, "",
         googleUser.displayName ?? "");
   }
-
 
   Future<void> signOutUser() async {
     await storage.erase();
@@ -134,8 +144,6 @@ class LoginController extends GetxController with StateMixin<dynamic> {
     }
   }
 
-
-
   Future<void> signinTrueCaller(String social_login_id, String phone,
       String firebase_token, String name) async {
     dio.post("/SocialLogin", queryParameters: {
@@ -153,14 +161,11 @@ class LoginController extends GetxController with StateMixin<dynamic> {
           successToast(value.data["message"].toString());
           UserDetailsModel.fromJson(value.data).data!.user!.obs;
 
-          await storage.write("userId",
-              UserDetailsModel.fromJson(value.data).data!.user!.id!);
-
           await storage.write(
-              "token", UserDetailsModel.fromJson(value.data)
-                  .data!
-                  .token!
-                  .toString());
+              "userId", UserDetailsModel.fromJson(value.data).data!.user!.id!);
+
+          await storage.write("token",
+              UserDetailsModel.fromJson(value.data).data!.token!.toString());
 
           change(userProfile, status: RxStatus.success());
 
@@ -176,5 +181,4 @@ class LoginController extends GetxController with StateMixin<dynamic> {
       }
     }).onError((error, stackTrace) {});
   }
-
 }

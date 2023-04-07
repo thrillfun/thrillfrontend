@@ -14,6 +14,24 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Row(
+        children: [
+          Flexible(
+              child: Container(
+                alignment: Alignment.center,
+                width: Get.width,
+                child: Text(
+                  "Your Account",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ))
+        ],
+      ),),
       body: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
         height: Get.height,
@@ -21,22 +39,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
         child:controller.obx((state) =>  ListView(
           shrinkWrap: true,
           children: [
-            Row(
-              children: [
-                Flexible(
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: Get.width,
-                      child: Text(
-                        "Your Account",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ))
-              ],
-            ),
+
             const SizedBox(
               height: 10,
             ),
@@ -75,7 +78,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
             //   child: socialLayout(),
             // ),
           ],
-        )),
+        ),onLoading: loader()),
       ),
     );
   }
@@ -98,8 +101,8 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
           ),
         ),
         errorWidget: (context, string, dynamic) => CachedNetworkImage(
-            placeholder: (a, b) => const Center(
-              child: CircularProgressIndicator(),
+            placeholder: (a, b) =>  Center(
+              child: loader(),
             ),
             fit: BoxFit.contain,
             imageBuilder: (context, imageProvider) => Container(

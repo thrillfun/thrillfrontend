@@ -10,8 +10,8 @@ import 'package:thrill/app/rest/rest_urls.dart';
 
 import '../../../utils/utils.dart';
 
-class SpinWheelController extends GetxController with StateMixin<SpinWheelDataModel> {
-
+class SpinWheelController extends GetxController
+    with StateMixin<SpinWheelDataModel> {
   StreamController<int>? streamController;
   RxList<RecentRewards> recentRewardsList = RxList();
 
@@ -46,13 +46,12 @@ class SpinWheelController extends GetxController with StateMixin<SpinWheelDataMo
     super.onClose();
   }
 
-
   getWheelData() async {
-    if(wheelRewardsList.isEmpty){
-      change(wheelData,status:RxStatus.loading());
+    if (wheelRewardsList.isEmpty) {
+      change(wheelData, status: RxStatus.loading());
     }
     dio.options.headers['Authorization'] =
-    "Bearer ${await GetStorage().read("token")}";
+        "Bearer ${await GetStorage().read("token")}";
     var response = await dio.get("/spin-wheel/data");
 
     print(response.data);
@@ -63,26 +62,23 @@ class SpinWheelController extends GetxController with StateMixin<SpinWheelDataMo
           wheelData = SpinWheelDataModel.fromJson(response.data);
 
           recentRewardsList.value =
-          SpinWheelDataModel.fromJson(response.data).data!.recentRewards!;
+              SpinWheelDataModel.fromJson(response.data).data!.recentRewards!;
 
           wheelRewardsList.value =
-          SpinWheelDataModel.fromJson(response.data).data!.wheelRewards!;
+              SpinWheelDataModel.fromJson(response.data).data!.wheelRewards!;
 
           remainingChance.value =
               int.parse(wheelData.data!.availableChance ?? "0");
-          usedChanceValue.value =
-              int.parse(wheelData.data!.usedChance ?? "0");
+          usedChanceValue.value = int.parse(wheelData.data!.usedChance ?? "0");
 
-          lastReward.value =
-              wheelData.data!.lastReward.toString();
-          change(wheelData,status:RxStatus.success());
-
+          lastReward.value = wheelData.data!.lastReward.toString();
+          change(wheelData, status: RxStatus.success());
         } on HttpException catch (e) {
-          change(wheelData,status:RxStatus.error(e.toString()));
+          change(wheelData, status: RxStatus.error(e.toString()));
 
           errorToast(response.data['message']);
         } on Exception catch (e) {
-          change(wheelData,status:RxStatus.error(e.toString()));
+          change(wheelData, status: RxStatus.error(e.toString()));
           errorToast(e.toString());
         }
       } else {
@@ -92,14 +88,13 @@ class SpinWheelController extends GetxController with StateMixin<SpinWheelDataMo
       log(e.toString());
     }
   }
-  getRewardUpdate(var rewardId) async {
 
+  getRewardUpdate(var rewardId) async {
     try {
       dio.options.headers['Authorization'] =
-      "Bearer ${await GetStorage().read("token")}";
+          "Bearer ${await GetStorage().read("token")}";
       var response = await dio
           .post("/spin-wheel/reward-won", data: {"reward_id": rewardId});
-
 
       if (response.statusCode == 200) {
         try {

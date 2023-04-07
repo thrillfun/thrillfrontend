@@ -37,6 +37,103 @@ final progressNotifier = ValueNotifier<ProgressBarState>(
 
 AudioPlayer audioPlayer = AudioPlayer();
 
+var lightThemeData = ThemeData(
+  elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+          backgroundColor:
+              MaterialStateProperty.all<Color>(ColorManager.colorAccent))),
+  dividerColor: Colors.grey,
+  fontFamily: ('Urbanist'),
+  bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+  hintColor: Colors.black.withOpacity(0.3),
+  indicatorColor: ColorManager.colorAccent,
+  focusColor: ColorManager.colorAccent,
+  dialogBackgroundColor: Colors.white,
+  progressIndicatorTheme:
+      ProgressIndicatorThemeData(color: ColorManager.colorAccent),
+  textSelectionTheme:
+      TextSelectionThemeData(cursorColor: ColorManager.colorAccent),
+  inputDecorationTheme: InputDecorationTheme(
+      prefixIconColor: ColorManager.colorAccent,
+      focusColor: ColorManager.colorAccent,
+      fillColor: Colors.grey.withOpacity(0.1),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        borderSide: const BorderSide(
+          color: Color(0xffFAFAFA),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        borderSide: BorderSide(
+          color: Colors.grey.withOpacity(0.1),
+        ),
+      )),
+  scaffoldBackgroundColor: Colors.white,
+  textTheme: const TextTheme(button: TextStyle(color: Colors.white)),
+  tabBarTheme: const TabBarTheme(
+      labelStyle: TextStyle(fontWeight: FontWeight.w700),
+      indicatorColor: ColorManager.colorAccent,
+      labelColor: Colors.black,
+      dividerColor: ColorManager.colorAccent),
+  appBarTheme: const AppBarTheme(
+      centerTitle: true,
+      titleTextStyle:
+          TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+      color: Colors.white,
+      iconTheme: IconThemeData(color: Colors.black),
+      elevation: 0),
+  primaryColor: ColorManager.colorAccent,
+);
+var darkThemeData = ThemeData(
+  dividerColor: ColorManager.colorAccentTransparent,
+  fontFamily: ('Urbanist'),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+          backgroundColor:
+              MaterialStateProperty.all<Color>(ColorManager.colorAccent))),
+  bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: Colors.black,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+  hintColor: Colors.white.withOpacity(0.3),
+  indicatorColor: ColorManager.colorAccent,
+  focusColor: ColorManager.colorAccent,
+  backgroundColor: Colors.black,
+  textSelectionTheme:
+      TextSelectionThemeData(cursorColor: ColorManager.colorAccent),
+  inputDecorationTheme: InputDecorationTheme(
+      prefixIconColor: ColorManager.colorAccent,
+      focusColor: ColorManager.colorAccent,
+      fillColor: Colors.grey.withOpacity(0.1),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        borderSide: const BorderSide(
+          color: Color(0xffFAFAFA),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        borderSide: BorderSide(
+          color: Colors.grey.withOpacity(0.1),
+        ),
+      )),
+  dialogBackgroundColor: Colors.black,
+  appBarTheme: const AppBarTheme(
+    color: Colors.black,
+    elevation: 0,
+    centerTitle: true,
+    titleTextStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+  ),
+  scaffoldBackgroundColor: Colors.black,
+  cardColor: Colors.black,
+  tabBarTheme: const TabBarTheme(indicatorColor: ColorManager.colorAccent),
+  progressIndicatorTheme:
+      const ProgressIndicatorThemeData(color: ColorManager.colorAccent),
+  colorScheme: const ColorScheme.dark(background: Colors.black),
+  primaryColor: ColorManager.colorAccent,
+);
 const LinearGradient gradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -355,8 +452,8 @@ Widget imgProfile(String imagePath) => Container(
                 ),
               ),
           errorWidget: (context, string, dynamic) => CachedNetworkImage(
-              placeholder: (a, b) => const Center(
-                    child: CircularProgressIndicator(),
+              placeholder: (a, b) => Center(
+                    child: loader(),
                   ),
               fit: BoxFit.fill,
               height: 60,
@@ -372,7 +469,6 @@ Widget imgProfile(String imagePath) => Container(
               imageUrl: RestUrl.placeholderImage),
           imageUrl: RestUrl.profileUrl + imagePath),
     );
-
 
 getTempDirectory() async {
   var directoryIOS = await getApplicationDocumentsDirectory();

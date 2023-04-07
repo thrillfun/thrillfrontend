@@ -59,7 +59,7 @@ class _CameraState extends State<CameraView>
   var loaderHeight = 80.0;
 
   // Initial values
-  bool _isCameraInitialized = false;
+  var _isCameraInitialized = false;
   bool _isCameraPermissionGranted = false;
   bool _isRearCameraSelected = true;
   final bool _isVideoCameraSelected = true;
@@ -78,8 +78,7 @@ class _CameraState extends State<CameraView>
 
   AnimationController? animationController;
 
-  camera.ResolutionPreset currentResolutionPreset =
-      camera.ResolutionPreset.medium;
+  camera.ResolutionPreset currentResolutionPreset = camera.ResolutionPreset.max;
 
   //get camera permission status and start camera
 
@@ -101,11 +100,14 @@ class _CameraState extends State<CameraView>
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.black,
-        body: _controller.value.isInitialized
+        body: _isCameraInitialized
             ? Stack(
                 alignment: Alignment.topCenter,
                 children: [
-                  camera.CameraPreview(_controller),
+                  AspectRatio(
+                    aspectRatio: Get.size.aspectRatio,
+                    child: camera.CameraPreview(_controller),
+                  ),
                   Container(
                     alignment: Alignment.bottomCenter,
                     padding:
@@ -116,56 +118,53 @@ class _CameraState extends State<CameraView>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            InkWell(
-                              onTap: _isRecordingInProgress
-                                  ? () async {
-                                      if (!_controller.value.isRecordingVideo) {
-                                        await resumeVideoRecording();
-                                      } else {
-                                        await pauseVideoRecording();
-                                      }
-                                    }
-                                  : () async {
-                                      _toggleCameraLens();
-                                      setState(() {
-                                        _isCameraInitialized = false;
-                                      });
-                                      // onNewCameraSelected(cameras[
-                                      // _isRearCameraSelected
-                                      //     ? 1
-                                      //     : 0]);
-                                      // setState(() {
-                                      //   _isRearCameraSelected =
-                                      //   !_isRearCameraSelected;
-                                      // });
-                                    },
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.circle,
-                                    color: Colors.black38,
-                                    size: 50,
-                                  ),
-                                  Icon(
+                            Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: ColorManager.colorAccent),
+                                    shape: BoxShape.circle,
+                                    color: ColorManager.colorAccent
+                                        .withOpacity(0.3)),
+                                child: InkWell(
+                                  onTap: _isRecordingInProgress
+                                      ? () async {
+                                          if (!_controller
+                                              .value.isRecordingVideo) {
+                                            await resumeVideoRecording();
+                                          } else {
+                                            await pauseVideoRecording();
+                                          }
+                                        }
+                                      : () async {
+                                          _toggleCameraLens();
+                                          setState(() {
+                                            _isCameraInitialized = false;
+                                          });
+                                          // onNewCameraSelected(cameras[
+                                          // _isRearCameraSelected
+                                          //     ? 1
+                                          //     : 0]);
+                                          // setState(() {
+                                          //   _isRearCameraSelected =
+                                          //   !_isRearCameraSelected;
+                                          // });
+                                        },
+                                  child: Icon(
                                     _isRearCameraSelected
                                         ? Icons.camera_front
                                         : Icons.camera_rear,
                                     color: Colors.white,
                                     size: 20,
                                   ),
-                                ],
-                              ),
-                            ),
+                                )),
                             Obx(() => DropdownButton(
                                   value: defaultVideoSpeed.value,
                                   items: items
                                       .map((e) => DropdownMenuItem(
                                             child: Text(
                                               e.toString() + "x",
-                                              style: TextStyle(
-                                                  color: ColorManager
-                                                      .dayNightText),
+                                              style: TextStyle(),
                                             ),
                                             value: e,
                                           ))
@@ -252,138 +251,170 @@ class _CameraState extends State<CameraView>
                                 ],
                               ),
                             ),
-                            InkWell(
-                              onTap: () async {
-                                try {
-                                  if (await Permission.photos.isGranted ==
-                                      false) {
-                                    await Permission.photos
-                                        .request()
-                                        .then((value) async {
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: ColorManager.colorAccent),
+                                  color: ColorManager.colorAccent
+                                      .withOpacity(0.3)),
+                              child: InkWell(
+                                onTap: () async {
+                                  try {
+                                    if (await Permission.photos.isGranted ==
+                                        false) {
+                                      await Permission.photos
+                                          .request()
+                                          .then((value) async {
+                                        await ImagePicker()
+                                            .pickVideo(
+                                                source: ImageSource.gallery)
+                                            .then((value) async {
+                                          if (value != null) {
+                                            int currentUnix = DateTime.now()
+                                                .millisecondsSinceEpoch;
+
+                                            await cameraController.openEditor(
+                                                true,
+                                                value.path,
+                                                selectedSound.value.isEmpty
+                                                    ? Get
+                                                        .arguments["sound_path"]
+                                                        .toString()
+                                                    : selectedSound.value,
+                                                GetStorage().read("userId"),
+                                                Get.arguments["sound_owner"]
+                                                    .toString());
+                                          }
+                                        });
+                                      });
+                                    } else {
                                       await ImagePicker()
                                           .pickVideo(
                                               source: ImageSource.gallery)
-                                          .then((value)async  {
+                                          .then((value) async {
                                         if (value != null) {
                                           int currentUnix = DateTime.now()
                                               .millisecondsSinceEpoch;
 
-                                         await cameraController.openEditor(true, value.path,selectedSound.value.isEmpty
-                                              ? Get.arguments["sound_path"]
-                                              .toString()
-                                              : selectedSound.value,
+                                          await cameraController.openEditor(
+                                              true,
+                                              value.path,
+                                              selectedSound.value.isEmpty
+                                                  ? Get.arguments["sound_path"]
+                                                      .toString()
+                                                  : selectedSound.value,
                                               GetStorage().read("userId"),
                                               Get.arguments["sound_owner"]
                                                   .toString());
-
                                         }
                                       });
-                                    });
-                                  } else {
-                                    await ImagePicker()
-                                        .pickVideo(source: ImageSource.gallery)
-                                        .then((value)async  {
-                                      if (value != null) {
-                                        int currentUnix = DateTime.now()
-                                            .millisecondsSinceEpoch;
-
-                                        await cameraController.openEditor(
-                                            true,
-                                            value.path,
-                                            selectedSound.value.isEmpty
-                                                ? Get.arguments["sound_path"]
-                                                    .toString()
-                                                : selectedSound.value,
-                                            GetStorage().read("userId"),
-                                            Get.arguments["sound_owner"]
-                                                .toString());
-                                      }
-                                    });
+                                    }
+                                  } catch (e) {
+                                    errorToast(e.toString());
                                   }
-                                } catch (e) {
-                                  errorToast(e.toString());
-                                }
-                              },
-                              child: const Icon(
-                                Icons.browse_gallery_outlined,
-                                color: Colors.white,
+                                },
+                                child: const Icon(
+                                  Icons.browse_gallery_outlined,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             //preview button
                             !isRecordingComplete
-                                ? InkWell(
-                                    onTap: () async {
-                                      if (_currentFlashMode ==
-                                          camera.FlashMode.off) {
-                                        setState(() {
-                                          _currentFlashMode =
-                                              camera.FlashMode.torch;
-                                          // _controller!.setFlashMode(
-                                          //     FlashMode.torch);
-                                        });
-                                      } else {
-                                        setState(() {
-                                          _currentFlashMode =
-                                              camera.FlashMode.off;
+                                ? Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                            color: ColorManager.colorAccent),
+                                        color: ColorManager.colorAccent
+                                            .withOpacity(0.3)),
+                                    child: InkWell(
+                                      onTap: () async {
+                                        if (_currentFlashMode ==
+                                            camera.FlashMode.off) {
+                                          setState(() {
+                                            _currentFlashMode =
+                                                camera.FlashMode.torch;
+                                            // _controller!.setFlashMode(
+                                            //     FlashMode.torch);
+                                          });
+                                        } else {
+                                          setState(() {
+                                            _currentFlashMode =
+                                                camera.FlashMode.off;
 
-                                          // _controller!.setFlashMode(
-                                          //     FlashMode.off);
-                                        });
-                                      }
-                                      //await openEditor();
-                                      // Get.to(VideoEditor(
-                                      //   file: _videoFile!,
-                                      // ));
-                                    },
-                                    child: _currentFlashMode ==
-                                            camera.FlashMode.off
-                                        ? const Icon(
-                                            Icons.flash_off_rounded,
-                                            color: Colors.white,
-                                          )
-                                        : const Icon(
-                                            Icons.flash_on_rounded,
-                                            color: Colors.white,
-                                          ),
+                                            // _controller!.setFlashMode(
+                                            //     FlashMode.off);
+                                          });
+                                        }
+                                        //await openEditor();
+                                        // Get.to(VideoEditor(
+                                        //   file: _videoFile!,
+                                        // ));
+                                      },
+                                      child: _currentFlashMode ==
+                                              camera.FlashMode.off
+                                          ? const Icon(
+                                              Icons.flash_off_rounded,
+                                              color: Colors.white,
+                                            )
+                                          : const Icon(
+                                              Icons.flash_on_rounded,
+                                              color: Colors.white,
+                                            ),
+                                    ),
                                   )
-                                : InkWell(
-                                    onTap: () async {
-                                      setState(() {
-                                        isRecordingComplete = true;
-                                      });
-                                      try {
-
-                                       await  cameraController.openEditor(
-                                            false,
-                                            "",
-                                            selectedSound.value.isEmpty
-                                                ? Get.arguments["sound_url"]
-                                                    .toString()
-                                                : selectedSound.value,
-                                            GetStorage().read("userId"),
-                                            Get.arguments["sound_owner"]??GetStorage().read("username")
-                                                .toString());
-                                        // cameraController.openEditor(
-                                        //     false,
-                                        //     "",
-                                        //     soundsController.selectedSoundPath
-                                        //         .value.isEmpty
-                                        //         ? widget.selectedSound
-                                        //         : soundsController
-                                        //         .selectedSoundPath.value,
-                                        //     widget.id!,
-                                        //     userDetailsController.userProfile
-                                        //         .value.username ??
-                                        //         userDetailsController
-                                        //             .userProfile.value.name
-                                        //             .toString());
-                                      } catch (e) {
-                                        errorToast(e.toString());
-                                      }
-                                    },
-                                    child: const Icon(
-                                      Icons.done,
-                                      color: Colors.white,
+                                : Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                            color: ColorManager.colorAccent),
+                                        color: ColorManager.colorAccent
+                                            .withOpacity(0.3)),
+                                    child: InkWell(
+                                      onTap: () async {
+                                        setState(() {
+                                          isRecordingComplete = true;
+                                        });
+                                        try {
+                                          await cameraController.openEditor(
+                                              false,
+                                              "",
+                                              selectedSound.value.isEmpty
+                                                  ? Get.arguments["sound_url"]
+                                                      .toString()
+                                                  : selectedSound.value,
+                                              GetStorage().read("userId"),
+                                              Get.arguments["sound_owner"] ??
+                                                  GetStorage()
+                                                      .read("username")
+                                                      .toString());
+                                          // cameraController.openEditor(
+                                          //     false,
+                                          //     "",
+                                          //     soundsController.selectedSoundPath
+                                          //         .value.isEmpty
+                                          //         ? widget.selectedSound
+                                          //         : soundsController
+                                          //         .selectedSoundPath.value,
+                                          //     widget.id!,
+                                          //     userDetailsController.userProfile
+                                          //         .value.username ??
+                                          //         userDetailsController
+                                          //             .userProfile.value.name
+                                          //             .toString());
+                                        } catch (e) {
+                                          errorToast(e.toString());
+                                        }
+                                      },
+                                      child: const Icon(
+                                        Icons.done,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                           ],
@@ -401,7 +432,9 @@ class _CameraState extends State<CameraView>
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     child: InkWell(
                       onTap: () {
-                        Get.bottomSheet(SelectSoundView(),shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)));
+                        Get.bottomSheet(SelectSoundView(),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)));
                         // favouritesController.getFavourites().then(
                         //       (_) async =>
                         //       soundsController.getSoundsList().then((_) {
@@ -434,16 +467,14 @@ class _CameraState extends State<CameraView>
                   ),
                 ],
               )
-            : //loading layout
-            const Center(
+            : Container(
+                alignment: Alignment.center,
                 child: Text(
-                  'LOADING',
+                  "loading",
                   style: TextStyle(color: Colors.white),
                 ),
               ));
   }
-
-
 
   @override
   void initState() {
@@ -465,7 +496,7 @@ class _CameraState extends State<CameraView>
           isRecordingComplete = true;
         });
         try {
-         await  cameraController.openEditor(
+          await cameraController.openEditor(
               false,
               "",
               selectedSound.value.isEmpty
@@ -864,7 +895,8 @@ class SelectSoundView extends GetView<SelectSoundController> {
                               .downloadCustomLocation(
                             url: "${RestUrl.awsSoundUrl}${state[index].sound}",
                             path: saveCacheDirectory,
-                            filename: basenameWithoutExtension(state[index].sound.toString()),
+                            filename: basenameWithoutExtension(
+                                state[index].sound.toString()),
                             extension: ".mp3",
                             progress: (progress) async {
                               currentProgress.value = progress;

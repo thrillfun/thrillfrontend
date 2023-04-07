@@ -7,9 +7,11 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:thrill/app/modules/discover/views/discover_view.dart';
+import 'package:thrill/app/modules/home/home_videos_player/views/home_videos_player_view.dart';
 import 'package:thrill/app/modules/login/views/login_view.dart';
 import 'package:thrill/app/modules/profile/views/profile_view.dart';
 import 'package:thrill/app/modules/related_videos/controllers/related_videos_controller.dart';
+import 'package:thrill/app/modules/settings/views/settings_view.dart';
 import 'package:thrill/app/modules/wallet/views/wallet_view.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 import 'package:network_info_plus/network_info_plus.dart';
@@ -40,96 +42,10 @@ class HomeController extends GetxController {
       GetX<RelatedVideosController>(
           builder: (controller) => controller.isLoading.isTrue
               ? loader()
-              : Stack(
-                  children: [
-                    PageView.builder(
-                        onPageChanged: (page) {},
-                        itemCount: controller.relatedVideosList.length,
-                        scrollDirection: Axis.vertical,
-                        controller: pageController,
-                        itemBuilder: (context, index) =>
-                          RelatedVideosView(
-                            videoUrl: controller
-                                .relatedVideosList[index].video
-                                .toString(),
-                            pageController: pageController!,
-                            nextPage: index + 1,
-                            videoId: controller.relatedVideosList[index].id!,
-                            gifImage:
-                                controller.relatedVideosList[index].gifImage,
-                            publicUser:
-                                controller.relatedVideosList[index].user,
-                            soundName:
-                                controller.relatedVideosList[index].soundName,
-                            UserId:
-                                controller.relatedVideosList[index].user!.id,
-                            userName: controller
-                                .relatedVideosList[index].user!.username!.obs,
-                            description: controller
-                                .relatedVideosList[index].description!.obs,
-                            hashtagsList:
-                                controller.relatedVideosList[index].hashtags??[],
-                            soundOwner: controller
-                                .relatedVideosList[index].soundOwner,
-                            sound: controller.relatedVideosList[index].sound,
-                            videoLikeStatus: controller
-                                .relatedVideosList[index].videoLikeStatus
-                                .toString(),
-                            isCommentAllowed: controller
-                                        .relatedVideosList[index]
-                                        .isCommentable ==
-                                    "Yes"
-                                ? true.obs
-                                : false.obs,
-                            like: controller
-                                .relatedVideosList[index].likes!.obs,
-                            isfollow: controller
-                                .relatedVideosList[index].user!.isfollow!,
-                            commentsCount: controller
-                                .relatedVideosList[index].comments!.obs,
-                            soundId:
-                                controller.relatedVideosList[index].soundId,
-                        avatar: controller
-                            .relatedVideosList[index].user!.avatar,
-                        currentPageIndex: index.obs,
-                        fcmToken: controller.relatedVideosList[index].user!.firebaseToken,
-                          )
-                        ),
-                    Align(
-                      child: IconButton(
-                          onPressed: () async {
-                            if (await Permission.camera.isGranted &&
-                                await Permission.storage.isGranted &&
-                                await Permission.microphone.isGranted) {
-                              Get.toNamed(Routes.CAMERA, arguments: {
-                                "selected_sound": "",
-                                "sound_path": ""
-                              });
-                            } else {
-                              await Permission.camera.request().then(
-                                  (value) async => await Permission.storage
-                                          .request()
-                                          .then((value) async {
-                                        await Permission.microphone
-                                            .request()
-                                            .then((value) {
-                                          Get.toNamed(Routes.CAMERA,
-                                              arguments: {
-                                                "selected_sound": "",
-                                                "sound_path": ""
-                                              });
-                                        });
-                                      }));
-                            }
-                          },
-                          icon: Icon(Icons.camera)),
-                      alignment: Alignment.topRight,
-                    ),
-                  ],
-                )),
+              :  HomeVideosPlayerView()),
       const DiscoverView(),
       const WalletView(),
-      const ProfileView()
+      const SettingsView()
     ];
   }
 

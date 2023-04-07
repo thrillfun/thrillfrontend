@@ -20,7 +20,11 @@ import '../modules/discover/search/search_videos_player/bindings/search_videos_p
 import '../modules/discover/search/search_videos_player/views/search_videos_player_view.dart';
 import '../modules/discover/search/views/search_view.dart';
 import '../modules/discover/views/discover_view.dart';
+import '../modules/following_videos/bindings/following_videos_binding.dart';
+import '../modules/following_videos/views/following_videos_view.dart';
 import '../modules/home/bindings/home_binding.dart';
+import '../modules/home/home_videos_player/bindings/home_videos_player_binding.dart';
+import '../modules/home/home_videos_player/views/home_videos_player_view.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/otpverify/bindings/otpverify_binding.dart';
@@ -89,6 +93,8 @@ import '../modules/spin_wheel/bindings/spin_wheel_binding.dart';
 import '../modules/spin_wheel/user_levels/bindings/user_levels_binding.dart';
 import '../modules/spin_wheel/user_levels/views/user_levels_view.dart';
 import '../modules/spin_wheel/views/spin_wheel_view.dart';
+import '../modules/trending_videos/bindings/trending_videos_binding.dart';
+import '../modules/trending_videos/views/trending_videos_view.dart';
 import '../modules/wallet/bindings/wallet_binding.dart';
 import '../modules/wallet/views/wallet_view.dart';
 import '../modules/wallet/wallet_trasactions/bindings/wallet_trasactions_binding.dart';
@@ -137,6 +143,13 @@ class AppPages {
       name: _Paths.HOME,
       page: () => const HomeView(),
       binding: HomeBinding(),
+      children: [
+        GetPage(
+          name: _Paths.HOME_VIDEOS_PLAYER,
+          page: () => const HomeVideosPlayerView(),
+          binding: HomeVideosPlayerBinding(),
+        ),
+      ],
     ),
     GetPage(
       name: _Paths.RELATED_VIDEOS,
@@ -408,8 +421,18 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.COMMENTS,
-      page: () =>  CommentsView(),
+      page: () => CommentsView(),
       binding: CommentsBinding(),
+    ),
+    GetPage(
+      name: _Paths.FOLLOWING_VIDEOS,
+      page: () => FollowingVideosView(),
+      binding: FollowingVideosBinding(),
+    ),
+    GetPage(
+      name: _Paths.TRENDING_VIDEOS,
+      page: () =>  TrendingVideosView(),
+      binding: TrendingVideosBinding(),
     ),
   ];
 }

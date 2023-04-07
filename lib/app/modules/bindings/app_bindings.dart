@@ -5,7 +5,9 @@ import 'package:thrill/app/modules/comments/controllers/comments_controller.dart
 import 'package:thrill/app/modules/discover/controllers/discover_controller.dart';
 import 'package:thrill/app/modules/discover/hash_tags_details/controllers/hash_tags_details_controller.dart';
 import 'package:thrill/app/modules/discover/search/controllers/search_controller.dart';
+import 'package:thrill/app/modules/following_videos/controllers/following_videos_controller.dart';
 import 'package:thrill/app/modules/home/controllers/home_controller.dart';
+import 'package:thrill/app/modules/home/home_videos_player/controllers/home_videos_player_controller.dart';
 import 'package:thrill/app/modules/login/otpverify/controllers/otpverify_controller.dart';
 import 'package:thrill/app/modules/others_profile/controllers/others_profile_controller.dart';
 import 'package:thrill/app/modules/others_profile/other_user_videos/controllers/other_user_videos_controller.dart';
@@ -29,6 +31,7 @@ import 'package:thrill/app/modules/sounds/controllers/sounds_controller.dart';
 import 'package:thrill/app/modules/spin_wheel/controllers/spin_wheel_controller.dart';
 import 'package:thrill/app/modules/supercontroller/super_controller.dart';
 import 'package:thrill/app/modules/supercontroller/video_editing_controller.dart';
+import 'package:thrill/app/modules/trending_videos/controllers/trending_videos_controller.dart';
 import 'package:thrill/app/modules/wallet/controllers/wallet_controller.dart';
 import 'package:thrill/app/modules/wallet/wallet_trasactions/controllers/wallet_trasactions_controller.dart';
 
@@ -80,6 +83,9 @@ class AppBindings extends Bindings {
     Get.lazyPut(() => SelectSoundController(), fenix: true);
     Get.lazyPut(() => VideoEditingController(),fenix: true);
     Get.lazyPut(() => CommentsController(),fenix: true);
+    Get.lazyPut(() => FollowingVideosController(),fenix: true);
+    Get.lazyPut(() => TrendingVideosController(),fenix: true);
+    Get.lazyPut(() => HomeVideosPlayerController(),fenix: true);
 
 
   }

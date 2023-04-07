@@ -8,7 +8,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugins.GeneratedPluginRegistrant
 
 
-class MainActivity: FlutterFragmentActivity() {
+class MainActivity: FlutterActivity() {
     companion object {
         init {
             StateHandler.replaceStateClass(UiConfigMainMenu::class.java, NativeConfigurationInjection::class.java)

@@ -1,19 +1,19 @@
-class VideosBySoundModel {
+class FavouriteVideosModel {
   bool? status;
   bool? error;
   String? message;
-  List<VideosBySound>? data;
+  List<Data>? data;
 
-  VideosBySoundModel({this.status, this.error, this.message, this.data});
+  FavouriteVideosModel({this.status, this.error, this.message, this.data});
 
-  VideosBySoundModel.fromJson(Map<String, dynamic> json) {
+  FavouriteVideosModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     error = json['error'];
     message = json['message'];
     if (json['data'] != null) {
-      data = <VideosBySound>[];
+      data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new VideosBySound.fromJson(v));
+        data!.add(new Data.fromJson(v));
       });
     }
   }
@@ -30,7 +30,7 @@ class VideosBySoundModel {
   }
 }
 
-class VideosBySound {
+class Data {
   int? id;
   String? video;
   String? description;
@@ -43,7 +43,7 @@ class VideosBySound {
   String? gifImage;
   String? speed;
   int? comments;
-  List<dynamic>? hashtags;
+  List<String>? hashtags;
   String? isDuet;
   String? duetFrom;
   String? isDuetable;
@@ -51,7 +51,7 @@ class VideosBySound {
   String? soundOwner;
   User? user;
 
-  VideosBySound(
+  Data(
       {this.id,
         this.video,
         this.description,
@@ -72,7 +72,7 @@ class VideosBySound {
         this.soundOwner,
         this.user});
 
-  VideosBySound.fromJson(Map<String, dynamic> json) {
+  Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     video = json['video'];
     description = json['description'];
@@ -85,7 +85,7 @@ class VideosBySound {
     gifImage = json['gif_image'];
     speed = json['speed'];
     comments = json['comments'];
-    hashtags = json['hashtags'];
+    hashtags = json['hashtags'].cast<String>();
     isDuet = json['is_duet'];
     duetFrom = json['duet_from'];
     isDuetable = json['is_duetable'];
@@ -126,21 +126,21 @@ class User {
   String? name;
   String? username;
   String? email;
-  Null? dob;
+  String? dob;
   String? phone;
-  Null? avatar;
+  String? avatar;
   String? socialLoginId;
   String? socialLoginType;
-  Null? firstName;
-  Null? lastName;
-  Null? gender;
-  Null? websiteUrl;
-  Null? bio;
-  Null? youtube;
-  Null? facebook;
-  Null? instagram;
-  Null? twitter;
-  Null? firebaseToken;
+  String? firstName;
+  String? lastName;
+  String? gender;
+  String? websiteUrl;
+  String? bio;
+  String? youtube;
+  String? facebook;
+  String? instagram;
+  String? twitter;
+  String? firebaseToken;
   String? referralCount;
   String? following;
   String? followers;
@@ -266,4 +266,3 @@ class Levels {
     return data;
   }
 }
-

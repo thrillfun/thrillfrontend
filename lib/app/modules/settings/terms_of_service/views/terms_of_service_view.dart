@@ -11,7 +11,8 @@ class TermsOfServiceView extends GetView<TermsOfServiceController> {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.close)),
-          title: const Text('Terms of Service',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700),),
+          title: const Text('Terms of Service',style:         TextStyle(color: Colors.black, fontWeight: FontWeight.w700,fontSize: 24),
+              ),
           centerTitle: true,
         ),
         body: controller.loadPrivacyPage("https://thrill.fun/terms-conditions")

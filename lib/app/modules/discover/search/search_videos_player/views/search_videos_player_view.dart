@@ -178,7 +178,7 @@ class SearchVideosPlayerView extends GetView<SearchVideosPlayerController> {
                                     userName: (Get.arguments["search_videos"] as List<VideosList>)[index].user!.username,
                                     avatar: (Get.arguments["search_videos"] as List<VideosList>)[index].user!.avatar ?? "",
                                     fcmToken: (Get.arguments["search_videos"] as List<VideosList>)[index].user!
-                                        .firebaseToken));
+                                        .firebaseToken,description: (Get.arguments["search_videos"] as List<VideosList>)[index].description,));
                               });
                               // GetStorage().read("videoPrivacy") ==
                               //     "Private"
