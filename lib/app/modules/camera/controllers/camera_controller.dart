@@ -48,12 +48,7 @@ class CameraController extends GetxController {
   }
 
   getAlbums() async {
-    var storagePermission = await Permission.storage.status;
-    if (storagePermission.isGranted) {
-      localSoundsList.value = await OnAudioQuery().querySongs();
-    } else {
-      Permission.storage.request();
-    }
+    localSoundsList.value = await OnAudioQuery().querySongs();
   }
 
   Future<void> openEditor(bool isGallery, String path, String selectedSound,
@@ -87,7 +82,7 @@ class CameraController extends GetxController {
 
         await VESDK
             .openEditor(Video.composition(videos: videosList),
-                configuration: setConfig(albums, selectedSound, owner))
+                configuration: await setConfig(albums, selectedSound, owner))
             .then((value) async {
           Map<dynamic, dynamic> serializationData = await value?.serialization;
           var isOriginal = true.obs;
@@ -133,19 +128,24 @@ class CameraController extends GetxController {
           // await dir.delete(recursive: true);
 
           if (isOriginal.isFalse) {
-            selectedSound = "";
             if (value != null) {
-
               if(file.existsSync()){
                 Get.toNamed(Routes.POST_SCREEN, arguments: {
-                  "sound_url":selectedSound,
-                  "file_path": "$saveCacheDirectory/selectedVideo.mp4"
+                  "sound_url":basename(selectedSound.toString()),
+                  "file_path": "$saveCacheDirectory/selectedVideo.mp4",
+                  "is_original":selectedSound.isNotEmpty?false:true,
+                  "sound_name":selectedSound.isNotEmpty?"sound by $owner":"",
+                  "sound_owner":owner,
                 });
               }
               else{
                 Get.toNamed(Routes.POST_SCREEN, arguments: {
-                  "sound_url":null,
-                  "file_path": "$saveCacheDirectory/selectedVideo.mp4"
+                  "sound_url":basename(selectedSound.toString()),
+                  "file_path": "$saveCacheDirectory/selectedVideo.mp4",
+                  "is_original":selectedSound.isNotEmpty?false:true,
+                  "sound_name":selectedSound.isNotEmpty?"sound by $owner":"",
+                "sound_owner":owner,
+
                 });
               }
 
@@ -160,7 +160,11 @@ class CameraController extends GetxController {
                 if (ReturnCode.isSuccess(returnCode)) {
                   Get.toNamed(Routes.POST_SCREEN, arguments: {
                     "sound_url":selectedSound,
-                    "file_path": "$saveCacheDirectory/selectedVideo.mp4"
+                    "file_path": "$saveCacheDirectory/selectedVideo.mp4",
+                    "is_original":selectedSound.isNotEmpty?false:true,
+                    "sound_name":selectedSound.isNotEmpty?"sound by $owner":"",
+                    "sound_owner":owner,
+
                   });
                 } else {
                   errorToast(data.toString());
@@ -172,7 +176,12 @@ class CameraController extends GetxController {
                   .then((audio) async {
                 Get.toNamed(Routes.POST_SCREEN, arguments: {
                   "sound_url":"${saveCacheDirectory}originalAudio.mp3",
-                  "file_path": value.video.substring(7, value.video.length)
+                  "file_path": value.video.substring(7, value.video.length),
+                  "is_original":selectedSound.isNotEmpty?false:true,
+                  "sound_name":selectedSound.isNotEmpty?"sound by $owner":"",
+                  "sound_owner":owner,
+
+
                 });
               });
             }
@@ -181,7 +190,7 @@ class CameraController extends GetxController {
       } else {
         await VESDK
             .openEditor(Video(path),
-                configuration: setConfig(albums, selectedSound, owner))
+                configuration: await setConfig(albums, selectedSound, owner))
             .then((value) async {
           Map<dynamic, dynamic> serializationData = await value?.serialization;
 
@@ -205,19 +214,48 @@ class CameraController extends GetxController {
           });
           if (!isOriginal.value) {
             if (value != null) {
+
               Get.toNamed(Routes.POST_SCREEN, arguments: {
                 "file_path": value.video.substring(7, value.video.length),
-                "sound_url": file.existsSync()?songPath:selectedSound
+                "sound_url": file.existsSync()?songPath:selectedSound,
+                "is_original":false,
+              "sound_owner":owner,
+
               });
             }
-          } else {
-            var dir = await getTempDirectory();
+          }
+          else if(selectedSound.isNotEmpty){
             await FFmpegKit.execute(
-                    "-y -i ${value!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
+                '-y -i ${value!.video.substring(7, value.video.length)} -i $selectedSound -map 0:v -map 1:a  -shortest $saveCacheDirectory/selectedVideo.mp4')
+                .then((ffmpegValue) async {
+              final returnCode = await ffmpegValue.getReturnCode();
+              var data = await ffmpegValue.getOutput();
+              if (ReturnCode.isSuccess(returnCode)) {
+                Get.toNamed(Routes.POST_SCREEN, arguments: {
+                  "sound_url":selectedSound,
+                  "file_path": "$saveCacheDirectory/selectedVideo.mp4",
+                  "is_original":selectedSound.isNotEmpty?false:true,
+                  "sound_name":selectedSound.isNotEmpty?"sound by $owner":"",
+                  "sound_owner":owner,
+
+                });
+              } else {
+                errorToast(data.toString());
+              }
+            });
+
+          }
+          else {
+            await FFmpegKit.execute(
+                "-y -i ${value!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
                 .then((audio) async {
               Get.toNamed(Routes.POST_SCREEN, arguments: {
-                "file_path": value.video.substring(7, value.video.length),
                 "sound_url":"${saveCacheDirectory}originalAudio.mp3",
+                "file_path": value.video.substring(7, value.video.length),
+                "is_original":true,
+                "sound_owner":owner,
+
+
               });
             });
           }
@@ -226,20 +264,18 @@ class CameraController extends GetxController {
     }
   }
 
-  imgly.Configuration setConfig(
-      List<SongModel> albums, String selectedSound, String? userName) {
+  Future<imgly.Configuration> setConfig(
+      List<SongModel> albums, String selectedSound, String? userName) async {
     List<imgly.AudioClip> audioClips = [];
     List<imgly.AudioClip> selectedAudioClips = [];
     List<imgly.AudioClipCategory> audioClipCategories = [];
 
     var audioFile = File(selectedSound);
-    if (audioFile.existsSync()) {
-      selectedAudioClips.add(imgly.AudioClip("",
-          selectedSound,
-          title: "Original by ${userName ?? GetStorage().read("username")}",
-          thumbnailURI:
-              "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png"));
-    }
+    selectedAudioClips.add(imgly.AudioClip("",
+        audioFile.path,
+        title: "Original by ${userName ?? GetStorage().read("username")}",
+        thumbnailURI:
+        "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png"));
 
     if (albums.isNotEmpty) {
       albums.forEach((element) {
@@ -261,13 +297,14 @@ class CameraController extends GetxController {
       });
     }
 
-    if (selectedSound.isNotEmpty && audioFile.existsSync()) {
+    if (selectedSound.isNotEmpty) {
       audioClipCategories.add(imgly.AudioClipCategory("", "selected sound",
+          thumbnailURI: "assets/logo2.png",
           items: selectedAudioClips));
     }
     audioClipCategories.add(
       imgly.AudioClipCategory("audio_cat_1", "local",
-          thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png",
+          thumbnailURI: "assets/logo2.png",
           items: audioClips),
     );
 
@@ -293,7 +330,7 @@ class CameraController extends GetxController {
     var trimOptions = imgly.TrimOptions(
         minimumDuration: 5,
         maximumDuration: 60,
-        forceMode: imgly.ForceTrimMode.always);
+        );
     final configuration = imgly.Configuration(
       theme: imgly.ThemeOptions(imgly.Theme("")),
       trim: trimOptions,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:thrill/app/routes/app_pages.dart';
+import 'package:thrill/app/utils/strings.dart';
 
 import '../../../../../utils/utils.dart';
 import '../controllers/favourite_sounds_controller.dart';
@@ -78,34 +79,7 @@ class FavouriteSoundsView extends GetView<FavouriteSoundsController> {
                     ),
                   ),
                   onTap: () => {
-                    Get.toNamed(Routes.SOUNDS)
-                    // Get.to(SoundDetails(
-                    //   map: {
-                    //     "sound": controller.favouriteSounds[index].sound,
-                    //     "user": controller
-                    //         .favouriteSounds[index].user!.name!.isEmpty
-                    //         ? controller.favouriteSounds[index].user!.name!
-                    //         : "",
-                    //     "soundName":
-                    //     controller.favouriteSounds[index].sound,
-                    //     "title": controller.favouriteSounds[index].name,
-                    //     "id": controller.favouriteSounds[index].user!.id,
-                    //     "profile":
-                    //     controller.favouriteSounds[index].user!.avatar,
-                    //     "name":
-                    //     controller.favouriteSounds[index].user!.name,
-                    //     "sound_id": controller.favouriteSounds[index].id,
-                    //     "username": controller
-                    //         .favouriteSounds[index].user!.username,
-                    //     "isFollow": 0,
-                    //     "userProfile": controller
-                    //         .favouriteSounds[index].user!.avatar
-                    //         .toString()
-                    //         .isEmpty
-                    //         ? controller.favouriteSounds[index].user!.avatar
-                    //         : RestUrl.placeholderImage
-                    //   },
-                    // )
+                    Get.toNamed(Routes.SOUNDS,arguments: {"sound_name":state[index].sound,"sound_url":state[index].sound})
                   },
                 )),
         onLoading: loader(),

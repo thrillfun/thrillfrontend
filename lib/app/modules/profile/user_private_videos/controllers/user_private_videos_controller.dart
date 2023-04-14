@@ -11,7 +11,6 @@ class UserPrivateVideosController extends GetxController with StateMixin<RxList<
   RxList<PrivateVideos> privateVideosList = RxList();
   var storage = GetStorage();
   var userProfile = User().obs;
-  var userVideoController = Get.find<UserVideosController>();
 
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
@@ -74,9 +73,8 @@ class UserPrivateVideosController extends GetxController with StateMixin<RxList<
     }).then((value) {
 
       if(value.data["status"]){
-        successToast(value.data["message"]);
+        Get.find<UserVideosController>().getUserVideos();
         getUserPrivateVideos();
-        userVideoController.getUserVideos();
       }
       else{
         errorToast(value.data["message"]);

@@ -1182,6 +1182,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                 .write("profileId", widget.UserId);
 
                             Get.toNamed(Routes.SOUNDS, arguments: {
+                              "sound_id":widget.soundId,
                               "sound_name": widget.soundName.toString(),
                               "sound_url": widget.sound,
                             });
@@ -1208,9 +1209,9 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                 width: 5,
                               ),
                               Text(
-                                widget.soundName!.isEmpty
-                                    ? "Original Sound"
-                                    : widget.soundName! +
+                                widget.soundName!.isNotEmpty && widget.soundName.toString()!="null"
+                                    ?widget.soundName!
+                                    : "Original Sound" +
                                         " by ${widget.publicUser!.name}",
                                 style: const TextStyle(color: Colors.white),
                               )

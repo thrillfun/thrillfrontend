@@ -5,16 +5,18 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:path/path.dart';
+import 'package:thrill/app/rest/models/sounds_model.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 
+import '../../../rest/models/sound_details_model.dart';
 import '../../../rest/models/user_details_model.dart' as user;
 import '../../../rest/models/videos_by_sound_model.dart';
 import '../../../rest/rest_urls.dart';
 import '../../../utils/page_manager.dart';
 import '../../../utils/utils.dart';
 
-class SoundsController extends GetxController
-    with StateMixin<RxList<VideosBySound>> {
+class SoundsController extends GetxController with StateMixin<SoundDetails> {
   //TODO: Implement SoundsController
   late AudioPlayer audioPlayer;
   late Duration duration;
@@ -37,7 +39,7 @@ class SoundsController extends GetxController
   var selectedSoundPath = "".obs;
 
   var currentProgress = "0".obs;
-
+  var soundDetails = SoundDetails();
   var isProfileLoading = false.obs;
   RxList<VideosBySound> videoList = RxList();
   var title = "";
@@ -51,11 +53,6 @@ class SoundsController extends GetxController
 
   @override
   void onInit() {
-    getUserProfile().then((value) {
-      getVideosBySound();
-      setupAudioPlayer();
-    });
-
     super.onInit();
   }
 
@@ -68,6 +65,7 @@ class SoundsController extends GetxController
 
   @override
   void onReady() {
+    getSoundDetails();
     super.onReady();
   }
 
@@ -80,40 +78,35 @@ class SoundsController extends GetxController
     audioPlayer.seek(position);
   }
 
-  Future<void> getUserProfile() async {
+  Future<void> getSoundDetails() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
-    if (await GetStorage().read("token") == null ||
-        await GetStorage().read("userId") == null) {
-      Get.toNamed(Routes.LOGIN);
-    } else {
-      isProfileLoading.value = true;
-      dio.post('/user/get-profile', queryParameters: {
-        "id": "${GetStorage().read("profileId")}"
-      }).then((result) {
-        userProfile =
-            user.UserDetailsModel.fromJson(result.data).data!.user!.obs;
-        isProfileLoading.value = false;
-      }).onError((error, stackTrace) {
-        errorToast(error.toString());
-        isProfileLoading.value = false;
-      });
-    }
+    change(soundDetails, status: RxStatus.loading());
+
+    dio.post("sound/get",
+        queryParameters: {"id": Get.arguments["sound_id"]}).then((value) {
+      soundDetails = SoundDetailsModel.fromJson(value.data).data!;
+      setupAudioPlayer(soundDetails.sound!);
+      getVideosBySound(soundDetails.sound!);
+
+      change(soundDetails, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(soundDetails, status: RxStatus.error(error.toString()));
+    });
   }
 
-  setupAudioPlayer() async {
+  setupAudioPlayer(String soundurl) async {
     playerController = PlayerController();
 
     audioPlayer = AudioPlayer();
 
-    duration = (await audioPlayer
-        .setUrl(RestUrl.soundUrl + Get.arguments["sound_name"]))!;
+    duration = (await audioPlayer.setUrl(RestUrl.soundUrl + soundurl))!;
     await FileSupport()
         .downloadCustomLocation(
-      url: RestUrl.awsSoundUrl + Get.arguments["sound_name"],
+      url: RestUrl.awsSoundUrl + soundurl,
       path: saveCacheDirectory,
-      filename: Get.arguments["sound_name"],
+      filename: basenameWithoutExtension(soundurl),
       extension: ".mp3",
       progress: (progress) async {},
     )
@@ -174,16 +167,11 @@ class SoundsController extends GetxController
     });
   }
 
-  Future<void> getVideosBySound() async {
-    change(videoList, status: RxStatus.loading());
-    dio.post("sound/videosbysound", queryParameters: {
-      "sound": "${Get.arguments["sound_name"]}"
-    }).then((value) {
+  Future<void> getVideosBySound(String soundName) async {
+    dio.post("sound/videosbysound", queryParameters: {"sound": soundName}).then(
+        (value) {
       videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
-      change(videoList, status: RxStatus.success());
-    }).onError((error, stackTrace) {
-      change(videoList, status: RxStatus.error(error.toString()));
-    });
+    }).onError((error, stackTrace) {});
   }
 
   downloadAudio(String soundUrl, String userName, String soundName,
@@ -196,7 +184,7 @@ class SoundsController extends GetxController
           .downloadCustomLocation(
         url: "${RestUrl.awsSoundUrl}$soundUrl",
         path: saveCacheDirectory,
-        filename: soundName,
+        filename: basenameWithoutExtension(soundUrl),
         extension: ".mp3",
         progress: (progress) async {
           currentProgress.value = progress;
@@ -208,9 +196,9 @@ class SoundsController extends GetxController
         // GetStorage().write("sound_owner", userName);
 
         Get.toNamed(Routes.CAMERA, arguments: {
-          "sound_url": value!.path,
-          "sound_name": soundName,
-          "sound_owner": userName
+          "sound_url": value!.uri.obs,
+          "sound_name": basenameWithoutExtension(value.path),
+          "sound_owner": userName.obs
         });
       }).onError((error, stackTrace) {
         errorToast(error.toString());

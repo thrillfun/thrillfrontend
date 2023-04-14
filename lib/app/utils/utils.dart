@@ -81,7 +81,7 @@ var lightThemeData = ThemeData(
   appBarTheme: const AppBarTheme(
       centerTitle: true,
       titleTextStyle:
-          TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+      TextStyle(color:Colors.black,fontWeight: FontWeight.w700, fontSize: 24,),
       color: Colors.white,
       iconTheme: IconThemeData(color: Colors.black),
       elevation: 0),
@@ -124,7 +124,7 @@ var darkThemeData = ThemeData(
     color: Colors.black,
     elevation: 0,
     centerTitle: true,
-    titleTextStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+    titleTextStyle:TextStyle(color:Colors.white,fontWeight: FontWeight.w700, fontSize: 24,),
   ),
   scaffoldBackgroundColor: Colors.black,
   cardColor: Colors.black,
@@ -211,7 +211,7 @@ showErrorToast(BuildContext context, String msg) async {
   ));
 }
 
-errorToast(String message) async {
+errorToast(dynamic message) async {
   Get.showSnackbar(GetSnackBar(
     duration: const Duration(seconds: 3),
     barBlur: 10,
@@ -225,7 +225,7 @@ errorToast(String message) async {
     borderRadius: 10,
     backgroundColor: Colors.red.shade50,
     messageText: Text(
-      message,
+      message.toString(),
       style: const TextStyle(fontWeight: FontWeight.bold),
     ),
     isDismissible: true,

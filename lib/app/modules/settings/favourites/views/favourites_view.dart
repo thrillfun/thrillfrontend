@@ -16,7 +16,7 @@ class FavouritesView extends GetView<FavouritesController> {
     var selectedTab = 0.obs;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Favourites",
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 24),
           textAlign: TextAlign.center,

@@ -9,7 +9,7 @@ import '../../../../utils/color_manager.dart';
 import '../controllers/post_screen_controller.dart';
 import 'package:hashtagable/hashtagable.dart';
 
-class PostScreenView extends GetView<PostScreenController> {
+class PostScreenView extends GetView<PostScreenController>  {
   PostScreenView({Key? key}) : super(key: key);
 
   @override

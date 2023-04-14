@@ -23,13 +23,13 @@ class ReferalView extends GetView<ReferalController> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView(
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         children: [
           Expanded(
             child: Stack(
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 20),
+                  margin: const EdgeInsets.only(top: 20),
                   height: Get.height / 2,
                   alignment: Alignment.topCenter,
                   child: SvgPicture.asset(
@@ -49,7 +49,7 @@ class ReferalView extends GetView<ReferalController> {
               ],
             ),
           ),
-          Expanded(
+          const Expanded(
             child: Text(
               "Refer a friend and get a chance to win Bitcoin worth 1 Lakh!",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
@@ -58,7 +58,7 @@ class ReferalView extends GetView<ReferalController> {
           ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(top: 20, bottom: 20),
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -69,21 +69,21 @@ class ReferalView extends GetView<ReferalController> {
                       children: [
                         Container(
                           alignment: Alignment.topCenter,
-                          padding: EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                               border:
                                   Border.all(color: ColorManager.colorAccent),
                               shape: BoxShape.circle,
                               color: ColorManager.colorAccentTransparent),
-                          child: Icon(
+                          child: const Icon(
                             IconlyBroken.user_2,
                             color: ColorManager.colorAccent,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
-                        Text(
+                        const Text(
                           "Invite your friend",
                           textAlign: TextAlign.center,
                           style: TextStyle(fontWeight: FontWeight.w700),
@@ -91,7 +91,7 @@ class ReferalView extends GetView<ReferalController> {
                       ],
                     ),
                   ),
-                  Expanded(
+                  const Expanded(
                       child: Divider(
                     color: ColorManager.colorAccent,
                         thickness: 1,
@@ -101,28 +101,28 @@ class ReferalView extends GetView<ReferalController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          margin: EdgeInsets.only(top: 10),
-                          padding: EdgeInsets.all(10),
+                          margin: const EdgeInsets.only(top: 10),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                               border:
                                   Border.all(color: ColorManager.colorAccent),
                               shape: BoxShape.circle,
                               color: ColorManager.colorAccentTransparent),
-                          child: Icon(
+                          child: const Icon(
                             IconlyBroken.download,
                             color: ColorManager.colorAccent,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
-                        Text("Your friend download app",
+                        const Text("Your friend download app",
                             textAlign: TextAlign.center,
                             style: TextStyle(fontWeight: FontWeight.w700))
                       ],
                     ),
                   ),
-                  Flexible(
+                  const Flexible(
                       child: Center(
                     child: Divider(
                       color: ColorManager.colorAccent,
@@ -134,22 +134,22 @@ class ReferalView extends GetView<ReferalController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          margin: EdgeInsets.only(top: 10),
-                          padding: EdgeInsets.all(10),
+                          margin: const EdgeInsets.only(top: 10),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                               border:
                                   Border.all(color: ColorManager.colorAccent),
                               shape: BoxShape.circle,
                               color: ColorManager.colorAccentTransparent),
-                          child: Icon(
+                          child: const Icon(
                             IconlyBroken.star,
                             color: ColorManager.colorAccent,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
-                        Text("You and your friend get reward",
+                        const Text("You and your friend get reward",
                             textAlign: TextAlign.center,
                             style: TextStyle(fontWeight: FontWeight.w700))
                       ],
@@ -173,19 +173,19 @@ class ReferalView extends GetView<ReferalController> {
             width: Get.width,
             decoration: BoxDecoration(
                 color: Colors.transparent,
-                border: Border.all(color: const Color(0xff353841)),
+                border: Border.all(color: ColorManager.colorAccent),
                 borderRadius: const BorderRadius.all(Radius.circular(10))),
             child: Row(
               children: [
                 Expanded(
                     child: Padding(
-                  padding: EdgeInsets.only(left: 10),
+                  padding: const EdgeInsets.only(left: 10),
                   child: Text(
                     state!.value.referralCode.toString(),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
+                      fontWeight: FontWeight.w700,
                       fontSize: 18,
-                      color: Colors.white,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -219,7 +219,7 @@ class ReferalView extends GetView<ReferalController> {
                         successToast("Link copied!");
                       });
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.copy,
                       color: Colors.white,
                     ),
@@ -253,7 +253,7 @@ class ReferalView extends GetView<ReferalController> {
                   ])),
           child: const Text(
             "Refer Now",
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(color: Colors.white, fontSize: 18,fontWeight: FontWeight.w700),
           ),
         ),
       );

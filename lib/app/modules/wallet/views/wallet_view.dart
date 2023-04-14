@@ -305,40 +305,44 @@ class WalletBalance extends GetView<WalletController> {
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: Obx(() => TextFormField(
-                              enabled: false,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '',
-                              ),
-                              controller:
-                                  controller.textEditingController.value,
-                              obscuringCharacter: '*',
-                              obscureText: isTextVisible.value,
-                              style: const TextStyle(
-                                  fontSize: 30,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700),
-                            )),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Obx(() => TextFormField(
+                                enabled: false,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: '',
+                                ),
+                                controller:
+                                    controller.textEditingController.value,
+                                obscuringCharacter: '*',
+                                obscureText: isTextVisible.value,
+                                style: const TextStyle(
+                                    fontSize: 30,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700),
+                              )),
+                        ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: Obx(() => TextFormField(
-                              enabled: false,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '',
-                              ),
-                              controller: controller.textDollarController.value,
-                              obscuringCharacter: '*',
-                              obscureText: isTextVisible.value,
-                              style: TextStyle(
-                                  fontSize: 24,
-                                  color: Colors.white.withOpacity(0.5),
-                                  fontWeight: FontWeight.w700),
-                            )),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Obx(() => TextFormField(
+                                enabled: false,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: '',
+                                ),
+                                controller: controller.textDollarController.value,
+                                obscuringCharacter: '*',
+                                obscureText: isTextVisible.value,
+                                style: TextStyle(
+                                    fontSize: 24,
+                                    color: Colors.white.withOpacity(0.5),
+                                    fontWeight: FontWeight.w700),
+                              )),
+                        ),
                       ),
                     ],
                   )),

@@ -5,6 +5,7 @@ import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:iconly/iconly.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../rest/rest_urls.dart';
@@ -20,62 +21,52 @@ class QrCodeView extends GetView<QrCodeController> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Container(
-              height: 100,
-              width: Get.width,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(),
-                  image: DecorationImage(
-                      image: NetworkImage(Get.arguments["avatar"] != null
-                          ? RestUrl.profileUrl + Get.arguments["avatar"]
-                          : RestUrl.placeholderImage))),
-            ),
-            Text(GetStorage().read("name")??"",
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 24)),
-            Text("Scan QR Code to follow account",
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18)),
-            RepaintBoundary(
-              key: controller.previewContainer,
-              child: Neumorphic(
-                margin: EdgeInsets.all(20),
-                style: NeumorphicStyle(
-
-                  surfaceIntensity: 10,
-                  lightSource: LightSource.top,
-                  intensity: 10,
-                  depth: 10,
-                  color: Colors.white
-                ),
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Container(
+          height: 150,
+          width: 150,
+          child: imgProfile(Get.arguments["avatar"]),
+        ),
+        Text(GetStorage().read("name") ?? "",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
+        Card(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 20,
+          margin:
+              const EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 10,
+              ),
+               Padding(padding: EdgeInsets.symmetric(horizontal: 10),child: Text("Scan QR Code to follow ${GetStorage().read("name")}",
+                   maxLines: 1,
+                   overflow: TextOverflow.ellipsis,
+                   style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20)),),
+              RepaintBoundary(
+                key: controller.previewContainer,
                 child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(45)),
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(45)),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Obx(() => Visibility(
-                        visible: controller.qrData.value.isNotEmpty,
+                          visible: controller.qrData.value.isNotEmpty,
                           child: QrImage(
-                        eyeStyle: QrEyeStyle(
-                          eyeShape: QrEyeShape.circle,
-                          color: ColorManager.colorAccent,
-                        ),
-                        padding: const EdgeInsets.all(25),
-                        foregroundColor: Colors.black,
-                        dataModuleStyle: const QrDataModuleStyle(
-                            dataModuleShape: QrDataModuleShape.circle),
-                        data: controller.qrData.value,
-                        version: QrVersions.auto,
-                        embeddedImageStyle: QrEmbeddedImageStyle(),
-                      ))),
+                            eyeStyle: const QrEyeStyle(
+                              eyeShape: QrEyeShape.circle,
+                              color: ColorManager.colorAccent,
+                            ),
+                            foregroundColor: Colors.black,
+                            dataModuleStyle: const QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.circle),
+                            data: controller.qrData.value,
+                            version: QrVersions.auto,
+                            embeddedImageStyle: QrEmbeddedImageStyle(),
+                          ))),
                       Card(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
@@ -90,143 +81,135 @@ class QrCodeView extends GetView<QrCodeController> {
                     ],
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            Flexible(
-                child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                InkWell(
-                    onTap: () async => await controller.captureSocialPng(),
-                    borderRadius: BorderRadius.circular(10),
-                    splashColor: ColorManager.colorAccentTransparent,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.download,
-                            color: ColorManager.dayNightIcon,
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            saveToDevice,
-                            style: TextStyle(
-                                fontSize: 16,
-                                color: ColorManager.dayNightIcon,
-                                fontWeight: FontWeight.bold),
-                          )
-                        ],
+              )
+            ],
+          ),
+        ),
+        const SizedBox(
+          height: 30,
+        ),
+        Flexible(
+            child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            InkWell(
+                onTap: () async => await controller.captureSocialPng(),
+                borderRadius: BorderRadius.circular(10),
+                splashColor: ColorManager.colorAccentTransparent,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        IconlyBroken.download,
+                        color: ColorManager.dayNightIcon,
+                        size: 35,
                       ),
-                    )),
-                InkWell(
-                    onTap: () async {
-                      String barcodeScanRes =
-                          await FlutterBarcodeScanner.scanBarcode(
-                              "#ff6666", "Cancel", true, ScanMode.QR);
-                      if (barcodeScanRes.isNotEmpty && barcodeScanRes != '-1') {
-                        final PendingDynamicLinkData? initialLink =
-                            await FirebaseDynamicLinks.instance
-                                .getDynamicLink(Uri.parse(barcodeScanRes));
-
-                        if (initialLink!.link.queryParameters["type"] ==
-                            "profile") {
-                          // Get.to(ViewProfile(
-                          //     initialLink!.link
-                          //         .queryParameters["id"],
-                          //     0.obs,
-                          //     initialLink!.link
-                          //         .queryParameters["name"],
-                          //     initialLink!
-                          //         .link
-                          //         .queryParameters["something"]));
-                        } else if (initialLink!.link.queryParameters["type"] ==
-                            "video") {
-                          successToast(initialLink!.link.queryParameters["id"]
-                              .toString());
-                        }
-                      }
-                    },
-                    borderRadius: BorderRadius.circular(10),
-                    splashColor: Colors.white.withOpacity(0.50),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.qr_code,
-                            color: ColorManager.dayNightIcon,
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              String barcodeScanRes =
-                                  await FlutterBarcodeScanner.scanBarcode(
-                                      "#ff6666", "Cancel", true, ScanMode.QR);
-
-                              final PendingDynamicLinkData? initialLink =
-                                  await FirebaseDynamicLinks.instance
-                                      .getDynamicLink(
-                                          Uri.parse(barcodeScanRes));
-
-                              if (initialLink!.link.queryParameters["type"] ==
-                                  "profile") {
-                                // Get.to(ViewProfile(
-                                //     initialLink!.link
-                                //         .queryParameters["id"],
-                                //     0.obs,
-                                //     initialLink!.link
-                                //         .queryParameters["name"],
-                                //     initialLink!
-                                //         .link
-                                //         .queryParameters["something"]));
-                              } else if (initialLink!
-                                      .link.queryParameters["type"] ==
-                                  "video") {
-                                successToast(initialLink!
-                                    .link.queryParameters["id"]
-                                    .toString());
-                              }
-
-                              showDialog(
-                                  context: context,
-                                  builder: (_) => Material(
-                                        child:
-                                            Center(child: Text(barcodeScanRes)),
-                                      ));
-                            },
-                            child: Text(
-                              scanQRCode,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: ColorManager.dayNightIcon,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          )
-                        ],
+                      const SizedBox(
+                        height: 5,
                       ),
-                    ))
-              ],
-            ))
+                      Text(
+                        saveToDevice,
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: ColorManager.dayNightIcon,
+                            fontWeight: FontWeight.w700),
+                      )
+                    ],
+                  ),
+                )),
+            InkWell(
+                onTap: () async {
+                  String barcodeScanRes =
+                      await FlutterBarcodeScanner.scanBarcode(
+                          "#ff6666", "Cancel", true, ScanMode.QR);
+                  if (barcodeScanRes.isNotEmpty && barcodeScanRes != '-1') {
+                    final PendingDynamicLinkData? initialLink =
+                        await FirebaseDynamicLinks.instance
+                            .getDynamicLink(Uri.parse(barcodeScanRes));
+
+                    if (initialLink!.link.queryParameters["type"] ==
+                        "profile") {
+                      // Get.to(ViewProfile(
+                      //     initialLink!.link
+                      //         .queryParameters["id"],
+                      //     0.obs,
+                      //     initialLink!.link
+                      //         .queryParameters["name"],
+                      //     initialLink!
+                      //         .link
+                      //         .queryParameters["something"]));
+                    } else if (initialLink!.link.queryParameters["type"] ==
+                        "video") {
+                      successToast(
+                          initialLink!.link.queryParameters["id"].toString());
+                    }
+                  }
+                },
+                borderRadius: BorderRadius.circular(10),
+                splashColor: Colors.white.withOpacity(0.50),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        IconlyBroken.scan,
+                        color: ColorManager.dayNightIcon,
+                        size: 35,
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          String barcodeScanRes =
+                              await FlutterBarcodeScanner.scanBarcode(
+                                  "#ff6666", "Cancel", true, ScanMode.QR);
+
+                          final PendingDynamicLinkData? initialLink =
+                              await FirebaseDynamicLinks.instance
+                                  .getDynamicLink(Uri.parse(barcodeScanRes));
+
+                          if (initialLink!.link.queryParameters["type"] ==
+                              "profile") {
+                            // Get.to(ViewProfile(
+                            //     initialLink!.link
+                            //         .queryParameters["id"],
+                            //     0.obs,
+                            //     initialLink!.link
+                            //         .queryParameters["name"],
+                            //     initialLink!
+                            //         .link
+                            //         .queryParameters["something"]));
+                          } else if (initialLink!
+                                  .link.queryParameters["type"] ==
+                              "video") {
+                            successToast(initialLink!.link.queryParameters["id"]
+                                .toString());
+                          }
+
+                          showDialog(
+                              context: context,
+                              builder: (_) => Material(
+                                    child: Center(child: Text(barcodeScanRes)),
+                                  ));
+                        },
+                        child: Text(
+                          scanQRCode,
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: ColorManager.dayNightIcon,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      )
+                    ],
+                  ),
+                ))
           ],
-        ));
+        ))
+      ],
+    ));
   }
-}
-
-Widget scanqQr() {
-  return Center(
-    child: ElevatedButton(
-      onPressed: () async {},
-      child: const Text("scan"),
-    ),
-  );
 }

@@ -122,6 +122,7 @@ class LoginController extends GetxController with StateMixin<dynamic> {
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
+
     // Once signed in, return the UserCredential
     await socialLoginRegister(googleUser.id, "google", googleUser.email, "",
         googleUser.displayName ?? "");

@@ -7,24 +7,23 @@ import 'package:thrill/app/utils/utils.dart';
 
 import '../../user_private_videos/controllers/user_private_videos_controller.dart';
 
-
-class UserVideosController extends GetxController with StateMixin<RxList<Videos>>  {
+class UserVideosController extends GetxController
+    with StateMixin<RxList<Videos>> {
   //TODO: Implement UserVideosController
 
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var userVideos = RxList<Videos>();
-  var userPrivateVideoController = Get.find<UserPrivateVideosController>();
 
   var isInitialised = false.obs;
 
   @override
   void onInit() {
-    getUserVideos();
     super.onInit();
   }
 
   @override
   void onReady() {
+    getUserVideos();
     super.onReady();
   }
 
@@ -38,53 +37,31 @@ class UserVideosController extends GetxController with StateMixin<RxList<Videos>
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     change(userVideos, status: RxStatus.loading());
-    userVideos.clear();
 
     dio
-        .post('/video/user-videos', queryParameters: {"user_id": "${await GetStorage().read("userId")}"})
+        .post('/video/user-videos', queryParameters: {
+          "user_id": "${await GetStorage().read("userId")}"
+        })
         .timeout(const Duration(seconds: 10))
         .then((response) {
-      userVideos = UserVideosModel.fromJson(response.data).data!.obs;
-      change(userVideos, status: RxStatus.success());
-    })
+          userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+          change(userVideos, status: RxStatus.success());
+        })
         .onError((error, stackTrace) {
-      change(userVideos, status: RxStatus.error());
-    });
+          change(userVideos, status: RxStatus.error());
+        });
   }
 
-
-  Future<void> deleteUserVideo(int videoId)async{
-    dio.options.headers={"Authorization":"Bearer ${await GetStorage().read("token")}"};
-    dio.post("video/delete",queryParameters: {
-      "video_id":videoId
-    }).then((value) {
-
-      if(value.data["status"]){
+  Future<void> deleteUserVideo(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/delete", queryParameters: {"video_id": videoId}).then(
+        (value) {
+      if (value.data["status"]) {
         successToast(value.data["message"]);
         getUserVideos();
-      }
-      else{
-        errorToast(value.data["message"]);
-      }
-    }).onError((error, stackTrace) {
-      errorToast(error.toString());
-    });
-
-  }
-
-  Future<void> makeVideoPrivateOrPublic(int videoId,String visibility)async{
-    dio.options.headers={"Authorization":"Bearer ${await GetStorage().read("token")}"};
-    dio.post("video/change-visibility",queryParameters: {
-      "video_id":videoId,
-      "visibility":visibility
-    }).then((value) {
-
-      if(value.data["status"]){
-        successToast(value.data["message"]);
-        getUserVideos();
-        userPrivateVideoController.getUserPrivateVideos();
-      }
-      else{
+      } else {
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
@@ -92,4 +69,23 @@ class UserVideosController extends GetxController with StateMixin<RxList<Videos>
     });
   }
 
+  Future<void> makeVideoPrivateOrPublic(int videoId, String visibility) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/change-visibility", queryParameters: {
+      "video_id": videoId,
+      "visibility": visibility
+    }).then((value) {
+      if (value.data["status"]) {
+        Get.find<UserPrivateVideosController>().getUserPrivateVideos();
+        getUserVideos();
+       // successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {
+      errorToast(error.toString());
+    });
+  }
 }

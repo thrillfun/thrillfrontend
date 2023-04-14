@@ -24,15 +24,7 @@ class NotificationsSettingsView
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          interactions,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                              fontSize: 18),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
+
                         Row(
                           children: [
                             const Expanded(child: Text(likes,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20),)),

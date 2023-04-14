@@ -87,12 +87,9 @@ class SettingsView extends GetView<SettingsController> {
                           )
                         ],
                       ),
-                  onLoading: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [loader()],
-                  )),
+                  onLoading:Container(child: loader(),
+                  alignment: Alignment.center,)),
               Divider(
-                color: Colors.white.withOpacity(0.5),
               ),
               const SizedBox(
                 height: 15,
@@ -116,33 +113,22 @@ class SettingsView extends GetView<SettingsController> {
               GestureDetector(
                   onTap: () async {
                     Get.toNamed(Routes.FAVOURITES);
-                    // await favouritesController
-                    //     .getFavourites()
-                    //     .then((value) => Get.to(Favourites()));
-
-                    //  Navigator.pushNamed(context, '/inbox');
-                  },
+                                      },
                   child: mainTile(IconlyBroken.heart, 'Favourite')),
               GestureDetector(
                   onTap: () async {
                     Get.toNamed(Routes.INBOX);
-                    // await inboxController
-                    //     .getInbox()
-                    //     .then((value) => Get.to(Inbox()));
 
-                    //  Navigator.pushNamed(context, '/inbox');
                   },
                   child: mainTile(IconlyBroken.message, inbox)),
               GestureDetector(
                   onTap: () {
                     Get.toNamed(Routes.PRIVACY);
-                    //  Navigator.pushNamed(context, '/privacy');
                   },
                   child: mainTile(IconlyBroken.shield_done, privacy)),
               GestureDetector(
                   onTap: () {
                     Get.toNamed(Routes.WALLET);
-                    //  Navigator.pushNamed(context, '/wallet');
                   },
                   child: mainTile(IconlyBroken.wallet, wallet)),
               GestureDetector(

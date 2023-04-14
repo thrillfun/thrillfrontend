@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -86,5 +87,28 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
       followersLoading.value = false;
     });
     followersLoading.value = false;
+  }
+
+  Future<String> createDynamicLink(
+      String id, String? type, String? name, String? avatar,
+      {String? referal}) async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: 'https://thrill.page.link/',
+      link: Uri.parse(
+          "https://thrill.fun?type=$type&id=$id&name=$name&something=$avatar&referal=$referal"),
+      androidParameters: const AndroidParameters(
+        packageName: 'com.thrill.media',
+        minimumVersion: 1,
+      ),
+      // iosParameters: IosParameters(
+      //   bundleId: 'your_ios_bundle_identifier',
+      //   minimumVersion: '1',x
+      //   appStoreId: 'your_app_store_id',
+      // ),
+    );
+    final dynamicLink =
+    await FirebaseDynamicLinks.instance.buildLink(parameters);
+
+    return dynamicLink.toString();
   }
 }

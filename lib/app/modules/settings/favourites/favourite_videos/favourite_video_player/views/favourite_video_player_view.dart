@@ -13,6 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:sim_data/sim_data.dart';
 import 'package:thrill/app/rest/models/favourites_model.dart';
 
+import '../../../../../../rest/models/favourite_videos_model.dart' as fav;
 import '../../../../../../rest/models/site_settings_model.dart';
 import '../../../../../../rest/rest_urls.dart';
 import '../../../../../../routes/app_pages.dart';
@@ -28,7 +29,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
 
   @override
   Widget build(BuildContext context) {
-    var pageViewController = PageController();
+    var pageViewController = PageController(initialPage: Get.arguments["init_page"]);
     var playerController = BetterPlayerListVideoPlayerController();
     var commentsController = Get.find<CommentsController>();
     late AnimationController _controller;
@@ -36,7 +37,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
       backgroundColor: Colors.black,
       body: PageView.builder(
           itemCount:
-          (Get.arguments["favourite_videos"] as List<FavouriteVideos>)
+          (Get.arguments["favourite_videos"] as RxList<fav.Data>)
               .length,
           scrollDirection: Axis.vertical,
           controller: pageViewController,
@@ -61,7 +62,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
 
                     BetterPlayerDataSource.network(RestUrl.videoUrl +
                         (Get.arguments["favourite_videos"]
-                        as List<FavouriteVideos>)[index]
+                        as List<fav.Data>)[index]
                             .video!),
                     betterPlayerListVideoPlayerController: playerController,
                     configuration: BetterPlayerConfiguration(
@@ -121,7 +122,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                             //     ),
                             //     likeBuilder: (bool isLiked) {
                             //       (Get.arguments["favourite_videos"] as List<
-                            //           FavouriteVideos>)[index].videoLikeStatus == 0
+                            //            fav.Data>)[index].videoLikeStatus == 0
                             //           ? isLiked = false
                             //           : isLiked = true;
                             //       return Icon(
@@ -135,7 +136,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                             //     },
                             //     likeCount: (Get
                             //         .arguments["favourite_videos"] as List<
-                            //         FavouriteVideos>)[index].videoLikeStatus,
+                            //          fav.Data>)[index].videoLikeStatus,
                             //     countBuilder:
                             //         (int? count, bool isLiked, String text) {
                             //       var color =
@@ -156,14 +157,14 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                             //     onTap: (_) async {
                             //       controller.likeVideo(
                             //           (Get.arguments["favourite_videos"] as List<
-                            //               FavouriteVideos>)[index].videoLikeStatus == 0
+                            //                fav.Data>)[index].videoLikeStatus == 0
                             //               ? 1
                             //               : 0,
                             //           (Get.arguments["favourite_videos"] as List<
-                            //               FavouriteVideos>)[index].id!,
+                            //                fav.Data>)[index].id!,
                             //           token: (Get
                             //               .arguments["favourite_videos"] as List<
-                            //               FavouriteVideos>)[index].user!.firebaseToken);
+                            //                fav.Data>)[index].user!.firebaseToken);
                             //     }),
                           ],
                         ),
@@ -178,37 +179,37 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                       .getComments(
                                       (Get
                                           .arguments["favourite_videos"] as List<
-                                          FavouriteVideos>)[index].id!)
+                                          fav.Data>)[index].id!)
                                       .then((value) {
                                     Get.bottomSheet(CommentsView(
                                         videoId: (Get
                                             .arguments["favourite_videos"] as List<
-                                            FavouriteVideos>)[index].id,
+                                            fav.Data>)[index].id,
                                         userId: (Get
                                             .arguments["favourite_videos"] as List<
-                                            FavouriteVideos>)[index].user!.id,
+                                            fav.Data>)[index].user!.id,
                                         isCommentAllowed:
                                         true.obs
                                         ,
                                         isfollow: int.parse((Get
                                             .arguments["favourite_videos"] as List<
-                                            FavouriteVideos>)[index].user!
+                                            fav.Data>)[index].user!
                                             .following
                                             .toString()),
                                         userName: (Get
                                             .arguments["favourite_videos"] as List<
-                                            FavouriteVideos>)[index].user!
+                                            fav.Data>)[index].user!
                                             .username,
                                         avatar: (Get
                                             .arguments["favourite_videos"] as List<
-                                            FavouriteVideos>)[index].user!
+                                            fav.Data>)[index].user!
                                             .avatar ?? "",
                                         fcmToken: (Get
                                             .arguments["favourite_videos"] as List<
-                                            FavouriteVideos>)[index].user!
+                                            fav.Data>)[index].user!
                                             .firebaseToken,description:(Get
                                         .arguments["favourite_videos"] as List<
-                                        FavouriteVideos>)[index].description));
+                                        fav.Data>)[index].description));
                                   });
                                   // GetStorage().read("videoPrivacy") ==
                                   //     "Private"
@@ -223,10 +224,10 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                 )),
                             Text(
                               (Get.arguments["favourite_videos"] as List<
-                                  FavouriteVideos>)[index].comments != null
+                                   fav.Data>)[index].comments != null
                                   ? "${(Get
                                   .arguments["favourite_videos"] as List<
-                                  FavouriteVideos>)[index].comments}"
+                                   fav.Data>)[index].comments}"
                                   : "0",
                               style: const TextStyle(
                                   fontSize: 12,
@@ -376,7 +377,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                               () async {
                                                             if ((Get
                                                                 .arguments["favourite_videos"] as List<
-                                                                FavouriteVideos>)[index]
+                                                                 fav.Data>)[index]
                                                                 .user!.id ==
                                                                 GetStorage()
                                                                     .read(
@@ -419,7 +420,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                                             .deleteUserVideo(
                                                                             (Get
                                                                                 .arguments["favourite_videos"] as List<
-                                                                                FavouriteVideos>)[index]
+                                                                                 fav.Data>)[index]
                                                                                 .user!
                                                                                 .id!)
                                                                             .then((
@@ -462,7 +463,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                           },
                                                           icon: (Get
                                                               .arguments["favourite_videos"] as List<
-                                                              FavouriteVideos>)[index]
+                                                               fav.Data>)[index]
                                                               .user!.id
                                                               ==
                                                               GetStorage()
@@ -482,7 +483,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                           )),
                                                       (Get
                                                           .arguments["favourite_videos"] as List<
-                                                          FavouriteVideos>)[index]
+                                                           fav.Data>)[index]
                                                           .user!.id ==
                                                           GetStorage()
                                                               .read(
@@ -527,13 +528,13 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                                         "video",
                                                                         (Get
                                                                             .arguments["favourite_videos"] as List<
-                                                                            FavouriteVideos>)[index]
+                                                                             fav.Data>)[index]
                                                                             .user!
                                                                             .username
                                                                             .toString(),
                                                                         (Get
                                                                             .arguments["favourite_videos"] as List<
-                                                                            FavouriteVideos>)[index]
+                                                                             fav.Data>)[index]
                                                                             .user!
                                                                             .avatar
                                                                             .toString())));
@@ -573,11 +574,11 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                                 .downloadAndProcessVideo(
                                                                 (Get
                                                                     .arguments["favourite_videos"] as List<
-                                                                    FavouriteVideos>)[index]
+                                                                     fav.Data>)[index]
                                                                     .video!,
                                                                 (Get
                                                                     .arguments["favourite_videos"] as List<
-                                                                    FavouriteVideos>)[index]
+                                                                     fav.Data>)[index]
                                                                     .user!
                                                                     .username
                                                                     .toString());
@@ -653,7 +654,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                       .checkIfVideoReported(
                                                       (Get
                                                           .arguments["favourite_videos"] as List<
-                                                          FavouriteVideos>)[index]
+                                                           fav.Data>)[index]
                                                           .id!,
                                                       await GetStorage()
                                                           .read("userId"))
@@ -668,16 +669,16 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                           showReportDialog(
                                                               (Get
                                                                   .arguments["favourite_videos"] as List<
-                                                                  FavouriteVideos>)[index]
+                                                                   fav.Data>)[index]
                                                                   .user!.id!,
                                                               (Get
                                                                   .arguments["favourite_videos"] as List<
-                                                                  FavouriteVideos>)[index]
+                                                                   fav.Data>)[index]
                                                                   .user!
                                                                   .username!,
                                                               (Get
                                                                   .arguments["favourite_videos"] as List<
-                                                                  FavouriteVideos>)[index]
+                                                                   fav.Data>)[index]
                                                                   .user!
                                                                   .id!));
                                                     }
@@ -754,14 +755,14 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                       .checkUserBlocked(
                                                       (Get
                                                           .arguments["favourite_videos"] as List<
-                                                          FavouriteVideos>)[index]
+                                                           fav.Data>)[index]
                                                           .user!.id!)
                                                       .then((value) async =>
                                                   await controller
                                                       .blockUnblockUser(
                                                       (Get
                                                           .arguments["favourite_videos"] as List<
-                                                          FavouriteVideos>)[index]
+                                                           fav.Data>)[index]
                                                           .user!.id!,
                                                       value));
                                                 }
@@ -868,11 +869,11 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                           .followUnfollowUser(
                                                           (Get
                                                               .arguments["favourite_videos"] as List<
-                                                              FavouriteVideos>)[index]
+                                                               fav.Data>)[index]
                                                               .user!.id!,
                                                           int.parse((Get
                                                               .arguments["favourite_videos"] as List<
-                                                              FavouriteVideos>)[index]
+                                                               fav.Data>)[index]
                                                               .user!.following
                                                               .toString()) ==
                                                               0
@@ -896,7 +897,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                     children: [
                                                       int.parse((Get
                                                           .arguments["favourite_videos"] as List<
-                                                          FavouriteVideos>)[index]
+                                                           fav.Data>)[index]
                                                           .user!.following
                                                           .toString()) == 0
                                                           ? const Icon(
@@ -979,7 +980,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                             }
                           } else {
                             if ((Get.arguments["favourite_videos"] as List<
-                                FavouriteVideos>)[index].user!.id ==
+                                 fav.Data>)[index].user!.id ==
                                 GetStorage().read("userId")) {
                               Get.toNamed(Routes.PROFILE);
                             }
@@ -987,7 +988,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                               Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
                                 "profileId": (Get
                                     .arguments["favourite_videos"] as List<
-                                    FavouriteVideos>)[index].user!.id
+                                     fav.Data>)[index].user!.id
                               });
                             }
                           }
@@ -1014,15 +1015,15 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                     ),
                                 imageUrl: (Get
                                     .arguments["favourite_videos"] as List<
-                                    FavouriteVideos>)[index].user!.avatar ==
+                                     fav.Data>)[index].user!.avatar ==
                                     null ||
                                     (Get.arguments["favourite_videos"] as List<
-                                        FavouriteVideos>)[index].user!.avatar!
+                                         fav.Data>)[index].user!.avatar!
                                         .isEmpty
                                     ? RestUrl.placeholderImage
                                     : RestUrl.profileUrl +
                                     (Get.arguments["favourite_videos"] as List<
-                                        FavouriteVideos>)[index].user!.avatar
+                                         fav.Data>)[index].user!.avatar
                                         .toString(),
                                 fit: BoxFit.fill,
                               ),
@@ -1038,7 +1039,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                     Text(
                                       (Get
                                           .arguments["favourite_videos"] as List<
-                                          FavouriteVideos>)[index].user!
+                                           fav.Data>)[index].user!
                                           .username ?? "",
                                       style: const TextStyle(
                                           color: Colors.white,
@@ -1089,11 +1090,11 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                                   .followUnfollowUser(
                                                 (Get
                                                     .arguments["favourite_videos"] as List<
-                                                    FavouriteVideos>)[index]
+                                                     fav.Data>)[index]
                                                     .user!.id!,
                                                 int.parse((Get
                                                     .arguments["favourite_videos"] as List<
-                                                    FavouriteVideos>)[index]
+                                                     fav.Data>)[index]
                                                     .user!
                                                     .following.toString()) == 0
                                                     ? "follow"
@@ -1109,7 +1110,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                             child: Text(
                                               int.parse((Get
                                                   .arguments["favourite_videos"] as List<
-                                                  FavouriteVideos>)[index].user!
+                                                   fav.Data>)[index].user!
                                                   .following
                                                   .toString()) == 0
                                                   ? "Follow"
@@ -1129,7 +1130,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                           null &&
                                           (Get
                                               .arguments["favourite_videos"] as List<
-                                              FavouriteVideos>)[index].user!
+                                               fav.Data>)[index].user!
                                               .id !=
                                               GetStorage().read("userId"),
                                     )
@@ -1140,7 +1141,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                 ),
                                 Text(
                                   (Get.arguments["favourite_videos"] as List<
-                                      FavouriteVideos>)[index].user!.name ?? "",
+                                       fav.Data>)[index].user!.name ?? "",
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 14,
@@ -1158,7 +1159,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Text(
                           (Get.arguments["favourite_videos"] as List<
-                              FavouriteVideos>)[index].description.toString(),
+                               fav.Data>)[index].description.toString(),
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -1167,15 +1168,15 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                       ),
                       Visibility(
                         visible: (Get.arguments["favourite_videos"] as List<
-                            FavouriteVideos>)[index].hashtags != null && (Get.arguments["favourite_videos"] as List<
-                            FavouriteVideos>)[index].hashtags!.isNotEmpty,
+                             fav.Data>)[index].hashtags != null && (Get.arguments["favourite_videos"] as List<
+                             fav.Data>)[index].hashtags!.isNotEmpty,
                         child: Container(
                           height: 35,
                           margin: const EdgeInsets.symmetric(horizontal: 10),
                           child: ListView.builder(
                               itemCount: (Get
                                   .arguments["favourite_videos"] as List<
-                                  FavouriteVideos>)[index].hashtags?.length,
+                                   fav.Data>)[index].hashtags?.length,
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, hashtagIndex) =>
@@ -1184,14 +1185,14 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                       await GetStorage().write("hashtagId",
                                           (Get
                                               .arguments["favourite_videos"] as List<
-                                              FavouriteVideos>)[index]
-                                              .hashtags![hashtagIndex].id);
+                                               fav.Data>)[index]
+                                              .hashtags![hashtagIndex].length);
                                       Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                           arguments: {
                                             "hashtag_name":
                                             "${(Get
                                                 .arguments["favourite_videos"] as List<
-                                                FavouriteVideos>)[index]
+                                                 fav.Data>)[index]
                                                 .hashtags![hashtagIndex]}"
                                           });
                                     },
@@ -1210,7 +1211,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                                       child: Text(
                                         (Get
                                             .arguments["favourite_videos"] as List<
-                                            FavouriteVideos>)[index]
+                                             fav.Data>)[index]
                                             .hashtags![hashtagIndex]
                                             .toString(),
                                         style: const TextStyle(
@@ -1226,15 +1227,15 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                           await GetStorage()
                               .write("profileId", (Get
                               .arguments["favourite_videos"] as List<
-                              FavouriteVideos>)[index].user!.id);
+                               fav.Data>)[index].user!.id);
 
                           Get.toNamed(Routes.SOUNDS, arguments: {
                             "sound_name": (Get
                                 .arguments["favourite_videos"] as List<
-                                FavouriteVideos>)[index].soundName.toString(),
+                                 fav.Data>)[index].soundName.toString(),
                             "sound_url": (Get
                                 .arguments["favourite_videos"] as List<
-                                FavouriteVideos>)[index].sound,
+                                 fav.Data>)[index].sound,
                           });
                         },
                         child: Row(
@@ -1260,13 +1261,13 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                             ),
                             Text(
                               (Get.arguments["favourite_videos"] as List<
-                                  FavouriteVideos>)[index].soundName!.isEmpty
+                                   fav.Data>)[index].soundName!.isEmpty
                                   ? "Original Sound"
                                   : (Get.arguments["favourite_videos"] as List<
-                                  FavouriteVideos>)[index].soundName! +
+                                   fav.Data>)[index].soundName! +
                                   " by ${(Get
                                       .arguments["favourite_videos"] as List<
-                                      FavouriteVideos>)[index].user!.name}",
+                                       fav.Data>)[index].user!.name}",
                               style: const TextStyle(color: Colors.white),
                             )
                           ],

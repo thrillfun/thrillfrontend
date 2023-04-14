@@ -116,7 +116,9 @@ class SearchView extends GetView<SearchController> {
                     state![0].users!.length,
                     (index) => InkWell(
                           onTap: () async {
-                            Get.toNamed(Routes.OTHERS_PROFILE,arguments: {"profileId":state[0].users![index].id});
+                            Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
+                              "profileId": state[0].users![index].id
+                            });
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),
@@ -493,10 +495,7 @@ class SearchView extends GetView<SearchController> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        state[0]
-                                            .sounds![index]
-                                            .sound
-                                            .toString(),
+                                        state[0].sounds![index].name.toString(),
                                         style: TextStyle(
                                             fontWeight: FontWeight.w700,
                                             fontSize: 18),
@@ -547,9 +546,7 @@ class SearchView extends GetView<SearchController> {
                               "profileId", state[0].sounds![index].userId);
 
                           Get.toNamed(Routes.SOUNDS, arguments: {
-
-                            "sound_name":
-                                state[0].sounds![index].sound.toString(),
+                            "sound_id": state[0].sounds![index].id,
                             "sound_url":
                                 state[0].sounds![index].sound.toString(),
                           });
@@ -593,7 +590,10 @@ class SearchView extends GetView<SearchController> {
                             shrinkWrap: true,
                             itemBuilder: (context, index) => InkWell(
                                   onTap: () async {
-                                    Get.toNamed(Routes.OTHERS_PROFILE,arguments: {"profileId":state[0].users![index].id});
+                                    Get.toNamed(Routes.OTHERS_PROFILE,
+                                        arguments: {
+                                          "profileId": state[0].users![index].id
+                                        });
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(10),
@@ -992,7 +992,7 @@ class SearchView extends GetView<SearchController> {
                                               Text(
                                                 state[0]
                                                     .sounds![index]
-                                                    .sound
+                                                    .name
                                                     .toString(),
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.w700,
@@ -1002,12 +1002,11 @@ class SearchView extends GetView<SearchController> {
                                               Text(
                                                 state[0]
                                                             .sounds![index]
-                                                            .soundOwner !=
+                                                            .createdAt !=
                                                         null
                                                     ? state[0]
                                                         .sounds![index]
-                                                        .soundOwner!
-                                                        .name
+                                                        .createdAt!
                                                         .toString()
                                                     : "",
                                                 style: TextStyle(
@@ -1018,12 +1017,12 @@ class SearchView extends GetView<SearchController> {
                                               Text(
                                                 state[0]
                                                             .sounds![index]
-                                                            .soundOwner !=
+                                                            .updatedAt !=
                                                         null
-                                                    ? state[0]
+                                                    ?
+                                                state[0]
                                                         .sounds![index]
-                                                        .soundOwner!
-                                                        .name
+                                                        .updatedAt
                                                         .toString()
                                                     : "",
                                                 style: TextStyle(
@@ -1059,14 +1058,13 @@ class SearchView extends GetView<SearchController> {
                                 await GetStorage().write("profileId",
                                     state[0].sounds![index].userId);
 
-                                await GetStorage().write(
-                                    "profileId", state[0].sounds![index].userId);
+                                await GetStorage().write("profileId",
+                                    state[0].sounds![index].userId);
 
                                 Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_name":
-                                  state[0].sounds![index].sound.toString(),
+                                  "sound_id": state[0].sounds![index].id,
                                   "sound_url":
-                                  state[0].sounds![index].sound.toString(),
+                                      state[0].sounds![index].sound.toString(),
                                 });
                                 // Get.to(SoundDetails(map: {
                                 //   "sound": state[0].sounds![index].sound,

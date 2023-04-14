@@ -78,7 +78,7 @@ class WalletController extends GetxController with StateMixin<RxList<Balance>> {
     });
     btcusdtChannel.stream.listen((event) {
       btcPer.value = double.parse(jsonDecode(event)['P']).toStringAsFixed(2);
-      btcPrice = double.parse(jsonDecode(event)['c']).toStringAsFixed(6).obs;
+      btcPrice.value = double.parse(jsonDecode(event)['c']).toStringAsFixed(6);
       getDatafromBinance();
 
     });
@@ -165,7 +165,7 @@ class WalletController extends GetxController with StateMixin<RxList<Balance>> {
         textEditingController.value.text = "0.0";
       } else {
         textEditingController.value.text =
-            (totalAmount / double.parse(btcPrice.toString()))
+            (totalAmount / double.parse(btcPrice.value.toString()))
                 .toStringAsFixed(6);
       }
 

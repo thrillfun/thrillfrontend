@@ -75,18 +75,18 @@ class UserVideosView extends GetView<UserVideosController> {
                                 onPressed: () {
                                   Get.bottomSheet(Scaffold(
                                     body: Container(
-                                      margin: EdgeInsets.all(10),
+                                      margin: const EdgeInsets.all(10),
                                       child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         InkWell(
-                                          child: Text("Delete Video",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700),),
+                                          child: const Text("Delete Video",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700),),
                                           onTap: () {
                                             Get.defaultDialog(
                                                 content: const Text(
                                                     "you want to delete this video?"),
                                                 title: "Are your sure?",
-                                                titleStyle: TextStyle(
+                                                titleStyle: const TextStyle(
                                                     fontWeight:
                                                     FontWeight.w700),
                                                 confirm: InkWell(
@@ -99,14 +99,14 @@ class UserVideosView extends GetView<UserVideosController> {
                                                             .circular(10),
                                                         color: Colors
                                                             .red.shade400),
-                                                    child: Text(
+                                                    child: const Text(
                                                       "Yes",
                                                       style: TextStyle(
                                                           fontWeight:
                                                           FontWeight.w700,
                                                           color: Colors.white),
                                                     ),
-                                                    padding: EdgeInsets.all(10),
+                                                    padding: const EdgeInsets.all(10),
                                                   ),
                                                   onTap: () => controller
                                                       .deleteUserVideo(
@@ -122,28 +122,28 @@ class UserVideosView extends GetView<UserVideosController> {
                                                         BorderRadius
                                                             .circular(10),
                                                         color: Colors.green),
-                                                    child: Text("Cancel",
+                                                    child: const Text("Cancel",
                                                         style: TextStyle(
                                                             fontWeight:
                                                             FontWeight.w700,
                                                             color:
                                                             Colors.white)),
                                                     alignment: Alignment.center,
-                                                    padding: EdgeInsets.all(10),
+                                                    padding: const EdgeInsets.all(10),
                                                   ),
                                                   onTap: () => Get.back(),
                                                 ));
                                           },
                                         ),
-                                        SizedBox(height: 10,),
+                                        const SizedBox(height: 10,),
                                         InkWell(
-                                          child: Text("Make video private",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700)),
+                                          child: const Text("Make video private",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700)),
                                           onTap: () {
                                             Get.defaultDialog(
                                                 content: const Text(
                                                     "you want to private this video?"),
                                                 title: "Are your sure?",
-                                                titleStyle: TextStyle(
+                                                titleStyle: const TextStyle(
                                                     fontWeight:
                                                     FontWeight.w700),
                                                 confirm: InkWell(
@@ -156,14 +156,14 @@ class UserVideosView extends GetView<UserVideosController> {
                                                             .circular(10),
                                                         color: Colors
                                                             .red.shade400),
-                                                    child: Text(
+                                                    child: const Text(
                                                       "Yes",
                                                       style: TextStyle(
                                                           fontWeight:
                                                           FontWeight.w700,
                                                           color: Colors.white),
                                                     ),
-                                                    padding: EdgeInsets.all(10),
+                                                    padding: const EdgeInsets.all(10),
                                                   ),
                                                   onTap: () => controller
                                                       .makeVideoPrivateOrPublic(
@@ -179,14 +179,14 @@ class UserVideosView extends GetView<UserVideosController> {
                                                         BorderRadius
                                                             .circular(10),
                                                         color: Colors.green),
-                                                    child: Text("Cancel",
+                                                    child: const Text("Cancel",
                                                         style: TextStyle(
                                                             fontWeight:
                                                             FontWeight.w700,
                                                             color:
                                                             Colors.white)),
                                                     alignment: Alignment.center,
-                                                    padding: EdgeInsets.all(10),
+                                                    padding: const EdgeInsets.all(10),
                                                   ),
                                                   onTap: () => Get.back(),
                                                 ));

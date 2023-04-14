@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hashtagable/hashtagable.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/app/utils/aws_client.dart';
@@ -24,6 +25,8 @@ import '../../../../utils/strings.dart';
 class PostScreenController extends GetxController {
   String? selectedSound;
   bool? isFromGallery;
+  var dialog = Get.snackbar("Uploading files", "please wait",
+      showProgressIndicator: true, shouldIconPulse: true);
   VideoPlayerController? videoPlayerController;
   var isHashtag = false.obs;
   var descriptionText = "".obs;
@@ -96,66 +99,58 @@ class PostScreenController extends GetxController {
   }
 
   Future<void> awsUploadVideo(int currentUnix, String desc) async {
-    var file = File(Get.arguments["file_path"]);
-    // await AWSClient().uploadData("test", "Thrill-$currentUnix.mp4",  file.readAsBytesSync());
-    try {
+    await SimpleS3()
+        .uploadFile(
+      File(Get.arguments["file_path"]),
+      "thrillvideonew",
+      "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
+      AWSRegions.apSouth1,
+      debugLog: true,
+      fileName: "$currentUnix.mp4",
+      s3FolderPath: "test",
+      accessControl: S3AccessControl.publicRead,
+    )
+        .then((value) async {
+      print("============================> Video Upload Success!!!!");
+      if (Get.arguments["is_original"] == false) {
+        await postUpload(
+            "$currentUnix.mp4",basename(Get.arguments["sound_url"]).toString(), "$currentUnix.gif", desc);
+      } else {
+        awsUploadSound(
+                File(Get.arguments["sound_url"]).path, "$currentUnix")
+            .then((value) async => await postUpload("$currentUnix.mp4",
+                "$currentUnix.mp3", "$currentUnix.gif", desc));
+      }
+    }).onError((error, stackTrace) {
+      errorToast(error.toString());
+    });
+  }
+
+  Future<void> awsUploadSound(String file, String currentUnix) async {
+    if (file.isNotEmpty) {
       await SimpleS3()
           .uploadFile(
-        File(Get.arguments["file_path"]),
+        File(file),
         "thrillvideonew",
         "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
         AWSRegions.apSouth1,
         debugLog: true,
-        fileName: "Thrill-$currentUnix.mp4",
-        s3FolderPath: "test",
+        fileName: '$currentUnix.mp3',
+        s3FolderPath: "sound",
         accessControl: S3AccessControl.publicRead,
       )
           .then((value) async {
-        print("============================> Video Upload Success!!!!");
-        if(Get.arguments["sound_url"]==null){
-          await postUpload(
-              "Thrill-$currentUnix.mp4", "", "$currentUnix.gif", desc);
-        }
-        else{
-          awsUploadSound(File(Get.arguments["sound_url"]).path, desc).then((value) async => await postUpload(
-              "Thrill-$currentUnix.mp4", "", "$currentUnix.gif", desc));
-        }
-
+        Logger().wtf(value);
+      }).onError((error, stackTrace) {
+        errorToast(error.toString());
       });
-    } on Exception catch (e) {
-      Logger().wtf(e);
     }
   }
 
-  Future<void> awsUploadSound(String file, String currentUnix) async {
-    try {
-      if (file.isNotEmpty) {
-        await SimpleS3()
-            .uploadFile(
-          File(file),
-          "thrillvideonew",
-          "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
-          AWSRegions.apSouth1,
-          debugLog: true,
-          fileName: '$currentUnix.mp3',
-          s3FolderPath: "sound",
-          accessControl: S3AccessControl.publicRead,
-        )
-            .then((value) async {
-          Logger().w(value);
-        }).onError((error, stackTrace) {
-          errorToast(error.toString());
-        });
-      }
-    } catch (e) {
-      Logger().wtf(e);
-    }
-  }
-
-  Future<String> createGIF(int currentUnix,String desc) async {
+  Future<String> createGIF(int currentUnix, String desc) async {
     String outputPath = '$saveCacheDirectory$currentUnix.gif';
     FFmpegKit.execute(
-            "-y -i ${Get.arguments["file_path"]} -r 50 -filter:v scale=200:200 -t 5 $outputPath")
+            "-y -i ${Get.arguments["file_path"]} -r 18 -s 250x160 -t 2.8 $outputPath")
         .then((session) async {
       final returnCode = await session.getReturnCode();
 
@@ -172,14 +167,13 @@ class PostScreenController extends GetxController {
           accessControl: S3AccessControl.publicRead,
         )
             .then((value) async {
-          awsUploadVideo(currentUnix,desc);
-
+          awsUploadVideo(currentUnix, desc);
+        }).onError((error, stackTrace) {
+          errorToast(error.toString());
         });
-        // print("============================> GIF Success!!!!");
       } else {
-        // print("============================> GIF Error!!!!");
         errorToast("thumbnail uploaded failed");
-        awsUploadVideo(currentUnix,desc);
+        awsUploadVideo(currentUnix, desc);
         Logger().wtf("failed");
       }
     });
@@ -189,9 +183,7 @@ class PostScreenController extends GetxController {
   postUpload(String videoId, String soundId, String gifId, String desc) async {
     String tagList = jsonEncode(extractHashTags(textEditingController.text));
 
-    var gifName = "".obs;
     videoPlayerController!.pause();
-    var file = File(Get.arguments["file_path"]);
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -199,7 +191,9 @@ class PostScreenController extends GetxController {
       "user_id": await GetStorage().read("userId"),
       "video": videoId,
       "sound": soundId,
-      "sound_name": Get.arguments["sound_name"] ?? "original",
+      "sound_name": Get.arguments["sound_name"]==null || Get.arguments["sound_name"].toString().isEmpty
+          ? "original"
+          : Get.arguments["sound_name"].toString(),
       "language": 1,
       "category": 1,
       "hashtags": tagList,

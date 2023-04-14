@@ -36,7 +36,8 @@ import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 
 import '../select_sound/controllers/select_sound_controller.dart';
 
-var selectedSound = "".obs;
+var selectedSound = Get.arguments["sound_url"] ?? "".obs;
+var soundOwner ="".obs;
 
 class CameraView extends StatefulWidget {
   const CameraView({Key? key}) : super(key: key);
@@ -48,8 +49,9 @@ class CameraView extends StatefulWidget {
 class _CameraState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin<CameraView> {
   var timer = 60.obs;
+
   Timer? time;
-  late camera.CameraController _controller;
+  camera.CameraController? _controller;
   CameraController cameraController = Get.find<CameraController>();
   var videoEditingController = Get.find<VideoEditingController>();
   File? file;
@@ -100,14 +102,11 @@ class _CameraState extends State<CameraView>
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.black,
-        body: _isCameraInitialized
+        body: _controller != null && _controller!.value.isInitialized
             ? Stack(
                 alignment: Alignment.topCenter,
                 children: [
-                  AspectRatio(
-                    aspectRatio: Get.size.aspectRatio,
-                    child: camera.CameraPreview(_controller),
-                  ),
+                  camera.CameraPreview(_controller!),
                   Container(
                     alignment: Alignment.bottomCenter,
                     padding:
@@ -129,7 +128,7 @@ class _CameraState extends State<CameraView>
                                 child: InkWell(
                                   onTap: _isRecordingInProgress
                                       ? () async {
-                                          if (!_controller
+                                          if (!_controller!
                                               .value.isRecordingVideo) {
                                             await resumeVideoRecording();
                                           } else {
@@ -138,9 +137,9 @@ class _CameraState extends State<CameraView>
                                         }
                                       : () async {
                                           _toggleCameraLens();
-                                          setState(() {
-                                            _isCameraInitialized = false;
-                                          });
+                                          // setState(() {
+                                          //   _isCameraInitialized = false;
+                                          // });
                                           // onNewCameraSelected(cameras[
                                           // _isRearCameraSelected
                                           //     ? 1
@@ -261,59 +260,25 @@ class _CameraState extends State<CameraView>
                                       .withOpacity(0.3)),
                               child: InkWell(
                                 onTap: () async {
-                                  try {
-                                    if (await Permission.photos.isGranted ==
-                                        false) {
-                                      await Permission.photos
-                                          .request()
-                                          .then((value) async {
-                                        await ImagePicker()
-                                            .pickVideo(
-                                                source: ImageSource.gallery)
-                                            .then((value) async {
-                                          if (value != null) {
-                                            int currentUnix = DateTime.now()
-                                                .millisecondsSinceEpoch;
+                                  await ImagePicker()
+                                      .pickVideo(source: ImageSource.gallery)
+                                      .then((value) async {
+                                    if (value != null) {
+                                      int currentUnix =
+                                          DateTime.now().millisecondsSinceEpoch;
 
-                                            await cameraController.openEditor(
-                                                true,
-                                                value.path,
-                                                selectedSound.value.isEmpty
-                                                    ? Get
-                                                        .arguments["sound_path"]
-                                                        .toString()
-                                                    : selectedSound.value,
-                                                GetStorage().read("userId"),
-                                                Get.arguments["sound_owner"]
-                                                    .toString());
-                                          }
-                                        });
-                                      });
-                                    } else {
-                                      await ImagePicker()
-                                          .pickVideo(
-                                              source: ImageSource.gallery)
-                                          .then((value) async {
-                                        if (value != null) {
-                                          int currentUnix = DateTime.now()
-                                              .millisecondsSinceEpoch;
-
-                                          await cameraController.openEditor(
-                                              true,
-                                              value.path,
-                                              selectedSound.value.isEmpty
-                                                  ? Get.arguments["sound_path"]
-                                                      .toString()
-                                                  : selectedSound.value,
-                                              GetStorage().read("userId"),
-                                              Get.arguments["sound_owner"]
-                                                  .toString());
-                                        }
-                                      });
+                                      await cameraController.openEditor(
+                                          true,
+                                          value.path,
+                                          selectedSound == null
+                                              ? ""
+                                              : selectedSound.value.toString(),
+                                          GetStorage().read("userId"),
+                                          soundOwner.value.isEmpty
+                                              ? ""
+                                              : soundOwner.value);
                                     }
-                                  } catch (e) {
-                                    errorToast(e.toString());
-                                  }
+                                  });
                                 },
                                 child: const Icon(
                                   Icons.browse_gallery_outlined,
@@ -384,29 +349,11 @@ class _CameraState extends State<CameraView>
                                           await cameraController.openEditor(
                                               false,
                                               "",
-                                              selectedSound.value.isEmpty
-                                                  ? Get.arguments["sound_url"]
-                                                      .toString()
-                                                  : selectedSound.value,
+                                              selectedSound.value.toString(),
                                               GetStorage().read("userId"),
-                                              Get.arguments["sound_owner"] ??
-                                                  GetStorage()
-                                                      .read("username")
-                                                      .toString());
-                                          // cameraController.openEditor(
-                                          //     false,
-                                          //     "",
-                                          //     soundsController.selectedSoundPath
-                                          //         .value.isEmpty
-                                          //         ? widget.selectedSound
-                                          //         : soundsController
-                                          //         .selectedSoundPath.value,
-                                          //     widget.id!,
-                                          //     userDetailsController.userProfile
-                                          //         .value.username ??
-                                          //         userDetailsController
-                                          //             .userProfile.value.name
-                                          //             .toString());
+                                              soundOwner.value.isEmpty
+                                                  ? ""
+                                                  : soundOwner.value);
                                         } catch (e) {
                                           errorToast(e.toString());
                                         }
@@ -455,10 +402,9 @@ class _CameraState extends State<CameraView>
                             width: 10,
                           ),
                           Obx(() => Text(
-                                selectedSound.value.isNotEmpty
-                                    ? basename(selectedSound.value)
-                                    : Get.arguments["sound_name"] ??
-                                        "Select Sound",
+                                selectedSound.value != ""
+                                    ? basename(selectedSound.value.toString())
+                                    : "Select Sound",
                                 style: TextStyle(color: Colors.white),
                               ))
                         ],
@@ -480,8 +426,6 @@ class _CameraState extends State<CameraView>
   void initState() {
     _getAvailableCameras();
 
-    setState(() {});
-
     _currentFlashMode = camera.FlashMode.off;
     animationController = AnimationController(
         vsync: this, duration: Duration(seconds: timer.value));
@@ -499,16 +443,17 @@ class _CameraState extends State<CameraView>
           await cameraController.openEditor(
               false,
               "",
-              selectedSound.value.isEmpty
-                  ? Get.arguments["sound_path"].toString()
+              selectedSound.value.isEmpty && Get.arguments["sound_path"] != null
+                  ? Get.arguments["sound_path"]
                   : selectedSound.value,
               GetStorage().read("userId"),
-              Get.arguments["sound_owner"].toString());
+              soundOwner.value.isEmpty ? "" : soundOwner.value);
         } catch (e) {
           errorToast(e.toString());
         }
       }
     });
+    setState(() {});
 
     super.initState();
   }
@@ -526,7 +471,7 @@ class _CameraState extends State<CameraView>
         enableAudio: true);
 
     try {
-      await _controller.initialize();
+      await _controller!.initialize();
       // to notify the widgets that camera has been initialized and now camera preview can be done
       setState(() {});
     } catch (e) {
@@ -536,21 +481,22 @@ class _CameraState extends State<CameraView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_controller.value.isInitialized) {
+    if (!_controller!.value.isInitialized) {
       return;
     }
 
     if (state == AppLifecycleState.inactive) {
-      _controller.dispose();
+      _controller!.dispose();
+      setState(() {});
     } else if (state == AppLifecycleState.resumed) {
-      onNewCameraSelected(_controller.description);
+      onNewCameraSelected(_controller!.description);
     }
   }
 
   //dispose camera controller and timer
   @override
   void dispose() {
-    _controller?.dispose();
+    _controller!.dispose();
     animationController!.dispose();
     time?.cancel();
     super.dispose();
@@ -558,7 +504,7 @@ class _CameraState extends State<CameraView>
 
   void _toggleCameraLens() {
     // get current lens direction (front / rear)
-    final lensDirection = _controller.description.lensDirection;
+    final lensDirection = _controller!.description.lensDirection;
     camera.CameraDescription newDescription;
     if (lensDirection == camera.CameraLensDirection.front) {
       newDescription = cameras.firstWhere((description) =>
@@ -569,7 +515,8 @@ class _CameraState extends State<CameraView>
     }
 
     if (newDescription != null) {
-      onNewCameraSelected(newDescription);
+      _initCamera(newDescription);
+      setState(() {});
     } else {
       print('Asked camera not available');
     }
@@ -609,14 +556,14 @@ class _CameraState extends State<CameraView>
 
   //start video recording
   Future<void> startVideoRecording() async {
-    if (_controller.value.isRecordingVideo) {
+    if (_controller!.value.isRecordingVideo) {
       // A recording has already started, do nothing.
       return;
     }
 
     try {
       // startTimer();
-      await _controller.startVideoRecording().then((value) => {
+      await _controller?.startVideoRecording().then((value) => {
             setState(() {
               loaderWidth = 110;
               loaderHeight = 110;
@@ -630,9 +577,11 @@ class _CameraState extends State<CameraView>
   }
 
   Future<void> stopVideoRecording() async {
-    if (_controller.value.isInitialized && _controller.value.isRecordingVideo) {
+    if (_controller!.value.isInitialized &&
+        _controller!.value.isRecordingVideo &&
+        _controller != null) {
       try {
-        XFile file = await _controller.stopVideoRecording();
+        XFile file = await _controller!.stopVideoRecording();
         var videoFile = File(file.path);
         var tempPath = await getTemporaryDirectory();
         loaderHeight = 80;
@@ -689,7 +638,7 @@ class _CameraState extends State<CameraView>
 
   //pause video recording and cancel timer
   Future<void> pauseVideoRecording() async {
-    if (!_controller.value.isRecordingVideo) {
+    if (!_controller!.value.isRecordingVideo) {
       loaderHeight = 80;
       loaderWidth = 80;
       setState(() {});
@@ -699,7 +648,7 @@ class _CameraState extends State<CameraView>
     }
 
     try {
-      await _controller.stopVideoRecording();
+      await _controller!.stopVideoRecording();
     } on camera.CameraException catch (e) {
       print('Error pausing video recording: $e');
     }
@@ -707,7 +656,7 @@ class _CameraState extends State<CameraView>
 
   //resume video recording
   Future<void> resumeVideoRecording() async {
-    if (!_controller.value.isRecordingVideo) {
+    if (!_controller!.value.isRecordingVideo) {
       // No video recording was in progress
       return;
     }
@@ -715,7 +664,7 @@ class _CameraState extends State<CameraView>
     loaderWidth = 110;
     setState(() {});
     try {
-      await _controller.stopVideoRecording();
+      await _controller!.stopVideoRecording();
     } on camera.CameraException catch (e) {
       print('Error resuming video recording: $e');
     }
@@ -768,7 +717,7 @@ class _CameraState extends State<CameraView>
 
     if (mounted) {
       setState(() {
-        _isCameraInitialized = _controller.value.isInitialized;
+        _isCameraInitialized = _controller!.value.isInitialized;
       });
     }
   }
@@ -792,138 +741,432 @@ class SelectSoundView extends GetView<SelectSoundController> {
 
   @override
   Widget build(BuildContext context) {
+    var selectedTab = 0.obs;
     return Scaffold(
-      body: controller.obx(
-          (state) => state!.isEmpty
-              ? Column(
+      body: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 10,
+            bottom: TabBar(
+                onTap: (int index) {
+                  selectedTab.value = index;
+                },
+                indicatorColor: ColorManager.colorAccent,
+                indicatorPadding: const EdgeInsets.symmetric(horizontal: 10),
+                tabs: [
+                  Obx(() => Tab(
+                        icon: Icon(
+                          Icons.dashboard,
+                          color: selectedTab.value == 0
+                              ? ColorManager.colorAccent
+                              : ColorManager.colorAccentTransparent,
+                        ),
+                      )),
+                  Obx(() => Tab(
+                        icon: Icon(
+                          Icons.lock,
+                          color: selectedTab.value == 1
+                              ? ColorManager.colorAccent
+                              : ColorManager.colorAccentTransparent,
+                        ),
+                      )),
+                  Obx(() => Tab(
+                    icon: Icon(
+                      Icons.lock,
+                      color: selectedTab.value == 2
+                          ? ColorManager.colorAccent
+                          : ColorManager.colorAccentTransparent,
+                    ),
+                  ))
+                ]),
+          ),
+          body: TabBarView(children: [
+            controller.obx(
+                (state) => state!.isEmpty
+                    ? Column(
+                        children: [emptyListWidget()],
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: state!.length,
+                        itemBuilder: (context, index) => InkWell(
+                              child: Container(
+                                margin: const EdgeInsets.all(10),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Image.asset(
+                                              "assets/Image.png",
+                                              height: 80,
+                                              width: 80,
+                                            ),
+                                            Container(
+                                              height: 40,
+                                              width: 40,
+                                              child: imgProfile(state[index]
+                                                          .soundOwner !=
+                                                      null
+                                                  ? state[index]
+                                                      .soundOwner!
+                                                      .avtars
+                                                      .toString()
+                                                  : RestUrl.placeholderImage),
+                                            )
+                                          ],
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              state[index].sound.toString(),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 18),
+                                            ),
+                                            Text(
+                                              state[index].soundOwner == null
+                                                  ? ""
+                                                  : state[index]
+                                                      .soundOwner!
+                                                      .name
+                                                      .toString(),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14),
+                                            ),
+                                            Text(
+                                              state[index].soundOwner == null
+                                                  ? ""
+                                                  : state[index]
+                                                      .soundOwner!
+                                                      .name
+                                                      .toString(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      state[index].soundOwner == null
+                                          ? "0"
+                                          : state[index]
+                                              .soundOwner!
+                                              .followersCount
+                                              .toString(),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              onTap: () async {
+                                var fileSupport = FileSupport();
+                                var currentProgress = "0".obs;
+                                Get.defaultDialog(
+                                    title: "Downloading audio",
+                                    content:
+                                        Obx(() => Text(currentProgress.value)));
+                                await fileSupport
+                                    .downloadCustomLocation(
+                                  url:
+                                      "${RestUrl.awsSoundUrl}${state[index].sound}",
+                                  path: saveCacheDirectory,
+                                  filename: basenameWithoutExtension(
+                                      state[index].sound.toString()),
+                                  extension: ".mp3",
+                                  progress: (progress) async {
+                                    currentProgress.value = progress;
+                                  },
+                                )
+                                    .then((value) {
+                                  soundOwner.value =
+                                          state[index]
+                                              .soundOwner!
+                                              .username
+                                              .toString();
+                                  selectedSound.value = value!.uri.toString();
+                                  Get.back();
+                                  // Get.toNamed(Routes.CAMERA, arguments: {
+                                  //   "sound_url": value!.path,
+                                  //   "sound_name": soundName,
+                                  //   "sound_owner": userName
+                                  // });
+                                }).onError((error, stackTrace) {
+                                  Get.back();
+                                  errorToast(error.toString());
+                                });
+                              },
+                            )),
+                onEmpty: Column(
+                  children: [emptyListWidget()],
+                ),
+                onLoading: Container(
+                  child: loader(),
+                  height: Get.height,
+                  width: Get.width,
+                )),
+            controller.obx(
+                (_) => controller.localSoundsList!.isEmpty
+                    ? Column(
+                        children: [emptyListWidget()],
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: controller.localSoundsList!.length,
+                        itemBuilder: (context, index) => InkWell(
+                              child: Container(
+                                margin: const EdgeInsets.all(10),
+                                child: Row(
+                                  children: [
+                                    Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Image.asset(
+                                          "assets/Image.png",
+                                          height: 80,
+                                          width: 80,
+                                        ),
+                                        Container(
+                                          height: 40,
+                                          width: 40,
+                                          child: imgProfile(controller
+                                                      .localSoundsList[index]
+                                                      .artist !=
+                                                  null
+                                              ? controller
+                                                  .localSoundsList[index]
+                                                  .displayNameWOExt!
+                                                  .toString()
+                                              : RestUrl.placeholderImage),
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          controller
+                                              .localSoundsList[index].title
+                                              .toString(),
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 18),
+                                        ),
+                                        Text(
+                                          controller.localSoundsList[index]
+                                                      .album ==
+                                                  null
+                                              ? ""
+                                              : controller
+                                                  .localSoundsList[index].album
+                                                  .toString(),
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14),
+                                        ),
+                                        Text(
+                                          controller.localSoundsList[index]
+                                                      .dateAdded ==
+                                                  null
+                                              ? ""
+                                              : controller
+                                                  .localSoundsList[index]
+                                                  .dateAdded
+                                                  .toString(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              onTap: () async {
+                                var file = File(controller
+                                    .localSoundsList[index].uri
+                                    .toString());
+                                successToast(file.path);
+                                selectedSound.value = file.path;
+
+                                // soundOwner.value =
+                                //     state[index].soundOwner!.name ??
+                                //         state[index]
+                                //             .soundOwner!
+                                //             .username
+                                //             .toString();
+                                // selectedSound.value = value!.path;
+                                // Get.back();
+                              },
+                            )),
+                onLoading: Container(
+                  child: loader(),
+                  height: Get.height,
+                  width: Get.width,
+                )),
+            controller.obx(
+                    (_) => controller.favouriteSounds!.isEmpty
+                    ? Column(
                   children: [emptyListWidget()],
                 )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: state!.length,
-                  itemBuilder: (context, index) => InkWell(
-                        child: Container(
-                          margin: const EdgeInsets.all(10),
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Image.asset(
-                                        "assets/Image.png",
-                                        height: 80,
-                                        width: 80,
-                                      ),
-                                      Container(
-                                        height: 40,
-                                        width: 40,
-                                        child: imgProfile(
-                                            state[index].soundOwner != null
-                                                ? state[index]
-                                                    .soundOwner!
-                                                    .avtars
-                                                    .toString()
-                                                : RestUrl.placeholderImage),
-                                      )
-                                    ],
+                    : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: controller.favouriteSounds!.length,
+                    itemBuilder: (context, index) => InkWell(
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Image.asset(
+                                  "assets/Image.png",
+                                  height: 80,
+                                  width: 80,
+                                ),
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  child: imgProfile(controller
+                                      .favouriteSounds[index]
+                                      .name !=
+                                      null
+                                      ? controller
+                                      .favouriteSounds[index]
+                                      .name!
+                                      .toString()
+                                      : RestUrl.placeholderImage),
+                                )
+                              ],
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  controller
+                                      .favouriteSounds[index].sound
+                                      .toString(),
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18),
+                                ),
+                                Text(
+                                  controller.favouriteSounds[index]
+                                      .sound ==
+                                      null
+                                      ? ""
+                                      : controller
+                                      .favouriteSounds[index].sound
+                                      .toString(),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14),
+                                ),
+                                Text(
+                                  controller.favouriteSounds[index]
+                                      .createdAt ==
+                                      null
+                                      ? ""
+                                      : controller
+                                      .favouriteSounds[index]
+                                      .createdAt
+                                      .toString(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
                                   ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        state[index].sound.toString(),
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 18),
-                                      ),
-                                      Text(
-                                        state[index].soundOwner == null
-                                            ? ""
-                                            : state[index]
-                                                .soundOwner!
-                                                .name
-                                                .toString(),
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 14),
-                                      ),
-                                      Text(
-                                        state[index].soundOwner == null
-                                            ? ""
-                                            : state[index]
-                                                .soundOwner!
-                                                .name
-                                                .toString(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                state[index].soundOwner == null
-                                    ? "0"
-                                    : state[index]
-                                        .soundOwner!
-                                        .followersCount
-                                        .toString(),
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 14),
-                              )
-                            ],
-                          ),
+                                )
+                              ],
+                            ),
+                          ],
                         ),
-                        onTap: () async {
-                          var fileSupport = FileSupport();
-                          var currentProgress = "0".obs;
-                          Get.defaultDialog(
-                              title: "Downloading audio",
-                              content: Obx(() => Text(currentProgress.value)));
-                          await fileSupport
-                              .downloadCustomLocation(
-                            url: "${RestUrl.awsSoundUrl}${state[index].sound}",
-                            path: saveCacheDirectory,
-                            filename: basenameWithoutExtension(
-                                state[index].sound.toString()),
-                            extension: ".mp3",
-                            progress: (progress) async {
-                              currentProgress.value = progress;
-                            },
-                          )
-                              .then((value) {
-                            selectedSound.value = value!.path;
-                            Get.back();
-                            // Get.toNamed(Routes.CAMERA, arguments: {
-                            //   "sound_url": value!.path,
-                            //   "sound_name": soundName,
-                            //   "sound_owner": userName
-                            // });
-                          }).onError((error, stackTrace) {
-                            Get.back();
-                            errorToast(error.toString());
-                          });
-                        },
-                      )),
-          onEmpty: Column(
-            children: [emptyListWidget()],
-          ),
-          onLoading: Container(
-            child: loader(),
-            height: Get.height,
-            width: Get.width,
-          )),
+                      ),
+                      onTap: () async {
+                        var fileSupport = FileSupport();
+                        var currentProgress = "0".obs;
+                        Get.defaultDialog(
+                            title: "Downloading audio",
+                            content:
+                            Obx(() => Text(currentProgress.value)));
+                        await fileSupport
+                            .downloadCustomLocation(
+                          url:
+                          "${RestUrl.awsSoundUrl}${controller.favouriteSounds[index].sound}",
+                          path: saveCacheDirectory,
+                          filename: basenameWithoutExtension(
+                              controller.favouriteSounds[index].sound.toString()),
+                          extension: ".mp3",
+                          progress: (progress) async {
+                            currentProgress.value = progress;
+                          },
+                        )
+                            .then((value) {
+                          soundOwner.value =
+                              controller.favouriteSounds[index]
+                                  .user!
+                                  .username
+                                  .toString();
+                          selectedSound.value = value!.uri.toString();
+                          Get.back();
+                          // Get.toNamed(Routes.CAMERA, arguments: {
+                          //   "sound_url": value!.path,
+                          //   "sound_name": soundName,
+                          //   "sound_owner": userName
+                          // });
+                        }).onError((error, stackTrace) {
+                          Get.back();
+                          errorToast(error.toString());
+                        });
+
+                        // soundOwner.value =
+                        //     state[index].soundOwner!.name ??
+                        //         state[index]
+                        //             .soundOwner!
+                        //             .username
+                        //             .toString();
+                        // selectedSound.value = value!.path;
+                        // Get.back();
+                      },
+                    )),
+                onLoading: Container(
+                  child: loader(),
+                  height: Get.height,
+                  width: Get.width,
+                ))
+          ]),
+        ),
+      ),
     );
   }
 }

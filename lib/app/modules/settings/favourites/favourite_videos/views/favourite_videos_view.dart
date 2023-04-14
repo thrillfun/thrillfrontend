@@ -20,8 +20,8 @@ class FavouriteVideosView extends GetView<FavouriteVideosController> {
                 children: [emptyListWidget()],
               )
             : Padding(
-          padding: EdgeInsets.all(10),
-              child: GridView.count(
+                padding: EdgeInsets.all(10),
+                child: GridView.count(
                   crossAxisCount: 2,
                   crossAxisSpacing: 10,
                   childAspectRatio: 0.8,
@@ -48,12 +48,15 @@ class FavouriteVideosView extends GetView<FavouriteVideosController> {
                                                 child: Icon(
                                                   Icons.play_circle,
                                                   size: 14,
-                                                  color: ColorManager.colorAccent,
+                                                  color:
+                                                      ColorManager.colorAccent,
                                                 ),
                                               ),
                                               TextSpan(
                                                 text: "  " +
-                                                    state[index].views.toString(),
+                                                    state[index]
+                                                        .views
+                                                        .toString(),
                                               ),
                                             ],
                                           ),
@@ -105,47 +108,14 @@ class FavouriteVideosView extends GetView<FavouriteVideosController> {
                             ),
                             onTap: () {
                               Get.toNamed(Routes.FAVOURITE_VIDEO_PLAYER,
-                                  arguments: {"favourite_videos": state});
-                              // List<PublicVideos> videosList1 = [];
-                              // controller.favouriteVideos.forEach((element) {
-                              //   var user = PublicUser(
-                              //     id: element.user?.id,
-                              //     name: element.user?.name,
-                              //     facebook: element.user?.facebook,
-                              //     firstName: element.user?.firstName,
-                              //     lastName: element.user?.lastName,
-                              //     username: element.user?.username,
-                              //     isFollow: 0,
-                              //   );
-                              //   videosList1.add(PublicVideos(
-                              //     id: element.id,
-                              //     video: element.video,
-                              //     description: element.description,
-                              //     sound: element.sound,
-                              //     soundName: element.soundName,
-                              //     soundCategoryName: element.soundCategoryName,
-                              //     // soundOwner: element.soundOwner,
-                              //     filter: element.filter,
-                              //     likes: element.likes,
-                              //     views: element.views,
-                              //     gifImage: element.gifImage,
-                              //     speed: element.speed,
-                              //     comments: element.comments,
-                              //     isDuet: "no",
-                              //     duetFrom: "",
-                              //     isCommentable: "yes",
-                              //     // videoLikeStatus: element.videoLikeStatus,
-                              //     user: user,
-                              //   ));
-                              // });
-                              // Get.to(VideoPlayerItem(
-                              //   videosList: videosList1,
-                              //   position: index,
-                              // ));
+                                  arguments: {
+                                    "favourite_videos": state,
+                                    "init_page": index
+                                  });
                             },
                           )),
                 ),
-            ),
+              ),
         onLoading: loader(),
         onEmpty: emptyListWidget(data: "No favourite videos"));
   }

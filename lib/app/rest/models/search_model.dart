@@ -445,9 +445,11 @@ class SoundsList {
   String? name;
   SoundOwner? soundOwner;
   int? sound_used_inweek_count;
+  String? createdAt;
+  String? updatedAt;
 
   SoundsList(
-      {this.id, this.sound, this.category, this.userId, this.soundOwner});
+      {this.id, this.sound, this.category, this.userId, this.soundOwner,this.createdAt,this.updatedAt});
 
   SoundsList.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -459,6 +461,8 @@ class SoundsList {
         ? new SoundOwner.fromJson(json['sound_owner'])
         : null;
     sound_used_inweek_count = json["sound_used_inweek_count"] ?? 0;
+    createdAt = json["created_at"]??"";
+    updatedAt = json["updated_at"]??"";
   }
 
   Map<String, dynamic> toJson() {
@@ -472,6 +476,8 @@ class SoundsList {
       data['sound_owner'] = this.soundOwner!.toJson();
     }
     data["sound_used_inweek_count"]= this.sound_used_inweek_count;
+    data["created_at"] = this.createdAt;
+    data["updated_at"]= this.updatedAt;
     return data;
   }
 }
