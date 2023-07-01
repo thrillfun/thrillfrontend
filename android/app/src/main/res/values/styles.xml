@@ -5,15 +5,73 @@
         <!-- Show a splash screen on the activity. Automatically removed when
              Flutter draws its first frame -->
         <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.
          This theme determines the color of the Android Window while your
          Flutter UI initializes, as well as behind your Flutter UI while its
-         running.
+         running.¬
 
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
-
+    <style name="default_editor_theme" parent="Theme.Imgly">
+        <item name="imgly_background_color">#000000</item>
+        <item name="imgly_optionToolBar_background_color">#000000</item>
+        <item name="imgly_actionBar_background_color">#000000</item>
+        <item name="imgly_slider_background_color">#000000</item>
+        <item name="imgly_slider_thumb_color">#0A8381</item>
+        <item name="imgly_slider_track_color">#0A8381</item>
+        <item name="imgly_editor_text_color_secondary">#ffffff</item>
+        <item name="imgly_slider_thumb_color_disabled">#000000</item>
+        <item name="imgly_highlight_color">#000000</item>
+        <item name="imgly_transparent_color">@color/imgly_transparent_color</item>
+        <item name="imgly_camera_header_background_color">@color/imgly_camera_header_background_color</item>
+        <item name="imgly_camera_footer_background_color">#ffffff</item>
+        <item name="imgly_icon_border_color_active">#0A8381</item>
+        <item name="imgly_slider_track_color_progress">#0A8381</item>
+        <item name="imgly_text_color">@color/imgly_text_color</item>
+        <item name="imgly_editor_text_color">@color/imgly_editor_text_color</item>
+        <item name="imgly_camera_text_color">@color/imgly_camera_text_color</item>
+        <item name="imgly_text_color_active">@color/imgly_text_color_active</item>
+        <item name="imgly_text_on_image_color">@color/imgly_text_on_image_color</item>
+        <item name="imgly_icon_color_active">#0A8381</item>
+        <item name="imgly_shuffle_icon_color">@color/imgly_shuffle_icon_color</item>
+        <item name="imgly_text_on_image_color_secondary">@color/imgly_text_on_image_color_secondary</item>
+        <item name="imgly_button_color">@color/imgly_button_color</item>
+        <item name="imgly_button_color_pressed">@color/imgly_button_color_pressed</item>
+        <item name="imgly_button_color_disabled">@color/imgly_button_color_disabled</item>
+        <item name="imgly_icon_color">#0A8381</item>
+        <item name="imgly_icon_color_disabled">@color/imgly_icon_color_disabled</item>
+        <item name="imgly_crop_icon_fill_color_active">@color/imgly_crop_icon_fill_color_active</item>
+        <item name="imgly_crop_icon_fill_color">@color/imgly_crop_icon_fill_color</item>
+        <item name="imgly_text_input_background_color">@color/imgly_text_input_background_color</item>
+        <item name="imgly_sticker_selection_background_color">@color/imgly_sticker_selection_background_color</item>
+        <item name="imgly_audio_selection_background_color">@color/imgly_audio_selection_background_color</item>
+        <item name="imgly_audio_selection_background_color_selected">#0A8381</item>
+        <item name="imgly_quickOptionToolBar_background_color">@color/imgly_quickOptionToolBar_background_color</item>
+        <item name="imgly_dialog_background_color">@color/imgly_dialog_background_color</item>
+        <item name="imgly_shuffle_icon_overlay_color">@color/imgly_shuffle_icon_overlay_color</item>
+        <item name="imgly_text_on_image_background_color">@color/imgly_text_on_image_background_color</item>
+        <item name="imgly_brush_preview_background_color">@color/imgly_brush_preview_background_color</item>
+        <item name="imgly_icon_color_on_canvas">@color/imgly_icon_color_on_canvas</item>
+        <item name="imgly_icon_color_on_canvas_disabled">@color/imgly_icon_color_on_canvas_disabled</item>
+        <item name="imgly_icon_color_secondary">@color/imgly_icon_color_secondary</item>
+        <item name="imgly_camera_background_color">@color/imgly_camera_background_color</item>
+        <item name="imgly_camera_icon_color">@color/imgly_camera_icon_color</item>
+        <item name="imgly_transform_background_color">@color/imgly_transform_background_color</item>
+        <item name="imgly_editor_position_snap_indicator_color">@color/imgly_editor_position_snap_indicator_color</item>
+        <item name="imgly_editor_rotation_snap_indicator_color">@color/imgly_editor_rotation_snap_indicator_color</item>
+        <item name="imgly_editor_bounding_snap_indicator_color">@color/imgly_editor_bounding_snap_indicator_color</item>
+        <item name="imgly_tooltip_background_color">@color/imgly_tooltip_background_color</item>
+        <item name="imgly_time_line_range_limit_reached_color">@color/imgly_time_line_range_limit_reached_color</item>
+        <item name="imgly_thumb_handle_limit_reached_color">@color/imgly_thumb_handle_limit_reached_color</item>
+        <item name="imgly_time_line_range_color">#0A8381</item>
+        <item name="imgly_thumb_handle_color">@color/imgly_thumb_handle_color</item>
+        <item name="android:windowBackground">@color/imgly_text_on_image_background_color</item>
+    </style>
 </resources>

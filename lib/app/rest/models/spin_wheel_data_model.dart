@@ -34,10 +34,10 @@ class WheelData {
 
   WheelData(
       {this.recentRewards,
-        this.availableChance,
-        this.usedChance,
-        this.lastReward,
-        this.wheelRewards});
+      this.availableChance,
+      this.usedChance,
+      this.lastReward,
+      this.wheelRewards});
 
   WheelData.fromJson(Map<String, dynamic> json) {
     if (json['recent_rewards'] != null) {
@@ -46,7 +46,7 @@ class WheelData {
         recentRewards!.add(new RecentRewards.fromJson(v));
       });
     }
-    availableChance = json['available_chance'];
+    availableChance = json['available_chance'] ?? "0";
     usedChance = json['used_chance'];
     lastReward = json['last_reward'];
     if (json['wheel_rewards'] != null) {
@@ -114,15 +114,15 @@ class WheelRewards {
 
   WheelRewards(
       {this.id,
-        this.amount,
-        this.currency,
-        this.currencySymbol,
-        this.probability,
-        this.probabilityCounter,
-        this.isImage,
-        this.imagePath,
-        this.createdAt,
-        this.updatedAt});
+      this.amount,
+      this.currency,
+      this.currencySymbol,
+      this.probability,
+      this.probabilityCounter,
+      this.isImage,
+      this.imagePath,
+      this.createdAt,
+      this.updatedAt});
 
   WheelRewards.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -152,6 +152,7 @@ class WheelRewards {
     return data;
   }
 }
+
 class RewardModel {
   bool? status;
   RewardData? data;

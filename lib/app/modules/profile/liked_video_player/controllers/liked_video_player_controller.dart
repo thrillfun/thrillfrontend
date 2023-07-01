@@ -1,4 +1,5 @@
 import 'package:better_player/better_player.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:file_support/file_support.dart';
@@ -16,14 +17,20 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../../rest/models/site_settings_model.dart';
+import '../../../../rest/models/user_liked_videos_model.dart';
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/utils.dart';
+import '../../user_liked_videos/controllers/user_liked_videos_controller.dart';
 
-class LikedVideoPlayerController extends GetxController {
+class LikedVideoPlayerController extends GetxController
+    with StateMixin<RxList<LikedVideos>> {
+  RxList<LikedVideos> likedVideos = RxList<LikedVideos>();
 
   BetterPlayerEventType? eventType;
+  VideoPlayerController? videoPlayerController;
   var isUserBlocked = false.obs;
   var isLoading = false.obs;
   var isVideoReported = false.obs;
@@ -32,6 +39,7 @@ class LikedVideoPlayerController extends GetxController {
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  var userLikedVideosController = Get.find<UserLikedVideosController>();
   @override
   void onInit() {
     super.onInit();
@@ -39,13 +47,66 @@ class LikedVideoPlayerController extends GetxController {
 
   @override
   void onReady() {
+    getUserLikedVideos();
     super.onReady();
   }
 
   @override
   void onClose() {
+    if (videoPlayerController!.value.isInitialized &&
+        videoPlayerController != null) {
+      videoPlayerController!.dispose();
+    }
     super.onClose();
   }
+
+  Future<void> notInterested(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/change_interest", queryParameters: {
+      "content_id": videoId,
+      "filter_by": "tag"
+    }).then((value) {
+      value.data["status"]
+          ? successToast(value.data["message"])
+          : errorToast(value.data["message"]);
+      getUserLikedVideos();
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
+
+  Future<void> postVideoView(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/view", queryParameters: {"video_id": videoId}).then(
+        (value) {
+      if (value.data["status"]) {
+        Logger().wtf("View posted successfully");
+      }
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<void> getUserLikedVideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (likedVideos.isEmpty) {
+      change(likedVideos, status: RxStatus.loading());
+    }
+    dio.post('/user/user-liked-videos', queryParameters: {
+      "user_id": "${await GetStorage().read("userId")}"
+    }).then((result) {
+      likedVideos = UserLikedVideosModel.fromJson(result.data).data!.obs;
+      change(likedVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      print(error);
+      change(likedVideos, status: RxStatus.error(error.toString()));
+    });
+  }
+
   Future<bool> likeVideo(int isLike, int videoId,
       {int userId = 0, String? token}) async {
     var isLiked = false;
@@ -56,10 +117,9 @@ class LikedVideoPlayerController extends GetxController {
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      // getAllVideos();
+      getUserLikedVideos();
       if (isLike == 1) {
-
-        sendNotification(token.toString(),title: "Someone liked your video!");
+        sendNotification(token.toString(), title: "Someone liked your video!");
         // await notificationsController.sendFcmNotification(token.toString(),
         //     title:
         //     "${await GetStorage().read("user")["username"]} liked you video",
@@ -69,6 +129,7 @@ class LikedVideoPlayerController extends GetxController {
         // await notificationsController.sendChatNotifcations(userId,
         //     "${await GetStorage().read("user")["username"]} liked your video!");
       }
+      userLikedVideosController.getUserLikedVideos();
     }).onError((error, stackTrace) {
       errorToast(error.toString());
     });
@@ -92,6 +153,7 @@ class LikedVideoPlayerController extends GetxController {
       "action": "$action"
     }).then((value) {
       if (value.data["status"]) {
+        getUserLikedVideos();
         // getAllVideos();
       } else {
         errorToast(value.data["message"]);
@@ -134,22 +196,27 @@ class LikedVideoPlayerController extends GetxController {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     dio.post("video/delete", queryParameters: {"video_id": videoId}).then(
-            (value) {
-          if (value.data["status"]) {
-            successToast(value.data["message"]);
-            // getAllVideos();
-          } else {
-            errorToast(value.data["message"]);
-          }
-        }).onError((error, stackTrace) {
+        (value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+        // getAllVideos();
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {
       errorToast(error.toString());
     });
   }
 
   downloadAndProcessVideo(String videoUrl, String videoName) async {
-    Get.defaultDialog(title: "Loading", content: loader());
+    var videoProgress = "0".obs;
+    Get.defaultDialog(
+        title: "Download video....",
+        content: Container(
+          child: Obx(() => Text(videoProgress.value)),
+        ));
     final directory = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_PICTURES);
+        ExternalPath.DIRECTORY_MOVIES);
     if (await Directory('$directory/thrill/').exists() == false) {
       await Directory('$directory/thrill/').create();
     }
@@ -164,12 +231,14 @@ class LikedVideoPlayerController extends GetxController {
       filename: videoName,
       extension: ".mp4",
       progress: (progress) async {
-        Logger().i(progress);
+        videoProgress.value = progress;
       },
     )
         .then((video) async {
+      if (Get.isDialogOpen!) {
+        Get.back();
+      }
       successToast("video downloaded successfully");
-      Get.back();
 
       // await FFmpegKit.execute(
       //     "-y -i ${video!.path} -i ${logo!.path} -filter_complex overlay=10:10 -codec:a copy ${path.path}$videoName.mp4")
@@ -184,7 +253,6 @@ class LikedVideoPlayerController extends GetxController {
       //   }
       // }).onError((error, stackTrace) => errorToast(error.toString()));
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
       Get.back();
     });
   }
@@ -229,6 +297,7 @@ class LikedVideoPlayerController extends GetxController {
 
     return isVideoReported.value;
   }
+
   Future<String> createDynamicLink(
       String id, String? type, String? name, String? avatar,
       {String? referal}) async {
@@ -247,7 +316,7 @@ class LikedVideoPlayerController extends GetxController {
       // ),
     );
     final dynamicLink =
-    await FirebaseDynamicLinks.instance.buildLink(parameters);
+        await FirebaseDynamicLinks.instance.buildLink(parameters);
 
     return dynamicLink.toString();
   }
@@ -257,7 +326,7 @@ class LikedVideoPlayerController extends GetxController {
     var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
     dio.options.headers = {
       "Authorization":
-      "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+          "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
     };
     final data = {
       "to": fcmToken,
@@ -269,7 +338,7 @@ class LikedVideoPlayerController extends GetxController {
         "id": "1",
         "status": "done",
         "image":
-        "https://scontent.fbom19-2.fna.fbcdn.net/v/t39.30808-6/271720827_4979339162088555_3028905257532289818_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=HMgk-tDtBcQAX9uJheY&_nc_ht=scontent.fbom19-2.fna&oh=00_AfCVE7nSsxVGPTfTa8FCyff4jOzTKWi_JvTXpDWm7WrVjg&oe=63E84FB2"
+            "https://scontent.fbom19-2.fna.fbcdn.net/v/t39.30808-6/271720827_4979339162088555_3028905257532289818_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=HMgk-tDtBcQAX9uJheY&_nc_ht=scontent.fbom19-2.fna&oh=00_AfCVE7nSsxVGPTfTa8FCyff4jOzTKWi_JvTXpDWm7WrVjg&oe=63E84FB2"
       }
     };
     dio.post("/send", data: jsonEncode(data)).then((value) {

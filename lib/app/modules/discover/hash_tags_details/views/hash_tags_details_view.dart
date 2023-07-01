@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 
 import '../../../../rest/rest_urls.dart';
@@ -15,7 +16,7 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Tending Hashtag",
+          title: const Text("Tending Hashtag",
               style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w700,
@@ -45,59 +46,60 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
                     const SizedBox(
                       width: 10,
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          (Get.arguments["hashtag_name"] as String),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 24),
-                        ),
-                        Text(
-                          state!.length.toString() + " Videos",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w500, fontSize: 14),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              border:
-                                  Border.all(color: ColorManager.colorAccent),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 20),
-                            child: InkWell(
-                              onTap: () async {
-                                await controller.addHashtagToFavourite();
-                              },
-                              child: RichText(
-                                text: const TextSpan(
-                                  children: [
-                                    WidgetSpan(
-                                      child: Icon(
-                                        Icons.bookmark,
-                                        size: 18,
-                                        color: ColorManager.colorAccent,
-                                      ),
-                                    ),
-                                    TextSpan(
+                    Expanded(
+                      child: Text(
+                        (Get.arguments["hashtag_name"] as String)
+                            .replaceAll("#", ""),
+                        style: const TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 24),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Container(
+                    margin: const EdgeInsets.all(10),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: ColorManager.colorAccent),
+                    ),
+                    padding: const EdgeInsets.all(10),
+                    child: InkWell(
+                      onTap: () async {
+                        await controller.addHashtagToFavourite();
+                      },
+                      child: Obx(() => Text.rich(
+                            TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Icon(
+                                    Icons.bookmark,
+                                    size: 18,
+                                    color: ColorManager.colorAccent,
+                                  ),
+                                ),
+                                controller.isFavouriteHastag.isFalse
+                                    ? TextSpan(
                                         text: "  Add to Favourites",
                                         style: TextStyle(
                                             fontWeight: FontWeight.w700,
                                             color: ColorManager.colorAccent,
+                                            fontSize: 14))
+                                    : TextSpan(
+                                        text: "  Remove from favourites",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: ColorManager.colorAccent,
                                             fontSize: 14)),
-                                  ],
-                                ),
-                              ),
-                            ))
-                      ],
-                    )
-                  ],
-                ),
+                              ],
+                            ),
+                          )),
+                    )),
                 SizedBox(
                   width: Get.width,
                   height: 50,
@@ -119,7 +121,7 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
                                   onTap: () {
                                     Get.toNamed(Routes.HASH_TAGS_VIDEO_PLAYER,
                                         arguments: {
-                                          "hash_tags_videos": state,
+                                          "hashtagId": state[videoIndex].id,
                                           "init_page": videoIndex
                                         });
                                     // List<PublicVideos> videosList1 = [
@@ -206,8 +208,10 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
                                             ),
                                             TextSpan(
                                                 text: " " +
-                                                    state[videoIndex]
-                                                        .views
+                                                    NumberFormat.compact()
+                                                        .format(
+                                                            state[videoIndex]
+                                                                .views)
                                                         .toString(),
                                                 style: const TextStyle(
                                                     color: Colors.white,

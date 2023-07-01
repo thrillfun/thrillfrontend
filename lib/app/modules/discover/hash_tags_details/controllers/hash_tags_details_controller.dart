@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logger/logger.dart';
 import 'package:thrill/app/utils/utils.dart';
 
 import '../../../../rest/models/hash_tag_details_model.dart';
@@ -9,18 +10,21 @@ import '../../../../rest/rest_urls.dart';
 class HashTagsDetailsController extends GetxController
     with StateMixin<RxList<HashtagRelatedVideos>> {
   RxList<HashtagRelatedVideos> hashTagsDetailsList = RxList();
+
+  var isFavouriteHastag = false.obs;
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
 
   @override
   void onInit() {
-    getVideosByHashTags();
     super.onInit();
   }
 
   @override
   void onReady() {
+    getVideosByHashTags();
+
     super.onReady();
   }
 
@@ -39,6 +43,8 @@ class HashTagsDetailsController extends GetxController
       "hashtag_id": "${await GetStorage().read("hashtagId")}"
     }).then((value) {
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
+      isFavouriteHastag.value =
+          hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
       change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());
@@ -53,7 +59,7 @@ class HashTagsDetailsController extends GetxController
       queryParameters: {
         "id": "${await GetStorage().read("hashtagId")}",
         "type": "hashtag",
-        "action": "1"
+        "action": isFavouriteHastag.value == true ? "0" : "1"
       },
     ).then((value) {
       if (value.data["status"]) {
@@ -61,8 +67,9 @@ class HashTagsDetailsController extends GetxController
       } else {
         errorToast(value.data["message"]);
       }
+      getVideosByHashTags();
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().wtf(error);
     });
   }
 }

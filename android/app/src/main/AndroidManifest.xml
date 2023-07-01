@@ -1,34 +1,50 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.thrill.media">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+
     <uses-permission android:name="android.permission.FLASHLIGHT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Android 12 or below  -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- Android 13 or greater  -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
-    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
-    <uses-feature android:name="android.hardware.camera.front" />
-    <uses-feature android:name="android.hardware.microphone" />
-    <uses-feature android:name="android.hardware.camera2" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!--
+        features permissions
+    -->
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera2"
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.camera.autofocus"
-        android:required="true" />
-    <uses-feature android:name="android.hardware.camera.flash" />
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <queries>
         <intent>
@@ -47,9 +63,11 @@
         android:usesCleartextTraffic="true">
 
         <!--2p8y5ccc015211dea4dd5b6a7bc87e9c19d64 release key truecaller -->
-        <!--KImlN2daecc7755b14526b6651ad8e1e34362 debug key truecaller -->
+        <!--7PbVA3996bab134634b79a0db162244f8f15b debug key truecaller -->
 
-        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="2p8y5ccc015211dea4dd5b6a7bc87e9c19d64"/>
+        <meta-data
+            android:name="com.truecaller.android.sdk.PartnerKey"
+            android:value="2p8y5ccc015211dea4dd5b6a7bc87e9c19d64" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
@@ -81,27 +99,30 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
 
-     
+
             </intent-filter>
 
             <intent-filter>
-    <action android:name="android.intent.action.VIEW"/>
-    <category android:name="android.intent.category.DEFAULT"/>
-    <category android:name="android.intent.category.BROWSABLE"/>
-    <data
-        android:host="thrill.fun"
-        android:scheme="https"/>
-</intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="thrill.fun"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
 
         <activity
-    android:name="com.yalantis.ucrop.UCropActivity"
-    android:screenOrientation="portrait"
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
@@ -109,4 +130,5 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
 </manifest>

@@ -1,14 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:sim_data/sim_data.dart';
 import 'package:sim_data/sim_model.dart';
+import 'package:thrill/app/modules/related_videos/controllers/related_videos_controller.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 import 'package:firebase_auth/firebase_auth.dart' as user;
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -24,7 +22,7 @@ class LoginController extends GetxController with StateMixin<dynamic> {
   var isSimCardAvailable = true.obs;
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var qrData = "".obs;
-
+  var relatedVideosController = Get.find<RelatedVideosController>();
   @override
   void onInit() {
     super.onInit();
@@ -64,19 +62,22 @@ class LoginController extends GetxController with StateMixin<dynamic> {
           ? ""
           : GetStorage().read("referral_code").toString()
     }).then((value) async {
-      if(Get.isBottomSheetOpen!){
+      if (Get.isBottomSheetOpen!) {
         Get.back();
-        Get.defaultDialog(title: "Signing you in Please wait",content: loader(),middleText: "");
+        Get.defaultDialog(
+            title: "Signing you in Please wait",
+            content: loader(),
+            middleText: "");
       }
-      if(value.data["status"]){
+      if (value.data["status"]) {
         userProfile = UserDetailsModel.fromJson(value.data).data!.user!;
 
         await storage.write(
             "userId", UserDetailsModel.fromJson(value.data).data!.user!.id!);
         await storage.write(
             "name", UserDetailsModel.fromJson(value.data).data!.user!.name!);
-        await storage.write(
-            "avatar", UserDetailsModel.fromJson(value.data).data!.user!.avatar!);
+        await storage.write("avatar",
+            UserDetailsModel.fromJson(value.data).data!.user!.avatar!);
         await storage.write("username",
             UserDetailsModel.fromJson(value.data).data!.user!.username!);
         await storage.write("token",
@@ -96,19 +97,15 @@ class LoginController extends GetxController with StateMixin<dynamic> {
         change(userProfile, status: RxStatus.success());
 
         await storage.write("user", userProfile).then((_) async {
-          await Get.forceAppUpdate();
+          await relatedVideosController.refereshVideos();
           Get.back(closeOverlays: true);
         });
 
         successToast(value.data["message"]);
-      }
-      else{
+      } else {
         errorToast(value.data["message"]);
       }
-
-    }).onError((error, stackTrace) {
-      change(userProfile, status: RxStatus.error(error.toString()));
-    });
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> signInWithGoogle() async {
@@ -145,10 +142,11 @@ class LoginController extends GetxController with StateMixin<dynamic> {
     }
   }
 
-  Future<void> signinTrueCaller(String social_login_id, String phone,
-      String firebase_token, String name) async {
+  Future<void> signinTrueCaller(
+      String social_login_id, String phone, String name) async {
+    var firebase_token = await FirebaseMessaging.instance.getToken();
     dio.post("/SocialLogin", queryParameters: {
-      "social_login_id": social_login_id,
+      "social_login_id": firebase_token,
       "social_login_type": "truecaller",
       "phone": phone,
       "firebase_token": firebase_token,
@@ -170,9 +168,9 @@ class LoginController extends GetxController with StateMixin<dynamic> {
 
           change(userProfile, status: RxStatus.success());
 
-          await storage.write("user", userProfile).then((_) {
-            Get.forceAppUpdate();
-            Get.toNamed(Routes.HOME);
+          await storage.write("user", userProfile).then((_) async {
+            await relatedVideosController.refereshVideos();
+            Get.back(closeOverlays: true);
           });
         } else {
           errorToast(value.data["message"]);

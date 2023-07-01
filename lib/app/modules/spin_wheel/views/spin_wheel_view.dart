@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:glassmorphism/glassmorphism.dart';
+import 'package:iconly/iconly.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
@@ -14,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:thrill/app/modules/spin_wheel/user_levels/views/user_levels_view.dart';
 
 import '../../../rest/models/spin_wheel_data_model.dart';
@@ -25,7 +28,6 @@ import '../controllers/spin_wheel_controller.dart';
 class SpinWheelView extends GetView<SpinWheelController> {
   SpinWheelView({Key? key}) : super(key: key);
   ScrollController _controller = ScrollController();
-  var isSpinning = false.obs;
 
   var selectedInt = 0.obs;
   late AnimationController spinController = AnimationController(
@@ -43,7 +45,6 @@ class SpinWheelView extends GetView<SpinWheelController> {
   @override
   Widget build(BuildContext context) {
     _controller.addListener(_scrollListener);
-
     return Scaffold(
         body: Stack(
       children: [
@@ -51,6 +52,9 @@ class SpinWheelView extends GetView<SpinWheelController> {
           (state) => SingleChildScrollView(
             child: Column(
               children: [
+                SizedBox(
+                  height: MediaQuery.of(context).viewPadding.top,
+                ),
                 prizeLayout(),
                 wheelLayout(),
                 submitButtonLayout(),
@@ -68,58 +72,87 @@ class SpinWheelView extends GetView<SpinWheelController> {
       ],
     ));
   }
-  prizeLayout() => Container(
-    padding: const EdgeInsets.all(20),
-    margin: const EdgeInsets.only(left: 20, right: 20),
-    decoration: const BoxDecoration(),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        CachedNetworkImage(imageUrl: RestUrl.assetsUrl + "gift.png"),
-        const SizedBox(
-          width: 20,
-        ),
-        Row(
-          children: [
-            Obx(() => Text(
-              "${controller.remainingChance.value} ",
-              style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 50),
-            )),
-            const Text(
-              "Available \nChances ",
-              style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14),
-            )
+
+  prizeLayout() => GlassmorphicContainer(
+        width: Get.width,
+        height: 100,
+        borderRadius: 10,
+        blur: 20,
+        margin: const EdgeInsets.all(10),
+        alignment: Alignment.bottomCenter,
+        border: 2,
+        linearGradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xff0A8381).withOpacity(0.7),
+              Colors.black.withOpacity(0.7),
+              Color(0xff1D5855).withOpacity(0.7),
+            ]),
+        borderGradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFffffff).withOpacity(0.0),
+            Color((0xFFFFFFFF)).withOpacity(0.0),
           ],
         ),
-        const SizedBox(
-          width: 20,
+        child: Container(
+          decoration: const BoxDecoration(),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CachedNetworkImage(imageUrl: RestUrl.assetsUrl + "gift.png"),
+              const SizedBox(
+                width: 20,
+              ),
+              Row(
+                children: [
+                  Obx(() => Text(
+                        "${controller.remainingChance.value} ",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 50,
+                            color: Colors.white),
+                      )),
+                  const Text(
+                    "Available \nChances ",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        color: Colors.white),
+                  )
+                ],
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Obx(() => Text(
+                        "${controller.lastReward.value}",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            color: Colors.white),
+                      )),
+                  const Text(
+                    "Last Reward  ",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        color: Colors.white),
+                  )
+                ],
+              )
+            ],
+          ),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Obx(() => Text(
-              "${controller.lastReward.value}",
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18),
-            )),
-            const Text(
-              "Last Reward  ",
-              style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14),
-            )
-          ],
-        )
-      ],
-    ),
-  );
+      );
 
   wheelLayout() => Container(
         decoration: const BoxDecoration(
@@ -127,182 +160,310 @@ class SpinWheelView extends GetView<SpinWheelController> {
         margin: const EdgeInsets.only(top: 40, bottom: 10),
         padding: const EdgeInsets.all(10),
         height: Get.height / 2,
-        child: Container(
-          decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2)),
-          child: FortuneWheel(
-            duration: const Duration(seconds: 10),
-            animateFirst: false,
-            selected: controller.streamController!.stream,
-            indicators: <FortuneIndicator>[
-              FortuneIndicator(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    alignment: Alignment.center,
-                    height: Get.height,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: SvgPicture.asset(
-                      'assets/spinDirection.svg',
-                      height: 120,
-                      width: 120,
-                      fit: BoxFit.fill,
-                    ),
-                  )),
-            ],
-            physics: CircularPanPhysics(
+        child: Stack(children: [
+          Container(
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2)),
+            child: FortuneWheel(
               duration: const Duration(seconds: 10),
-              curve: Curves.decelerate,
-            ),
-            items: [
-              for (int i = 0;
-                  i < controller.wheelData.data!.wheelRewards!.length;
-                  i++)
-                FortuneItem(
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      i.isOdd
-                          ? Image.asset(
-                              "assets/ellipse6.png",
-                              fit: BoxFit.cover,
-                            )
-                          : i == 0
-                              ? Image.asset(
-                                  "assets/ellipse7.png",
-                                  fit: BoxFit.cover,
-                                )
-                              : Image.asset(
-                                  "assets/ellipse8.png",
-                                  fit: BoxFit.cover,
-                                ),
-                      Padding(
-                        padding: const EdgeInsets.all(25),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const SizedBox(),
-                            controller.wheelData.data!.wheelRewards![i]
-                                        .imagePath ==
-                                    null
-                                ? Text(
-                                    controller.wheelData.data!.wheelRewards![i]
-                                        .currencySymbol
-                                        .toString(),
-                                    style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700),
+              animateFirst: false,
+              selected: controller.streamController!.stream,
+              indicators: <FortuneIndicator>[
+                FortuneIndicator(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      alignment: Alignment.center,
+                      height: Get.height,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      child: SvgPicture.asset(
+                        'assets/spinDirection.svg',
+                        height: 120,
+                        width: 120,
+                        fit: BoxFit.fill,
+                      ),
+                    )),
+              ],
+              physics: CircularPanPhysics(
+                duration: const Duration(seconds: 10),
+                curve: Curves.decelerate,
+              ),
+              items: [
+                for (int i = 0;
+                    i < controller.wheelData.data!.wheelRewards!.length;
+                    i++)
+                  FortuneItem(
+                    style: FortuneItemStyle(
+                        borderColor: Colors.white,
+                        borderWidth: 4,
+                        color: i.isOdd
+                            ? Color(0xff01CCC9).withOpacity(1)
+                            : i == 0
+                                ? Color(0xffF2C94C)
+                                : Color(0xff2F80ED).withOpacity(1)),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        i.isOdd
+                            ? Container(
+                                decoration: BoxDecoration(
+                                    gradient: RadialGradient(
+                                        focalRadius: 0.28,
+                                        focal: Alignment.centerLeft,
+                                        radius: 0.9,
+                                        colors: [
+                                      Color(0xff0177CC).withOpacity(0.3),
+                                      Color(0xff01CCC9).withOpacity(0),
+                                      Color(0xff0060A5).withOpacity(0.47),
+                                      Color(0xff0177CC),
+                                      Color(0xff01CCC9).withOpacity(0),
+                                      Color(0xff01CCC9).withOpacity(0),
+                                    ])),
+                              )
+                            : i == 0
+                                ? Container(
+                                    width: Get.width,
+                                    height: Get.height,
+                                    margin:
+                                        EdgeInsets.only(top: 10, bottom: 10),
+                                    decoration: BoxDecoration(
+                                        gradient: RadialGradient(
+                                            focalRadius: 0.28,
+                                            focal: Alignment.centerLeft,
+                                            radius: 0.9,
+                                            colors: [
+                                          Color(0xffFF0000).withOpacity(0.3),
+                                          Color(0xffF2C94C).withOpacity(0),
+                                          Color(0xffFF0000).withOpacity(0.47),
+                                          Color(0xffFF0000),
+                                          Color(0xffF2C94C).withOpacity(0),
+                                          Color(0xffF2C94C).withOpacity(0),
+                                        ])),
                                   )
-                                : CachedNetworkImage(
-                                    fit: BoxFit.fill,
-                                    height: 20,
-                                    width: 20,
-                                    imageUrl: RestUrl.profileUrl +
-                                        controller.wheelData.data!
-                                            .wheelRewards![i].imagePath
-                                            .toString()),
-                            Text(
-                              '${controller.wheelData.data!.wheelRewards![i].currencySymbol} ${controller.wheelData.data!.wheelRewards![i].amount} ',
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                : Container(
+                                    decoration: BoxDecoration(
+                                        gradient: RadialGradient(
+                                            focalRadius: 0.28,
+                                            focal: Alignment.centerLeft,
+                                            radius: 0.9,
+                                            colors: [
+                                          Color(0xff0177CC).withOpacity(0.3),
+                                          Color(0xff2F80ED).withOpacity(0),
+                                          Color(0xff110056).withOpacity(0.47),
+                                          Color(0xff2F11A5),
+                                          Color(0xff2F80ED).withOpacity(0),
+                                          Color(0xff2F80ED).withOpacity(0),
+                                        ])),
+                                  ),
+                        Padding(
+                          padding: const EdgeInsets.all(25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              controller.wheelData.data!.wheelRewards![i]
+                                          .imagePath ==
+                                      null
+                                  ? Text(
+                                      controller.wheelData.data!
+                                          .wheelRewards![i].currencySymbol
+                                          .toString(),
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700),
+                                    )
+                                  : Container(
+                                      margin: EdgeInsets.only(left: 40),
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          border:
+                                              Border.all(color: Colors.white)),
+                                      child: CachedNetworkImage(
+                                          fit: BoxFit.fill,
+                                          height: 30,
+                                          width: 30,
+                                          imageUrl: controller.wheelData.data!
+                                              .wheelRewards![i].imagePath
+                                              .toString()),
+                                    ),
+                              Text(
+                                '${controller.wheelData.data!.wheelRewards![i].amount} ',
+                                style: const TextStyle(
+                                    fontSize: 21, fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    //     : Padding(
+                    //   padding: const EdgeInsets.only(left: 25),
+                    //   child: Image.network(
+                    //     "${RestUrl.profileUrl}${wheelController.wheelData.value.data!.wheelRewards![i].imagePath}",
+                    //     width: 30,
+                    //     height: 30,
+                    //   ),
+                    // ),
+                  ),
+              ],
+              onAnimationEnd: () {
+                updateSpin();
+                controller.isSpinning.toggle();
+              },
+            ),
+          ),
+          Obx(() => Visibility(
+              visible: controller.isRewardWon.isTrue,
+              child: Container(
+                alignment: Alignment.center,
+                decoration:
+                    BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                child: Stack(
+                  children: [
+                    Column(
+                      children: [
+                        Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            IgnorePointer(
+                              child: Lottie.asset("assets/congrats.json",
+                                  fit: BoxFit.fill,
+                                  width: Get.width,
+                                  height: 400),
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Lottie.asset(
+                                  "assets/winning.json",
+                                  fit: BoxFit.contain,
+                                ),
+                                Text(
+                                  "Congratulations!",
+                                  style: TextStyle(
+                                      color: ColorManager.colorPrimaryLight,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Obx(() => Text(
+                                      controller.rewardMsg.value
+                                          .replaceAll("Congratus", "")
+                                          .capitalizeFirst
+                                          .toString(),
+                                      style: TextStyle(
+                                          color: ColorManager.colorPrimaryLight,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w700),
+                                    ))
+                              ],
                             )
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  //     : Padding(
-                  //   padding: const EdgeInsets.only(left: 25),
-                  //   child: Image.network(
-                  //     "${RestUrl.profileUrl}${wheelController.wheelData.value.data!.wheelRewards![i].imagePath}",
-                  //     width: 30,
-                  //     height: 30,
-                  //   ),
-                  // ),
+
+                        // InkWell(
+                        //   onTap: () {
+                        //     // ScreenshotController()
+                        //     //     .captureFromWidget(Container(
+                        //     //         padding: const EdgeInsets.all(30.0),
+                        //     //         decoration: BoxDecoration(
+                        //     //           border: Border.all(
+                        //     //               color: Colors.blueAccent, width: 5.0),
+                        //     //           color: Colors.redAccent,
+                        //     //         ),
+                        //     //         child: Text("This is an invisible widget")))
+                        //     //     .then((capturedImage) async {
+                        //     //   var file = await File("${saveCacheDirectory}temp.png")
+                        //     //       .writeAsBytes(capturedImage);
+                        //     //   Logger().wtf(file.path);
+                        //     //   // Handle captured image
+                        //     // });
+                        //   },
+                        //   child: Container(
+                        //     width: Get.width,
+                        //     margin: const EdgeInsets.symmetric(
+                        //         horizontal: 20, vertical: 20),
+                        //     padding: const EdgeInsets.all(10),
+                        //     alignment: Alignment.center,
+                        //     decoration: const BoxDecoration(
+                        //         borderRadius: BorderRadius.all(
+                        //           Radius.circular(10),
+                        //         ),
+                        //         gradient: LinearGradient(
+                        //             begin: Alignment.topCenter,
+                        //             end: Alignment.bottomCenter,
+                        //             colors: [
+                        //               ColorManager.colorPrimaryLight,
+                        //               ColorManager.colorAccent
+                        //             ])),
+                        //     child: const Text(
+                        //       "Excellent!",
+                        //       style:
+                        //           TextStyle(color: Colors.white, fontSize: 18),
+                        //     ),
+                        //   ),
+                        // )
+                      ],
+                    ),
+                  ],
                 ),
-            ],
-            onAnimationEnd: () {
-              updateSpin();
-            },
-          ),
-        ),
+              )))
+        ]),
       );
 
-  submitButtonLayout() => InkWell(
-        onTap: () async {
-          spinTheWheelTap();
-        },
+  submitButtonLayout() => Obx(() => InkWell(
+        onTap: () => spinTheWheelTap(),
         child: Container(
           width: Get.width,
           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
           padding: const EdgeInsets.all(10),
           alignment: Alignment.center,
-          decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(
+          decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(
                 Radius.circular(10),
               ),
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    ColorManager.colorPrimaryLight,
-                    ColorManager.colorAccent
+                    controller.isSpinning.isTrue
+                        ? Colors.grey
+                        : ColorManager.colorPrimaryLight,
+                    controller.isSpinning.isTrue
+                        ? Colors.grey
+                        : ColorManager.colorAccent
                   ])),
           child: const Text(
             "Spin the wheel!",
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
           ),
         ),
-      );
+      ));
 
   spinTheWheelTap() async {
     if (controller.remainingChance.value > 0) {
-      isSpin.value = true;
-
+      controller.isSpinning.value = true;
       listForReward.clear();
-
-      Random p = Random();
-      double cumulativeProbability = 0.0;
-      List<WheelRewards> dataList = [];
-      for (WheelRewards data in controller.wheelRewardsList) {
-        cumulativeProbability = data.probability!.toDouble();
-        if (p.nextInt(100) + 1 <= cumulativeProbability) {
-          dataList.add(data);
-          // return data;
-        }
-      }
-
-      var random = getRandomElement(dataList);
-      int id = random.id!.toInt();
-      rewardId = id;
-      selectedInt.value = random.id!.toInt();
-
-      // for(WheelRewards data in wheelController.wheelRewardsList){
-      //   if(data.probability != null && data.probability!.toInt() < 10 && data.probability!.toInt()>0){
-      //
-      //   }
-      // }
-      //
-
-      //await player.resume();
-      controller.streamController!.add(selectedInt.value);
-    } else {
-      isSpin.value = true;
+      controller.streamController!.add(controller.random?.id - 2);
     }
   }
 
   void updateSpin() async {
     try {
       //progressDialogue(Get.context!);
-      controller.getRewardUpdate(rewardId);
+      controller.getRewardUpdate(controller.random?.id);
       // closeDialogue(Get.context!);
-      controller.getWheelData();
       // player!.stop();
       // await player.stop();
       // await player.play();
       // await player.pause();
       isSpin.value = false;
-      showWinDialog(controller.wheelData.message.toString());
     } catch (e) {
       closeDialogue(Get.context!);
       showErrorToast(Get.context!, e.toString());

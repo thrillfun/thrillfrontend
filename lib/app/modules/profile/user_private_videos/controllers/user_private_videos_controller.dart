@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logger/logger.dart';
 import 'package:thrill/app/modules/profile/user_videos/controllers/user_videos_controller.dart';
 
 import '../../../../rest/models/user_private_video_model.dart';
@@ -60,7 +61,7 @@ class UserPrivateVideosController extends GetxController with StateMixin<RxList<
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().wtf(error);
     });
 
   }
@@ -80,7 +81,7 @@ class UserPrivateVideosController extends GetxController with StateMixin<RxList<
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().wtf(error);
     });
   }
 }

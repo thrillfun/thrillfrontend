@@ -43,20 +43,20 @@ class Balance {
 
   Balance(
       {this.code,
-        this.amount,
-        this.symbol,
-        this.image,
-        this.isActive,
-        this.networkName,
-        this.minAmount,
-        this.maxAmount,
-        this.feeDigit});
+      this.amount,
+      this.symbol,
+      this.image,
+      this.isActive,
+      this.networkName,
+      this.minAmount,
+      this.maxAmount,
+      this.feeDigit});
 
   Balance.fromJson(Map<String, dynamic> json) {
     code = json['code'];
-    amount = json['amount'];
+    amount = json['amount'] ?? 0.0;
     symbol = json['symbol'];
-    image = json['image'];
+    image = json['image'] ?? "";
     isActive = json['is_active'];
     networkName = json['network_name'];
     minAmount = json['min_amount'];
@@ -98,20 +98,20 @@ class CryptoModel {
 
   CryptoModel(
       {this.symbol,
-        this.priceChange,
-        this.priceChangePercent,
-        this.weightedAvgPrice,
-        this.openPrice,
-        this.highPrice,
-        this.lowPrice,
-        this.lastPrice,
-        this.volume,
-        this.quoteVolume,
-        this.openTime,
-        this.closeTime,
-        this.firstId,
-        this.lastId,
-        this.count});
+      this.priceChange,
+      this.priceChangePercent,
+      this.weightedAvgPrice,
+      this.openPrice,
+      this.highPrice,
+      this.lowPrice,
+      this.lastPrice,
+      this.volume,
+      this.quoteVolume,
+      this.openTime,
+      this.closeTime,
+      this.firstId,
+      this.lastId,
+      this.count});
 
   CryptoModel.fromJson(Map<String, dynamic> json) {
     symbol = json['symbol'];

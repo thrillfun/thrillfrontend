@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_player/better_player.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
@@ -16,14 +17,18 @@ import 'package:path_provider/path_provider.dart';
 import '../../../../../../rest/models/site_settings_model.dart';
 import '../../../../../../rest/rest_urls.dart';
 import '../../../../../../utils/utils.dart';
+import 'package:thrill/app/rest/models/favourite_videos_model.dart' as fav;
 
-class FavouriteVideoPlayerController extends GetxController {
+class FavouriteVideoPlayerController extends GetxController
+    with StateMixin<RxList<fav.Data>> {
   BetterPlayerEventType? eventType;
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  RxList<fav.Data> favouriteVideos = RxList();
 
   var isUserBlocked = false.obs;
   var isLoading = false.obs;
   var isVideoReported = false.obs;
+  var favouritesModel = fav.FavouriteVideosModel().obs;
 
   var isInitialised = false.obs;
   var fileSupport = FileSupport();
@@ -32,6 +37,8 @@ class FavouriteVideoPlayerController extends GetxController {
 
   @override
   void onInit() {
+    getFavourites();
+
     super.onInit();
   }
 
@@ -45,6 +52,68 @@ class FavouriteVideoPlayerController extends GetxController {
     super.onClose();
   }
 
+  Future<void> notInterested(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/change_interest", queryParameters: {
+      "content_id": videoId,
+      "filter_by": "tag"
+    }).then((value) {
+      value.data["status"]
+          ? successToast(value.data["message"])
+          : errorToast(value.data["message"]);
+      getFavourites();
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
+
+  Future<void> postVideoView(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/view", queryParameters: {"video_id": videoId}).then(
+        (value) {
+      if (value.data["status"]) {
+        Logger().wtf("View posted successfully");
+      }
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<void> getFavourites() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (favouriteVideos.isEmpty) {
+      change(favouriteVideos, status: RxStatus.loading());
+    }
+    dio.get('video/favorite-videos').then((value) {
+      favouritesModel = fav.FavouriteVideosModel.fromJson(value.data).obs;
+      favouriteVideos = favouritesModel.value.data!.obs;
+      change(favouriteVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(favouriteVideos, status: RxStatus.error());
+    });
+  }
+
+  Future<void> deleteUserVideo(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/delete", queryParameters: {"video_id": videoId}).then(
+        (value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+        getFavourites();
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
+
   Future<bool> likeVideo(int isLike, int videoId,
       {int userId = 0, String? token}) async {
     var isLiked = false;
@@ -55,7 +124,7 @@ class FavouriteVideoPlayerController extends GetxController {
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      // getAllVideos();
+      getFavourites();
       if (isLike == 1) {
         sendNotification(token.toString(), title: "Someone liked your video!");
         // await notificationsController.sendFcmNotification(token.toString(),
@@ -127,27 +196,15 @@ class FavouriteVideoPlayerController extends GetxController {
     });
   }
 
-  Future<void> deleteUserVideo(int videoId) async {
-    dio.options.headers = {
-      "Authorization": "Bearer ${await GetStorage().read("token")}"
-    };
-    dio.post("video/delete", queryParameters: {"video_id": videoId}).then(
-        (value) {
-      if (value.data["status"]) {
-        successToast(value.data["message"]);
-        // getAllVideos();
-      } else {
-        errorToast(value.data["message"]);
-      }
-    }).onError((error, stackTrace) {
-      errorToast(error.toString());
-    });
-  }
-
   downloadAndProcessVideo(String videoUrl, String videoName) async {
-    Get.defaultDialog(title: "Loading", content: loader());
+    var videoProgress = "0".obs;
+    Get.defaultDialog(
+        title: "Download video....",
+        content: Container(
+          child: Obx(() => Text(videoProgress.value)),
+        ));
     final directory = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_PICTURES);
+        ExternalPath.DIRECTORY_MOVIES);
     if (await Directory('$directory/thrill/').exists() == false) {
       await Directory('$directory/thrill/').create();
     }
@@ -162,12 +219,14 @@ class FavouriteVideoPlayerController extends GetxController {
       filename: videoName,
       extension: ".mp4",
       progress: (progress) async {
-        Logger().i(progress);
+        videoProgress.value = progress;
       },
     )
         .then((video) async {
+      if (Get.isDialogOpen!) {
+        Get.back();
+      }
       successToast("video downloaded successfully");
-      Get.back();
 
       // await FFmpegKit.execute(
       //     "-y -i ${video!.path} -i ${logo!.path} -filter_complex overlay=10:10 -codec:a copy ${path.path}$videoName.mp4")
@@ -182,7 +241,6 @@ class FavouriteVideoPlayerController extends GetxController {
       //   }
       // }).onError((error, stackTrace) => errorToast(error.toString()));
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
       Get.back();
     });
   }

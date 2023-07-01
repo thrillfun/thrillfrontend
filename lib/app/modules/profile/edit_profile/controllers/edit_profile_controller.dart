@@ -6,15 +6,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart';
+import 'package:path/path.dart';
 import 'package:thrill/app/rest/rest_urls.dart';
 import 'package:thrill/app/utils/utils.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:iconly/iconly.dart';
+import 'package:uri_to_file/uri_to_file.dart';
 
 import '../../../../utils/color_manager.dart';
+import '../../../settings/controllers/settings_controller.dart';
+import '../../controllers/profile_controller.dart';
+import '../../../../rest/models/user_details_model.dart';
 
-class EditProfileController extends GetxController {
+class EditProfileController extends GetxController with StateMixin<Rx<User>> {
   var dio = client.Dio(client.BaseOptions(baseUrl: RestUrl.baseUrl));
   var imagePath = "".obs;
   XFile image = XFile("");
@@ -34,6 +40,9 @@ class EditProfileController extends GetxController {
   var mobile = "".obs;
 
   var location = "".obs;
+
+  var userProfile = User().obs;
+
   TextEditingController nameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
@@ -51,25 +60,42 @@ class EditProfileController extends GetxController {
   FocusNode locationNode = FocusNode();
   FocusNode emailNode = FocusNode();
   FocusNode mobileNode = FocusNode();
+  var settingsController = Get.find<SettingsController>();
+  var profileController = Get.find<ProfileController>();
 
   @override
   void onInit() {
-
     super.onInit();
+    getUserProfile();
   }
 
   @override
   void onReady() {
-    userNameController.text = Get.arguments["username"]??"";
-    nameController.text = Get.arguments["name"]??"";
-    lastNameController.text = Get.arguments["name"]??"";
-    emailController.text = Get.arguments["email"]??"";
-    mobileController.text = Get.arguments["mobile"]??"";
-    webSiteController.text = Get.arguments["website"]??"";
-    bioController.text = Get.arguments["bio"]??"";
-    locationController.text = Get.arguments["location"]??"";
-    dob.value = Get.arguments["dob"]??"";
     super.onReady();
+  }
+
+  Future<void> getUserProfile() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    change(userProfile, status: RxStatus.loading());
+    dio.post('/user/get-profile', queryParameters: {
+      "id": "${GetStorage().read("userId")}"
+    }).then((result) {
+      userProfile = UserDetailsModel.fromJson(result.data).data!.user!.obs;
+      change(userProfile, status: RxStatus.success());
+      userNameController.text = userProfile.value.username!;
+      nameController.text = userProfile.value.name!;
+      lastNameController.text = userProfile.value.name!;
+      emailController.text = userProfile.value.email!;
+      mobileController.text = userProfile.value.phone!;
+      webSiteController.text = userProfile.value.websiteUrl!;
+      bioController.text = userProfile.value.bio!;
+      locationController.text = userProfile.value.location!;
+      dob.value = userProfile.value.dob!;
+    }).onError((error, stackTrace) {
+      change(userProfile, status: RxStatus.error(error.toString()));
+    });
   }
 
   @override
@@ -78,11 +104,14 @@ class EditProfileController extends GetxController {
   }
 
   Future<void> updateProfile() async {
-
-    dio.options.headers={"Authorization":"Bearer ${await GetStorage().read("token")}"};
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
     if (imagePath.value.isNotEmpty) {
+      var imageFile = File(imagePath.value);
       client.FormData formData = client.FormData.fromMap({
-        "avatar": File(imagePath.value),
+        "avatar": await client.MultipartFile.fromFile(imageFile.path,
+            filename: basenameWithoutExtension(imageFile.path)),
         "username": userNameController.text,
         "first_name": nameController.text,
         'last_name': lastNameController.text,
@@ -92,14 +121,13 @@ class EditProfileController extends GetxController {
         "location": location.value,
         "phone": mobileController.text,
         "email": emailController.text,
-        "dob":dob.value
+        "dob": dob.value
       });
-    await dio.post("user/edit", data:formData).then((value) {
-        if (value.data["status"]) {
-          successToast(value.data["message"]);
-        } else {
-          errorToast(value.data["message"]);
-        }
+      await dio.post("user/edit", data: formData).then((value) {
+        successToast(value.data["message"]);
+        getUserProfile();
+        settingsController.getUserProfile();
+        profileController.getUserProfile();
       }).onError((error, stackTrace) {});
     } else {
       dio.post("user/edit", queryParameters: {
@@ -112,15 +140,13 @@ class EditProfileController extends GetxController {
         "location": location.value,
         "phone": mobileController.text,
         "email": emailController.text,
-        "dob":dob.value
-
+        "dob": dob.value
       }).then((value) {
         if (value.data["status"]) {
           successToast(value.data["message"]);
         } else {
           errorToast(value.data["message"]);
         }
-
       }).onError((error, stackTrace) {});
     }
   }

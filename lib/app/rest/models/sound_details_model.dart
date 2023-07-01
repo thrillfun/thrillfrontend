@@ -8,7 +8,8 @@ class SoundDetailsModel {
 
   SoundDetailsModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    data = json['data'] != null ? new SoundDetails.fromJson(json['data']) : null;
+    data =
+        json['data'] != null ? new SoundDetails.fromJson(json['data']) : null;
     message = json['message'];
     error = json['error'];
   }
@@ -36,31 +37,36 @@ class SoundDetails {
   String? updatedAt;
   int? soundUsedCount;
   SoundOwner? soundOwner;
+  IsFavouriteSound? isFavouriteSound;
 
   SoundDetails(
       {this.id,
-        this.sound,
-        this.userId,
-        this.category,
-        this.name,
-        this.thumbnail,
-        this.createdAt,
-        this.updatedAt,
-        this.soundUsedCount,
-        this.soundOwner});
+      this.sound,
+      this.userId,
+      this.category,
+      this.name,
+      this.thumbnail,
+      this.createdAt,
+      this.updatedAt,
+      this.soundUsedCount,
+      this.soundOwner,
+      this.isFavouriteSound});
 
   SoundDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    sound = json['sound']??"";
-    userId = json['user_id']??0;
-    category = json['category']??"";
-    name = json['name']??"";
-    thumbnail = json['thumbnail']??"";
-    createdAt = json['created_at']??0;
-    updatedAt = json['updated_at']??0;
-    soundUsedCount = json['sound_used_count']??0;
+    sound = json['sound'] ?? "";
+    userId = json['user_id'] ?? 0;
+    category = json['category'] ?? "";
+    name = json['name'] ?? "";
+    thumbnail = json['thumbnail'] ?? "";
+    createdAt = json['created_at'] ?? 0;
+    updatedAt = json['updated_at'] ?? 0;
+    soundUsedCount = json['sound_used_count'] ?? 0;
     soundOwner = json['sound_owner'] != null
         ? new SoundOwner.fromJson(json['sound_owner'])
+        : null;
+    isFavouriteSound = json['is_favourite_sound'] != null
+        ? new IsFavouriteSound.fromJson(json['is_favourite_sound'])
         : null;
   }
 
@@ -77,6 +83,9 @@ class SoundDetails {
     data['sound_used_count'] = this.soundUsedCount;
     if (this.soundOwner != null) {
       data['sound_owner'] = this.soundOwner!.toJson();
+    }
+    if (this.isFavouriteSound != null) {
+      data['is_favourite_sound'] = this.isFavouriteSound!.toJson();
     }
     return data;
   }
@@ -114,33 +123,33 @@ class SoundOwner {
 
   SoundOwner(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.emailVerifiedAt,
-        this.phone,
-        this.avtars,
-        this.location,
-        this.coverImage,
-        this.rating,
-        this.notification,
-        this.twoFAToggle,
-        this.status,
-        this.deactivationRequest,
-        this.role,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.referralCode,
-        this.firebaseToken,
-        this.systemActive,
-        this.activeDate,
-        this.spinWallet,
-        this.createdAt,
-        this.updatedAt,
-        this.isVerified,
-        this.followingCount,
-        this.followersCount});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.emailVerifiedAt,
+      this.phone,
+      this.avtars,
+      this.location,
+      this.coverImage,
+      this.rating,
+      this.notification,
+      this.twoFAToggle,
+      this.status,
+      this.deactivationRequest,
+      this.role,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.referralCode,
+      this.firebaseToken,
+      this.systemActive,
+      this.activeDate,
+      this.spinWallet,
+      this.createdAt,
+      this.updatedAt,
+      this.isVerified,
+      this.followingCount,
+      this.followersCount});
 
   SoundOwner.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -203,6 +212,47 @@ class SoundOwner {
     data['is_verified'] = this.isVerified;
     data['following_count'] = this.followingCount;
     data['followers_count'] = this.followersCount;
+    return data;
+  }
+}
+
+class IsFavouriteSound {
+  int? id;
+  int? userId;
+  int? tableId;
+  String? tableName;
+  int? isFavorite;
+  String? createdAt;
+  String? updatedAt;
+
+  IsFavouriteSound(
+      {this.id,
+      this.userId,
+      this.tableId,
+      this.tableName,
+      this.isFavorite,
+      this.createdAt,
+      this.updatedAt});
+
+  IsFavouriteSound.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    userId = json['user_id'];
+    tableId = json['table_id'];
+    tableName = json['table_name'];
+    isFavorite = json['is_favorite'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['user_id'] = this.userId;
+    data['table_id'] = this.tableId;
+    data['table_name'] = this.tableName;
+    data['is_favorite'] = this.isFavorite;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
     return data;
   }
 }

@@ -6,18 +6,24 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_networkimage_2/provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:sim_data/sim_data.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/app/modules/login/views/login_view.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 import 'package:thrill/app/utils/page_manager.dart';
 import 'package:thrill/app/utils/strings.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../rest/rest_urls.dart';
 import 'color_manager.dart';
@@ -43,7 +49,7 @@ var lightThemeData = ThemeData(
           backgroundColor:
               MaterialStateProperty.all<Color>(ColorManager.colorAccent))),
   dividerColor: Colors.grey,
-  fontFamily: ('Urbanist'),
+  fontFamily: ('Roboto'),
   bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
@@ -52,9 +58,9 @@ var lightThemeData = ThemeData(
   focusColor: ColorManager.colorAccent,
   dialogBackgroundColor: Colors.white,
   progressIndicatorTheme:
-      ProgressIndicatorThemeData(color: ColorManager.colorAccent),
+      const ProgressIndicatorThemeData(color: ColorManager.colorAccent),
   textSelectionTheme:
-      TextSelectionThemeData(cursorColor: ColorManager.colorAccent),
+      const TextSelectionThemeData(cursorColor: ColorManager.colorAccent),
   inputDecorationTheme: InputDecorationTheme(
       prefixIconColor: ColorManager.colorAccent,
       focusColor: ColorManager.colorAccent,
@@ -62,34 +68,43 @@ var lightThemeData = ThemeData(
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10.0),
         borderSide: const BorderSide(
-          color: Color(0xffFAFAFA),
+          color: Colors.black,
         ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10.0),
         borderSide: BorderSide(
-          color: Colors.grey.withOpacity(0.1),
+          color: Colors.grey,
         ),
       )),
   scaffoldBackgroundColor: Colors.white,
-  textTheme: const TextTheme(button: TextStyle(color: Colors.white)),
+  textTheme: const TextTheme(
+    button: TextStyle(color: Colors.white),
+  ),
   tabBarTheme: const TabBarTheme(
-      labelStyle: TextStyle(fontWeight: FontWeight.w700),
-      indicatorColor: ColorManager.colorAccent,
       labelColor: Colors.black,
+      indicatorSize: TabBarIndicatorSize.label,
+      labelStyle: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: ColorManager.colorAccent,
+          fontSize: 18),
+      indicatorColor: ColorManager.colorAccent,
       dividerColor: ColorManager.colorAccent),
   appBarTheme: const AppBarTheme(
       centerTitle: true,
-      titleTextStyle:
-      TextStyle(color:Colors.black,fontWeight: FontWeight.w700, fontSize: 24,),
+      titleTextStyle: TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.w700,
+        fontSize: 24,
+      ),
       color: Colors.white,
       iconTheme: IconThemeData(color: Colors.black),
       elevation: 0),
   primaryColor: ColorManager.colorAccent,
 );
 var darkThemeData = ThemeData(
-  dividerColor: ColorManager.colorAccentTransparent,
-  fontFamily: ('Urbanist'),
+  dividerColor: Colors.grey,
+  fontFamily: ('Roboto'),
   elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           backgroundColor:
@@ -102,7 +117,7 @@ var darkThemeData = ThemeData(
   focusColor: ColorManager.colorAccent,
   backgroundColor: Colors.black,
   textSelectionTheme:
-      TextSelectionThemeData(cursorColor: ColorManager.colorAccent),
+      const TextSelectionThemeData(cursorColor: ColorManager.colorAccent),
   inputDecorationTheme: InputDecorationTheme(
       prefixIconColor: ColorManager.colorAccent,
       focusColor: ColorManager.colorAccent,
@@ -124,11 +139,23 @@ var darkThemeData = ThemeData(
     color: Colors.black,
     elevation: 0,
     centerTitle: true,
-    titleTextStyle:TextStyle(color:Colors.white,fontWeight: FontWeight.w700, fontSize: 24,),
+    titleTextStyle: TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontSize: 24,
+    ),
   ),
   scaffoldBackgroundColor: Colors.black,
   cardColor: Colors.black,
-  tabBarTheme: const TabBarTheme(indicatorColor: ColorManager.colorAccent),
+  tabBarTheme: const TabBarTheme(
+      indicatorSize: TabBarIndicatorSize.label,
+      labelColor: Colors.white,
+      labelStyle: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: ColorManager.colorAccent,
+          fontSize: 18),
+      indicatorColor: ColorManager.colorAccent,
+      dividerColor: ColorManager.colorAccent),
   progressIndicatorTheme:
       const ProgressIndicatorThemeData(color: ColorManager.colorAccent),
   colorScheme: const ColorScheme.dark(background: Colors.black),
@@ -213,9 +240,9 @@ showErrorToast(BuildContext context, String msg) async {
 
 errorToast(dynamic message) async {
   Get.showSnackbar(GetSnackBar(
-    duration: const Duration(seconds: 3),
+    duration: const Duration(seconds: 30),
     barBlur: 10,
-    borderColor: Colors.red,
+    borderColor: Colors.red.shade800,
     borderWidth: 1.5,
     margin: const EdgeInsets.only(
       left: 10,
@@ -223,72 +250,10 @@ errorToast(dynamic message) async {
       bottom: 10,
     ),
     borderRadius: 10,
-    backgroundColor: Colors.red.shade50,
+    backgroundColor: Colors.red.shade300,
     messageText: Text(
       message.toString(),
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    ),
-    isDismissible: true,
-    mainButton: IconButton(
-      onPressed: () {
-        Get.back();
-      },
-      icon: const Icon(Icons.close),
-    ),
-    icon: const Icon(
-      Icons.error,
-      color: Colors.red,
-    ),
-  ));
-}
-
-showSuccessToast(BuildContext context, String msg) async {
-  Get.showSnackbar(GetSnackBar(
-    duration: const Duration(seconds: 3),
-    barBlur: 10,
-    borderColor: Colors.green,
-    borderWidth: 1.5,
-    margin: const EdgeInsets.only(
-      left: 10,
-      right: 10,
-      bottom: 10,
-    ),
-    borderRadius: 10,
-    backgroundColor: Colors.green.shade50,
-    messageText: Text(
-      msg,
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    ),
-    isDismissible: true,
-    mainButton: IconButton(
-      onPressed: () {
-        Get.back();
-      },
-      icon: const Icon(Icons.close),
-    ),
-    icon: const Icon(
-      Icons.error,
-      color: Colors.green,
-    ),
-  ));
-}
-
-successToast(String msg) async {
-  Get.showSnackbar(GetSnackBar(
-    duration: const Duration(seconds: 3),
-    barBlur: 10,
-    borderColor: Colors.green,
-    borderWidth: 1.5,
-    margin: const EdgeInsets.only(
-      left: 10,
-      right: 10,
-      bottom: 10,
-    ),
-    borderRadius: 10,
-    backgroundColor: Colors.green.shade50,
-    messageText: Text(
-      msg,
-      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+      style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
     ),
     isDismissible: true,
     mainButton: IconButton(
@@ -297,12 +262,77 @@ successToast(String msg) async {
       },
       icon: const Icon(
         Icons.close,
-        color: Colors.black,
+        color: Colors.white,
+      ),
+    ),
+    icon: Icon(
+      Icons.error,
+      color: Colors.white,
+    ),
+  ));
+}
+
+showSuccessToast(BuildContext context, String msg) async {
+  Get.showSnackbar(GetSnackBar(
+    duration: const Duration(seconds: 3),
+    barBlur: 10,
+    borderColor: Colors.green.shade800,
+    borderWidth: 1.5,
+    margin: const EdgeInsets.only(
+      left: 10,
+      right: 10,
+      bottom: 10,
+    ),
+    borderRadius: 10,
+    backgroundColor: Colors.green.shade600,
+    messageText: Text(
+      msg,
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    ),
+    isDismissible: true,
+    mainButton: IconButton(
+      onPressed: () {
+        Get.back();
+      },
+      icon: const Icon(Icons.close),
+    ),
+    icon: Icon(
+      Icons.error,
+      color: Colors.green.shade600,
+    ),
+  ));
+}
+
+successToast(String msg) async {
+  Get.showSnackbar(GetSnackBar(
+    duration: const Duration(seconds: 3),
+    barBlur: 10,
+    borderColor: ColorManager.colorAccent,
+    borderWidth: 1.5,
+    margin: const EdgeInsets.only(
+      left: 10,
+      right: 10,
+      bottom: 10,
+    ),
+    borderRadius: 10,
+    backgroundColor: ColorManager.colorAccent,
+    messageText: Text(
+      msg,
+      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+    ),
+    isDismissible: true,
+    mainButton: IconButton(
+      onPressed: () {
+        Get.back();
+      },
+      icon: const Icon(
+        Icons.close,
+        color: Colors.white,
       ),
     ),
     icon: const Icon(
       Icons.error,
-      color: Colors.green,
+      color: Colors.white,
     ),
   ));
 }
@@ -405,32 +435,36 @@ void seek(Duration position) {
 
 Widget imgNet(String imgPath) {
   return CachedNetworkImage(
-      placeholder: (a, b) => const Center(
-            child: CircularProgressIndicator(),
+      placeholder: (a, b) => Center(
+            child: loader(),
           ),
-      fit: BoxFit.cover,
+      fit: BoxFit.fitWidth,
       imageBuilder: (context, imageProvider) => Container(
-            width: MediaQuery.of(context).size.width,
+            width: Get.width,
             decoration: BoxDecoration(
+              color: Colors.black,
               borderRadius: BorderRadius.circular(10),
               shape: BoxShape.rectangle,
-              image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+              image:
+                  DecorationImage(image: imageProvider, fit: BoxFit.fitWidth),
             ),
           ),
       errorWidget: (context, string, dynamic) => CachedNetworkImage(
-          placeholder: (a, b) => const Center(
-                child: CircularProgressIndicator(),
+          placeholder: (a, b) => Center(
+                child: loader(),
               ),
           fit: BoxFit.cover,
           imageBuilder: (context, imageProvider) => Container(
                 decoration: BoxDecoration(
+                  color: Colors.black,
                   borderRadius: BorderRadius.circular(10),
                   shape: BoxShape.rectangle,
                   image:
                       DecorationImage(image: imageProvider, fit: BoxFit.cover),
                 ),
               ),
-          imageUrl: '${RestUrl.thambUrl}thumb-not-available.png'),
+          imageUrl:
+              'https://craftsnippets.com/articles_images/placeholder/placeholder.jpg'),
       imageUrl: imgPath);
 }
 
@@ -470,6 +504,153 @@ Widget imgProfile(String imagePath) => Container(
           imageUrl: RestUrl.profileUrl + imagePath),
     );
 
+Widget imgProfileDetails(String imagePath) => Container(
+      child: CachedNetworkImage(
+          placeholder: (a, b) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+          fit: BoxFit.fill,
+          imageBuilder: (context, imageProvider) => Container(
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
+              ),
+          errorWidget: (context, string, dynamic) => CachedNetworkImage(
+              placeholder: (a, b) => Center(
+                    child: loader(),
+                  ),
+              fit: BoxFit.fill,
+              height: 60,
+              width: 60,
+              imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          image: imageProvider, fit: BoxFit.fill),
+                    ),
+                  ),
+              imageUrl: RestUrl.placeholderImage),
+          imageUrl: RestUrl.profileUrl + imagePath),
+    );
+
+Widget imgProfileDialog(String imagePath) => Container(
+      child: CachedNetworkImage(
+          placeholder: (a, b) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+          fit: BoxFit.fill,
+          imageBuilder: (context, imageProvider) => Container(
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(10),
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
+              ),
+          errorWidget: (context, string, dynamic) => CachedNetworkImage(
+              placeholder: (a, b) => Center(
+                    child: loader(),
+                  ),
+              fit: BoxFit.fill,
+              imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(10),
+                      image: DecorationImage(
+                          image: imageProvider, fit: BoxFit.fill),
+                    ),
+                  ),
+              imageUrl: RestUrl.placeholderImage),
+          imageUrl: RestUrl.profileUrl + imagePath),
+    );
+
+Widget imgSound(String imagePath) => Container(
+      child: CachedNetworkImage(
+          placeholder: (a, b) => Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: ColorManager.colorAccent.withOpacity(0.5),
+                      width: 2),
+                  borderRadius: BorderRadius.circular(10),
+                  shape: BoxShape.rectangle,
+                ),
+                child: CachedNetworkImage(
+                    placeholder: (a, b) => Container(
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/person_place_holder.png"),
+                                opacity: 0.3,
+                                filterQuality: FilterQuality.high,
+                                fit: BoxFit.contain),
+                          ),
+                        ),
+                    fit: BoxFit.contain,
+                    imageBuilder: (context, imageProvider) => Container(
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/person_place_holder.png"),
+                                opacity: 0.3,
+                                filterQuality: FilterQuality.high,
+                                fit: BoxFit.contain),
+                          ),
+                        ),
+                    imageUrl: RestUrl.placeholderImage),
+              ),
+          fit: BoxFit.fill,
+          height: 60,
+          width: 60,
+          imageBuilder: (context, imageProvider) => Container(
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  border: Border.all(color: ColorManager.colorAccent),
+                  borderRadius: BorderRadius.circular(10),
+                  shape: BoxShape.rectangle,
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
+              ),
+          errorWidget: (context, string, dynamic) => Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: ColorManager.colorAccent.withOpacity(0.5),
+                      width: 2),
+                  borderRadius: BorderRadius.circular(10),
+                  shape: BoxShape.rectangle,
+                ),
+                child: CachedNetworkImage(
+                    placeholder: (a, b) => Container(
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/person_place_holder.png"),
+                                opacity: 0.3,
+                                filterQuality: FilterQuality.high,
+                                fit: BoxFit.contain),
+                          ),
+                        ),
+                    fit: BoxFit.contain,
+                    imageBuilder: (context, imageProvider) => Container(
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/person_place_holder.png"),
+                                opacity: 0.3,
+                                filterQuality: FilterQuality.high,
+                                fit: BoxFit.contain),
+                          ),
+                        ),
+                    imageUrl: RestUrl.placeholderImage),
+              ),
+          imageUrl: RestUrl.profileUrl + imagePath),
+    );
 getTempDirectory() async {
   var directoryIOS = await getApplicationDocumentsDirectory();
   var directoryANDROID = await getTemporaryDirectory();
@@ -505,27 +686,6 @@ loadLocalSvg(String name) => SvgPicture.asset(
       fit: BoxFit.fill,
     );
 
-loadSvgCacheImage(String url) {
-  return FittedBox(
-    fit: BoxFit.fill,
-    child: SvgPicture(
-      AdvancedNetworkSvg(
-        RestUrl.assetsUrl + url,
-        (theme) => (bytes, colorFilter, key) {
-          return svg.svgPictureDecoder(
-            bytes ?? Uint8List.fromList(const []),
-            false,
-            colorFilter,
-            key,
-            theme: theme,
-          );
-        },
-        useDiskCache: true,
-      ),
-    ),
-  );
-}
-
 errorWidget() => CachedNetworkImage(
       fit: BoxFit.fill,
       imageUrl:
@@ -558,82 +718,110 @@ loader() => Container(
       width: 150,
       alignment: Alignment.center,
       color: Colors.transparent.withOpacity(0.0),
-      child: Lottie.network(
-          "https://assets10.lottiefiles.com/packages/lf20_dkz94xcg.json",
-          height: 150,
-          width: 150),
+      child: Lottie.asset("assets/loader.json", height: 150, width: 150),
     );
 
 showWinDialog(String msg) => Get.defaultDialog(
+      contentPadding: EdgeInsets.all(5),
       backgroundColor: Colors.transparent,
       title: "",
-      content: Stack(
-        children: [
-          Container(
-            height: 250,
-            margin: const EdgeInsets.only(top: 50),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
-            ),
-            width: Get.width,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Text(
-                  "Successful",
-                  style: TextStyle(
-                      color: ColorManager.colorPrimaryLight,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w700),
-                ),
-                Text(
-                  msg,
-                  style: const TextStyle(
-                      color: Color(0xff1C1E24),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400),
-                ),
-                InkWell(
-                  onTap: () {
-                    Get.back();
-                  },
-                  child: Container(
-                    width: Get.width,
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 20),
-                    padding: const EdgeInsets.all(10),
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
-                        gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              ColorManager.colorPrimaryLight,
-                              ColorManager.colorAccent
-                            ])),
-                    child: const Text(
-                      "Excellent!",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
-                  ),
-                )
-              ],
-            ),
+      content: Container(
+          margin: const EdgeInsets.only(top: 50),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
           ),
-          SizedBox(
-            width: Get.width,
-            child: CachedNetworkImage(
-                fit: BoxFit.contain,
-                height: 150,
-                width: 150,
-                imageUrl: RestUrl.assetsUrl + "you_won_logo.png"),
-          )
-        ],
-      ),
+          width: Get.width,
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Stack(
+                    children: [
+                      IgnorePointer(
+                        child: Lottie.asset("assets/congrats.json",
+                            fit: BoxFit.cover, height: 150, width: Get.width),
+                      ),
+                      Container(
+                        alignment: Alignment.topCenter,
+                        padding: EdgeInsets.only(bottom: 20),
+                        child: Lottie.asset("assets/winning.json",
+                            height: 200, fit: BoxFit.fill, width: 500),
+                      ),
+                    ],
+                  ),
+                  const Text(
+                    "Congratulations!",
+                    style: TextStyle(
+                        color: ColorManager.colorPrimaryLight,
+                        fontSize: 25,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    msg,
+                    style: const TextStyle(
+                        color: ColorManager.colorPrimaryLight,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      // ScreenshotController()
+                      //     .captureFromWidget(Container(
+                      //         padding: const EdgeInsets.all(30.0),
+                      //         decoration: BoxDecoration(
+                      //           border: Border.all(
+                      //               color: Colors.blueAccent, width: 5.0),
+                      //           color: Colors.redAccent,
+                      //         ),
+                      //         child: Text("This is an invisible widget")))
+                      //     .then((capturedImage) async {
+                      //   var file = await File("${saveCacheDirectory}temp.png")
+                      //       .writeAsBytes(capturedImage);
+                      //   Logger().wtf(file.path);
+                      //   // Handle captured image
+                      // });
+                    },
+                    child: Container(
+                      width: Get.width,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 20),
+                      padding: const EdgeInsets.all(10),
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                          gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                ColorManager.colorPrimaryLight,
+                                ColorManager.colorAccent
+                              ])),
+                      child: const Text(
+                        "Excellent!",
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Align(
+                alignment: Alignment.topRight,
+                child: InkWell(
+                  onTap: () => Get.back(),
+                  child: Icon(
+                    IconlyLight.close_square,
+                    color: ColorManager.colorAccent,
+                  ),
+                ),
+              )
+            ],
+          )),
     );
 
 convertUTC(String format) {
@@ -641,6 +829,32 @@ convertUTC(String format) {
   var newStr = str.substring(0, 10) + ' ' + str.substring(11, 23);
   DateTime dt = DateTime.parse(newStr);
   return DateFormat("dd-MM-yyyy").format(dt).toString();
+}
+
+checkForLogin(VoidCallback action) async {
+  if (await GetStorage().read("token") == null) {
+    if (await Permission.phone.isGranted) {
+      await SimDataPlugin.getSimData().then((value) => value.cards.isEmpty
+          ? showLoginBottomSheet(false.obs)
+          : showLoginBottomSheet(true.obs));
+    } else {
+      await Permission.phone.request().then((value) async =>
+          await SimDataPlugin.getSimData().then((value) => value.cards.isEmpty
+              ? showLoginBottomSheet(false.obs)
+              : showLoginBottomSheet(true.obs)));
+    }
+  } else {
+    action();
+  }
+}
+
+showLoginBottomSheet(RxBool isPhoneAvailable) => showModalBottomSheet(
+    isScrollControlled: true,
+    context: Get.context!,
+    builder: (BuildContext context) => LoginView(isPhoneAvailable));
+
+extension FormatViews on int {
+  String formatViews() => NumberFormat.compact().format(this);
 }
 
 extension Unique<E, Id> on List<E> {

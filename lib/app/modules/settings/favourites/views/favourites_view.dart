@@ -45,10 +45,10 @@ class FavouritesView extends GetView<FavouritesController> {
                     )
                   ]),
             ),
-            body: const TabBarView(children: [
+            body: TabBarView(children: [
               FavouriteSoundsView(),
-              FavouriteVideosView(),
-              FavouriteHashtagsView(),
+              const FavouriteVideosView(),
+              const FavouriteHashtagsView(),
             ]),
           )),
     );

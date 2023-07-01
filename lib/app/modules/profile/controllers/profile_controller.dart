@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logger/logger.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 
 import '../../../rest/models/followers_model.dart';
@@ -31,7 +32,7 @@ class ProfileController extends GetxController with StateMixin<Rx<User>> {
             "referal", dynamicLinkData.link.queryParameters["id"].toString());
       }
     }).onError((error) {
-      errorToast(error.toString());
+      Logger().wtf(error);
     });
     super.onInit();
   }

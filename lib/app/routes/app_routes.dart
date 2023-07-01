@@ -80,6 +80,12 @@ abstract class Routes {
   static const FOLLOWING_VIDEOS = _Paths.FOLLOWING_VIDEOS;
   static const TRENDING_VIDEOS = _Paths.TRENDING_VIDEOS;
   static const HOME_VIDEOS_PLAYER = _Paths.HOME + _Paths.HOME_VIDEOS_PLAYER;
+  static const LOGIN_SCREEN = _Paths.LOGIN + _Paths.LOGIN_SCREEN;
+  static const SOUND_VIDEOS = _Paths.SETTINGS +
+      _Paths.FAVOURITES +
+      _Paths.FAVOURITE_SOUNDS +
+      _Paths.SOUND_VIDEOS;
+  static const SPLASH_SCREEN = _Paths.SPLASH_SCREEN;
 }
 
 abstract class _Paths {
@@ -139,4 +145,7 @@ abstract class _Paths {
   static const FOLLOWING_VIDEOS = '/following-videos';
   static const TRENDING_VIDEOS = '/trending-videos';
   static const HOME_VIDEOS_PLAYER = '/home-videos-player';
+  static const LOGIN_SCREEN = '/login-screen';
+  static const SOUND_VIDEOS = '/sound-videos';
+  static const SPLASH_SCREEN = '/splash-screen';
 }

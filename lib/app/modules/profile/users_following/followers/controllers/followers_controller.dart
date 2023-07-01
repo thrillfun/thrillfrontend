@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logger/logger.dart';
 
 import '../../../../../rest/models/followers_model.dart';
 import '../../../../../rest/rest_urls.dart';
@@ -49,7 +52,11 @@ class FollowersController extends GetxController
   }
 
   Future<void> followUnfollowUser(
-      int userId,String action
+      int userId,String action,{
+        String fcmToken="",
+        String image="",
+        String name="",
+  }
       ) async{
 
     dio.options.headers={
@@ -57,13 +64,49 @@ class FollowersController extends GetxController
     };
     dio.post("user/follow-unfollow-user",queryParameters: {"publisher_user_id":userId,"action":"$action"}).then((value) {
       if(value.data["status"]) {
+        if(action=="follow"){
+          sendNotification(fcmToken,body: "$name started following you!",title: "New follower!",image: image);
+        }
+        else{
+          sendNotification(fcmToken,body: "$name stopped following you!",title: "Follower lost",image: image);
+
+        }
         getUserFollowers();
       }
       else{
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().wtf(error);
+    });
+  }
+  Future<void> sendNotification(String fcmToken,
+      {String? body = "", String? title = "", String? image = ""}) async {
+    var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
+    dio.options.headers = {
+      "Authorization":
+      "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+    };
+    final data = {
+      "to": fcmToken,
+      "notification": {"body": body, "title": title, "image": image},
+      "priority": "high",
+      "image": image,
+      "data": {
+        "url":image,
+        "body":body,
+        "title":title,
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        "id": "1",
+        "status": "done",
+        "image":
+        image
+      }
+    };
+    dio.post("/send", data: jsonEncode(data)).then((value) {
+      Logger().wtf(value);
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
     });
   }
 }

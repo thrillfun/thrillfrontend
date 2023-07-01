@@ -23,11 +23,12 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:ui' as ui;
 import 'package:path_provider/path_provider.dart';
+
 class QrCodeController extends GetxController {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   User? userModel;
   final GlobalKey previewContainer = new GlobalKey();
-  var qrData= ''.obs;
+  var qrData = ''.obs;
   final count = 0.obs;
 
   @override
@@ -45,6 +46,7 @@ class QrCodeController extends GetxController {
   void onClose() {
     super.onClose();
   }
+
   Future<String> createDynamicLink() async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
       uriPrefix: 'https://thrill.page.link/',
@@ -61,35 +63,37 @@ class QrCodeController extends GetxController {
       // ),
     );
     final dynamicLink =
-    await FirebaseDynamicLinks.instance.buildLink(parameters);
+        await FirebaseDynamicLinks.instance.buildLink(parameters);
     qrData.value = dynamicLink.toString();
     return dynamicLink.toString();
   }
+
   Future<void> captureSocialPng() {
     DateTime dateTime = DateTime.now();
 
-    List<String> imagePaths = [];
     final RenderBox box = Get.context!.findRenderObject() as RenderBox;
     return Future.delayed(const Duration(milliseconds: 20), () async {
       RenderRepaintBoundary? boundary = previewContainer.currentContext!
           .findRenderObject() as RenderRepaintBoundary?;
-      ui.Image image = await boundary!.toImage();
+      ui.Image image = await boundary!.toImage(pixelRatio: 10);
       ByteData? byteData =
           await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
-      File imgFile = File(
-          '${saveDirectory}ThrillProfileQR-${dateTime.hour}${dateTime.minute}${dateTime.second}${dateTime.millisecond}.png');
-      imagePaths.add(imgFile.path);
-      imgFile.writeAsBytes(pngBytes).then((value) async {
-        await Share.shareFiles(imagePaths,
+
+      await File(
+              '${saveDirectory}ThrillProfileQR-${dateTime.hour}${dateTime.minute}${dateTime.second}${dateTime.millisecond}.png')
+          .writeAsBytes(pngBytes)
+          .then((value) async {
+        List<String> fileList = [];
+        fileList.add(value.path);
+        await Share.shareFiles(fileList,
             subject: 'Share',
             text: 'Check this Out!',
             sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
-      }).catchError((onError) {
-        print(onError);
       });
     });
   }
+
   saveQrCode() async {
     // var status = await Permission.storage.isGranted;
     // if (!status) {
@@ -120,10 +124,10 @@ class QrCodeController extends GetxController {
       await File(qrFile.path).writeAsBytes(
           buffer.asUint8List(picData.offsetInBytes, picData.lengthInBytes));
       Get.back();
-      successToast( "Successfully Saved QR Code!!");
+      successToast("Successfully Saved QR Code!!");
     } catch (e) {
       Get.back();
-      errorToast( "Failed to Save QR Code\n$e}");
+      errorToast("Failed to Save QR Code\n$e}");
     }
   }
 }

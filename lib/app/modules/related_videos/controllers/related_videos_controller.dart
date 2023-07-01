@@ -3,23 +3,23 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:file_support/file_support.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:thrill/app/rest/models/related_videos_model.dart';
 import 'package:thrill/app/rest/rest_urls.dart';
-import 'package:thrill/app/utils/strings.dart';
 import 'package:thrill/app/utils/utils.dart';
 import 'package:video_player/video_player.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../rest/models/site_settings_model.dart';
 
-class RelatedVideosController extends GetxController {
+class RelatedVideosController extends GetxController
+    with StateMixin<RxList<RelatedVideos>> {
   late VideoPlayerController videoPlayerController;
 
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
@@ -37,7 +37,7 @@ class RelatedVideosController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getAllVideos();
+    getAllVideos(true);
   }
 
   @override
@@ -50,35 +50,53 @@ class RelatedVideosController extends GetxController {
     super.onClose();
   }
 
-  Future<void> getAllVideos() async {
+  Future<void> notInterested(int videoId) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
-
-    //change(publicVideosList, status: RxStatus.loading());
-
-    dio.get("/video/list").then((value) {
-      if (relatedVideosList.isEmpty) {
-        // change(relatedVideosList, status: RxStatus.loading());
-
-        isLoading.value = true;
-        relatedVideosList = RelatedVideosModel.fromJson(value.data).data!.obs;
-
-        // change(relatedVideosList, status: RxStatus.success());
-      } else {
-        relatedVideosList.value =
-            RelatedVideosModel.fromJson(value.data).data!.obs;
-
-        // change(publicVideosList, status: RxStatus.success());
-      }
-
-      //  change(publicVideosList, status: RxStatus.success());
-      isLoading.value = false;
+    dio.post("video/change_interest", queryParameters: {
+      "content_id": videoId,
+      "filter_by": "tag"
+    }).then((value) {
+      value.data["status"]
+          ? successToast(value.data["message"])
+          : errorToast(value.data["message"]);
+      refereshVideos();
     }).onError((error, stackTrace) {
-      isLoading.value = false;
-      //   change(publicVideosList, status: RxStatus.error());
+      Logger().wtf(error);
     });
-    isLoading.value = false;
+  }
+
+  Future<void> getAllVideos(bool isRefresh) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (relatedVideosList.isEmpty) {
+      change(relatedVideosList, status: RxStatus.loading());
+    }
+    dio.get("video/list").then((value) {
+      relatedVideosList.value =
+          RelatedVideosModel.fromJson(value.data).data!.obs;
+      change(relatedVideosList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(relatedVideosList, status: RxStatus.error(error.toString()));
+    });
+  }
+
+  Future<void> refereshVideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    change(relatedVideosList, status: RxStatus.loading());
+
+    dio.get("video/list").then((value) {
+      relatedVideosList.value =
+          RelatedVideosModel.fromJson(value.data).data!.obs;
+
+      change(relatedVideosList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(relatedVideosList, status: RxStatus.error());
+    });
   }
 
   Future<void> postVideoView(int videoId) async {
@@ -94,7 +112,7 @@ class RelatedVideosController extends GetxController {
   }
 
   Future<bool> likeVideo(int isLike, int videoId,
-      {int userId = 0, String? token}) async {
+      {int userId = 0, String? token, String userName = ""}) async {
     var isLiked = false;
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -103,21 +121,12 @@ class RelatedVideosController extends GetxController {
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      getAllVideos();
+      getAllVideos(false);
       if (isLike == 1) {
-        sendNotification(token.toString(), title: "Someone liked your video!");
-        // await notificationsController.sendFcmNotification(token.toString(),
-        //     title:
-        //     "${await GetStorage().read("user")["username"]} liked you video",
-        //     body: "Enjoy",
-        //     image: RestUrl.profileUrl +
-        //         await GetStorage().read("user")["avatar"].toString());
-        // await notificationsController.sendChatNotifcations(userId,
-        //     "${await GetStorage().read("user")["username"]} liked your video!");
+        sendNotification(token.toString(),
+            title: "New Likes!", body: "$userName liked your video");
       }
-    }).onError((error, stackTrace) {
-      errorToast(error.toString());
-    });
+    }).onError((error, stackTrace) {});
 
     if (isLike == 0) {
       isLiked = false;
@@ -138,7 +147,7 @@ class RelatedVideosController extends GetxController {
       "action": "$action"
     }).then((value) {
       if (value.data["status"]) {
-        getAllVideos();
+        getAllVideos(false);
       } else {
         errorToast(value.data["message"]);
       }
@@ -152,8 +161,8 @@ class RelatedVideosController extends GetxController {
     await dio.post("user/is-user-blocked",
         queryParameters: {"blocked_user": userId}).then((value) {
       isUserBlocked.value = value.data["status"];
-      getAllVideos();
-    }).onError((error, stackTrace) => errorToast(error.toString()));
+      getAllVideos(false);
+    }).onError((error, stackTrace) {});
     return isUserBlocked.value;
   }
 
@@ -170,9 +179,7 @@ class RelatedVideosController extends GetxController {
       } else {
         errorToast(value.data["message"]);
       }
-    }).onError((error, stackTrace) {
-      errorToast(error.toString());
-    });
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> deleteUserVideo(int videoId) async {
@@ -183,19 +190,22 @@ class RelatedVideosController extends GetxController {
         (value) {
       if (value.data["status"]) {
         successToast(value.data["message"]);
-        getAllVideos();
+        getAllVideos(true);
       } else {
         errorToast(value.data["message"]);
       }
-    }).onError((error, stackTrace) {
-      errorToast(error.toString());
-    });
+    }).onError((error, stackTrace) {});
   }
 
   downloadAndProcessVideo(String videoUrl, String videoName) async {
-    Get.defaultDialog(title: "Loading", content: loader());
+    var videoProgress = "0".obs;
+    Get.defaultDialog(
+        title: "Download video....",
+        content: Container(
+          child: Obx(() => Text(videoProgress.value)),
+        ));
     final directory = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_PICTURES);
+        ExternalPath.DIRECTORY_MOVIES);
     if (await Directory('$directory/thrill/').exists() == false) {
       await Directory('$directory/thrill/').create();
     }
@@ -210,12 +220,14 @@ class RelatedVideosController extends GetxController {
       filename: videoName,
       extension: ".mp4",
       progress: (progress) async {
-        Logger().i(progress);
+        videoProgress.value = progress;
       },
     )
         .then((video) async {
+      if (Get.isDialogOpen!) {
+        Get.back();
+      }
       successToast("video downloaded successfully");
-      Get.back();
 
       // await FFmpegKit.execute(
       //     "-y -i ${video!.path} -i ${logo!.path} -filter_complex overlay=10:10 -codec:a copy ${path.path}$videoName.mp4")
@@ -230,7 +242,6 @@ class RelatedVideosController extends GetxController {
       //   }
       // }).onError((error, stackTrace) => errorToast(error.toString()));
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
       Get.back();
     });
   }
@@ -259,7 +270,7 @@ class RelatedVideosController extends GetxController {
 
     await dio.post("SiteSettings").then((value) {
       siteSettingsList.value = SiteSettingsModel.fromJson(value.data).data!;
-    }).onError((error, stackTrace) => errorToast(error.toString()));
+    }).onError((error, stackTrace) {});
   }
 
   Future<bool> checkIfVideoReported(int videoId, int userId) async {
@@ -269,12 +280,11 @@ class RelatedVideosController extends GetxController {
       "reason": "nothing"
     }).then((value) {
       isVideoReported.value = value.data["status"];
-    }).onError((error, stackTrace) {
-      errorToast(error.toString());
-    });
+    }).onError((error, stackTrace) {});
 
     return isVideoReported.value;
   }
+
   Future<void> favUnfavVideo(int videoId, String action) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -290,6 +300,7 @@ class RelatedVideosController extends GetxController {
       }
     }).onError((error, stackTrace) {});
   }
+
   Future<String> createDynamicLink(
       String id, String? type, String? name, String? avatar,
       {String? referal}) async {
@@ -326,11 +337,13 @@ class RelatedVideosController extends GetxController {
       "priority": "high",
       "image": image,
       "data": {
+        "url": image,
+        "body": body,
+        "title": title,
         "click_action": "FLUTTER_NOTIFICATION_CLICK",
         "id": "1",
         "status": "done",
-        "image":
-            "https://scontent.fbom19-2.fna.fbcdn.net/v/t39.30808-6/271720827_4979339162088555_3028905257532289818_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=HMgk-tDtBcQAX9uJheY&_nc_ht=scontent.fbom19-2.fna&oh=00_AfCVE7nSsxVGPTfTa8FCyff4jOzTKWi_JvTXpDWm7WrVjg&oe=63E84FB2"
+        "image": image
       }
     };
     dio.post("/send", data: jsonEncode(data)).then((value) {

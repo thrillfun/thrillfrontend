@@ -17,538 +17,499 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
       appBar: AppBar(
         elevation: 0,
         title: Row(
-        children: [
-          Flexible(
-              child: Container(
-                alignment: Alignment.center,
-                width: Get.width,
-                child: Text(
-                  "Your Account",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                  ),
+          children: [
+            Flexible(
+                child: Container(
+              alignment: Alignment.center,
+              width: Get.width,
+              child: Text(
+                "Your Account",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
                 ),
-              ))
-        ],
-      ),),
+              ),
+            ))
+          ],
+        ),
+      ),
       body: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
         height: Get.height,
         width: Get.width,
-        child:controller.obx((state) =>  ListView(
-          shrinkWrap: true,
-          children: [
+        child: controller.obx(
+            (state) => ListView(
+                  shrinkWrap: true,
+                  children: [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    InkWell(
+                      onTap: () =>
+                          Get.toNamed(Routes.EDIT_PROFILE, arguments: {}),
+                      child: profilePicLayout(),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Divider(),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    InkWell(
+                      onTap: () => Get.toNamed(Routes.EDIT_PROFILE),
+                      child: aboutYouLayout(),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
 
-            const SizedBox(
-              height: 10,
-            ),
-            InkWell(
-              onTap: () => Get.toNamed(Routes.EDIT_PROFILE,arguments: {  "avatar": state!.value.avatar,
-                "email": state!.value.email??"",
-                "phone": state!.value.phone??"",
-                "dob":state!.value.dob??"",
-                "userName": state.value.username??"",
-                "name": state!.value.firstName??"",
-                "last_name": state!.value.lastName??"",
-                "mobile": state!.value.phone??"",
-                "website":state!.value.websiteUrl??"",
-                "bio":state!.value.bio??"",
-                "location":state!.value.location??""}),
-              child: profilePicLayout(),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Divider(
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            InkWell(
-              onTap: () => Get.toNamed(Routes.EDIT_PROFILE),
-              child: aboutYouLayout(),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-
-            // InkWell(
-            //   onTap: () => Get.to(ManageAccount()),
-            //   child: socialLayout(),
-            // ),
-          ],
-        ),onLoading: loader()),
+                    // InkWell(
+                    //   onTap: () => Get.to(ManageAccount()),
+                    //   child: socialLayout(),
+                    // ),
+                  ],
+                ),
+            onLoading: loader()),
       ),
     );
   }
 
   profilePicLayout() => SizedBox(
-    height: 160,
-    width: 160,
-    child: CachedNetworkImage(
-        placeholder: (a, b) => Center(
-          child: loader(),
-        ),
         height: 160,
         width: 160,
-        imageBuilder: (context, imageProvider) => Container(
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            image: DecorationImage(
-                image: imageProvider, fit: BoxFit.contain),
-          ),
-        ),
-        errorWidget: (context, string, dynamic) => CachedNetworkImage(
-            placeholder: (a, b) =>  Center(
-              child: loader(),
-            ),
-            fit: BoxFit.contain,
+        child: CachedNetworkImage(
+            placeholder: (a, b) => Center(
+                  child: loader(),
+                ),
+            height: 160,
+            width: 160,
             imageBuilder: (context, imageProvider) => Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                    image: imageProvider, fit: BoxFit.contain),
-              ),
-            ),
-            imageUrl: RestUrl.placeholderImage),
-        imageUrl: RestUrl.profileUrl +
-            controller.userProfile.value.avatar.toString()),
-  );
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        image: imageProvider, fit: BoxFit.contain),
+                  ),
+                ),
+            errorWidget: (context, string, dynamic) => CachedNetworkImage(
+                placeholder: (a, b) => Center(
+                      child: loader(),
+                    ),
+                fit: BoxFit.contain,
+                imageBuilder: (context, imageProvider) => Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                            image: imageProvider, fit: BoxFit.contain),
+                      ),
+                    ),
+                imageUrl: RestUrl.placeholderImage),
+            imageUrl: RestUrl.profileUrl +
+                controller.userProfile.value.avatar.toString()),
+      );
   aboutYouLayout() => controller.obx((state) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        "About You",
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 20,
-        ),
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            IconlyLight.profile,
-          ),
-          const SizedBox(
-            width: 10,
-          ),
           Text(
-            "Name",
+            "About You",
             style: TextStyle(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               fontSize: 20,
             ),
           ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        controller.userProfile.value.name.toString(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 20,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        children: [
-          Icon(
-            IconlyLight.tick_square,
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              Icon(
+                IconlyLight.profile,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Name",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                ),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            controller.userProfile.value.name.toString(),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          Text(
-            "Username",
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
-          ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        "@" +
-                            state!.value.username
-                                .toString(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 20,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        children: [
-          Icon(
-            IconlyLight.info_square,
+          Row(
+            children: [
+              Icon(
+                IconlyLight.tick_square,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Username",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                ),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            "@" + state!.value.username.toString(),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          Text(
-            "Bio",
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
-          ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Flexible(
-                          child: Text(
+          Row(
+            children: [
+              Icon(
+                IconlyLight.info_square,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Bio",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                ),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                              child: Text(
                             state!.value.bio.toString().isEmpty
                                 ? "N/A"
                                 : state!.value.bio.toString(),
+                            textAlign: TextAlign.justify,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 20),
+                                fontWeight: FontWeight.w600, fontSize: 20),
                           )),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        children: [
-          Icon(
-            IconlyLight.calendar,
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          Text(
-            "DOB",
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 20),
-          ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        state!.value.dob.toString().isEmpty
-                            ? "N/A"
-                            : state!.value.dob.toString(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        children: [
-          Icon(
-            Icons.male,
+          Row(
+            children: [
+              Icon(
+                IconlyLight.calendar,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "DOB",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            state!.value.dob.toString().isEmpty
+                                ? "N/A"
+                                : state!.value.dob.toString(),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 20),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          Text(
-            "Gender",
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 20),
-          ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        state!.value.gender
-                            .toString()
-                            .isEmpty
-                            ? "N/A"
-                            : state!.value.gender
-                            .toString(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        children: [
-          Icon(
-            IconlyLight.message,
+          Row(
+            children: [
+              Icon(
+                Icons.male,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Gender",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            state!.value.gender.toString().isEmpty
+                                ? "N/A"
+                                : state!.value.gender.toString(),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 20),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          Text(
-            "Email",
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 20),
-          ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        state!.value.email
-                            .toString()
-                            .isEmpty
-                            ? "N/A"
-                            : state!.value.email.toString(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        children: [
-          Icon(
-            IconlyLight.call,
+          Row(
+            children: [
+              Icon(
+                IconlyLight.message,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Email",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            state!.value.email.toString().isEmpty
+                                ? "N/A"
+                                : state!.value.email.toString(),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 20),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          Text(
-            "Mobile",
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 20),
+          Row(
+            children: [
+              Icon(
+                IconlyLight.call,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Mobile",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            state!.value.phone.toString().isEmpty
+                                ? "N/A"
+                                : state!.value.phone.toString(),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 20),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        state!.value.phone
-                            .toString()
-                            .isEmpty
-                            ? "N/A"
-                            : state!.value.phone.toString(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
         ],
-      ),
-    ],
-  ));
+      ));
   socialLayout() => controller.obx((state) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        "Social",
-        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            IconlyLight.info_square,
+          const Text(
+            "Social",
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          const Text(
-            "Instagram",
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-          ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        state!.value.instagram
-                            .toString()
-                            .isEmpty
-                            ? "N/A"
-                            : state!.value.instagram
-                            .toString(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 20),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        children: [
-          Icon(
-            IconlyLight.paper,
+          Row(
+            children: [
+              Icon(
+                IconlyLight.info_square,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              const Text(
+                "Instagram",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            state!.value.instagram.toString().isEmpty
+                                ? "N/A"
+                                : state!.value.instagram.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 20),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          const Text(
-            "Facebook",
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-          ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        state!.value.facebook
-                            .toString()
-                            .isEmpty
-                            ? "N/A"
-                            : state!.value.facebook
-                            .toString(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 20),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        children: [
-          Icon(
-            IconlyLight.bag,
+          Row(
+            children: [
+              Icon(
+                IconlyLight.paper,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              const Text(
+                "Facebook",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            state!.value.facebook.toString().isEmpty
+                                ? "N/A"
+                                : state!.value.facebook.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 20),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
           const SizedBox(
-            width: 10,
+            height: 10,
           ),
-          const Text(
-            "Twitter",
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+          Row(
+            children: [
+              Icon(
+                IconlyLight.bag,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              const Text(
+                "Twitter",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              Flexible(
+                  child: Container(
+                      width: Get.width,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            state!.value.twitter.toString().isEmpty
+                                ? "N/A"
+                                : state!.value.twitter.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 20),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Flexible(child: Icon(IconlyLight.arrow_right_square))
+                        ],
+                      )))
+            ],
           ),
-          Flexible(
-              child: Container(
-                  width: Get.width,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        state!.value.twitter
-                            .toString()
-                            .isEmpty
-                            ? "N/A"
-                            : state!.value.twitter
-                            .toString(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 20),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Flexible(child: Icon(IconlyLight.arrow_right_square))
-                    ],
-                  )))
         ],
-      ),
-    ],
-  ));
-  }
-
+      ));
+}

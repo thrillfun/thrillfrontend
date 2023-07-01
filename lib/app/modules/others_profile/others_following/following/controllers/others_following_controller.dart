@@ -3,17 +3,18 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../../../../rest/models/followers_model.dart';
+import '../../../../../rest/models/following_model.dart';
 import '../../../../../rest/rest_urls.dart';
 import '../../../../../utils/utils.dart';
 
 class OthersFollowingController extends GetxController
-    with StateMixin<RxList<Followers>> {
+    with StateMixin<RxList<Following>> {
 //TODO: Implement FollowersController
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
 
-  var followersModel = RxList<Followers>();
+  var followersModel = RxList<Following>();
 
   @override
   void onInit() {
@@ -41,24 +42,24 @@ class OthersFollowingController extends GetxController
     dio.post('user/get-followings', queryParameters: {
       "user_id": "${Get.arguments["profileId"]}"
     }).then((result) {
-      followersModel = FollowersModel.fromJson(result.data).data!.obs;
+      followersModel = FollowingModel.fromJson(result.data).data!.obs;
       change(followersModel, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followersModel, status: RxStatus.error());
     });
   }
-  Future<void> followUnfollowUser(
-      int userId,String action
-      ) async{
 
-    dio.options.headers={
-      "Authorization":"Bearer ${await GetStorage().read("token")}"
+  Future<void> followUnfollowUser(int userId, String action) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
-    dio.post("user/follow-unfollow-user",queryParameters: {"publisher_user_id":userId,"action":"$action"}).then((value) {
-      if(value.data["status"]) {
+    dio.post("user/follow-unfollow-user", queryParameters: {
+      "publisher_user_id": userId,
+      "action": "$action"
+    }).then((value) {
+      if (value.data["status"]) {
         getFollowings();
-      }
-      else{
+      } else {
         errorToast("sorry an error has occurred");
       }
     }).onError((error, stackTrace) {});

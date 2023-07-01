@@ -42,7 +42,6 @@ class WalletTrasactionsController extends GetxController  with StateMixin<RxList
         change(transactionsList, status: RxStatus.empty());
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
       change(transactionsList, status: RxStatus.error());
     });
   }

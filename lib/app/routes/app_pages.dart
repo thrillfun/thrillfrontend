@@ -27,6 +27,8 @@ import '../modules/home/home_videos_player/bindings/home_videos_player_binding.d
 import '../modules/home/home_videos_player/views/home_videos_player_view.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login/bindings/login_binding.dart';
+import '../modules/login/login_screen/bindings/login_screen_binding.dart';
+import '../modules/login/login_screen/views/login_screen_view.dart';
 import '../modules/login/otpverify/bindings/otpverify_binding.dart';
 import '../modules/login/otpverify/views/otpverify_view.dart';
 import '../modules/login/views/login_view.dart';
@@ -88,11 +90,15 @@ import '../modules/settings/terms_of_service/bindings/terms_of_service_binding.d
 import '../modules/settings/terms_of_service/views/terms_of_service_view.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/sounds/bindings/sounds_binding.dart';
+import '../modules/sounds/sound_videos/bindings/sound_videos_binding.dart';
+import '../modules/sounds/sound_videos/views/sound_videos_view.dart';
 import '../modules/sounds/views/sounds_view.dart';
 import '../modules/spin_wheel/bindings/spin_wheel_binding.dart';
 import '../modules/spin_wheel/user_levels/bindings/user_levels_binding.dart';
 import '../modules/spin_wheel/user_levels/views/user_levels_view.dart';
 import '../modules/spin_wheel/views/spin_wheel_view.dart';
+import '../modules/splash_screen/bindings/splash_screen_binding.dart';
+import '../modules/splash_screen/views/splash_screen_view.dart';
 import '../modules/trending_videos/bindings/trending_videos_binding.dart';
 import '../modules/trending_videos/views/trending_videos_view.dart';
 import '../modules/wallet/bindings/wallet_binding.dart';
@@ -137,6 +143,11 @@ class AppPages {
           page: () => OtpverifyView(),
           binding: OtpverifyBinding(),
         ),
+        GetPage(
+          name: _Paths.LOGIN_SCREEN,
+          page: () => LoginScreenView(true.obs),
+          binding: LoginScreenBinding(),
+        ),
       ],
     ),
     GetPage(
@@ -168,7 +179,7 @@ class AppPages {
           children: [
             GetPage(
               name: _Paths.SEARCH_VIDEOS_PLAYER,
-              page: () => const SearchVideosPlayerView(),
+              page: () =>  SearchVideosPlayerView(),
               binding: SearchVideosPlayerBinding(),
             ),
           ],
@@ -180,14 +191,14 @@ class AppPages {
           children: [
             GetPage(
               name: _Paths.HASH_TAGS_VIDEO_PLAYER,
-              page: () => const HashTagsVideoPlayerView(),
+              page: () =>  HashTagsVideoPlayerView(),
               binding: HashTagsVideoPlayerBinding(),
             ),
           ],
         ),
         GetPage(
           name: _Paths.DISCOVER_VIDEO_PLAYER,
-          page: () => const DiscoverVideoPlayerView(),
+          page: () =>  DiscoverVideoPlayerView(),
           binding: DiscoverVideoPlayerBinding(),
         ),
       ],
@@ -250,17 +261,17 @@ class AppPages {
         ),
         GetPage(
           name: _Paths.PROFILE_VIDEOS,
-          page: () => const ProfileVideosView(),
+          page: () => ProfileVideosView(),
           binding: ProfileVideosBinding(),
         ),
         GetPage(
           name: _Paths.LIKED_VIDEO_PLAYER,
-          page: () => const LikedVideoPlayerView(),
+          page: () => LikedVideoPlayerView(),
           binding: LikedVideoPlayerBinding(),
         ),
         GetPage(
           name: _Paths.PRIVATE_VIDEOS_PLAYER,
-          page: () => const PrivateVideosPlayerView(),
+          page: () => PrivateVideosPlayerView(),
           binding: PrivateVideosPlayerBinding(),
         ),
         GetPage(
@@ -294,7 +305,7 @@ class AppPages {
         ),
         GetPage(
           name: _Paths.OTHERS_LIKED_VIDEOS,
-          page: () => const others.OthersLikedVideosView(),
+          page: () => others.OthersLikedVideosView(),
           binding: others.OthersLikedVideosBinding(),
         ),
         GetPage(
@@ -311,12 +322,12 @@ class AppPages {
         ),
         GetPage(
           name: _Paths.OTHERS_PROFILE_VIDEOS,
-          page: () => const OthersProfileVideosView(),
+          page: () =>  OthersProfileVideosView(),
           binding: OthersProfileVideosBinding(),
         ),
         GetPage(
           name: _Paths.OTHERS_LIKED_VIDEOS_PLAYER,
-          page: () => const OthersLikedVideosPlayerView(),
+          page: () =>  OthersLikedVideosPlayerView(),
           binding: OthersLikedVideosPlayerBinding(),
         ),
       ],
@@ -333,7 +344,7 @@ class AppPages {
       children: [
         GetPage(
           name: _Paths.SELECT_SOUND,
-          page: () => const SelectSoundView(),
+          page: () => SelectSoundView(),
           binding: SelectSoundBinding(),
         ),
         GetPage(
@@ -365,8 +376,15 @@ class AppPages {
           children: [
             GetPage(
               name: _Paths.FAVOURITE_SOUNDS,
-              page: () => const FavouriteSoundsView(),
+              page: () => FavouriteSoundsView(),
               binding: FavouriteSoundsBinding(),
+              children: [
+                GetPage(
+                  name: _Paths.SOUND_VIDEOS,
+                  page: () => SoundVideosView(),
+                  binding: SoundVideosBinding(),
+                ),
+              ],
             ),
             GetPage(
               name: _Paths.FAVOURITE_VIDEOS,
@@ -375,7 +393,7 @@ class AppPages {
               children: [
                 GetPage(
                   name: _Paths.FAVOURITE_VIDEO_PLAYER,
-                  page: () => const FavouriteVideoPlayerView(),
+                  page: () => FavouriteVideoPlayerView(),
                   binding: FavouriteVideoPlayerBinding(),
                 ),
               ],
@@ -431,8 +449,13 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.TRENDING_VIDEOS,
-      page: () =>  TrendingVideosView(),
+      page: () => TrendingVideosView(),
       binding: TrendingVideosBinding(),
+    ),
+    GetPage(
+      name: _Paths.SPLASH_SCREEN,
+      page: () => const SplashScreenView(),
+      binding: SplashScreenBinding(),
     ),
   ];
 }

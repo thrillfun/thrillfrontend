@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logger/logger.dart';
 import 'package:thrill/app/rest/models/user_videos_model.dart';
 import 'package:thrill/app/rest/rest_urls.dart';
 import 'package:thrill/app/utils/utils.dart';
@@ -18,12 +19,13 @@ class UserVideosController extends GetxController
 
   @override
   void onInit() {
+    getUserVideos();
+
     super.onInit();
   }
 
   @override
   void onReady() {
-    getUserVideos();
     super.onReady();
   }
 
@@ -38,11 +40,10 @@ class UserVideosController extends GetxController
     };
     change(userVideos, status: RxStatus.loading());
 
-    dio
+ await   dio
         .post('/video/user-videos', queryParameters: {
           "user_id": "${await GetStorage().read("userId")}"
         })
-        .timeout(const Duration(seconds: 10))
         .then((response) {
           userVideos = UserVideosModel.fromJson(response.data).data!.obs;
           change(userVideos, status: RxStatus.success());
@@ -65,7 +66,7 @@ class UserVideosController extends GetxController
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().wtf(error);
     });
   }
 
@@ -80,12 +81,12 @@ class UserVideosController extends GetxController
       if (value.data["status"]) {
         Get.find<UserPrivateVideosController>().getUserPrivateVideos();
         getUserVideos();
-       // successToast(value.data["message"]);
+        // successToast(value.data["message"]);
       } else {
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().wtf(error);
     });
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -17,9 +15,10 @@ class UsersFollowingView extends GetView<UsersFollowingController> {
       initialIndex: Get.arguments["index"] as int,
       child: Scaffold(
         appBar: AppBar(
+          title: Text("Your followers and followings"),
           bottom: TabBar(
             onTap: (index) => {},
-            tabs:const  [
+            tabs: const [
               Tab(
                 text: "Following",
               ),

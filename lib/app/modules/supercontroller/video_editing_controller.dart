@@ -178,6 +178,7 @@ class VideoEditingController extends GetxController {
 
   }
   getLocalAlbums() async {
+    if(await Permission.audio.isRestricted)
     if (await Permission.audio.isGranted == false) {
       await Permission.audio.request().then((value) async {
         localSoundsList.value = await OnAudioQuery().querySongs();

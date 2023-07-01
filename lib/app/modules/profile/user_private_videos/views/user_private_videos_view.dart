@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:iconly/iconly.dart';
+import 'package:lottie/lottie.dart';
 import 'package:thrill/app/routes/app_pages.dart';
+import 'package:thrill/app/widgets/no_liked_videos.dart';
+import 'package:thrill/app/widgets/no_search_result.dart';
 
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/color_manager.dart';
@@ -15,9 +19,8 @@ class UserPrivateVideosView extends GetView<UserPrivateVideosController> {
   Widget build(BuildContext context) {
     return controller.obx(
         (state) => state!.isEmpty
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Icon(Icons.lock_clock)],
+            ? NoSearchResult(
+                text: "No Private Videos!",
               )
             : Column(
                 children: [
@@ -76,8 +79,8 @@ class UserPrivateVideosView extends GetView<UserPrivateVideosController> {
                                                   TextSpan(
                                                       text: " " +
                                                           state[index]
-                                                              .views
-                                                              .toString(),
+                                                              .views!
+                                                              .formatViews(),
                                                       style: const TextStyle(
                                                           color: Colors.white,
                                                           fontWeight:
@@ -93,133 +96,266 @@ class UserPrivateVideosView extends GetView<UserPrivateVideosController> {
                                       right: 5,
                                       child: IconButton(
                                           onPressed: () {
-                                            Get.bottomSheet(Scaffold(
-                                              body: Container(
-                                                margin: EdgeInsets.all(10),
+                                            showModalBottomSheet(
+                                              isScrollControlled: true,
+                                              context: context,
+                                              builder: (BuildContext context) =>
+                                                  Container(
+                                                margin:
+                                                    const EdgeInsets.all(10),
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     InkWell(
-                                                      child: Text("Delete Video",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700),),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10),
+                                                        child: Row(
+                                                          children: const [
+                                                            Icon(
+                                                              IconlyBroken
+                                                                  .delete,
+                                                              color: Colors.red,
+                                                            ),
+                                                            SizedBox(
+                                                              width: 10,
+                                                            ),
+                                                            Text(
+                                                              "Delete Video",
+                                                              style: TextStyle(
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
                                                       onTap: () {
                                                         Get.defaultDialog(
                                                             content: const Text(
                                                                 "you want to delete this video?"),
-                                                            title: "Are your sure?",
-                                                            titleStyle: TextStyle(
-                                                                fontWeight:
-                                                                FontWeight.w700),
+                                                            title:
+                                                                "Are your sure?",
+                                                            titleStyle:
+                                                                const TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w700),
                                                             confirm: InkWell(
                                                               child: Container(
-                                                                width: Get.width,
-                                                                alignment: Alignment.center,
+                                                                width:
+                                                                    Get.width,
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
                                                                 decoration: BoxDecoration(
                                                                     borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(10),
+                                                                        BorderRadius.circular(
+                                                                            10),
                                                                     color: Colors
-                                                                        .red.shade400),
-                                                                child: Text(
+                                                                        .red
+                                                                        .shade400),
+                                                                child:
+                                                                    const Text(
                                                                   "Yes",
                                                                   style: TextStyle(
                                                                       fontWeight:
-                                                                      FontWeight.w700,
-                                                                      color: Colors.white),
+                                                                          FontWeight
+                                                                              .w700,
+                                                                      color: Colors
+                                                                          .white),
                                                                 ),
-                                                                padding: EdgeInsets.all(10),
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(10),
                                                               ),
                                                               onTap: () => controller
                                                                   .deleteUserVideo(
-                                                                  state[index].id!)
-                                                                  .then((value) =>
-                                                                  Get.back()),
+                                                                      state[index]
+                                                                          .id!)
+                                                                  .then(
+                                                                      (value) {
+                                                                if (Get
+                                                                    .isDialogOpen!) {
+                                                                  Get.back();
+                                                                }
+                                                                Navigator.pop(
+                                                                    context);
+                                                              }),
                                                             ),
                                                             cancel: InkWell(
                                                               child: Container(
-                                                                width: Get.width,
+                                                                width:
+                                                                    Get.width,
                                                                 decoration: BoxDecoration(
                                                                     borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(10),
-                                                                    color: Colors.green),
-                                                                child: Text("Cancel",
+                                                                        BorderRadius.circular(
+                                                                            10),
+                                                                    color: Colors
+                                                                        .green),
+                                                                child: const Text(
+                                                                    "Cancel",
                                                                     style: TextStyle(
                                                                         fontWeight:
-                                                                        FontWeight.w700,
-                                                                        color:
-                                                                        Colors.white)),
-                                                                alignment: Alignment.center,
-                                                                padding: EdgeInsets.all(10),
+                                                                            FontWeight
+                                                                                .w700,
+                                                                        color: Colors
+                                                                            .white)),
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(10),
                                                               ),
-                                                              onTap: () => Get.back(),
+                                                              onTap: () {
+                                                                if (Get
+                                                                    .isDialogOpen!) {
+                                                                  Get.back();
+                                                                }
+                                                                Navigator.pop(
+                                                                    context);
+                                                              },
                                                             ));
                                                       },
                                                     ),
-                                                    SizedBox(height: 10,),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    const Divider(
+                                                      height: 2,
+                                                    ),
                                                     InkWell(
-                                                      child: Text("Make video private",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w700)),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10),
+                                                        child: Row(
+                                                          children: const [
+                                                            Icon(
+                                                              IconlyBroken.lock,
+                                                              color: ColorManager
+                                                                  .colorAccent,
+                                                            ),
+                                                            SizedBox(
+                                                              width: 10,
+                                                            ),
+                                                            Text(
+                                                                "Make video public",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w700))
+                                                          ],
+                                                        ),
+                                                      ),
                                                       onTap: () {
                                                         Get.defaultDialog(
                                                             content: const Text(
                                                                 "you want to public this video?"),
-                                                            title: "Are your sure?",
-                                                            titleStyle: TextStyle(
-                                                                fontWeight:
-                                                                FontWeight.w700),
+                                                            title:
+                                                                "Are your sure?",
+                                                            titleStyle:
+                                                                const TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w700),
                                                             confirm: InkWell(
                                                               child: Container(
-                                                                width: Get.width,
-                                                                alignment: Alignment.center,
+                                                                width:
+                                                                    Get.width,
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
                                                                 decoration: BoxDecoration(
                                                                     borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(10),
+                                                                        BorderRadius.circular(
+                                                                            10),
                                                                     color: Colors
-                                                                        .red.shade400),
-                                                                child: Text(
+                                                                        .red
+                                                                        .shade400),
+                                                                child:
+                                                                    const Text(
                                                                   "Yes",
                                                                   style: TextStyle(
                                                                       fontWeight:
-                                                                      FontWeight.w700,
-                                                                      color: Colors.white),
+                                                                          FontWeight
+                                                                              .w700,
+                                                                      color: Colors
+                                                                          .white),
                                                                 ),
-                                                                padding: EdgeInsets.all(10),
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(10),
                                                               ),
                                                               onTap: () => controller
                                                                   .makeVideoPrivateOrPublic(
-                                                                  state[index].id!,"Public")
-                                                                  .then((value) =>
-                                                                  Get.back()),
+                                                                      state[index]
+                                                                          .id!,
+                                                                      "Public")
+                                                                  .then(
+                                                                      (value) {
+                                                                if (Get
+                                                                    .isDialogOpen!) {
+                                                                  Get.back();
+                                                                }
+                                                                Navigator.pop(
+                                                                    context);
+                                                              }),
                                                             ),
                                                             cancel: InkWell(
                                                               child: Container(
-                                                                width: Get.width,
+                                                                width:
+                                                                    Get.width,
                                                                 decoration: BoxDecoration(
                                                                     borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(10),
-                                                                    color: Colors.green),
-                                                                child: Text("Cancel",
+                                                                        BorderRadius.circular(
+                                                                            10),
+                                                                    color: Colors
+                                                                        .green),
+                                                                child: const Text(
+                                                                    "Cancel",
                                                                     style: TextStyle(
                                                                         fontWeight:
-                                                                        FontWeight.w700,
-                                                                        color:
-                                                                        Colors.white)),
-                                                                alignment: Alignment.center,
-                                                                padding: EdgeInsets.all(10),
+                                                                            FontWeight
+                                                                                .w700,
+                                                                        color: Colors
+                                                                            .white)),
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(10),
                                                               ),
-                                                              onTap: () => Get.back(),
+                                                              onTap: () {
+                                                                if (Get
+                                                                    .isDialogOpen!) {
+                                                                  Get.back();
+                                                                }
+                                                                Navigator.pop(
+                                                                    context);
+                                                              },
                                                             ));
                                                       },
                                                     )
                                                   ],
-                                                ),),
-                                            ));
+                                                ),
+                                              ),
+                                            );
                                           },
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(),
                                           color: Colors.red,
-                                          icon: const Icon(Icons.more_vert_outlined)),
+                                          icon: const Icon(
+                                              Icons.more_vert_outlined)),
                                     )
                                   ],
                                 ),
@@ -232,7 +368,7 @@ class UserPrivateVideosView extends GetView<UserPrivateVideosController> {
           children: [Expanded(child: loader())],
         ),
         onEmpty: Column(
-          children: [Expanded(child: emptyListWidget())],
+          children: [Expanded(child: NoLikedVideos())],
         ));
   }
 }

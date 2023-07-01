@@ -1,11 +1,13 @@
 import 'package:get/get.dart';
 import 'package:thrill/app/modules/camera/controllers/camera_controller.dart';
+import 'package:thrill/app/modules/camera/post_screen/controllers/post_screen_controller.dart';
 import 'package:thrill/app/modules/camera/select_sound/controllers/select_sound_controller.dart';
 import 'package:thrill/app/modules/comments/controllers/comments_controller.dart';
 import 'package:thrill/app/modules/discover/controllers/discover_controller.dart';
 import 'package:thrill/app/modules/discover/hash_tags_details/controllers/hash_tags_details_controller.dart';
 import 'package:thrill/app/modules/discover/search/controllers/search_controller.dart';
 import 'package:thrill/app/modules/following_videos/controllers/following_videos_controller.dart';
+import 'package:thrill/app/modules/home/controllers/ConnectionManagerController.dart';
 import 'package:thrill/app/modules/home/controllers/home_controller.dart';
 import 'package:thrill/app/modules/home/home_videos_player/controllers/home_videos_player_controller.dart';
 import 'package:thrill/app/modules/login/otpverify/controllers/otpverify_controller.dart';
@@ -36,7 +38,11 @@ import 'package:thrill/app/modules/wallet/controllers/wallet_controller.dart';
 import 'package:thrill/app/modules/wallet/wallet_trasactions/controllers/wallet_trasactions_controller.dart';
 
 import '../login/controllers/login_controller.dart';
+import '../login/login_screen/controllers/login_screen_controller.dart';
 import '../others_profile/others_liked_videos/controllers/others_liked_videos_controller.dart';
+import '../others_profile/others_liked_videos_player/controllers/others_liked_videos_player_controller.dart';
+import '../others_profile/others_liked_videos_player/controllers/others_liked_videos_player_controller.dart';
+import '../others_profile/others_liked_videos_player/controllers/others_liked_videos_player_controller.dart';
 import '../profile/profile_videos/controllers/profile_videos_controller.dart';
 import '../settings/favourites/favourite_sounds/controllers/favourite_sounds_controller.dart';
 import '../settings/favourites/favourite_videos/controllers/favourite_videos_controller.dart';
@@ -48,6 +54,7 @@ class AppBindings extends Bindings {
   void dependencies() {
     Get.put(() => AppSuperController());
     Get.lazyPut(() => LoginController(), fenix: true);
+    Get.lazyPut(() => LoginScreenController(), fenix: true);
     Get.lazyPut(() => HomeController(), fenix: true);
     Get.lazyPut(() => OtpverifyController(), fenix: true);
     Get.lazyPut(() => RelatedVideosController(), fenix: true);
@@ -70,6 +77,7 @@ class AppBindings extends Bindings {
     Get.lazyPut(() => OtherssFollowingController(), fenix: true);
     Get.lazyPut(() => OthersFollowingController(), fenix: true);
     Get.lazyPut(() => others.OtherFollowersController(), fenix: true);
+    Get.lazyPut(() => OthersLikedVideosPlayerController(), fenix: true);
     Get.lazyPut(() => HashTagsDetailsController(), fenix: true);
     Get.lazyPut(() => SoundsController(), fenix: true);
     Get.lazyPut(() => ProfileVideosController(), fenix: true);
@@ -81,12 +89,12 @@ class AppBindings extends Bindings {
     Get.lazyPut(() => FavouriteVideosController(), fenix: true);
     Get.lazyPut(() => FavouriteHashtagsController(), fenix: true);
     Get.lazyPut(() => SelectSoundController(), fenix: true);
-    Get.lazyPut(() => VideoEditingController(),fenix: true);
-    Get.lazyPut(() => CommentsController(),fenix: true);
-    Get.lazyPut(() => FollowingVideosController(),fenix: true);
-    Get.lazyPut(() => TrendingVideosController(),fenix: true);
-    Get.lazyPut(() => HomeVideosPlayerController(),fenix: true);
-
+    Get.lazyPut(() => CommentsController(), fenix: true);
+    Get.lazyPut(() => FollowingVideosController(), fenix: true);
+    Get.lazyPut(() => TrendingVideosController(), fenix: true);
+    Get.lazyPut(() => HomeVideosPlayerController(), fenix: true);
+    Get.lazyPut(() => PostScreenController(), fenix: false);
+    Get.lazyPut(() => ConnectionManagerController(), fenix: false);
 
   }
 }

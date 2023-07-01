@@ -54,7 +54,7 @@ class ReferalController extends GetxController with StateMixin<Rx<User>> {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
       uriPrefix: 'https://thrill.page.link/',
       link: Uri.parse(
-          "https://thrill.fun?type=$type&id=$id&name=$name&something=$avatar&referal=$referal"),
+          "https://thrill.fun?type=$type&id=$id&name=$name&avatar=$avatar&referal=$referal"),
       androidParameters: const AndroidParameters(
         packageName: 'com.thrill.media',
         minimumVersion: 1,

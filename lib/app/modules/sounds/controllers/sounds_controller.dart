@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:dio/dio.dart';
 import 'package:file_support/file_support.dart';
@@ -5,7 +7,9 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:logger/logger.dart';
 import 'package:path/path.dart';
+import 'package:thrill/app/modules/camera/controllers/camera_controller.dart';
 import 'package:thrill/app/rest/models/sounds_model.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 
@@ -16,12 +20,14 @@ import '../../../rest/rest_urls.dart';
 import '../../../utils/page_manager.dart';
 import '../../../utils/utils.dart';
 
-class SoundsController extends GetxController with StateMixin<SoundDetails> {
+class SoundsController extends GetxController
+    with StateMixin<SoundDetails>, GetTickerProviderStateMixin {
   //TODO: Implement SoundsController
   late AudioPlayer audioPlayer;
   late Duration duration;
   late PlayerController playerController;
   var fileSupport = FileSupport();
+  AnimationController? animationController;
 
   var progressCount = "".obs;
   var isPlaying = false.obs;
@@ -38,11 +44,15 @@ class SoundsController extends GetxController with StateMixin<SoundDetails> {
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var selectedSoundPath = "".obs;
 
+  var cameraController = Get.find<CameraController>();
+
   var currentProgress = "0".obs;
   var soundDetails = SoundDetails();
   var isProfileLoading = false.obs;
   RxList<VideosBySound> videoList = RxList();
+  var isVideosLoading = false.obs;
   var title = "";
+  int id = Get.arguments["sound_id"];
   final progressNotifier = ValueNotifier<ProgressBarState>(
     ProgressBarState(
       current: Duration.zero,
@@ -53,11 +63,17 @@ class SoundsController extends GetxController with StateMixin<SoundDetails> {
 
   @override
   void onInit() {
+    animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 5000));
+
     super.onInit();
   }
 
   @override
   void dispose() {
+    if (animationController != null) {
+      animationController?.dispose();
+    }
     audioPlayer.dispose();
     playerController.dispose();
     super.dispose();
@@ -69,31 +85,40 @@ class SoundsController extends GetxController with StateMixin<SoundDetails> {
     super.onReady();
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
   void seek(Duration position) {
     audioPlayer.seek(position);
   }
 
-  Future<void> getSoundDetails() async {
+  getSoundDetails() async {
+    change(soundDetails, status: RxStatus.loading());
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
-    change(soundDetails, status: RxStatus.loading());
 
-    dio.post("sound/get",
-        queryParameters: {"id": Get.arguments["sound_id"]}).then((value) {
+    await dio.post("sound/get",
+        queryParameters: {"id": Get.arguments["sound_id"]}).then((value) async {
       soundDetails = SoundDetailsModel.fromJson(value.data).data!;
-      setupAudioPlayer(soundDetails.sound!);
-      getVideosBySound(soundDetails.sound!);
+      await getVideosBySound(soundDetails.sound!);
+
+      await setupAudioPlayer(soundDetails.sound!);
 
       change(soundDetails, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(soundDetails, status: RxStatus.error(error.toString()));
     });
+  }
+
+  Future<void> getVideosBySound(String soundName) async {
+    isVideosLoading.value = true;
+    dio.post("sound/videosbysound", queryParameters: {"sound": soundName}).then(
+        (value) {
+      videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
+      isVideosLoading.value = false;
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+      isVideosLoading.value = false;
+    });
+    isVideosLoading.value = false;
   }
 
   setupAudioPlayer(String soundurl) async {
@@ -146,37 +171,28 @@ class SoundsController extends GetxController with StateMixin<SoundDetails> {
     });
   }
 
-  Future<void> addSoundToFavourite() async {
+  Future<void> addSoundToFavourite(int id, String action) async {
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
     dio.post(
       "favorite/add-to-favorite",
-      queryParameters: {
-        "id": "${await GetStorage().read("soundId")}",
-        "type": "sound",
-        "action": "1"
-      },
+      queryParameters: {"id": id, "type": "sound", "action": action},
     ).then((value) {
       if (value.data["status"]) {
+        getSoundDetails();
         successToast(value.data["message"]);
       } else {
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().wtf(error);
     });
   }
 
-  Future<void> getVideosBySound(String soundName) async {
-    dio.post("sound/videosbysound", queryParameters: {"sound": soundName}).then(
-        (value) {
-      videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
-    }).onError((error, stackTrace) {});
-  }
-
-  downloadAudio(String soundUrl, String userName, String soundName,
+  downloadAudio(RxString soundUrl, RxString userName, RxString soundName,
       bool isFavourites) async {
     try {
+      var file = File(saveCacheDirectory + soundUrl.value);
       Get.defaultDialog(
           title: "Downloading audio",
           content: Obx(() => Text(currentProgress.value)));
@@ -184,7 +200,7 @@ class SoundsController extends GetxController with StateMixin<SoundDetails> {
           .downloadCustomLocation(
         url: "${RestUrl.awsSoundUrl}$soundUrl",
         path: saveCacheDirectory,
-        filename: basenameWithoutExtension(soundUrl),
+        filename: basenameWithoutExtension(soundUrl.value),
         extension: ".mp3",
         progress: (progress) async {
           currentProgress.value = progress;
@@ -194,17 +210,31 @@ class SoundsController extends GetxController with StateMixin<SoundDetails> {
         // GetStorage().write("sound_path", value!.path);
         // GetStorage().write("sound_name", soundName);
         // GetStorage().write("sound_owner", userName);
+        cameraController.userUploadedSound.value = file.uri.toString();
+        cameraController.soundName = soundName;
+        cameraController.soundOwner = userName;
 
-        Get.toNamed(Routes.CAMERA, arguments: {
-          "sound_url": value!.uri.obs,
-          "sound_name": basenameWithoutExtension(value.path),
-          "sound_owner": userName.obs
-        });
+        everAll([soundName, userName], (callback) {
+          cameraController.userUploadedSound.value = file.uri.toString();
+          cameraController.soundName = soundName;
+          cameraController.soundOwner = userName;
+        }, condition: value!.path.isNotEmpty);
+
+        Get.toNamed(Routes.CAMERA);
       }).onError((error, stackTrace) {
-        errorToast(error.toString());
+        Logger().wtf(error);
       });
+      // if (await file.exists()) {
+      //   Get.toNamed(Routes.CAMERA, arguments: {
+      //     "sound_url": file.uri.obs,
+      //     "sound_name": soundName.obs,
+      //     "sound_owner": userName.obs
+      //   });
+      // } else {
+
+      // }
     } on Exception catch (e) {
-      errorToast(e.toString());
+      Logger().wtf(e);
     }
   }
 }

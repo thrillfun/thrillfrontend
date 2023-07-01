@@ -76,39 +76,41 @@ class User {
   String? boxTwo;
   String? boxThree;
   String? referralCode;
+  int? isFollow;
   String? location;
 
   User(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.phone,
-        this.avatar,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.firstName,
-        this.lastName,
-        this.gender,
-        this.websiteUrl,
-        this.bio,
-        this.youtube,
-        this.facebook,
-        this.instagram,
-        this.twitter,
-        this.firebaseToken,
-        this.referralCount,
-        this.following,
-        this.followers,
-        this.likes,
-        this.isVerified,
-        this.levels,
-        this.totalVideos,
-        this.boxTwo,
-        this.boxThree,
-        this.referralCode,
-        this.location});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.phone,
+      this.avatar,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.firstName,
+      this.lastName,
+      this.gender,
+      this.websiteUrl,
+      this.bio,
+      this.youtube,
+      this.facebook,
+      this.instagram,
+      this.twitter,
+      this.firebaseToken,
+      this.referralCount,
+      this.following,
+      this.followers,
+      this.likes,
+      this.isVerified,
+      this.levels,
+      this.totalVideos,
+      this.boxTwo,
+      this.boxThree,
+      this.referralCode,
+      this.isFollow,
+      this.location});
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -140,6 +142,7 @@ class User {
     boxTwo = json['box_two'] ?? "";
     boxThree = json['box_three'] ?? "";
     referralCode = json['referral_code'] ?? "";
+    isFollow = json["isfollow"] ?? 0;
     location = json["location"] ?? "";
   }
 
@@ -176,6 +179,7 @@ class User {
     data['box_two'] = this.boxTwo;
     data['box_three'] = this.boxThree;
     data['referral_code'] = this.referralCode;
+    data["isfollow"] = this.isFollow;
     data["location"] = this.location;
     return data;
   }

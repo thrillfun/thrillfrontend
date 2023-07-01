@@ -44,6 +44,7 @@ class CommentsView extends GetView<CommentsController> {
         body: controller.obx(
           (state) => Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Row(
               //   children: [
@@ -79,29 +80,42 @@ class CommentsView extends GetView<CommentsController> {
                                     if (await GetStorage().read("token") ==
                                         null) {
                                       if (await Permission.phone.isGranted) {
-                                        await SimDataPlugin.getSimData().then(
-                                            (value) => value.cards.isEmpty
-                                                ? Get.bottomSheet(
-                                                    LoginView(false.obs))
-                                                : Get.bottomSheet(
-                                                    LoginView(true.obs)));
+                                        await SimDataPlugin.getSimData().then((value) => value.cards.isEmpty
+                                            ? Get.bottomSheet(LoginView(false.obs),
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(
+                                                        15)),
+                                                isScrollControlled: false,
+                                                backgroundColor: Theme.of(context)
+                                                    .scaffoldBackgroundColor)
+                                            : Get.bottomSheet(LoginView(true.obs),
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15)),
+                                                isScrollControlled: false,
+                                                backgroundColor: Theme.of(context)
+                                                    .scaffoldBackgroundColor));
                                       } else {
-                                        await Permission.phone.request().then(
-                                            (value) async => await SimDataPlugin
-                                                    .getSimData()
-                                                .then((value) => value
-                                                        .cards.isEmpty
-                                                    ? Get.bottomSheet(
-                                                        LoginView(false.obs))
-                                                    : Get.bottomSheet(
-                                                        LoginView(true.obs))));
+                                        await Permission.phone.request().then((value) async =>
+                                            await SimDataPlugin.getSimData().then((value) => value
+                                                    .cards.isEmpty
+                                                ? Get.bottomSheet(LoginView(false.obs),
+                                                    shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                15)),
+                                                    isScrollControlled: false,
+                                                    backgroundColor: Theme.of(context)
+                                                        .scaffoldBackgroundColor)
+                                                : Get.bottomSheet(LoginView(true.obs),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                    isScrollControlled: false,
+                                                    backgroundColor: Theme.of(context).scaffoldBackgroundColor)));
                                       }
                                     } else {
-                                      await GetStorage()
-                                          .write("profileId", userId)
-                                          .then((value) {
-                                        Get.toNamed(Routes.OTHERS_PROFILE);
-                                      });
+                                      Get.toNamed(Routes.OTHERS_PROFILE,
+                                          arguments: {"profileId": userId});
                                     }
                                   },
                                   child: SizedBox(
@@ -170,32 +184,46 @@ class CommentsView extends GetView<CommentsController> {
                                       if (await GetStorage().read("token") ==
                                           null) {
                                         if (await Permission.phone.isGranted) {
-                                          await SimDataPlugin.getSimData().then(
-                                              (value) => value.cards.isEmpty
-                                                  ? Get.bottomSheet(
-                                                      LoginView(false.obs))
-                                                  : Get.bottomSheet(
-                                                      LoginView(true.obs)));
+                                          await SimDataPlugin.getSimData().then((value) => value
+                                                  .cards.isEmpty
+                                              ? Get.bottomSheet(
+                                                  LoginView(false.obs),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15)),
+                                                  isScrollControlled: false,
+                                                  backgroundColor:
+                                                      Theme.of(context)
+                                                          .scaffoldBackgroundColor)
+                                              : Get.bottomSheet(
+                                                  LoginView(true.obs),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(15)),
+                                                  isScrollControlled: false,
+                                                  backgroundColor: Theme.of(context).scaffoldBackgroundColor));
                                         } else {
-                                          await Permission.phone.request().then(
-                                              (value) async =>
-                                                  await SimDataPlugin
-                                                          .getSimData()
-                                                      .then((value) => value
-                                                              .cards.isEmpty
-                                                          ? Get.bottomSheet(
-                                                              LoginView(
-                                                                  false.obs))
-                                                          : Get.bottomSheet(
-                                                              LoginView(
-                                                                  true.obs))));
+                                          await Permission.phone.request().then((value) async => await SimDataPlugin.getSimData().then((value) => value
+                                                  .cards.isEmpty
+                                              ? Get.bottomSheet(LoginView(false.obs),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15)),
+                                                  isScrollControlled: false,
+                                                  backgroundColor: Theme.of(context)
+                                                      .scaffoldBackgroundColor)
+                                              : Get.bottomSheet(LoginView(true.obs),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                  isScrollControlled: false,
+                                                  backgroundColor: Theme.of(context).scaffoldBackgroundColor)));
                                         }
                                       } else {
-                                        await GetStorage()
-                                            .write("profileId", userId)
-                                            .then((value) {
-                                          Get.toNamed(Routes.OTHERS_PROFILE);
-                                        });
+                                        Get.toNamed(Routes.OTHERS_PROFILE,
+                                            arguments: {
+                                              "profileId": state[index].userId
+                                            });
                                       }
                                     },
                                     child: ClipOval(
@@ -241,20 +269,18 @@ class CommentsView extends GetView<CommentsController> {
                                   Expanded(child: Container()),
                                   InkWell(
                                       onTap: () => Get.defaultDialog(
-                                          title:
-                                              "Are you sure?",
-                                          titleStyle: TextStyle(fontWeight: FontWeight.w700,fontSize: 24),
-                                          middleText: "Are you sure you want to report this comment",
+                                          title: "Are you sure?",
+                                          titleStyle: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 24),
+                                          middleText:
+                                              "Are you sure you want to report this comment",
                                           confirm: ElevatedButton(
-                                              onPressed: () => {
-                                                Get.back()
-                                              },
+                                              onPressed: () => {Get.back()},
                                               child: Text("yes")),
-                                      cancel: ElevatedButton(
-                                          onPressed: () => {
-                                            Get.back()
-                                          },
-                                          child: Text("no"))),
+                                          cancel: ElevatedButton(
+                                              onPressed: () => {Get.back()},
+                                              child: Text("no"))),
                                       child: Icon(
                                         IconlyBroken.info_circle,
                                         color: Colors.red.shade700,
@@ -355,22 +381,38 @@ class CommentsView extends GetView<CommentsController> {
                                     ..onTap = () async {
                                       Get.back(closeOverlays: true);
                                       if (await Permission.phone.isGranted) {
-                                        await SimDataPlugin.getSimData().then(
-                                            (value) => value.cards.isEmpty
-                                                ? Get.bottomSheet(
-                                                    LoginView(false.obs))
-                                                : Get.bottomSheet(
-                                                    LoginView(true.obs)));
+                                        await SimDataPlugin.getSimData().then((value) => value.cards.isEmpty
+                                            ? Get.bottomSheet(LoginView(false.obs),
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(
+                                                        15)),
+                                                isScrollControlled: false,
+                                                backgroundColor: Theme.of(context)
+                                                    .scaffoldBackgroundColor)
+                                            : Get.bottomSheet(LoginView(true.obs),
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15)),
+                                                isScrollControlled: false,
+                                                backgroundColor: Theme.of(context)
+                                                    .scaffoldBackgroundColor));
                                       } else {
-                                        await Permission.phone.request().then(
-                                            (value) async => await SimDataPlugin
-                                                    .getSimData()
-                                                .then((value) => value
-                                                        .cards.isEmpty
-                                                    ? Get.bottomSheet(
-                                                        LoginView(false.obs))
-                                                    : Get.bottomSheet(
-                                                        LoginView(true.obs))));
+                                        await Permission.phone.request().then((value) async =>
+                                            await SimDataPlugin.getSimData().then((value) => value
+                                                    .cards.isEmpty
+                                                ? Get.bottomSheet(LoginView(false.obs),
+                                                    shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                15)),
+                                                    isScrollControlled: false,
+                                                    backgroundColor: Theme.of(context)
+                                                        .scaffoldBackgroundColor)
+                                                : Get.bottomSheet(LoginView(true.obs),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                    isScrollControlled: false,
+                                                    backgroundColor: Theme.of(context).scaffoldBackgroundColor)));
                                       }
                                     },
                                   style: const TextStyle(
@@ -480,10 +522,11 @@ class CommentsView extends GetView<CommentsController> {
                                                         .toString(),
                                                     comment: videoComment.value,
                                                     fcmToken:
-                                                        fcmToken.toString())
+                                                        fcmToken.toString(),
+                                                    userName: userName)
                                                 .then((value) async {
                                               relatedVideosController
-                                                  .getAllVideos();
+                                                  .getAllVideos(false);
                                               _textEditingController.clear();
                                             });
                                           },

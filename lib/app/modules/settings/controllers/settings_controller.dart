@@ -4,6 +4,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 import '../../../rest/models/followers_model.dart';
 
 import '../../../rest/models/user_details_model.dart';
@@ -51,7 +52,7 @@ class SettingsController extends GetxController with StateMixin<Rx<User>> {
       await firebase.FirebaseAuth.instance.signOut();
       googleUser.signOut();
     } on Exception catch (e) {
-      errorToast(e.toString());
+      Logger().wtf(e);
     }
   }
   Future<void> getUserProfile() async {

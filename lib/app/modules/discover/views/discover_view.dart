@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:thrill/app/rest/rest_urls.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:thrill/app/routes/app_pages.dart';
@@ -16,11 +17,15 @@ class DiscoverView extends GetView<DiscoverController> {
 
   @override
   Widget build(BuildContext context) {
+    controller.getTopHashTagVideos();
     return Scaffold(
         body: controller.obx(
             (state) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).viewPadding.top,
+                    ),
                     SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
                       scrollDirection: Axis.horizontal,
@@ -71,7 +76,7 @@ class DiscoverView extends GetView<DiscoverController> {
                           Wrap(
                             runSpacing: 10,
                             children: List.generate(
-                                state!.length,
+                                controller.allHashtagsList!.length,
                                 (index) => Padding(
                                     padding: const EdgeInsets.only(
                                         left: 5, right: 5, top: 20, bottom: 20),
@@ -86,12 +91,15 @@ class DiscoverView extends GetView<DiscoverController> {
                                           onTap: () async {
                                             await GetStorage().write(
                                                 "hashtagId",
-                                                state[index].hashtagId);
+                                                controller
+                                                    .allHashtagsList[index].id);
                                             Get.toNamed(
                                                 Routes.HASH_TAGS_DETAILS,
                                                 arguments: {
                                                   "hashtag_name":
-                                                      "${state[index].hashtagName}"
+                                                      "${controller.allHashtagsList[index].name}",
+                                                  "hashtagId": controller
+                                                      .allHashtagsList[index].id
                                                 });
                                           },
                                           child: Container(
@@ -106,12 +114,12 @@ class DiscoverView extends GetView<DiscoverController> {
                                                 right: 5,
                                               ),
                                               child: Text(
-                                                state[index]
-                                                    .hashtagName
+                                                controller
+                                                    .allHashtagsList[index].name
                                                     .toString(),
                                                 style: const TextStyle(
-                                                  fontSize: 12,
-                                                ),
+                                                    fontSize: 12,
+                                                    color: Colors.white),
                                               ))),
                                     ))),
                           )
@@ -133,7 +141,8 @@ class DiscoverView extends GetView<DiscoverController> {
                                       Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                           arguments: {
                                             "hashtag_name":
-                                                "${state[index].hashtagName}"
+                                                "${state[index].hashtagName}",
+                                            "hashtagId": state[index].hashtagId
                                           });
                                       // await hashtagVideosController
                                       //     .getVideosByHashTags(state[index].hashtagId!)
@@ -227,89 +236,110 @@ class DiscoverView extends GetView<DiscoverController> {
                                   ),
                                   Container(
                                     alignment: Alignment.centerLeft,
-                                    child:SingleChildScrollView(
+                                    child: SingleChildScrollView(
                                       physics: BouncingScrollPhysics(),
                                       scrollDirection: Axis.horizontal,
-                                      child:  Row(
-                                      children: List.generate(
-                                          state[index].videos!.length,
-                                              (videoIndex) => Container(
-                                            margin: EdgeInsets.symmetric(horizontal: 10),
-                                            height: 150,
-                                            width: 120,
-                                            child: InkWell(
-                                              onTap: () {},
-                                              child: InkWell(
-                                                onTap: () {
-                                                  Get.toNamed(
-                                                      Routes
-                                                          .DISCOVER_VIDEO_PLAYER,
-                                                      arguments: {
-                                                        "discover_videos":
-                                                        state[index]
-                                                            .videos,
-                                                        "init_page": videoIndex
-                                                      });
-                                                },
-                                                child: Stack(
-                                                  fit: StackFit.expand,
-                                                  children: [
-                                                    imgNet(RestUrl.gifUrl +
-                                                        state[index]
-                                                            .videos![
-                                                        videoIndex]
-                                                            .gifImage
-                                                            .toString()),
-                                                    Positioned(
-                                                        bottom: 10,
-                                                        left: 10,
-                                                        right: 10,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                          children: [
-                                                            RichText(
-                                                              text:
-                                                              TextSpan(
+                                      child: Row(
+                                        children: List.generate(
+                                            state[index].videos!.length,
+                                            (videoIndex) => Container(
+                                                  margin: EdgeInsets.symmetric(
+                                                      horizontal: 10),
+                                                  height: 150,
+                                                  width: 120,
+                                                  child: InkWell(
+                                                    onTap: () {},
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        Get.toNamed(
+                                                            Routes
+                                                                .DISCOVER_VIDEO_PLAYER,
+                                                            arguments: {
+                                                              "init_page":
+                                                                  videoIndex,
+                                                              "hashtagId":
+                                                                  state[index]
+                                                                      .hashtagId
+                                                            });
+                                                      },
+                                                      child: Stack(
+                                                        fit: StackFit.expand,
+                                                        children: [
+                                                          imgNet(RestUrl
+                                                                  .gifUrl +
+                                                              state[index]
+                                                                  .videos![
+                                                                      videoIndex]
+                                                                  .gifImage
+                                                                  .toString()),
+                                                          Positioned(
+                                                              bottom: 10,
+                                                              left: 10,
+                                                              right: 10,
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
                                                                 children: [
-                                                                  const WidgetSpan(
-                                                                    child:
-                                                                    Icon(
-                                                                      Icons
-                                                                          .play_circle,
-                                                                      size:
-                                                                      18,
-                                                                      color:
-                                                                      ColorManager.colorAccent,
+                                                                  RichText(
+                                                                    text:
+                                                                        TextSpan(
+                                                                      children: [
+                                                                        const WidgetSpan(
+                                                                          child:
+                                                                              Icon(
+                                                                            Icons.play_circle,
+                                                                            size:
+                                                                                18,
+                                                                            color:
+                                                                                ColorManager.colorAccent,
+                                                                          ),
+                                                                        ),
+                                                                        TextSpan(
+                                                                            text:
+                                                                                " " + NumberFormat.compact().format(state[index].videos![videoIndex].views).toString(),
+                                                                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                                                                      ],
                                                                     ),
-                                                                  ),
-                                                                  TextSpan(
-                                                                      text: " " +
-                                                                          state[index].videos![videoIndex].views.toString(),
-                                                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                                                                  )
                                                                 ],
-                                                              ),
-                                                            )
-                                                          ],
-                                                        ))
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          )),
-                                    ),),
+                                                              ))
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )),
+                                      ),
+                                    ),
                                   )
                                 ],
                               ))),
                     )
                   ],
                 ),
-            onLoading: Container(
-              height: Get.height,
-              width: Get.height,
-              alignment: Alignment.center,
-              child: loader(),
+            onLoading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: loader(),
+                )
+              ],
+            ),
+            onError: (error) => Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: emptyListWidget(),
+                    )
+                  ],
+                ),
+            onEmpty: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: emptyListWidget(),
+                )
+              ],
             )));
   }
 }

@@ -44,4 +44,5 @@ class OthersLikedVideosController extends GetxController   with StateMixin<RxLis
       print(error);
       change(likedVideos, status: RxStatus.error(error.toString()));
     });
-  }}
+  }
+}

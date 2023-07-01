@@ -55,8 +55,8 @@ class FavouriteVideosView extends GetView<FavouriteVideosController> {
                                               TextSpan(
                                                 text: "  " +
                                                     state[index]
-                                                        .views
-                                                        .toString(),
+                                                        .views!
+                                                        .formatViews(),
                                               ),
                                             ],
                                           ),
@@ -70,28 +70,11 @@ class FavouriteVideosView extends GetView<FavouriteVideosController> {
                                 ),
                                 Row(
                                   children: [
-                                    ClipOval(
-                                      child: CachedNetworkImage(
-                                        imageUrl: state[index]
-                                                    .user!
-                                                    .avatar
-                                                    .toString()
-                                                    .isEmpty ||
-                                                state[index]
-                                                        .user!
-                                                        .avatar
-                                                        .toString() ==
-                                                    "null"
-                                            ? RestUrl.placeholderImage
-                                            : RestUrl.profileUrl +
-                                                state[index]
-                                                    .user!
-                                                    .avatar
-                                                    .toString(),
-                                        height: 20,
-                                        width: 20,
-                                        fit: BoxFit.fill,
-                                      ),
+                                    Container(
+                                      height: 20,
+                                      width: 20,
+                                      child: imgProfile(
+                                          state[index].user!.avatar.toString()),
                                     ),
                                     const SizedBox(
                                       width: 10,

@@ -43,7 +43,7 @@ class LikedVideos {
   String? gifImage;
   String? speed;
   int? comments;
-  List<dynamic>? hashtags;
+  List<Hashtags>? hashtags;
   String? isDuet;
   String? duetFrom;
   String? isDuetable;
@@ -51,54 +51,56 @@ class LikedVideos {
   String? soundOwner;
   int? videoLikeStatus;
   int? soundId;
-  int? isfollow;
   User? user;
 
   LikedVideos(
       {this.id,
-        this.video,
-        this.description,
-        this.sound,
-        this.soundName,
-        this.soundCategoryName,
-        this.filter,
-        this.likes,
-        this.views,
-        this.gifImage,
-        this.speed,
-        this.comments,
-        this.hashtags,
-        this.isDuet,
-        this.duetFrom,
-        this.isDuetable,
-        this.isCommentable,
-        this.soundOwner,
-        this.isfollow,
-        this.videoLikeStatus,
-        this.user,
-        this.soundId});
+      this.video,
+      this.description,
+      this.sound,
+      this.soundName,
+      this.soundCategoryName,
+      this.filter,
+      this.likes,
+      this.views,
+      this.gifImage,
+      this.speed,
+      this.comments,
+      this.hashtags,
+      this.isDuet,
+      this.duetFrom,
+      this.isDuetable,
+      this.isCommentable,
+      this.soundOwner,
+      this.videoLikeStatus,
+      this.user,
+      this.soundId});
 
   LikedVideos.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    video = json['video'];
-    description = json['description'];
-    sound = json['sound'];
-    soundName = json['sound_name'];
-    soundCategoryName = json['sound_category_name'];
-    filter = json['filter'];
-    likes = json['likes'];
-    views = json['views'];
-    gifImage = json['gif_image'];
-    speed = json['speed'];
-    comments = json['comments'];
-    hashtags = json['hashtags'];
-    isDuet = json['is_duet'];
-    duetFrom = json['duet_from'];
-    isDuetable = json['is_duetable'];
-    isCommentable = json['is_commentable'];
-    soundOwner = json['sound_owner'];
-    isfollow=json['isfollow']??0;
-    videoLikeStatus = json["video_like_status"]??0;
+    video = json['video'] ?? "";
+    description = json['description'] ?? "";
+    sound = json['sound'] ?? "";
+    soundName = json['sound_name'] ?? "";
+    soundCategoryName = json['sound_category_name'] ?? "";
+    filter = json['filter'] ?? "";
+    likes = json['likes'] ?? "";
+    views = json['views'] ?? "";
+    gifImage = json['gif_image'] ?? "";
+    speed = json['speed'] ?? "";
+    comments = json['comments'] ?? "";
+    if (json['hashtags'] != null) {
+      hashtags = <Hashtags>[];
+      json['hashtags'].forEach((v) {
+        hashtags!.add(new Hashtags.fromJson(v));
+      });
+    }
+    isDuet = json['is_duet'] ?? "";
+    duetFrom = json['duet_from'] ?? "";
+    isDuetable = json['is_duetable'] ?? "";
+    isCommentable = json['is_commentable'] ?? "";
+    soundOwner = json['sound_owner'] ?? "";
+    videoLikeStatus = json["video_like_status"] ?? 0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
     soundId = json["sound_id"];
   }
@@ -117,18 +119,104 @@ class LikedVideos {
     data['gif_image'] = this.gifImage;
     data['speed'] = this.speed;
     data['comments'] = this.comments;
-    data['hashtags'] = this.hashtags??[];
+    if (this.hashtags != null) {
+      data['hashtags'] = this.hashtags!.map((v) => v.toJson()).toList();
+    }
     data['is_duet'] = this.isDuet;
     data['duet_from'] = this.duetFrom;
     data['is_duetable'] = this.isDuetable;
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
-    data["isfollow"] = this.isfollow;
     data["video_like_status"] = this.videoLikeStatus;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
     data['sound_id'] = this.soundId;
+    return data;
+  }
+}
+
+class Hashtags {
+  int? id;
+  int? videoId;
+  int? hashtagId;
+  String? createdAt;
+  String? updatedAt;
+  int? isFavouriteHashtagCount;
+  Hashtag? hashtag;
+
+  Hashtags(
+      {this.id,
+      this.videoId,
+      this.hashtagId,
+      this.createdAt,
+      this.updatedAt,
+      this.isFavouriteHashtagCount,
+      this.hashtag});
+
+  Hashtags.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    videoId = json['video_id'];
+    hashtagId = json['hashtag_id'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    isFavouriteHashtagCount = json['is_favourite_hashtag_count'];
+    hashtag =
+        json['hashtag'] != null ? new Hashtag.fromJson(json['hashtag']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['video_id'] = this.videoId;
+    data['hashtag_id'] = this.hashtagId;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    data['is_favourite_hashtag_count'] = this.isFavouriteHashtagCount;
+    if (this.hashtag != null) {
+      data['hashtag'] = this.hashtag!.toJson();
+    }
+    return data;
+  }
+}
+
+class Hashtag {
+  int? id;
+  int? userId;
+  String? name;
+  int? isActive;
+  String? description;
+  String? createdAt;
+  String? updatedAt;
+
+  Hashtag(
+      {this.id,
+      this.userId,
+      this.name,
+      this.isActive,
+      this.description,
+      this.createdAt,
+      this.updatedAt});
+
+  Hashtag.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    userId = json['user_id'];
+    name = json['name'];
+    isActive = json['is_active'];
+    description = json['description'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['user_id'] = this.userId;
+    data['name'] = this.name;
+    data['is_active'] = this.isActive;
+    data['description'] = this.description;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
     return data;
   }
 }
@@ -160,37 +248,39 @@ class User {
   Levels? levels;
   String? totalVideos;
   String? boxTwo;
-  String? boxThree;
+  int? isfollow;
 
+  String? boxThree;
 
   User(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.phone,
-        this.avatar,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.firstName,
-        this.lastName,
-        this.gender,
-        this.websiteUrl,
-        this.bio,
-        this.youtube,
-        this.facebook,
-        this.instagram,
-        this.twitter,
-        this.firebaseToken,
-        this.referralCount,
-        this.following,
-        this.followers,
-        this.likes,
-        this.levels,
-        this.totalVideos,
-        this.boxTwo,
-        this.boxThree});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.phone,
+      this.avatar,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.firstName,
+      this.lastName,
+      this.gender,
+      this.websiteUrl,
+      this.bio,
+      this.youtube,
+      this.facebook,
+      this.instagram,
+      this.twitter,
+      this.firebaseToken,
+      this.referralCount,
+      this.following,
+      this.followers,
+      this.likes,
+      this.levels,
+      this.totalVideos,
+      this.boxTwo,
+      this.isfollow,
+      this.boxThree});
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? '';
@@ -217,9 +307,11 @@ class User {
     followers = json['followers'] ?? "";
     likes = json['likes'] ?? "";
     levels =
-    json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
+        json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
     totalVideos = json['total_videos'] ?? "";
     boxTwo = json['box_two'] ?? "";
+    isfollow = json['isfollow'] ?? 0;
+
     boxThree = json['box_three'] ?? "";
   }
 
@@ -253,6 +345,8 @@ class User {
     }
     data['total_videos'] = this.totalVideos;
     data['box_two'] = this.boxTwo;
+    data["isfollow"] = this.isfollow;
+
     data['box_three'] = this.boxThree;
     return data;
   }

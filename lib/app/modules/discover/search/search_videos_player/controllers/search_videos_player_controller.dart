@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_player/better_player.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import 'package:better_player/better_player.dart';
@@ -14,11 +15,15 @@ import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../../../rest/models/search_model.dart';
 import '../../../../../rest/models/site_settings_model.dart';
 import '../../../../../rest/rest_urls.dart';
 import '../../../../../utils/utils.dart';
 
-class SearchVideosPlayerController extends GetxController {
+class SearchVideosPlayerController extends GetxController
+    with StateMixin<RxList<SearchData>> {
+  RxList<SearchData> searchList = RxList();
+
   BetterPlayerEventType? eventType;
   var isUserBlocked = false.obs;
   var isLoading = false.obs;
@@ -27,10 +32,11 @@ class SearchVideosPlayerController extends GetxController {
   var isInitialised = false.obs;
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
-
+  var query = Get.arguments["search_query"] ?? "";
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   @override
   void onInit() {
+    searchHashtags();
     super.onInit();
   }
 
@@ -44,6 +50,51 @@ class SearchVideosPlayerController extends GetxController {
     super.onClose();
   }
 
+  Future<void> postVideoView(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/view", queryParameters: {"video_id": videoId}).then(
+        (value) {
+      if (value.data["status"]) {
+        Logger().wtf("View posted successfully");
+      }
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<void> notInterested(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/change_interest", queryParameters: {
+      "content_id": videoId,
+      "filter_by": "tag"
+    }).then((value) {
+      value.data["status"]
+          ? successToast(value.data["message"])
+          : errorToast(value.data["message"]);
+      searchHashtags();
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
+
+  Future<void> searchHashtags() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+
+    if (searchList.isEmpty) {
+      change(searchList, status: RxStatus.loading());
+    }
+    dio.get("hashtag/search?search=$query").then((value) {
+      searchList = SearchHashTagsModel.fromJson(value.data).data!.obs;
+      change(searchList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(searchList, status: RxStatus.error(error.toString()));
+    });
+  }
+
   Future<bool> likeVideo(int isLike, int videoId,
       {int userId = 0, String? token}) async {
     var isLiked = false;
@@ -54,10 +105,9 @@ class SearchVideosPlayerController extends GetxController {
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      // getAllVideos();
+      searchHashtags();
       if (isLike == 1) {
-
-        sendNotification(token.toString(),title: "Someone liked your video!");
+        sendNotification(token.toString(), title: "Someone liked your video!");
         // await notificationsController.sendFcmNotification(token.toString(),
         //     title:
         //     "${await GetStorage().read("user")["username"]} liked you video",
@@ -90,7 +140,7 @@ class SearchVideosPlayerController extends GetxController {
       "action": "$action"
     }).then((value) {
       if (value.data["status"]) {
-        // getAllVideos();
+        searchHashtags();
       } else {
         errorToast(value.data["message"]);
       }
@@ -118,6 +168,8 @@ class SearchVideosPlayerController extends GetxController {
       "action": isBlocked ? "Unblock" : "Block"
     }).then((value) {
       if (value.data["status"]) {
+        searchHashtags();
+
         successToast(value.data["message"]);
       } else {
         errorToast(value.data["message"]);
@@ -132,22 +184,27 @@ class SearchVideosPlayerController extends GetxController {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     dio.post("video/delete", queryParameters: {"video_id": videoId}).then(
-            (value) {
-          if (value.data["status"]) {
-            successToast(value.data["message"]);
-            // getAllVideos();
-          } else {
-            errorToast(value.data["message"]);
-          }
-        }).onError((error, stackTrace) {
+        (value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+        searchHashtags();
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {
       errorToast(error.toString());
     });
   }
 
   downloadAndProcessVideo(String videoUrl, String videoName) async {
-    Get.defaultDialog(title: "Loading", content: loader());
+    var videoProgress = "0".obs;
+    Get.defaultDialog(
+        title: "Download video....",
+        content: Container(
+          child: Obx(() => Text(videoProgress.value)),
+        ));
     final directory = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_PICTURES);
+        ExternalPath.DIRECTORY_MOVIES);
     if (await Directory('$directory/thrill/').exists() == false) {
       await Directory('$directory/thrill/').create();
     }
@@ -162,12 +219,14 @@ class SearchVideosPlayerController extends GetxController {
       filename: videoName,
       extension: ".mp4",
       progress: (progress) async {
-        Logger().i(progress);
+        videoProgress.value = progress;
       },
     )
         .then((video) async {
+      if (Get.isDialogOpen!) {
+        Get.back();
+      }
       successToast("video downloaded successfully");
-      Get.back();
 
       // await FFmpegKit.execute(
       //     "-y -i ${video!.path} -i ${logo!.path} -filter_complex overlay=10:10 -codec:a copy ${path.path}$videoName.mp4")
@@ -182,7 +241,6 @@ class SearchVideosPlayerController extends GetxController {
       //   }
       // }).onError((error, stackTrace) => errorToast(error.toString()));
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
       Get.back();
     });
   }
@@ -227,6 +285,7 @@ class SearchVideosPlayerController extends GetxController {
 
     return isVideoReported.value;
   }
+
   Future<String> createDynamicLink(
       String id, String? type, String? name, String? avatar,
       {String? referal}) async {
@@ -245,7 +304,7 @@ class SearchVideosPlayerController extends GetxController {
       // ),
     );
     final dynamicLink =
-    await FirebaseDynamicLinks.instance.buildLink(parameters);
+        await FirebaseDynamicLinks.instance.buildLink(parameters);
 
     return dynamicLink.toString();
   }
@@ -255,7 +314,7 @@ class SearchVideosPlayerController extends GetxController {
     var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
     dio.options.headers = {
       "Authorization":
-      "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+          "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
     };
     final data = {
       "to": fcmToken,
@@ -267,7 +326,7 @@ class SearchVideosPlayerController extends GetxController {
         "id": "1",
         "status": "done",
         "image":
-        "https://scontent.fbom19-2.fna.fbcdn.net/v/t39.30808-6/271720827_4979339162088555_3028905257532289818_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=HMgk-tDtBcQAX9uJheY&_nc_ht=scontent.fbom19-2.fna&oh=00_AfCVE7nSsxVGPTfTa8FCyff4jOzTKWi_JvTXpDWm7WrVjg&oe=63E84FB2"
+            "https://scontent.fbom19-2.fna.fbcdn.net/v/t39.30808-6/271720827_4979339162088555_3028905257532289818_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=HMgk-tDtBcQAX9uJheY&_nc_ht=scontent.fbom19-2.fna&oh=00_AfCVE7nSsxVGPTfTa8FCyff4jOzTKWi_JvTXpDWm7WrVjg&oe=63E84FB2"
       }
     };
     dio.post("/send", data: jsonEncode(data)).then((value) {
@@ -277,4 +336,3 @@ class SearchVideosPlayerController extends GetxController {
     });
   }
 }
-

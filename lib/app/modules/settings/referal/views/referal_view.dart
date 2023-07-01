@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
+import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../utils/color_manager.dart';
@@ -22,141 +23,126 @@ class ReferalView extends GetView<ReferalController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Expanded(
-            child: Stack(
+          Stack(
+            children: [
+              Container(
+                alignment: Alignment.center,
+                margin: const EdgeInsets.only(top: 20),
+                child: Lottie.asset("assets/referal.json", fit: BoxFit.fill),
+              ),
+              Container(
+                width: Get.width,
+                alignment: Alignment.center,
+                child: Image.asset(
+                  "assets/background_referal.png",
+                  fit: BoxFit.fill,
+                  width: Get.width,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            "Refer a friend and get a chance to win Bitcoin worth 1 Lakh!",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+            textAlign: TextAlign.center,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 20, bottom: 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 20),
-                  height: Get.height / 2,
-                  alignment: Alignment.topCenter,
-                  child: SvgPicture.asset(
-                    "assets/referal_background.svg",
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      alignment: Alignment.topCenter,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          border: Border.all(color: ColorManager.colorAccent),
+                          shape: BoxShape.circle,
+                          color: ColorManager.colorAccentTransparent),
+                      child: const Icon(
+                        IconlyBroken.user_2,
+                        color: ColorManager.colorAccent,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Text(
+                      "Invite your friend",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    )
+                  ],
+                ),
+                const Expanded(
+                    child: Divider(
+                  color: ColorManager.colorAccent,
+                  thickness: 1,
+                )),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: ColorManager.colorAccent),
+                            shape: BoxShape.circle,
+                            color: ColorManager.colorAccentTransparent),
+                        child: const Icon(
+                          IconlyBroken.download,
+                          color: ColorManager.colorAccent,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Text("Your friend download app",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.w700))
+                    ],
                   ),
                 ),
-                Container(
-                  height: 150,
-                  width: Get.width,
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    "assets/background_referal.png",
-                    fit: BoxFit.fill,
-                    width: Get.width,
+                const Flexible(
+                    child: Center(
+                  child: Divider(
+                    color: ColorManager.colorAccent,
+                    thickness: 1,
+                  ),
+                )),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: ColorManager.colorAccent),
+                            shape: BoxShape.circle,
+                            color: ColorManager.colorAccentTransparent),
+                        child: const Icon(
+                          IconlyBroken.star,
+                          color: ColorManager.colorAccent,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Text("You and your friend get reward",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.w700))
+                    ],
                   ),
                 ),
               ],
-            ),
-          ),
-          const Expanded(
-            child: Text(
-              "Refer a friend and get a chance to win Bitcoin worth 1 Lakh!",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 20),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          alignment: Alignment.topCenter,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: ColorManager.colorAccent),
-                              shape: BoxShape.circle,
-                              color: ColorManager.colorAccentTransparent),
-                          child: const Icon(
-                            IconlyBroken.user_2,
-                            color: ColorManager.colorAccent,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          "Invite your friend",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        )
-                      ],
-                    ),
-                  ),
-                  const Expanded(
-                      child: Divider(
-                    color: ColorManager.colorAccent,
-                        thickness: 1,
-                  )),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: ColorManager.colorAccent),
-                              shape: BoxShape.circle,
-                              color: ColorManager.colorAccentTransparent),
-                          child: const Icon(
-                            IconlyBroken.download,
-                            color: ColorManager.colorAccent,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text("Your friend download app",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontWeight: FontWeight.w700))
-                      ],
-                    ),
-                  ),
-                  const Flexible(
-                      child: Center(
-                    child: Divider(
-                      color: ColorManager.colorAccent,
-                      thickness: 1,
-                    ),
-                  )),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: ColorManager.colorAccent),
-                              shape: BoxShape.circle,
-                              color: ColorManager.colorAccentTransparent),
-                          child: const Icon(
-                            IconlyBroken.star,
-                            color: ColorManager.colorAccent,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text("You and your friend get reward",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontWeight: FontWeight.w700))
-                      ],
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
           referCodeLayout(),
@@ -230,9 +216,15 @@ class ReferalView extends GetView<ReferalController> {
           ),
       onLoading: loader());
 
-  submitButtonLayout() => InkWell(
-        onTap: () {
-          Share.share(fullDeepLink.value);
+  submitButtonLayout() => controller.obx((state) => InkWell(
+        onTap: () async {
+          await controller
+              .createDynamicLink(state!.value.id.toString(), "referal",
+                  state.value.username, state.value.avatar,
+                  referal: state.value.referralCode)
+              .then((value) {
+            Share.share(value);
+          });
         },
         child: Container(
           height: 50,
@@ -253,10 +245,11 @@ class ReferalView extends GetView<ReferalController> {
                   ])),
           child: const Text(
             "Refer Now",
-            style: TextStyle(color: Colors.white, fontSize: 18,fontWeight: FontWeight.w700),
+            style: TextStyle(
+                color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
           ),
         ),
-      );
+      ));
 
   createDynamicLink() async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(

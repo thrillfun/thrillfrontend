@@ -1,19 +1,22 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logger/logger.dart';
 
 import '../../../../../rest/models/followers_model.dart';
 import '../../../../../rest/rest_urls.dart';
 import '../../../../../utils/utils.dart';
 
-class FollowingsController extends GetxController with StateMixin<RxList<Followers>> {
+class FollowingsController extends GetxController
+    with StateMixin<RxList<Followers>> {
 //TODO: Implement FollowersController
-var dio = Dio(BaseOptions(
-  baseUrl: RestUrl.baseUrl,
-));
+  var dio = Dio(BaseOptions(
+    baseUrl: RestUrl.baseUrl,
+  ));
 
-var followersModel = RxList<Followers>();
-
+  var followersModel = RxList<Followers>();
 
   @override
   void onInit() {
@@ -31,39 +34,79 @@ var followersModel = RxList<Followers>();
     super.onClose();
   }
 
-Future<void> getFollowings() async {
-  dio.options.headers = {
-    "Authorization": "Bearer ${await GetStorage().read("token")}"
-  };
-  change(followersModel, status: RxStatus.loading());
-  if (followersModel.isNotEmpty) followersModel.clear();
+  Future<void> getFollowings() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    change(followersModel, status: RxStatus.loading());
+    if (followersModel.isNotEmpty) followersModel.clear();
 
-  dio.post('user/get-followings', queryParameters: {
-    "user_id": "${await GetStorage().read("userId")}"
-  }).then((result) {
-
-    followersModel = FollowersModel.fromJson(result.data).data!.obs;
+    dio.post('user/get-followings', queryParameters: {
+      "user_id": "${await GetStorage().read("userId")}"
+    }).then((result) {
+      followersModel = FollowersModel.fromJson(result.data).data!.obs;
       change(followersModel, status: RxStatus.success());
     }).onError((error, stackTrace) {
+      change(followersModel, status: RxStatus.error());
+    });
+  }
 
-    change(followersModel, status: RxStatus.error());
+  Future<void> followUnfollowUser(
+    int userId,
+    String action, {
+    String fcmToken = "",
+    String image = "",
+    String name = "",
+  }) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-unfollow-user", queryParameters: {
+      "publisher_user_id": userId,
+      "action": "$action"
+    }).then((value) {
+      if (value.data["status"]) {
+        if (action == "follow") {
+          sendNotification(fcmToken,
+              body: "$name started following you!",
+              title: "New follower!",
+              image: image);
+        }
+        getFollowings();
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
 
-  });
-}
-Future<void> followUnfollowUser(
-    int userId,String action
-    ) async{
-
-  dio.options.headers={
-    "Authorization":"Bearer ${await GetStorage().read("token")}"
-  };
-  dio.post("user/follow-unfollow-user",queryParameters: {"publisher_user_id":userId,"action":"$action"}).then((value) {
-    if(value.data["status"]) {
-      getFollowings();
-    }
-    else{
-      errorToast("sorry an error has occurred");
-    }
-  }).onError((error, stackTrace) {});
-}
+  Future<void> sendNotification(String fcmToken,
+      {String? body = "", String? title = "", String? image = ""}) async {
+    var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
+    dio.options.headers = {
+      "Authorization":
+          "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+    };
+    final data = {
+      "to": fcmToken,
+      "notification": {"body": body, "title": title, "image": image},
+      "priority": "high",
+      "image": image,
+      "data": {
+        "url": image,
+        "body": body,
+        "title": title,
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        "id": "1",
+        "status": "done",
+        "image": image
+      }
+    };
+    dio.post("/send", data: jsonEncode(data)).then((value) {
+      Logger().wtf(value);
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
 }

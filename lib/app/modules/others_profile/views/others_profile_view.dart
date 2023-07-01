@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
+import 'package:readmore/readmore.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:thrill/app/modules/others_profile/other_user_videos/views/other_user_videos_view.dart';
 import 'package:thrill/app/modules/others_profile/others_liked_videos/views/others_liked_videos_view.dart';
@@ -21,445 +22,500 @@ class OthersProfileView extends GetView<OthersProfileController> {
   @override
   Widget build(BuildContext context) {
     var selectedTab = 0.obs;
-
+    controller.getUserProfile();
     return Scaffold(
       body: controller.obx(
           (state) => Scaffold(
+              extendBodyBehindAppBar: true,
               appBar: AppBar(
-                title: Obx(() => Text(
-                    controller.userProfile.value.name.toString().isEmpty ||
-                            controller.userProfile.value.name == null
-                        ? controller.userProfile.value.username.toString()
-                        : controller.userProfile.value.name.toString(),
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 24))),
+                backgroundColor: Colors.transparent.withOpacity(0.0),
               ),
               body: Column(
                 children: [
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Column(
+                  Stack(
                     children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            "assets/profile_background.svg",
-                            fit: BoxFit.contain,
-                            width: Get.width,
-                          ),
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SvgPicture.asset(
-                                "assets/23.svg",
-                                height: 100,
-                                width: 100,
-                              ),
-                              Container(
-                                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                                  height: 80,
-                                  width: 80,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: CachedNetworkImage(
-                                    fit: BoxFit.fill,
-                                    imageUrl: state!.value.avatar
-                                            .toString()
-                                            .isEmpty
-                                        ? RestUrl.placeholderImage
-                                        : '${RestUrl.profileUrl}${state.value.avatar}',
-                                    placeholder: (a, b) => const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  )),
-                            ],
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${state.value.name}',
-                            style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Visibility(
-                              visible: state.value.isVerified == 'true',
-                              child: SvgPicture.asset(
-                                'assets/verified.svg',
-                              ))
-                        ],
-                      ),
-                      Text(
-                        '@${state.value.username}',
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Get.toNamed(Routes.OTHERS_FOLLOWERS, arguments: {
-                                "index": 0,
-                                "profileId": "${state.value.id}"
-                              });
-                            },
-                            child: RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(children: [
-                                  TextSpan(
-                                      text: '${state.value.following}'
-                                          '\n',
-                                      style: TextStyle(
-                                          color: Get.isPlatformDarkMode
-                                              ? Colors.white
-                                              : Colors.black,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700)),
-                                  TextSpan(
-                                      text: following,
-                                      style: TextStyle(
-                                          color: Get.isPlatformDarkMode
-                                              ? Colors.white
-                                              : Colors.black,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500)),
-                                ])),
-                          ),
-                          const SizedBox(
-                            height: 45,
-                            child: VerticalDivider(
-                              thickness: 1,
-                              width: 1,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Get.toNamed(Routes.OTHERS_FOLLOWERS, arguments: {
-                                "index": 1,
-                                "profileId": "${state.value.id}"
-                              });
-
-                              // followersController
-                              //     .getUserFollowers(state.value.id!)
-                              //     .then((value) => followersController
-                              //         .getUserFollowing(state.value.id!)
-                              //         .then((value) => Get.to(FollowingAndFollowers(
-                              //             false.obs, state.value.id!.obs))));
-
-                              // Navigator.pushNamed(context, "/followingAndFollowers", arguments: {'id':userModel!.id, 'index':0});
-                            },
-                            child: RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(children: [
-                                  TextSpan(
-                                      text: '${state.value.followers}'
-                                          '\n',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          color: Get.isPlatformDarkMode
-                                              ? Colors.white
-                                              : Colors.black,
-                                          fontWeight: FontWeight.w700)),
-                                  TextSpan(
-                                      text: followers,
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Get.isPlatformDarkMode
-                                              ? Colors.white
-                                              : Colors.black,
-                                          fontWeight: FontWeight.w500)),
-                                ])),
-                          ),
-                          Container(
-                            height: 45,
-                            child: const VerticalDivider(
-                              thickness: 1,
-                              width: 1,
-                            ),
-                          ),
-                          RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(children: [
-                                TextSpan(
-                                    text:
-                                        '${state.value.likes!.isEmpty ? 0 : state.value.likes}'
-                                        '\n',
-                                    style: TextStyle(
-                                        color: Get.isPlatformDarkMode
-                                            ? Colors.white
-                                            : Colors.black,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700)),
-                                TextSpan(
-                                    text: likes,
-                                    style: TextStyle(
-                                        color: Get.isPlatformDarkMode
-                                            ? Colors.white
-                                            : Colors.black,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500)),
-                              ])),
-                        ],
+                      Container(
+                        height: 250,
+                        decoration: BoxDecoration(
+                            gradient: ColorManager.postGradient,
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(30),
+                                bottomRight: Radius.circular(30))),
                       ),
                       SizedBox(
-                        height: 10,
+                        height: MediaQuery.of(context).viewPadding.top,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      Column(
                         children: [
-                          Expanded(
-                              child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      color: ColorManager.colorAccent),
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 20),
-                                  child: InkWell(
-                                    onTap: () {
-                                      // userDetailsController.followUnfollowUser(
-                                      //     int.parse(controller
-                                      //         .otherUserProfile.value.id
-                                      //         .toString()),
-                                      //     isFollow!.value == 0
-                                      //         ? "follow"
-                                      //         : "unfollow",
-                                      //     token: controller
-                                      //         .otherUserProfile.value.firebaseToken
-                                      //         .toString());
-                                      // userDetailsController
-                                      //     .getOtherUserProfile(userId);
-                                    },
-                                    child: Text(
-                                        isFollow == 0 ? "Follow" : "Following",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        )),
-                                  ))),
-                          Expanded(
-                              child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: ColorManager.colorAccent),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 20),
-                                  child: InkWell(
-                                    onTap: () {
-                                      // Get.to(ChatScreen(
-                                      //     inboxModel: Inbox(
-                                      //         id: controller
-                                      //             .otherUserProfile.value.id,
-                                      //         userImage: controller
-                                      //             .otherUserProfile.value.avatar,
-                                      //         name: controller
-                                      //             .otherUserProfile.value.name)));
-                                    },
-                                    child: const Text("Message",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        )),
-                                  ))),
-                          ClipOval(
-                            child: InkWell(
-                                onTap: () async {
-                                  Share.share(await controller
-                                      .createDynamicLink(
-                                          controller.userProfile.value.id
-                                              .toString(),
-                                          "profile",
-                                          controller.userProfile.value.name!,
-                                          controller
-                                              .userProfile.value.avatar!));
-                                },
-                                child: Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(50),
-                                        color: ColorManager
-                                            .colorAccentTransparent),
-                                    padding: const EdgeInsets.all(15),
-                                    child: Icon(
-                                      Icons.share,
-                                      size: 16,
-                                      color: ColorManager.dayNightIcon,
-                                    ))),
+                          SizedBox(
+                            height: MediaQuery.of(context).viewPadding.top,
                           ),
-                          ClipOval(
-                            child: InkWell(
-                                onTap: () {
-                                  controller.isFollowingVisible.toggle();
-                                },
-                                child: Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(50),
-                                        color: ColorManager
-                                            .colorAccentTransparent),
-                                    padding: const EdgeInsets.all(15),
-                                    child: Icon(
-                                      IconlyBroken.user_2,
-                                      size: 16,
-                                      color: ColorManager.dayNightIcon,
-                                    ))),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Obx(() => Visibility(
-                            visible: controller.isFollowingVisible.isTrue,
-                            child: Container(
-                              alignment: Alignment.centerLeft,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: List.generate(
-                                      controller.followersModel.length,
-                                      (index) => InkWell(
-                                            onTap: () => Get.offNamed(
-                                                Routes.OTHERS_PROFILE,
-                                                arguments: {
-                                                  "profileId": controller
-                                                      .followersModel[index].id
-                                                }),
-                                            child: Container(
-                                              margin: EdgeInsets.all(10),
-                                              child: Column(
-                                                children: [
-                                                  Stack(
-                                                    alignment:
-                                                        Alignment.bottomRight,
-                                                    children: [
-                                                      imgProfile(controller
-                                                          .followersModel[index]
-                                                          .avtars
-                                                          .toString()),
-                                                      InkWell(
-                                                        onTap: () => controller
-                                                            .followUnfollowUser(
-                                                                controller
-                                                                    .followersModel[
-                                                                        index]
-                                                                    .id!,
-                                                                controller.followersModel[index]
-                                                                            .isFollowing ==
-                                                                        0
-                                                                    ? "follow"
-                                                                    : "unfollow"),
-                                                        child: Container(
-                                                          decoration: BoxDecoration(
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              color: ColorManager
-                                                                  .colorPrimaryLight
-                                                                  .withOpacity(
-                                                                      0.5)),
-                                                          child: Icon(
-                                                            Icons.add,
-                                                            color: Colors.white,
-                                                          ),
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                  SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Text(
-                                                    controller
-                                                            .followersModel[
-                                                                index]
-                                                            .name
-                                                            .toString()
-                                                            .isEmpty
-                                                        ? controller
-                                                            .followersModel[
-                                                                index]
-                                                            .username
-                                                            .toString()
-                                                        : controller
-                                                            .followersModel[
-                                                                index]
-                                                            .name
-                                                            .toString(),
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w700),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
+                          Stack(
+                            alignment: Alignment.topCenter,
+                            children: [
+                              Card(
+                                margin: const EdgeInsets.only(
+                                    left: 20, right: 20, bottom: 20, top: 60),
+                                elevation: 10,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20)),
+                                child: Column(
+                                  children: [
+                                    const SizedBox(
+                                      height: 80,
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '${state!.value.name.toString().isEmpty ? state.value.username : state.value.name}',
+                                          style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Visibility(
+                                            visible: state.value.isVerified ==
+                                                'true',
+                                            child: SvgPicture.asset(
+                                              'assets/verified.svg',
+                                            ))
+                                      ],
+                                    ),
+                                    Text(
+                                      '@${state.value.username}',
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Visibility(
+                                      visible:
+                                          state.value.bio.toString().isNotEmpty,
+                                      child: Padding(
+                                          padding: EdgeInsets.all(20),
+                                          child: ReadMoreText(
+                                            state.value.bio.toString() + " ",
+                                            trimLines: 2,
+                                            colorClickableText:
+                                                ColorManager.colorAccent,
+                                            trimMode: TrimMode.Line,
+                                            trimCollapsedText: 'More',
+                                            trimExpandedText: 'Less',
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400),
+                                            moreStyle: TextStyle(
+                                                fontSize: 14,
+                                                color: ColorManager.colorAccent,
+                                                fontWeight: FontWeight.w700),
+                                            lessStyle: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w700,
+                                                color:
+                                                    ColorManager.colorAccent),
                                           )),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            Get.toNamed(Routes.OTHERS_FOLLOWERS,
+                                                arguments: {
+                                                  "index": 0,
+                                                  "profileId":
+                                                      "${state.value.id}"
+                                                });
+                                          },
+                                          child: Column(
+                                            children: [
+                                              Text('${state.value.following}',
+                                                  style: const TextStyle(
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.w700)),
+                                              const Text(following,
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w300))
+                                            ],
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Get.toNamed(Routes.OTHERS_FOLLOWERS,
+                                                arguments: {
+                                                  "index": 1,
+                                                  "profileId":
+                                                      "${state.value.id}"
+                                                });
+                                          },
+                                          child: Column(
+                                            children: [
+                                              Text('${state.value.followers}',
+                                                  style: const TextStyle(
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.w700)),
+                                              const Text(followers,
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w300))
+                                            ],
+                                          ),
+                                        ),
+                                        Column(
+                                          children: [
+                                            Text(
+                                                '${state.value.likes == null || state.value.likes!.isEmpty ? 0 : state.value.likes}',
+                                                style: const TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight:
+                                                        FontWeight.w700)),
+                                            const Text(likes,
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        FontWeight.w300))
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(
+                                            child: Container(
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    color: ColorManager
+                                                        .colorAccent),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 10,
+                                                        horizontal: 20),
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    controller.followUnfollowUser(
+                                                        controller.userProfile
+                                                            .value.id!,
+                                                        controller
+                                                                    .userProfile
+                                                                    .value
+                                                                    .isFollow ==
+                                                                0
+                                                            ? "follow"
+                                                            : "unfollow");
+
+                                                    // userDetailsController.followUnfollowUser(
+                                                    //     int.parse(controller
+                                                    //         .otherUserProfile.value.id
+                                                    //         .toString()),
+                                                    //     isFollow!.value == 0
+                                                    //         ? "follow"
+                                                    //         : "unfollow",
+                                                    //     token: controller
+                                                    //         .otherUserProfile.value.firebaseToken
+                                                    //         .toString());
+                                                    // userDetailsController
+                                                    //     .getOtherUserProfile(userId);
+                                                  },
+                                                  child: Obx(() => Text(
+                                                      controller
+                                                                  .userProfile
+                                                                  .value
+                                                                  .isFollow ==
+                                                              0
+                                                          ? "Follow"
+                                                          : "Following",
+                                                      style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color:
+                                                              Colors.white))),
+                                                ))),
+                                        // Expanded(
+                                        //     child: Container(
+                                        //         margin:
+                                        //             const EdgeInsets.symmetric(
+                                        //                 horizontal: 10),
+                                        //         alignment: Alignment.center,
+                                        //         decoration: BoxDecoration(
+                                        //           borderRadius:
+                                        //               BorderRadius.circular(20),
+                                        //           border: Border.all(
+                                        //               color: ColorManager
+                                        //                   .colorAccent),
+                                        //         ),
+                                        //         padding:
+                                        //             const EdgeInsets.symmetric(
+                                        //                 vertical: 10,
+                                        //                 horizontal: 20),
+                                        //         child: InkWell(
+                                        //           onTap: () {
+                                        //             // Get.to(ChatScreen(
+                                        //             //     inboxModel: Inbox(
+                                        //             //         id: controller
+                                        //             //             .otherUserProfile.value.id,
+                                        //             //         userImage: controller
+                                        //             //             .otherUserProfile.value.avatar,
+                                        //             //         name: controller
+                                        //             //             .otherUserProfile.value.name)));
+                                        //           },
+                                        //           child: const Text("Message",
+                                        //               style: TextStyle(
+                                        //                 fontSize: 14,
+                                        //                 fontWeight:
+                                        //                     FontWeight.w600,
+                                        //               )),
+                                        //         ))),
+                                        ClipOval(
+                                          child: InkWell(
+                                              onTap: () async {
+                                                Share.share(
+                                                    await controller
+                                                        .createDynamicLink(
+                                                            controller
+                                                                .userProfile
+                                                                .value
+                                                                .id
+                                                                .toString(),
+                                                            "profile",
+                                                            controller
+                                                                .userProfile
+                                                                .value
+                                                                .name!,
+                                                            controller
+                                                                .userProfile
+                                                                .value
+                                                                .avatar!));
+                                              },
+                                              child: Container(
+                                                  margin: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 10),
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              50),
+                                                      color: ColorManager
+                                                          .colorAccentTransparent),
+                                                  padding:
+                                                      const EdgeInsets.all(15),
+                                                  child: Icon(
+                                                    Icons.share,
+                                                    size: 16,
+                                                    color: ColorManager
+                                                        .dayNightIcon,
+                                                  ))),
+                                        ),
+                                        // ClipOval(
+                                        //   child: InkWell(
+                                        //       onTap: () {
+                                        //         controller.isFollowingVisible
+                                        //             .toggle();
+                                        //       },
+                                        //       child: Container(
+                                        //           margin: const EdgeInsets
+                                        //                   .symmetric(
+                                        //               horizontal: 10),
+                                        //           decoration: BoxDecoration(
+                                        //               borderRadius:
+                                        //                   BorderRadius.circular(
+                                        //                       50),
+                                        //               color: ColorManager
+                                        //                   .colorAccentTransparent),
+                                        //           padding:
+                                        //               const EdgeInsets.all(15),
+                                        //           child: Icon(
+                                        //             IconlyBroken.user_2,
+                                        //             size: 16,
+                                        //             color: ColorManager
+                                        //                 .dayNightIcon,
+                                        //           ))),
+                                        // ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    )
+                                  ],
                                 ),
                               ),
-                            ),
-                          ))
+                              InkWell(
+                                onTap: () => Get.defaultDialog(
+                                    title: "",
+                                    middleText: "",
+                                    backgroundColor:
+                                        Colors.transparent.withOpacity(0.0),
+                                    contentPadding: EdgeInsets.zero,
+                                    content: SizedBox(
+                                      height: Get.height / 2,
+                                      child: imgProfileDialog(
+                                          state.value.avatar.toString()),
+                                    )),
+                                child: Container(
+                                  margin: const EdgeInsets.only(top: 20),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SvgPicture.asset(
+                                        "assets/profile_progress.svg",
+                                        height: 100,
+                                        width: 100,
+                                        fit: BoxFit.contain,
+                                      ),
+                                      Container(
+                                        height: 80,
+                                        width: 80,
+                                        child: imgProfileDetails(
+                                            state!.value.avatar.toString()),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
                     ],
                   ),
+                  Visibility(
+                      visible: controller.followersModel.isNotEmpty,
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: List.generate(
+                                controller.followersModel.length,
+                                (index) => InkWell(
+                                      onTap: () => Get.offNamed(
+                                          Routes.OTHERS_PROFILE,
+                                          arguments: {
+                                            "profileId": controller
+                                                .followersModel[index].id
+                                          }),
+                                      child: Container(
+                                        margin: EdgeInsets.all(10),
+                                        child: Column(
+                                          children: [
+                                            Stack(
+                                              alignment: Alignment.bottomRight,
+                                              children: [
+                                                InkWell(
+                                                  onTap: () => {
+                                                    Get.toNamed(
+                                                        Routes.OTHERS_PROFILE,
+                                                        arguments: {
+                                                          "profileId": controller
+                                                              .followersModel[
+                                                                  index]
+                                                              .id
+                                                        })
+                                                  },
+                                                  child: imgProfile(controller
+                                                      .followersModel[index]
+                                                      .avtars
+                                                      .toString()),
+                                                ),
+                                                // InkWell(
+                                                //   onTap: () => controller
+                                                //       .followUnfollowUser(
+                                                //           controller
+                                                //               .followersModel[
+                                                //                   index]
+                                                //               .id!,
+                                                //           controller.followersModel[index]
+                                                //                       .isFollowing ==
+                                                //                   0
+                                                //               ? "follow"
+                                                //               : "unfollow"),
+                                                //   child: Container(
+                                                //     decoration: BoxDecoration(
+                                                //         shape: BoxShape
+                                                //             .circle,
+                                                //         color: ColorManager
+                                                //             .colorPrimaryLight
+                                                //             .withOpacity(
+                                                //                 0.5)),
+                                                //     child: Icon(
+                                                //       Icons.add,
+                                                //       color: Colors.white,
+                                                //     ),
+                                                //   ),
+                                                // )
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              controller.followersModel[index]
+                                                      .name
+                                                      .toString()
+                                                      .isEmpty
+                                                  ? controller
+                                                      .followersModel[index]
+                                                      .username
+                                                      .toString()
+                                                  : controller
+                                                      .followersModel[index]
+                                                      .name
+                                                      .toString(),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w700),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    )),
+                          ),
+                        ),
+                      )),
                   Expanded(
                     child: DefaultTabController(
                       length: 2,
                       child: Scaffold(
-                        appBar: AppBar(
-                          toolbarHeight: 10,
-                          titleSpacing: 0,
-                          automaticallyImplyLeading: false,
-                          bottom: TabBar(
-                              onTap: (index) => selectedTab.value = index,
-                              tabs: [
-                                Obx(() => Tab(
-                                      icon: Icon(
-                                        Icons.dashboard,
-                                        color: selectedTab.value == 0
-                                            ? ColorManager.colorAccent
-                                            : ColorManager
-                                                .colorAccentTransparent,
-                                      ),
-                                    )),
-                                Obx(() => Tab(
-                                      icon: Icon(
-                                        Icons.favorite,
-                                        color: selectedTab.value == 1
-                                            ? ColorManager.colorAccent
-                                            : ColorManager
-                                                .colorAccentTransparent,
-                                      ),
-                                    ))
-                              ]),
-                        ),
-                        body: const TabBarView(
+                        body: Column(
                           children: [
-                            OtherUserVideosView(),
-                            OthersLikedVideosView()
+                            TabBar(
+                                onTap: (index) => selectedTab.value = index,
+                                tabs: [
+                                  Tab(
+                                    text: "Posts",
+                                  ),
+                                  Tab(
+                                    text: "Liked",
+                                  )
+                                ]),
+                            Expanded(
+                                child: TabBarView(
+                              children: [
+                                OtherUserVideosView(),
+                                OthersLikedVideosView()
+                              ],
+                            ))
                           ],
                         ),
                       ),

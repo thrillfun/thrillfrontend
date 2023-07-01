@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logger/logger.dart';
 import 'package:thrill/app/rest/models/search_model.dart';
 import 'package:thrill/app/utils/utils.dart';
 
@@ -44,8 +47,11 @@ class SearchController extends GetxController
     });
   }
 
+
   Future<void> followUnfollowUser(int userId, String action,
-      {String? searchQuery}) async {
+      {String? searchQuery, String fcmToken="",
+        String image="",
+        String name="",}) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -54,10 +60,63 @@ class SearchController extends GetxController
       "action": "$action"
     }).then((value) {
       if (value.data["status"]) {
+        if (action == "follow") {
+          sendNotification(fcmToken,
+              body: "$name started following you!",
+              title: "New follower!",
+              image: image);
+        }
         searchHashtags(searchQuery ?? "");
       } else {
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {});
+  }
+
+  Future<void> sendNotification(String fcmToken,
+      {String? body = "", String? title = "", String? image = ""}) async {
+    var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
+    dio.options.headers = {
+      "Authorization":
+      "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+    };
+    final data = {
+      "to": fcmToken,
+      "notification": {"body": body, "title": title, "image": image},
+      "priority": "high",
+      "image": image,
+      "data": {
+        "url":image,
+        "body":body,
+        "title":title,
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        "id": "1",
+        "status": "done",
+        "image":
+        image
+      }
+    };
+    dio.post("/send", data: jsonEncode(data)).then((value) {
+      Logger().wtf(value);
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
+  Future<void> addSoundToFavourite(int id, String action) async {
+    dio.options.headers["Authorization"] =
+    "Bearer ${await GetStorage().read("token")}";
+    dio.post(
+      "favorite/add-to-favorite",
+      queryParameters: {"id": id, "type": "sound", "action": action},
+    ).then((value) {
+      if (value.data["status"]) {
+        searchHashtags("");
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
   }
 }

@@ -9,6 +9,7 @@ import 'package:iconly/iconly.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../rest/rest_urls.dart';
+import '../../../../routes/app_pages.dart';
 import '../../../../utils/color_manager.dart';
 import '../../../../utils/strings.dart';
 import '../../../../utils/utils.dart';
@@ -23,6 +24,9 @@ class QrCodeView extends GetView<QrCodeController> {
         body: Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
+        SizedBox(
+          height: MediaQuery.of(context).viewPadding.top,
+        ),
         Container(
           height: 150,
           width: 150,
@@ -41,10 +45,15 @@ class QrCodeView extends GetView<QrCodeController> {
               const SizedBox(
                 height: 10,
               ),
-               Padding(padding: EdgeInsets.symmetric(horizontal: 10),child: Text("Scan QR Code to follow ${GetStorage().read("name")}",
-                   maxLines: 1,
-                   overflow: TextOverflow.ellipsis,
-                   style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20)),),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Text(
+                    "Scan QR Code to follow ${GetStorage().read("name")}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 20)),
+              ),
               RepaintBoundary(
                 key: controller.previewContainer,
                 child: Container(
@@ -55,17 +64,23 @@ class QrCodeView extends GetView<QrCodeController> {
                     children: [
                       Obx(() => Visibility(
                           visible: controller.qrData.value.isNotEmpty,
-                          child: QrImage(
-                            eyeStyle: const QrEyeStyle(
-                              eyeShape: QrEyeShape.circle,
-                              color: ColorManager.colorAccent,
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: QrImage(
+                                eyeStyle: const QrEyeStyle(
+                                  eyeShape: QrEyeShape.circle,
+                                  color: ColorManager.colorAccent,
+                                ),
+                                foregroundColor: ColorManager.colorAccent,
+                                dataModuleStyle: const QrDataModuleStyle(
+                                    dataModuleShape: QrDataModuleShape.circle),
+                                data: controller.qrData.value,
+                                version: QrVersions.auto,
+                                embeddedImageStyle: QrEmbeddedImageStyle(),
+                              ),
                             ),
-                            foregroundColor: Colors.black,
-                            dataModuleStyle: const QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.circle),
-                            data: controller.qrData.value,
-                            version: QrVersions.auto,
-                            embeddedImageStyle: QrEmbeddedImageStyle(),
                           ))),
                       Card(
                         shape: RoundedRectangleBorder(
@@ -131,19 +146,9 @@ class QrCodeView extends GetView<QrCodeController> {
 
                     if (initialLink!.link.queryParameters["type"] ==
                         "profile") {
-                      // Get.to(ViewProfile(
-                      //     initialLink!.link
-                      //         .queryParameters["id"],
-                      //     0.obs,
-                      //     initialLink!.link
-                      //         .queryParameters["name"],
-                      //     initialLink!
-                      //         .link
-                      //         .queryParameters["something"]));
-                    } else if (initialLink!.link.queryParameters["type"] ==
-                        "video") {
-                      successToast(
-                          initialLink!.link.queryParameters["id"].toString());
+                      Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
+                        "profileId": initialLink.link.queryParameters["id"]
+                      });
                     }
                   }
                 },

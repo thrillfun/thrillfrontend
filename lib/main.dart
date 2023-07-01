@@ -10,6 +10,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart' as transition;
 import 'package:get/get.dart';
 import 'package:get/get_navigation/get_navigation.dart';
@@ -34,7 +35,7 @@ GlobalKey key = GlobalKey();
 AwesomeNotifications? awesomeNotifications;
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
   await GetStorage.init();
 
@@ -94,52 +95,29 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent.withOpacity(0.0)));
+  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   FirebaseDynamicLinks.instance.onLink.listen(
     (pendingDynamicLinkData) async {
       // Set up the `onLink` event listener next as it may be received here
-      if (pendingDynamicLinkData!.link.queryParameters["type"] == "profile") {
-        await GetStorage()
-            .write("profileId",
-                pendingDynamicLinkData!.link.queryParameters["id"].toString())
-            .then((value) {
-          Get.toNamed(Routes.OTHERS_PROFILE);
-        });
-      } else if (pendingDynamicLinkData!.link.queryParameters["type"] ==
+      if (pendingDynamicLinkData.link.queryParameters["type"] == "profile") {
+        // Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
+        //   "profileId": pendingDynamicLinkData.link.queryParameters["id"]
+        // });
+        successToast(
+            pendingDynamicLinkData.link.queryParameters["type"].toString());
+      } else if (pendingDynamicLinkData.link.queryParameters["type"] ==
           "video") {
         successToast(
-            pendingDynamicLinkData!.link.queryParameters["id"].toString());
-      } else if (pendingDynamicLinkData!.link.queryParameters["type"] ==
+            pendingDynamicLinkData.link.queryParameters["id"].toString());
+      } else if (pendingDynamicLinkData.link.queryParameters["type"] ==
           "referal") {
-        await GetStorage()
-            .write(
-                "referral_code",
-                pendingDynamicLinkData!.link.queryParameters["referal"]
-                    .toString())
-            .then((value) async {
-          if (GetStorage().read("token") == null) {
-            if (await Permission.phone.isGranted) {
-              await SimDataPlugin.getSimData().then((value) =>
-                  value.cards.isEmpty
-                      ? Get.bottomSheet(LoginView(false.obs))
-                      : Get.bottomSheet(LoginView(true.obs)));
-            } else {
-              await Permission.phone.request().then((value) async =>
-                  await SimDataPlugin.getSimData().then((value) =>
-                      value.cards.isEmpty
-                          ? Get.bottomSheet(LoginView(false.obs))
-                          : Get.bottomSheet(LoginView(true.obs))));
-            }
-          }
-          // await GetStorage()
-          //     .write("profileId",
-          //         pendingDynamicLinkData!.link.queryParameters["id"].toString())
-          //     .then((value) {
-          //   Get.toNamed(Routes.OTHERS_PROFILE);
-          // });
-        });
-        // successToast(pendingDynamicLinkData!.link.queryParameters["id"].toString());
+        await GetStorage().write("referral_code",
+            pendingDynamicLinkData.link.queryParameters["referal"].toString());
+        successToast(
+            pendingDynamicLinkData!.link.queryParameters["referal"].toString());
       }
     },
   );

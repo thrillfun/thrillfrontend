@@ -18,9 +18,9 @@ class ColorManager {
   static const Color colorAccent = Color(0xff0A8381);
   static Color dayNight = Get.isPlatformDarkMode ? Colors.black : Colors.white;
   static Color dayNightText =
-  Get.isPlatformDarkMode ? Colors.white : Colors.black;
+      Get.isPlatformDarkMode ? Colors.white : Colors.black;
   static Color dayNightIcon =
-  Get.isPlatformDarkMode ? colorPrimaryLight : colorAccent;
+      Get.isPlatformDarkMode ? colorPrimaryLight : colorAccent;
 
   static const Color colorAccentTransparent = Color(0x2f2dcbc8);
 
@@ -31,5 +31,14 @@ class ColorManager {
         Color(0xff0A8381),
         Color(0xff1D5855),
         Colors.black,
+      ]);
+
+  static const LinearGradient postGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        colorAccent,
+        Colors.black,
+        colorAccent,
       ]);
 }

@@ -34,8 +34,10 @@ class Videos {
   int? id;
   String? video;
   String? description;
+  int? soundId;
   String? sound;
   String? soundName;
+  int? isFavouriteSoundCount;
   String? soundCategoryName;
   String? filter;
   int? likes;
@@ -43,61 +45,67 @@ class Videos {
   String? gifImage;
   String? speed;
   int? comments;
+  List<Hashtags>? hashtags;
   String? isDuet;
   String? duetFrom;
   String? isDuetable;
   String? isCommentable;
   String? soundOwner;
-  String? videoLikeStatus;
-  int? isfollow;
+  int? videoLikeStatus;
   User? user;
-  int? soundId;
 
   Videos(
       {this.id,
-        this.video,
-        this.description,
-        this.sound,
-        this.soundName,
-        this.soundCategoryName,
-        this.filter,
-        this.likes,
-        this.views,
-        this.gifImage,
-        this.speed,
-        this.comments,
-        this.isDuet,
-        this.duetFrom,
-        this.isDuetable,
-        this.isCommentable,
-        this.soundOwner,
-        this.videoLikeStatus,
-        this.isfollow,
-        this.user,
-        this.soundId});
+      this.video,
+      this.description,
+      this.soundId,
+      this.sound,
+      this.soundName,
+      this.isFavouriteSoundCount,
+      this.soundCategoryName,
+      this.filter,
+      this.likes,
+      this.views,
+      this.gifImage,
+      this.speed,
+      this.comments,
+      this.hashtags,
+      this.isDuet,
+      this.duetFrom,
+      this.isDuetable,
+      this.isCommentable,
+      this.soundOwner,
+      this.videoLikeStatus,
+      this.user});
 
   Videos.fromJson(Map<String, dynamic> json) {
-    id = json['id'] ?? "";
-    video = json['video'] ?? "";
-    description = json['description'] ?? "";
-    sound = json['sound'] ?? "";
-    soundName = json['sound_name'] ?? "";
-    soundCategoryName = json['sound_category_name'] ?? "";
-    filter = json['filter'] ?? "";
-    likes = json['likes'] ?? "";
-    views = json['views'] ?? "";
-    gifImage = json['gif_image'] ?? "";
-    speed = json['speed'] ?? "";
-    comments = json['comments'] ?? "";
-    isDuet = json['is_duet'] ?? "";
-    duetFrom = json['duet_from'] ?? "";
-    isDuetable = json['is_duetable'] ?? "";
-    isCommentable = json['is_commentable'] ?? "";
-    soundOwner = json['sound_owner'] ?? "";
-    videoLikeStatus = json['video_like_status']??'';
-    isfollow=json["isfollow"]??0;
+    id = json['id'];
+    video = json['video'];
+    description = json['description'];
+    soundId = json['sound_id'];
+    sound = json['sound'];
+    soundName = json['sound_name'];
+    isFavouriteSoundCount = json['is_favourite_sound_count'];
+    soundCategoryName = json['sound_category_name'];
+    filter = json['filter'];
+    likes = json['likes'];
+    views = json['views'];
+    gifImage = json['gif_image'];
+    speed = json['speed'];
+    comments = json['comments'];
+    if (json['hashtags'] != null) {
+      hashtags = <Hashtags>[];
+      json['hashtags'].forEach((v) {
+        hashtags!.add(new Hashtags.fromJson(v));
+      });
+    }
+    isDuet = json['is_duet'];
+    duetFrom = json['duet_from'];
+    isDuetable = json['is_duetable'];
+    isCommentable = json['is_commentable'];
+    soundOwner = json['sound_owner'];
+    videoLikeStatus = json['video_like_status'] ?? 0;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
-    soundId = json["sound_id"];
   }
 
   Map<String, dynamic> toJson() {
@@ -105,8 +113,10 @@ class Videos {
     data['id'] = this.id;
     data['video'] = this.video;
     data['description'] = this.description;
+    data['sound_id'] = this.soundId;
     data['sound'] = this.sound;
     data['sound_name'] = this.soundName;
+    data['is_favourite_sound_count'] = this.isFavouriteSoundCount;
     data['sound_category_name'] = this.soundCategoryName;
     data['filter'] = this.filter;
     data['likes'] = this.likes;
@@ -114,17 +124,103 @@ class Videos {
     data['gif_image'] = this.gifImage;
     data['speed'] = this.speed;
     data['comments'] = this.comments;
+    if (this.hashtags != null) {
+      data['hashtags'] = this.hashtags!.map((v) => v.toJson()).toList();
+    }
     data['is_duet'] = this.isDuet;
     data['duet_from'] = this.duetFrom;
     data['is_duetable'] = this.isDuetable;
     data['is_commentable'] = this.isCommentable;
     data['sound_owner'] = this.soundOwner;
     data['video_like_status'] = this.videoLikeStatus;
-    data["isfollow"] = this.isfollow;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }
-    data["sound_id"] = this.soundId;
+    return data;
+  }
+}
+
+class Hashtags {
+  int? id;
+  int? videoId;
+  int? hashtagId;
+  String? createdAt;
+  String? updatedAt;
+  int? isFavouriteHashtagCount;
+  Hashtag? hashtag;
+
+  Hashtags(
+      {this.id,
+      this.videoId,
+      this.hashtagId,
+      this.createdAt,
+      this.updatedAt,
+      this.isFavouriteHashtagCount,
+      this.hashtag});
+
+  Hashtags.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    videoId = json['video_id'];
+    hashtagId = json['hashtag_id'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    isFavouriteHashtagCount = json['is_favourite_hashtag_count'];
+    hashtag =
+        json['hashtag'] != null ? new Hashtag.fromJson(json['hashtag']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['video_id'] = this.videoId;
+    data['hashtag_id'] = this.hashtagId;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    data['is_favourite_hashtag_count'] = this.isFavouriteHashtagCount;
+    if (this.hashtag != null) {
+      data['hashtag'] = this.hashtag!.toJson();
+    }
+    return data;
+  }
+}
+
+class Hashtag {
+  int? id;
+  int? userId;
+  String? name;
+  int? isActive;
+  Null? description;
+  String? createdAt;
+  String? updatedAt;
+
+  Hashtag(
+      {this.id,
+      this.userId,
+      this.name,
+      this.isActive,
+      this.description,
+      this.createdAt,
+      this.updatedAt});
+
+  Hashtag.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    userId = json['user_id'];
+    name = json['name'];
+    isActive = json['is_active'];
+    description = json['description'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['user_id'] = this.userId;
+    data['name'] = this.name;
+    data['is_active'] = this.isActive;
+    data['description'] = this.description;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
     return data;
   }
 }
@@ -157,35 +253,37 @@ class User {
   String? totalVideos;
   String? boxTwo;
   String? boxThree;
+  int? isFollow;
 
   User(
       {this.id,
-        this.name,
-        this.username,
-        this.email,
-        this.dob,
-        this.phone,
-        this.avatar,
-        this.socialLoginId,
-        this.socialLoginType,
-        this.firstName,
-        this.lastName,
-        this.gender,
-        this.websiteUrl,
-        this.bio,
-        this.youtube,
-        this.facebook,
-        this.instagram,
-        this.twitter,
-        this.firebaseToken,
-        this.referralCount,
-        this.following,
-        this.followers,
-        this.likes,
-        this.levels,
-        this.totalVideos,
-        this.boxTwo,
-        this.boxThree});
+      this.name,
+      this.username,
+      this.email,
+      this.dob,
+      this.phone,
+      this.avatar,
+      this.socialLoginId,
+      this.socialLoginType,
+      this.firstName,
+      this.lastName,
+      this.gender,
+      this.websiteUrl,
+      this.bio,
+      this.youtube,
+      this.facebook,
+      this.instagram,
+      this.twitter,
+      this.firebaseToken,
+      this.referralCount,
+      this.following,
+      this.followers,
+      this.likes,
+      this.levels,
+      this.totalVideos,
+      this.boxTwo,
+      this.boxThree,
+      this.isFollow});
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? "";
@@ -212,10 +310,11 @@ class User {
     followers = json['followers'] ?? "";
     likes = json['likes'] ?? "";
     levels =
-    json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
+        json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
     totalVideos = json['total_videos'] ?? "";
     boxTwo = json['box_two'] ?? "";
     boxThree = json['box_three'] ?? "";
+    isFollow = json["isfollow"] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -249,6 +348,7 @@ class User {
     data['total_videos'] = this.totalVideos;
     data['box_two'] = this.boxTwo;
     data['box_three'] = this.boxThree;
+    data["isfollow"] = this.isFollow;
     return data;
   }
 }

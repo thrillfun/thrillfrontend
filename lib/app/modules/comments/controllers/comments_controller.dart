@@ -48,7 +48,7 @@ class CommentsController extends GetxController with StateMixin {
     });
   }
 
-  postComment({int? videoId, String? userId, String? comment,String fcmToken=""}) async {
+  postComment({int? videoId, String? userId, String? comment,String fcmToken="",userName=""}) async {
     change(commentsList, status: RxStatus.loading());
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -61,11 +61,11 @@ class CommentsController extends GetxController with StateMixin {
       try {
         successToast(value.data["message"]);
         change(commentsList, status: RxStatus.success());
-        sendNotification(fcmToken,title: "Somebody commented on your video");
+        sendNotification(fcmToken,title: "New Comments",body: "${userName} commented on your video");
 
         getComments(videoId!);
       } catch (e) {
-        errorToast(value.data["message"]);
+        Logger().wtf(e);
         change(commentsList, status: RxStatus.error());
       }
     }).onError((error, stackTrace) {
@@ -89,7 +89,7 @@ class CommentsController extends GetxController with StateMixin {
         successToast(value.data["message"]);
         sendNotification(fcmToken,title: "Somebody liked your comment");
       } catch (e) {
-        errorToast(value.data["message"]);
+        Logger().wtf(e);
         change(commentsList, status: RxStatus.error());
       }
     }).onError((error, stackTrace) {
@@ -109,11 +109,14 @@ Future<void> sendNotification(String fcmToken,
     "priority": "high",
     "image": image,
     "data": {
+      "url":image,
+      "body":body,
+      "title":title,
       "click_action": "FLUTTER_NOTIFICATION_CLICK",
       "id": "1",
       "status": "done",
       "image":
-      "https://scontent.fbom19-2.fna.fbcdn.net/v/t39.30808-6/271720827_4979339162088555_3028905257532289818_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=HMgk-tDtBcQAX9uJheY&_nc_ht=scontent.fbom19-2.fna&oh=00_AfCVE7nSsxVGPTfTa8FCyff4jOzTKWi_JvTXpDWm7WrVjg&oe=63E84FB2"
+      image
     }
   };
   dio.post("/send", data: jsonEncode(data)).then((value) {
