@@ -16,13 +16,25 @@ import 'package:flutter/foundation.dart'
 /// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
+    }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -40,7 +52,6 @@ class DefaultFirebaseOptions {
     }
   }
 
-
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyARlZ8FnRMLBCdmepxUhpodWEJre_Ii8GQ',
     appId: '1:882291140458:android:35113df137e7399d3e6713',
@@ -48,29 +59,5 @@ class DefaultFirebaseOptions {
     projectId: 'algebraic-envoy-350105',
     databaseURL: 'https://algebraic-envoy-350105-default-rtdb.firebaseio.com',
     storageBucket: 'algebraic-envoy-350105.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCn2oXiqua7pqQ1mVz6HRubs7MQOzlBev0',
-    appId: '1:882291140458:ios:3767dc61b37a726f3e6713',
-    messagingSenderId: '882291140458',
-    projectId: 'algebraic-envoy-350105',
-    databaseURL: 'https://algebraic-envoy-350105-default-rtdb.firebaseio.com',
-    storageBucket: 'algebraic-envoy-350105.appspot.com',
-    androidClientId: '882291140458-6rhfu1lbokehkq4ajpe9kkh1oi8bngso.apps.googleusercontent.com',
-    iosClientId: '882291140458-of9jnfi8rp4ma6had7ajg5g2ccss2m5h.apps.googleusercontent.com',
-    iosBundleId: 'com.thrill',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCn2oXiqua7pqQ1mVz6HRubs7MQOzlBev0',
-    appId: '1:882291140458:ios:daa0566bbc38dfb43e6713',
-    messagingSenderId: '882291140458',
-    projectId: 'algebraic-envoy-350105',
-    databaseURL: 'https://algebraic-envoy-350105-default-rtdb.firebaseio.com',
-    storageBucket: 'algebraic-envoy-350105.appspot.com',
-    androidClientId: '882291140458-6rhfu1lbokehkq4ajpe9kkh1oi8bngso.apps.googleusercontent.com',
-    iosClientId: '882291140458-stkjj79kpplgkjglqul61256msj1leon.apps.googleusercontent.com',
-    iosBundleId: 'com.thrill.thrillGetxBackup',
   );
 }

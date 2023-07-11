@@ -5,10 +5,10 @@ import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
 
 import '../../../rest/models/followers_model.dart';
+import '../../../rest/models/search_model.dart' as search;
 import '../../../rest/models/user_details_model.dart';
 import '../../../rest/rest_urls.dart';
 import '../../../routes/app_pages.dart';
-import '../../../utils/utils.dart';
 import '../other_user_videos/controllers/other_user_videos_controller.dart';
 
 class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
@@ -23,11 +23,14 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var profileId = Get.arguments["profileId"];
   var otherUserVideosController = Get.find<OtherUserVideosController>();
+  RxList<search.SearchData> searchList = RxList();
+  var isSuggestedLoading = false.obs;
 
   @override
   void onInit() {
-    getUserProfile();
-    getFollowings();
+    getUserProfile(Get.arguments["profileId"]);
+    searchHashtags("");
+
     super.onInit();
   }
 
@@ -49,29 +52,38 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
       "publisher_user_id": userId,
       "action": "$action"
     }).then((value) {
-      getUserProfile();
+      getUserProfile(Get.arguments["profileId"]);
+      searchHashtags("");
     }).onError((error, stackTrace) {
       Logger().wtf(error);
     });
   }
 
-  Future<void> getUserProfile() async {
+  Future<void> followUnfollowTopUser(int userId, String action) async{
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("user/follow-unfollow-user", queryParameters: {
+      "publisher_user_id": userId,
+      "action": "$action"
+    }).then((value)async  {
+      await searchHashtags("");
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
+
+  Future<void> getUserProfile(int id) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     change(userProfile, status: RxStatus.loading());
-    if (await storage.read("token") == null ||
-        await storage.read("userId") == null) {
-      Get.toNamed(Routes.LOGIN);
-    } else {
-      dio.post('/user/get-profile', queryParameters: {"id": "$profileId"}).then(
-          (result) {
-        userProfile = UserDetailsModel.fromJson(result.data).data!.user!.obs;
-        change(userProfile, status: RxStatus.success());
-      }).onError((error, stackTrace) {
-        change(userProfile, status: RxStatus.error(error.toString()));
-      });
-    }
+    dio.post('/user/get-profile', queryParameters: {"id": id}).then((result) {
+      userProfile = UserDetailsModel.fromJson(result.data).data!.user!.obs;
+      change(userProfile, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(userProfile, status: RxStatus.error(error.toString()));
+    });
   }
 
   Future<void> getUserProfileWithId(int id) async {
@@ -103,6 +115,23 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
     }).then((result) {
       followersModel = FollowersModel.fromJson(result.data).data!.obs;
     }).onError((error, stackTrace) {});
+  }
+
+  Future<void> searchHashtags(String searchQuery) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    isSuggestedLoading = true.obs;
+    dio.get("hashtag/search?search=$searchQuery").then((value) {
+      searchList = search.SearchHashTagsModel.fromJson(value.data).data!.obs;
+      searchList.refresh();
+      isSuggestedLoading = false.obs;
+
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+      isSuggestedLoading = false.obs;
+
+    });
   }
 
   Future<String> createDynamicLink(

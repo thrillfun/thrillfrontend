@@ -5,16 +5,23 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:file_support/file_support.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:uri_to_file/uri_to_file.dart';
 import 'package:video_compress/video_compress.dart';
+import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../rest/models/sounds_model.dart';
@@ -23,12 +30,6 @@ import '../../../routes/app_pages.dart';
 import '../../../utils/page_manager.dart';
 import '../../../utils/strings.dart';
 import '../../../utils/utils.dart';
-import 'package:video_editor_sdk/video_editor_sdk.dart';
-import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
-import 'package:on_audio_query/on_audio_query.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
-import 'package:uri_to_file/uri_to_file.dart';
 
 class CameraController extends GetxController with GetTickerProviderStateMixin {
   var fileSupport = FileSupport();
@@ -76,7 +77,6 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
   @override
   void onInit() {
     initAnimationController();
-
     super.onInit();
   }
 
@@ -98,14 +98,50 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
   }
 
   @override
-  void onClose() {
+  void dispose() {
     if (animationController != null) {
       animationController?.dispose();
     }
-    audioPlayer.dispose();
+    if (audioPlayer != null) {
+      audioPlayer.dispose();
+    }
     playerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void onClose() {
     super.onClose();
   }
+
+  deleteFilesandReturn() async {
+    var tempDirectory = await getTemporaryDirectory();
+    final dir = Directory(tempDirectory.path + "/videos");
+    if (!await Directory(dir.path).exists()) {
+      await Directory(dir.path).create();
+    }
+    final List<FileSystemEntity> entities = await dir.list().toList();
+    if (entities.isNotEmpty) {
+      Get.defaultDialog(
+        title: "Are you sure?",
+        middleText: "Are you sure you want to discard changes",
+        cancel: ElevatedButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("Cancel")),
+        confirm: ElevatedButton(
+            onPressed: () async {
+              uint8list.clear();
+              dir.deleteSync(recursive: true);
+              Get.offAllNamed(Routes.HOME);
+            },
+            child: Text("Ok")),
+      );
+    }
+  }
+
+  getVideoDirectory() async {}
 
   void seek(Duration position) {
     audioPlayer.seek(position);
@@ -455,6 +491,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
       minimumDuration: 5,
       maximumDuration: maxDuration,
     );
+
     final configuration = imgly.Configuration(
       theme: imgly.ThemeOptions(imgly.Theme(
         "default_editor_theme",

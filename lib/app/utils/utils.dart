@@ -76,7 +76,12 @@ var lightThemeData = ThemeData(
         borderSide: BorderSide(
           color: Colors.grey,
         ),
-      )),
+      ),disabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10.0),
+    borderSide: BorderSide(
+      color: Colors.grey.withOpacity(0.1),
+    ),
+  )),
   scaffoldBackgroundColor: Colors.white,
   textTheme: const TextTheme(
     button: TextStyle(color: Colors.white),
@@ -133,8 +138,14 @@ var darkThemeData = ThemeData(
         borderSide: BorderSide(
           color: Colors.grey.withOpacity(0.1),
         ),
-      )),
+      ),disabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10.0),
+    borderSide: BorderSide(
+      color: Colors.grey.withOpacity(0.1),
+    ),
+  )),
   dialogBackgroundColor: Colors.black,
+
   appBarTheme: const AppBarTheme(
     color: Colors.black,
     elevation: 0,
@@ -848,15 +859,30 @@ checkForLogin(VoidCallback action) async {
   }
 }
 
-showLoginBottomSheet(RxBool isPhoneAvailable) => showModalBottomSheet(
-    isScrollControlled: true,
-    context: Get.context!,
-    builder: (BuildContext context) => LoginView(isPhoneAvailable));
+showLoginBottomSheet(RxBool isPhoneAvailable) =>
+    Get.bottomSheet(LoginView(isPhoneAvailable),shape: RoundedRectangleBorder(
+        borderRadius:
+        BorderRadius.only(topRight: Radius.circular(15),topLeft: Radius.circular(15))),
+        isScrollControlled: false,
+        backgroundColor: Theme.of(Get.context!)
+            .scaffoldBackgroundColor);
 
 extension FormatViews on int {
   String formatViews() => NumberFormat.compact().format(this);
 }
 
+extension FormatCrypto on String{
+  String formatCrypto() => isEmpty ? double.parse("0.0").toStringAsFixed(1).toString(): double.parse(this).toStringAsFixed(4).toString();
+}
+
+Widget myLabel(String txt){
+  return Align(
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Text(txt, style: const TextStyle(color: Color(0xff21252E), fontWeight: FontWeight.w900, fontSize: 13),),
+      ));
+}
 extension Unique<E, Id> on List<E> {
   List<E> unique([Id Function(E element)? id, bool inplace = true]) {
     final ids = Set();

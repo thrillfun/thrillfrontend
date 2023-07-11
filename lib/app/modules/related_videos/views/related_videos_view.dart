@@ -69,7 +69,7 @@ class RelatedVideosView extends StatefulWidget {
       this.isLastPage});
 
   String? videoUrl, fcmToken;
-  LoopPageController? pageController;
+  PageController? pageController;
   int? nextPage;
   int? videoId;
   String? avatar;
@@ -420,7 +420,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                         ),
                         Container(
                           margin: const EdgeInsets.only(
-                              right: 10, top: 10, bottom: 60),
+                              right: 10, top: 10, bottom: 80),
                           child: Column(
                             children: [
                               IconButton(
@@ -557,7 +557,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                                             .deleteUserVideo(widget
                                                                                 .videoId!)
                                                                             .then((value) =>
-                                                                                Get.back()),
+                                                                                relatedVideosController.refereshVideos().then((value) => Get.back())),
                                                                       ),
                                                                       cancel: InkWell(
                                                                         child:
@@ -912,88 +912,88 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                 const SizedBox(
                                                   height: 10,
                                                 ),
-                                                InkWell(
-                                                  onTap: () async {
-                                                    if (await GetStorage()
-                                                            .read("token") ==
-                                                        null) {
-                                                      if (await Permission
-                                                          .phone.isGranted) {
-                                                        await SimDataPlugin
-                                                                .getSimData()
-                                                            .then((value) => value
-                                                                    .cards
-                                                                    .isEmpty
-                                                                ? Get.bottomSheet(
-                                                                    LoginView(
-                                                                        false
-                                                                            .obs))
-                                                                : Get.bottomSheet(
-                                                                    LoginView(true
-                                                                        .obs)));
-                                                      } else {
-                                                        await Permission.phone
-                                                            .request()
-                                                            .then((value) async => await SimDataPlugin
-                                                                    .getSimData()
-                                                                .then((value) => value
-                                                                        .cards
-                                                                        .isEmpty
-                                                                    ? Get.bottomSheet(
-                                                                        LoginView(false
-                                                                            .obs))
-                                                                    : Get.bottomSheet(
-                                                                        LoginView(
-                                                                            true.obs))));
-                                                      }
-                                                    } else {
-                                                      relatedVideosController
-                                                          .notInterested(
-                                                        widget.videoId!,
-                                                      );
-                                                    }
-                                                    // userDetailsController
-                                                    //     .followUnfollowUser(
-                                                    //     widget.UserId,
-                                                    //     widget.isfollow == 0
-                                                    //         ? "follow"
-                                                    //         : "unfollow",
-                                                    //     token: widget
-                                                    //         .publicUser!
-                                                    //         .firebaseToken
-                                                    //         .toString());
-                                                    // followingVideosController
-                                                    //     .getAllVideos();
-                                                  },
-                                                  child: Row(
-                                                    children: [
-                                                      widget.isfollow! == 0
-                                                          ? const Icon(
-                                                              Icons.report,
-                                                              color: ColorManager
-                                                                  .colorAccent,
-                                                              size: 30,
-                                                            )
-                                                          : const Icon(
-                                                              Icons.report,
-                                                              color: ColorManager
-                                                                  .colorAccent,
-                                                              size: 30,
-                                                            ),
-                                                      const SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                      const Text(
-                                                        "Not Interested",
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: ColorManager
-                                                                .colorAccent),
-                                                      )
-                                                    ],
-                                                  ),
-                                                )
+                                                // InkWell(
+                                                //   onTap: () async {
+                                                //     if (await GetStorage()
+                                                //             .read("token") ==
+                                                //         null) {
+                                                //       if (await Permission
+                                                //           .phone.isGranted) {
+                                                //         await SimDataPlugin
+                                                //                 .getSimData()
+                                                //             .then((value) => value
+                                                //                     .cards
+                                                //                     .isEmpty
+                                                //                 ? Get.bottomSheet(
+                                                //                     LoginView(
+                                                //                         false
+                                                //                             .obs))
+                                                //                 : Get.bottomSheet(
+                                                //                     LoginView(true
+                                                //                         .obs)));
+                                                //       } else {
+                                                //         await Permission.phone
+                                                //             .request()
+                                                //             .then((value) async => await SimDataPlugin
+                                                //                     .getSimData()
+                                                //                 .then((value) => value
+                                                //                         .cards
+                                                //                         .isEmpty
+                                                //                     ? Get.bottomSheet(
+                                                //                         LoginView(false
+                                                //                             .obs))
+                                                //                     : Get.bottomSheet(
+                                                //                         LoginView(
+                                                //                             true.obs))));
+                                                //       }
+                                                //     } else {
+                                                //       relatedVideosController
+                                                //           .notInterested(
+                                                //         widget.videoId!,
+                                                //       );
+                                                //     }
+                                                //     // userDetailsController
+                                                //     //     .followUnfollowUser(
+                                                //     //     widget.UserId,
+                                                //     //     widget.isfollow == 0
+                                                //     //         ? "follow"
+                                                //     //         : "unfollow",
+                                                //     //     token: widget
+                                                //     //         .publicUser!
+                                                //     //         .firebaseToken
+                                                //     //         .toString());
+                                                //     // followingVideosController
+                                                //     //     .getAllVideos();
+                                                //   },
+                                                //   child: Row(
+                                                //     children: [
+                                                //       widget.isfollow! == 0
+                                                //           ? const Icon(
+                                                //               Icons.report,
+                                                //               color: ColorManager
+                                                //                   .colorAccent,
+                                                //               size: 30,
+                                                //             )
+                                                //           : const Icon(
+                                                //               Icons.report,
+                                                //               color: ColorManager
+                                                //                   .colorAccent,
+                                                //               size: 30,
+                                                //             ),
+                                                //       const SizedBox(
+                                                //         width: 10,
+                                                //       ),
+                                                //       const Text(
+                                                //         "Not Interested",
+                                                //         style: TextStyle(
+                                                //             fontWeight:
+                                                //                 FontWeight.bold,
+                                                //             color: ColorManager
+                                                //                 .colorAccent),
+                                                //       )
+                                                //     ],
+                                                //   ),
+                                                // )
                                               ]),
                                         ),
                                         shape: RoundedRectangleBorder(
@@ -1022,7 +1022,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.only(bottom: 60),
+                    margin: const EdgeInsets.only(bottom: 80),
                     alignment: Alignment.bottomLeft,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,

@@ -66,7 +66,7 @@ class LoginScreenView extends GetView<LoginScreenController> {
                         ),
                         Expanded(
                             child: Text(
-                          "Login with phone",
+                          "Truecaller",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
@@ -134,7 +134,7 @@ class LoginScreenView extends GetView<LoginScreenController> {
                       width: Get.width,
                       alignment: Alignment.center,
                       child: const Text(
-                        "Login with google",
+                        "Google",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
@@ -213,7 +213,7 @@ class LoginScreenView extends GetView<LoginScreenController> {
   // trueCallerLayout()=> ;
   submitButtonLayout() => InkWell(
         child: const Text(
-          "Login via OTP",
+          "Phone Number",
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,

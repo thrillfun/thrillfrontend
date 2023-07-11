@@ -39,69 +39,57 @@ class SettingsView extends GetView<SettingsController> {
                         height: MediaQuery.of(context).viewPadding.top,
                       ),
                       controller.obx(
-                          (state) => Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      Get.toNamed(Routes.PROFILE);
-                                    },
-                                    child: Container(
-                                        alignment: Alignment.center,
-                                        width: 60,
-                                        height: 60,
-                                        child: SizedBox(
-                                            height: 60,
-                                            width: 60,
-                                            child: imgProfile(state!
-                                                .value.avatar
-                                                .toString()))),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Expanded(
-                                      child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        state!.value.name.toString().isEmpty
-                                            ? "@${state!.value.username}"
-                                            : state.value.name.toString(),
-                                        textAlign: TextAlign.left,
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        "@${state!.value.username}",
-                                        textAlign: TextAlign.start,
-                                        style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.normal),
-                                      )
-                                    ],
-                                  )),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: Container(
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                    Radius.circular(200))),
-                                        width: 30,
-                                        height: 30,
-                                        child: const Icon(
-                                          Icons.rotate_90_degrees_ccw,
-                                          size: 20,
-                                        )),
-                                  )
-                                ],
-                              ),
+                          (state) => InkWell(
+                            onTap:()=>Get.toNamed(Routes.PROFILE) ,
+                            child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        Get.toNamed(Routes.PROFILE);
+                                      },
+                                      child: Container(
+                                          alignment: Alignment.center,
+                                          width: 60,
+                                          height: 60,
+                                          child: SizedBox(
+                                              height: 60,
+                                              width: 60,
+                                              child: imgProfile(state!
+                                                  .value.avatar
+                                                  .toString()))),
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Expanded(
+                                        child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          state!.value.name.toString().isEmpty
+                                              ? "@${state!.value.username}"
+                                              : state.value.name.toString(),
+                                          textAlign: TextAlign.left,
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          "@${state!.value.username}",
+                                          textAlign: TextAlign.start,
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.normal),
+                                        )
+                                      ],
+                                    )),
+
+                                  ],
+                                ),
+                          ),
                           onLoading: Container(
                             child: loader(),
                             alignment: Alignment.center,
@@ -228,7 +216,25 @@ class SettingsView extends GetView<SettingsController> {
                                     },
                                     child: const Text("No")));
                           },
-                          child: mainTile(IconlyBroken.logout, logout)),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 5),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(5),
+                                  margin: const EdgeInsets.only(right: 20),
+                                  child: Icon(IconlyBroken.logout, color: Colors.red, size: 26),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    "Logout",
+                                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700,color: Colors.red),
+                                  ),
+                                ),
+                                const Icon(IconlyBroken.arrow_right_2)
+                              ],
+                            ),
+                          )),
                       Card(
                         shape: RoundedRectangleBorder(
                             side: const BorderSide(

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:thrill/app/modules/others_profile/others_following/followers/controllers/others_followers_controller.dart';
@@ -12,8 +10,10 @@ import '../../../../../widgets/no_search_result.dart';
 
 class FollowersView extends GetView<OtherFollowersController> {
   const FollowersView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
+    controller.getUserFollowers();
     return controller.obx(
         (state) => state!.isEmpty
             ? NoSearchResult(
@@ -51,14 +51,11 @@ class FollowersView extends GetView<OtherFollowersController> {
                                             Text(
                                               state[index]
                                                           .name
-                                                          .toString() ==
-                                                      "null"
-                                                  ? state[index]
+                                                          ??
+                                                state[index]
                                                       .username
                                                       .toString()
-                                                  : state[index]
-                                                      .name
-                                                      .toString(),
+                                                  ,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(

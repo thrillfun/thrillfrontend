@@ -55,3 +55,10 @@ body {
   bottom: 0;
   right: 0;
 }
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #000000;
+    background-image: url("img/dark-background.png");
+  }
+}

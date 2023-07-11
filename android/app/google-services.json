@@ -15,19 +15,27 @@
       },
       "oauth_client": [
         {
-          "client_id": "882291140458-ca00kdpilm63do28hie7dggs3u7pr8n3.apps.googleusercontent.com",
+          "client_id": "882291140458-1rio9k8fmbf8ss7cog12a2qth2srrii5.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.thrill.media",
-            "certificate_hash": "1bcc6d88d6ef4cdfa8e93d6b859400c8cdd9ab2d"
+            "certificate_hash": "82ed3daa72a0d0fff0e4a691bcd397b1f9e67f37"
           }
         },
         {
-          "client_id": "882291140458-pvjtrj1cnh22qpqodt2mu31figoabb8m.apps.googleusercontent.com",
+          "client_id": "882291140458-a8rjhqcndkr8rk1ca0ve1vrperkel0o1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.thrill.media",
             "certificate_hash": "3cef413a306efbc26b43e3fd0d53360a3a6c6129"
+          }
+        },
+        {
+          "client_id": "882291140458-b8r8dr6s7qrkbkodn10uvma62oa449uh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thrill.media",
+            "certificate_hash": "1bcc6d88d6ef4cdfa8e93d6b859400c8cdd9ab2d"
           }
         },
         {

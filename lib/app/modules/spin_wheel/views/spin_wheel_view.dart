@@ -163,6 +163,7 @@ class SpinWheelView extends GetView<SpinWheelController> {
         child: Stack(children: [
           Container(
             decoration: BoxDecoration(
+              gradient: ColorManager.walletGradient,
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 2)),
             child: FortuneWheel(
@@ -263,14 +264,14 @@ class SpinWheelView extends GetView<SpinWheelController> {
                               controller.wheelData.data!.wheelRewards![i]
                                           .imagePath ==
                                       null
-                                  ? Text(
-                                      controller.wheelData.data!
-                                          .wheelRewards![i].currencySymbol
-                                          .toString(),
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700),
-                                    )
+                                  ? RotatedBox(quarterTurns: 2,child: Text(
+                                controller.wheelData.data!
+                                    .wheelRewards![i].currencySymbol
+                                    .toString(),
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700),
+                              ),)
                                   : Container(
                                       margin: EdgeInsets.only(left: 40),
                                       decoration: BoxDecoration(
@@ -278,18 +279,23 @@ class SpinWheelView extends GetView<SpinWheelController> {
                                           shape: BoxShape.circle,
                                           border:
                                               Border.all(color: Colors.white)),
-                                      child: CachedNetworkImage(
+                                      child: RotatedBox(quarterTurns: 1,child: CachedNetworkImage(
                                           fit: BoxFit.fill,
                                           height: 30,
                                           width: 30,
                                           imageUrl: controller.wheelData.data!
                                               .wheelRewards![i].imagePath
-                                              .toString()),
+                                              .toString()),),
                                     ),
-                              Text(
+                              RotatedBox(quarterTurns: 1,child: Column(children: [Text(
                                 '${controller.wheelData.data!.wheelRewards![i].amount} ',
                                 style: const TextStyle(
-                                    fontSize: 21, fontWeight: FontWeight.w700),
+                                    fontSize: 21, fontWeight: FontWeight.w700),),
+                                SizedBox(height: 5,),
+                                Text(
+                                  '${controller.wheelData.data!.wheelRewards![i].currency} ',
+                                  style: const TextStyle(
+                                      fontSize: 15, fontWeight: FontWeight.w700),)],),
                               ),
                             ],
                           ),
@@ -312,43 +318,55 @@ class SpinWheelView extends GetView<SpinWheelController> {
               },
             ),
           ),
-          Obx(() => Visibility(
-              visible: controller.isRewardWon.isTrue,
-              child: Container(
-                alignment: Alignment.center,
-                decoration:
+          Center(
+            child: Obx(() => Visibility(
+                maintainAnimation: true,
+                maintainState: true,
+                visible: controller.isRewardWon.isTrue,
+                child: Obx(() => AnimatedOpacity(
+                  duration: const Duration(milliseconds: 500),
+                  curve: controller.isRewardWon.isTrue ?Curves.easeInOutCirc:Curves.easeInCirc,
+                  opacity: controller.isRewardWon.isTrue ? 1 : 0,
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration:
                     BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-                child: Stack(
-                  children: [
-                    Column(
+                    child: Stack(
+                      alignment: Alignment.center,
                       children: [
-                        Stack(
-                          alignment: Alignment.topCenter,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            IgnorePointer(
-                              child: Lottie.asset("assets/congrats.json",
-                                  fit: BoxFit.fill,
-                                  width: Get.width,
-                                  height: 400),
-                            ),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
+                            Stack(
+                              alignment: Alignment.topCenter,
                               children: [
-                                Lottie.asset(
-                                  "assets/winning.json",
-                                  fit: BoxFit.contain,
+                                IgnorePointer(
+                                  child: Lottie.asset("assets/congrats.json",
+                                      fit: BoxFit.fill,
+                                      width: Get.width,
+                                      height: 400),
                                 ),
-                                Text(
-                                  "Congratulations!",
-                                  style: TextStyle(
-                                      color: ColorManager.colorPrimaryLight,
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Obx(() => Text(
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Lottie.asset(
+                                        "assets/winning.json",
+                                        fit: BoxFit.contain,
+                                        height: 250
+                                    ),
+                                    Text(
+                                      "Congratulations!",
+                                      style: TextStyle(
+                                          color: ColorManager.colorPrimaryLight,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Obx(() => Text(
                                       controller.rewardMsg.value
                                           .replaceAll("Congratus", "")
                                           .capitalizeFirst
@@ -358,58 +376,59 @@ class SpinWheelView extends GetView<SpinWheelController> {
                                           fontSize: 25,
                                           fontWeight: FontWeight.w700),
                                     ))
+                                  ],
+                                )
                               ],
-                            )
+                            ),
+
+                            // InkWell(
+                            //   onTap: () {
+                            //     // ScreenshotController()
+                            //     //     .captureFromWidget(Container(
+                            //     //         padding: const EdgeInsets.all(30.0),
+                            //     //         decoration: BoxDecoration(
+                            //     //           border: Border.all(
+                            //     //               color: Colors.blueAccent, width: 5.0),
+                            //     //           color: Colors.redAccent,
+                            //     //         ),
+                            //     //         child: Text("This is an invisible widget")))
+                            //     //     .then((capturedImage) async {
+                            //     //   var file = await File("${saveCacheDirectory}temp.png")
+                            //     //       .writeAsBytes(capturedImage);
+                            //     //   Logger().wtf(file.path);
+                            //     //   // Handle captured image
+                            //     // });
+                            //   },
+                            //   child: Container(
+                            //     width: Get.width,
+                            //     margin: const EdgeInsets.symmetric(
+                            //         horizontal: 20, vertical: 20),
+                            //     padding: const EdgeInsets.all(10),
+                            //     alignment: Alignment.center,
+                            //     decoration: const BoxDecoration(
+                            //         borderRadius: BorderRadius.all(
+                            //           Radius.circular(10),
+                            //         ),
+                            //         gradient: LinearGradient(
+                            //             begin: Alignment.topCenter,
+                            //             end: Alignment.bottomCenter,
+                            //             colors: [
+                            //               ColorManager.colorPrimaryLight,
+                            //               ColorManager.colorAccent
+                            //             ])),
+                            //     child: const Text(
+                            //       "Excellent!",
+                            //       style:
+                            //           TextStyle(color: Colors.white, fontSize: 18),
+                            //     ),
+                            //   ),
+                            // )
                           ],
                         ),
-
-                        // InkWell(
-                        //   onTap: () {
-                        //     // ScreenshotController()
-                        //     //     .captureFromWidget(Container(
-                        //     //         padding: const EdgeInsets.all(30.0),
-                        //     //         decoration: BoxDecoration(
-                        //     //           border: Border.all(
-                        //     //               color: Colors.blueAccent, width: 5.0),
-                        //     //           color: Colors.redAccent,
-                        //     //         ),
-                        //     //         child: Text("This is an invisible widget")))
-                        //     //     .then((capturedImage) async {
-                        //     //   var file = await File("${saveCacheDirectory}temp.png")
-                        //     //       .writeAsBytes(capturedImage);
-                        //     //   Logger().wtf(file.path);
-                        //     //   // Handle captured image
-                        //     // });
-                        //   },
-                        //   child: Container(
-                        //     width: Get.width,
-                        //     margin: const EdgeInsets.symmetric(
-                        //         horizontal: 20, vertical: 20),
-                        //     padding: const EdgeInsets.all(10),
-                        //     alignment: Alignment.center,
-                        //     decoration: const BoxDecoration(
-                        //         borderRadius: BorderRadius.all(
-                        //           Radius.circular(10),
-                        //         ),
-                        //         gradient: LinearGradient(
-                        //             begin: Alignment.topCenter,
-                        //             end: Alignment.bottomCenter,
-                        //             colors: [
-                        //               ColorManager.colorPrimaryLight,
-                        //               ColorManager.colorAccent
-                        //             ])),
-                        //     child: const Text(
-                        //       "Excellent!",
-                        //       style:
-                        //           TextStyle(color: Colors.white, fontSize: 18),
-                        //     ),
-                        //   ),
-                        // )
                       ],
                     ),
-                  ],
-                ),
-              )))
+                  ),)))),
+          )
         ]),
       );
 

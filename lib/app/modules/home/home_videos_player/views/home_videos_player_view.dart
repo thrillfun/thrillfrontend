@@ -53,14 +53,21 @@ class _HomeVideosPlayerViewState extends State<HomeVideosPlayerView>
                             onTap: () {
                               if (index == 0) {
                                 relatedVideosController.refereshVideos();
+                                controller.selectedIndex.value = index;
+
                               }
                               if (index == 1) {
-                                followingVideosController.refereshVideos();
+                                checkForLogin(() {
+                                  followingVideosController.refereshVideos();
+                                  controller.selectedIndex.value = index;
+
+                                });
                               }
                               if (index == 2) {
                                 trendingVideosController.refereshVideos();
+                                controller.selectedIndex.value = index;
+
                               }
-                              controller.selectedIndex.value = index;
                             },
                             child: Column(
                               mainAxisSize: MainAxisSize.min,

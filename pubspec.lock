@@ -570,6 +570,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+  firebase_crashlytics:
+    dependency: "direct main"
+    description:
+      name: firebase_crashlytics
+      sha256: "398012cf7838f8a373a25da65dd62fc3a3f4abe4b5f886caa634952c3387dce3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.3"
+  firebase_crashlytics_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_crashlytics_platform_interface
+      sha256: "39dfcc9a5ddfaa0588ad67f1016174dd9e19f6b31f592b8641bd559399567592"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.6.3"
   firebase_database:
     dependency: "direct main"
     description:
@@ -1205,10 +1221,18 @@ packages:
     dependency: transitive
     description:
       name: imgly_sdk
-      sha256: "3a0a7d4cdc2c8e89d8a9c3680e6808c556c196cb55f89f561b2f6173d8cf5f2b"
+      sha256: "18e3a7c6b5a842d849317f116e9870ce670a55453a5629fa2459d68c8e5f0305"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.0"
+    version: "3.0.0"
+  in_app_update:
+    dependency: "direct main"
+    description:
+      name: in_app_update
+      sha256: a220c46e649ae6cfaa80ea6688efb22e73eaa9ec538d8666f5814cc04c08a696
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.4"
   intl:
     dependency: "direct main"
     description:
@@ -2098,10 +2122,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_editor_sdk
-      sha256: "1575b6bced067620b04cefc2cdca81a08d5b7305cdba4902edb0f28342607af7"
+      sha256: "5475e777ed95b6b89a377ff83c5ba28fbefcaac196f1e9cbc6aef216e6d82233"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.0"
+    version: "3.0.0"
   video_player:
     dependency: "direct main"
     description:

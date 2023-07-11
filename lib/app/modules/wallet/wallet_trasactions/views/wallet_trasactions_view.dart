@@ -30,7 +30,7 @@ class WalletTrasactionsView extends GetView<WalletTrasactionsController> {
                       color: state[index].transactionStatus == "Completed"
                           ? Colors.green.shade600
                           : state[index].transactionStatus == "Pending"
-                              ? Colors.yellow.shade600
+                              ? Colors.grey.shade600
                               : state[index].transactionStatus == "Cancelled"
                                   ? Colors.red.shade600
                                   : Colors.green.shade600,
@@ -86,7 +86,7 @@ class WalletTrasactionsView extends GetView<WalletTrasactionsController> {
                                             fontWeight: FontWeight.w700),
                                       ),
                                       Text(
-                                        state[index].transactionId.toString(),
+                                        state[index].transactionStatus??"",
                                         textAlign: TextAlign.start,
                                         style: const TextStyle(
                                             color: Colors.black,

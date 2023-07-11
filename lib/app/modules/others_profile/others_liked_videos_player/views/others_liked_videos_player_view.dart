@@ -702,7 +702,7 @@ class _OthersLikedVideosState extends State<OthersLikedVideos>
                                                                           ),
                                                                           onTap: () => relatedVideosController
                                                                               .deleteUserVideo(widget.videoId!)
-                                                                              .then((value) => Get.back()),
+                                                                              .then((value) =>relatedVideosController.getOtherUserVideos().then((value) => Get.back())),
                                                                         ),
                                                                         cancel:
                                                                             InkWell(
@@ -1041,87 +1041,87 @@ class _OthersLikedVideosState extends State<OthersLikedVideos>
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                              InkWell(
-                                                onTap: () async {
-                                                  if (await GetStorage()
-                                                          .read("token") ==
-                                                      null) {
-                                                    if (await Permission
-                                                        .phone.isGranted) {
-                                                      await SimDataPlugin
-                                                              .getSimData()
-                                                          .then((value) => value
-                                                                  .cards.isEmpty
-                                                              ? Get.bottomSheet(
-                                                                  LoginView(
-                                                                      false
-                                                                          .obs))
-                                                              : Get.bottomSheet(
-                                                                  LoginView(true
-                                                                      .obs)));
-                                                    } else {
-                                                      await Permission.phone
-                                                          .request()
-                                                          .then((value) async => await SimDataPlugin
-                                                                  .getSimData()
-                                                              .then((value) => value
-                                                                      .cards
-                                                                      .isEmpty
-                                                                  ? Get.bottomSheet(
-                                                                      LoginView(
-                                                                          false
-                                                                              .obs))
-                                                                  : Get.bottomSheet(
-                                                                      LoginView(true.obs))));
-                                                    }
-                                                  } else {
-                                                    relatedVideosController
-                                                        .notInterested(
-                                                      widget.videoId!,
-                                                    );
-                                                  }
-                                                  // userDetailsController
-                                                  //     .followUnfollowUser(
-                                                  //     widget.UserId,
-                                                  //     widget.isfollow == 0
-                                                  //         ? "follow"
-                                                  //         : "unfollow",
-                                                  //     token: widget
-                                                  //         .publicUser!
-                                                  //         .firebaseToken
-                                                  //         .toString());
-                                                  // followingVideosController
-                                                  //     .getAllVideos();
-                                                },
-                                                child: Row(
-                                                  children: [
-                                                    widget.isfollow! == 0
-                                                        ? const Icon(
-                                                            Icons.report,
-                                                            color: ColorManager
-                                                                .colorAccent,
-                                                            size: 30,
-                                                          )
-                                                        : const Icon(
-                                                            Icons.report,
-                                                            color: ColorManager
-                                                                .colorAccent,
-                                                            size: 30,
-                                                          ),
-                                                    const SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    const Text(
-                                                      "Not Interested",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: ColorManager
-                                                              .colorAccent),
-                                                    )
-                                                  ],
-                                                ),
-                                              )
+                                              // InkWell(
+                                              //   onTap: () async {
+                                              //     if (await GetStorage()
+                                              //             .read("token") ==
+                                              //         null) {
+                                              //       if (await Permission
+                                              //           .phone.isGranted) {
+                                              //         await SimDataPlugin
+                                              //                 .getSimData()
+                                              //             .then((value) => value
+                                              //                     .cards.isEmpty
+                                              //                 ? Get.bottomSheet(
+                                              //                     LoginView(
+                                              //                         false
+                                              //                             .obs))
+                                              //                 : Get.bottomSheet(
+                                              //                     LoginView(true
+                                              //                         .obs)));
+                                              //       } else {
+                                              //         await Permission.phone
+                                              //             .request()
+                                              //             .then((value) async => await SimDataPlugin
+                                              //                     .getSimData()
+                                              //                 .then((value) => value
+                                              //                         .cards
+                                              //                         .isEmpty
+                                              //                     ? Get.bottomSheet(
+                                              //                         LoginView(
+                                              //                             false
+                                              //                                 .obs))
+                                              //                     : Get.bottomSheet(
+                                              //                         LoginView(true.obs))));
+                                              //       }
+                                              //     } else {
+                                              //       relatedVideosController
+                                              //           .notInterested(
+                                              //         widget.videoId!,
+                                              //       );
+                                              //     }
+                                              //     // userDetailsController
+                                              //     //     .followUnfollowUser(
+                                              //     //     widget.UserId,
+                                              //     //     widget.isfollow == 0
+                                              //     //         ? "follow"
+                                              //     //         : "unfollow",
+                                              //     //     token: widget
+                                              //     //         .publicUser!
+                                              //     //         .firebaseToken
+                                              //     //         .toString());
+                                              //     // followingVideosController
+                                              //     //     .getAllVideos();
+                                              //   },
+                                              //   child: Row(
+                                              //     children: [
+                                              //       widget.isfollow! == 0
+                                              //           ? const Icon(
+                                              //               Icons.report,
+                                              //               color: ColorManager
+                                              //                   .colorAccent,
+                                              //               size: 30,
+                                              //             )
+                                              //           : const Icon(
+                                              //               Icons.report,
+                                              //               color: ColorManager
+                                              //                   .colorAccent,
+                                              //               size: 30,
+                                              //             ),
+                                              //       const SizedBox(
+                                              //         width: 10,
+                                              //       ),
+                                              //       const Text(
+                                              //         "Not Interested",
+                                              //         style: TextStyle(
+                                              //             fontWeight:
+                                              //                 FontWeight.bold,
+                                              //             color: ColorManager
+                                              //                 .colorAccent),
+                                              //       )
+                                              //     ],
+                                              //   ),
+                                              // )
                                             ]),
                                       ),
                                       shape: RoundedRectangleBorder(

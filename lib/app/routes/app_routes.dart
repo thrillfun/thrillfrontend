@@ -86,6 +86,7 @@ abstract class Routes {
       _Paths.FAVOURITE_SOUNDS +
       _Paths.SOUND_VIDEOS;
   static const SPLASH_SCREEN = _Paths.SPLASH_SCREEN;
+  static const WITHDRAW = _Paths.WALLET + _Paths.WITHDRAW;
 }
 
 abstract class _Paths {
@@ -148,4 +149,5 @@ abstract class _Paths {
   static const LOGIN_SCREEN = '/login-screen';
   static const SOUND_VIDEOS = '/sound-videos';
   static const SPLASH_SCREEN = '/splash-screen';
+  static const WITHDRAW = '/withdraw';
 }

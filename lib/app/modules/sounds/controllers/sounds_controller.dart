@@ -12,6 +12,7 @@ import 'package:path/path.dart';
 import 'package:thrill/app/modules/camera/controllers/camera_controller.dart';
 import 'package:thrill/app/rest/models/sounds_model.dart';
 import 'package:thrill/app/routes/app_pages.dart';
+import 'package:thrill/app/utils/strings.dart';
 
 import '../../../rest/models/sound_details_model.dart';
 import '../../../rest/models/user_details_model.dart' as user;
@@ -63,9 +64,10 @@ class SoundsController extends GetxController
 
   @override
   void onInit() {
+    getSoundDetails();
+
     animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 5000));
-
     super.onInit();
   }
 
@@ -81,7 +83,6 @@ class SoundsController extends GetxController
 
   @override
   void onReady() {
-    getSoundDetails();
     super.onReady();
   }
 
@@ -89,19 +90,16 @@ class SoundsController extends GetxController
     audioPlayer.seek(position);
   }
 
-  getSoundDetails() async {
+  Future<void> getSoundDetails() async {
     change(soundDetails, status: RxStatus.loading());
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
 
     await dio.post("sound/get",
-        queryParameters: {"id": Get.arguments["sound_id"]}).then((value) async {
+        queryParameters: {"id": id}).then((value) async {
       soundDetails = SoundDetailsModel.fromJson(value.data).data!;
       await getVideosBySound(soundDetails.sound!);
-
-      await setupAudioPlayer(soundDetails.sound!);
-
       change(soundDetails, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(soundDetails, status: RxStatus.error(error.toString()));
@@ -109,16 +107,18 @@ class SoundsController extends GetxController
   }
 
   Future<void> getVideosBySound(String soundName) async {
-    isVideosLoading.value = true;
+    change(soundDetails, status: RxStatus.loading());
+
     dio.post("sound/videosbysound", queryParameters: {"sound": soundName}).then(
         (value) {
       videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
-      isVideosLoading.value = false;
-    }).onError((error, stackTrace) {
+      change(soundDetails, status: RxStatus.success());
+
+        }).onError((error, stackTrace) {
       Logger().wtf(error);
-      isVideosLoading.value = false;
+      change(soundDetails, status: RxStatus.error(error.toString()));
+
     });
-    isVideosLoading.value = false;
   }
 
   setupAudioPlayer(String soundurl) async {
@@ -127,19 +127,7 @@ class SoundsController extends GetxController
     audioPlayer = AudioPlayer();
 
     duration = (await audioPlayer.setUrl(RestUrl.soundUrl + soundurl))!;
-    await FileSupport()
-        .downloadCustomLocation(
-      url: RestUrl.awsSoundUrl + soundurl,
-      path: saveCacheDirectory,
-      filename: basenameWithoutExtension(soundurl),
-      extension: ".mp3",
-      progress: (progress) async {},
-    )
-        .then((value) async {
-      await playerController.preparePlayer(value!.path).then((value) {
-        isPlayerInit.value = true;
-      });
-    });
+
     audioTotalDuration.value = duration;
     audioPlayer.positionStream.listen((position) {
       final oldState = progressNotifier.value;
@@ -193,23 +181,8 @@ class SoundsController extends GetxController
       bool isFavourites) async {
     try {
       var file = File(saveCacheDirectory + soundUrl.value);
-      Get.defaultDialog(
-          title: "Downloading audio",
-          content: Obx(() => Text(currentProgress.value)));
-      await fileSupport
-          .downloadCustomLocation(
-        url: "${RestUrl.awsSoundUrl}$soundUrl",
-        path: saveCacheDirectory,
-        filename: basenameWithoutExtension(soundUrl.value),
-        extension: ".mp3",
-        progress: (progress) async {
-          currentProgress.value = progress;
-        },
-      )
-          .then((value) {
-        // GetStorage().write("sound_path", value!.path);
-        // GetStorage().write("sound_name", soundName);
-        // GetStorage().write("sound_owner", userName);
+
+      if(file.existsSync()){
         cameraController.userUploadedSound.value = file.uri.toString();
         cameraController.soundName = soundName;
         cameraController.soundOwner = userName;
@@ -218,12 +191,46 @@ class SoundsController extends GetxController
           cameraController.userUploadedSound.value = file.uri.toString();
           cameraController.soundName = soundName;
           cameraController.soundOwner = userName;
-        }, condition: value!.path.isNotEmpty);
+        }, condition: file.path.isNotEmpty);
 
         Get.toNamed(Routes.CAMERA);
-      }).onError((error, stackTrace) {
-        Logger().wtf(error);
-      });
+      }
+      else{
+        Get.defaultDialog(
+            title: "Downloading audio",
+            content: Obx(() => Text(currentProgress.value)));
+
+        await fileSupport
+            .downloadCustomLocation(
+          url: "${RestUrl.awsSoundUrl}$soundUrl",
+          path: saveCacheDirectory,
+          filename: basenameWithoutExtension(soundUrl.value),
+          extension: ".mp3",
+          progress: (progress) async {
+            currentProgress.value = progress;
+          },
+        )
+            .then((value) {
+          // GetStorage().write("sound_path", value!.path);
+          // GetStorage().write("sound_name", soundName);
+          // GetStorage().write("sound_owner", userName);
+          Get.back();
+          cameraController.userUploadedSound.value = file.uri.toString();
+          cameraController.soundName = soundName;
+          cameraController.soundOwner = userName;
+
+          everAll([soundName, userName], (callback) {
+            cameraController.userUploadedSound.value = file.uri.toString();
+            cameraController.soundName = soundName;
+            cameraController.soundOwner = userName;
+          }, condition: value!.path.isNotEmpty);
+
+          Get.toNamed(Routes.CAMERA);
+        }).onError((error, stackTrace) {
+          Logger().wtf(error);
+        });
+      }
+
       // if (await file.exists()) {
       //   Get.toNamed(Routes.CAMERA, arguments: {
       //     "sound_url": file.uri.obs,

@@ -16,7 +16,7 @@ class WalletView extends GetView<WalletController> {
   @override
   Widget build(BuildContext context) {
     var isTextVisible = true.obs;
-
+    controller.getBalance();
     return Scaffold(
         body: controller.obx(
       (state) => Column(
@@ -115,29 +115,11 @@ class WalletView extends GetView<WalletController> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Expanded(
-                        child: InkWell(
-                      onTap: () => null,
-                      child: Card(
-                        elevation: 10,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                        margin: const EdgeInsets.only(
-                            left: 5, right: 5, bottom: 10),
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 20, bottom: 20),
-                          child: Column(
-                            children: const [
-                              Icon(Icons.money),
-                              Text("Deposit")
-                            ],
-                          ),
-                        ),
-                      ),
-                    )),
+
                     Expanded(
                         child: InkWell(
                       onTap: () {
+                        Get.toNamed(Routes.WITHDRAW,arguments: {"balance":controller.totalbalance.value});
                         // Get.to(PaymentRequest());
                       },
                       child: Card(
@@ -159,7 +141,7 @@ class WalletView extends GetView<WalletController> {
                     )),
                     Expanded(
                         child: InkWell(
-                      onTap: () => null,
+                      onTap: () => Get.toNamed(Routes.SPIN_WHEEL),
                       child: Card(
                         elevation: 10,
                         shape: RoundedRectangleBorder(
@@ -176,7 +158,27 @@ class WalletView extends GetView<WalletController> {
                           ),
                         ),
                       ),
-                    ))
+                    )),
+                    Expanded(
+                        child: InkWell(
+                          onTap: () => Get.toNamed(Routes.WALLET_TRASACTIONS),
+                          child: Card(
+                            elevation: 10,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            margin: const EdgeInsets.only(
+                                left: 5, right: 5, bottom: 10),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 20, bottom: 20),
+                              child: Column(
+                                children: const [
+                                  Icon(Icons.money),
+                                  Text("History")
+                                ],
+                              ),
+                            ),
+                          ),
+                        )),
                   ],
                 )
               ],
@@ -214,12 +216,12 @@ class WalletView extends GetView<WalletController> {
                         fontSize: 25,
                       ),
                     ),
-                    InkWell(
-                      child: const Icon(Icons.book),
-                      onTap: () {
-                        Get.toNamed(Routes.WALLET_TRASACTIONS);
-                      },
-                    ),
+                    // InkWell(
+                    //   child: const Icon(Icons.book),
+                    //   onTap: () {
+                    //     Get.toNamed(Routes.WALLET_TRASACTIONS);
+                    //   },
+                    // ),
                   ],
                 ),
                 const SizedBox(

@@ -14,6 +14,7 @@ class FollowingView extends GetView<OthersFollowingController> {
 
   @override
   Widget build(BuildContext context) {
+    controller.getFollowings();
     return controller.obx(
         (state) => state!.isEmpty
             ? NoSearchResult(
@@ -48,9 +49,9 @@ class FollowingView extends GetView<OthersFollowingController> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          state[index].name.toString() == "null"
-                                              ? state[index].username.toString()
-                                              : state[index].name.toString(),
+                                          state[index].name
+                                              ?? state[index].username.toString()
+                                              ,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(

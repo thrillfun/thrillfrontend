@@ -22,7 +22,8 @@ class OthersProfileView extends GetView<OthersProfileController> {
   @override
   Widget build(BuildContext context) {
     var selectedTab = 0.obs;
-    controller.getUserProfile();
+    controller.getUserProfile(Get.arguments["profileId"]);
+    controller.searchHashtags("");
     return Scaffold(
       body: controller.obx(
           (state) => Scaffold(
@@ -172,21 +173,17 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                             ],
                                           ),
                                         ),
-                                        Column(
-                                          children: [
-                                            Text(
-                                                '${state.value.likes == null || state.value.likes!.isEmpty ? 0 : state.value.likes}',
-                                                style: const TextStyle(
-                                                    fontSize: 24,
-                                                    fontWeight:
-                                                        FontWeight.w700)),
-                                            const Text(likes,
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight:
-                                                        FontWeight.w300))
-                                          ],
-                                        ),
+                                        InkWell(
+                                            onTap: () {
+                                              controller.isFollowingVisible
+                                                  .toggle();
+                                            },
+                                            child: Column(children: [Icon(
+                                              IconlyBroken.user_2,
+                                              size: 28,
+                                              color: ColorManager
+                                                  .dayNightIcon,
+                                            )],)),
                                       ],
                                     ),
                                     const SizedBox(
@@ -328,31 +325,7 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                                         .dayNightIcon,
                                                   ))),
                                         ),
-                                        // ClipOval(
-                                        //   child: InkWell(
-                                        //       onTap: () {
-                                        //         controller.isFollowingVisible
-                                        //             .toggle();
-                                        //       },
-                                        //       child: Container(
-                                        //           margin: const EdgeInsets
-                                        //                   .symmetric(
-                                        //               horizontal: 10),
-                                        //           decoration: BoxDecoration(
-                                        //               borderRadius:
-                                        //                   BorderRadius.circular(
-                                        //                       50),
-                                        //               color: ColorManager
-                                        //                   .colorAccentTransparent),
-                                        //           padding:
-                                        //               const EdgeInsets.all(15),
-                                        //           child: Icon(
-                                        //             IconlyBroken.user_2,
-                                        //             size: 16,
-                                        //             color: ColorManager
-                                        //                 .dayNightIcon,
-                                        //           ))),
-                                        // ),
+
                                       ],
                                     ),
                                     SizedBox(
@@ -400,102 +373,91 @@ class OthersProfileView extends GetView<OthersProfileController> {
                       )
                     ],
                   ),
-                  Visibility(
-                      visible: controller.followersModel.isNotEmpty,
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: List.generate(
-                                controller.followersModel.length,
-                                (index) => InkWell(
-                                      onTap: () => Get.offNamed(
-                                          Routes.OTHERS_PROFILE,
-                                          arguments: {
-                                            "profileId": controller
-                                                .followersModel[index].id
-                                          }),
+          Obx(() => Visibility(
+              visible: controller.isFollowingVisible.isTrue,
+              child:GetX<OthersProfileController>(builder: (controller)=>controller.isSuggestedLoading.isTrue?loader(): Container(
+                alignment: Alignment.centerLeft,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(
+                        controller.searchList[0].users!.length,
+                            (index) => InkWell(
+                          onTap: () => Get.offAndToNamed(Routes.OTHERS_PROFILE,arguments:{"profileId": controller.searchList[0].users![index].id!})
+                          ,
+                          child: Container(
+                            margin: EdgeInsets.all(10),
+                            child: Column(
+                              children: [
+                                Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    InkWell(
+                                      onTap: ()  {
+                                        Get.offAndToNamed(Routes.OTHERS_PROFILE,arguments:{"profileId": controller.searchList[0].users![index].id!});
+                                        // controller.getUserProfile(controller.followersModel[index].id! );
+                                      },
+                                      child: imgProfile( controller.searchList[0].users![index]
+                                          .avatar
+                                          .toString()),
+                                    ),
+                                    InkWell(
+                                      onTap: () => controller
+                                          .followUnfollowTopUser(
+                                          controller.searchList[0].users![
+                                          index]
+                                              .id!,
+                                          controller.searchList[0].users![index]
+                                              .isfollow ==
+                                              0
+                                              ? "follow"
+                                              : "unfollow"),
                                       child: Container(
-                                        margin: EdgeInsets.all(10),
-                                        child: Column(
-                                          children: [
-                                            Stack(
-                                              alignment: Alignment.bottomRight,
-                                              children: [
-                                                InkWell(
-                                                  onTap: () => {
-                                                    Get.toNamed(
-                                                        Routes.OTHERS_PROFILE,
-                                                        arguments: {
-                                                          "profileId": controller
-                                                              .followersModel[
-                                                                  index]
-                                                              .id
-                                                        })
-                                                  },
-                                                  child: imgProfile(controller
-                                                      .followersModel[index]
-                                                      .avtars
-                                                      .toString()),
-                                                ),
-                                                // InkWell(
-                                                //   onTap: () => controller
-                                                //       .followUnfollowUser(
-                                                //           controller
-                                                //               .followersModel[
-                                                //                   index]
-                                                //               .id!,
-                                                //           controller.followersModel[index]
-                                                //                       .isFollowing ==
-                                                //                   0
-                                                //               ? "follow"
-                                                //               : "unfollow"),
-                                                //   child: Container(
-                                                //     decoration: BoxDecoration(
-                                                //         shape: BoxShape
-                                                //             .circle,
-                                                //         color: ColorManager
-                                                //             .colorPrimaryLight
-                                                //             .withOpacity(
-                                                //                 0.5)),
-                                                //     child: Icon(
-                                                //       Icons.add,
-                                                //       color: Colors.white,
-                                                //     ),
-                                                //   ),
-                                                // )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              controller.followersModel[index]
-                                                      .name
-                                                      .toString()
-                                                      .isEmpty
-                                                  ? controller
-                                                      .followersModel[index]
-                                                      .username
-                                                      .toString()
-                                                  : controller
-                                                      .followersModel[index]
-                                                      .name
-                                                      .toString(),
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w700),
-                                            )
-                                          ],
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape
+                                                .circle,
+                                            color: ColorManager
+                                                .colorPrimaryLight
+                                                .withOpacity(
+                                                0.5)),
+                                        child: Icon(
+                                          controller.searchList[0].users![index].isfollow ==
+                                              0
+                                              ? Icons.add
+                                              : Icons.remove ,
+                                          color: Colors.white,
                                         ),
                                       ),
-                                    )),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  controller.searchList[0].users![index]
+                                      .name
+                                      ??
+                                      controller.searchList[0].users![index]
+                                          .username.toString()
+                                  ,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w700),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                      )),
+                        )),
+                  ),
+                ),
+              ))
+
+             )
+                  )
+                  ,
                   Expanded(
                     child: DefaultTabController(
-                      length: 2,
+                      length: 1,
                       child: Scaffold(
                         body: Column(
                           children: [
@@ -505,15 +467,15 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                   Tab(
                                     text: "Posts",
                                   ),
-                                  Tab(
-                                    text: "Liked",
-                                  )
+                                  // Tab(
+                                  //   text: "Liked",
+                                  // )
                                 ]),
                             Expanded(
                                 child: TabBarView(
                               children: [
                                 OtherUserVideosView(),
-                                OthersLikedVideosView()
+                                // OthersLikedVideosView()
                               ],
                             ))
                           ],

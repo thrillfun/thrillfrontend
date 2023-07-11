@@ -41,7 +41,8 @@ class FollowingVideosController extends GetxController
 
   var isInitialised = false.obs;
   var fileSupport = FileSupport();
-
+  var currentPage = 1.obs;
+  var nextPage = 2.obs;
   @override
   void onReady() {
     getAllVideos(true);
@@ -91,6 +92,36 @@ class FollowingVideosController extends GetxController
       change(followingVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followingVideosList, status: RxStatus.error());
+    });
+  }
+  Future<void> getPaginationAllVideos(int page) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (followingVideosList.isEmpty) {
+      change(followingVideosList, status: RxStatus.loading());
+    }
+    dio.get("video/list?page=$page").then((value) {
+      FollowingVideosModel.fromJson(value.data).data!.forEach((element) {
+        followingVideosList.add(element);
+      });
+
+      if (FollowingVideosModel.fromJson(value.data).pagination!.currentPage !=
+          FollowingVideosModel.fromJson(value.data).pagination!.lastPage) {
+        nextPage.value =
+            FollowingVideosModel.fromJson(value.data).pagination!.currentPage! +
+                1;
+      } else {
+        nextPage.value = FollowingVideosModel.fromJson(value.data).pagination!.lastPage!;
+      }
+      currentPage.value =
+      FollowingVideosModel.fromJson(value.data).pagination!.currentPage!;
+
+      followingVideosList.refresh();
+
+      change(followingVideosList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(followingVideosList, status: RxStatus.error(error.toString()));
     });
   }
 

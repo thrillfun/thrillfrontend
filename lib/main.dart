@@ -1,30 +1,22 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:get/get.dart' as transition;
 import 'package:get/get.dart';
 import 'package:get/get_navigation/get_navigation.dart';
-import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sim_data/sim_data.dart';
-import 'package:sim_data/sim_model.dart';
 import 'package:thrill/app/modules/bindings/app_bindings.dart';
-import 'package:thrill/app/utils/color_manager.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 
-import 'app/modules/login/views/login_view.dart';
 import 'app/routes/app_pages.dart';
 import 'app/utils/utils.dart';
 import 'firebase_options.dart';
@@ -44,17 +36,16 @@ void main() async {
     await Permission.notification.request();
   }
   MobileAds.instance.initialize();
-  if (Platform.isIOS) {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
-  } else {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
-  }
-  MobileAds.instance.initialize();
-  if (Platform.isIOS) {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
-  } else {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
-  }
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
+
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  // PlatformDispatcher.instance.onError = (error, stack) {
+  //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: false);
+  //   return true;
+  // };
   awesomeNotifications = AwesomeNotifications();
   awesomeNotifications?.initialize(
       'resource://drawable/icon.png',
@@ -106,18 +97,15 @@ void main() async {
         // Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
         //   "profileId": pendingDynamicLinkData.link.queryParameters["id"]
         // });
-        successToast(
-            pendingDynamicLinkData.link.queryParameters["type"].toString());
+
       } else if (pendingDynamicLinkData.link.queryParameters["type"] ==
           "video") {
-        successToast(
-            pendingDynamicLinkData.link.queryParameters["id"].toString());
+
       } else if (pendingDynamicLinkData.link.queryParameters["type"] ==
           "referal") {
         await GetStorage().write("referral_code",
             pendingDynamicLinkData.link.queryParameters["referal"].toString());
-        successToast(
-            pendingDynamicLinkData!.link.queryParameters["referal"].toString());
+
       }
     },
   );

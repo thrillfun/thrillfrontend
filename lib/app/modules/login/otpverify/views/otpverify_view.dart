@@ -1,22 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
-
 import 'package:get/get.dart';
 import 'package:thrill/app/utils/strings.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../utils/color_manager.dart';
 import '../../../../utils/utils.dart';
 import '../controllers/otpverify_controller.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:icons_plus/icons_plus.dart';
-import 'package:sim_data/sim_data.dart';
-import 'package:sms_autofill/sms_autofill.dart';
-
-import 'package:url_launcher/url_launcher.dart';
 
 class OtpverifyView extends StatefulWidget {
   const OtpverifyView({Key? key}) : super(key: key);
@@ -30,6 +22,7 @@ class _OtpverifyViewState extends State<OtpverifyView> {
 
   var otp = "".obs;
   var controller = Get.find<OtpverifyController>();
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -54,6 +47,7 @@ class _OtpverifyViewState extends State<OtpverifyView> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: InputDecoration(
+              contentPadding: EdgeInsets.zero,
               filled: true,
               prefixIcon: Icon(
                 Icons.call,
@@ -85,13 +79,13 @@ class _OtpverifyViewState extends State<OtpverifyView> {
             width: Get.width,
             alignment: Alignment.center,
             margin: const EdgeInsets.all(10),
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: ColorManager.colorAccent),
             child: const Text("SEND OTP",
                 style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Colors.white)),
           ),
@@ -154,7 +148,9 @@ class _OtpverifyViewState extends State<OtpverifyView> {
 
 class CheckOtpView extends StatefulWidget {
   CheckOtpView({required this.phoneNumber});
+
   String? phoneNumber;
+
   @override
   State<CheckOtpView> createState() => _CheckOtpViewState();
 }
@@ -162,6 +158,7 @@ class CheckOtpView extends StatefulWidget {
 class _CheckOtpViewState extends State<CheckOtpView> {
   var otp = "".obs;
   var controller = Get.find<OtpverifyController>();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -235,7 +232,7 @@ class _CheckOtpViewState extends State<CheckOtpView> {
             margin: EdgeInsets.all(10),
             width: Get.width,
             child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(15),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -248,12 +245,25 @@ class _CheckOtpViewState extends State<CheckOtpView> {
                   child: const Text(
                     "Submit",
                     style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: Colors.white),
                   ),
                 )),
           ),
+          Center(
+              child: InkWell(
+            onTap: () => controller.sendOtp(widget.phoneNumber.toString()),
+            child: Text(
+              "Resend Otp",
+              style: TextStyle(
+                color: ColorManager.colorAccent,
+                fontWeight: FontWeight.w700,
+                decoration: TextDecoration.underline,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )),
           Container(
             width: Get.width,
             margin: EdgeInsets.all(10),

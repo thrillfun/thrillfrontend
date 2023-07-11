@@ -88,8 +88,8 @@ class Followers {
 
   Followers.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? 0;
-    name = json['name'] ?? "";
-    username = json['username'] ?? "";
+    name = json['name'] ;
+    username = json['username'];
     email = json['email'] ?? "";
     dob = json['dob'] ?? "";
     emailVerifiedAt = json['email_verified_at'] ?? "";

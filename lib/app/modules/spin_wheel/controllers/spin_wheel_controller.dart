@@ -23,7 +23,6 @@ class SpinWheelController extends GetxController
 
   var wheelData = SpinWheelDataModel();
 
-  List<WheelRewards> chanceList = [];
   var rewardMsg = "".obs;
 
   WheelRewards? random;
@@ -35,6 +34,7 @@ class SpinWheelController extends GetxController
   var wheelRewards = RewardModel().obs;
   var isSpinning = false.obs;
   var isRewardWon = false.obs;
+  List<WheelRewards> chanceList = [];
 
   @override
   void onInit() {
@@ -50,13 +50,19 @@ class SpinWheelController extends GetxController
     });
 
     ever(wheelRewardsList, (callback) {
-      if (wheelRewardsList.length > 2 && remainingChance.value < 2) {
-        for (var rewards in wheelRewardsList) {
-          if (p.nextInt(100) + 1 <= rewards.probability) {
-            chanceList.add(rewards);
-          }
-        }
-        random = getRandomElement(chanceList);
+      if (wheelRewardsList.isNotEmpty && wheelRewardsList.length>2 && remainingChance.value < 2) {
+      var chance = p.nextInt(20) + 1;
+      chanceList = wheelRewardsList.where((p0) =>chance <= p0.probability).toList();
+      // for (var rewards in wheelRewardsList) {
+      //     if (chance <= rewards.probability) {
+      //       chanceList.add(rewards);
+      //     }
+      //     else{
+      //       chance = p.nextInt(100) + 1;
+      //     }
+      //
+      //   }
+      random = getRandomElement(chanceList);
       }
     });
 
@@ -92,6 +98,7 @@ class SpinWheelController extends GetxController
       lastReward.value = wheelData.data!.lastReward.toString();
       change(wheelData, status: RxStatus.success());
     }).onError((error, stackTrace) {
+      getWheelData();
       Logger().wtf(error);
     });
   }
@@ -105,6 +112,7 @@ class SpinWheelController extends GetxController
       getWheelData();
       isRewardWon = true.obs;
       rewardMsg.value = value.data["message"];
+      random = getRandomElement(chanceList);
       Future.delayed(Duration(seconds: 7))
           .then((value) => isRewardWon.value = false);
     }).onError((error, stackTrace) {

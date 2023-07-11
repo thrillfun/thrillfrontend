@@ -359,8 +359,13 @@ class SearchView extends GetView<search.SearchController> {
                                     state[0]
                                         .videos![index]
                                         .user!
-                                        .name
-                                        .toString(),
+                                        .name??  state[0]
+                                        .videos![index]
+                                        .user!
+                                        .username!
+                                       ,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500),
@@ -648,7 +653,11 @@ class SearchView extends GetView<search.SearchController> {
                                                           .searchList[0]
                                                           .sounds![index]
                                                           .soundOwner!
-                                                          .name!
+                                                          .name ??  "@"+controller
+                                                      .searchList[0]
+                                                      .sounds![index]
+                                                      .soundOwner!
+                                                      .username!
                                                       : controller
                                                           .searchList[0]
                                                           .sounds![index]
@@ -669,80 +678,19 @@ class SearchView extends GetView<search.SearchController> {
                                               DeviceInfoPlugin();
                                           AndroidDeviceInfo androidInfo =
                                               await deviceInfo.androidInfo;
-                                          if (androidInfo.version.sdkInt > 31) {
-                                            if (await Permission
-                                                .audio.isGranted) {
-                                              Get.toNamed(Routes.SOUNDS,
-                                                  arguments: {
-                                                    "sound_id": state[0]
-                                                        .sounds![index]
-                                                        .id,
-                                                    "sound_name": state[0]
-                                                        .sounds![index]
-                                                        .name,
-                                                    "sound_url": state[0]
-                                                        .sounds![index]
-                                                        .sound
-                                                        .toString(),
-                                                  });
-                                              // refreshAlreadyCapturedImages();
-                                            } else {
-                                              await Permission.audio
-                                                  .request()
-                                                  .then((value) async {
-                                                Get.toNamed(Routes.SOUNDS,
-                                                    arguments: {
-                                                      "sound_id": state[0]
-                                                          .sounds![index]
-                                                          .id,
-                                                      "sound_name": state[0]
-                                                          .sounds![index]
-                                                          .name,
-                                                      "sound_url": state[0]
-                                                          .sounds![index]
-                                                          .sound
-                                                          .toString(),
-                                                    });
+                                          Get.toNamed(Routes.SOUNDS,
+                                              arguments: {
+                                                "sound_id": state[0]
+                                                    .sounds![index]
+                                                    .id,
+                                                "sound_name": state[0]
+                                                    .sounds![index]
+                                                    .name,
+                                                "sound_url": state[0]
+                                                    .sounds![index]
+                                                    .sound
+                                                    .toString(),
                                               });
-                                            }
-                                          } else {
-                                            if (await Permission
-                                                .storage.isGranted) {
-                                              Get.toNamed(Routes.SOUNDS,
-                                                  arguments: {
-                                                    "sound_id": state[0]
-                                                        .sounds![index]
-                                                        .id,
-                                                    "sound_name": state[0]
-                                                        .sounds![index]
-                                                        .name,
-                                                    "sound_url": state[0]
-                                                        .sounds![index]
-                                                        .sound
-                                                        .toString(),
-                                                  });
-                                              // refreshAlreadyCapturedImages();
-                                            } else {
-                                              await Permission.storage
-                                                  .request()
-                                                  .then((value) => Get.toNamed(
-                                                          Routes.SOUNDS,
-                                                          arguments: {
-                                                            "sound_id": state[0]
-                                                                .sounds![index]
-                                                                .id,
-                                                            "sound_name": state[
-                                                                    0]
-                                                                .sounds![index]
-                                                                .name,
-                                                            "sound_url": state[
-                                                                    0]
-                                                                .sounds![index]
-                                                                .sound
-                                                                .toString(),
-                                                          }));
-                                            }
-                                          }
                                         },
                                       )),
                                       IconButton(

@@ -651,7 +651,7 @@ class SoundOwner {
 
   SoundOwner.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name'] ?? "";
+    name = json['name'] ;
     username = json['username'] ?? "";
     email = json['email'] ?? "";
     dob = json['dob'] ?? "";

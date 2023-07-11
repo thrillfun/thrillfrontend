@@ -34,9 +34,9 @@ import '../views/home_videos_player_view.dart';
 class HomeVideosPlayerController extends GetxController {
   var storage = GetStorage();
   var selectedIndex = 0.obs;
-  final pageController = LoopPageController();
+  final pageController = PageController();
   final trendingPageController = LoopPageController();
-  final followingPageController = LoopPageController();
+  final followingPageController = PageController();
   RxList<SearchData> searchList = RxList();
 
   var listOfScreens = ["For you", "Following", "Trending"];
@@ -53,13 +53,23 @@ class HomeVideosPlayerController extends GetxController {
   @override
   void onInit() {
     searchHashtags("");
+    var page =1;
+    pageController.addListener(() {
+    });
+
     videoScreens = [
       relatedVideosController.obx(
           (state) => Stack(
                 children: [
                   RefreshIndicator(
                       color: ColorManager.colorAccent,
-                      child: LoopPageView.builder(
+                      child: PageView.builder(
+                        onPageChanged: (index){
+                          if(index==state!.length-1){
+                          page = page+1;
+                          relatedVideosController.getPaginationAllVideos(relatedVideosController.nextPage.value);
+                          }
+                        },
                           itemCount: state!.length,
                           scrollDirection: Axis.vertical,
                           controller: pageController,
@@ -142,10 +152,16 @@ class HomeVideosPlayerController extends GetxController {
             ? emptyFollowingLayout()
             : Stack(
                 children: [
-                  LoopPageView.builder(
+                  PageView.builder(
                       itemCount: state!.length,
                       scrollDirection: Axis.vertical,
                       controller: followingPageController,
+                      onPageChanged: (index){
+                        if(index==state!.length-1){
+                          page = page+1;
+                          followingVideosController.getPaginationAllVideos(relatedVideosController.nextPage.value);
+                        }
+                      },
                       itemBuilder: (context, index) => FollowingVideosView(
                             videoUrl: state[index].video.toString(),
                             pageController: followingPageController!,
@@ -200,7 +216,7 @@ class HomeVideosPlayerController extends GetxController {
                       controller: trendingPageController,
                       itemBuilder: (context, index) => TrendingVideosView(
                             videoUrl: state[index].video.toString(),
-                            pageController: pageController!,
+                            pageController: trendingPageController!,
                             nextPage: index + 1,
                             videoId: state[index].id!,
                             gifImage: state[index].gifImage,

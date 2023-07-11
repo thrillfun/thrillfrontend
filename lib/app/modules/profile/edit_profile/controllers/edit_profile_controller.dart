@@ -123,11 +123,12 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
         "email": emailController.text,
         "dob": dob.value
       });
-      await dio.post("user/edit", data: formData).then((value) {
+      await dio.post("user/edit", data: formData).then((value)async {
         successToast(value.data["message"]);
         getUserProfile();
-        settingsController.getUserProfile();
-        profileController.getUserProfile();
+        await settingsController.getUserProfile();
+        await  profileController.getUserProfile();
+        // Get.close(1);
       }).onError((error, stackTrace) {});
     } else {
       dio.post("user/edit", queryParameters: {
@@ -141,9 +142,13 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
         "phone": mobileController.text,
         "email": emailController.text,
         "dob": dob.value
-      }).then((value) {
+      }).then((value) async {
         if (value.data["status"]) {
           successToast(value.data["message"]);
+          getUserProfile();
+          await settingsController.getUserProfile();
+          await  profileController.getUserProfile();
+          // Get.close(1);
         } else {
           errorToast(value.data["message"]);
         }
@@ -223,7 +228,10 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
         ),
       ],
     ).then((croppedImage) {
-      imagePath.value = croppedImage!.path;
+      if(croppedImage!=null){
+        imagePath.value = croppedImage!.path;
+        updateProfile();
+      }
     });
   }
 }

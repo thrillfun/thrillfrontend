@@ -105,6 +105,8 @@ import '../modules/wallet/bindings/wallet_binding.dart';
 import '../modules/wallet/views/wallet_view.dart';
 import '../modules/wallet/wallet_trasactions/bindings/wallet_trasactions_binding.dart';
 import '../modules/wallet/wallet_trasactions/views/wallet_trasactions_view.dart';
+import '../modules/wallet/withdraw/bindings/withdraw_binding.dart';
+import '../modules/wallet/withdraw/views/withdraw_view.dart';
 
 import '../modules/others_profile/bindings/others_profile_binding.dart'
     as others;
@@ -179,7 +181,7 @@ class AppPages {
           children: [
             GetPage(
               name: _Paths.SEARCH_VIDEOS_PLAYER,
-              page: () =>  SearchVideosPlayerView(),
+              page: () => SearchVideosPlayerView(),
               binding: SearchVideosPlayerBinding(),
             ),
           ],
@@ -191,14 +193,14 @@ class AppPages {
           children: [
             GetPage(
               name: _Paths.HASH_TAGS_VIDEO_PLAYER,
-              page: () =>  HashTagsVideoPlayerView(),
+              page: () => HashTagsVideoPlayerView(),
               binding: HashTagsVideoPlayerBinding(),
             ),
           ],
         ),
         GetPage(
           name: _Paths.DISCOVER_VIDEO_PLAYER,
-          page: () =>  DiscoverVideoPlayerView(),
+          page: () => DiscoverVideoPlayerView(),
           binding: DiscoverVideoPlayerBinding(),
         ),
       ],
@@ -212,6 +214,11 @@ class AppPages {
           name: _Paths.WALLET_TRASACTIONS,
           page: () => const WalletTrasactionsView(),
           binding: WalletTrasactionsBinding(),
+        ),
+        GetPage(
+          name: _Paths.WITHDRAW,
+          page: () => const WithdrawView(),
+          binding: WithdrawBinding(),
         ),
       ],
     ),
@@ -322,12 +329,12 @@ class AppPages {
         ),
         GetPage(
           name: _Paths.OTHERS_PROFILE_VIDEOS,
-          page: () =>  OthersProfileVideosView(),
+          page: () => OthersProfileVideosView(),
           binding: OthersProfileVideosBinding(),
         ),
         GetPage(
           name: _Paths.OTHERS_LIKED_VIDEOS_PLAYER,
-          page: () =>  OthersLikedVideosPlayerView(),
+          page: () => OthersLikedVideosPlayerView(),
           binding: OthersLikedVideosPlayerBinding(),
         ),
       ],

@@ -70,7 +70,7 @@ class LoginView extends GetView<LoginController> {
                       ),
                       Expanded(
                           child: Text(
-                        "Login with phone",
+                        "Truecaller",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
@@ -106,7 +106,7 @@ class LoginView extends GetView<LoginController> {
                         child: Container(
                       alignment: Alignment.center,
                       child: const Text(
-                        "Login via OTP",
+                        "Phone Number",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
@@ -137,7 +137,7 @@ class LoginView extends GetView<LoginController> {
                     width: Get.width,
                     alignment: Alignment.center,
                     child: const Text(
-                      "Login with google",
+                      "Google",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -161,7 +161,7 @@ class LoginView extends GetView<LoginController> {
               ),
               TextSpan(
                   text: " Terms of Service ",
-                  style: const TextStyle(color: ColorManager.colorPrimaryLight),
+                  style: const TextStyle(color: ColorManager.colorAccent),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () async => {
                           launchUrl(Uri.parse(termsOfServiceUrl),
@@ -172,7 +172,7 @@ class LoginView extends GetView<LoginController> {
               ),
               TextSpan(
                   text: "Privacy Policy ",
-                  style: const TextStyle(color: ColorManager.colorPrimaryLight),
+                  style: const TextStyle(color: ColorManager.colorAccent),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () async => {
                           launchUrl(Uri.parse(privacyPolicyUrl),

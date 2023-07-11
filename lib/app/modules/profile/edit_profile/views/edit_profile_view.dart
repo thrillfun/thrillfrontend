@@ -108,146 +108,147 @@ class EditProfileView extends GetView<EditProfileController> {
             )),
       );
 
-  updateFieldsLayout() => Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          TextFormField(
-            controller: controller.userNameController,
-            focusNode: controller.userNode,
-            onChanged: (value) {
-              controller.userName.value = value;
-            },
-            decoration: const InputDecoration(
-              filled: true,
-              prefixIcon: Icon(
-                IconlyLight.profile,
-              ),
-              hintText: "User name....",
-            ),
-          ),
+  updateFieldsLayout() => controller.obx((state) => Column(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      TextFormField(
 
-          const SizedBox(
-            height: 10,
+        controller: controller.userNameController,
+        focusNode: controller.userNode,
+        onChanged: (value) {
+          controller.userName.value = value;
+        },
+        decoration: const InputDecoration(
+          filled: true,
+          prefixIcon: Icon(
+            IconlyLight.profile,
           ),
+          hintText: "User name....",
+        ),
+      ),
 
-          TextFormField(
-            focusNode: controller.nameNode,
-            controller: controller.nameController,
-            decoration: const InputDecoration(
-              filled: true,
-              prefixIcon: Icon(
-                IconlyLight.tick_square,
-              ),
-              hintText: "full name....",
-            ),
-            onChanged: (value) {
-              controller.name.value = value;
-            },
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Visibility(
-            visible: controller.mobile.value.isEmpty,
-            child: TextFormField(
-              controller: controller.emailController,
-              focusNode: controller.emailNode,
-              onChanged: (value) {
-                controller.email.value = value;
-              },
-              decoration: const InputDecoration(
-                filled: true,
-                prefixIcon: Icon(
-                  IconlyLight.message,
-                ),
-                hintText: "Email....",
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Visibility(
-            visible: controller.email.value.isEmpty,
-            child: TextFormField(
-              controller: controller.mobileController,
-              focusNode: controller.mobileNode,
-              onChanged: (value) {
-                controller.mobile.value = value;
-              },
-              decoration: const InputDecoration(
-                filled: true,
-                prefixIcon: Icon(
-                  Icons.mobile_friendly,
-                ),
-                hintText: "Mobile....",
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
+      const SizedBox(
+        height: 10,
+      ),
 
-          TextFormField(
-            focusNode: controller.urlNode,
-            controller: controller.webSiteController,
-            decoration: const InputDecoration(
-              filled: true,
-              prefixIcon: Icon(
-                CupertinoIcons.link,
-              ),
-              hintText: "Website URL....",
+      TextFormField(
+        focusNode: controller.nameNode,
+        controller: controller.nameController,
+        decoration: const InputDecoration(
+          filled: true,
+          prefixIcon: Icon(
+            IconlyLight.tick_square,
+          ),
+          hintText: "full name....",
+        ),
+        onChanged: (value) {
+          controller.name.value = value;
+        },
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      Visibility(
+        visible: controller.mobile.value.isEmpty,
+        child: TextFormField(
+          controller: controller.emailController,
+          focusNode: controller.emailNode,
+          onChanged: (value) {
+            controller.email.value = value;
+          },
+          decoration: const InputDecoration(
+            filled: true,
+            prefixIcon: Icon(
+              IconlyLight.message,
             ),
-            onChanged: (value) {
-              controller.webSiteUrl.value = value;
-            },
+            hintText: "Email....",
           ),
-          const SizedBox(
-            height: 10,
+        ),
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      Visibility(
+        visible: controller.email.value.isEmpty,
+        child: TextFormField(
+          controller: controller.mobileController,
+          focusNode: controller.mobileNode,
+          onChanged: (value) {
+            controller.mobile.value = value;
+          },
+          decoration: const InputDecoration(
+            filled: true,
+            prefixIcon: Icon(
+              Icons.mobile_friendly,
+            ),
+            hintText: "Mobile....",
           ),
+        ),
+      ),
+      const SizedBox(
+        height: 10,
+      ),
 
-          TextFormField(
-            focusNode: controller.bioNode,
-            controller: controller.bioController,
-            maxLength: 150,
-            maxLines: null,
-            decoration: const InputDecoration(
-              filled: true,
-              hintText: "Bio....",
-              prefixIcon: Icon(
-                IconlyLight.info_square,
-              ),
-            ),
-            onChanged: (value) {
-              controller.bio.value = value;
-            },
+      TextFormField(
+        focusNode: controller.urlNode,
+        controller: controller.webSiteController,
+        decoration: const InputDecoration(
+          filled: true,
+          prefixIcon: Icon(
+            CupertinoIcons.link,
           ),
-          const SizedBox(
-            height: 10,
+          hintText: "Website URL....",
+        ),
+        onChanged: (value) {
+          controller.webSiteUrl.value = value;
+        },
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+
+      TextFormField(
+        focusNode: controller.bioNode,
+        controller: controller.bioController,
+        maxLength: 150,
+        maxLines: null,
+        decoration: const InputDecoration(
+          filled: true,
+          hintText: "Bio....",
+          prefixIcon: Icon(
+            IconlyLight.info_square,
           ),
-          TextFormField(
-            focusNode: controller.locationNode,
-            controller: controller.locationController,
-            decoration: const InputDecoration(
-              filled: true,
-              hintText: "Location....",
-              prefixIcon: Icon(
-                IconlyLight.location,
-              ),
-            ),
-            onChanged: (value) {
-              controller.location.value = value;
-            },
+        ),
+        onChanged: (value) {
+          controller.bio.value = value;
+        },
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      TextFormField(
+        focusNode: controller.locationNode,
+        controller: controller.locationController,
+        decoration: const InputDecoration(
+          filled: true,
+          hintText: "Location....",
+          prefixIcon: Icon(
+            IconlyLight.location,
           ),
-          const SizedBox(
-            height: 10,
-          ),
-          InkWell(
-            onTap: () {
-              DatePicker.showDatePicker(Get.context!,
-                  showTitleActions: true,
-                  minTime: DateTime(1920, 12, 12),
-                  maxTime: DateTime.now(), onChanged: (date) {
+        ),
+        onChanged: (value) {
+          controller.location.value = value;
+        },
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      InkWell(
+        onTap: () {
+          DatePicker.showDatePicker(Get.context!,
+              showTitleActions: true,
+              minTime: DateTime(1920, 12, 12),
+              maxTime: DateTime.now(), onChanged: (date) {
                 String formattedDate = DateFormat('dd/MM/yyyy').format(date);
                 controller.dob.value = formattedDate;
               }, onConfirm: (date) {
@@ -255,60 +256,60 @@ class EditProfileView extends GetView<EditProfileController> {
                 controller.dob.value = formattedDate;
               }, currentTime: DateTime.now());
 
-              // Get.bottomSheet(
-              //     Container(
-              //       height: Get.height / 4,
-              //       child: CupertinoDatePicker(
-              //         minimumDate: DateTime(1920),
-              //         backgroundColor: ColorManager.dayNight,
-              //         mode: CupertinoDatePickerMode.date,
-              //         onDateTimeChanged: (value) {
-              //           dob.value = value.toString();
-              //         },
-              //         initialDateTime: DateTime.now(),
-              //         maximumDate: DateTime.now(),
-              //       ),
-              //     ),
-              //     backgroundColor: ColorManager.dayNight);
-            },
-            child: Container(
-              width: Get.width,
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(),
+          // Get.bottomSheet(
+          //     Container(
+          //       height: Get.height / 4,
+          //       child: CupertinoDatePicker(
+          //         minimumDate: DateTime(1920),
+          //         backgroundColor: ColorManager.dayNight,
+          //         mode: CupertinoDatePickerMode.date,
+          //         onDateTimeChanged: (value) {
+          //           dob.value = value.toString();
+          //         },
+          //         initialDateTime: DateTime.now(),
+          //         maximumDate: DateTime.now(),
+          //       ),
+          //     ),
+          //     backgroundColor: ColorManager.dayNight);
+        },
+        child: Container(
+          width: Get.width,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.0),
+            border: Border.all(),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                IconlyLight.calendar,
+                color: ColorManager.colorAccent,
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    IconlyLight.calendar,
-                    color: ColorManager.colorAccent,
-                  ),
-                  Obx(() => Text(
-                        "  " + controller.dob.value.toString(),
-                      ))
-                ],
-              ),
-            ),
+              Obx(() => Text(
+                "  " + controller.dob.value.toString(),
+              ))
+            ],
           ),
-          const SizedBox(
-            height: 10,
-          ),
-          dropDownGender(),
-          const SizedBox(
-            height: 10,
-          ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //   children: [
-          //     layoutYoutube(),
-          //     layoutFacebook(),
-          //     layoutInstagram(),
-          //     layoutTwitter(),
-          //   ],
-          // )
-        ],
-      );
+        ),
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      dropDownGender(),
+      const SizedBox(
+        height: 10,
+      ),
+      // Row(
+      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //   children: [
+      //     layoutYoutube(),
+      //     layoutFacebook(),
+      //     layoutInstagram(),
+      //     layoutTwitter(),
+      //   ],
+      // )
+    ],
+  ));
   dropDownGender() => Obx(() => Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: List.generate(
@@ -380,9 +381,7 @@ class EditProfileView extends GetView<EditProfileController> {
 
   submitButtonLayout() => InkWell(
         onTap: () async {
-          await controller.updateProfile().then((value) {
-            Get.back();
-          });
+          await controller.updateProfile();
         },
         child: Container(
           width: Get.width,

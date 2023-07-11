@@ -34,6 +34,9 @@ class RelatedVideosController extends GetxController
   var isInitialised = false.obs;
   var fileSupport = FileSupport();
 
+  var currentPage = 1.obs;
+  var nextPage = 2.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -77,6 +80,37 @@ class RelatedVideosController extends GetxController
     dio.get("video/list").then((value) {
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
+      change(relatedVideosList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(relatedVideosList, status: RxStatus.error(error.toString()));
+    });
+  }
+
+  Future<void> getPaginationAllVideos(int page) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (relatedVideosList.isEmpty) {
+      change(relatedVideosList, status: RxStatus.loading());
+    }
+    dio.get("video/list?page=$page").then((value) {
+      RelatedVideosModel.fromJson(value.data).data!.forEach((element) {
+        relatedVideosList.add(element);
+      });
+
+      if (RelatedVideosModel.fromJson(value.data).pagination!.currentPage !=
+          RelatedVideosModel.fromJson(value.data).pagination!.lastPage) {
+        nextPage.value =
+            RelatedVideosModel.fromJson(value.data).pagination!.currentPage! +
+                1;
+      } else {
+        nextPage.value = RelatedVideosModel.fromJson(value.data).pagination!.lastPage!;
+      }
+      currentPage.value =
+          RelatedVideosModel.fromJson(value.data).pagination!.currentPage!;
+
+      relatedVideosList.refresh();
+
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(relatedVideosList, status: RxStatus.error(error.toString()));
