@@ -82,7 +82,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-3566466065033894~8811061337" />
 
         <activity
             android:name="com.example.tiktak.MainActivity"
