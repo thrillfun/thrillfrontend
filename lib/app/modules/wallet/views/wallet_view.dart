@@ -78,6 +78,7 @@ class WalletView extends GetView<WalletController> {
                               enabled: false,
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
+                                disabledBorder: InputBorder.none,
                                 hintText: '',
                               ),
                               controller:
@@ -98,6 +99,9 @@ class WalletView extends GetView<WalletController> {
                               enabled: false,
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
                                 hintText: '',
                               ),
                               controller: controller.textDollarController.value,
@@ -115,11 +119,12 @@ class WalletView extends GetView<WalletController> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-
                     Expanded(
                         child: InkWell(
                       onTap: () {
-                        Get.toNamed(Routes.WITHDRAW,arguments: {"balance":controller.totalbalance.value});
+                        Get.toNamed(Routes.WITHDRAW, arguments: {
+                          "balance": controller.totalbalance.value
+                        });
                         // Get.to(PaymentRequest());
                       },
                       child: Card(
@@ -161,24 +166,24 @@ class WalletView extends GetView<WalletController> {
                     )),
                     Expanded(
                         child: InkWell(
-                          onTap: () => Get.toNamed(Routes.WALLET_TRASACTIONS),
-                          child: Card(
-                            elevation: 10,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
-                            margin: const EdgeInsets.only(
-                                left: 5, right: 5, bottom: 10),
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 20, bottom: 20),
-                              child: Column(
-                                children: const [
-                                  Icon(Icons.money),
-                                  Text("History")
-                                ],
-                              ),
-                            ),
+                      onTap: () => Get.toNamed(Routes.WALLET_TRASACTIONS),
+                      child: Card(
+                        elevation: 10,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        margin: const EdgeInsets.only(
+                            left: 5, right: 5, bottom: 10),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20, bottom: 20),
+                          child: Column(
+                            children: const [
+                              Icon(Icons.money),
+                              Text("History")
+                            ],
                           ),
-                        )),
+                        ),
+                      ),
+                    )),
                   ],
                 )
               ],

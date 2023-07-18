@@ -17,6 +17,7 @@ class FollowersController extends GetxController
   ));
 
   var followersModel = RxList<Followers>();
+  var nextPageUrl = "https://thrill.fun/api/user/get-followers?page=1".obs;
 
   @override
   void onInit() {
@@ -45,47 +46,78 @@ class FollowersController extends GetxController
       "user_id": "${await GetStorage().read("userId")}"
     }).then((result) {
       followersModel = FollowersModel.fromJson(result.data).data!.obs;
+      nextPageUrl.value =
+          FollowersModel.fromJson(result.data).pagination!.nextPageUrl ?? "";
       change(followersModel, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followersModel, status: RxStatus.error());
     });
   }
 
-  Future<void> followUnfollowUser(
-      int userId,String action,{
-        String fcmToken="",
-        String image="",
-        String name="",
-  }
-      ) async{
-
-    dio.options.headers={
-      "Authorization":"Bearer ${await GetStorage().read("token")}"
+  Future<void> getPaginationFollowers(int page) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
-    dio.post("user/follow-unfollow-user",queryParameters: {"publisher_user_id":userId,"action":"$action"}).then((value) {
-      if(value.data["status"]) {
-        if(action=="follow"){
-          sendNotification(fcmToken,body: "$name started following you!",title: "New follower!",image: image);
-        }
-        else{
-          sendNotification(fcmToken,body: "$name stopped following you!",title: "Follower lost",image: image);
+    if (followersModel.isEmpty) {
+      change(followersModel, status: RxStatus.loading());
+    }
+    dio.post(nextPageUrl.value, queryParameters: {
+      "user_id": "${await GetStorage().read("userId")}"
+    }).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        FollowersModel.fromJson(value.data).data!.forEach((element) {
+          followersModel.add(element);
+        });
+        followersModel.refresh();
+      }
+      nextPageUrl.value =
+          FollowersModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
 
+      change(followersModel, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<void> followUnfollowUser(
+    int userId,
+    String action, {
+    String fcmToken = "",
+    String image = "",
+    String name = "",
+  }) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-unfollow-user", queryParameters: {
+      "publisher_user_id": userId,
+      "action": "$action"
+    }).then((value) {
+      if (value.data["status"]) {
+        if (action == "follow") {
+          sendNotification(fcmToken,
+              body: "$name started following you!",
+              title: "New follower!",
+              image: image);
+        } else {
+          sendNotification(fcmToken,
+              body: "$name stopped following you!",
+              title: "Follower lost",
+              image: image);
         }
         getUserFollowers();
-      }
-      else{
+      } else {
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
       Logger().wtf(error);
     });
   }
+
   Future<void> sendNotification(String fcmToken,
       {String? body = "", String? title = "", String? image = ""}) async {
     var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
     dio.options.headers = {
       "Authorization":
-      "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+          "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
     };
     final data = {
       "to": fcmToken,
@@ -93,14 +125,13 @@ class FollowersController extends GetxController
       "priority": "high",
       "image": image,
       "data": {
-        "url":image,
-        "body":body,
-        "title":title,
+        "url": image,
+        "body": body,
+        "title": title,
         "click_action": "FLUTTER_NOTIFICATION_CLICK",
         "id": "1",
         "status": "done",
-        "image":
-        image
+        "image": image
       }
     };
     dio.post("/send", data: jsonEncode(data)).then((value) {

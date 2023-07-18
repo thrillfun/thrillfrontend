@@ -29,7 +29,7 @@ class PrivateVideosPlayerController extends GetxController
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
-
+  var nextPageUrl = "https://thrill.fun/api/video/private?page=1".obs;
   @override
   void onInit() {
     getUserPrivateVideos();
@@ -73,10 +73,36 @@ class PrivateVideosPlayerController extends GetxController
     dio.get('/video/private').then((value) {
       privateVideosList.value =
           UserPrivateVideosModel.fromJson(value.data).data!.obs;
+      nextPageUrl.value =
+          UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
       change(privateVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(privateVideosList, status: RxStatus.error(error.toString()));
     });
+  }
+
+  Future<void> getPaginationAllVideos(int page) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (privateVideosList.isEmpty) {
+      change(privateVideosList, status: RxStatus.loading());
+    }
+    dio.post(nextPageUrl.value, queryParameters: {
+      "user_id": "${Get.arguments["profileId"]}"
+    }).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        UserPrivateVideosModel.fromJson(value.data).data!.forEach((element) {
+          privateVideosList.add(element);
+        });
+        privateVideosList.refresh();
+      }
+      nextPageUrl.value =
+          UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
+      change(privateVideosList, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> deleteUserVideo(int videoId) async {

@@ -10,6 +10,7 @@ class PrivacyView extends GetView<PrivacyController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           leading:
               IconButton(onPressed: () => Get.back(), icon: Icon(Icons.close)),

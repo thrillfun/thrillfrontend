@@ -50,7 +50,6 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     InAppUpdate.checkForUpdate().then((updateInfo) {
-
       if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
         if (updateInfo.immediateUpdateAllowed) {
           // Perform immediate update
@@ -88,7 +87,7 @@ class HomeController extends GetxController {
 
   @override
   void onReady() {
-    // getSiteSettings();
+    getSiteSettings();
     super.onReady();
   }
 
@@ -151,7 +150,7 @@ class HomeController extends GetxController {
     };
     await dio.post("SiteSettings").then((value) {
       siteSettingsList.value = SiteSettingsModel.fromJson(value.data).data!;
-      showCustomAd();
+      // showCustomAd();
     }).onError((error, stackTrace) {});
   }
 

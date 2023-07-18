@@ -19,10 +19,17 @@ class FollowersView extends GetView<OtherFollowersController> {
             ? NoSearchResult(
                 text: "User have no followers yet!",
               )
-            : Wrap(
-                children: List.generate(
-                    state!.length,
-                    (index) => InkWell(
+            : NotificationListener<ScrollEndNotification>(
+                onNotification: (scrollNotification) {
+                  if (scrollNotification.metrics.pixels ==
+                      scrollNotification.metrics.maxScrollExtent) {
+                    controller.getPaginationFollowers(1);
+                  }
+                  return true;
+                },
+                child: ListView.builder(
+                    itemCount: state!.length,
+                    itemBuilder: (context, index) => InkWell(
                           onTap: () async {
                             Get.toNamed(Routes.OTHERS_PROFILE,
                                 arguments: {"profileId": state[index].id});
@@ -49,13 +56,10 @@ class FollowersView extends GetView<OtherFollowersController> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              state[index]
-                                                          .name
-                                                          ??
-                                                state[index]
+                                              state[index].name ??
+                                                  state[index]
                                                       .username
-                                                      .toString()
-                                                  ,
+                                                      .toString(),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
@@ -133,8 +137,7 @@ class FollowersView extends GetView<OtherFollowersController> {
                               ],
                             ),
                           ),
-                        )),
-              ),
+                        ))),
         onLoading: Column(
           children: [Expanded(child: loader())],
         ),

@@ -105,6 +105,8 @@ dependencies:
   flutter_native_splash: ^2.2.19
   firebase_crashlytics: ^3.3.3
   in_app_update: ^4.1.4
+  mobile_scanner: ^3.3.0
+  lazy_load_listview: 0.0.4
   flutter: 
     sdk: flutter
   better_player: 

@@ -8,11 +8,12 @@ import '../../../../rest/models/user_private_video_model.dart';
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/utils.dart';
 
-class UserPrivateVideosController extends GetxController with StateMixin<RxList<PrivateVideos>> {
+class UserPrivateVideosController extends GetxController
+    with StateMixin<RxList<PrivateVideos>> {
   RxList<PrivateVideos> privateVideosList = RxList();
   var storage = GetStorage();
   var userProfile = User().obs;
-
+  var nextPageUrl = "https://thrill.fun/api/video/private?page=1".obs;
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
@@ -41,43 +42,67 @@ class UserPrivateVideosController extends GetxController with StateMixin<RxList<
     dio.get('/video/private').then((value) {
       privateVideosList.value =
           UserPrivateVideosModel.fromJson(value.data).data!.obs;
+      nextPageUrl.value =
+          UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
       change(privateVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(privateVideosList, status: RxStatus.error(error.toString()));
     });
   }
 
-  Future<void> deleteUserVideo(int videoId)async{
-    dio.options.headers={"Authorization":"Bearer ${await GetStorage().read("token")}"};
-    dio.post("video/delete",queryParameters: {
-      "video_id":videoId
+  Future<void> getPaginationAllVideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (privateVideosList.isEmpty) {
+      change(privateVideosList, status: RxStatus.loading());
+    }
+    dio.post(nextPageUrl.value, queryParameters: {
+      "user_id": "${Get.arguments["profileId"]}"
     }).then((value) {
+      nextPageUrl.value =
+          UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
+      if (nextPageUrl.isNotEmpty) {
+        UserPrivateVideosModel.fromJson(value.data).data!.forEach((element) {
+          privateVideosList.add(element);
+        });
+        privateVideosList.refresh();
+      }
+      change(privateVideosList, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
+  }
 
-      if(value.data["status"]){
+  Future<void> deleteUserVideo(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/delete", queryParameters: {"video_id": videoId}).then(
+        (value) {
+      if (value.data["status"]) {
         successToast(value.data["message"]);
         getUserPrivateVideos();
-      }
-      else{
+      } else {
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {
       Logger().wtf(error);
     });
-
   }
 
-  Future<void> makeVideoPrivateOrPublic(int videoId,String visibility)async{
-    dio.options.headers={"Authorization":"Bearer ${await GetStorage().read("token")}"};
-    dio.post("video/change-visibility",queryParameters: {
-      "video_id":videoId,
-      "visibility":visibility
+  Future<void> makeVideoPrivateOrPublic(int videoId, String visibility) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/change-visibility", queryParameters: {
+      "video_id": videoId,
+      "visibility": visibility
     }).then((value) {
-
-      if(value.data["status"]){
+      if (value.data["status"]) {
         Get.find<UserVideosController>().getUserVideos();
         getUserPrivateVideos();
-      }
-      else{
+      } else {
         errorToast(value.data["message"]);
       }
     }).onError((error, stackTrace) {

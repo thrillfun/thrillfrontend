@@ -356,14 +356,8 @@ class SearchView extends GetView<search.SearchController> {
                                   ),
                                   Expanded(
                                       child: Text(
-                                    state[0]
-                                        .videos![index]
-                                        .user!
-                                        .name??  state[0]
-                                        .videos![index]
-                                        .user!
-                                        .username!
-                                       ,
+                                    state[0].videos![index].user!.name ??
+                                        state[0].videos![index].user!.username!,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
@@ -650,14 +644,17 @@ class SearchView extends GetView<search.SearchController> {
                                                               .soundOwner !=
                                                           null
                                                       ? controller
-                                                          .searchList[0]
-                                                          .sounds![index]
-                                                          .soundOwner!
-                                                          .name ??  "@"+controller
-                                                      .searchList[0]
-                                                      .sounds![index]
-                                                      .soundOwner!
-                                                      .username!
+                                                              .searchList[0]
+                                                              .sounds![index]
+                                                              .soundOwner!
+                                                              .name ??
+                                                          "@" +
+                                                              controller
+                                                                  .searchList[0]
+                                                                  .sounds![
+                                                                      index]
+                                                                  .soundOwner!
+                                                                  .username!
                                                       : controller
                                                           .searchList[0]
                                                           .sounds![index]
@@ -680,9 +677,8 @@ class SearchView extends GetView<search.SearchController> {
                                               await deviceInfo.androidInfo;
                                           Get.toNamed(Routes.SOUNDS,
                                               arguments: {
-                                                "sound_id": state[0]
-                                                    .sounds![index]
-                                                    .id,
+                                                "sound_id":
+                                                    state[0].sounds![index].id,
                                                 "sound_name": state[0]
                                                     .sounds![index]
                                                     .name,
@@ -968,19 +964,23 @@ class SearchView extends GetView<search.SearchController> {
                                                 ),
                                                 Row(
                                                   children: [
-                                                    Text(
+                                                    Expanded(
+                                                        child: Text(
                                                       "@" +
                                                           state[0]
                                                               .users![index]
                                                               .username
-                                                              .toString() +
-                                                          " | ",
+                                                              .toString(),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                       style: const TextStyle(
                                                           fontSize: 14,
                                                           fontWeight:
                                                               FontWeight.w500),
-                                                    ),
-                                                    Text(
+                                                    )),
+                                                    Expanded(
+                                                        child: Text(
                                                       state[0]
                                                                   .users![index]
                                                                   .followers
@@ -999,11 +999,14 @@ class SearchView extends GetView<search.SearchController> {
                                                                   .followers
                                                                   .toString() +
                                                               " Followers",
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                       style: const TextStyle(
                                                           fontSize: 12,
                                                           fontWeight:
                                                               FontWeight.w400),
-                                                    )
+                                                    ))
                                                   ],
                                                 )
                                               ],

@@ -493,6 +493,15 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
     );
 
     final configuration = imgly.Configuration(
+      tools: [
+        imgly.Tool.audio,
+        imgly.Tool.composition,
+        imgly.Tool.sticker,
+        imgly.Tool.text,
+        imgly.Tool.textDesign,
+        imgly.Tool.transform,
+        imgly.Tool.trim,
+      ],
       theme: imgly.ThemeOptions(imgly.Theme(
         "default_editor_theme",
       )),

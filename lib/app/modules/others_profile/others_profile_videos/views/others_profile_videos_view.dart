@@ -34,7 +34,7 @@ import '../controllers/others_profile_videos_controller.dart';
 class OthersProfileVideosView extends GetView<OthersProfileVideosController> {
   OthersProfileVideosView({Key? key}) : super(key: key);
   var pageViewController =
-      LoopPageController(initialPage: Get.arguments["init_page"] ?? 0);
+      PageController(initialPage: Get.arguments["init_page"] ?? 0);
 
   var playerController = BetterPlayerListVideoPlayerController();
   var commentsController = Get.find<CommentsController>();
@@ -43,17 +43,23 @@ class OthersProfileVideosView extends GetView<OthersProfileVideosController> {
 
   @override
   Widget build(BuildContext context) {
-    controller.getUserVideos();
+    controller.refereshvideos();
     return Scaffold(
       body: controller.obx(
           (state) => state!.isEmpty
               ? NoSearchResult(
                   text: "No Videos!",
                 )
-              : LoopPageView.builder(
+              : PageView.builder(
                   itemCount: state!.length,
                   scrollDirection: Axis.vertical,
                   controller: pageViewController,
+                  onPageChanged: (index) {
+                    if (index == state!.length - 1) {
+                      controller
+                          .getPaginationAllVideos(controller.nextPage.value);
+                    }
+                  },
                   itemBuilder: (context, index) {
                     _controller =
                         AnimationController(vsync: Scaffold.of(context));
@@ -217,7 +223,7 @@ class OthersVideos extends StatefulWidget {
       this.fcmToken});
 
   String? videoUrl, fcmToken;
-  LoopPageController? pageController;
+  PageController? pageController;
   int? nextPage;
   int? videoId;
   String? avatar;
@@ -1297,7 +1303,7 @@ class _OthersVideosState extends State<OthersVideos>
                         const SizedBox(
                           height: 10,
                         ),
-                         Flexible(
+                        Flexible(
                             child: Padding(
                           padding: const EdgeInsets.only(
                               left: 10, right: 100, bottom: 10),

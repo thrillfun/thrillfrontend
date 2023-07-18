@@ -13,6 +13,7 @@ class OthersFollowingController extends GetxController
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
+  var nextPageUrl = "https://thrill.fun/api/user/get-followings?page=1".obs;
 
   var followersModel = RxList<Following>();
 
@@ -43,10 +44,36 @@ class OthersFollowingController extends GetxController
       "user_id": "${Get.arguments["profileId"]}"
     }).then((result) {
       followersModel = FollowingModel.fromJson(result.data).data!.obs;
+      nextPageUrl.value =
+          FollowingModel.fromJson(result.data).pagination!.nextPageUrl ?? "";
+
       change(followersModel, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followersModel, status: RxStatus.error());
     });
+  }
+
+  Future<void> getPaginationFollowing(int page) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (followersModel.isEmpty) {
+      change(followersModel, status: RxStatus.loading());
+    }
+    dio.post(nextPageUrl.value, queryParameters: {
+      "user_id": "${Get.arguments["profileId"]}"
+    }).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        FollowingModel.fromJson(value.data).data!.forEach((element) {
+          followersModel.add(element);
+        });
+        followersModel.refresh();
+      }
+      nextPageUrl.value =
+          FollowingModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
+
+      change(followersModel, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> followUnfollowUser(int userId, String action) async {

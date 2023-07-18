@@ -16,6 +16,8 @@ class HashTagsDetailsController extends GetxController
     baseUrl: RestUrl.baseUrl,
   ));
 
+  var nextPageUrl =
+      "https://thrill.fun/api/hashtag/top-hashtags-videos?page=1".obs;
   @override
   void onInit() {
     super.onInit();
@@ -46,9 +48,34 @@ class HashTagsDetailsController extends GetxController
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
       change(hashTagsDetailsList, status: RxStatus.success());
+      nextPageUrl.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());
     });
+  }
+
+  Future<void> getPaginationVideosByHashTags() async {
+    dio.options.headers["Authorization"] =
+        "Bearer ${await GetStorage().read("token")}";
+
+    dio.post(nextPageUrl.value, queryParameters: {
+      "hashtag_id": "${await GetStorage().read("hashtagId")}"
+    }).then((value) {
+      nextPageUrl.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
+      if (nextPageUrl.isNotEmpty) {
+        hashTagsDetailsList
+            .addAll(HashtagDetailsModel.fromJson(value.data).data!);
+      }
+      hashTagsDetailsList.refresh();
+
+      isFavouriteHastag.value =
+          hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+      change(hashTagsDetailsList, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> addHashtagToFavourite() async {

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -14,6 +16,7 @@ import '../../../../utils/color_manager.dart';
 import '../../../../utils/strings.dart';
 import '../../../../utils/utils.dart';
 import '../controllers/qr_code_controller.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class QrCodeView extends GetView<QrCodeController> {
   const QrCodeView({Key? key}) : super(key: key);
@@ -136,21 +139,22 @@ class QrCodeView extends GetView<QrCodeController> {
                 )),
             InkWell(
                 onTap: () async {
-                  String barcodeScanRes =
-                      await FlutterBarcodeScanner.scanBarcode(
-                          "#ff6666", "Cancel", true, ScanMode.QR);
-                  if (barcodeScanRes.isNotEmpty && barcodeScanRes != '-1') {
-                    final PendingDynamicLinkData? initialLink =
-                        await FirebaseDynamicLinks.instance
-                            .getDynamicLink(Uri.parse(barcodeScanRes));
+                  Get.toNamed(Routes.QR_SCAN_VIEW);
+                  // String barcodeScanRes =
+                  //     await FlutterBarcodeScanner.scanBarcode(
+                  //         "#ff6666", "Cancel", true, ScanMode.QR);
+                  // if (barcodeScanRes.isNotEmpty && barcodeScanRes != '-1') {
+                  //   final PendingDynamicLinkData? initialLink =
+                  //       await FirebaseDynamicLinks.instance
+                  //           .getDynamicLink(Uri.parse(barcodeScanRes));
 
-                    if (initialLink!.link.queryParameters["type"] ==
-                        "profile") {
-                      Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
-                        "profileId": initialLink.link.queryParameters["id"]
-                      });
-                    }
-                  }
+                  //   if (initialLink!.link.queryParameters["type"] ==
+                  //       "profile") {
+                  //     Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
+                  //       "profileId": initialLink.link.queryParameters["id"]
+                  //     });
+                  //   }
+                  // }
                 },
                 borderRadius: BorderRadius.circular(10),
                 splashColor: Colors.white.withOpacity(0.50),

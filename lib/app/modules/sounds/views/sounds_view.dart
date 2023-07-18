@@ -23,7 +23,6 @@ class SoundsView extends GetView<SoundsController> {
 
   @override
   Widget build(BuildContext context) {
-
     final audioPlayer = AudioPlayer();
     final playerController = PlayerController();
 
@@ -273,7 +272,8 @@ class SoundsView extends GetView<SoundsController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                state!.soundOwner!.name ?? state!.soundOwner!.username!,
+                                state!.soundOwner!.name ??
+                                    state!.soundOwner!.username!,
                                 style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w700),
                               ),
@@ -299,127 +299,131 @@ class SoundsView extends GetView<SoundsController> {
                     thickness: 2,
                   ),
                 ),
-                controller.obx((state) => Expanded(
-                    child:
-
-                    GridView.count(
-                      crossAxisCount: 3,
-                      shrinkWrap: true,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      physics: const BouncingScrollPhysics(),
-                      childAspectRatio: 0.8,
-                      children: List.generate(
-                          controller.videoList.length,
+                controller.obx(
+                    (state) => Expanded(
+                            child: GridView.count(
+                          crossAxisCount: 3,
+                          shrinkWrap: true,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          physics: const BouncingScrollPhysics(),
+                          childAspectRatio: 0.8,
+                          children: List.generate(
+                              controller.videoList.length,
                               (index) => Container(
-                            decoration: BoxDecoration(
-                                borderRadius:
-                                BorderRadius.circular(20)),
-                            child: GestureDetector(
-                              onTap: () {
-                                Get.toNamed(Routes.SOUND_VIDEOS,
-                                    arguments: {
-                                      "init_page": index,
-                                      "sound_name": state!.sound
-                                    });
-                                // List<PublicVideos> videosList1 = [];
-                                // videoList.forEach((element) {
-                                //   var user = PublicUser(
-                                //     id: element.user?.id,
-                                //     name: element.user?.name,
-                                //     facebook: element.user?.facebook,
-                                //     firstName: element.user?.firstName,
-                                //     lastName: element.user?.lastName,
-                                //     username: element.user?.username,
-                                //     isFollow: widget.map["isFollow"],
-                                //   );
-                                //   videosList1.add(PublicVideos(
-                                //       id: element.id,
-                                //       video: element.video,
-                                //       description: element.description,
-                                //       sound: element.sound,
-                                //       soundName: element.sound,
-                                //       soundCategoryName:
-                                //       element.sound_category_name,
-                                //       soundOwner: element.sound_owner,
-                                //       filter: element.filter,
-                                //       likes: element.likes,
-                                //       views: element.views,
-                                //       gifImage: element.gif_image,
-                                //       speed: element.speed,
-                                //       comments: element.comments,
-                                //       isDuet: element.is_duet,
-                                //       duetFrom: element.duet_from,
-                                //       isCommentable: element.is_commentable,
-                                //       user: user,
-                                //       videoLikeStatus: 0));
-                                // });
-                                // Get.to(VideoPlayerItem(
-                                //   videosList: videosList1,
-                                //   position: index,
-                                // ));
-                              },
-                              child: Stack(
-                                fit: StackFit.expand,
-                                alignment: Alignment.center,
-                                children: [
-                                  imgNet(controller
-                                      .videoList[index].gifImage
-                                      .toString()
-                                      .isEmpty
-                                      ? '${RestUrl.thambUrl}thumb-not-available.png'
-                                      : '${RestUrl.gifUrl}${controller.videoList[index].gifImage}'),
-                                  Container(
-                                      height: Get.height,
-                                      alignment: Alignment.bottomLeft,
-                                      margin:
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 10),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.start,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Get.toNamed(Routes.SOUND_VIDEOS,
+                                            arguments: {
+                                              "init_page": index,
+                                              "sound_name": state!.sound
+                                            });
+                                        // List<PublicVideos> videosList1 = [];
+                                        // videoList.forEach((element) {
+                                        //   var user = PublicUser(
+                                        //     id: element.user?.id,
+                                        //     name: element.user?.name,
+                                        //     facebook: element.user?.facebook,
+                                        //     firstName: element.user?.firstName,
+                                        //     lastName: element.user?.lastName,
+                                        //     username: element.user?.username,
+                                        //     isFollow: widget.map["isFollow"],
+                                        //   );
+                                        //   videosList1.add(PublicVideos(
+                                        //       id: element.id,
+                                        //       video: element.video,
+                                        //       description: element.description,
+                                        //       sound: element.sound,
+                                        //       soundName: element.sound,
+                                        //       soundCategoryName:
+                                        //       element.sound_category_name,
+                                        //       soundOwner: element.sound_owner,
+                                        //       filter: element.filter,
+                                        //       likes: element.likes,
+                                        //       views: element.views,
+                                        //       gifImage: element.gif_image,
+                                        //       speed: element.speed,
+                                        //       comments: element.comments,
+                                        //       isDuet: element.is_duet,
+                                        //       duetFrom: element.duet_from,
+                                        //       isCommentable: element.is_commentable,
+                                        //       user: user,
+                                        //       videoLikeStatus: 0));
+                                        // });
+                                        // Get.to(VideoPlayerItem(
+                                        //   videosList: videosList1,
+                                        //   position: index,
+                                        // ));
+                                      },
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        alignment: Alignment.center,
                                         children: [
-                                          RichText(
-                                            text: TextSpan(
-                                              children: [
-                                                const WidgetSpan(
-                                                  child: Icon(
-                                                    Icons.play_circle,
-                                                    size: 18,
-                                                    color: ColorManager
-                                                        .colorAccent,
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                    text: " " +
-                                                        controller
-                                                            .videoList[
-                                                        index]
-                                                            .views!
-                                                            .formatViews(),
-                                                    style: const TextStyle(
-                                                        color: Colors
-                                                            .white,
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .w600,
-                                                        fontSize: 16)),
-                                              ],
-                                            ),
+                                          imgNet(controller
+                                                  .videoList[index].gifImage
+                                                  .toString()
+                                                  .isEmpty
+                                              ? '${RestUrl.thambUrl}thumb-not-available.png'
+                                              : '${RestUrl.gifUrl}${controller.videoList[index].gifImage}'),
+                                          Container(
+                                              height: Get.height,
+                                              alignment: Alignment.bottomLeft,
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 10),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  RichText(
+                                                    text: TextSpan(
+                                                      children: [
+                                                        const WidgetSpan(
+                                                          child: Icon(
+                                                            Icons.play_circle,
+                                                            size: 18,
+                                                            color: ColorManager
+                                                                .colorAccent,
+                                                          ),
+                                                        ),
+                                                        TextSpan(
+                                                            text: " " +
+                                                                controller
+                                                                    .videoList[
+                                                                        index]
+                                                                    .views!
+                                                                    .formatViews(),
+                                                            style: const TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16)),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              )),
+                                          const Icon(
+                                            Icons.play_circle,
+                                            color: Colors.white,
                                           )
                                         ],
-                                      )),
-                                  const Icon(
-                                    Icons.play_circle,
-                                    color: Colors.white,
-                                  )
-                                ],
-                              ),
-                            ),
-                          )),
-                    )),onError: (error)=>NoSearchResult(text: "No Videos for this sound!",),onEmpty: NoSearchResult(text: "No Videos for this sound!",)),
-
+                                      ),
+                                    ),
+                                  )),
+                        )),
+                    onError: (error) => NoSearchResult(
+                          text: "No Videos for this sound!",
+                        ),
+                    onEmpty: NoSearchResult(
+                      text: "No Videos for this sound!",
+                    )),
                 const SizedBox(
                   height: 20,
                 ),

@@ -60,7 +60,7 @@ class TrendingVideosView extends StatefulWidget {
       this.fcmToken});
 
   String? videoUrl, fcmToken;
-  LoopPageController? pageController;
+  PageController? pageController;
   int? nextPage;
   int? videoId;
   String? avatar;
@@ -260,9 +260,9 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                     dotPrimaryColor: Colors.red.shade200,
                                     dotSecondaryColor: Colors.red,
                                   ),
-                                  isLiked:  widget.videoLikeStatus == "0"
-                                      ?  false
-                                      :  true,
+                                  isLiked: widget.videoLikeStatus == "0"
+                                      ? false
+                                      : true,
                                   likeBuilder: (bool isLiked) {
                                     widget.videoLikeStatus == "0"
                                         ? isLiked = false
@@ -272,7 +272,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                           ? Icons.favorite
                                           : Icons.favorite_outline,
                                       color:
-                                      isLiked ? Colors.red : Colors.white,
+                                          isLiked ? Colors.red : Colors.white,
                                       size: 25,
                                     );
                                   },
@@ -280,7 +280,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                   countBuilder:
                                       (int? count, bool isLiked, String text) {
                                     var color =
-                                    isLiked ? Colors.white : Colors.white;
+                                        isLiked ? Colors.white : Colors.white;
                                     Widget result;
                                     if (count == 0) {
                                       result = Text(
@@ -503,62 +503,60 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                                           IconButton(
                                                               onPressed:
                                                                   () async {
-                                                                if (widget
-                                                                        .UserId ==
-                                                                    GetStorage()
-                                                                        .read(
-                                                                            "userId")) {
-                                                                  Get.defaultDialog(
-                                                                      content: const Text("you want to delete this video?"),
-                                                                      title: "Are your sure?",
-                                                                      confirm: InkWell(
-                                                                        child:
-                                                                            Container(
-                                                                          width:
-                                                                              Get.width,
-                                                                          alignment:
-                                                                              Alignment.center,
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: BorderRadius.circular(10),
-                                                                              color: Colors.red.shade400),
+                                                                checkForLogin(
+                                                                    () async {
+                                                                  if (widget
+                                                                          .UserId ==
+                                                                      GetStorage()
+                                                                          .read(
+                                                                              "userId")) {
+                                                                    Get.defaultDialog(
+                                                                        content: const Text("you want to delete this video?"),
+                                                                        title: "Are your sure?",
+                                                                        confirm: InkWell(
                                                                           child:
-                                                                              const Text("Yes"),
-                                                                          padding:
-                                                                              const EdgeInsets.all(10),
+                                                                              Container(
+                                                                            width:
+                                                                                Get.width,
+                                                                            alignment:
+                                                                                Alignment.center,
+                                                                            decoration:
+                                                                                BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.red.shade400),
+                                                                            child:
+                                                                                const Text("Yes"),
+                                                                            padding:
+                                                                                const EdgeInsets.all(10),
+                                                                          ),
+                                                                          onTap: () => trendingVideosController
+                                                                              .deleteUserVideo(widget.videoId!)
+                                                                              .then((value) => trendingVideosController.refereshVideos().then((value) => Get.back())),
                                                                         ),
-                                                                        onTap: () => trendingVideosController
-                                                                            .deleteUserVideo(widget
-                                                                                .videoId!)
-                                                                            .then((value) =>
-                                                                                trendingVideosController.refereshVideos().then((value) => Get.back())),
-                                                                      ),
-                                                                      cancel: InkWell(
-                                                                        child:
-                                                                            Container(
-                                                                          width:
-                                                                              Get.width,
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: BorderRadius.circular(10),
-                                                                              color: Colors.green),
+                                                                        cancel: InkWell(
                                                                           child:
-                                                                              const Text("Cancel"),
-                                                                          alignment:
-                                                                              Alignment.center,
-                                                                          padding:
-                                                                              const EdgeInsets.all(10),
-                                                                        ),
-                                                                        onTap: () =>
-                                                                            Get.back(),
-                                                                      ));
+                                                                              Container(
+                                                                            width:
+                                                                                Get.width,
+                                                                            decoration:
+                                                                                BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.green),
+                                                                            child:
+                                                                                const Text("Cancel"),
+                                                                            alignment:
+                                                                                Alignment.center,
+                                                                            padding:
+                                                                                const EdgeInsets.all(10),
+                                                                          ),
+                                                                          onTap: () =>
+                                                                              Get.back(),
+                                                                        ));
 
-                                                                  //  showDeleteDialog();
-                                                                } else {
-                                                                  trendingVideosController
-                                                                      .favUnfavVideo(
-                                                                          widget
-                                                                              .videoId!,
-                                                                          "fav");
-                                                                }
+                                                                    //  showDeleteDialog();
+                                                                  } else {
+                                                                    trendingVideosController.favUnfavVideo(
+                                                                        widget
+                                                                            .videoId!,
+                                                                        "fav");
+                                                                  }
+                                                                });
                                                               },
                                                               icon: widget.UserId ==
                                                                       GetStorage()
@@ -697,53 +695,11 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                                 ),
                                                 InkWell(
                                                   onTap: () async {
-                                                    if (await GetStorage()
-                                                            .read("token") ==
-                                                        null) {
-                                                      if (await Permission
-                                                          .phone.isGranted) {
-                                                        await SimDataPlugin
-                                                                .getSimData()
-                                                            .then((value) => value
-                                                                    .cards
-                                                                    .isEmpty
-                                                                ? Get.bottomSheet(
-                                                                    LoginView(
-                                                                        false
-                                                                            .obs))
-                                                                : Get.bottomSheet(
-                                                                    LoginView(true
-                                                                        .obs)));
-                                                      } else {
-                                                        await Permission.phone
-                                                            .request()
-                                                            .then((value) async => await SimDataPlugin
-                                                                    .getSimData()
-                                                                .then((value) => value
-                                                                        .cards
-                                                                        .isEmpty
-                                                                    ? Get.bottomSheet(
-                                                                        LoginView(false
-                                                                            .obs))
-                                                                    : Get.bottomSheet(
-                                                                        LoginView(
-                                                                            true.obs))));
-                                                      }
-                                                    } else {
+                                                    checkForLogin(() async {
                                                       await trendingVideosController
-                                                          .checkIfVideoReported(
-                                                              widget.videoId!,
-                                                              await GetStorage()
-                                                                  .read(
-                                                                      "userId"))
-                                                          .then((value) async {
-                                                        if (value) {
-                                                          errorToast(
-                                                              "video is already reported");
-                                                        } else {
-                                                          await trendingVideosController
-                                                              .getSiteSettings()
-                                                              .then((_) => showReportDialog(
+                                                          .getSiteSettings()
+                                                          .then((_) =>
+                                                              showReportDialog(
                                                                   widget
                                                                       .videoId!,
                                                                   widget
@@ -751,9 +707,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                                                       .value,
                                                                   widget
                                                                       .UserId!));
-                                                        }
-                                                      });
-                                                    }
+                                                    });
                                                   },
                                                   child: Row(
                                                     children: const [
@@ -786,39 +740,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                                 ),
                                                 InkWell(
                                                   onTap: () async {
-                                                    if (await GetStorage()
-                                                            .read("token") ==
-                                                        null) {
-                                                      if (await Permission
-                                                          .phone.isGranted) {
-                                                        await SimDataPlugin
-                                                                .getSimData()
-                                                            .then((value) => value
-                                                                    .cards
-                                                                    .isEmpty
-                                                                ? Get.bottomSheet(
-                                                                    LoginView(
-                                                                        false
-                                                                            .obs))
-                                                                : Get.bottomSheet(
-                                                                    LoginView(true
-                                                                        .obs)));
-                                                      } else {
-                                                        await Permission.phone
-                                                            .request()
-                                                            .then((value) async => await SimDataPlugin
-                                                                    .getSimData()
-                                                                .then((value) => value
-                                                                        .cards
-                                                                        .isEmpty
-                                                                    ? Get.bottomSheet(
-                                                                        LoginView(false
-                                                                            .obs))
-                                                                    : Get.bottomSheet(
-                                                                        LoginView(
-                                                                            true.obs))));
-                                                      }
-                                                    } else {
+                                                    checkForLogin(() async {
                                                       await trendingVideosController
                                                           .checkUserBlocked(
                                                               widget.UserId!)
@@ -828,7 +750,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                                                       widget
                                                                           .UserId!,
                                                                       value));
-                                                    }
+                                                    });
                                                     // if (
                                                     //     GetStorage().read(
                                                     //         "token") !=
@@ -1181,13 +1103,15 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                 scrollDirection: Axis.horizontal,
                                 itemBuilder: (context, index) => InkWell(
                                       onTap: () async {
-                                        await GetStorage().write("hashtagId",
-                                            widget.hashtagsList![index].id);
-                                        Get.toNamed(Routes.HASH_TAGS_DETAILS,
-                                            arguments: {
-                                              "hashtag_name":
-                                                  "${widget.hashtagsList![index].name}"
-                                            });
+                                        checkForLogin(() async {
+                                          await GetStorage().write("hashtagId",
+                                              widget.hashtagsList![index].id);
+                                          Get.toNamed(Routes.HASH_TAGS_DETAILS,
+                                              arguments: {
+                                                "hashtag_name":
+                                                    "${widget.hashtagsList![index].name}"
+                                              });
+                                        });
                                       },
                                       child: Container(
                                         decoration: BoxDecoration(
@@ -1214,53 +1138,55 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                         ),
                         GestureDetector(
                           onTap: () async {
-                            await GetStorage()
-                                .write("profileId", widget.UserId);
+                            checkForLogin(() async {
+                              await GetStorage()
+                                  .write("profileId", widget.UserId);
 
-                            DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-                            AndroidDeviceInfo androidInfo =
-                                await deviceInfo.androidInfo;
-                            if (androidInfo.version.sdkInt > 31) {
-                              if (await Permission.audio.isGranted) {
-                                Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_id": widget.soundId,
-                                  "user_id": widget.UserId,
-                                  "user_name": widget.userName!.value,
-                                  "avatars": widget.avatar,
-                                  "sound_name": widget.soundName.toString(),
-                                  "sound_url": widget.sound,
-                                });
-                                // refreshAlreadyCapturedImages();
+                              DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+                              AndroidDeviceInfo androidInfo =
+                                  await deviceInfo.androidInfo;
+                              if (androidInfo.version.sdkInt > 31) {
+                                if (await Permission.audio.isGranted) {
+                                  Get.toNamed(Routes.SOUNDS, arguments: {
+                                    "sound_id": widget.soundId,
+                                    "user_id": widget.UserId,
+                                    "user_name": widget.userName!.value,
+                                    "avatars": widget.avatar,
+                                    "sound_name": widget.soundName.toString(),
+                                    "sound_url": widget.sound,
+                                  });
+                                  // refreshAlreadyCapturedImages();
+                                } else {
+                                  await Permission.audio
+                                      .request()
+                                      .then((value) async {
+                                    Get.toNamed(Routes.SOUNDS, arguments: {
+                                      "sound_id": widget.soundId,
+                                      "sound_name": widget.soundName.toString(),
+                                      "sound_url": widget.sound,
+                                    });
+                                  });
+                                }
                               } else {
-                                await Permission.audio
-                                    .request()
-                                    .then((value) async {
+                                if (await Permission.storage.isGranted) {
                                   Get.toNamed(Routes.SOUNDS, arguments: {
                                     "sound_id": widget.soundId,
                                     "sound_name": widget.soundName.toString(),
                                     "sound_url": widget.sound,
                                   });
-                                });
+                                  // refreshAlreadyCapturedImages();
+                                } else {
+                                  await Permission.storage.request().then(
+                                      (value) => Get.toNamed(Routes.SOUNDS,
+                                              arguments: {
+                                                "sound_id": widget.soundId,
+                                                "sound_name":
+                                                    widget.soundName.toString(),
+                                                "sound_url": widget.sound,
+                                              }));
+                                }
                               }
-                            } else {
-                              if (await Permission.storage.isGranted) {
-                                Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_id": widget.soundId,
-                                  "sound_name": widget.soundName.toString(),
-                                  "sound_url": widget.sound,
-                                });
-                                // refreshAlreadyCapturedImages();
-                              } else {
-                                await Permission.storage.request().then(
-                                    (value) =>
-                                        Get.toNamed(Routes.SOUNDS, arguments: {
-                                          "sound_id": widget.soundId,
-                                          "sound_name":
-                                              widget.soundName.toString(),
-                                          "sound_url": widget.sound,
-                                        }));
-                              }
-                            }
+                            });
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,

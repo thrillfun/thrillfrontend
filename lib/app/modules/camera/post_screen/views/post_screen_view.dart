@@ -283,14 +283,13 @@ class PostScreenView extends GetView<PostScreenController> {
                                   controller.lastChangedWord.value =
                                       words[words.length - 1];
 
-                                  controller.textEditingController.text =
-                                      controller
-                                          .textEditingController.text
-                                          .replaceAll(
-                                              words[words.length - 1],
-                                              controller.searchItems[index]
-                                                  .toString()
-                                                  .removeAllWhitespace);
+                                  controller.textEditingController.text = controller
+                                      .textEditingController.text
+                                      .replaceAll(
+                                          controller.textEditingController.text,
+                                          controller
+                                                  .textEditingController.text +
+                                              "${controller.searchItems[index].toString().replaceAll(RegExp("#"), '')}");
 
                                   controller.textEditingController.selection =
                                       TextSelection.fromPosition(TextPosition(

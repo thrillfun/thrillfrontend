@@ -108,122 +108,136 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
                   ),
                 ),
                 Expanded(
-                    child: GridView.count(
-                  crossAxisCount: 3,
-                  shrinkWrap: true,
-                  childAspectRatio: 0.8,
-                  mainAxisSpacing: 5,
-                  children: List.generate(
-                      state!.length,
-                      (videoIndex) => Stack(
-                            children: [
-                              InkWell(
-                                  onTap: () {
-                                    Get.toNamed(Routes.HASH_TAGS_VIDEO_PLAYER,
-                                        arguments: {
-                                          "hashtagId": state[videoIndex].id,
-                                          "init_page": videoIndex
-                                        });
-                                    // List<PublicVideos> videosList1 = [
-                                    // ];
-                                    // state!.forEach((element) {
-                                    //   var user = PublicUser(
-                                    //     id: element.user?.id,
-                                    //     name: element.user?.name,
-                                    //     facebook: element.user
-                                    //         ?.facebook,
-                                    //     firstName: element.user
-                                    //         ?.firstName,
-                                    //     lastName: element.user
-                                    //         ?.lastName,
-                                    //     username: element.user
-                                    //         ?.username,
-                                    //     isFollow: 0,
-                                    //   );
-                                    //   videosList1.add(PublicVideos(
-                                    //     id: element.id,
-                                    //     video: element.video,
-                                    //     description: element
-                                    //         .description,
-                                    //     sound: element.sound,
-                                    //     soundName: element.soundName,
-                                    //     soundCategoryName:
-                                    //     element.soundCategoryName,
-                                    //     soundOwner: element
-                                    //         .soundOwner,
-                                    //     filter: element.filter,
-                                    //     likes: element.likes,
-                                    //     views: element.views,
-                                    //     gifImage: element.gifImage,
-                                    //     speed: element.speed,
-                                    //     comments: element.comments,
-                                    //     isDuet: "no",
-                                    //     duetFrom: "",
-                                    //     isCommentable: "yes",
-                                    //     user: user,
-                                    //   ));
-                                    // });
-                                    // Get.to(VideoPlayerItem(
-                                    //   videosList: videosList1,
-                                    //   position: index,
-                                    // ));
-                                    // Get.to(
-                                    //     VideoPlayerScreen(
-                                    //   isLock: false,
-                                    //   isFav: false,
-                                    //   isFeed: false,
-                                    //   position: videoIndex,
-                                    //   hashTagVideos: controller
-                                    //       .hashTagsDetailsList,
-                                    // ));
-                                  },
-                                  child: Card(
-                                    elevation: 10,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(15)),
-                                    child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: imgNet(RestUrl.gifUrl +
-                                            state[videoIndex]
-                                                .gifImage
-                                                .toString())),
-                                  )),
-                              Positioned(
-                                  bottom: 10,
-                                  left: 10,
-                                  right: 10,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          children: [
-                                            const WidgetSpan(
-                                              child: Icon(
-                                                Icons.play_circle,
-                                                size: 18,
-                                                color: ColorManager.colorAccent,
+                    child: NotificationListener<ScrollEndNotification>(
+                  onNotification: (scrollNotification) {
+                    if (scrollNotification.metrics.pixels ==
+                        scrollNotification.metrics.maxScrollExtent) {
+                      controller.getPaginationVideosByHashTags();
+                    }
+
+                    return true;
+                  },
+                  child: GridView.count(
+                    crossAxisCount: 3,
+                    shrinkWrap: true,
+                    childAspectRatio: 0.8,
+                    mainAxisSpacing: 5,
+                    children: List.generate(
+                        state!.length,
+                        (videoIndex) => Stack(
+                              children: [
+                                InkWell(
+                                    onTap: () {
+                                      Get.toNamed(Routes.HASH_TAGS_VIDEO_PLAYER,
+                                          arguments: {
+                                            "hashtagId": state[videoIndex].id,
+                                            "init_page": videoIndex
+                                          });
+                                      // List<PublicVideos> videosList1 = [
+                                      // ];
+                                      // state!.forEach((element) {
+                                      //   var user = PublicUser(
+                                      //     id: element.user?.id,
+                                      //     name: element.user?.name,
+                                      //     facebook: element.user
+                                      //         ?.facebook,
+                                      //     firstName: element.user
+                                      //         ?.firstName,
+                                      //     lastName: element.user
+                                      //         ?.lastName,
+                                      //     username: element.user
+                                      //         ?.username,
+                                      //     isFollow: 0,
+                                      //   );
+                                      //   videosList1.add(PublicVideos(
+                                      //     id: element.id,
+                                      //     video: element.video,
+                                      //     description: element
+                                      //         .description,
+                                      //     sound: element.sound,
+                                      //     soundName: element.soundName,
+                                      //     soundCategoryName:
+                                      //     element.soundCategoryName,
+                                      //     soundOwner: element
+                                      //         .soundOwner,
+                                      //     filter: element.filter,
+                                      //     likes: element.likes,
+                                      //     views: element.views,
+                                      //     gifImage: element.gifImage,
+                                      //     speed: element.speed,
+                                      //     comments: element.comments,
+                                      //     isDuet: "no",
+                                      //     duetFrom: "",
+                                      //     isCommentable: "yes",
+                                      //     user: user,
+                                      //   ));
+                                      // });
+                                      // Get.to(VideoPlayerItem(
+                                      //   videosList: videosList1,
+                                      //   position: index,
+                                      // ));
+                                      // Get.to(
+                                      //     VideoPlayerScreen(
+                                      //   isLock: false,
+                                      //   isFav: false,
+                                      //   isFeed: false,
+                                      //   position: videoIndex,
+                                      //   hashTagVideos: controller
+                                      //       .hashTagsDetailsList,
+                                      // ));
+                                    },
+                                    child: Card(
+                                      elevation: 10,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15)),
+                                      child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          child: imgNet(RestUrl.gifUrl +
+                                              state[videoIndex]
+                                                  .gifImage
+                                                  .toString())),
+                                    )),
+                                Positioned(
+                                    bottom: 10,
+                                    left: 10,
+                                    right: 10,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              const WidgetSpan(
+                                                child: Icon(
+                                                  Icons.play_circle,
+                                                  size: 18,
+                                                  color:
+                                                      ColorManager.colorAccent,
+                                                ),
                                               ),
-                                            ),
-                                            TextSpan(
-                                                text: " " +
-                                                    NumberFormat.compact()
-                                                        .format(
-                                                            state[videoIndex]
-                                                                .views)
-                                                        .toString(),
-                                                style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 16)),
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ))
-                            ],
-                          )),
+                                              TextSpan(
+                                                  text: " " +
+                                                      NumberFormat.compact()
+                                                          .format(
+                                                              state[videoIndex]
+                                                                  .views)
+                                                          .toString(),
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 16)),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ))
+                              ],
+                            )),
+                  ),
                 ))
               ],
             ),

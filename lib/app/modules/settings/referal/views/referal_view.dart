@@ -44,10 +44,13 @@ class ReferalView extends GetView<ReferalController> {
               ),
             ],
           ),
-          Text(
-            "Refer a friend and get a chance to win Bitcoin worth 1 Lakh!",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
-            textAlign: TextAlign.center,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              "Refer a friend and get a chance to win Bitcoin worth 1 Lakh!",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+              textAlign: TextAlign.center,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 20, bottom: 20),
@@ -87,7 +90,7 @@ class ReferalView extends GetView<ReferalController> {
                 )),
                 Expanded(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
                         margin: const EdgeInsets.only(top: 10),
@@ -104,7 +107,7 @@ class ReferalView extends GetView<ReferalController> {
                       const SizedBox(
                         height: 10,
                       ),
-                      const Text("Your friend download app",
+                      const Text("download app",
                           textAlign: TextAlign.center,
                           style: TextStyle(fontWeight: FontWeight.w700))
                     ],
@@ -136,7 +139,7 @@ class ReferalView extends GetView<ReferalController> {
                       const SizedBox(
                         height: 10,
                       ),
-                      const Text("You and your friend get reward",
+                      const Text("You both get reward",
                           textAlign: TextAlign.center,
                           style: TextStyle(fontWeight: FontWeight.w700))
                     ],

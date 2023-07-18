@@ -37,7 +37,7 @@ class HashTagsVideoPlayerView extends GetView<HashTagsVideoPlayerController> {
   late AnimationController _controller;
 
   var pageViewController =
-      LoopPageController(initialPage: Get.arguments["init_page"]);
+      PageController(initialPage: Get.arguments["init_page"]);
   var playerController = BetterPlayerListVideoPlayerController();
 
   @override
@@ -45,10 +45,15 @@ class HashTagsVideoPlayerView extends GetView<HashTagsVideoPlayerController> {
     controller.getVideosByHashTags();
     return Scaffold(
       body: controller.obx(
-          (state) => LoopPageView.builder(
+          (state) => PageView.builder(
               itemCount: state!.length,
               scrollDirection: Axis.vertical,
               controller: pageViewController,
+              onPageChanged: (index) {
+                if (index == state.length - 1) {
+                  controller.getPaginationVideosByHashTags();
+                }
+              },
               itemBuilder: (context, index) {
                 _controller = AnimationController(vsync: Scaffold.of(context));
                 return HashtagVideos(
@@ -238,7 +243,7 @@ class HashtagVideos extends StatefulWidget {
       this.fcmToken});
 
   String? videoUrl, fcmToken;
-  LoopPageController? pageController;
+  PageController? pageController;
   int? nextPage;
   int? videoId;
   String? avatar;
@@ -708,11 +713,10 @@ class _HashtagVideosState extends State<HashtagVideos>
                                                                           padding:
                                                                               const EdgeInsets.all(10),
                                                                         ),
-                                                                        onTap: () => relatedVideosController
-                                                                            .deleteUserVideo(widget
-                                                                                .videoId!)
+                                                                        onTap: () => relatedVideosController.deleteUserVideo(widget.videoId!).then((value) => relatedVideosController
+                                                                            .getVideosByHashTags()
                                                                             .then((value) =>
-                                                                                relatedVideosController.getVideosByHashTags().then((value) => Get.back())),
+                                                                                Get.back())),
                                                                       ),
                                                                       cancel: InkWell(
                                                                         child:

@@ -3,8 +3,10 @@ class FollowingModel {
   bool? error;
   String? message;
   List<Following>? data;
+  Pagination? pagination;
 
-  FollowingModel({this.status, this.error, this.message, this.data});
+  FollowingModel(
+      {this.status, this.error, this.message, this.data, this.pagination});
 
   FollowingModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -16,6 +18,9 @@ class FollowingModel {
         data!.add(new Following.fromJson(v));
       });
     }
+    pagination = json['pagination'] != null
+        ? new Pagination.fromJson(json['pagination'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -25,6 +30,9 @@ class FollowingModel {
     data['message'] = this.message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
+    }
+    if (this.pagination != null) {
+      data['pagination'] = this.pagination!.toJson();
     }
     return data;
   }
@@ -88,8 +96,8 @@ class Following {
 
   Following.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? 0;
-    name = json['name']  ;
-    username = json['username']  ;
+    name = json['name'];
+    username = json['username'];
     email = json['email'] ?? "";
     dob = json['dob'] ?? "";
     emailVerifiedAt = json['email_verified_at'] ?? "";
@@ -111,7 +119,7 @@ class Following {
     createdAt = json['created_at'] ?? "";
     updatedAt = json['updated_at'] ?? "";
     isVerified = json['is_verified'] ?? 0;
-    isFolling = json['isFolling'] ?? 0;
+    isFolling = json['isfollow_count'] ?? 0;
     // isFollowing = json['isFolling'] ?? 0;
   }
 
@@ -141,9 +149,46 @@ class Following {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['is_verified'] = this.isVerified;
-    data['isFolling'] = this.isFolling;
+    data['isfollow_count'] = this.isFolling;
     //   data["isFolling"] = this.isFollowing;
 
+    return data;
+  }
+}
+
+class Pagination {
+  int? currentPage;
+  int? lastPage;
+  int? perPage;
+  int? total;
+  String? firstPageUrl;
+  String? nextPageUrl;
+
+  Pagination(
+      {this.currentPage,
+      this.lastPage,
+      this.perPage,
+      this.total,
+      this.firstPageUrl,
+      this.nextPageUrl});
+
+  Pagination.fromJson(Map<String, dynamic> json) {
+    currentPage = json['current_page'];
+    lastPage = json['last_page'];
+    perPage = json['per_page'];
+    total = json['total'];
+    firstPageUrl = json['first_page_url'];
+    nextPageUrl = json['next_page_url'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['current_page'] = this.currentPage;
+    data['last_page'] = this.lastPage;
+    data['per_page'] = this.perPage;
+    data['total'] = this.total;
+    data['first_page_url'] = this.firstPageUrl;
+    data['next_page_url'] = this.nextPageUrl;
     return data;
   }
 }

@@ -91,6 +91,7 @@ class RelatedVideosView extends StatefulWidget {
   RxInt? commentsCount = 0.obs;
   int? soundId = 0;
   bool? isLastPage;
+  VoidCallback? movePage;
 
   @override
   State<RelatedVideosView> createState() => _RelatedVideosViewState();
@@ -106,6 +107,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
   late AnimationController _controller;
   bool keepAlive = false;
   var isVisible = false.obs;
+  var postView = false.obs;
   @override
   void initState() {
     // TODO: implement initState
@@ -126,17 +128,22 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
           });
 
     videoPlayerController.addListener(() {
+      if (videoPlayerController.value.position.inSeconds == 9 &&
+          videoPlayerController.value.position > Duration.zero) {
+        postView.value = true;
+      }
       if (videoPlayerController.value.duration ==
               videoPlayerController.value.position &&
           videoPlayerController.value.position > Duration.zero) {
-        relatedVideosController.postVideoView(widget.videoId!);
-
         widget.pageController!.animateToPage(widget.nextPage!,
             duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+        relatedVideosController
+            .postVideoView(widget.videoId!)
+            .then((value) => postView.value = false);
         setState(() {});
       }
 
-      Future.delayed(Duration(seconds: 1)).then((value) {
+      Future.delayed(const Duration(seconds: 1)).then((value) {
         if (Get.isBottomSheetOpen!) {
           videoPlayerController.pause();
         } else if (!Get.isBottomSheetOpen! && isVisible.isTrue) {
@@ -152,8 +159,8 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
 
   @override
   void dispose() {
+    widget.pageController!.dispose();
     videoPlayerController.dispose();
-
     super.dispose();
   }
 
@@ -281,54 +288,61 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                               top: 10, bottom: 10, right: 20),
                           child: Column(
                             children: [
-                              LikeButton(
-                                  countPostion: CountPostion.bottom,
-                                  size: 28,
-                                  circleColor: CircleColor(
-                                      start: Colors.red.shade200,
-                                      end: Colors.red),
-                                  bubblesColor: BubblesColor(
-                                    dotPrimaryColor: Colors.red.shade200,
-                                    dotSecondaryColor: Colors.red,
-                                  ),
-                                  likeBuilder: (bool isLiked) {
-                                    widget.videoLikeStatus == "0"
-                                        ? isLiked = false
-                                        : isLiked = true;
-                                    return Icon(
-                                      isLiked
-                                          ? Icons.favorite
-                                          : Icons.favorite_outline,
-                                      color:
-                                          isLiked ? Colors.red : Colors.white,
-                                      size: 25,
-                                    );
-                                  },
-                                  likeCount: widget.like!.value,
-                                  countBuilder:
-                                      (int? count, bool isLiked, String text) {
-                                    var color =
-                                        isLiked ? Colors.white : Colors.white;
-                                    Widget result;
-                                    if (count == 0) {
-                                      result = Text(
-                                        "0",
-                                        style: TextStyle(color: color),
-                                      );
-                                    } else
-                                      result = Text(
-                                        text,
-                                        style: TextStyle(color: color),
-                                      );
-                                    return result;
-                                  },
-                                  onTap: (_) async {
-                                    relatedVideosController.likeVideo(
-                                        widget.videoLikeStatus == "0" ? 1 : 0,
-                                        widget.videoId!,
-                                        token: widget.fcmToken,
-                                        userName: widget.userName!.value);
-                                  }),
+                              Obx(() => relatedVideosController
+                                      .isLikeEnable.isFalse
+                                  ? loader()
+                                  : LikeButton(
+                                      countPostion: CountPostion.bottom,
+                                      size: 28,
+                                      circleColor: CircleColor(
+                                          start: Colors.red.shade200,
+                                          end: Colors.red),
+                                      bubblesColor: BubblesColor(
+                                        dotPrimaryColor: Colors.red.shade200,
+                                        dotSecondaryColor: Colors.red,
+                                      ),
+                                      likeBuilder: (bool isLiked) {
+                                        widget.videoLikeStatus == "0"
+                                            ? isLiked = false
+                                            : isLiked = true;
+                                        return Icon(
+                                          isLiked
+                                              ? Icons.favorite
+                                              : Icons.favorite_outline,
+                                          color: isLiked
+                                              ? Colors.red
+                                              : Colors.white,
+                                          size: 25,
+                                        );
+                                      },
+                                      likeCount: widget.like!.value,
+                                      countBuilder: (int? count, bool isLiked,
+                                          String text) {
+                                        var color = isLiked
+                                            ? Colors.white
+                                            : Colors.white;
+                                        Widget result;
+                                        if (count == 0) {
+                                          result = Text(
+                                            "0",
+                                            style: TextStyle(color: color),
+                                          );
+                                        } else
+                                          result = Text(
+                                            text,
+                                            style: TextStyle(color: color),
+                                          );
+                                        return result;
+                                      },
+                                      onTap: (_) =>
+                                          relatedVideosController.likeVideo(
+                                              widget.videoLikeStatus == "0"
+                                                  ? 1
+                                                  : 0,
+                                              widget.videoId!,
+                                              token: widget.fcmToken,
+                                              userName:
+                                                  widget.userName!.value)))
                             ],
                           ),
                         ),
@@ -343,7 +357,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                         .then((value) {
                                       Get.bottomSheet(
                                         ClipRRect(
-                                          borderRadius: BorderRadius.only(
+                                          borderRadius: const BorderRadius.only(
                                               topLeft: Radius.circular(10),
                                               topRight: Radius.circular(10)),
                                           child: CommentsView(
@@ -530,62 +544,60 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                           IconButton(
                                                               onPressed:
                                                                   () async {
-                                                                if (widget
-                                                                        .UserId ==
-                                                                    GetStorage()
-                                                                        .read(
-                                                                            "userId")) {
-                                                                  Get.defaultDialog(
-                                                                      content: const Text("you want to delete this video?"),
-                                                                      title: "Are your sure?",
-                                                                      confirm: InkWell(
-                                                                        child:
-                                                                            Container(
-                                                                          width:
-                                                                              Get.width,
-                                                                          alignment:
-                                                                              Alignment.center,
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: BorderRadius.circular(10),
-                                                                              color: Colors.red.shade400),
+                                                                checkForLogin(
+                                                                    () async {
+                                                                  if (widget
+                                                                          .UserId ==
+                                                                      GetStorage()
+                                                                          .read(
+                                                                              "userId")) {
+                                                                    Get.defaultDialog(
+                                                                        content: const Text("you want to delete this video?"),
+                                                                        title: "Are your sure?",
+                                                                        confirm: InkWell(
                                                                           child:
-                                                                              const Text("Yes"),
-                                                                          padding:
-                                                                              const EdgeInsets.all(10),
+                                                                              Container(
+                                                                            width:
+                                                                                Get.width,
+                                                                            alignment:
+                                                                                Alignment.center,
+                                                                            decoration:
+                                                                                BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.red.shade400),
+                                                                            child:
+                                                                                const Text("Yes"),
+                                                                            padding:
+                                                                                const EdgeInsets.all(10),
+                                                                          ),
+                                                                          onTap: () => relatedVideosController
+                                                                              .deleteUserVideo(widget.videoId!)
+                                                                              .then((value) => relatedVideosController.refereshVideos().then((value) => Get.back())),
                                                                         ),
-                                                                        onTap: () => relatedVideosController
-                                                                            .deleteUserVideo(widget
-                                                                                .videoId!)
-                                                                            .then((value) =>
-                                                                                relatedVideosController.refereshVideos().then((value) => Get.back())),
-                                                                      ),
-                                                                      cancel: InkWell(
-                                                                        child:
-                                                                            Container(
-                                                                          width:
-                                                                              Get.width,
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: BorderRadius.circular(10),
-                                                                              color: Colors.green),
+                                                                        cancel: InkWell(
                                                                           child:
-                                                                              const Text("Cancel"),
-                                                                          alignment:
-                                                                              Alignment.center,
-                                                                          padding:
-                                                                              const EdgeInsets.all(10),
-                                                                        ),
-                                                                        onTap: () =>
-                                                                            Get.back(),
-                                                                      ));
+                                                                              Container(
+                                                                            width:
+                                                                                Get.width,
+                                                                            decoration:
+                                                                                BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.green),
+                                                                            child:
+                                                                                const Text("Cancel"),
+                                                                            alignment:
+                                                                                Alignment.center,
+                                                                            padding:
+                                                                                const EdgeInsets.all(10),
+                                                                          ),
+                                                                          onTap: () =>
+                                                                              Get.back(),
+                                                                        ));
 
-                                                                  //  showDeleteDialog();
-                                                                } else {
-                                                                  relatedVideosController
-                                                                      .favUnfavVideo(
-                                                                          widget
-                                                                              .videoId!,
-                                                                          "fav");
-                                                                }
+                                                                    //  showDeleteDialog();
+                                                                  } else {
+                                                                    relatedVideosController.favUnfavVideo(
+                                                                        widget
+                                                                            .videoId!,
+                                                                        "fav");
+                                                                  }
+                                                                });
                                                               },
                                                               icon: widget.UserId ==
                                                                       GetStorage()
@@ -724,39 +736,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                 ),
                                                 InkWell(
                                                   onTap: () async {
-                                                    if (await GetStorage()
-                                                            .read("token") ==
-                                                        null) {
-                                                      if (await Permission
-                                                          .phone.isGranted) {
-                                                        await SimDataPlugin
-                                                                .getSimData()
-                                                            .then((value) => value
-                                                                    .cards
-                                                                    .isEmpty
-                                                                ? Get.bottomSheet(
-                                                                    LoginView(
-                                                                        false
-                                                                            .obs))
-                                                                : Get.bottomSheet(
-                                                                    LoginView(true
-                                                                        .obs)));
-                                                      } else {
-                                                        await Permission.phone
-                                                            .request()
-                                                            .then((value) async => await SimDataPlugin
-                                                                    .getSimData()
-                                                                .then((value) => value
-                                                                        .cards
-                                                                        .isEmpty
-                                                                    ? Get.bottomSheet(
-                                                                        LoginView(false
-                                                                            .obs))
-                                                                    : Get.bottomSheet(
-                                                                        LoginView(
-                                                                            true.obs))));
-                                                      }
-                                                    } else {
+                                                    checkForLogin(() async {
                                                       await relatedVideosController
                                                           .checkIfVideoReported(
                                                               widget.videoId!,
@@ -780,7 +760,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                                       .UserId!));
                                                         }
                                                       });
-                                                    }
+                                                    });
                                                   },
                                                   child: Row(
                                                     children: const [
@@ -813,39 +793,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                 ),
                                                 InkWell(
                                                   onTap: () async {
-                                                    if (await GetStorage()
-                                                            .read("token") ==
-                                                        null) {
-                                                      if (await Permission
-                                                          .phone.isGranted) {
-                                                        await SimDataPlugin
-                                                                .getSimData()
-                                                            .then((value) => value
-                                                                    .cards
-                                                                    .isEmpty
-                                                                ? Get.bottomSheet(
-                                                                    LoginView(
-                                                                        false
-                                                                            .obs))
-                                                                : Get.bottomSheet(
-                                                                    LoginView(true
-                                                                        .obs)));
-                                                      } else {
-                                                        await Permission.phone
-                                                            .request()
-                                                            .then((value) async => await SimDataPlugin
-                                                                    .getSimData()
-                                                                .then((value) => value
-                                                                        .cards
-                                                                        .isEmpty
-                                                                    ? Get.bottomSheet(
-                                                                        LoginView(false
-                                                                            .obs))
-                                                                    : Get.bottomSheet(
-                                                                        LoginView(
-                                                                            true.obs))));
-                                                      }
-                                                    } else {
+                                                    checkForLogin(() async {
                                                       await relatedVideosController
                                                           .checkUserBlocked(
                                                               widget.UserId!)
@@ -855,7 +803,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                                       widget
                                                                           .UserId!,
                                                                       value));
-                                                    }
+                                                    });
                                                     // if (
                                                     //     GetStorage().read(
                                                     //         "token") !=
@@ -1088,6 +1036,15 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                       Visibility(
                                         child: InkWell(
                                             onTap: () async {
+                                              checkForLogin(() {
+                                                relatedVideosController
+                                                    .followUnfollowUser(
+                                                  widget.UserId!,
+                                                  widget.isfollow == 0
+                                                      ? "follow"
+                                                      : "unfollow",
+                                                );
+                                              });
                                               if (await GetStorage()
                                                       .read("token") ==
                                                   null) {
@@ -1115,15 +1072,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                                   : showLoginBottomSheet(
                                                                       true.obs)));
                                                 }
-                                              } else {
-                                                relatedVideosController
-                                                    .followUnfollowUser(
-                                                  widget.UserId!,
-                                                  widget.isfollow == 0
-                                                      ? "follow"
-                                                      : "unfollow",
-                                                );
-                                              }
+                                              } else {}
                                             },
                                             child: Container(
                                               padding:
@@ -1145,10 +1094,6 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                   borderRadius:
                                                       BorderRadius.circular(5)),
                                             )),
-                                        visible: GetStorage().read("token") !=
-                                                null &&
-                                            widget.UserId !=
-                                                GetStorage().read("userId"),
                                       )
                                     ],
                                   ),
@@ -1183,15 +1128,15 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                             trimMode: TrimMode.Line,
                             trimCollapsedText: 'More',
                             trimExpandedText: 'Less',
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                                 color: Colors.white),
-                            moreStyle: TextStyle(
+                            moreStyle: const TextStyle(
                                 fontSize: 14,
                                 color: ColorManager.colorAccent,
                                 fontWeight: FontWeight.w700),
-                            lessStyle: TextStyle(
+                            lessStyle: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: ColorManager.colorAccent),
@@ -1208,13 +1153,15 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                 scrollDirection: Axis.horizontal,
                                 itemBuilder: (context, index) => InkWell(
                                       onTap: () async {
-                                        await GetStorage().write("hashtagId",
-                                            widget.hashtagsList![index].id);
-                                        Get.toNamed(Routes.HASH_TAGS_DETAILS,
-                                            arguments: {
-                                              "hashtag_name":
-                                                  "${widget.hashtagsList![index].name}"
-                                            });
+                                        checkForLogin(() async {
+                                          await GetStorage().write("hashtagId",
+                                              widget.hashtagsList![index].id);
+                                          Get.toNamed(Routes.HASH_TAGS_DETAILS,
+                                              arguments: {
+                                                "hashtag_name":
+                                                    "${widget.hashtagsList![index].name}"
+                                              });
+                                        });
                                       },
                                       child: Container(
                                         decoration: BoxDecoration(
@@ -1241,53 +1188,55 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                         ),
                         GestureDetector(
                           onTap: () async {
-                            await GetStorage()
-                                .write("profileId", widget.UserId);
+                            checkForLogin(() async {
+                              await GetStorage()
+                                  .write("profileId", widget.UserId);
 
-                            DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-                            AndroidDeviceInfo androidInfo =
-                                await deviceInfo.androidInfo;
-                            if (androidInfo.version.sdkInt > 31) {
-                              if (await Permission.audio.isGranted) {
-                                Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_id": widget.soundId,
-                                  "user_id": widget.UserId,
-                                  "user_name": widget.userName!.value,
-                                  "avatars": widget.avatar,
-                                  "sound_name": widget.soundName.toString(),
-                                  "sound_url": widget.sound,
-                                });
-                                // refreshAlreadyCapturedImages();
+                              DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+                              AndroidDeviceInfo androidInfo =
+                                  await deviceInfo.androidInfo;
+                              if (androidInfo.version.sdkInt > 31) {
+                                if (await Permission.audio.isGranted) {
+                                  Get.toNamed(Routes.SOUNDS, arguments: {
+                                    "sound_id": widget.soundId,
+                                    "user_id": widget.UserId,
+                                    "user_name": widget.userName!.value,
+                                    "avatars": widget.avatar,
+                                    "sound_name": widget.soundName.toString(),
+                                    "sound_url": widget.sound,
+                                  });
+                                  // refreshAlreadyCapturedImages();
+                                } else {
+                                  await Permission.audio
+                                      .request()
+                                      .then((value) async {
+                                    Get.toNamed(Routes.SOUNDS, arguments: {
+                                      "sound_id": widget.soundId,
+                                      "sound_name": widget.soundName.toString(),
+                                      "sound_url": widget.sound,
+                                    });
+                                  });
+                                }
                               } else {
-                                await Permission.audio
-                                    .request()
-                                    .then((value) async {
+                                if (await Permission.storage.isGranted) {
                                   Get.toNamed(Routes.SOUNDS, arguments: {
                                     "sound_id": widget.soundId,
                                     "sound_name": widget.soundName.toString(),
                                     "sound_url": widget.sound,
                                   });
-                                });
+                                  // refreshAlreadyCapturedImages();
+                                } else {
+                                  await Permission.storage.request().then(
+                                      (value) => Get.toNamed(Routes.SOUNDS,
+                                              arguments: {
+                                                "sound_id": widget.soundId,
+                                                "sound_name":
+                                                    widget.soundName.toString(),
+                                                "sound_url": widget.sound,
+                                              }));
+                                }
                               }
-                            } else {
-                              if (await Permission.storage.isGranted) {
-                                Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_id": widget.soundId,
-                                  "sound_name": widget.soundName.toString(),
-                                  "sound_url": widget.sound,
-                                });
-                                // refreshAlreadyCapturedImages();
-                              } else {
-                                await Permission.storage.request().then(
-                                    (value) =>
-                                        Get.toNamed(Routes.SOUNDS, arguments: {
-                                          "sound_id": widget.soundId,
-                                          "sound_name":
-                                              widget.soundName.toString(),
-                                          "sound_url": widget.sound,
-                                        }));
-                              }
-                            }
+                            });
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -1325,7 +1274,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(color: Colors.white),
                               )),
-                              SizedBox(
+                              const SizedBox(
                                 width: 40,
                               )
                             ],
@@ -1395,8 +1344,8 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
               const SizedBox(
                 height: 10,
               ),
-              Center(
-                child: const Text(
+              const Center(
+                child: Text(
                   'Report',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                 ),
@@ -1404,13 +1353,13 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
               const SizedBox(
                 height: 10,
               ),
-              Divider(),
+              const Divider(),
               const SizedBox(
                 height: 20,
               ),
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(left: 20),
-                child: const Text(
+                child: Text(
                   'Why are you reporting this post?',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   textAlign: TextAlign.start,

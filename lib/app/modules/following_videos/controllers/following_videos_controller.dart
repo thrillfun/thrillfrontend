@@ -43,6 +43,8 @@ class FollowingVideosController extends GetxController
   var fileSupport = FileSupport();
   var currentPage = 1.obs;
   var nextPage = 2.obs;
+  var nextPageUrl = "https://thrill.fun/api/video/following?page=1".obs;
+
   @override
   void onReady() {
     getAllVideos(true);
@@ -88,12 +90,14 @@ class FollowingVideosController extends GetxController
         followingVideosList.value =
             FollowingVideosModel.fromJson(value.data).data!.obs;
       }
-
+      nextPageUrl.value =
+          FollowingVideosModel.fromJson(value.data).pagination!.nextPageUrl!;
       change(followingVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followingVideosList, status: RxStatus.error());
     });
   }
+
   Future<void> getPaginationAllVideos(int page) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -101,28 +105,20 @@ class FollowingVideosController extends GetxController
     if (followingVideosList.isEmpty) {
       change(followingVideosList, status: RxStatus.loading());
     }
-    dio.get("video/list?page=$page").then((value) {
-      FollowingVideosModel.fromJson(value.data).data!.forEach((element) {
-        followingVideosList.add(element);
-      });
-
-      if (FollowingVideosModel.fromJson(value.data).pagination!.currentPage !=
-          FollowingVideosModel.fromJson(value.data).pagination!.lastPage) {
-        nextPage.value =
-            FollowingVideosModel.fromJson(value.data).pagination!.currentPage! +
-                1;
-      } else {
-        nextPage.value = FollowingVideosModel.fromJson(value.data).pagination!.lastPage!;
+    dio.get(nextPageUrl.value).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        FollowingVideosModel.fromJson(value.data).data!.forEach((element) {
+          followingVideosList.add(element);
+        });
+        followingVideosList.refresh();
       }
-      currentPage.value =
-      FollowingVideosModel.fromJson(value.data).pagination!.currentPage!;
 
-      followingVideosList.refresh();
+      nextPageUrl.value =
+          FollowingVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
 
       change(followingVideosList, status: RxStatus.success());
-    }).onError((error, stackTrace) {
-      change(followingVideosList, status: RxStatus.error(error.toString()));
-    });
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> refereshVideos() async {

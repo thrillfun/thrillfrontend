@@ -4,7 +4,8 @@ class RelatedVideosModel {
   List<RelatedVideos>? data;
   bool? error;
   Pagination? pagination;
-  RelatedVideosModel({this.status, this.message, this.data, this.error, this.pagination});
+  RelatedVideosModel(
+      {this.status, this.message, this.data, this.error, this.pagination});
 
   RelatedVideosModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -242,8 +243,8 @@ class User {
     twitter = json['twitter'] ?? "";
     firebaseToken = json['firebase_token'] ?? "";
     referralCount = json['referral_count'] ?? "";
-    following = json['following'] ?? "";
-    followers = json['followers'] ?? "";
+    following = json['following'] ?? 0;
+    followers = json['followers'] ?? 0;
     isfollow = json['isfollow'] ?? 0;
     likes = json['likes'] ?? "0";
     levels =
@@ -310,6 +311,7 @@ class Levels {
     return data;
   }
 }
+
 class Pagination {
   int? currentPage;
   int? lastPage;
@@ -320,11 +322,11 @@ class Pagination {
 
   Pagination(
       {this.currentPage,
-        this.lastPage,
-        this.perPage,
-        this.total,
-        this.firstPageUrl,
-        this.nextPageUrl});
+      this.lastPage,
+      this.perPage,
+      this.total,
+      this.firstPageUrl,
+      this.nextPageUrl});
 
   Pagination.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];

@@ -1289,6 +1289,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.8"
+  lazy_load_listview:
+    dependency: "direct main"
+    description:
+      name: lazy_load_listview
+      sha256: de1c033fffb20ee7fb8abdf019f2f2fbcebcf8998a05d256ab3a8714d276b88d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4"
   like_button:
     dependency: "direct main"
     description:
@@ -1401,6 +1409,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  mobile_scanner:
+    dependency: "direct main"
+    description:
+      name: mobile_scanner
+      sha256: "54dd914e1bb5758b3db7aa02e56d65d80285ba0705e0e5fa5cfbb11e27344c4b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.0"
   multi_select_flutter:
     dependency: "direct main"
     description:

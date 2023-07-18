@@ -565,11 +565,10 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                                                                           padding:
                                                                               const EdgeInsets.all(10),
                                                                         ),
-                                                                        onTap: () => followingVideosController
-                                                                            .deleteUserVideo(widget
-                                                                                .videoId!)
+                                                                        onTap: () => followingVideosController.deleteUserVideo(widget.videoId!).then((value) => followingVideosController
+                                                                            .refereshVideos()
                                                                             .then((value) =>
-                                                                                followingVideosController.refereshVideos().then((value) => Get.back())),
+                                                                                Get.back())),
                                                                       ),
                                                                       cancel: InkWell(
                                                                         child:
@@ -1131,9 +1130,7 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                                                 followingVideosController
                                                     .followUnfollowUser(
                                                   widget.UserId!,
-                                                  widget.isfollow == 0
-                                                      ? "follow"
-                                                      : "unfollow",
+                                                  "unfollow",
                                                 );
                                               }
                                             },
@@ -1143,9 +1140,7 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                                                       vertical: 5,
                                                       horizontal: 10),
                                               child: Text(
-                                                widget.isfollow == 0
-                                                    ? "Follow"
-                                                    : "Following",
+                                                "Following",
                                                 style: const TextStyle(
                                                     fontSize: 10,
                                                     color: Colors.white),

@@ -12,11 +12,20 @@ class DiscoverController extends GetxController
   final count = 0.obs;
   RxList<Tophashtagvideos> tophashtagvideosList = RxList();
   RxList<AllHashtags> allHashtagsList = RxList();
+  var callApi = false.obs;
+  var nextPageUrl =
+      "https://thrill.fun/api/hashtag/top-hashtags-videos?page=1".obs;
 
   @override
   void onInit() {
-    getTopHashTagVideos();
+    //getTopHashTagVideos();
     getAllHashtags();
+    ever(callApi, (callback) {
+      if (callApi.isTrue) {
+        getPaginationTopHashTagVideos();
+      }
+    });
+
     super.onInit();
   }
 
@@ -32,16 +41,42 @@ class DiscoverController extends GetxController
 
   Future<void> getTopHashTagVideos() async {
     change(tophashtagvideosList, status: RxStatus.loading());
+
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
+
     await dio.get("hashtag/top-hashtags-videos").then((value) {
       tophashtagvideosList =
           TopHashtagVideosModel.fromJson(value.data).data!.obs;
+      nextPageUrl.value =
+          TopHashtagVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
       change(tophashtagvideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(tophashtagvideosList, status: RxStatus.error(error.toString()));
     });
+  }
+
+  Future<void> getPaginationTopHashTagVideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (tophashtagvideosList.isEmpty) {
+      change(tophashtagvideosList, status: RxStatus.loading());
+    }
+    dio.get(nextPageUrl.value).then((value) {
+      nextPageUrl.value =
+          TopHashtagVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
+      if (nextPageUrl.isNotEmpty) {
+        tophashtagvideosList
+            .addAll(TopHashtagVideosModel.fromJson(value.data).data!);
+      }
+      tophashtagvideosList.refresh();
+
+      change(tophashtagvideosList, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> getAllHashtags() async {

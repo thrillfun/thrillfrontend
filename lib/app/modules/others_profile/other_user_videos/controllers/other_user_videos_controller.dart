@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -11,9 +12,20 @@ class OtherUserVideosController extends GetxController
 
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var userVideos = RxList<Videos>();
+  var scrollController = ScrollController();
+  var currentPage = 1.obs;
+  var nextPage = 2.obs;
+  var nextPageUrl = "https://thrill.fun/api/video/user-videos?page=1".obs;
   @override
   void onInit() {
     getUserVideos();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        getPaginationAllVideos(nextPage.value);
+        // Bottom poistion
+      }
+    });
     super.onInit();
   }
 
@@ -32,17 +44,38 @@ class OtherUserVideosController extends GetxController
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     change(userVideos, status: RxStatus.loading());
-    dio
-        .post('/video/user-videos',
-            queryParameters: {"user_id": "${Get.arguments["profileId"]}"})
-        .timeout(const Duration(seconds: 10))
-        .then((response) {
-          userVideos.clear();
-          userVideos = UserVideosModel.fromJson(response.data).data!.obs;
-          change(userVideos, status: RxStatus.success());
-        })
-        .onError((error, stackTrace) {
-          change(userVideos, status: RxStatus.error());
+    dio.post('/video/user-videos', queryParameters: {
+      "user_id": "${Get.arguments["profileId"]}"
+    }).then((response) {
+      userVideos.clear();
+      userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+      nextPageUrl.value =
+          UserVideosModel.fromJson(response.data).pagination!.nextPageUrl ?? "";
+      change(userVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(userVideos, status: RxStatus.error());
+    });
+  }
+
+  Future<void> getPaginationAllVideos(int page) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (userVideos.isEmpty) {
+      change(userVideos, status: RxStatus.loading());
+    }
+    dio.post(nextPageUrl.value, queryParameters: {
+      "user_id": "${Get.arguments["profileId"]}"
+    }).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        UserVideosModel.fromJson(value.data).data!.forEach((element) {
+          userVideos.add(element);
         });
+        userVideos.refresh();
+      }
+      nextPageUrl.value =
+          UserVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
+      change(userVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
   }
 }

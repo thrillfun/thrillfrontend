@@ -83,6 +83,8 @@ import '../modules/settings/privacy/views/privacy_view.dart';
 import '../modules/settings/profile_details/bindings/profile_details_binding.dart';
 import '../modules/settings/profile_details/views/profile_details_view.dart';
 import '../modules/settings/qr_code/bindings/qr_code_binding.dart';
+import '../modules/settings/qr_code/qr_scan_view/bindings/qr_scan_view_binding.dart';
+import '../modules/settings/qr_code/qr_scan_view/views/qr_scan_view_view.dart';
 import '../modules/settings/qr_code/views/qr_code_view.dart';
 import '../modules/settings/referal/bindings/referal_binding.dart';
 import '../modules/settings/referal/views/referal_view.dart';
@@ -421,6 +423,13 @@ class AppPages {
           name: _Paths.QR_CODE,
           page: () => const QrCodeView(),
           binding: QrCodeBinding(),
+          children: [
+            GetPage(
+              name: _Paths.QR_SCAN_VIEW,
+              page: () => const QrScanViewView(),
+              binding: QrScanViewBinding(),
+            ),
+          ],
         ),
         GetPage(
           name: _Paths.NOTIFICATIONS_SETTINGS,

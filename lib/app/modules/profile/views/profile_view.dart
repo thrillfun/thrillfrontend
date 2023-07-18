@@ -64,25 +64,35 @@ class ProfileView extends GetView<ProfileController> {
                                     const SizedBox(
                                       height: 80,
                                     ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          '${state!.value.name.toString().isEmpty ? state.value.username : state.value.name}',
-                                          style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700),
-                                        ),
-                                        const SizedBox(
-                                          width: 5,
-                                        ),
-                                        Visibility(
-                                            visible: state.value.isVerified ==
-                                                'true',
-                                            child: SvgPicture.asset(
-                                              'assets/verified.svg',
-                                            ))
-                                      ],
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 20),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                              child: Text(
+                                            '${state!.value.name.toString().isEmpty ? state.value.username : state.value.name}',
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w700),
+                                          )),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          Visibility(
+                                              visible: state.value.isVerified ==
+                                                  'true',
+                                              child: SvgPicture.asset(
+                                                'assets/verified.svg',
+                                              ))
+                                        ],
+                                      ),
                                     ),
                                     Text(
                                       '@${state.value.username}',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 import 'package:thrill/app/widgets/no_search_result.dart';
 
@@ -26,67 +27,78 @@ class OtherUserVideosView extends GetView<OtherUserVideosController> {
                 Expanded(
                     child: Padding(
                   padding: const EdgeInsets.only(bottom: 0),
-                  child: GridView.count(
-                    padding: const EdgeInsets.all(10),
-                    shrinkWrap: true,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    crossAxisCount: 3,
-                    childAspectRatio: 0.8,
-                    children: List.generate(
-                        state!.length,
-                        (index) => GestureDetector(
-                              onTap: () {
-                                Get.toNamed(Routes.OTHERS_PROFILE_VIDEOS,
-                                    arguments: {
-                                      "init_page": index,
-                                      "profileId": Get.arguments["profileId"]
-                                    });
-                              },
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  imgNet(
-                                      '${RestUrl.gifUrl}${controller.userVideos[index].gifImage}'),
-                                  Positioned(
-                                      bottom: 10,
-                                      left: 10,
-                                      right: 10,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          RichText(
-                                            text: TextSpan(
-                                              children: [
-                                                const WidgetSpan(
-                                                  child: Icon(
-                                                    Icons.play_circle,
-                                                    size: 18,
-                                                    color: ColorManager
-                                                        .colorAccent,
-                                                  ),
+                  child: NotificationListener<ScrollEndNotification>(
+                      onNotification: (scrollNotification) {
+                        if (scrollNotification.metrics.pixels ==
+                            scrollNotification.metrics.maxScrollExtent) {
+                          controller.getPaginationAllVideos(1);
+                        }
+                        return true;
+                      },
+                      child: GridView.count(
+                        padding: const EdgeInsets.all(10),
+                        shrinkWrap: true,
+                        controller: controller.scrollController,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        crossAxisCount: 3,
+                        childAspectRatio: 0.8,
+                        children: List.generate(
+                            state!.length,
+                            (index) => GestureDetector(
+                                  onTap: () {
+                                    Get.toNamed(Routes.OTHERS_PROFILE_VIDEOS,
+                                        arguments: {
+                                          "init_page": index,
+                                          "profileId":
+                                              Get.arguments["profileId"]
+                                        });
+                                  },
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      imgNet(
+                                          '${RestUrl.gifUrl}${controller.userVideos[index].gifImage}'),
+                                      Positioned(
+                                          bottom: 10,
+                                          left: 10,
+                                          right: 10,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    const WidgetSpan(
+                                                      child: Icon(
+                                                        Icons.play_circle,
+                                                        size: 18,
+                                                        color: ColorManager
+                                                            .colorAccent,
+                                                      ),
+                                                    ),
+                                                    TextSpan(
+                                                        text: " " +
+                                                            controller
+                                                                .userVideos[
+                                                                    index]
+                                                                .views!
+                                                                .formatViews(),
+                                                        style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 16)),
+                                                  ],
                                                 ),
-                                                TextSpan(
-                                                    text: " " +
-                                                        controller
-                                                            .userVideos[index]
-                                                            .views!
-                                                            .formatViews(),
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 16)),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      )),
-                                ],
-                              ),
-                            )),
-                  ),
+                                              )
+                                            ],
+                                          )),
+                                    ],
+                                  ),
+                                )),
+                      )),
                 ))
               ],
             ),

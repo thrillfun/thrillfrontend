@@ -4,6 +4,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:sim_data/sim_data.dart';
 import 'package:sim_data/sim_model.dart';
 import 'package:thrill/app/modules/related_videos/controllers/related_videos_controller.dart';
+import 'package:thrill/app/modules/trending_videos/bindings/trending_videos_binding.dart';
+import 'package:thrill/app/modules/trending_videos/controllers/trending_videos_controller.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 import 'package:firebase_auth/firebase_auth.dart' as user;
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -23,6 +25,7 @@ class LoginController extends GetxController with StateMixin<dynamic> {
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var qrData = "".obs;
   var relatedVideosController = Get.find<RelatedVideosController>();
+  var trendingVideosController = Get.find<TrendingVideosController>();
   @override
   void onInit() {
     super.onInit();
@@ -95,9 +98,9 @@ class LoginController extends GetxController with StateMixin<dynamic> {
         //     .then((value) => print("Firebase result => success"));
 
         change(userProfile, status: RxStatus.success());
-
+        relatedVideosController.refereshVideos();
+        await trendingVideosController.refereshVideos();
         await storage.write("user", userProfile).then((_) async {
-          await relatedVideosController.refereshVideos();
           Get.back(closeOverlays: true);
         });
 

@@ -35,7 +35,7 @@ import '../controllers/discover_video_player_controller.dart';
 class DiscoverVideoPlayerView extends GetView<DiscoverVideoPlayerController> {
   DiscoverVideoPlayerView({Key? key}) : super(key: key);
   var pageViewController =
-      LoopPageController(initialPage: Get.arguments["init_page"] ?? 0);
+      PageController(initialPage: Get.arguments["init_page"] ?? 0);
 
   var playerController = BetterPlayerListVideoPlayerController();
   var commentsController = Get.find<CommentsController>();
@@ -45,10 +45,15 @@ class DiscoverVideoPlayerView extends GetView<DiscoverVideoPlayerController> {
     controller.refereshVideos();
     return Scaffold(
       body: controller.obx(
-          (state) => LoopPageView.builder(
+          (state) => PageView.builder(
               itemCount: state!.length,
               scrollDirection: Axis.vertical,
               controller: pageViewController,
+              onPageChanged: (index) {
+                if (index == state.length - 1) {
+                  controller.getPaginationVideosByHashTags();
+                }
+              },
               itemBuilder: (context, index) {
                 _controller = AnimationController(vsync: Scaffold.of(context));
                 return DiscoverVideos(
@@ -211,7 +216,7 @@ class DiscoverVideos extends StatefulWidget {
       this.fcmToken});
 
   String? videoUrl, fcmToken;
-  LoopPageController? pageController;
+  PageController? pageController;
   int? nextPage;
   int? videoId;
   String? avatar;
@@ -682,11 +687,10 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                                                                           padding:
                                                                               const EdgeInsets.all(10),
                                                                         ),
-                                                                        onTap: () => relatedVideosController
-                                                                            .deleteUserVideo(widget
-                                                                                .videoId!)
+                                                                        onTap: () => relatedVideosController.deleteUserVideo(widget.videoId!).then((value) => relatedVideosController
+                                                                            .refereshVideos()
                                                                             .then((value) =>
-                                                                                relatedVideosController.refereshVideos().then((value) => Get.back())),
+                                                                                Get.back())),
                                                                       ),
                                                                       cancel: InkWell(
                                                                         child:

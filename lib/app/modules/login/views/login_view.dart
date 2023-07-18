@@ -32,7 +32,7 @@ class LoginView extends GetView<LoginController> {
       children: [
         loginLayout(),
         Visibility(
-          visible: isPhoneAvailable.value,
+          visible: false, //isPhoneAvailable.value
           child: InkWell(
               onTap: () {
                 TruecallerSdk.initializeSDK(
@@ -92,7 +92,8 @@ class LoginView extends GetView<LoginController> {
                       child: OtpverifyView()));
             },
             child: Container(
-                margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+                margin: const EdgeInsets.only(
+                    left: 20, right: 20, bottom: 20, top: 20),
                 padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),

@@ -3,8 +3,10 @@ class UserVideosModel {
   String? message;
   List<Videos>? data;
   bool? error;
+  Pagination? pagination;
 
-  UserVideosModel({this.status, this.message, this.data, this.error});
+  UserVideosModel(
+      {this.status, this.message, this.data, this.error, this.pagination});
 
   UserVideosModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -16,6 +18,9 @@ class UserVideosModel {
       });
     }
     error = json['error'];
+    pagination = json['pagination'] != null
+        ? new Pagination.fromJson(json['pagination'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -26,6 +31,9 @@ class UserVideosModel {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
     data['error'] = this.error;
+    if (this.pagination != null) {
+      data['pagination'] = this.pagination!.toJson();
+    }
     return data;
   }
 }
@@ -371,6 +379,43 @@ class Levels {
     data['current'] = this.current;
     data['next'] = this.next;
     data['progress'] = this.progress;
+    return data;
+  }
+}
+
+class Pagination {
+  int? currentPage;
+  int? lastPage;
+  int? perPage;
+  int? total;
+  String? firstPageUrl;
+  String? nextPageUrl;
+
+  Pagination(
+      {this.currentPage,
+      this.lastPage,
+      this.perPage,
+      this.total,
+      this.firstPageUrl,
+      this.nextPageUrl});
+
+  Pagination.fromJson(Map<String, dynamic> json) {
+    currentPage = json['current_page'];
+    lastPage = json['last_page'];
+    perPage = json['per_page'];
+    total = json['total'];
+    firstPageUrl = json['first_page_url'];
+    nextPageUrl = json['next_page_url'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['current_page'] = this.currentPage;
+    data['last_page'] = this.lastPage;
+    data['per_page'] = this.perPage;
+    data['total'] = this.total;
+    data['first_page_url'] = this.firstPageUrl;
+    data['next_page_url'] = this.nextPageUrl;
     return data;
   }
 }

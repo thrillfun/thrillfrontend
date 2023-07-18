@@ -12,7 +12,8 @@ buildscript {
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.8.1'
         classpath 'com.android.tools.build:gradle:7.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'ly.img.android.sdk:plugin:10.6.0'
+        classpath 'ly.img.android.sdk:plugin:10.7.2'
+
 
     }
 }

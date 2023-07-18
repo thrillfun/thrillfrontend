@@ -40,6 +40,8 @@ class LikedVideoPlayerController extends GetxController
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var userLikedVideosController = Get.find<UserLikedVideosController>();
+  var nextPageUrl = "https://thrill.fun/api/user/user-liked-videos?page=1".obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -101,10 +103,36 @@ class LikedVideoPlayerController extends GetxController
     }).then((result) {
       likedVideos = UserLikedVideosModel.fromJson(result.data).data!.obs;
       change(likedVideos, status: RxStatus.success());
+      nextPageUrl.value =
+          UserLikedVideosModel.fromJson(result.data).pagination!.nextPageUrl ??
+              "";
     }).onError((error, stackTrace) {
       print(error);
       change(likedVideos, status: RxStatus.error(error.toString()));
     });
+  }
+
+  Future<void> getPaginationAllVideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (likedVideos.isEmpty) {
+      change(likedVideos, status: RxStatus.loading());
+    }
+    dio.post(nextPageUrl.value, queryParameters: {
+      "user_id": "${await GetStorage().read("userId")}"
+    }).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        UserLikedVideosModel.fromJson(value.data).data!.forEach((element) {
+          likedVideos.add(element);
+        });
+        likedVideos.refresh();
+        nextPageUrl.value =
+            UserLikedVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+                "";
+      }
+      change(likedVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
   }
 
   Future<bool> likeVideo(int isLike, int videoId,
@@ -129,7 +157,6 @@ class LikedVideoPlayerController extends GetxController
         // await notificationsController.sendChatNotifcations(userId,
         //     "${await GetStorage().read("user")["username"]} liked your video!");
       }
-      userLikedVideosController.getUserLikedVideos();
     }).onError((error, stackTrace) {
       errorToast(error.toString());
     });

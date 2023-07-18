@@ -36,12 +36,12 @@ import '../controllers/liked_video_player_controller.dart';
 class LikedVideoPlayerView extends GetView<LikedVideoPlayerController> {
   LikedVideoPlayerView({Key? key}) : super(key: key);
   var pageViewController =
-      LoopPageController(initialPage: Get.arguments["init_page"] ?? 0);
+      PageController(initialPage: Get.arguments["init_page"] ?? 0);
 
   var playerController = BetterPlayerListVideoPlayerController();
   var commentsController = Get.find<CommentsController>();
   AnimationController? _controller;
-  var pageController = LoopPageController();
+  var pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +53,14 @@ class LikedVideoPlayerView extends GetView<LikedVideoPlayerController> {
                   text:
                       "Whenever you will like any videos. they will show up here",
                 )
-              : LoopPageView.builder(
+              : PageView.builder(
                   itemCount: state.length,
                   scrollDirection: Axis.vertical,
+                  onPageChanged: (index) {
+                    if (index == state!.length - 1) {
+                      controller.getPaginationAllVideos();
+                    }
+                  },
                   controller: pageViewController,
                   itemBuilder: (context, index) {
                     _controller =
@@ -231,7 +236,7 @@ class LikedVideos extends StatefulWidget {
       this.fcmToken});
 
   String? videoUrl, fcmToken;
-  LoopPageController? pageController;
+  PageController? pageController;
   int? nextPage;
   int? videoId;
   String? avatar;
@@ -1315,30 +1320,30 @@ class _LikedVideosState extends State<LikedVideos>
                                 height: 10,
                               ),
                               Flexible(
-                            child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10, right: 100, bottom: 10),
-                          child: ReadMoreText(
-                            widget.description!.value + " ",
-                            trimLines: 2,
-                            colorClickableText: ColorManager.colorAccent,
-                            trimMode: TrimMode.Line,
-                            trimCollapsedText: 'More',
-                            trimExpandedText: 'Less',
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white),
-                            moreStyle: TextStyle(
-                                fontSize: 14,
-                                color: ColorManager.colorAccent,
-                                fontWeight: FontWeight.w700),
-                            lessStyle: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: ColorManager.colorAccent),
-                          ),
-                        )),
+                                  child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 10, right: 100, bottom: 10),
+                                child: ReadMoreText(
+                                  widget.description!.value + " ",
+                                  trimLines: 2,
+                                  colorClickableText: ColorManager.colorAccent,
+                                  trimMode: TrimMode.Line,
+                                  trimCollapsedText: 'More',
+                                  trimExpandedText: 'Less',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white),
+                                  moreStyle: TextStyle(
+                                      fontSize: 14,
+                                      color: ColorManager.colorAccent,
+                                      fontWeight: FontWeight.w700),
+                                  lessStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: ColorManager.colorAccent),
+                                ),
+                              )),
                               Visibility(
                                 visible: widget.hashtagsList!.isNotEmpty,
                                 child: Container(

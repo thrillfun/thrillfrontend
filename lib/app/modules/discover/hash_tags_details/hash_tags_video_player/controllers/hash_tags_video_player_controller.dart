@@ -34,7 +34,8 @@ class HashTagsVideoPlayerController extends GetxController
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
-
+  var nextPageUrl =
+      "https://thrill.fun/api/hashtag/get-videos-by-hashtag?page=1".obs;
   @override
   void onInit() {
     getVideosByHashTags();
@@ -93,10 +94,35 @@ class HashTagsVideoPlayerController extends GetxController
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+      nextPageUrl.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
       change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());
     });
+  }
+
+  Future<void> getPaginationVideosByHashTags() async {
+    dio.options.headers["Authorization"] =
+        "Bearer ${await GetStorage().read("token")}";
+
+    dio.post(nextPageUrl.value, queryParameters: {
+      "hashtag_id": "${await GetStorage().read("hashtagId")}"
+    }).then((value) {
+      nextPageUrl.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
+      if (nextPageUrl.isNotEmpty) {
+        hashTagsDetailsList
+            .addAll(HashtagDetailsModel.fromJson(value.data).data!);
+      }
+      hashTagsDetailsList.refresh();
+
+      isFavouriteHastag.value =
+          hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+      change(hashTagsDetailsList, status: RxStatus.success());
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> refereshVideosByHashtags() async {

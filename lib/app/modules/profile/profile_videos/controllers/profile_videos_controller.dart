@@ -30,6 +30,8 @@ class ProfileVideosController extends GetxController
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
+  var nextPageUrl = "https://thrill.fun/api/video/user-videos?page=1".obs;
+
   @override
   void onInit() {
     getUserVideos();
@@ -78,11 +80,36 @@ class ProfileVideosController extends GetxController
         .timeout(const Duration(seconds: 10))
         .then((response) {
           userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+
+          nextPageUrl.value =
+              UserVideosModel.fromJson(response.data).pagination!.nextPageUrl ??
+                  "";
           change(userVideos, status: RxStatus.success());
         })
         .onError((error, stackTrace) {
           change(userVideos, status: RxStatus.error());
         });
+  }
+
+  Future<void> getPaginationAllVideos(int page) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    change(userVideos, status: RxStatus.loadingMore());
+
+    dio.post(nextPageUrl.value, queryParameters: {
+      "user_id": "${await GetStorage().read("userId")}"
+    }).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        userVideos.addAll(UserVideosModel.fromJson(value.data).data!);
+
+        userVideos.refresh();
+      }
+      change(userVideos, status: RxStatus.success());
+
+      nextPageUrl.value =
+          UserVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> deleteUserVideo(int videoId) async {

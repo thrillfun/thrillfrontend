@@ -33,22 +33,27 @@ import '../controllers/profile_videos_controller.dart';
 class ProfileVideosView extends GetView<ProfileVideosController> {
   ProfileVideosView({Key? key}) : super(key: key);
   var pageViewController =
-      LoopPageController(initialPage: Get.arguments["init_page"] ?? 0);
+      PageController(initialPage: Get.arguments["init_page"] ?? 0);
 
   var playerController = BetterPlayerListVideoPlayerController();
   var commentsController = Get.find<CommentsController>();
   AnimationController? _controller;
-  var pageController = LoopPageController();
+  var pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
     controller.getUserVideos();
     return Scaffold(
       body: controller.obx(
-          (state) => LoopPageView.builder(
+          (state) => PageView.builder(
               itemCount: state!.length,
               scrollDirection: Axis.vertical,
               controller: pageViewController,
+              onPageChanged: (index) {
+                if (index == state!.length - 1) {
+                  controller.getPaginationAllVideos(0);
+                }
+              },
               itemBuilder: (context, index) {
                 _controller = AnimationController(vsync: Scaffold.of(context));
                 return LikedVideos(
@@ -249,7 +254,7 @@ class LikedVideos extends StatefulWidget {
       this.fcmToken});
 
   String? videoUrl, fcmToken;
-  LoopPageController? pageController;
+  PageController? pageController;
   int? nextPage;
   int? videoId;
   String? avatar;
@@ -665,11 +670,10 @@ class _LikedVideosState extends State<LikedVideos>
                                                                           padding:
                                                                               const EdgeInsets.all(10),
                                                                         ),
-                                                                        onTap: () => relatedVideosController
-                                                                            .deleteUserVideo(widget
-                                                                                .videoId!)
+                                                                        onTap: () => relatedVideosController.deleteUserVideo(widget.videoId!).then((value) => relatedVideosController
+                                                                            .getUserVideos()
                                                                             .then((value) =>
-                                                                                relatedVideosController.getUserVideos().then((value) => Get.back())),
+                                                                                Get.back())),
                                                                       ),
                                                                       cancel: InkWell(
                                                                         child:

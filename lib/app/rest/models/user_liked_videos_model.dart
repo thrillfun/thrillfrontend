@@ -3,8 +3,10 @@ class UserLikedVideosModel {
   bool? error;
   String? message;
   List<LikedVideos>? data;
+  Pagination? pagination;
 
-  UserLikedVideosModel({this.status, this.error, this.message, this.data});
+  UserLikedVideosModel(
+      {this.status, this.error, this.message, this.data, this.pagination});
 
   UserLikedVideosModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -16,6 +18,9 @@ class UserLikedVideosModel {
         data!.add(new LikedVideos.fromJson(v));
       });
     }
+    pagination = json['pagination'] != null
+        ? new Pagination.fromJson(json['pagination'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -25,6 +30,9 @@ class UserLikedVideosModel {
     data['message'] = this.message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
+    }
+    if (this.pagination != null) {
+      data['pagination'] = this.pagination!.toJson();
     }
     return data;
   }
@@ -370,6 +378,43 @@ class Levels {
     data['current'] = this.current;
     data['next'] = this.next;
     data['progress'] = this.progress;
+    return data;
+  }
+}
+
+class Pagination {
+  int? currentPage;
+  int? lastPage;
+  int? perPage;
+  int? total;
+  String? firstPageUrl;
+  String? nextPageUrl;
+
+  Pagination(
+      {this.currentPage,
+      this.lastPage,
+      this.perPage,
+      this.total,
+      this.firstPageUrl,
+      this.nextPageUrl});
+
+  Pagination.fromJson(Map<String, dynamic> json) {
+    currentPage = json['current_page'];
+    lastPage = json['last_page'];
+    perPage = json['per_page'];
+    total = json['total'];
+    firstPageUrl = json['first_page_url'];
+    nextPageUrl = json['next_page_url'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['current_page'] = this.currentPage;
+    data['last_page'] = this.lastPage;
+    data['per_page'] = this.perPage;
+    data['total'] = this.total;
+    data['first_page_url'] = this.firstPageUrl;
+    data['next_page_url'] = this.nextPageUrl;
     return data;
   }
 }

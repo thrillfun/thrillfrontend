@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
+import 'package:thrill/app/modules/related_videos/controllers/related_videos_controller.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 import 'package:thrill/app/utils/utils.dart';
 import 'package:thrill/app/widgets/no_liked_videos.dart';
@@ -24,6 +25,7 @@ class SettingsView extends GetView<SettingsController> {
 
   @override
   Widget build(BuildContext context) {
+    var relatedVideosController = Get.find<RelatedVideosController>();
     controller.getUserProfile();
     return Scaffold(
       body: controller.obx(
@@ -40,8 +42,8 @@ class SettingsView extends GetView<SettingsController> {
                       ),
                       controller.obx(
                           (state) => InkWell(
-                            onTap:()=>Get.toNamed(Routes.PROFILE) ,
-                            child: Row(
+                                onTap: () => Get.toNamed(Routes.PROFILE),
+                                child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     InkWell(
@@ -66,7 +68,8 @@ class SettingsView extends GetView<SettingsController> {
                                         child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
                                         Text(
                                           state!.value.name.toString().isEmpty
@@ -86,10 +89,9 @@ class SettingsView extends GetView<SettingsController> {
                                         )
                                       ],
                                     )),
-
                                   ],
                                 ),
-                          ),
+                              ),
                           onLoading: Container(
                             child: loader(),
                             alignment: Alignment.center,
@@ -206,8 +208,12 @@ class SettingsView extends GetView<SettingsController> {
                                         backgroundColor: Colors.red),
                                     onPressed: () async {
                                       await controller.signOutUser().then(
-                                          (value) =>
-                                              Get.offAllNamed(Routes.HOME));
+                                          (value) async =>
+                                              relatedVideosController
+                                                  .refereshVideos()
+                                                  .then((value) =>
+                                                      Get.offAllNamed(
+                                                          Routes.HOME)!));
                                     },
                                     child: const Text('Yes')),
                                 cancel: ElevatedButton(
@@ -223,12 +229,16 @@ class SettingsView extends GetView<SettingsController> {
                                 Container(
                                   padding: const EdgeInsets.all(5),
                                   margin: const EdgeInsets.only(right: 20),
-                                  child: Icon(IconlyBroken.logout, color: Colors.red, size: 26),
+                                  child: Icon(IconlyBroken.logout,
+                                      color: Colors.red, size: 26),
                                 ),
                                 Expanded(
                                   child: Text(
                                     "Logout",
-                                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700,color: Colors.red),
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.red),
                                   ),
                                 ),
                                 const Icon(IconlyBroken.arrow_right_2)

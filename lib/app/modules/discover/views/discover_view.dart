@@ -21,6 +21,7 @@ class DiscoverView extends GetView<DiscoverController> {
     return Scaffold(
         body: controller.obx(
             (state) => Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
@@ -127,193 +128,205 @@ class DiscoverView extends GetView<DiscoverController> {
                       ),
                     ),
                     Expanded(
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: state!.length,
-                          itemBuilder: (context, index) => Visibility(
-                              visible: state[index].videos!.isNotEmpty,
-                              child: Column(
-                                children: [
-                                  InkWell(
-                                    onTap: () async {
-                                      await GetStorage().write(
-                                          "hashtagId", state[index].hashtagId);
-                                      Get.toNamed(Routes.HASH_TAGS_DETAILS,
-                                          arguments: {
-                                            "hashtag_name":
-                                                "${state[index].hashtagName}",
-                                            "hashtagId": state[index].hashtagId
-                                          });
-                                      // await hashtagVideosController
-                                      //     .getVideosByHashTags(state[index].hashtagId!)
-                                      //     .then((value) => Get.to(() => HashTagsScreen(
-                                      //   tagName: state[index].hashtagName,
-                                      //   videosList: state[index].videos,
-                                      //   videoCount: state[index].hashtagId,
-                                      // )));
-                                    },
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 10),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                  padding: const EdgeInsets
-                                                          .symmetric(
-                                                      horizontal: 10,
-                                                      vertical: 10),
-                                                  decoration: BoxDecoration(
+                      child: NotificationListener<ScrollEndNotification>(
+                        onNotification: (scrollNotification) {
+                          if (scrollNotification.metrics.pixels ==
+                              scrollNotification.metrics.maxScrollExtent) {
+                            controller.getPaginationTopHashTagVideos();
+                          }
+
+                          return true;
+                        },
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: state!.length,
+                            itemBuilder: (context, index) => Visibility(
+                                visible: state[index].videos!.isNotEmpty,
+                                child: Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () async {
+                                        await GetStorage().write("hashtagId",
+                                            state[index].hashtagId);
+                                        Get.toNamed(Routes.HASH_TAGS_DETAILS,
+                                            arguments: {
+                                              "hashtag_name":
+                                                  "${state[index].hashtagName}",
+                                              "hashtagId":
+                                                  state[index].hashtagId
+                                            });
+                                        // await hashtagVideosController
+                                        //     .getVideosByHashTags(state[index].hashtagId!)
+                                        //     .then((value) => Get.to(() => HashTagsScreen(
+                                        //   tagName: state[index].hashtagName,
+                                        //   videosList: state[index].videos,
+                                        //   videoCount: state[index].hashtagId,
+                                        // )));
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 10),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                    padding: const EdgeInsets
+                                                            .symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 10),
+                                                    decoration: BoxDecoration(
+                                                        color: ColorManager
+                                                            .colorAccentTransparent,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(50)),
+                                                    child: const Icon(
+                                                      Icons.numbers,
                                                       color: ColorManager
-                                                          .colorAccentTransparent,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              50)),
-                                                  child: const Icon(
-                                                    Icons.numbers,
-                                                    color: ColorManager
-                                                        .colorAccent,
-                                                  )),
-                                              const SizedBox(
-                                                width: 10,
-                                              ),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    state[index].hashtagName ==
-                                                            null
-                                                        ? ""
-                                                        : state[index]
-                                                            .hashtagName!,
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        fontSize: 18),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                  Text(
-                                                    "Trending Hashtag",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 14),
-                                                  )
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                state[index].videoCount == null
-                                                    ? ""
-                                                    : state[index]
-                                                        .videoCount
-                                                        .toString()!,
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 14),
-                                              ),
-                                              const Icon(
-                                                Icons.keyboard_arrow_right,
-                                                color: ColorManager.colorAccent,
-                                                size: 25,
-                                              )
-                                            ],
-                                          ),
-                                        ],
+                                                          .colorAccent,
+                                                    )),
+                                                const SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      state[index].hashtagName ==
+                                                              null
+                                                          ? ""
+                                                          : state[index]
+                                                              .hashtagName!,
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          fontSize: 18),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Text(
+                                                      "Trending Hashtag",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          fontSize: 14),
+                                                    )
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  state[index].videoCount ==
+                                                          null
+                                                      ? ""
+                                                      : state[index]
+                                                          .videoCount
+                                                          .toString()!,
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 14),
+                                                ),
+                                                const Icon(
+                                                  Icons.keyboard_arrow_right,
+                                                  color:
+                                                      ColorManager.colorAccent,
+                                                  size: 25,
+                                                )
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.centerLeft,
-                                    child: SingleChildScrollView(
-                                      physics: BouncingScrollPhysics(),
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: List.generate(
-                                            state[index].videos!.length,
-                                            (videoIndex) => Container(
-                                                  margin: EdgeInsets.symmetric(
-                                                      horizontal: 10),
-                                                  height: 150,
-                                                  width: 120,
-                                                  child: InkWell(
-                                                    onTap: () {},
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: SingleChildScrollView(
+                                        physics: BouncingScrollPhysics(),
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          children: List.generate(
+                                              state[index].videos!.length,
+                                              (videoIndex) => Container(
+                                                    margin:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 10),
+                                                    height: 150,
+                                                    width: 120,
                                                     child: InkWell(
-                                                      onTap: () {
-                                                        Get.toNamed(
-                                                            Routes
-                                                                .DISCOVER_VIDEO_PLAYER,
-                                                            arguments: {
-                                                              "init_page":
-                                                                  videoIndex,
-                                                              "hashtagId":
-                                                                  state[index]
-                                                                      .hashtagId
-                                                            });
-                                                      },
-                                                      child: Stack(
-                                                        fit: StackFit.expand,
-                                                        children: [
-                                                          imgNet(RestUrl
-                                                                  .gifUrl +
-                                                              state[index]
-                                                                  .videos![
-                                                                      videoIndex]
-                                                                  .gifImage
-                                                                  .toString()),
-                                                          Positioned(
-                                                              bottom: 10,
-                                                              left: 10,
-                                                              right: 10,
-                                                              child: Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      children: [
-                                                                        const WidgetSpan(
-                                                                          child:
-                                                                              Icon(
-                                                                            Icons.play_circle,
-                                                                            size:
-                                                                                18,
-                                                                            color:
-                                                                                ColorManager.colorAccent,
+                                                      onTap: () {},
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          Get.toNamed(
+                                                              Routes
+                                                                  .DISCOVER_VIDEO_PLAYER,
+                                                              arguments: {
+                                                                "init_page":
+                                                                    videoIndex,
+                                                                "hashtagId":
+                                                                    state[index]
+                                                                        .hashtagId
+                                                              });
+                                                        },
+                                                        child: Stack(
+                                                          fit: StackFit.expand,
+                                                          children: [
+                                                            imgNet(RestUrl
+                                                                    .gifUrl +
+                                                                state[index]
+                                                                    .videos![
+                                                                        videoIndex]
+                                                                    .gifImage
+                                                                    .toString()),
+                                                            Positioned(
+                                                                bottom: 10,
+                                                                left: 10,
+                                                                right: 10,
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    RichText(
+                                                                      text:
+                                                                          TextSpan(
+                                                                        children: [
+                                                                          const WidgetSpan(
+                                                                            child:
+                                                                                Icon(
+                                                                              Icons.play_circle,
+                                                                              size: 18,
+                                                                              color: ColorManager.colorAccent,
+                                                                            ),
                                                                           ),
-                                                                        ),
-                                                                        TextSpan(
-                                                                            text:
-                                                                                " " + NumberFormat.compact().format(state[index].videos![videoIndex].views).toString(),
-                                                                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                                                                      ],
-                                                                    ),
-                                                                  )
-                                                                ],
-                                                              ))
-                                                        ],
+                                                                          TextSpan(
+                                                                              text: " " + NumberFormat.compact().format(state[index].videos![videoIndex].views).toString(),
+                                                                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ))
+                                                          ],
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                )),
+                                                  )),
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                ],
-                              ))),
+                                    )
+                                  ],
+                                ))),
+                      ),
                     )
                   ],
                 ),

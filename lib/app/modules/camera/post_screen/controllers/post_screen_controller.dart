@@ -246,7 +246,7 @@ class PostScreenController extends GetxController {
   Future<String> createGIF() async {
     String outputPath = '$saveCacheDirectory$currentUnix.gif';
     FFmpegKit.execute(
-            "-y -i ${videoFile.value.path} -r 18 -s 200x320 -t 3 $outputPath")
+            "-y -i ${videoFile.value.path} -r 18 -s 175x280 -t 3 $outputPath")
         .then((session) async {
       final returnCode = await session.getReturnCode();
 

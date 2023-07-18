@@ -26,66 +26,76 @@ class UserLikedVideosView extends GetView<UserLikedVideosController> {
                 Expanded(
                     child: Padding(
                   padding: const EdgeInsets.only(bottom: 0),
-                  child: GridView.count(
-                    padding: const EdgeInsets.all(10),
-                    shrinkWrap: true,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    crossAxisCount: 3,
-                    childAspectRatio: 0.8,
-                    children: List.generate(
-                        state!.length,
-                        (index) => GestureDetector(
-                              onTap: () {
-                                Get.toNamed(Routes.LIKED_VIDEO_PLAYER,
-                                    arguments: {
-                                      "liked_videos": state,
-                                      "init_page": index
-                                    });
-                              },
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  imgNet(
-                                      '${RestUrl.gifUrl}${controller.likedVideos[index].gifImage}'),
-                                  Positioned(
-                                      bottom: 10,
-                                      left: 10,
-                                      right: 10,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          RichText(
-                                            text: TextSpan(
-                                              children: [
-                                                const WidgetSpan(
-                                                  child: Icon(
-                                                    Icons.play_circle,
-                                                    size: 18,
-                                                    color: ColorManager
-                                                        .colorAccent,
+                  child: NotificationListener<ScrollEndNotification>(
+                    onNotification: (scrollNotification) {
+                      if (scrollNotification.metrics.pixels ==
+                          scrollNotification.metrics.maxScrollExtent) {
+                        controller.getPaginationAllVideos();
+                      }
+                      return true;
+                    },
+                    child: GridView.count(
+                      padding: const EdgeInsets.all(10),
+                      shrinkWrap: true,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      crossAxisCount: 3,
+                      childAspectRatio: 0.8,
+                      children: List.generate(
+                          state!.length,
+                          (index) => GestureDetector(
+                                onTap: () {
+                                  Get.toNamed(Routes.LIKED_VIDEO_PLAYER,
+                                      arguments: {
+                                        "liked_videos": state,
+                                        "init_page": index
+                                      });
+                                },
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    imgNet(
+                                        '${RestUrl.gifUrl}${controller.likedVideos[index].gifImage}'),
+                                    Positioned(
+                                        bottom: 10,
+                                        left: 10,
+                                        right: 10,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  const WidgetSpan(
+                                                    child: Icon(
+                                                      Icons.play_circle,
+                                                      size: 18,
+                                                      color: ColorManager
+                                                          .colorAccent,
+                                                    ),
                                                   ),
-                                                ),
-                                                TextSpan(
-                                                    text: " " +
-                                                        controller
-                                                            .likedVideos[index]
-                                                            .views!
-                                                            .formatViews(),
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 16)),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      )),
-                                ],
-                              ),
-                            )),
+                                                  TextSpan(
+                                                      text: " " +
+                                                          controller
+                                                              .likedVideos[
+                                                                  index]
+                                                              .views!
+                                                              .formatViews(),
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 16)),
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        )),
+                                  ],
+                                ),
+                              )),
+                    ),
                   ),
                 ))
               ],

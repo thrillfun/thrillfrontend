@@ -39,7 +39,13 @@ class _HomeVideosPlayerViewState extends State<HomeVideosPlayerView>
       body: Stack(
         children: [
           Obx(() => controller.videoScreens[controller.selectedIndex.value]),
-          Padding(
+          Container(
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10.0,
+              )
+            ]),
             padding:
                 EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top),
             child: Row(
@@ -54,19 +60,16 @@ class _HomeVideosPlayerViewState extends State<HomeVideosPlayerView>
                               if (index == 0) {
                                 relatedVideosController.refereshVideos();
                                 controller.selectedIndex.value = index;
-
                               }
                               if (index == 1) {
                                 checkForLogin(() {
                                   followingVideosController.refereshVideos();
                                   controller.selectedIndex.value = index;
-
                                 });
                               }
                               if (index == 2) {
                                 trendingVideosController.refereshVideos();
                                 controller.selectedIndex.value = index;
-
                               }
                             },
                             child: Column(

@@ -74,6 +74,11 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
     super.onReady();
   }
 
+  @override
+  void onClose() {
+    super.onClose();
+  }
+
   Future<void> getUserProfile() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -83,7 +88,6 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
       "id": "${GetStorage().read("userId")}"
     }).then((result) {
       userProfile = UserDetailsModel.fromJson(result.data).data!.user!.obs;
-      change(userProfile, status: RxStatus.success());
       userNameController.text = userProfile.value.username!;
       nameController.text = userProfile.value.name!;
       lastNameController.text = userProfile.value.name!;
@@ -93,14 +97,19 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
       bioController.text = userProfile.value.bio!;
       locationController.text = userProfile.value.location!;
       dob.value = userProfile.value.dob!;
+      gender.value = userProfile.value.gender ?? "male";
+
+      if (gender.value.toLowerCase() == "male") {
+        genderSelectIndex.value = 0;
+      } else if (gender.value.toLowerCase() == "female") {
+        genderSelectIndex.value = 1;
+      } else {
+        genderSelectIndex.value = 2;
+      }
+      change(userProfile, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(userProfile, status: RxStatus.error(error.toString()));
     });
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
   }
 
   Future<void> updateProfile() async {
@@ -113,6 +122,7 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
         "avatar": await client.MultipartFile.fromFile(imageFile.path,
             filename: basenameWithoutExtension(imageFile.path)),
         "username": userNameController.text,
+        "name": nameController.text,
         "first_name": nameController.text,
         'last_name': lastNameController.text,
         "gender": genderList[genderSelectIndex.value],
@@ -123,16 +133,23 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
         "email": emailController.text,
         "dob": dob.value
       });
-      await dio.post("user/edit", data: formData).then((value)async {
-        successToast(value.data["message"]);
-        getUserProfile();
-        await settingsController.getUserProfile();
-        await  profileController.getUserProfile();
+      await dio.post("user/edit", data: formData).then((value) async {
+        if (value.data[status]) {
+          successToast(value.data["message"]);
+          await getUserProfile();
+
+          await settingsController.getUserProfile();
+          await profileController.getUserProfile();
+        } else {
+          errorToast(value.data["message"]);
+        }
+
         // Get.close(1);
       }).onError((error, stackTrace) {});
     } else {
       dio.post("user/edit", queryParameters: {
         "username": userNameController.text,
+        "name": nameController.text,
         "first_name": nameController.text,
         'last_name': lastNameController.text,
         "gender": genderList[genderSelectIndex.value],
@@ -145,9 +162,10 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
       }).then((value) async {
         if (value.data["status"]) {
           successToast(value.data["message"]);
-          getUserProfile();
+          await getUserProfile();
+
           await settingsController.getUserProfile();
-          await  profileController.getUserProfile();
+          await profileController.getUserProfile();
           // Get.close(1);
         } else {
           errorToast(value.data["message"]);
@@ -227,10 +245,13 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
           title: '',
         ),
       ],
-    ).then((croppedImage) {
-      if(croppedImage!=null){
+    ).then((croppedImage) async {
+      if (croppedImage != null) {
         imagePath.value = croppedImage!.path;
-        updateProfile();
+        await updateProfile();
+        await settingsController.getUserProfile();
+        await profileController.getUserProfile();
+        await getUserProfile();
       }
     });
   }

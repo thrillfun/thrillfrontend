@@ -34,9 +34,10 @@ class RelatedVideosController extends GetxController
   var isInitialised = false.obs;
   var fileSupport = FileSupport();
 
-  var currentPage = 1.obs;
+  var currentPage = 10.obs;
   var nextPage = 2.obs;
-
+  var nextPageUrl = "https://thrill.fun/api/video/list?page=2".obs;
+  var isLikeEnable = true.obs;
   @override
   void onInit() {
     super.onInit();
@@ -80,6 +81,7 @@ class RelatedVideosController extends GetxController
     dio.get("video/list").then((value) {
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
+
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(relatedVideosList, status: RxStatus.error(error.toString()));
@@ -90,30 +92,17 @@ class RelatedVideosController extends GetxController
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
-    if (relatedVideosList.isEmpty) {
-      change(relatedVideosList, status: RxStatus.loading());
-    }
-    dio.get("video/list?page=$page").then((value) {
-      RelatedVideosModel.fromJson(value.data).data!.forEach((element) {
-        relatedVideosList.add(element);
-      });
 
-      if (RelatedVideosModel.fromJson(value.data).pagination!.currentPage !=
-          RelatedVideosModel.fromJson(value.data).pagination!.lastPage) {
-        nextPage.value =
-            RelatedVideosModel.fromJson(value.data).pagination!.currentPage! +
-                1;
-      } else {
-        nextPage.value = RelatedVideosModel.fromJson(value.data).pagination!.lastPage!;
+    dio.get(nextPageUrl.value).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        relatedVideosList.addAll(RelatedVideosModel.fromJson(value.data).data!);
       }
-      currentPage.value =
-          RelatedVideosModel.fromJson(value.data).pagination!.currentPage!;
-
       relatedVideosList.refresh();
-
+      nextPageUrl.value =
+          RelatedVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
-      change(relatedVideosList, status: RxStatus.error(error.toString()));
+      Logger().wtf(error);
     });
   }
 
@@ -123,7 +112,7 @@ class RelatedVideosController extends GetxController
     };
     change(relatedVideosList, status: RxStatus.loading());
 
-    dio.get("video/list").then((value) {
+    await dio.get("video/list").then((value) {
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
 
@@ -147,6 +136,8 @@ class RelatedVideosController extends GetxController
 
   Future<bool> likeVideo(int isLike, int videoId,
       {int userId = 0, String? token, String userName = ""}) async {
+    isLikeEnable.value = false;
+
     var isLiked = false;
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -167,6 +158,7 @@ class RelatedVideosController extends GetxController
     } else {
       isLiked = true;
     }
+    isLikeEnable.value = true;
 
     return isLiked;
   }
@@ -195,7 +187,7 @@ class RelatedVideosController extends GetxController
     await dio.post("user/is-user-blocked",
         queryParameters: {"blocked_user": userId}).then((value) {
       isUserBlocked.value = value.data["status"];
-      getAllVideos(false);
+      // getAllVideos(false);
     }).onError((error, stackTrace) {});
     return isUserBlocked.value;
   }

@@ -9,13 +9,17 @@ class TermsOfServiceView extends GetView<TermsOfServiceController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.close)),
-          title: const Text('Terms of Service',style:         TextStyle(color: Colors.black, fontWeight: FontWeight.w700,fontSize: 24),
-              ),
+          leading:
+              IconButton(onPressed: () => Get.back(), icon: Icon(Icons.close)),
+          title: const Text(
+            'Terms of Service',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 24),
+          ),
           centerTitle: true,
         ),
-        body: controller.loadPrivacyPage("https://thrill.fun/terms-conditions")
-    );
+        body:
+            controller.loadPrivacyPage("https://thrill.fun/terms-conditions"));
   }
 }

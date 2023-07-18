@@ -29,9 +29,14 @@ class OthersProfileVideosController extends GetxController
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
-
+  var nextPageUrl = "https://thrill.fun/api/video/user-videos?page=1".obs;
+  var currentPage = 1.obs;
+  var nextPage = 2.obs;
   @override
   void onInit() {
+    if (userVideos.isNotEmpty) {
+      refereshvideos();
+    }
     getUserVideos();
     super.onInit();
   }
@@ -82,12 +87,55 @@ class OthersProfileVideosController extends GetxController
     if (userVideos.isEmpty) {
       change(userVideos, status: RxStatus.loading());
     }
-    dio.post('/video/user-videos',
-        queryParameters: {"user_id": "${profileId}"}).then((response) {
+    dio.post('/video/user-videos', queryParameters: {
+      "user_id": "${Get.arguments["profileId"]}"
+    }).then((response) {
       userVideos = UserVideosModel.fromJson(response.data).data!.obs;
       change(userVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(userVideos, status: RxStatus.error());
+    });
+  }
+
+  Future<void> refereshvideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    change(userVideos, status: RxStatus.loading());
+
+    dio.post('/video/user-videos', queryParameters: {
+      "user_id": "${Get.arguments["profileId"]}"
+    }).then((response) {
+      userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+      change(userVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(userVideos, status: RxStatus.error());
+    });
+  }
+
+  Future<void> getPaginationAllVideos(int page) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    if (userVideos.isEmpty) {
+      change(userVideos, status: RxStatus.loading());
+    }
+    dio.post(nextPageUrl.value, queryParameters: {
+      "user_id": "${Get.arguments["profileId"]}"
+    }).then((value) {
+      if (UserVideosModel.fromJson(value.data).pagination!.nextPageUrl !=
+          null) {
+        nextPageUrl.value =
+            UserVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
+
+        UserVideosModel.fromJson(value.data).data!.forEach((element) {
+          userVideos.add(element);
+        });
+        userVideos.refresh();
+      }
+      change(userVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(userVideos, status: RxStatus.error(error.toString()));
     });
   }
 

@@ -2,8 +2,10 @@ class TopHashtagVideosModel {
   bool? status;
   String? message;
   List<Tophashtagvideos>? data;
+  Pagination? pagination;
 
-  TopHashtagVideosModel({this.status, this.message, this.data});
+  TopHashtagVideosModel(
+      {this.status, this.message, this.data, this.pagination});
 
   TopHashtagVideosModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -14,6 +16,9 @@ class TopHashtagVideosModel {
         data!.add(new Tophashtagvideos.fromJson(v));
       });
     }
+    pagination = json['pagination'] != null
+        ? new Pagination.fromJson(json['pagination'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -22,6 +27,9 @@ class TopHashtagVideosModel {
     data['message'] = this.message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
+    }
+    if (this.pagination != null) {
+      data['pagination'] = this.pagination!.toJson();
     }
     return data;
   }
@@ -33,7 +41,8 @@ class Tophashtagvideos {
   int? videoCount;
   List<Videos>? videos;
 
-  Tophashtagvideos({this.hashtagId, this.hashtagName, this.videoCount, this.videos});
+  Tophashtagvideos(
+      {this.hashtagId, this.hashtagName, this.videoCount, this.videos});
 
   Tophashtagvideos.fromJson(Map<String, dynamic> json) {
     hashtagId = json['hashtag_id'];
@@ -326,3 +335,39 @@ class Levels {
   }
 }
 
+class Pagination {
+  int? currentPage;
+  int? lastPage;
+  int? perPage;
+  int? total;
+  String? firstPageUrl;
+  String? nextPageUrl;
+
+  Pagination(
+      {this.currentPage,
+      this.lastPage,
+      this.perPage,
+      this.total,
+      this.firstPageUrl,
+      this.nextPageUrl});
+
+  Pagination.fromJson(Map<String, dynamic> json) {
+    currentPage = json['current_page'];
+    lastPage = json['last_page'];
+    perPage = json['per_page'];
+    total = json['total'];
+    firstPageUrl = json['first_page_url'];
+    nextPageUrl = json['next_page_url'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['current_page'] = this.currentPage;
+    data['last_page'] = this.lastPage;
+    data['per_page'] = this.perPage;
+    data['total'] = this.total;
+    data['first_page_url'] = this.firstPageUrl;
+    data['next_page_url'] = this.nextPageUrl;
+    return data;
+  }
+}

@@ -34,9 +34,9 @@ import '../views/home_videos_player_view.dart';
 class HomeVideosPlayerController extends GetxController {
   var storage = GetStorage();
   var selectedIndex = 0.obs;
-  final pageController = PageController();
-  final trendingPageController = LoopPageController();
-  final followingPageController = PageController();
+  var pageController = PageController();
+  var trendingPageController = PageController();
+  var followingPageController = PageController();
   RxList<SearchData> searchList = RxList();
 
   var listOfScreens = ["For you", "Following", "Trending"];
@@ -53,58 +53,51 @@ class HomeVideosPlayerController extends GetxController {
   @override
   void onInit() {
     searchHashtags("");
-    var page =1;
-    pageController.addListener(() {
-    });
+    var page = 1;
 
     videoScreens = [
       relatedVideosController.obx(
           (state) => Stack(
                 children: [
-                  RefreshIndicator(
-                      color: ColorManager.colorAccent,
-                      child: PageView.builder(
-                        onPageChanged: (index){
-                          if(index==state!.length-1){
-                          page = page+1;
-                          relatedVideosController.getPaginationAllVideos(relatedVideosController.nextPage.value);
-                          }
-                        },
-                          itemCount: state!.length,
-                          scrollDirection: Axis.vertical,
-                          controller: pageController,
-                          itemBuilder: (context, index) => RelatedVideosView(
-                                videoUrl: state[index].video.toString(),
-                                pageController: pageController!,
-                                nextPage: index + 1,
-                                videoId: state[index].id!,
-                                gifImage: state[index].gifImage,
-                                publicUser: state[index].user,
-                                soundName: state[index].soundName,
-                                UserId: state[index].user!.id,
-                                userName: state[index].user!.username!.obs,
-                                description: state[index].description!.obs,
-                                hashtagsList: state[index].hashtags ?? [],
-                                soundOwner: state[index].soundOwner ?? "",
-                                sound: state[index].sound,
-                                videoLikeStatus:
-                                    state[index].videoLikeStatus.toString(),
-                                isCommentAllowed:
-                                    state[index].isCommentable == "Yes"
-                                        ? true.obs
-                                        : false.obs,
-                                like: state[index].likes!.obs,
-                                isfollow: state[index].user!.isfollow!,
-                                commentsCount: state[index].comments!.obs,
-                                soundId: state[index].soundId,
-                                avatar: state[index].user!.avatar,
-                                currentPageIndex: index.obs,
-                                fcmToken: state[index].user!.firebaseToken,
-                                isLastPage:
-                                    index == (state.length - 1) ? true : false,
-                              )),
-                      onRefresh: () =>
-                          relatedVideosController.refereshVideos()),
+                  PageView.builder(
+                      itemCount: state!.length,
+                      scrollDirection: Axis.vertical,
+                      controller: pageController,
+                      onPageChanged: (index) {
+                        if (index == 2) {
+                          relatedVideosController.getPaginationAllVideos(0);
+                        }
+                      },
+                      itemBuilder: (context, index) => RelatedVideosView(
+                            videoUrl: state[index].video.toString(),
+                            pageController: pageController,
+                            nextPage: index + 1,
+                            videoId: state[index].id!,
+                            gifImage: state[index].gifImage,
+                            publicUser: state[index].user,
+                            soundName: state[index].soundName,
+                            UserId: state[index].user!.id,
+                            userName: state[index].user!.username!.obs,
+                            description: state[index].description!.obs,
+                            hashtagsList: state[index].hashtags ?? [],
+                            soundOwner: state[index].soundOwner ?? "",
+                            sound: state[index].sound,
+                            videoLikeStatus:
+                                state[index].videoLikeStatus.toString(),
+                            isCommentAllowed:
+                                state[index].isCommentable == "Yes"
+                                    ? true.obs
+                                    : false.obs,
+                            like: state[index].likes!.obs,
+                            isfollow: state[index].user!.isfollow!,
+                            commentsCount: state[index].comments!.obs,
+                            soundId: state[index].soundId,
+                            avatar: state[index].user!.avatar,
+                            currentPageIndex: index.obs,
+                            fcmToken: state[index].user!.firebaseToken,
+                            isLastPage:
+                                index == (state.length - 1) ? true : false,
+                          )),
                 ],
               ),
           onLoading: Column(
@@ -156,10 +149,9 @@ class HomeVideosPlayerController extends GetxController {
                       itemCount: state!.length,
                       scrollDirection: Axis.vertical,
                       controller: followingPageController,
-                      onPageChanged: (index){
-                        if(index==state!.length-1){
-                          page = page+1;
-                          followingVideosController.getPaginationAllVideos(relatedVideosController.nextPage.value);
+                      onPageChanged: (index) {
+                        if (index == state!.length - 2) {
+                          followingVideosController.getPaginationAllVideos(1);
                         }
                       },
                       itemBuilder: (context, index) => FollowingVideosView(
@@ -213,7 +205,7 @@ class HomeVideosPlayerController extends GetxController {
                   LoopPageView.builder(
                       itemCount: state!.length,
                       scrollDirection: Axis.vertical,
-                      controller: trendingPageController,
+                      controller: LoopPageController(),
                       itemBuilder: (context, index) => TrendingVideosView(
                             videoUrl: state[index].video.toString(),
                             pageController: trendingPageController!,

@@ -9,15 +9,11 @@ class InboxView extends GetView<InboxController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        titleTextStyle:
-        TextStyle(color: Colors.black, fontWeight: FontWeight.w700,fontSize: 24),
-        title: const Text('Your Inbox'),
-      ),
+      appBar: AppBar(),
       body: Center(
         child: Text(
-          'InboxView is working',
-          style: TextStyle(fontSize: 20),
+          'Coming Soon',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
         ),
       ),
     );
