@@ -159,7 +159,9 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
 
   @override
   void dispose() {
-    widget.pageController!.dispose();
+    if(mounted){
+      widget.pageController!.dispose();
+    }
     videoPlayerController.dispose();
     super.dispose();
   }
@@ -221,9 +223,12 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                         setState(() {});
                       },
                       onFocusLost: () {
-                        videoPlayerController.pause();
-                        isVisible.value = false;
-                        setState(() {});
+
+                        if(mounted){
+                          videoPlayerController.pause();
+                          isVisible.value = false;
+                          setState(() {});
+                        }
                       },
                       onFocusGained: () {
                         videoPlayerController.play();

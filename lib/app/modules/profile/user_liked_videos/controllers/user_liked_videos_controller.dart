@@ -49,6 +49,27 @@ class UserLikedVideosController extends GetxController
     });
   }
 
+  Future<void> refereshVideos() async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    change(likedVideos, status: RxStatus.loading());
+    dio.post('/user/user-liked-videos', queryParameters: {
+      "user_id": "${await GetStorage().read("userId")}"
+    }).then((result) {
+      likedVideos = UserLikedVideosModel.fromJson(result.data).data!.obs;
+
+      change(likedVideos, status: RxStatus.success());
+
+      nextPageUrl.value =
+          UserLikedVideosModel.fromJson(result.data).pagination!.nextPageUrl ??
+              "";
+    }).onError((error, stackTrace) {
+      print(error);
+      change(likedVideos, status: RxStatus.error(error.toString()));
+    });
+  }
+
   Future<void> getPaginationAllVideos() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"

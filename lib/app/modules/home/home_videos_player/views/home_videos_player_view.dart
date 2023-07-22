@@ -42,8 +42,9 @@ class _HomeVideosPlayerViewState extends State<HomeVideosPlayerView>
           Container(
             decoration: BoxDecoration(boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10.0,
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 50.0,
+                spreadRadius: 50, //
               )
             ]),
             padding:

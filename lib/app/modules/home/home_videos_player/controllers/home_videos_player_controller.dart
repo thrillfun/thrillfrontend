@@ -5,22 +5,18 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
 import 'package:loop_page_view/loop_page_view.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:path/path.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:sim_data/sim_data.dart';
 import 'package:thrill/app/modules/following_videos/controllers/following_videos_controller.dart';
 import 'package:thrill/app/modules/following_videos/views/following_videos_view.dart';
 import 'package:thrill/app/modules/trending_videos/controllers/trending_videos_controller.dart';
 import 'package:thrill/app/modules/trending_videos/views/trending_videos_view.dart';
 import 'package:thrill/app/utils/color_manager.dart';
-import 'package:thrill/app/utils/strings.dart';
 import 'package:thrill/app/widgets/no_search_result.dart';
 
 import '../../../../rest/models/search_model.dart';
@@ -29,7 +25,6 @@ import '../../../../routes/app_pages.dart';
 import '../../../../utils/utils.dart';
 import '../../../related_videos/controllers/related_videos_controller.dart';
 import '../../../related_videos/views/related_videos_view.dart';
-import '../views/home_videos_player_view.dart';
 
 class HomeVideosPlayerController extends GetxController {
   var storage = GetStorage();
@@ -50,10 +45,16 @@ class HomeVideosPlayerController extends GetxController {
   var followingVideosController = Get.find<FollowingVideosController>();
   var trendingVideosController = Get.find<TrendingVideosController>();
   var relatedVideosController = Get.find<RelatedVideosController>();
+  final String _adUnitId = 'ca-app-pub-3566466065033894/4388337265';
+  NativeAd? nativeAd;
+  var nativeAdIsLoaded = false.obs;
+  InterstitialAd? _interstitialAd;
+
   @override
   void onInit() {
     searchHashtags("");
     var page = 1;
+    loadNativeAd();
 
     videoScreens = [
       relatedVideosController.obx(
@@ -63,8 +64,15 @@ class HomeVideosPlayerController extends GetxController {
                       itemCount: state!.length,
                       scrollDirection: Axis.vertical,
                       controller: pageController,
-                      onPageChanged: (index) {
-                        if (index == 2) {
+                      onPageChanged: (index) async {
+                        if (index % 8 == 0 && index != 0) {
+                          await _interstitialAd!.show();
+                          _interstitialAd = null;
+                          loadNativeAd();
+                        }
+                        if (index ==
+                            relatedVideosController.relatedVideosList.length -
+                                1) {
                           relatedVideosController.getPaginationAllVideos(0);
                         }
                       },
@@ -283,6 +291,25 @@ class HomeVideosPlayerController extends GetxController {
     super.onInit();
   }
 
+  /// Loads a native ad.
+  Future<void> loadNativeAd() async {
+    InterstitialAd.load(
+        adUnitId: _adUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          // Called when an ad is successfully received.
+          onAdLoaded: (ad) {
+            debugPrint('$ad loaded.');
+            // Keep a reference to the ad so you can show it later.
+            _interstitialAd = ad;
+          },
+          // Called when an ad request failed.
+          onAdFailedToLoad: (LoadAdError error) {
+            debugPrint('InterstitialAd failed to load: $error');
+          },
+        ));
+  }
+
   Future<void> searchHashtags(String searchQuery) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -385,7 +412,8 @@ class HomeVideosPlayerController extends GetxController {
                               decoration: BoxDecoration(
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.3), //New
+                                    color: Colors.black.withOpacity(0.3),
+                                    //New
                                     blurRadius: 25.0,
                                   )
                                 ],
@@ -479,6 +507,7 @@ class HomeVideosPlayerController extends GetxController {
           )
         ],
       );
+
   Future<void> followUnfollowUser(
     int userId,
     String action, {
@@ -537,23 +566,29 @@ class HomeVideosPlayerController extends GetxController {
   }
 
   checkDynamicLink() async {
-    final PendingDynamicLinkData? initialLink =
-        await FirebaseDynamicLinks.instance.getInitialLink();
+   try{
+     final PendingDynamicLinkData? initialLink =
+     await FirebaseDynamicLinks.instance.getInitialLink();
 
-    if (initialLink != null) {
-      if (initialLink.link.queryParameters["type"] == "profile") {
-        // Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
-        //   "profileId": pendingDynamicLinkData.link.queryParameters["id"]
-        // });
-        successToast(initialLink.link.queryParameters["type"].toString());
-      } else if (initialLink.link.queryParameters["type"] == "video") {
-        successToast(initialLink.link.queryParameters["id"].toString());
-      } else if (initialLink.link.queryParameters["type"] == "referal") {
-        await GetStorage().write("referral_code",
-            initialLink.link.queryParameters["referal"].toString());
-        successToast(initialLink!.link.queryParameters["referal"].toString());
-      }
-    }
+     if (initialLink != null) {
+       if (initialLink.link.queryParameters["type"] == "profile") {
+         // Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
+         //   "profileId": pendingDynamicLinkData.link.queryParameters["id"]
+         // });
+         successToast(initialLink.link.queryParameters["type"].toString());
+       } else if (initialLink.link.queryParameters["type"] == "video") {
+         successToast(initialLink.link.queryParameters["id"].toString());
+       } else if (initialLink.link.queryParameters["type"] == "referal") {
+         await GetStorage().write("referral_code",
+             initialLink.link.queryParameters["referal"].toString());
+         successToast(initialLink!.link.queryParameters["referal"].toString());
+       }
+     }
+
+   }
+   catch(e){
+     Logger().wtf(e);
+   }
   }
 
   @override

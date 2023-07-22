@@ -4,30 +4,24 @@ import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_update/in_app_update.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:logger/logger.dart';
+import 'package:mac_address/mac_address.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 import 'package:thrill/app/modules/discover/views/discover_view.dart';
 import 'package:thrill/app/modules/home/home_videos_player/views/home_videos_player_view.dart';
-import 'package:thrill/app/modules/login/views/login_view.dart';
-import 'package:thrill/app/modules/profile/views/profile_view.dart';
-import 'package:thrill/app/modules/related_videos/controllers/related_videos_controller.dart';
 import 'package:thrill/app/modules/settings/views/settings_view.dart';
 import 'package:thrill/app/modules/wallet/views/wallet_view.dart';
-import 'package:thrill/app/routes/app_pages.dart';
-import 'package:network_info_plus/network_info_plus.dart';
-import 'package:mac_address/mac_address.dart';
 
 import '../../../rest/models/site_settings_model.dart';
 import '../../../rest/rest_urls.dart';
 import '../../../utils/utils.dart';
-import '../../camera/views/camera_view.dart';
-import '../../related_videos/views/related_videos_view.dart';
 
 class HomeController extends GetxController {
   var storage = GetStorage();
@@ -45,30 +39,42 @@ class HomeController extends GetxController {
   final Connectivity _connectivity = Connectivity();
 
   late StreamSubscription _streamSubscription;
+  NativeAd? _nativeAd;
+  bool _nativeAdIsLoaded = false;
+  InterstitialAd? _interstitialAd;
+
+  // TODO: replace this test ad unit with your own ad unit.
+  final String _adUnitId = 'ca-app-pub-3566466065033894/4388337265';
 
   @override
   void onInit() {
     super.onInit();
-    InAppUpdate.checkForUpdate().then((updateInfo) {
-      if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
-        if (updateInfo.immediateUpdateAllowed) {
-          // Perform immediate update
-          InAppUpdate.performImmediateUpdate().then((appUpdateResult) {
-            if (appUpdateResult == AppUpdateResult.success) {
-              //App Update successful
-            }
-          });
-        } else if (updateInfo.flexibleUpdateAllowed) {
-          //Perform flexible update
-          InAppUpdate.startFlexibleUpdate().then((appUpdateResult) {
-            if (appUpdateResult == AppUpdateResult.success) {
-              //App Update successful
-              InAppUpdate.completeFlexibleUpdate();
-            }
-          });
+
+    try {
+      InAppUpdate.checkForUpdate().then((updateInfo) {
+        if (updateInfo.updateAvailability ==
+            UpdateAvailability.updateAvailable) {
+          if (updateInfo.immediateUpdateAllowed) {
+            // Perform immediate update
+            InAppUpdate.performImmediateUpdate().then((appUpdateResult) {
+              if (appUpdateResult == AppUpdateResult.success) {
+                //App Update successful
+              }
+            });
+          } else if (updateInfo.flexibleUpdateAllowed) {
+            //Perform flexible update
+            InAppUpdate.startFlexibleUpdate().then((appUpdateResult) {
+              if (appUpdateResult == AppUpdateResult.success) {
+                //App Update successful
+                InAppUpdate.completeFlexibleUpdate();
+              }
+            });
+          }
         }
-      }
-    });
+      });
+    } catch (e) {
+      Logger().wtf(e);
+    }
     homeScreens = [
       const HomeVideosPlayerView(),
       const DiscoverView(),
@@ -84,6 +90,41 @@ class HomeController extends GetxController {
   getMacAddress() async => await GetMac.macAddress;
 
   getIpAddress() async => await info.getWifiIP();
+
+  void loadAd() {
+    InterstitialAd.load(
+        adUnitId: _adUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          // Called when an ad is successfully received.
+          onAdLoaded: (ad) {
+            debugPrint('$ad loaded.');
+            // Keep a reference to the ad so you can show it later.
+            _interstitialAd = ad;
+            successToast('$ad loaded.');
+            _interstitialAd!.show();
+          },
+          // Called when an ad request failed.
+          onAdFailedToLoad: (LoadAdError error) {
+            debugPrint('InterstitialAd failed to load: $error');
+          },
+        ));
+  }
+
+  showAd() async {
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+          onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        ad.dispose();
+        _interstitialAd = null;
+        loadAd();
+      }, onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        ad.dispose();
+        _interstitialAd = null;
+        loadAd();
+      });
+    }
+  }
 
   @override
   void onReady() {

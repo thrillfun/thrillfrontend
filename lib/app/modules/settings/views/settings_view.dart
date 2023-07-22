@@ -12,6 +12,7 @@ import 'package:thrill/app/modules/related_videos/controllers/related_videos_con
 import 'package:thrill/app/routes/app_pages.dart';
 import 'package:thrill/app/utils/utils.dart';
 import 'package:thrill/app/widgets/no_liked_videos.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../rest/rest_urls.dart';
 import '../../../utils/color_manager.dart';
@@ -254,7 +255,11 @@ class SettingsView extends GetView<SettingsController> {
                         elevation: 10,
                         child: GestureDetector(
                           onTap: () {
-                            Get.toNamed(Routes.CUSTOMER_SUPPORT);
+                            infoDialog(
+                                title: "Looking for help?",
+                                content:
+                                    "If you are facing product related issues or bugs or have any feedback in general, please drop us an email at:",
+                                buttonText: "support@thrill.fun");
                             //Navigator.pushNamed(context, '/customerSupport');
                           },
                           child: Container(
@@ -316,6 +321,28 @@ class SettingsView extends GetView<SettingsController> {
     );
   }
 
+  infoDialog({String? title, String? content, String? buttonText}) =>
+      Get.defaultDialog(
+          titlePadding: EdgeInsets.only(top: 10, bottom: 10),
+          title: title ?? "",
+          titleStyle: TextStyle(fontWeight: FontWeight.w700),
+          middleText: content ?? "",
+          middleTextStyle: TextStyle(
+            fontWeight: FontWeight.w400,
+          ),
+          confirm: InkWell(
+            onTap: () {
+              Uri emailURI = Uri(scheme: 'mailto', path: "info@thrill.fun");
+              launchUrl(emailURI);
+            },
+            child: Text(
+              buttonText ?? "",
+              style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline),
+            ),
+          ));
   Widget mainTile(IconData icon, String text) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
