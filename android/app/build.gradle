@@ -89,10 +89,10 @@ android {
 
     signingConfigs {
         release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
+            keyAlias='thrillkey'
+            keyPassword='Thrill@901'
+            storeFile=file('/Users/anantmann/StudioProjects/Thrill-Media/thrillkey')
+            storePassword='Thrill@901'
         }
     }
     buildTypes {
