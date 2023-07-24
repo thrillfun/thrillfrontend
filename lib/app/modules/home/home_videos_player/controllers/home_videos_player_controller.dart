@@ -157,7 +157,12 @@ class HomeVideosPlayerController extends GetxController {
                       itemCount: state!.length,
                       scrollDirection: Axis.vertical,
                       controller: followingPageController,
-                      onPageChanged: (index) {
+                      onPageChanged: (index) async {
+                        if (index % 8 == 0 && index != 0) {
+                          await _interstitialAd!.show();
+                          _interstitialAd = null;
+                          loadNativeAd();
+                        }
                         if (index == state!.length - 2) {
                           followingVideosController.getPaginationAllVideos(1);
                         }
@@ -214,6 +219,13 @@ class HomeVideosPlayerController extends GetxController {
                       itemCount: state!.length,
                       scrollDirection: Axis.vertical,
                       controller: LoopPageController(),
+                      onPageChanged: (index) async {
+                        if (index % 8 == 0 && index != 0) {
+                          await _interstitialAd!.show();
+                          _interstitialAd = null;
+                          loadNativeAd();
+                        }
+                      },
                       itemBuilder: (context, index) => TrendingVideosView(
                             videoUrl: state[index].video.toString(),
                             pageController: trendingPageController!,
@@ -566,29 +578,27 @@ class HomeVideosPlayerController extends GetxController {
   }
 
   checkDynamicLink() async {
-   try{
-     final PendingDynamicLinkData? initialLink =
-     await FirebaseDynamicLinks.instance.getInitialLink();
+    try {
+      final PendingDynamicLinkData? initialLink =
+          await FirebaseDynamicLinks.instance.getInitialLink();
 
-     if (initialLink != null) {
-       if (initialLink.link.queryParameters["type"] == "profile") {
-         // Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
-         //   "profileId": pendingDynamicLinkData.link.queryParameters["id"]
-         // });
-         successToast(initialLink.link.queryParameters["type"].toString());
-       } else if (initialLink.link.queryParameters["type"] == "video") {
-         successToast(initialLink.link.queryParameters["id"].toString());
-       } else if (initialLink.link.queryParameters["type"] == "referal") {
-         await GetStorage().write("referral_code",
-             initialLink.link.queryParameters["referal"].toString());
-         successToast(initialLink!.link.queryParameters["referal"].toString());
-       }
-     }
-
-   }
-   catch(e){
-     Logger().wtf(e);
-   }
+      if (initialLink != null) {
+        if (initialLink.link.queryParameters["type"] == "profile") {
+          // Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
+          //   "profileId": pendingDynamicLinkData.link.queryParameters["id"]
+          // });
+          successToast(initialLink.link.queryParameters["type"].toString());
+        } else if (initialLink.link.queryParameters["type"] == "video") {
+          successToast(initialLink.link.queryParameters["id"].toString());
+        } else if (initialLink.link.queryParameters["type"] == "referal") {
+          await GetStorage().write("referral_code",
+              initialLink.link.queryParameters["referal"].toString());
+          successToast(initialLink!.link.queryParameters["referal"].toString());
+        }
+      }
+    } catch (e) {
+      Logger().wtf(e);
+    }
   }
 
   @override
