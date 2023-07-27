@@ -34,6 +34,7 @@ class HomeVideosPlayerController extends GetxController {
   var followingPageController = PageController();
   RxList<SearchData> searchList = RxList();
 
+  var relatedCurrentIndex = 0.obs;
   var listOfScreens = ["For you", "Following", "Trending"];
   var isVisibleIndicator = [true, false, false];
   List<Widget> videoScreens = [];
@@ -46,6 +47,10 @@ class HomeVideosPlayerController extends GetxController {
   var trendingVideosController = Get.find<TrendingVideosController>();
   var relatedVideosController = Get.find<RelatedVideosController>();
   final String _adUnitId = 'ca-app-pub-3566466065033894/4388337265';
+
+  var isAdShowing = false.obs;
+  final String _nativeAdUnitId = 'ca-app-pub-3566466065033894/6507076010';
+
   NativeAd? nativeAd;
   var nativeAdIsLoaded = false.obs;
   InterstitialAd? _interstitialAd;
@@ -54,19 +59,25 @@ class HomeVideosPlayerController extends GetxController {
   void onInit() {
     searchHashtags("");
     var page = 1;
-    loadNativeAd();
+    loadIntersitialAd();
 
     videoScreens = [
       relatedVideosController.obx(
           (state) => Stack(
                 children: [
-                  PageView.builder(
+                  Obx(() => PageView.builder(
                       itemCount: state!.length,
                       scrollDirection: Axis.vertical,
                       controller: pageController,
+                      physics: isAdShowing.isTrue
+                          ? NeverScrollableScrollPhysics()
+                          : ScrollPhysics(),
                       onPageChanged: (index) async {
+                        relatedCurrentIndex.value = index;
+                        relatedVideosController.likeVideo(
+                            state[index].videoLikeStatus!, state[index].id!);
                         if (index % 8 == 0 && index != 0) {
-                          await _interstitialAd!.show();
+                          //  await _interstitialAd!.show();
                           _interstitialAd = null;
                           loadNativeAd();
                         }
@@ -76,36 +87,53 @@ class HomeVideosPlayerController extends GetxController {
                           relatedVideosController.getPaginationAllVideos(0);
                         }
                       },
-                      itemBuilder: (context, index) => RelatedVideosView(
-                            videoUrl: state[index].video.toString(),
-                            pageController: pageController,
-                            nextPage: index + 1,
-                            videoId: state[index].id!,
-                            gifImage: state[index].gifImage,
-                            publicUser: state[index].user,
-                            soundName: state[index].soundName,
-                            UserId: state[index].user!.id,
-                            userName: state[index].user!.username!.obs,
-                            description: state[index].description!.obs,
-                            hashtagsList: state[index].hashtags ?? [],
-                            soundOwner: state[index].soundOwner ?? "",
-                            sound: state[index].sound,
-                            videoLikeStatus:
-                                state[index].videoLikeStatus.toString(),
-                            isCommentAllowed:
-                                state[index].isCommentable == "Yes"
-                                    ? true.obs
-                                    : false.obs,
-                            like: state[index].likes!.obs,
-                            isfollow: state[index].user!.isfollow!,
-                            commentsCount: state[index].comments!.obs,
-                            soundId: state[index].soundId,
-                            avatar: state[index].user!.avatar,
-                            currentPageIndex: index.obs,
-                            fcmToken: state[index].user!.firebaseToken,
-                            isLastPage:
-                                index == (state.length - 1) ? true : false,
-                          )),
+                      itemBuilder: (context, index) =>
+                          index % 8 == 0 && index != 0
+                              ? Obx(() => nativeAdIsLoaded.isFalse
+                                  ? Container(
+                                      height: Get.height,
+                                      width: Get.width,
+                                      color: Colors.red,
+                                    )
+                                  : Container(
+                                      height: Get.height,
+                                      width: Get.width,
+                                      margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom),
+                                      child: AdWidget(
+                                        ad: nativeAd!,
+                                      ),
+                                    ))
+                              : RelatedVideosView(
+                                  videoUrl: state[index].video.toString(),
+                                  pageController: pageController,
+                                  nextPage: index + 1,
+                                  videoId: state[index].id!,
+                                  gifImage: state[index].gifImage,
+                                  publicUser: state[index].user,
+                                  soundName: state[index].soundName,
+                                  UserId: state[index].user!.id,
+                                  userName: state[index].user!.username!.obs,
+                                  description: state[index].description!.obs,
+                                  hashtagsList: state[index].hashtags ?? [],
+                                  soundOwner: state[index].soundOwner ?? "",
+                                  sound: state[index].sound,
+                                  videoLikeStatus:
+                                      state[index].videoLikeStatus.toString(),
+                                  isCommentAllowed:
+                                      state[index].isCommentable == "Yes"
+                                          ? true.obs
+                                          : false.obs,
+                                  like: state[index].likes!.obs,
+                                  isfollow: state[index].user!.isfollow!,
+                                  commentsCount: state[index].comments!.obs,
+                                  soundId: state[index].soundId,
+                                  avatar: state[index].user!.avatar,
+                                  currentPageIndex: index.obs,
+                                  fcmToken: state[index].user!.firebaseToken,
+                                  isLastPage: index == (state.length - 1)
+                                      ? true
+                                      : false,
+                                ))),
                 ],
               ),
           onLoading: Column(
@@ -161,7 +189,7 @@ class HomeVideosPlayerController extends GetxController {
                         if (index % 8 == 0 && index != 0) {
                           await _interstitialAd!.show();
                           _interstitialAd = null;
-                          loadNativeAd();
+                          loadIntersitialAd();
                         }
                         if (index == state!.length - 2) {
                           followingVideosController.getPaginationAllVideos(1);
@@ -223,7 +251,7 @@ class HomeVideosPlayerController extends GetxController {
                         if (index % 8 == 0 && index != 0) {
                           await _interstitialAd!.show();
                           _interstitialAd = null;
-                          loadNativeAd();
+                          loadIntersitialAd();
                         }
                       },
                       itemBuilder: (context, index) => TrendingVideosView(
@@ -267,8 +295,8 @@ class HomeVideosPlayerController extends GetxController {
           ),
           onError: (error) => Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Center(
+                children: const [
+                  Center(
                     child: Text(
                       "No Trending Videos",
                       textAlign: TextAlign.center,
@@ -283,8 +311,8 @@ class HomeVideosPlayerController extends GetxController {
               ),
           onEmpty: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Center(
+            children: const [
+              Center(
                 child: Text(
                   "No following Videos",
                   textAlign: TextAlign.center,
@@ -305,6 +333,54 @@ class HomeVideosPlayerController extends GetxController {
 
   /// Loads a native ad.
   Future<void> loadNativeAd() async {
+    try {
+      nativeAd = NativeAd(
+        adUnitId: _nativeAdUnitId,
+        factoryId: 'adFactory',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            print('$NativeAd loaded.');
+            isAdShowing.value = true;
+
+            nativeAdIsLoaded.value = true;
+
+            Future.delayed(Duration(seconds: 5)).then((value) {
+              // pageController.animateToPage((relatedCurrentIndex.value + 1),
+              //     duration: Duration(milliseconds: 300),
+              //     curve: Curves.easeInOut);
+              isAdShowing.value = false;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            // Dispose the ad here to free resources.
+            Logger().wtf('$NativeAd failedToLoad: $error');
+            ad.dispose();
+          },
+        ),
+        request: const AdRequest(),
+        nativeAdOptions:NativeAdOptions(mediaAspectRatio: MediaAspectRatio.portrait)
+
+        // Optional: Pass custom options to your native ad factory implementation.
+      );
+      nativeAd!.load();
+    } on Exception catch (e) {
+      nativeAd!.dispose();
+      nativeAd = null;
+    }
+  }
+
+  Future<void> disposeNativeAd() async {
+    try {
+      if (nativeAdIsLoaded.isTrue) {
+        nativeAd!.dispose();
+        nativeAd = null;
+      }
+    } catch (e) {
+      Logger().wtf(e);
+    }
+  }
+
+  Future<void> loadIntersitialAd() async {
     InterstitialAd.load(
         adUnitId: _adUnitId,
         request: const AdRequest(),

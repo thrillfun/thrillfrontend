@@ -159,10 +159,11 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
 
   @override
   void dispose() {
+    videoPlayerController.dispose();
+
     if(mounted){
       widget.pageController!.dispose();
     }
-    videoPlayerController.dispose();
     super.dispose();
   }
 
@@ -307,23 +308,24 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                         dotSecondaryColor: Colors.red,
                                       ),
                                       likeBuilder: (bool isLiked) {
-                                        widget.videoLikeStatus == "0"
+                                        relatedVideosController.isLiked.isFalse
                                             ? isLiked = false
                                             : isLiked = true;
                                         return Icon(
-                                          isLiked
+                                          relatedVideosController.isLiked.isTrue
                                               ? Icons.favorite
                                               : Icons.favorite_outline,
-                                          color: isLiked
+                                          color: relatedVideosController.isLiked.isTrue
                                               ? Colors.red
                                               : Colors.white,
                                           size: 25,
                                         );
                                       },
-                                      likeCount: widget.like!.value,
+                                      likeCount: relatedVideosController.totalLikes
+                                  .value,
                                       countBuilder: (int? count, bool isLiked,
                                           String text) {
-                                        var color = isLiked
+                                        var color = relatedVideosController.isLiked.isTrue
                                             ? Colors.white
                                             : Colors.white;
                                         Widget result;

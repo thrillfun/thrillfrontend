@@ -61,7 +61,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     lintOptions {
         disable 'InvalidPackage'
         checkReleaseBuilds false
@@ -82,7 +82,7 @@ android {
     defaultConfig {
         applicationId "com.thrill.media"
         minSdkVersion 24
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 31
         versionName '1.6.17'
     }
@@ -120,5 +120,6 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:30.0.0')
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
 
 }

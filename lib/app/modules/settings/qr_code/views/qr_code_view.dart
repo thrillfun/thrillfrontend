@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
 import 'package:get/get.dart';
@@ -173,37 +172,31 @@ class QrCodeView extends GetView<QrCodeController> {
                       ),
                       InkWell(
                         onTap: () async {
-                          String barcodeScanRes =
-                              await FlutterBarcodeScanner.scanBarcode(
-                                  "#ff6666", "Cancel", true, ScanMode.QR);
 
-                          final PendingDynamicLinkData? initialLink =
-                              await FirebaseDynamicLinks.instance
-                                  .getDynamicLink(Uri.parse(barcodeScanRes));
 
-                          if (initialLink!.link.queryParameters["type"] ==
-                              "profile") {
-                            // Get.to(ViewProfile(
-                            //     initialLink!.link
-                            //         .queryParameters["id"],
-                            //     0.obs,
-                            //     initialLink!.link
-                            //         .queryParameters["name"],
-                            //     initialLink!
-                            //         .link
-                            //         .queryParameters["something"]));
-                          } else if (initialLink!
-                                  .link.queryParameters["type"] ==
-                              "video") {
-                            successToast(initialLink!.link.queryParameters["id"]
-                                .toString());
-                          }
+                          // final PendingDynamicLinkData? initialLink =
+                          //     await FirebaseDynamicLinks.instance
+                          //         .getDynamicLink(Uri.parse(barcodeScanRes));
+                          //
+                          // if (initialLink!.link.queryParameters["type"] ==
+                          //     "profile") {
+                          //   // Get.to(ViewProfile(
+                          //   //     initialLink!.link
+                          //   //         .queryParameters["id"],
+                          //   //     0.obs,
+                          //   //     initialLink!.link
+                          //   //         .queryParameters["name"],
+                          //   //     initialLink!
+                          //   //         .link
+                          //   //         .queryParameters["something"]));
+                          // } else if (initialLink!
+                          //         .link.queryParameters["type"] ==
+                          //     "video") {
+                          //   successToast(initialLink!.link.queryParameters["id"]
+                          //       .toString());
+                          // }
 
-                          showDialog(
-                              context: context,
-                              builder: (_) => Material(
-                                    child: Center(child: Text(barcodeScanRes)),
-                                  ));
+
                         },
                         child: Text(
                           scanQRCode,

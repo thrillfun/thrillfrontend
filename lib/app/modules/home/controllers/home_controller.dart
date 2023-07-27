@@ -39,16 +39,22 @@ class HomeController extends GetxController {
   final Connectivity _connectivity = Connectivity();
 
   late StreamSubscription _streamSubscription;
-  NativeAd? _nativeAd;
-  bool _nativeAdIsLoaded = false;
+  NativeAd? nativeAd;
+  var nativeAdIsLoaded = false.obs;
   InterstitialAd? _interstitialAd;
 
   // TODO: replace this test ad unit with your own ad unit.
-  final String _adUnitId = 'ca-app-pub-3566466065033894/4388337265';
+  final String _adUnitId = 'ca-app-pub-3566466065033894/6507076010';
 
   @override
   void onInit() {
     super.onInit();
+    loadAd();
+    // ever(nativeAdIsLoaded, (callback) {
+    //   if (nativeAdIsLoaded.isTrue && nativeAd != null) {
+    //     Get.defaultDialog(content: Container(height: Get.height/2,width: Get.width,child: AdWidget(ad: nativeAd!),));
+    //   }
+    // });
 
     try {
       InAppUpdate.checkForUpdate().then((updateInfo) {
@@ -92,23 +98,30 @@ class HomeController extends GetxController {
   getIpAddress() async => await info.getWifiIP();
 
   void loadAd() {
-    InterstitialAd.load(
+    try {
+      nativeAd = NativeAd(
+        nativeTemplateStyle: NativeTemplateStyle(templateType: TemplateType.medium),
         adUnitId: _adUnitId,
-        request: const AdRequest(),
-        adLoadCallback: InterstitialAdLoadCallback(
-          // Called when an ad is successfully received.
+        // Factory ID registered by your native ad factory implementation.
+        listener: NativeAdListener(
           onAdLoaded: (ad) {
-            debugPrint('$ad loaded.');
-            // Keep a reference to the ad so you can show it later.
-            _interstitialAd = ad;
-            successToast('$ad loaded.');
-            _interstitialAd!.show();
+            print('$NativeAd loaded.');
+            nativeAdIsLoaded.value = true;
           },
-          // Called when an ad request failed.
-          onAdFailedToLoad: (LoadAdError error) {
-            debugPrint('InterstitialAd failed to load: $error');
+          onAdFailedToLoad: (ad, error) {
+            // Dispose the ad here to free resources.
+            Logger().wtf('$NativeAd failedToLoad: $error');
+            ad.dispose();
           },
-        ));
+        ),
+        request: const AdRequest(),
+        // Optional: Pass custom options to your native ad factory implementation.
+      );
+      nativeAd!.load();
+    } on Exception catch (e) {
+      nativeAd!.dispose();
+      nativeAd = null;
+    }
   }
 
   showAd() async {

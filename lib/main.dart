@@ -36,6 +36,7 @@ void main() async {
     await Permission.notification.request();
   }
   MobileAds.instance.initialize();
+  MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['62C93BF848F45761C3536701626D0E50','3AA759594FD19961A79D03130D1F9A87']));
   await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
 
   FlutterError.onError = (errorDetails) {

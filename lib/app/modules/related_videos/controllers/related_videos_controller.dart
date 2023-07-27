@@ -38,6 +38,8 @@ class RelatedVideosController extends GetxController
   var nextPage = 2.obs;
   var nextPageUrl = "https://thrill.fun/api/video/list?page=2".obs;
   var isLikeEnable = true.obs;
+  var isLiked = false.obs;
+  var totalLikes =0.obs;
   @override
   void onInit() {
     super.onInit();
@@ -138,7 +140,6 @@ class RelatedVideosController extends GetxController
       {int userId = 0, String? token, String userName = ""}) async {
     isLikeEnable.value = false;
 
-    var isLiked = false;
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -146,21 +147,24 @@ class RelatedVideosController extends GetxController
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      getAllVideos(false);
+      // getAllVideos(false);
+      totalLikes.value = value.data["data"]["likes"]??0;
+
+      if ((value.data["data"]["is_like"]??0) == "0") {
+        isLiked.value = false;
+      } else {
+        isLiked.value = true;
+      }
+
       if (isLike == 1) {
         sendNotification(token.toString(),
-            title: "New Likes!", body: "$userName liked your video");
+            title: "New Likes!",
+            body: "${GetStorage().read("userName")} liked your video");
       }
     }).onError((error, stackTrace) {});
-
-    if (isLike == 0) {
-      isLiked = false;
-    } else {
-      isLiked = true;
-    }
     isLikeEnable.value = true;
 
-    return isLiked;
+    return isLiked.value;
   }
 
   Future<void> followUnfollowUser(int userId, String action,

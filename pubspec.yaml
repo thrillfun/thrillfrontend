@@ -38,9 +38,8 @@ dependencies:
   google_mobile_ads: any
   firebase_database: any
   awesome_notifications: any
-  flutter_barcode_scanner: ^2.0.0
   pin_code_fields: any
-  permission_handler: any
+  permission_handler: ^10.4.3
   glassmorphism_ui: any
   get: any
   persistent_bottom_nav_bar: any
@@ -100,7 +99,7 @@ dependencies:
   connectivity_plus: ^4.0.1
   flutter_otp_text_field: ^1.1.1
   loop_page_view: ^1.2.1
-  flutter_local_notifications: 14.1.1
+  flutter_local_notifications: ^15.1.0+1
   readmore: ^2.2.0
   flutter_native_splash: ^2.2.19
   firebase_crashlytics: ^3.3.3
