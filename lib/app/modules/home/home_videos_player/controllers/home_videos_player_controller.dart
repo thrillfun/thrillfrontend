@@ -87,53 +87,64 @@ class HomeVideosPlayerController extends GetxController {
                           relatedVideosController.getPaginationAllVideos(0);
                         }
                       },
-                      itemBuilder: (context, index) =>
-                          index % 8 == 0 && index != 0
-                              ? Obx(() => nativeAdIsLoaded.isFalse
-                                  ? Container(
-                                      height: Get.height,
-                                      width: Get.width,
-                                      color: Colors.red,
-                                    )
-                                  : Container(
-                                      height: Get.height,
-                                      width: Get.width,
-                                      margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom),
-                                      child: AdWidget(
-                                        ad: nativeAd!,
-                                      ),
-                                    ))
-                              : RelatedVideosView(
-                                  videoUrl: state[index].video.toString(),
-                                  pageController: pageController,
-                                  nextPage: index + 1,
-                                  videoId: state[index].id!,
-                                  gifImage: state[index].gifImage,
-                                  publicUser: state[index].user,
-                                  soundName: state[index].soundName,
-                                  UserId: state[index].user!.id,
-                                  userName: state[index].user!.username!.obs,
-                                  description: state[index].description!.obs,
-                                  hashtagsList: state[index].hashtags ?? [],
-                                  soundOwner: state[index].soundOwner ?? "",
-                                  sound: state[index].sound,
-                                  videoLikeStatus:
-                                      state[index].videoLikeStatus.toString(),
-                                  isCommentAllowed:
-                                      state[index].isCommentable == "Yes"
-                                          ? true.obs
-                                          : false.obs,
-                                  like: state[index].likes!.obs,
-                                  isfollow: state[index].user!.isfollow!,
-                                  commentsCount: state[index].comments!.obs,
-                                  soundId: state[index].soundId,
-                                  avatar: state[index].user!.avatar,
-                                  currentPageIndex: index.obs,
-                                  fcmToken: state[index].user!.firebaseToken,
-                                  isLastPage: index == (state.length - 1)
-                                      ? true
-                                      : false,
-                                ))),
+                      itemBuilder: (context, index) => index % 8 == 0 &&
+                              index != 0
+                          ? Obx(() => nativeAdIsLoaded.isFalse
+                              ? Container(
+                                  height: Get.height,
+                                  width: Get.width,
+                                  color: Colors.red,
+                                )
+                              : Container(
+                                  height: Get.height,
+                                  width: Get.width,
+                                  decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.15),
+                                        blurRadius: 50.0,
+                                        spreadRadius: 50, //New
+                                      )
+                                    ],
+                                  ),
+                                  margin: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewPadding
+                                          .bottom),
+                                  child: AdWidget(
+                                    ad: nativeAd!,
+                                  ),
+                                ))
+                          : RelatedVideosView(
+                              videoUrl: state[index].video.toString(),
+                              pageController: pageController,
+                              nextPage: index + 1,
+                              videoId: state[index].id!,
+                              gifImage: state[index].gifImage,
+                              publicUser: state[index].user,
+                              soundName: state[index].soundName,
+                              UserId: state[index].user!.id,
+                              userName: state[index].user!.username!.obs,
+                              description: state[index].description!.obs,
+                              hashtagsList: state[index].hashtags ?? [],
+                              soundOwner: state[index].soundOwner ?? "",
+                              sound: state[index].sound,
+                              videoLikeStatus:
+                                  state[index].videoLikeStatus.toString(),
+                              isCommentAllowed:
+                                  state[index].isCommentable == "Yes"
+                                      ? true.obs
+                                      : false.obs,
+                              like: state[index].likes!.obs,
+                              isfollow: state[index].user!.isfollow!,
+                              commentsCount: state[index].comments!.obs,
+                              soundId: state[index].soundId,
+                              avatar: state[index].user!.avatar,
+                              currentPageIndex: index.obs,
+                              fcmToken: state[index].user!.firebaseToken,
+                              isLastPage:
+                                  index == (state.length - 1) ? true : false,
+                            ))),
                 ],
               ),
           onLoading: Column(
@@ -335,33 +346,34 @@ class HomeVideosPlayerController extends GetxController {
   Future<void> loadNativeAd() async {
     try {
       nativeAd = NativeAd(
-        adUnitId: _nativeAdUnitId,
-        factoryId: 'adFactory',
-        listener: NativeAdListener(
-          onAdLoaded: (ad) {
-            print('$NativeAd loaded.');
-            isAdShowing.value = true;
+          adUnitId: _nativeAdUnitId,
+          factoryId: 'adFactory',
+          listener: NativeAdListener(
+            onAdLoaded: (ad) {
+              print('$NativeAd loaded.');
+              isAdShowing.value = true;
 
-            nativeAdIsLoaded.value = true;
+              nativeAdIsLoaded.value = true;
 
-            Future.delayed(Duration(seconds: 5)).then((value) {
-              // pageController.animateToPage((relatedCurrentIndex.value + 1),
-              //     duration: Duration(milliseconds: 300),
-              //     curve: Curves.easeInOut);
-              isAdShowing.value = false;
-            });
-          },
-          onAdFailedToLoad: (ad, error) {
-            // Dispose the ad here to free resources.
-            Logger().wtf('$NativeAd failedToLoad: $error');
-            ad.dispose();
-          },
-        ),
-        request: const AdRequest(),
-        nativeAdOptions:NativeAdOptions(mediaAspectRatio: MediaAspectRatio.portrait)
+              Future.delayed(Duration(seconds: 5)).then((value) {
+                // pageController.animateToPage((relatedCurrentIndex.value + 1),
+                //     duration: Duration(milliseconds: 300),
+                //     curve: Curves.easeInOut);
+                isAdShowing.value = false;
+              });
+            },
+            onAdFailedToLoad: (ad, error) {
+              // Dispose the ad here to free resources.
+              Logger().wtf('$NativeAd failedToLoad: $error');
+              ad.dispose();
+            },
+          ),
+          request: const AdRequest(),
+          nativeAdOptions:
+              NativeAdOptions(mediaAspectRatio: MediaAspectRatio.portrait)
 
-        // Optional: Pass custom options to your native ad factory implementation.
-      );
+          // Optional: Pass custom options to your native ad factory implementation.
+          );
       nativeAd!.load();
     } on Exception catch (e) {
       nativeAd!.dispose();
