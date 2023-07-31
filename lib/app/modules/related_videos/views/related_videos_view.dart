@@ -108,6 +108,8 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
   bool keepAlive = false;
   var isVisible = false.obs;
   var postView = false.obs;
+  var currentDuration = Duration().obs;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -118,6 +120,8 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
       duration: const Duration(milliseconds: 5000),
       vsync: this,
     );
+    commentsController
+        .getComments(widget.videoId!);
     videoPlayerController =
         VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
           ..setLooping(false)
@@ -127,19 +131,14 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
             setState(() {});
           });
 
-    videoPlayerController.addListener(() {
-      if (videoPlayerController.value.position.inSeconds == 9 &&
-          videoPlayerController.value.position > Duration.zero) {
-        postView.value = true;
-      }
+    videoPlayerController.addListener(() async {
+      currentDuration.value = videoPlayerController.value.position;
+
       if (videoPlayerController.value.duration ==
               videoPlayerController.value.position &&
           videoPlayerController.value.position > Duration.zero) {
         widget.pageController!.animateToPage(widget.nextPage!,
             duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
-        relatedVideosController
-            .postVideoView(widget.videoId!)
-            .then((value) => postView.value = false);
         setState(() {});
       }
 
@@ -151,7 +150,27 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
         }
       });
     });
-
+    currentDuration.listen((p0) async {
+      if (videoPlayerController.value.duration.inSeconds > 0 &&
+          currentDuration.value.inSeconds > 0) {
+        if (videoPlayerController.value.duration.inSeconds > 10) {
+          if (currentDuration.value.inSeconds > 0 &&
+              currentDuration.value.inSeconds == 9) {
+            await relatedVideosController
+                .postVideoView(widget.videoId!)
+                .then((value) => postView.value = false);
+          }
+        }
+      }
+      if (videoPlayerController.value.duration.inSeconds < 10 &&
+          currentDuration.value.inSeconds > 0) {
+        if (currentDuration.value.inSeconds == 5) {
+          await relatedVideosController
+              .postVideoView(widget.videoId!)
+              .then((value) => postView.value = false);
+        }
+      }
+    });
     setState(() {});
 
     relatedVideosController.checkUserBlocked(widget.UserId!);
@@ -160,10 +179,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
   @override
   void dispose() {
     videoPlayerController.dispose();
-
-    if(mounted){
-      widget.pageController!.dispose();
-    }
+    widget.pageController!.dispose();
     super.dispose();
   }
 
@@ -175,15 +191,9 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
         children: [
           GestureDetector(
               onDoubleTap: () {
-                relatedVideosController
-                    .likeVideo(
-                        widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!,
-                        userName: widget.userName!.value)
-                    .then((value) {
-                  // if(Get.isDialogOpen!){
-                  //   Get.back();
-                  // }
-                });
+                relatedVideosController.likeVideo(
+                    widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!,
+                    userName: widget.userName!.value);
               },
               onTap: () {
                 if (videoPlayerController.value.isPlaying) {
@@ -206,26 +216,33 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                       onVisibilityGained: () {
                         videoPlayerController.play();
                         isVisible.value = true;
-                        setState(() {});
+                        if (mounted) {
+                          setState(() {});
+                        }
                       },
                       onVisibilityLost: () {
                         videoPlayerController.pause();
                         isVisible.value = false;
-                        setState(() {});
+                        if (mounted) {
+                          setState(() {});
+                        }
                       },
                       onForegroundLost: () {
                         videoPlayerController.pause();
                         isVisible.value = false;
-                        setState(() {});
+                        if (mounted) {
+                          setState(() {});
+                        }
                       },
                       onForegroundGained: () {
                         videoPlayerController.play();
                         isVisible.value = true;
-                        setState(() {});
+                        if (mounted) {
+                          setState(() {});
+                        }
                       },
                       onFocusLost: () {
-
-                        if(mounted){
+                        if (mounted) {
                           videoPlayerController.pause();
                           isVisible.value = false;
                           setState(() {});
@@ -293,63 +310,33 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                           margin: const EdgeInsets.only(
                               top: 10, bottom: 10, right: 20),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Obx(() => relatedVideosController
-                                      .isLikeEnable.isFalse
-                                  ? loader()
-                                  : LikeButton(
-                                      countPostion: CountPostion.bottom,
-                                      size: 28,
-                                      circleColor: CircleColor(
-                                          start: Colors.red.shade200,
-                                          end: Colors.red),
-                                      bubblesColor: BubblesColor(
-                                        dotPrimaryColor: Colors.red.shade200,
-                                        dotSecondaryColor: Colors.red,
-                                      ),
-                                      likeBuilder: (bool isLiked) {
+                              Obx(() => InkWell(
+                                  child: Icon(
+                                    relatedVideosController.isLiked.isTrue
+                                        ? Icons.favorite
+                                        : Icons.favorite_outline,
+                                    color:
+                                        relatedVideosController.isLiked.isTrue
+                                            ? Colors.red
+                                            : Colors.white,
+                                    size: 25,
+                                  ),
+                                  onTap: () {
+                                    relatedVideosController.likeVideo(
                                         relatedVideosController.isLiked.isFalse
-                                            ? isLiked = false
-                                            : isLiked = true;
-                                        return Icon(
-                                          relatedVideosController.isLiked.isTrue
-                                              ? Icons.favorite
-                                              : Icons.favorite_outline,
-                                          color: relatedVideosController.isLiked.isTrue
-                                              ? Colors.red
-                                              : Colors.white,
-                                          size: 25,
-                                        );
-                                      },
-                                      likeCount: relatedVideosController.totalLikes
-                                  .value,
-                                      countBuilder: (int? count, bool isLiked,
-                                          String text) {
-                                        var color = relatedVideosController.isLiked.isTrue
-                                            ? Colors.white
-                                            : Colors.white;
-                                        Widget result;
-                                        if (count == 0) {
-                                          result = Text(
-                                            "0",
-                                            style: TextStyle(color: color),
-                                          );
-                                        } else
-                                          result = Text(
-                                            text,
-                                            style: TextStyle(color: color),
-                                          );
-                                        return result;
-                                      },
-                                      onTap: (_) =>
-                                          relatedVideosController.likeVideo(
-                                              widget.videoLikeStatus == "0"
-                                                  ? 1
-                                                  : 0,
-                                              widget.videoId!,
-                                              token: widget.fcmToken,
-                                              userName:
-                                                  widget.userName!.value)))
+                                            ? 1
+                                            : 0,
+                                        widget.videoId!,
+                                        token: widget.fcmToken,
+                                        userName: widget.userName!.value);
+                                  })),
+                              Obx(() => Text(
+                                    relatedVideosController.totalLikes.value
+                                        .toString(),
+                                    style: TextStyle(color: Colors.white),
+                                  ))
                             ],
                           ),
                         ),
@@ -393,15 +380,13 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                     color: Colors.white,
                                     size: 25,
                                   )),
-                              Text(
-                                widget.commentsCount != null
-                                    ? "${widget.commentsCount}"
-                                    : "0",
-                                style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )
+                             Obx(() =>  Text(
+                               commentsController.commentsCount.value.toString(),
+                               style: const TextStyle(
+                                   fontSize: 12,
+                                   color: Colors.white,
+                                   fontWeight: FontWeight.bold),
+                             ))
                             ],
                           ),
                         ),
@@ -1335,6 +1320,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) => LoginView(isPhoneAvailable));
+
   showReportDialog(int videoId, String name, int id) async {
     try {
       List<String> reasonList = [];

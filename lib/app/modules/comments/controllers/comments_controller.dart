@@ -13,7 +13,7 @@ import '../../../utils/utils.dart';
 class CommentsController extends GetxController with StateMixin {
   //TODO: Implement CommentsController
   var fieldNode = FocusNode().obs;
-
+  var commentsCount = 0.obs;
   final count = 0.obs;
   @override
   void onInit() {
@@ -42,6 +42,7 @@ class CommentsController extends GetxController with StateMixin {
     dio.post("/video/comments", queryParameters: {"video_id": videoId}).then(
             (value) {
           commentsList = CommentsModel.fromJson(value.data).commentsData!.obs;
+          commentsCount.value = commentsList.length;
           change(commentsList, status: RxStatus.success());
         }).onError((error, stackTrace) {
       change(commentsList, status: RxStatus.error());
@@ -62,7 +63,6 @@ class CommentsController extends GetxController with StateMixin {
         successToast(value.data["message"]);
         change(commentsList, status: RxStatus.success());
         sendNotification(fcmToken,title: "New Comments",body: "${userName} commented on your video");
-
         getComments(videoId!);
       } catch (e) {
         Logger().wtf(e);

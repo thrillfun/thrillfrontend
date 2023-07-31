@@ -7,7 +7,6 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFFFF"
         android:paddingBottom="50dp"
         android:orientation="vertical">
 
@@ -32,8 +31,8 @@
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/ad_app_icon"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:paddingEnd="5dp"
                     app:civ_border_color="#00FFFFFF"
                     android:paddingRight="5dp"
@@ -62,16 +61,23 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="test"
-                        android:textColor="@color/gnt_black"
-                        android:textSize="21sp"
+                        android:shadowColor="@color/gnt_black"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="5"
                         android:textStyle="bold" />
                     <TextView
                         android:id="@+id/ad_sponsored"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="bottom"
-                        android:textColor="@color/gnt_black"
-
+                        android:shadowColor="@color/gnt_black"
+                        android:textColor="@color/white"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="5"
                         android:text="Sponsored"
                         android:textSize="12sp"
                         android:textStyle="normal" />
@@ -87,17 +93,21 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:text="test"
-                            android:textColor="@color/gnt_black"
-
+                            android:shadowColor="@color/gnt_black"
+                            android:textColor="@color/white"
                             android:layout_gravity="center"
+                            android:shadowDx="1"
+                            android:shadowDy="1"
+                            android:shadowRadius="5"
                             android:textSize="14sp"
                             android:textStyle="normal" />
 
                     </LinearLayout>
                     <TextView
                         android:id="@+id/ad_body"
-                        android:textColor="@color/white"
+                        android:textColor="@color/gnt_black"
                         android:layout_width="match_parent"
+                        android:visibility="gone"
                         android:layout_height="wrap_content"
                         android:textSize="12sp" />
 

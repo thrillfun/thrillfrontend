@@ -525,8 +525,7 @@ class CommentsView extends GetView<CommentsController> {
                                                         fcmToken.toString(),
                                                     userName: userName)
                                                 .then((value) async {
-                                              relatedVideosController
-                                                  .getAllVideos(false);
+
                                               _textEditingController.clear();
                                             });
                                           },

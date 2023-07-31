@@ -315,15 +315,27 @@ class _PrivateVideosState extends State<PrivateVideos>
           videoPlayerController.play();
         }
       });
+      if (videoPlayerController.value.duration.inSeconds > 0 &&
+          videoPlayerController.value.position.inSeconds > 0) {
+        if (videoPlayerController.value.duration.inSeconds > 10) {
+          if (videoPlayerController.value.position.inSeconds > 0 &&
+              videoPlayerController.value.position.inSeconds == 9) {
+            relatedVideosController.postVideoView(widget.videoId!);
+          }
+        } else if (videoPlayerController.value.duration.inSeconds <= 10) {
+          if (videoPlayerController.value.duration.inSeconds ==
+              videoPlayerController.value.position.inSeconds) {
+            relatedVideosController.postVideoView(widget.videoId!);
+          }
+        }
+      }
+
       if (videoPlayerController.value.duration ==
               videoPlayerController.value.position &&
-          videoPlayerController.value.position > Duration.zero &&
-          !Get.isBottomSheetOpen!) {
-        setState(() {
-          widget.pageController!.animateToPage(widget.nextPage!,
-              duration: const Duration(milliseconds: 700),
-              curve: Curves.easeOut);
-        });
+          videoPlayerController.value.position > Duration.zero) {
+        widget.pageController!.animateToPage(widget.nextPage!,
+            duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+        setState(() {});
       }
     });
 
@@ -1311,9 +1323,8 @@ class _PrivateVideosState extends State<PrivateVideos>
                                     height: 5,
                                   ),
                                   Text(
-                                    widget.publicUser!.name!.isEmpty
-                                        ? widget.publicUser!.username!
-                                        : widget.publicUser!.name!,
+                                    widget.publicUser!.name ??
+                                        widget.publicUser!.username!,
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 14,
@@ -1473,9 +1484,9 @@ class _PrivateVideosState extends State<PrivateVideos>
                                             .toLowerCase()
                                             .contains("original")
                                     ? widget.soundName! +
-                                        " by ${widget.publicUser!.name!.isEmpty ? widget.publicUser!.username : widget.publicUser!.name}"
+                                        " by ${widget.publicUser!.name ?? widget.publicUser!.username}"
                                     : "Original Sound" +
-                                        " by ${widget.publicUser!.name!.isEmpty ? widget.publicUser!.username : widget.publicUser!.name}",
+                                        " by ${widget.publicUser!.name ?? widget.publicUser!.username}",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(color: Colors.white),

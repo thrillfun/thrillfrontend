@@ -39,7 +39,8 @@ class RelatedVideosController extends GetxController
   var nextPageUrl = "https://thrill.fun/api/video/list?page=2".obs;
   var isLikeEnable = true.obs;
   var isLiked = false.obs;
-  var totalLikes =0.obs;
+  var totalLikes = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -81,9 +82,17 @@ class RelatedVideosController extends GetxController
       change(relatedVideosList, status: RxStatus.loading());
     }
     dio.get("video/list").then((value) {
+
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
 
+      relatedVideosList.insert(5, RelatedVideos());
+      relatedVideosList.insert(10, RelatedVideos());
+      relatedVideosList.insert(15, RelatedVideos());
+
+      relatedVideosList.refresh();
+
+      videoLikeStatus(relatedVideosList[0].id ?? 0);
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(relatedVideosList, status: RxStatus.error(error.toString()));
@@ -112,14 +121,28 @@ class RelatedVideosController extends GetxController
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
+
+    if(relatedVideosList.isNotEmpty){
+      relatedVideosList.clear();
+    }
     change(relatedVideosList, status: RxStatus.loading());
 
+
     await dio.get("video/list").then((value) {
+
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
 
+      relatedVideosList.insert(5, RelatedVideos());
+      relatedVideosList.insert(10, RelatedVideos());
+      relatedVideosList.insert(15, RelatedVideos());
+
+      relatedVideosList.refresh();
+
+
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
+
       change(relatedVideosList, status: RxStatus.error());
     });
   }
@@ -136,7 +159,7 @@ class RelatedVideosController extends GetxController
     }).onError((error, stackTrace) {});
   }
 
-  Future<bool> likeVideo(int isLike, int videoId,
+  Future<void> likeVideo(int isLike, int videoId,
       {int userId = 0, String? token, String userName = ""}) async {
     isLikeEnable.value = false;
 
@@ -148,23 +171,36 @@ class RelatedVideosController extends GetxController
       "is_like": "$isLike"
     }).then((value) async {
       // getAllVideos(false);
-      totalLikes.value = value.data["data"]["likes"]??0;
-
-      if ((value.data["data"]["is_like"]??0) == "0") {
-        isLiked.value = false;
-      } else {
-        isLiked.value = true;
-      }
-
+      videoLikeStatus(videoId);
       if (isLike == 1) {
         sendNotification(token.toString(),
             title: "New Likes!",
             body: "${GetStorage().read("userName")} liked your video");
       }
     }).onError((error, stackTrace) {});
-    isLikeEnable.value = true;
+  }
 
-    return isLiked.value;
+  Future<void> videoLikeStatus(
+    int videoId,
+  ) async {
+    isLikeEnable.value = false;
+
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post('video/like-by-id', queryParameters: {
+      "video_id": "$videoId",
+    }).then((value) async {
+      if ((value.data["data"]["is_like"] ?? 0) == 0) {
+        isLiked.value = false;
+      } else {
+        isLiked.value = true;
+      }
+      // getAllVideos(false);
+      totalLikes.value = value.data["data"]["likes"] ?? 0;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
   }
 
   Future<void> followUnfollowUser(int userId, String action,

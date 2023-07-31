@@ -62,7 +62,17 @@ class PrivateVideosPlayerController extends GetxController
       Logger().wtf(error);
     });
   }
-
+  Future<void> postVideoView(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/view", queryParameters: {"video_id": videoId}).then(
+            (value) {
+          if (value.data["status"]) {
+            Logger().wtf("View posted successfully");
+          }
+        }).onError((error, stackTrace) {});
+  }
   getUserPrivateVideos() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
