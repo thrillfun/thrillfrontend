@@ -83,16 +83,16 @@ android {
         applicationId "com.thrill.media"
         minSdkVersion 24
         targetSdkVersion 34
-        versionCode 33
-        versionName '1.6.19'
+        versionCode 35
+        versionName '1.6.21'
     }
 
     signingConfigs {
         release {
-            keyAlias='thrillkey'
-            keyPassword='Thrill@901'
-            storeFile=file('/Users/anantmann/StudioProjects/Thrill-Media/thrillkey')
-            storePassword='Thrill@901'
+            keyAlias = 'thrillkey'
+            keyPassword = 'Thrill@901'
+            storeFile = file('/Users/anantmann/StudioProjects/Thrill-Media/thrillkey')
+            storePassword = 'Thrill@901'
         }
     }
     buildTypes {

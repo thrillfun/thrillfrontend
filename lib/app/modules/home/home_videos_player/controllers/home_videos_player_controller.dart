@@ -12,6 +12,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
 import 'package:loop_page_view/loop_page_view.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:thrill/app/modules/comments/controllers/comments_controller.dart';
 import 'package:thrill/app/modules/following_videos/controllers/following_videos_controller.dart';
 import 'package:thrill/app/modules/following_videos/views/following_videos_view.dart';
 import 'package:thrill/app/modules/trending_videos/controllers/trending_videos_controller.dart';
@@ -19,7 +20,6 @@ import 'package:thrill/app/modules/trending_videos/views/trending_videos_view.da
 import 'package:thrill/app/utils/color_manager.dart';
 import 'package:thrill/app/widgets/no_search_result.dart';
 
-import '../../../../rest/models/related_videos_model.dart';
 import '../../../../rest/models/search_model.dart';
 import '../../../../rest/rest_urls.dart';
 import '../../../../routes/app_pages.dart';
@@ -56,7 +56,7 @@ class HomeVideosPlayerController extends GetxController {
   var nativeAdIsLoaded = false.obs;
   InterstitialAd? _interstitialAd;
   var adsIndexList = [5, 10, 15];
-
+  var commentsController = Get.find<CommentsController>();
   @override
   void onInit() {
     searchHashtags("");
@@ -76,17 +76,21 @@ class HomeVideosPlayerController extends GetxController {
                       //     ? NeverScrollableScrollPhysics()
                       //     : ScrollPhysics(),
                       onPageChanged: (index) async {
+                        commentsController
+                            .getComments(relatedVideosController
+                            .relatedVideosList[index].id!);
+                        relatedVideosController.followUnfollowStatus(
+                            relatedVideosController
+                                .relatedVideosList[index].id!);
                         relatedCurrentIndex.value = index;
                         relatedVideosController.videoLikeStatus(
                           relatedVideosController.relatedVideosList[index].id ??
                               0,
                         );
+
                         if (index % 5 == 0 && index != 0) {
-                          //  await _interstitialAd!.show();
                           loadIntersitialAd();
-
                           await loadNativeAd();
-
                         }
                         if (index ==
                             relatedVideosController.relatedVideosList.length -
@@ -96,7 +100,7 @@ class HomeVideosPlayerController extends GetxController {
                         }
                       },
                       itemBuilder: (context, index) {
-                        return index == 5 || index == 10 || index == 15
+                        return state![index].id==null
                             ? Obx(
                                 () => nativeAdIsLoaded.isFalse
                                     ? Container(
@@ -105,7 +109,7 @@ class HomeVideosPlayerController extends GetxController {
                                         child: loader(),
                                         alignment: Alignment.center,
                                       )
-                                    : Stack(
+                                    :  Stack(
                                         alignment: Alignment.bottomCenter,
                                         children: [
                                           Container(
@@ -205,6 +209,9 @@ class HomeVideosPlayerController extends GetxController {
                       scrollDirection: Axis.vertical,
                       controller: followingPageController,
                       onPageChanged: (index) async {
+                        commentsController
+                            .getComments(followingVideosController
+                            .followingVideosList[index].id!);
                         if (index % 8 == 0 && index != 0) {
                           await _interstitialAd!.show();
                           _interstitialAd = null;
@@ -262,11 +269,14 @@ class HomeVideosPlayerController extends GetxController {
       trendingVideosController.obx(
           (state) => Stack(
                 children: [
-                  LoopPageView.builder(
+                  PageView.builder(
                       itemCount: state!.length,
                       scrollDirection: Axis.vertical,
-                      controller: LoopPageController(),
+                      controller: trendingPageController,
                       onPageChanged: (index) async {
+                        commentsController
+                            .getComments(trendingVideosController
+                            .followingVideosList[index].id!);
                         if (index % 8 == 0 && index != 0) {
                           await _interstitialAd!.show();
                           _interstitialAd = null;

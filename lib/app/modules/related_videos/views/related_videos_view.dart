@@ -1,17 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
-import 'package:like_button/like_button.dart';
-import 'package:logger/logger.dart';
-import 'package:loop_page_view/loop_page_view.dart';
-import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:readmore/readmore.dart';
 import 'package:share_plus/share_plus.dart';
@@ -23,7 +16,6 @@ import 'package:thrill/app/rest/rest_urls.dart';
 import 'package:thrill/app/utils/strings.dart';
 import 'package:thrill/app/widgets/focus_detector.dart';
 import 'package:video_player/video_player.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../rest/models/site_settings_model.dart';
 import '../../../routes/app_pages.dart';
@@ -120,8 +112,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
       duration: const Duration(milliseconds: 5000),
       vsync: this,
     );
-    commentsController
-        .getComments(widget.videoId!);
+    commentsController.getComments(widget.videoId!);
     videoPlayerController =
         VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
           ..setLooping(false)
@@ -143,31 +134,32 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
       }
 
       Future.delayed(const Duration(seconds: 1)).then((value) {
-        if (Get.isBottomSheetOpen!) {
+        if (Get.isBottomSheetOpen! || Get.isDialogOpen!) {
           videoPlayerController.pause();
         } else if (!Get.isBottomSheetOpen! && isVisible.isTrue) {
           videoPlayerController.play();
         }
       });
     });
-    currentDuration.listen((p0) async {
+    currentDuration.listen((duration) async {
+      /*  //code to automatically take to video less than 10 seconds
+      // if(videoPlayerController.value.duration.inSeconds>=10){
+      //   widget.pageController!.animateToPage(widget.nextPage!,
+      //       duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+      //   setState(() {});
+      // }*/
       if (videoPlayerController.value.duration.inSeconds > 0 &&
-          currentDuration.value.inSeconds > 0) {
+          duration.inSeconds > 0) {
         if (videoPlayerController.value.duration.inSeconds > 10) {
-          if (currentDuration.value.inSeconds > 0 &&
-              currentDuration.value.inSeconds == 9) {
-            await relatedVideosController
-                .postVideoView(widget.videoId!)
-                .then((value) => postView.value = false);
+          if (duration.inSeconds > 0 && duration.inSeconds == 9) {
+            await relatedVideosController.postVideoView(widget.videoId!);
           }
         }
       }
       if (videoPlayerController.value.duration.inSeconds < 10 &&
-          currentDuration.value.inSeconds > 0) {
-        if (currentDuration.value.inSeconds == 5) {
-          await relatedVideosController
-              .postVideoView(widget.videoId!)
-              .then((value) => postView.value = false);
+          duration.inSeconds > 0) {
+        if (duration.inSeconds == 5) {
+          await relatedVideosController.postVideoView(widget.videoId!);
         }
       }
     });
@@ -191,9 +183,11 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
         children: [
           GestureDetector(
               onDoubleTap: () {
-                relatedVideosController.likeVideo(
-                    widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!,
-                    userName: widget.userName!.value);
+                checkForLogin(() {
+                  relatedVideosController.likeVideo(
+                      widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!,
+                      userName: widget.userName!.value);
+                });
               },
               onTap: () {
                 if (videoPlayerController.value.isPlaying) {
@@ -324,13 +318,16 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                     size: 25,
                                   ),
                                   onTap: () {
-                                    relatedVideosController.likeVideo(
-                                        relatedVideosController.isLiked.isFalse
-                                            ? 1
-                                            : 0,
-                                        widget.videoId!,
-                                        token: widget.fcmToken,
-                                        userName: widget.userName!.value);
+                                    checkForLogin(() {
+                                      relatedVideosController.likeVideo(
+                                          relatedVideosController
+                                                  .isLiked.isFalse
+                                              ? 1
+                                              : 0,
+                                          widget.videoId!,
+                                          token: widget.fcmToken,
+                                          userName: widget.userName!.value);
+                                    });
                                   })),
                               Obx(() => Text(
                                     relatedVideosController.totalLikes.value
@@ -359,7 +356,10 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                             userId: widget.UserId,
                                             isCommentAllowed:
                                                 widget.isCommentAllowed,
-                                            isfollow: widget.isfollow,
+                                            isfollow: relatedVideosController
+                                                    .isUserFollowed.isTrue
+                                                ? 1
+                                                : 0,
                                             userName: widget.userName!.value,
                                             avatar: widget.avatar ?? "",
                                             fcmToken: widget.fcmToken,
@@ -380,13 +380,14 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                     color: Colors.white,
                                     size: 25,
                                   )),
-                             Obx(() =>  Text(
-                               commentsController.commentsCount.value.toString(),
-                               style: const TextStyle(
-                                   fontSize: 12,
-                                   color: Colors.white,
-                                   fontWeight: FontWeight.bold),
-                             ))
+                              Obx(() => Text(
+                                    commentsController.commentsCount.value
+                                        .toString(),
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ))
                             ],
                           ),
                         ),
@@ -1032,53 +1033,29 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                 relatedVideosController
                                                     .followUnfollowUser(
                                                   widget.UserId!,
-                                                  widget.isfollow == 0
+                                                  relatedVideosController
+                                                          .isUserFollowed
+                                                          .isFalse
                                                       ? "follow"
                                                       : "unfollow",
                                                 );
                                               });
-                                              if (await GetStorage()
-                                                      .read("token") ==
-                                                  null) {
-                                                if (await Permission
-                                                    .phone.isGranted) {
-                                                  await SimDataPlugin
-                                                          .getSimData()
-                                                      .then((value) => value
-                                                              .cards.isEmpty
-                                                          ? showLoginBottomSheet(
-                                                              false.obs)
-                                                          : showLoginBottomSheet(
-                                                              true.obs));
-                                                } else {
-                                                  await Permission.phone
-                                                      .request()
-                                                      .then((value) async =>
-                                                          await SimDataPlugin
-                                                                  .getSimData()
-                                                              .then((value) => value
-                                                                      .cards
-                                                                      .isEmpty
-                                                                  ? showLoginBottomSheet(
-                                                                      false.obs)
-                                                                  : showLoginBottomSheet(
-                                                                      true.obs)));
-                                                }
-                                              } else {}
                                             },
                                             child: Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                       vertical: 5,
                                                       horizontal: 10),
-                                              child: Text(
-                                                widget.isfollow == 0
-                                                    ? "Follow"
-                                                    : "Following",
-                                                style: const TextStyle(
-                                                    fontSize: 10,
-                                                    color: Colors.white),
-                                              ),
+                                              child: Obx(() => Text(
+                                                    relatedVideosController
+                                                            .isUserFollowed
+                                                            .isFalse
+                                                        ? "Follow"
+                                                        : "Following",
+                                                    style: const TextStyle(
+                                                        fontSize: 10,
+                                                        color: Colors.white),
+                                                  )),
                                               decoration: BoxDecoration(
                                                   border: Border.all(
                                                       color: ColorManager

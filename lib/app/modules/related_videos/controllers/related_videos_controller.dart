@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:thrill/app/modules/comments/controllers/comments_controller.dart';
 import 'package:thrill/app/rest/models/related_videos_model.dart';
 import 'package:thrill/app/rest/rest_urls.dart';
 import 'package:thrill/app/utils/utils.dart';
@@ -41,6 +42,8 @@ class RelatedVideosController extends GetxController
   var isLiked = false.obs;
   var totalLikes = 0.obs;
 
+  var isUserFollowed = false.obs;
+  var commentsController =Get.find<CommentsController>();
   @override
   void onInit() {
     super.onInit();
@@ -82,17 +85,11 @@ class RelatedVideosController extends GetxController
       change(relatedVideosList, status: RxStatus.loading());
     }
     dio.get("video/list").then((value) {
-
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
-
-      relatedVideosList.insert(5, RelatedVideos());
-      relatedVideosList.insert(10, RelatedVideos());
-      relatedVideosList.insert(15, RelatedVideos());
-
-      relatedVideosList.refresh();
-
+      commentsController.getComments(relatedVideosList[0].id ?? 0);
       videoLikeStatus(relatedVideosList[0].id ?? 0);
+      followUnfollowStatus(relatedVideosList[0].user!.id!);
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(relatedVideosList, status: RxStatus.error(error.toString()));
@@ -122,27 +119,16 @@ class RelatedVideosController extends GetxController
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
 
-    if(relatedVideosList.isNotEmpty){
-      relatedVideosList.clear();
-    }
     change(relatedVideosList, status: RxStatus.loading());
 
-
     await dio.get("video/list").then((value) {
-
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
 
-      relatedVideosList.insert(5, RelatedVideos());
-      relatedVideosList.insert(10, RelatedVideos());
-      relatedVideosList.insert(15, RelatedVideos());
-
-      relatedVideosList.refresh();
-
-
+      videoLikeStatus(relatedVideosList[0].id ?? 0);
+      followUnfollowStatus(relatedVideosList[0].user!.id!);
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
-
       change(relatedVideosList, status: RxStatus.error());
     });
   }
@@ -203,6 +189,22 @@ class RelatedVideosController extends GetxController
     });
   }
 
+  Future<void> followUnfollowStatus(int userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-by-userid",
+        queryParameters: {"user_id": userId}).then((value) {
+      if (value.data["data"]["is_follow"] == 0) {
+        isUserFollowed.value = false;
+      } else {
+        isUserFollowed.value = true;
+      }
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
   Future<void> followUnfollowUser(int userId, String action,
       {String? searchQuery}) async {
     dio.options.headers = {
@@ -213,10 +215,10 @@ class RelatedVideosController extends GetxController
       "action": "$action"
     }).then((value) {
       if (value.data["status"]) {
-        getAllVideos(false);
       } else {
         errorToast(value.data["message"]);
       }
+      followUnfollowStatus(userId);
     }).onError((error, stackTrace) {});
   }
 

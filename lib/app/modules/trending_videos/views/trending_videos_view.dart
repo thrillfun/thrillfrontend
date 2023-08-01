@@ -98,6 +98,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
   var commentsController = Get.find<CommentsController>();
   late AnimationController _controller;
   var isVisible = false.obs;
+  var currentDuration = Duration().obs;
 
   @override
   void initState() {
@@ -111,22 +112,21 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
           ..initialize().then((value) {
             trendingVideosController.isInitialised.value = true;
             _controller.repeat();
-
             setState(() {});
-          })
-          ..play();
+          });
 
-    videoPlayerController.addListener(() {
+    videoPlayerController.addListener(() async {
+      currentDuration.value = videoPlayerController.value.position;
+
       if (videoPlayerController.value.duration ==
               videoPlayerController.value.position &&
           videoPlayerController.value.position > Duration.zero) {
-        trendingVideosController.postVideoView(widget.videoId!);
-
         widget.pageController!.animateToPage(widget.nextPage!,
             duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
         setState(() {});
       }
-      Future.delayed(Duration(seconds: 1)).then((value) {
+
+      Future.delayed(const Duration(seconds: 1)).then((value) {
         if (Get.isBottomSheetOpen!) {
           videoPlayerController.pause();
         } else if (!Get.isBottomSheetOpen! && isVisible.isTrue) {
@@ -134,8 +134,30 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
         }
       });
     });
-
+    currentDuration.listen((duration) async {
+      /*  //code to automatically take to video less than 10 seconds
+      // if(videoPlayerController.value.duration.inSeconds>=10){
+      //   widget.pageController!.animateToPage(widget.nextPage!,
+      //       duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+      //   setState(() {});
+      // }*/
+      if (videoPlayerController.value.duration.inSeconds > 0 &&
+          duration.inSeconds > 0) {
+        if (videoPlayerController.value.duration.inSeconds > 10) {
+          if (duration.inSeconds > 0 && duration.inSeconds == 9) {
+            await trendingVideosController.postVideoView(widget.videoId!);
+          }
+        }
+      }
+      if (videoPlayerController.value.duration.inSeconds < 10 &&
+          duration.inSeconds > 0) {
+        if (duration.inSeconds == 5) {
+          await trendingVideosController.postVideoView(widget.videoId!);
+        }
+      }
+    });
     setState(() {});
+
     super.initState();
   }
 
@@ -159,8 +181,10 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
         children: [
           GestureDetector(
               onDoubleTap: () {
-                trendingVideosController.likeVideo(
-                    widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!);
+                checkForLogin(() {
+                  trendingVideosController.likeVideo(
+                      widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!);
+                });
               },
               onTap: () {
                 if (videoPlayerController.value.isPlaying) {
@@ -296,11 +320,13 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                     return result;
                                   },
                                   onTap: (_) async {
-                                    trendingVideosController.likeVideo(
-                                      widget.videoLikeStatus == "0" ? 1 : 0,
-                                      widget.videoId!,
-                                      token: widget.fcmToken,
-                                    );
+                                    checkForLogin(() {
+                                      trendingVideosController.likeVideo(
+                                        widget.videoLikeStatus == "0" ? 1 : 0,
+                                        widget.videoId!,
+                                        token: widget.fcmToken,
+                                      );
+                                    });
                                   })),
                             ],
                           ),
@@ -980,71 +1006,36 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                         height: 5,
                                         width: 10,
                                       ),
-                                      Visibility(
-                                        child: InkWell(
-                                            onTap: () async {
-                                              if (await GetStorage()
-                                                      .read("token") ==
-                                                  null) {
-                                                if (await Permission
-                                                    .phone.isGranted) {
-                                                  await SimDataPlugin
-                                                          .getSimData()
-                                                      .then((value) => value
-                                                              .cards.isEmpty
-                                                          ? showLoginBottomSheet(
-                                                              false.obs)
-                                                          : showLoginBottomSheet(
-                                                              true.obs));
-                                                } else {
-                                                  await Permission.phone
-                                                      .request()
-                                                      .then((value) async =>
-                                                          await SimDataPlugin
-                                                                  .getSimData()
-                                                              .then((value) => value
-                                                                      .cards
-                                                                      .isEmpty
-                                                                  ? showLoginBottomSheet(
-                                                                      false.obs)
-                                                                  : showLoginBottomSheet(
-                                                                      true.obs)));
-                                                }
-                                              } else {
-                                                trendingVideosController
-                                                    .followUnfollowUser(
-                                                  widget.UserId!,
-                                                  widget.isfollow == 0
-                                                      ? "follow"
-                                                      : "unfollow",
-                                                );
-                                              }
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 5,
-                                                      horizontal: 10),
-                                              child: Text(
+                                      InkWell(
+                                          onTap: () async {
+                                            checkForLogin(() {
+                                              trendingVideosController
+                                                  .followUnfollowUser(
+                                                widget.UserId!,
                                                 widget.isfollow == 0
-                                                    ? "Follow"
-                                                    : "Following",
-                                                style: const TextStyle(
-                                                    fontSize: 10,
-                                                    color: Colors.white),
-                                              ),
-                                              decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: ColorManager
-                                                          .colorAccent),
-                                                  borderRadius:
-                                                      BorderRadius.circular(5)),
-                                            )),
-                                        visible: GetStorage().read("token") !=
-                                                null &&
-                                            widget.UserId !=
-                                                GetStorage().read("userId"),
-                                      )
+                                                    ? "follow"
+                                                    : "unfollow",
+                                              );
+                                            });
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 5, horizontal: 10),
+                                            child: Text(
+                                              widget.isfollow == 0
+                                                  ? "Follow"
+                                                  : "Following",
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.white),
+                                            ),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: ColorManager
+                                                        .colorAccent),
+                                                borderRadius:
+                                                    BorderRadius.circular(5)),
+                                          ))
                                     ],
                                   ),
                                   const SizedBox(

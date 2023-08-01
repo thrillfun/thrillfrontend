@@ -253,6 +253,7 @@ class _SearchVideosState extends State<SearchVideos>
   var commentsController = Get.find<CommentsController>();
   late AnimationController _controller;
   var isVisible = false.obs;
+  var currentDuration = Duration().obs;
 
   @override
   void initState() {
@@ -272,26 +273,47 @@ class _SearchVideosState extends State<SearchVideos>
             setState(() {});
           });
 
-    videoPlayerController.addListener(() {
-      Future.delayed(Duration(seconds: 1)).then((value) {
+    videoPlayerController.addListener(() async {
+      currentDuration.value = videoPlayerController.value.position;
+
+      if (videoPlayerController.value.duration ==
+          videoPlayerController.value.position &&
+          videoPlayerController.value.position > Duration.zero) {
+        widget.pageController!.animateToPage(widget.nextPage!,
+            duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+        setState(() {});
+      }
+
+      Future.delayed(const Duration(seconds: 1)).then((value) {
         if (Get.isBottomSheetOpen!) {
           videoPlayerController.pause();
         } else if (!Get.isBottomSheetOpen! && isVisible.isTrue) {
           videoPlayerController.play();
         }
       });
-      if (videoPlayerController.value.duration ==
-              videoPlayerController.value.position &&
-          videoPlayerController.value.position > Duration.zero) {
-        relatedVideosController.postVideoView(widget.videoId!);
-        setState(() {
-          widget.pageController!.animateToPage(widget.nextPage!,
-              duration: const Duration(milliseconds: 700),
-              curve: Curves.easeOut);
-        });
+    });
+    currentDuration.listen((duration) async {
+      /*  //code to automatically take to video less than 10 seconds
+      // if(videoPlayerController.value.duration.inSeconds>=10){
+      //   widget.pageController!.animateToPage(widget.nextPage!,
+      //       duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+      //   setState(() {});
+      // }*/
+      if (videoPlayerController.value.duration.inSeconds > 0 &&
+          duration.inSeconds > 0) {
+        if (videoPlayerController.value.duration.inSeconds > 10) {
+          if (duration.inSeconds > 0 && duration.inSeconds == 9) {
+            await relatedVideosController.postVideoView(widget.videoId!);
+          }
+        }
+      }
+      if (videoPlayerController.value.duration.inSeconds < 10 &&
+          duration.inSeconds > 0) {
+        if (duration.inSeconds == 5) {
+          await relatedVideosController.postVideoView(widget.videoId!);
+        }
       }
     });
-
     setState(() {});
 
     relatedVideosController.checkUserBlocked(widget.UserId!);

@@ -18,6 +18,7 @@ import 'package:thrill/app/modules/discover/views/discover_view.dart';
 import 'package:thrill/app/modules/home/home_videos_player/views/home_videos_player_view.dart';
 import 'package:thrill/app/modules/settings/views/settings_view.dart';
 import 'package:thrill/app/modules/wallet/views/wallet_view.dart';
+import 'package:thrill/app/routes/app_pages.dart';
 
 import '../../../rest/models/site_settings_model.dart';
 import '../../../rest/rest_urls.dart';
@@ -50,6 +51,11 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     loadAd();
+    siteSettingsList.listen((p0) {
+      if (p0.isNotEmpty) {
+        showCustomAd();
+      }
+    });
     // ever(nativeAdIsLoaded, (callback) {
     //   if (nativeAdIsLoaded.isTrue && nativeAd != null) {
     //     Get.defaultDialog(content: Container(height: Get.height/2,width: Get.width,child: AdWidget(ad: nativeAd!),));
@@ -100,7 +106,8 @@ class HomeController extends GetxController {
   void loadAd() {
     try {
       nativeAd = NativeAd(
-        nativeTemplateStyle: NativeTemplateStyle(templateType: TemplateType.medium),
+        nativeTemplateStyle:
+            NativeTemplateStyle(templateType: TemplateType.medium),
         adUnitId: _adUnitId,
         // Factory ID registered by your native ad factory implementation.
         listener: NativeAdListener(
@@ -204,18 +211,61 @@ class HomeController extends GetxController {
     };
     await dio.post("SiteSettings").then((value) {
       siteSettingsList.value = SiteSettingsModel.fromJson(value.data).data!;
-      // showCustomAd();
     }).onError((error, stackTrace) {});
   }
 
   showCustomAd() {
     siteSettingsList.forEach((element) {
       if (element.name == "advertisement_image") {
-        Get.defaultDialog(
-            title: "",
-            middleText: "",
-            content: CachedNetworkImage(
-                imageUrl: RestUrl.profileUrl + element.value));
+        showGeneralDialog(
+          context: Get.context!,
+          barrierColor: Colors.black12.withOpacity(0.6),
+          // Background color
+          barrierDismissible: false,
+          barrierLabel: 'Dialog',
+          transitionDuration: Duration(milliseconds: 400),
+          pageBuilder: (_, __, ___) {
+            return Scaffold(
+              body: InkWell(
+                onTap: () => Get.toNamed(Routes.SPIN_WHEEL),
+                child: Stack(
+                  children: [
+                    CachedNetworkImage(
+                        fit: BoxFit.fill,
+                        height: Get.height,
+                        width: Get.width,
+                        imageUrl: RestUrl.profileUrl + element.value),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                          onPressed: () => Get.back(), icon: Icon(Icons.close)),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+        // Get.defaultDialog(
+        //     title: "",
+        //     middleText: "",
+        //     backgroundColor: Colors.transparent.withOpacity(0.0),
+        //     contentPadding: EdgeInsets.zero,
+        //     titlePadding: EdgeInsets.zero,
+        //     content:InkWell(
+        //       onTap: ()=>Get.toNamed(Routes.SPIN_WHEEL),
+        //       child:  Stack(
+        //         children: [
+        //
+        //         CachedNetworkImage(
+        //             fit: BoxFit.fill,
+        //             height: Get.height/1.5,
+        //             width: Get.width,
+        //             imageUrl: RestUrl.profileUrl + element.value),
+        //        Align(
+        //          alignment: Alignment.topRight,
+        //          child:  IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.close)),)
+        //       ],),));
       }
     });
   }

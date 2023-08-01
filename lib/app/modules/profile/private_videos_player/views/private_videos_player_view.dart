@@ -315,21 +315,6 @@ class _PrivateVideosState extends State<PrivateVideos>
           videoPlayerController.play();
         }
       });
-      if (videoPlayerController.value.duration.inSeconds > 0 &&
-          videoPlayerController.value.position.inSeconds > 0) {
-        if (videoPlayerController.value.duration.inSeconds > 10) {
-          if (videoPlayerController.value.position.inSeconds > 0 &&
-              videoPlayerController.value.position.inSeconds == 9) {
-            relatedVideosController.postVideoView(widget.videoId!);
-          }
-        } else if (videoPlayerController.value.duration.inSeconds <= 10) {
-          if (videoPlayerController.value.duration.inSeconds ==
-              videoPlayerController.value.position.inSeconds) {
-            relatedVideosController.postVideoView(widget.videoId!);
-          }
-        }
-      }
-
       if (videoPlayerController.value.duration ==
               videoPlayerController.value.position &&
           videoPlayerController.value.position > Duration.zero) {
