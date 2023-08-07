@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
 import 'package:thrill/app/utils/utils.dart';
 
@@ -10,7 +11,8 @@ import '../../../../rest/rest_urls.dart';
 class HashTagsDetailsController extends GetxController
     with StateMixin<RxList<HashtagRelatedVideos>> {
   RxList<HashtagRelatedVideos> hashTagsDetailsList = RxList();
-
+  final  _bannerAdId = "ca-app-pub-3566466065033894/8796726228";
+  BannerAd? bannerAd;
   var isFavouriteHastag = false.obs;
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
@@ -18,6 +20,7 @@ class HashTagsDetailsController extends GetxController
 
   var nextPageUrl =
       "https://thrill.fun/api/hashtag/top-hashtags-videos?page=1".obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -25,8 +28,8 @@ class HashTagsDetailsController extends GetxController
 
   @override
   void onReady() {
+    loadAd();
     getVideosByHashTags();
-
     super.onReady();
   }
 
@@ -42,15 +45,24 @@ class HashTagsDetailsController extends GetxController
         "Bearer ${await GetStorage().read("token")}";
 
     dio.post("hashtag/get-videos-by-hashtag", queryParameters: {
-      "hashtag_id": "${await GetStorage().read("hashtagId")}"
+      "hashtag_id": "${Get.arguments["hashtagId"]}"
     }).then((value) {
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
-      isFavouriteHastag.value =
-          hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+      hashTagsDetailsList.removeWhere((element) => element.id==null);
+      hashTagsDetailsList.refresh();
+
       change(hashTagsDetailsList, status: RxStatus.success());
-      nextPageUrl.value =
-          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
-              "";
+
+      if (hashTagsDetailsList.isNotEmpty) {
+        isFavouriteHastag.value =
+            hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+
+        nextPageUrl.value =
+            HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
+                "";
+      } else {
+        change(hashTagsDetailsList, status: RxStatus.empty());
+      }
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());
     });
@@ -61,19 +73,21 @@ class HashTagsDetailsController extends GetxController
         "Bearer ${await GetStorage().read("token")}";
 
     dio.post(nextPageUrl.value, queryParameters: {
-      "hashtag_id": "${await GetStorage().read("hashtagId")}"
+      "hashtag_id": "${Get.arguments["hashtagId"]}"
     }).then((value) {
-      nextPageUrl.value =
-          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
-              "";
       if (nextPageUrl.isNotEmpty) {
         hashTagsDetailsList
             .addAll(HashtagDetailsModel.fromJson(value.data).data!);
-      }
-      hashTagsDetailsList.refresh();
+        hashTagsDetailsList.refresh();
 
-      isFavouriteHastag.value =
-          hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+      }
+
+      hashTagsDetailsList.removeWhere((element) => element.id == null);
+
+      nextPageUrl.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
+
       change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {});
   }
@@ -98,5 +112,22 @@ class HashTagsDetailsController extends GetxController
     }).onError((error, stackTrace) {
       Logger().wtf(error);
     });
+  }
+
+  void loadAd() {
+    bannerAd = BannerAd(
+      adUnitId: _bannerAdId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad){
+          Logger().wtf(ad);
+        },
+        onAdFailedToLoad: (ad, err) {
+          Logger().e(err);
+          ad.dispose();
+        },
+      ),
+    )..load();
   }
 }

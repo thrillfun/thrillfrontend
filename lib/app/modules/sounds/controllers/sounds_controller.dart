@@ -112,6 +112,9 @@ class SoundsController extends GetxController
     dio.post("sound/videosbysound", queryParameters: {"sound": soundName}).then(
         (value) {
       videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
+
+      videoList.removeWhere((element) => element.id==null);
+      videoList.refresh();
       change(soundDetails, status: RxStatus.success());
 
         }).onError((error, stackTrace) {

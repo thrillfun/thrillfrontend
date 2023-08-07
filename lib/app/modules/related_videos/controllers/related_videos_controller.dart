@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:file_support/file_support.dart';
@@ -18,6 +19,7 @@ import 'package:thrill/app/utils/utils.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../rest/models/site_settings_model.dart';
+import '../../../routes/app_pages.dart';
 
 class RelatedVideosController extends GetxController
     with StateMixin<RxList<RelatedVideos>> {
@@ -44,10 +46,19 @@ class RelatedVideosController extends GetxController
 
   var isUserFollowed = false.obs;
   var commentsController =Get.find<CommentsController>();
+  var isDialogVisible = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     getAllVideos(true);
+    getSiteSettings();
+    siteSettingsList.listen((p0) {
+      if (p0.isNotEmpty && isDialogVisible.isFalse) {
+        showCustomAd();
+        isDialogVisible = true.obs;
+      }
+    });
   }
 
   @override
@@ -125,6 +136,7 @@ class RelatedVideosController extends GetxController
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
 
+      commentsController.getComments(relatedVideosList[0].id ?? 0);
       videoLikeStatus(relatedVideosList[0].id ?? 0);
       followUnfollowStatus(relatedVideosList[0].user!.id!);
       change(relatedVideosList, status: RxStatus.success());
@@ -214,10 +226,7 @@ class RelatedVideosController extends GetxController
       "publisher_user_id": userId,
       "action": "$action"
     }).then((value) {
-      if (value.data["status"]) {
-      } else {
-        errorToast(value.data["message"]);
-      }
+
       followUnfollowStatus(userId);
     }).onError((error, stackTrace) {});
   }
@@ -418,6 +427,76 @@ class RelatedVideosController extends GetxController
       Logger().wtf(value);
     }).onError((error, stackTrace) {
       Logger().wtf(error);
+    });
+  }
+  showCustomAd() {
+    siteSettingsList.forEach((element) {
+      if (element.name == "advertisement_image") {
+        // showGeneralDialog(
+        //   context: Get.context!,
+        //   barrierColor: Colors.black12.withOpacity(0.6),
+        //   // Background color
+        //   barrierDismissible: false,
+        //   barrierLabel: 'Dialog',
+        //   transitionDuration: Duration(milliseconds: 400),
+        //   pageBuilder: (_, __, ___) {
+        //     return Scaffold(
+        //       backgroundColor: Colors.transparent.withOpacity(0.0),
+        //       body: Container(
+        //         alignment: Alignment.center,
+        //         child: SizedBox(
+        //           height: Get.height / 1.2,
+        //           width: Get.width / 1.2,
+        //           child: InkWell(
+        //             onTap: () {
+        //               Get.back();
+        //               Get.toNamed(Routes.SPIN_WHEEL);
+        //             },
+        //             child: Stack(
+        //               children: [
+        //                 CachedNetworkImage(
+        //                     fit: BoxFit.fill,
+        //                     height: Get.height,
+        //                     width: Get.width,
+        //                     imageUrl: RestUrl.profileUrl + element.value),
+        //                 Align(
+        //                   alignment: Alignment.topRight,
+        //                   child: IconButton(
+        //                       onPressed: () => Get.back(),
+        //                       icon: Icon(Icons.close)),
+        //                 )
+        //               ],
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //     );
+        //   },
+        // );
+        Get.defaultDialog(
+            title: "",
+            middleText: "",
+            backgroundColor: Colors.transparent.withOpacity(0.0),
+            contentPadding: EdgeInsets.zero,
+            titlePadding: EdgeInsets.zero,
+            content:InkWell(
+              onTap: ()=>Get.toNamed(Routes.SPIN_WHEEL),
+              child:  Stack(
+                children: [
+
+                  CachedNetworkImage(
+                      fit: BoxFit.fill,
+                      height: Get.height/1.2,
+                      width: Get.width,
+                      imageUrl: RestUrl.profileUrl + element.value),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child:  IconButton(onPressed: (){
+                      Get.back(closeOverlays: true);
+                      isDialogVisible.value=false;
+                      }, icon: Icon(Icons.close)),)
+                ],),));
+      }
     });
   }
 }

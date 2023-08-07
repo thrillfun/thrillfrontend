@@ -392,10 +392,10 @@ class SoundsView extends GetView<SoundsController> {
                                                         ),
                                                         TextSpan(
                                                             text: " " +
-                                                                controller
+                                                                (controller
                                                                     .videoList[
                                                                         index]
-                                                                    .views!
+                                                                    .views??0)
                                                                     .formatViews(),
                                                             style: const TextStyle(
                                                                 color: Colors

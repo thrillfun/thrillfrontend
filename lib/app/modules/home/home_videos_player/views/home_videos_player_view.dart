@@ -86,7 +86,11 @@ class _HomeVideosPlayerViewState extends State<HomeVideosPlayerView>
                                       fontSize: index ==
                                               controller.selectedIndex.value
                                           ? 16
-                                          : 16),
+                                          : 16,
+                                  fontWeight:  index ==
+                                      controller.selectedIndex.value
+                                      ? FontWeight.bold
+                                      : FontWeight.normal),
                                 ),
                                 SizedBox(
                                   height: 10,

@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
 import 'package:like_button/like_button.dart';
+import 'package:logger/logger.dart';
 import 'package:loop_page_view/loop_page_view.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:readmore/readmore.dart';
@@ -287,6 +288,7 @@ class _PrivateVideosState extends State<PrivateVideos>
   var commentsController = Get.find<CommentsController>();
   late AnimationController _controller;
   var isVisible = false.obs;
+  var currentDuration = Duration().obs;
 
   @override
   void initState() {
@@ -298,33 +300,70 @@ class _PrivateVideosState extends State<PrivateVideos>
       duration: const Duration(milliseconds: 5000),
       vsync: this,
     );
+    commentsController.getComments(widget.videoId!);
     videoPlayerController =
-        VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
-          ..setLooping(false)
-          ..initialize().then((value) {
-            relatedVideosController.isInitialised.value = true;
-            _controller.repeat();
-            setState(() {});
-          });
-
-    videoPlayerController.addListener(() {
-      Future.delayed(Duration(seconds: 1)).then((value) {
-        if (Get.isBottomSheetOpen!) {
-          videoPlayerController.pause();
-        } else if (!Get.isBottomSheetOpen! && isVisible.isTrue) {
-          videoPlayerController.play();
-        }
+    VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
+      ..setLooping(false)
+      ..initialize().then((value) {
+        relatedVideosController.isInitialised.value = true;
+        _controller.repeat();
+        setState(() {});
       });
+
+    videoPlayerController.addListener(() async {
+      currentDuration.value = videoPlayerController.value.position;
+
       if (videoPlayerController.value.duration ==
-              videoPlayerController.value.position &&
+          videoPlayerController.value.position &&
           videoPlayerController.value.position > Duration.zero) {
         widget.pageController!.animateToPage(widget.nextPage!,
             duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
         setState(() {});
       }
+
     });
 
+
+
+    currentDuration.listen((duration) async {
+      Future.delayed(Duration(seconds: 1)).then((value) {
+        try{
+          if (Get.isOverlaysOpen || isVisible.isFalse) {
+            setState(() {
+              videoPlayerController.pause();
+            });
+          } else  {
+            videoPlayerController.play();
+            setState(() {
+            });
+          }
+        }catch(e){
+          Logger().e(e);
+        }
+      });
+      /*  //code to automatically take to video less than 10 seconds
+      // if(videoPlayerController.value.duration.inSeconds>=10){
+      //   widget.pageController!.animateToPage(widget.nextPage!,
+      //       duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+      //   setState(() {});
+      // }*/
+      if (videoPlayerController.value.duration.inSeconds > 0 &&
+          duration.inSeconds > 0) {
+        if (videoPlayerController.value.duration.inSeconds > 10) {
+          if (duration.inSeconds > 0 && duration.inSeconds == 9) {
+            await relatedVideosController.postVideoView(widget.videoId!);
+          }
+        }
+      }
+      if (videoPlayerController.value.duration.inSeconds < 10 &&
+          duration.inSeconds > 0) {
+        if (duration.inSeconds == 5) {
+          await relatedVideosController.postVideoView(widget.videoId!);
+        }
+      }
+    });
     setState(() {});
+
 
     relatedVideosController.checkUserBlocked(widget.UserId!);
   }
@@ -349,15 +388,10 @@ class _PrivateVideosState extends State<PrivateVideos>
         children: [
           GestureDetector(
               onDoubleTap: () {
-                relatedVideosController
-                    .likeVideo(
-                  widget.videoLikeStatus == "0" ? 1 : 0,
-                  widget.videoId!,
-                )
-                    .then((value) {
-                  // if(Get.isDialogOpen!){
-                  //   Get.back();
-                  // }
+                checkForLogin(() {
+                  relatedVideosController.likeVideo(
+                      relatedVideosController.isLiked.isFalse ? 1 : 0, widget.videoId!,
+                      userName: widget.userName!.value);
                 });
               },
               onTap: () {
@@ -449,54 +483,34 @@ class _PrivateVideosState extends State<PrivateVideos>
                               top: 10, bottom: 10, right: 20),
                           child: Column(
                             children: [
-                              // LikeButton(
-                              //     countPostion: CountPostion.bottom,
-                              //     size: 28,
-                              //     circleColor: CircleColor(
-                              //         start: Colors.red.shade200,
-                              //         end: Colors.red),
-                              //     bubblesColor: BubblesColor(
-                              //       dotPrimaryColor: Colors.red.shade200,
-                              //       dotSecondaryColor: Colors.red,
-                              //     ),
-                              //     likeBuilder: (bool isLiked) {
-                              //       widget.videoLikeStatus == "0"
-                              //           ? isLiked = false
-                              //           : isLiked = true;
-                              //       return Icon(
-                              //         isLiked
-                              //             ? Icons.favorite
-                              //             : Icons.favorite_outline,
-                              //         color:
-                              //             isLiked ? Colors.red : Colors.white,
-                              //         size: 25,
-                              //       );
-                              //     },
-                              //     likeCount: widget.like!.value,
-                              //     countBuilder:
-                              //         (int? count, bool isLiked, String text) {
-                              //       var color =
-                              //           isLiked ? Colors.white : Colors.white;
-                              //       Widget result;
-                              //       if (count == 0) {
-                              //         result = Text(
-                              //           "0",
-                              //           style: TextStyle(color: color),
-                              //         );
-                              //       } else
-                              //         result = Text(
-                              //           text,
-                              //           style: TextStyle(color: color),
-                              //         );
-                              //       return result;
-                              //     },
-                              //     onTap: (_) async {
-                              //       relatedVideosController.likeVideo(
-                              //         widget.videoLikeStatus == "0" ? 1 : 0,
-                              //         widget.videoId!,
-                              //         token: widget.fcmToken,
-                              //       );
-                              //     }),
+                              Obx(() => InkWell(
+                                  child: Icon(
+                                    relatedVideosController.isLiked.isTrue
+                                        ? Icons.favorite
+                                        : Icons.favorite_outline,
+                                    color:
+                                    relatedVideosController.isLiked.isTrue
+                                        ? Colors.red
+                                        : Colors.white,
+                                    size: 25,
+                                  ),
+                                  onTap: () {
+                                    checkForLogin(() {
+                                      relatedVideosController.likeVideo(
+                                          relatedVideosController
+                                              .isLiked.isFalse
+                                              ? 1
+                                              : 0,
+                                          widget.videoId!,
+                                          token: widget.fcmToken,
+                                          userName: widget.userName!.value);
+                                    });
+                                  })),
+                              Obx(() => Text(
+                                relatedVideosController.totalLikes.value
+                                    .toString(),
+                                style: TextStyle(color: Colors.white),
+                              ))
                             ],
                           ),
                         ),
@@ -509,44 +523,43 @@ class _PrivateVideosState extends State<PrivateVideos>
                                     commentsController
                                         .getComments(widget.videoId!)
                                         .then((value) {
-                                      Get.bottomSheet(ClipRRect(
-                                        borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(10),
-                                            topRight: Radius.circular(10)),
-                                        child: PrivateCommentsView(
-                                          videoId: widget.videoId!,
-                                          userId: widget.UserId,
-                                          isCommentAllowed:
-                                              widget.isCommentAllowed,
-                                          isfollow: widget.isfollow,
-                                          userName: widget.userName!.value,
-                                          avatar: widget.avatar ?? "",
-                                          fcmToken: widget.fcmToken,
-                                          description:
-                                              widget.description?.value,
+                                      Get.bottomSheet(
+                                        ClipRRect(
+                                          borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(10),
+                                              topRight: Radius.circular(10)),
+                                          child: CommentsView(
+                                            videoId: widget.videoId!,
+                                            userId: widget.UserId,
+                                            isCommentAllowed:
+                                            widget.isCommentAllowed,
+                                            isfollow: relatedVideosController
+                                                .isUserFollowed.isTrue
+                                                ? 1
+                                                : 0,
+                                            userName: widget.userName!.value,
+                                            avatar: widget.avatar ?? "",
+                                            fcmToken: widget.fcmToken,
+                                            description:
+                                            widget.description?.value,
+                                          ),
                                         ),
-                                      ));
+                                      );
                                     });
-                                    // GetStorage().read("videoPrivacy") ==
-                                    //     "Private"
-                                    //     ? showErrorToast(
-                                    //     context, "this video is private!")
-                                    //     : showComments();
                                   },
                                   icon: const Icon(
                                     IconlyLight.chat,
                                     color: Colors.white,
                                     size: 25,
                                   )),
-                              Text(
-                                widget.commentsCount != null
-                                    ? "${widget.commentsCount}"
-                                    : "0",
+                              Obx(() => Text(
+                                commentsController.commentsCount.value
+                                    .toString(),
                                 style: const TextStyle(
                                     fontSize: 12,
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold),
-                              )
+                              ))
                             ],
                           ),
                         ),
@@ -1240,62 +1253,39 @@ class _PrivateVideosState extends State<PrivateVideos>
                                       Visibility(
                                         child: InkWell(
                                             onTap: () async {
-                                              if (await GetStorage()
-                                                      .read("token") ==
-                                                  null) {
-                                                if (await Permission
-                                                    .phone.isGranted) {
-                                                  await SimDataPlugin
-                                                          .getSimData()
-                                                      .then((value) => value
-                                                              .cards.isEmpty
-                                                          ? showLoginBottomSheet(
-                                                              false.obs)
-                                                          : showLoginBottomSheet(
-                                                              true.obs));
-                                                } else {
-                                                  await Permission.phone
-                                                      .request()
-                                                      .then((value) async =>
-                                                          await SimDataPlugin
-                                                                  .getSimData()
-                                                              .then((value) => value
-                                                                      .cards
-                                                                      .isEmpty
-                                                                  ? showLoginBottomSheet(
-                                                                      false.obs)
-                                                                  : showLoginBottomSheet(
-                                                                      true.obs)));
-                                                }
-                                              } else {
+                                              checkForLogin(() {
                                                 relatedVideosController
                                                     .followUnfollowUser(
                                                   widget.UserId!,
-                                                  widget.isfollow == 0
+                                                  relatedVideosController
+                                                      .isUserFollowed
+                                                      .isFalse
                                                       ? "follow"
                                                       : "unfollow",
                                                 );
-                                              }
+                                              });
                                             },
                                             child: Container(
                                               padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 5,
-                                                      horizontal: 10),
-                                              child: Text(
-                                                widget.isfollow == 0
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 5,
+                                                  horizontal: 10),
+                                              child: Obx(() => Text(
+                                                relatedVideosController
+                                                    .isUserFollowed
+                                                    .isFalse
                                                     ? "Follow"
                                                     : "Following",
                                                 style: const TextStyle(
                                                     fontSize: 10,
                                                     color: Colors.white),
-                                              ),
+                                              )),
                                               decoration: BoxDecoration(
                                                   border: Border.all(
                                                       color: ColorManager
                                                           .colorAccent),
                                                   borderRadius:
-                                                      BorderRadius.circular(5)),
+                                                  BorderRadius.circular(5)),
                                             )),
                                         visible: GetStorage().read("token") !=
                                                 null &&
@@ -1366,7 +1356,9 @@ class _PrivateVideosState extends State<PrivateVideos>
                                         Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                             arguments: {
                                               "hashtag_name":
-                                                  "${widget.hashtagsList![index].hashtag!.name}"
+                                              "${widget.hashtagsList![index].hashtag!.name}",
+                                              "hashtagId":
+                                              widget.hashtagsList![index].id
                                             });
                                       },
                                       child: Container(

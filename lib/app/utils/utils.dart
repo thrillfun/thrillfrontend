@@ -24,6 +24,7 @@ import 'package:thrill/app/routes/app_pages.dart';
 import 'package:thrill/app/utils/page_manager.dart';
 import 'package:thrill/app/utils/strings.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:wakelock/wakelock.dart';
 
 import '../rest/rest_urls.dart';
 import 'color_manager.dart';
@@ -442,6 +443,20 @@ musicPlayerBottomSheet(
 
 void seek(Duration position) {
   audioPlayer.seek(position);
+}
+enableWakeLock()async{
+  if(await Wakelock.enabled==false ){
+    await Wakelock.enable();
+  }
+  Logger().wtf(await Wakelock.enabled);
+}
+
+disableWakeLock()async{
+  if(await Wakelock.enabled){
+    await Wakelock.disable();
+  }
+  Logger().wtf(await Wakelock.enabled);
+
 }
 
 Widget imgNet(String imgPath) {

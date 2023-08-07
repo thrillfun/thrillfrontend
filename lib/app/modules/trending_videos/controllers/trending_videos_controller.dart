@@ -23,6 +23,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../rest/models/following_videos_model.dart';
 import '../../../rest/models/site_settings_model.dart';
+import '../../comments/controllers/comments_controller.dart';
 
 class TrendingVideosController extends GetxController
     with StateMixin<RxList<FollowingVideos>> {
@@ -39,7 +40,12 @@ class TrendingVideosController extends GetxController
 
   var isInitialised = false.obs;
   var fileSupport = FileSupport();
+  var isLikeEnable = true.obs;
+  var isLiked = false.obs;
+  var totalLikes = 0.obs;
+  var commentsController = Get.find<CommentsController>();
 
+  var isUserFollowed = false.obs;
   @override
   void onReady() {
     getAllVideos(true);
@@ -92,7 +98,9 @@ class TrendingVideosController extends GetxController
 
         change(followingVideosList, status: RxStatus.success());
       }
-
+      commentsController.getComments(followingVideosList[0].id ?? 0);
+      videoLikeStatus(followingVideosList[0].id ?? 0);
+      followUnfollowStatus(followingVideosList[0].user!.id!);
       change(followingVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followingVideosList, status: RxStatus.error());
@@ -109,7 +117,9 @@ class TrendingVideosController extends GetxController
 
     dio.get("video/top").then((value) {
       followingVideosList = FollowingVideosModel.fromJson(value.data).data!.obs;
-
+      commentsController.getComments(followingVideosList[0].id ?? 0);
+      videoLikeStatus(followingVideosList[0].id ?? 0);
+      followUnfollowStatus(followingVideosList[0].user!.id!);
       change(followingVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followingVideosList, status: RxStatus.error());
@@ -128,9 +138,10 @@ class TrendingVideosController extends GetxController
     }).onError((error, stackTrace) {});
   }
 
-  Future<bool> likeVideo(int isLike, int videoId,
-      {int userId = 0, String? token}) async {
-    var isLiked = false;
+  Future<void> likeVideo(int isLike, int videoId,
+      {int userId = 0, String? token, String userName = ""}) async {
+    isLikeEnable.value = false;
+
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -138,21 +149,54 @@ class TrendingVideosController extends GetxController
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      getAllVideos(false);
+      // getAllVideos(false);
+      videoLikeStatus(videoId);
       if (isLike == 1) {
-        sendNotification(token.toString(), title: "Someone liked your video!");
+        sendNotification(token.toString(),
+            title: "New Likes!",
+            body: "${GetStorage().read("userName")??"Anonymous"} liked your video");
       }
     }).onError((error, stackTrace) {});
-
-    if (isLike == 0) {
-      isLiked = false;
-    } else {
-      isLiked = true;
-    }
-
-    return isLiked;
   }
 
+  Future<void> videoLikeStatus(
+      int videoId,
+      ) async {
+    isLikeEnable.value = false;
+
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post('video/like-by-id', queryParameters: {
+      "video_id": "$videoId",
+    }).then((value) async {
+      if ((value.data["data"]["is_like"] ?? 0) == 0) {
+        isLiked.value = false;
+      } else {
+        isLiked.value = true;
+      }
+      // getAllVideos(false);
+      totalLikes.value = value.data["data"]["likes"] ?? 0;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> followUnfollowStatus(int userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-by-userid",
+        queryParameters: {"user_id": userId}).then((value) {
+      if (value.data["data"]["is_follow"] == 0) {
+        isUserFollowed.value = false;
+      } else {
+        isUserFollowed.value = true;
+      }
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
   Future<void> followUnfollowUser(int userId, String action,
       {String? searchQuery}) async {
     dio.options.headers = {

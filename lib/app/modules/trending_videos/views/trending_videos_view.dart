@@ -26,6 +26,7 @@ import '../../../routes/app_pages.dart';
 import '../../../utils/color_manager.dart';
 import '../../../utils/utils.dart';
 import '../../../widgets/focus_detector.dart';
+import '../../bindings/AdsController.dart';
 import '../../comments/views/comments_view.dart';
 import '../../login/views/login_view.dart';
 
@@ -99,6 +100,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
   late AnimationController _controller;
   var isVisible = false.obs;
   var currentDuration = Duration().obs;
+  var adsController = Get.find<AdsController>();
 
   @override
   void initState() {
@@ -123,13 +125,17 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
           videoPlayerController.value.position > Duration.zero) {
         widget.pageController!.animateToPage(widget.nextPage!,
             duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+
         setState(() {});
       }
 
       Future.delayed(const Duration(seconds: 1)).then((value) {
-        if (Get.isBottomSheetOpen!) {
+        if (Get.isOverlaysOpen ||
+            adsController.isInterstitialAdShowing.isTrue) {
           videoPlayerController.pause();
-        } else if (!Get.isBottomSheetOpen! && isVisible.isTrue) {
+        } else if (!Get.isOverlaysClosed &&
+            isVisible.isTrue &&
+            adsController.isInterstitialAdShowing.isFalse) {
           videoPlayerController.play();
         }
       });
@@ -156,6 +162,14 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
         }
       }
     });
+    // adsController.isInterstitialAdShowing.listen((isAdShowing) {
+    //   if(isAdShowing ==true){
+    //     videoPlayerController.pause();
+    //   }
+    //   else{
+    //     videoPlayerController.play();
+    //   }
+    // });
     setState(() {});
 
     super.initState();
@@ -163,6 +177,9 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
 
   @override
   void dispose() {
+    if (mounted) {
+      widget.pageController!.dispose();
+    }
     videoPlayerController.dispose();
     super.dispose();
   }
@@ -182,8 +199,12 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
           GestureDetector(
               onDoubleTap: () {
                 checkForLogin(() {
-                  trendingVideosController.likeVideo(
-                      widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!);
+                  checkForLogin(() {
+                    trendingVideosController.likeVideo(
+                        trendingVideosController.isLiked.isFalse ? 1 : 0,
+                        widget.videoId!,
+                        userName: widget.userName!.value);
+                  });
                 });
               },
               onTap: () {
@@ -233,19 +254,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                         isVisible.value = true;
                         setState(() {});
                       },
-                      child: Obx(() => trendingVideosController
-                              .isInitialised.isFalse
-                          ? loader()
-                          : SizedBox(
-                              height:
-                                  videoPlayerController.value.aspectRatio < 1.5
-                                      ? Get.height
-                                      : Get.height / 3,
-                              width:
-                                  videoPlayerController.value.aspectRatio > 1.5
-                                      ? videoPlayerController.value.size.width
-                                      : Get.width,
-                              child: VideoPlayer(videoPlayerController)))),
+                      child: VideoPlayer(videoPlayerController)),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -274,60 +283,34 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                               top: 10, bottom: 10, right: 20),
                           child: Column(
                             children: [
-                              Obx(() => LikeButton(
-                                  countPostion: CountPostion.bottom,
-                                  size: 28,
-                                  circleColor: CircleColor(
-                                      start: Colors.red.shade200,
-                                      end: Colors.red),
-                                  bubblesColor: BubblesColor(
-                                    dotPrimaryColor: Colors.red.shade200,
-                                    dotSecondaryColor: Colors.red,
+                              Obx(() => InkWell(
+                                  child: Icon(
+                                    trendingVideosController.isLiked.isTrue
+                                        ? Icons.favorite
+                                        : Icons.favorite_outline,
+                                    color:
+                                        trendingVideosController.isLiked.isTrue
+                                            ? Colors.red
+                                            : Colors.white,
+                                    size: 25,
                                   ),
-                                  isLiked: widget.videoLikeStatus == "0"
-                                      ? false
-                                      : true,
-                                  likeBuilder: (bool isLiked) {
-                                    widget.videoLikeStatus == "0"
-                                        ? isLiked = false
-                                        : isLiked = true;
-                                    return Icon(
-                                      isLiked
-                                          ? Icons.favorite
-                                          : Icons.favorite_outline,
-                                      color:
-                                          isLiked ? Colors.red : Colors.white,
-                                      size: 25,
-                                    );
-                                  },
-                                  likeCount: widget.like!.value,
-                                  countBuilder:
-                                      (int? count, bool isLiked, String text) {
-                                    var color =
-                                        isLiked ? Colors.white : Colors.white;
-                                    Widget result;
-                                    if (count == 0) {
-                                      result = Text(
-                                        "0",
-                                        style: TextStyle(color: color),
-                                      );
-                                    } else {
-                                      result = Text(
-                                        text,
-                                        style: TextStyle(color: color),
-                                      );
-                                    }
-                                    return result;
-                                  },
-                                  onTap: (_) async {
+                                  onTap: () {
                                     checkForLogin(() {
                                       trendingVideosController.likeVideo(
-                                        widget.videoLikeStatus == "0" ? 1 : 0,
-                                        widget.videoId!,
-                                        token: widget.fcmToken,
-                                      );
+                                          trendingVideosController
+                                                  .isLiked.isFalse
+                                              ? 1
+                                              : 0,
+                                          widget.videoId!,
+                                          token: widget.fcmToken,
+                                          userName: widget.userName!.value);
                                     });
                                   })),
+                              Obx(() => Text(
+                                    trendingVideosController.totalLikes.value
+                                        .toString(),
+                                    style: TextStyle(color: Colors.white),
+                                  ))
                             ],
                           ),
                         ),
@@ -342,7 +325,7 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                         .then((value) {
                                       Get.bottomSheet(
                                         ClipRRect(
-                                          borderRadius: BorderRadius.only(
+                                          borderRadius: const BorderRadius.only(
                                               topLeft: Radius.circular(10),
                                               topRight: Radius.circular(10)),
                                           child: CommentsView(
@@ -350,7 +333,10 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                             userId: widget.UserId,
                                             isCommentAllowed:
                                                 widget.isCommentAllowed,
-                                            isfollow: widget.isfollow,
+                                            isfollow: trendingVideosController
+                                                    .isUserFollowed.isTrue
+                                                ? 1
+                                                : 0,
                                             userName: widget.userName!.value,
                                             avatar: widget.avatar ?? "",
                                             fcmToken: widget.fcmToken,
@@ -371,15 +357,14 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                     color: Colors.white,
                                     size: 25,
                                   )),
-                              Text(
-                                widget.commentsCount != null
-                                    ? "${widget.commentsCount}"
-                                    : "0",
-                                style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )
+                              Obx(() => Text(
+                                    commentsController.commentsCount.value
+                                        .toString(),
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ))
                             ],
                           ),
                         ),
@@ -1012,7 +997,8 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                               trendingVideosController
                                                   .followUnfollowUser(
                                                 widget.UserId!,
-                                                widget.isfollow == 0
+                                                trendingVideosController
+                                                        .isUserFollowed.isFalse
                                                     ? "follow"
                                                     : "unfollow",
                                               );
@@ -1021,30 +1007,31 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
                                                 vertical: 5, horizontal: 10),
-                                            child: Text(
-                                              widget.isfollow == 0
-                                                  ? "Follow"
-                                                  : "Following",
-                                              style: const TextStyle(
-                                                  fontSize: 10,
-                                                  color: Colors.white),
-                                            ),
+                                            child: Obx(() => Text(
+                                                  trendingVideosController
+                                                          .isUserFollowed
+                                                          .isFalse
+                                                      ? "Follow"
+                                                      : "Following",
+                                                  style: const TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.white),
+                                                )),
                                             decoration: BoxDecoration(
                                                 border: Border.all(
                                                     color: ColorManager
                                                         .colorAccent),
                                                 borderRadius:
                                                     BorderRadius.circular(5)),
-                                          ))
+                                          )),
                                     ],
                                   ),
                                   const SizedBox(
                                     height: 5,
                                   ),
                                   Text(
-                                    widget.publicUser!.name!.isEmpty
-                                        ? widget.publicUser!.username!
-                                        : widget.publicUser!.name!,
+                                    widget.publicUser!.name ??
+                                        widget.publicUser!.username!,
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 14,
@@ -1100,7 +1087,9 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                                           Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                               arguments: {
                                                 "hashtag_name":
-                                                    "${widget.hashtagsList![index].name}"
+                                                    "${widget.hashtagsList![index].name}",
+                                                "hashtagId": widget
+                                                    .hashtagsList![index].id
                                               });
                                         });
                                       },
@@ -1226,23 +1215,23 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                   ),
                 ],
               )),
-          // IgnorePointer(
-          //   child: Visibility(
-          //     visible: !videoPlayerController.value.isPlaying,
-          //     child: Center(
-          //         child: ClipOval(
-          //       child: Container(
-          //         padding: const EdgeInsets.all(10),
-          //         color: ColorManager.colorAccent.withOpacity(0.5),
-          //         child: const Icon(
-          //           IconlyLight.play,
-          //           size: 25,
-          //           color: Colors.white,
-          //         ),
-          //       ),
-          //     )),
-          //   ),
-          // ),
+          IgnorePointer(
+            child: Visibility(
+              visible: !videoPlayerController.value.isPlaying,
+              child: Center(
+                  child: ClipOval(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  color: ColorManager.colorAccent.withOpacity(0.5),
+                  child: const Icon(
+                    IconlyLight.play,
+                    size: 25,
+                    color: Colors.white,
+                  ),
+                ),
+              )),
+            ),
+          ),
           // IgnorePointer(
           //   child: Obx((() => Visibility(
           //         visible: isVideoPaused.value,

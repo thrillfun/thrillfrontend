@@ -45,6 +45,8 @@ class UserVideosController extends GetxController
       "user_id": "${await GetStorage().read("userId")}"
     }).then((response) {
       userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+      userVideos.removeWhere((element) => element.id == null);
+      userVideos.refresh();
       nextPageUrl.value =
           UserVideosModel.fromJson(response.data).pagination!.nextPageUrl ?? "";
       change(userVideos, status: RxStatus.success());
@@ -64,6 +66,7 @@ class UserVideosController extends GetxController
     }).then((value) {
       if (nextPageUrl.isNotEmpty) {
         userVideos.addAll(UserVideosModel.fromJson(value.data).data!);
+        userVideos.removeWhere((element) => element.id == null);
         userVideos.refresh();
       }
       change(userVideos, status: RxStatus.success());

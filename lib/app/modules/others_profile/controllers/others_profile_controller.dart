@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:get/get.dart';
@@ -25,12 +27,13 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
   var otherUserVideosController = Get.find<OtherUserVideosController>();
   RxList<search.SearchData> searchList = RxList();
   var isSuggestedLoading = false.obs;
+  var isUserFollowed = false.obs;
 
   @override
   void onInit() {
     getUserProfile(Get.arguments["profileId"]);
+    followUnfollowStatus(Get.arguments["profileId"]);
     searchHashtags("");
-
     super.onInit();
   }
 
@@ -51,22 +54,68 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
     dio.post("user/follow-unfollow-user", queryParameters: {
       "publisher_user_id": userId,
       "action": "$action"
-    }).then((value) {
-      getUserProfile(Get.arguments["profileId"]);
+    }).then((value)async {
+      if(action.toLowerCase()=="follow"){
+        sendNotification(userProfile.value.firebaseToken??"",body: "${await GetStorage().read("userName")} started following you",title: "New Follower");
+      }
+      followUnfollowStatus(userId);
       searchHashtags("");
     }).onError((error, stackTrace) {
       Logger().wtf(error);
     });
   }
+  Future<void> sendNotification(String fcmToken,
+      {String? body = "", String? title = "", String? image = ""}) async {
+    var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
+    dio.options.headers = {
+      "Authorization":
+      "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+    };
+    final data = {
+      "to": fcmToken,
+      "notification": {"body": body, "title": title, "image": image},
+      "priority": "high",
+      "image": image,
+      "data": {
+        "url": image,
+        "body": body,
+        "title": title,
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        "id": "1",
+        "status": "done",
+        "image": image
+      }
+    };
+    dio.post("/send", data: jsonEncode(data)).then((value) {
+      Logger().wtf(value);
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
+  Future<void> followUnfollowStatus(int userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-by-userid",
+        queryParameters: {"user_id": userId}).then((value) {
+      if (value.data["data"]["is_follow"] == 0) {
+        isUserFollowed.value = false;
+      } else {
+        isUserFollowed.value = true;
+      }
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
 
-  Future<void> followUnfollowTopUser(int userId, String action) async{
+  Future<void> followUnfollowTopUser(int userId, String action) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     await dio.post("user/follow-unfollow-user", queryParameters: {
       "publisher_user_id": userId,
       "action": "$action"
-    }).then((value)async  {
+    }).then((value) async {
       await searchHashtags("");
     }).onError((error, stackTrace) {
       Logger().wtf(error);
@@ -80,6 +129,7 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
     change(userProfile, status: RxStatus.loading());
     dio.post('/user/get-profile', queryParameters: {"id": id}).then((result) {
       userProfile = UserDetailsModel.fromJson(result.data).data!.user!.obs;
+      followUnfollowStatus(userProfile.value.id!);
       change(userProfile, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(userProfile, status: RxStatus.error(error.toString()));
@@ -126,11 +176,9 @@ class OthersProfileController extends GetxController with StateMixin<Rx<User>> {
       searchList = search.SearchHashTagsModel.fromJson(value.data).data!.obs;
       searchList.refresh();
       isSuggestedLoading = false.obs;
-
     }).onError((error, stackTrace) {
       Logger().wtf(error);
       isSuggestedLoading = false.obs;
-
     });
   }
 

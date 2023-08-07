@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:thrill/app/modules/bindings/AdsController.dart';
 import 'package:thrill/app/modules/camera/controllers/camera_controller.dart';
 import 'package:thrill/app/modules/camera/post_screen/controllers/post_screen_controller.dart';
 import 'package:thrill/app/modules/camera/select_sound/controllers/select_sound_controller.dart';
@@ -31,7 +32,6 @@ import 'package:thrill/app/modules/settings/favourites/favourite_hashtags/contro
 import 'package:thrill/app/modules/settings/referal/controllers/referal_controller.dart';
 import 'package:thrill/app/modules/sounds/controllers/sounds_controller.dart';
 import 'package:thrill/app/modules/spin_wheel/controllers/spin_wheel_controller.dart';
-import 'package:thrill/app/modules/supercontroller/super_controller.dart';
 import 'package:thrill/app/modules/supercontroller/video_editing_controller.dart';
 import 'package:thrill/app/modules/trending_videos/controllers/trending_videos_controller.dart';
 import 'package:thrill/app/modules/wallet/controllers/wallet_controller.dart';
@@ -52,14 +52,14 @@ import '../spin_wheel/user_levels/controllers/user_levels_controller.dart';
 class AppBindings extends Bindings {
   @override
   void dependencies() {
-    Get.put(() => AppSuperController());
+    Get.put(AdsController(), permanent: true);
     Get.lazyPut(() => LoginController(), fenix: true);
     Get.lazyPut(() => LoginScreenController(), fenix: true);
-    Get.lazyPut(() => HomeController(), fenix: true);
+    Get.put(() => HomeController());
     Get.lazyPut(() => OtpverifyController(), fenix: true);
     Get.lazyPut(() => RelatedVideosController(), fenix: true);
-    Get.lazyPut(() => DiscoverController(), fenix: true);
-    Get.lazyPut(() => WalletController(), fenix: true);
+    Get.put(DiscoverController());
+    Get.put(WalletController());
     Get.lazyPut(() => WalletTrasactionsController(), fenix: true);
     Get.lazyPut(() => ProfileController(), fenix: true);
     Get.lazyPut(() => UserVideosController(), fenix: true);
@@ -69,7 +69,7 @@ class AppBindings extends Bindings {
     Get.lazyPut(() => UsersFollowingController(), fenix: true);
     Get.lazyPut(() => FollowingsController(), fenix: true);
     Get.lazyPut(() => FollowersController(), fenix: true);
-    Get.lazyPut(() => SpinWheelController(), fenix: true);
+    Get.put(SpinWheelController());
     Get.lazyPut(() => UserLevelsController(), fenix: true);
     Get.lazyPut(() => OthersProfileController(), fenix: true);
     Get.lazyPut(() => OtherUserVideosController(), fenix: true);
@@ -95,6 +95,5 @@ class AppBindings extends Bindings {
     Get.lazyPut(() => HomeVideosPlayerController(), fenix: true);
     Get.lazyPut(() => PostScreenController(), fenix: false);
     Get.lazyPut(() => ConnectionManagerController(), fenix: false);
-
   }
 }

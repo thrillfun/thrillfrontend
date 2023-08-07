@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
+import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:readmore/readmore.dart';
 import 'package:share_plus/share_plus.dart';
@@ -101,13 +102,14 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
   var isVisible = false.obs;
   var postView = false.obs;
   var currentDuration = Duration().obs;
+  var isVideoPaused = false.obs;
 
   @override
   void initState() {
     // TODO: implement initState
 
     super.initState();
-
+    enableWakeLock();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 5000),
       vsync: this,
@@ -132,34 +134,54 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
             duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
         setState(() {});
       }
-
-      Future.delayed(const Duration(seconds: 1)).then((value) {
-        if (Get.isBottomSheetOpen! || Get.isDialogOpen!) {
-          videoPlayerController.pause();
-        } else if (!Get.isBottomSheetOpen! && isVisible.isTrue) {
-          videoPlayerController.play();
+      1.seconds.delay(() {
+        try {
+          if (Get.isOverlaysOpen || isVisible.isFalse) {
+            setState(() {
+              videoPlayerController.pause();
+            });
+          } else {
+            videoPlayerController.play();
+            setState(() {});
+          }
+        } catch (e) {
+          Logger().e(e);
         }
       });
     });
+
+    relatedVideosController.isDialogVisible.listen((p0) {
+      if (p0 == true) {
+        setState(() {
+          videoPlayerController.pause();
+        });
+      } else {
+        videoPlayerController.play();
+        setState(() {});
+      }
+    });
     currentDuration.listen((duration) async {
-      /*  //code to automatically take to video less than 10 seconds
-      // if(videoPlayerController.value.duration.inSeconds>=10){
-      //   widget.pageController!.animateToPage(widget.nextPage!,
-      //       duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
-      //   setState(() {});
-      // }*/
-      if (videoPlayerController.value.duration.inSeconds > 0 &&
-          duration.inSeconds > 0) {
-        if (videoPlayerController.value.duration.inSeconds > 10) {
-          if (duration.inSeconds > 0 && duration.inSeconds == 9) {
+      //code to automatically take to video less than 10 seconds
+      /*    if(videoPlayerController.value.duration.inSeconds.isGreaterThan(9)){
+        widget.pageController!.animateToPage(widget.nextPage!,
+            duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+        setState(() {});
+      }*/
+      if (videoPlayerController.value.duration.inSeconds.isGreaterThan(0) &&
+          duration.inSeconds.isGreaterThan(0)) {
+        if (videoPlayerController.value.duration.inSeconds.isGreaterThan(10)) {
+          if (duration.inSeconds.isGreaterThan(0) &&
+              duration.inSeconds.isEqual(9)) {
             await relatedVideosController.postVideoView(widget.videoId!);
           }
         }
       }
-      if (videoPlayerController.value.duration.inSeconds < 10 &&
-          duration.inSeconds > 0) {
-        if (duration.inSeconds == 5) {
-          await relatedVideosController.postVideoView(widget.videoId!);
+      if (videoPlayerController.value.duration.inSeconds.isLowerThan(10) &&
+          duration.inSeconds.isGreaterThan(0)) {
+        if (duration.inSeconds.isEqual(5)) {
+          1.seconds.delay(() async {
+            await relatedVideosController.postVideoView(widget.videoId!);
+          });
         }
       }
     });
@@ -170,8 +192,11 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
 
   @override
   void dispose() {
+    disableWakeLock();
     videoPlayerController.dispose();
-    widget.pageController!.dispose();
+    if (mounted) {
+      widget.pageController!.dispose();
+    }
     super.dispose();
   }
 
@@ -185,7 +210,8 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
               onDoubleTap: () {
                 checkForLogin(() {
                   relatedVideosController.likeVideo(
-                      widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!,
+                      relatedVideosController.isLiked.isFalse ? 1 : 0,
+                      widget.videoId!,
                       userName: widget.userName!.value);
                 });
               },
@@ -247,36 +273,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                         isVisible.value = true;
                         setState(() {});
                       },
-                      child: Obx(() => relatedVideosController
-                              .isInitialised.isFalse
-                          ? loader()
-                          : SizedBox(
-                              height:
-                                  videoPlayerController.value.aspectRatio < 1.5
-                                      ? Get.height
-                                      : Get.height / 3,
-                              width:
-                                  videoPlayerController.value.aspectRatio > 1.5
-                                      ? videoPlayerController.value.size.width
-                                      : Get.width,
-                              child: VideoPlayer(videoPlayerController)))),
-                  // Center(
-                  //   child: VisibilityDetector(
-                  //     onVisibilityChanged: (info) {
-                  //       if (info.visibleFraction == 0) {
-                  //         isVisible.value = false;
-                  //         videoPlayerController.pause();
-                  //         setState(() {});
-                  //       } else {
-                  //         isVisible.value = true;
-                  //         videoPlayerController.play();
-                  //         setState(() {});
-                  //       }
-                  //     },
-                  //     key: const Key("unique key"),
-                  //     child: ,
-                  //   ),
-                  // ),
+                      child: VideoPlayer(videoPlayerController)),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -292,8 +289,6 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                       ),
                     ),
                   ),
-                  //AspectRatio(aspectRatio: videoPlayerController.value.aspectRatio,child: VideoPlayer(videoPlayerController),)
-
                   Container(
                     alignment: Alignment.centerRight,
                     child: Column(
@@ -369,11 +364,6 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                         ),
                                       );
                                     });
-                                    // GetStorage().read("videoPrivacy") ==
-                                    //     "Private"
-                                    //     ? showErrorToast(
-                                    //     context, "this video is private!")
-                                    //     : showComments();
                                   },
                                   icon: const Icon(
                                     IconlyLight.chat,
@@ -853,88 +843,6 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                                 const SizedBox(
                                                   height: 10,
                                                 ),
-                                                // InkWell(
-                                                //   onTap: () async {
-                                                //     if (await GetStorage()
-                                                //             .read("token") ==
-                                                //         null) {
-                                                //       if (await Permission
-                                                //           .phone.isGranted) {
-                                                //         await SimDataPlugin
-                                                //                 .getSimData()
-                                                //             .then((value) => value
-                                                //                     .cards
-                                                //                     .isEmpty
-                                                //                 ? Get.bottomSheet(
-                                                //                     LoginView(
-                                                //                         false
-                                                //                             .obs))
-                                                //                 : Get.bottomSheet(
-                                                //                     LoginView(true
-                                                //                         .obs)));
-                                                //       } else {
-                                                //         await Permission.phone
-                                                //             .request()
-                                                //             .then((value) async => await SimDataPlugin
-                                                //                     .getSimData()
-                                                //                 .then((value) => value
-                                                //                         .cards
-                                                //                         .isEmpty
-                                                //                     ? Get.bottomSheet(
-                                                //                         LoginView(false
-                                                //                             .obs))
-                                                //                     : Get.bottomSheet(
-                                                //                         LoginView(
-                                                //                             true.obs))));
-                                                //       }
-                                                //     } else {
-                                                //       relatedVideosController
-                                                //           .notInterested(
-                                                //         widget.videoId!,
-                                                //       );
-                                                //     }
-                                                //     // userDetailsController
-                                                //     //     .followUnfollowUser(
-                                                //     //     widget.UserId,
-                                                //     //     widget.isfollow == 0
-                                                //     //         ? "follow"
-                                                //     //         : "unfollow",
-                                                //     //     token: widget
-                                                //     //         .publicUser!
-                                                //     //         .firebaseToken
-                                                //     //         .toString());
-                                                //     // followingVideosController
-                                                //     //     .getAllVideos();
-                                                //   },
-                                                //   child: Row(
-                                                //     children: [
-                                                //       widget.isfollow! == 0
-                                                //           ? const Icon(
-                                                //               Icons.report,
-                                                //               color: ColorManager
-                                                //                   .colorAccent,
-                                                //               size: 30,
-                                                //             )
-                                                //           : const Icon(
-                                                //               Icons.report,
-                                                //               color: ColorManager
-                                                //                   .colorAccent,
-                                                //               size: 30,
-                                                //             ),
-                                                //       const SizedBox(
-                                                //         width: 10,
-                                                //       ),
-                                                //       const Text(
-                                                //         "Not Interested",
-                                                //         style: TextStyle(
-                                                //             fontWeight:
-                                                //                 FontWeight.bold,
-                                                //             color: ColorManager
-                                                //                 .colorAccent),
-                                                //       )
-                                                //     ],
-                                                //   ),
-                                                // )
                                               ]),
                                         ),
                                         shape: RoundedRectangleBorder(
@@ -1128,7 +1036,9 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                           Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                               arguments: {
                                                 "hashtag_name":
-                                                    "${widget.hashtagsList![index].name}"
+                                                    "${widget.hashtagsList![index].name}",
+                                                "hashtagId": widget
+                                                    .hashtagsList![index].id
                                               });
                                         });
                                       },
@@ -1254,23 +1164,23 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                   ),
                 ],
               )),
-          // IgnorePointer(
-          //   child: Visibility(
-          //     visible: !videoPlayerController.value.isPlaying,
-          //     child: Center(
-          //         child: ClipOval(
-          //       child: Container(
-          //         padding: const EdgeInsets.all(10),
-          //         color: ColorManager.colorAccent.withOpacity(0.5),
-          //         child: const Icon(
-          //           IconlyLight.play,
-          //           size: 25,
-          //           color: Colors.white,
-          //         ),
-          //       ),
-          //     )),
-          //   ),
-          // ),
+          IgnorePointer(
+            child: Visibility(
+              visible: !videoPlayerController.value.isPlaying,
+              child: Center(
+                  child: ClipOval(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  color: ColorManager.colorAccent.withOpacity(0.5),
+                  child: const Icon(
+                    IconlyLight.play,
+                    size: 25,
+                    color: Colors.white,
+                  ),
+                ),
+              )),
+            ),
+          ),
           // IgnorePointer(
           //   child: Obx((() => Visibility(
           //         visible: isVideoPaused.value,

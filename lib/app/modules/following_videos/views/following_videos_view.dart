@@ -165,38 +165,12 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
     super.initState();
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   // TODO: implement didChangeAppLifecycleState
-  //   switch (state) {
-  //     case AppLifecycleState.resumed:
-  //       // TODO: Handle this case.
-  //       if (isVisible.isTrue) {
-  //         videoPlayerController.play();
-  //       }
-  //       break;
-  //     case AppLifecycleState.inactive:
-  //       // Do like this in other lifecylestate if required !
-  //       isVisible.value = false;
-  //       videoPlayerController.pause();
-  //       break;
-  //     case AppLifecycleState.paused:
-  //       isVisible.value = false;
-  //       videoPlayerController.pause();
-  //       break;
-  //     case AppLifecycleState.detached:
-  //       isVisible.value = false;
-  //       videoPlayerController.pause();
-  //       // TODO: Handle this case.
-  //       break;
-  //   }
-  //   super.didChangeAppLifecycleState(state);
-  // }
-
   @override
   void dispose() {
+    if (mounted) {
+      widget.pageController!.dispose();
+    }
     videoPlayerController.dispose();
-
     super.dispose();
   }
 
@@ -224,7 +198,8 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
               onDoubleTap: () {
                 checkForLogin(() {
                   followingVideosController.likeVideo(
-                      widget.videoLikeStatus == "0" ? 1 : 0, widget.videoId!,
+                      followingVideosController.isLiked.isFalse ? 1 : 0,
+                      widget.videoId!,
                       userName: widget.userName!.value);
                 });
               },
@@ -828,39 +803,7 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                                                 ),
                                                 InkWell(
                                                   onTap: () async {
-                                                    if (await GetStorage()
-                                                            .read("token") ==
-                                                        null) {
-                                                      if (await Permission
-                                                          .phone.isGranted) {
-                                                        await SimDataPlugin
-                                                                .getSimData()
-                                                            .then((value) => value
-                                                                    .cards
-                                                                    .isEmpty
-                                                                ? Get.bottomSheet(
-                                                                    LoginView(
-                                                                        false
-                                                                            .obs))
-                                                                : Get.bottomSheet(
-                                                                    LoginView(true
-                                                                        .obs)));
-                                                      } else {
-                                                        await Permission.phone
-                                                            .request()
-                                                            .then((value) async => await SimDataPlugin
-                                                                    .getSimData()
-                                                                .then((value) => value
-                                                                        .cards
-                                                                        .isEmpty
-                                                                    ? Get.bottomSheet(
-                                                                        LoginView(false
-                                                                            .obs))
-                                                                    : Get.bottomSheet(
-                                                                        LoginView(
-                                                                            true.obs))));
-                                                      }
-                                                    } else {
+                                                    checkForLogin(() async {
                                                       await followingVideosController
                                                           .checkUserBlocked(
                                                               widget.UserId!)
@@ -870,8 +813,8 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                                                                       widget
                                                                           .UserId!,
                                                                       value));
-                                                    }
-                                                    // if (
+                                                    });
+                                                    // if (;
                                                     //     GetStorage().read(
                                                     //         "token") !=
                                                     //         null) {
@@ -908,12 +851,7 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                                                         width: 10,
                                                       ),
                                                       Obx(() => Text(
-                                                            followingVideosController
-                                                                        .isUserBlocked
-                                                                        .value ==
-                                                                    true
-                                                                ? "Block User..."
-                                                                : "Unblock User...",
+                                                            "Block User...",
                                                             style: const TextStyle(
                                                                 fontWeight:
                                                                     FontWeight
@@ -1204,7 +1142,9 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                                         Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                             arguments: {
                                               "hashtag_name":
-                                                  "${widget.hashtagsList![index].name}"
+                                              "${widget.hashtagsList![index].name}",
+                                              "hashtagId":
+                                              widget.hashtagsList![index].id
                                             });
                                       },
                                       child: Container(
@@ -1324,23 +1264,24 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                   ),
                 ],
               )),
-          // IgnorePointer(
-          //   child: Visibility(
-          //     visible: !videoPlayerController.value.isPlaying,
-          //     child: Center(
-          //         child: ClipOval(
-          //       child: Container(
-          //         padding: const EdgeInsets.all(10),
-          //         color: ColorManager.colorAccent.withOpacity(0.5),
-          //         child: const Icon(
-          //           IconlyLight.play,
-          //           size: 25,
-          //           color: Colors.white,
-          //         ),
-          //       ),
-          //     )),
-          //   ),
-          // ),
+          IgnorePointer(
+            child: Visibility(
+              visible: !videoPlayerController.value.isPlaying &&
+                  videoPlayerController.value.isInitialized,
+              child: Center(
+                  child: ClipOval(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  color: ColorManager.colorAccent.withOpacity(0.5),
+                  child: const Icon(
+                    IconlyLight.play,
+                    size: 25,
+                    color: Colors.white,
+                  ),
+                ),
+              )),
+            ),
+          ),
           // IgnorePointer(
           //   child: Obx((() => Visibility(
           //         visible: isVideoPaused.value,

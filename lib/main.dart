@@ -36,7 +36,13 @@ void main() async {
     await Permission.notification.request();
   }
   MobileAds.instance.initialize();
-  MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['62C93BF848F45761C3536701626D0E50','3AA759594FD19961A79D03130D1F9A87']));
+  MobileAds.instance
+      .updateRequestConfiguration(RequestConfiguration(testDeviceIds: [
+    '62C93BF848F45761C3536701626D0E50',
+    '3AA759594FD19961A79D03130D1F9A87',
+    '355A9ECF92AB39727391C9EFAACA9CD5',
+    'E832C8BE9072FDD05A1B4C879E930D1E'
+  ]));
   await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
 
   FlutterError.onError = (errorDetails) {
@@ -98,15 +104,12 @@ void main() async {
         // Get.toNamed(Routes.OTHERS_PROFILE, arguments: {
         //   "profileId": pendingDynamicLinkData.link.queryParameters["id"]
         // });
-
       } else if (pendingDynamicLinkData.link.queryParameters["type"] ==
           "video") {
-
       } else if (pendingDynamicLinkData.link.queryParameters["type"] ==
           "referal") {
         await GetStorage().write("referral_code",
             pendingDynamicLinkData.link.queryParameters["referal"].toString());
-
       }
     },
   );

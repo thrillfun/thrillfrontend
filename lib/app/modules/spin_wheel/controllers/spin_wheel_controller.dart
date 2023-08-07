@@ -38,7 +38,7 @@ class SpinWheelController extends GetxController
 
   @override
   void onInit() {
-    streamController = StreamController<int>();
+    streamController = StreamController<int>.broadcast();
 
     getWheelData();
 
@@ -113,8 +113,11 @@ class SpinWheelController extends GetxController
       isRewardWon = true.obs;
       rewardMsg.value = value.data["message"];
       random = getRandomElement(chanceList);
-      Future.delayed(Duration(seconds: 7))
-          .then((value) => isRewardWon.value = false);
+      7.seconds.delay((){
+        isSpinning.toggle();
+        isRewardWon.value = false;
+      });
+
     }).onError((error, stackTrace) {
       change(wheelData, status: RxStatus.error(error.toString()));
     });

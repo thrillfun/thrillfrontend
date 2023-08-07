@@ -1361,7 +1361,10 @@ class _SearchVideosState extends State<SearchVideos>
                                         Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                             arguments: {
                                               "hashtag_name":
-                                                  "${widget.hashtagsList![index].hashtag == null ? widget.hashtagsList![index].name! : widget.hashtagsList![index].hashtag!.name!}" //hashtag name empty
+                                              "${widget.hashtagsList![index].hashtag!=null?widget.hashtagsList![index].hashtag!.name: widget.hashtagsList![index].name}",
+                                              "hashtagId":
+                                              widget.hashtagsList![index].hashtag!=null?widget.hashtagsList![index].hashtag!.id: widget.hashtagsList![index].id
+
                                             });
                                       },
                                       child: Container(

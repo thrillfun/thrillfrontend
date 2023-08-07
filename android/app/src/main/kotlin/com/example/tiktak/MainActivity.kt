@@ -26,6 +26,6 @@ class MainActivity: FlutterActivity() {
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
-        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "adFactoryExample")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "adFactory")
     }
 }

@@ -49,6 +49,8 @@ class OtherUserVideosController extends GetxController
     }).then((response) {
       userVideos.clear();
       userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+      userVideos.removeWhere((element) => element.id == null);
+      userVideos.refresh();
       nextPageUrl.value =
           UserVideosModel.fromJson(response.data).pagination!.nextPageUrl ?? "";
       change(userVideos, status: RxStatus.success());
@@ -69,7 +71,7 @@ class OtherUserVideosController extends GetxController
     }).then((value) {
       if (nextPageUrl.isNotEmpty) {
         UserVideosModel.fromJson(value.data).data!.forEach((element) {
-          userVideos.add(element);
+          userVideos.addIf(element.id != null, element);
         });
         userVideos.refresh();
       }

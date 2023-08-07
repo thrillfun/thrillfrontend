@@ -16,6 +16,7 @@ import '../../../../rest/models/site_settings_model.dart';
 import '../../../../rest/models/videos_by_sound_model.dart';
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/utils.dart';
+import '../../../comments/controllers/comments_controller.dart';
 
 class SoundVideosController extends GetxController
     with StateMixin<RxList<VideosBySound>> {
@@ -31,8 +32,11 @@ class SoundVideosController extends GetxController
   var isInitialised = false.obs;
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
-  var isLiked = false;
+  var isLiked = false.obs;
+  var totalLikes = 0.obs;
 
+  var isUserFollowed = false.obs;
+  var commentsController = Get.find<CommentsController>();
   @override
   void onInit() {
     getVideosBySound(Get.arguments["sound_name"] ?? "");
@@ -111,8 +115,8 @@ class SoundVideosController extends GetxController
     });
   }
 
-  Future<bool> likeVideo(int isLike, int videoId,
-      {int userId = 0, String? token}) async {
+  Future<void> likeVideo(int isLike, int videoId,
+      {int userId = 0, String? token, String userName = ""}) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -120,27 +124,51 @@ class SoundVideosController extends GetxController
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      getVideosBySound(Get.arguments["sound_name"] ?? "");
+      // getAllVideos(false);
+      videoLikeStatus(videoId);
       if (isLike == 1) {
-        sendNotification(token.toString(), title: "Someone liked your video!");
-        // await notificationsController.sendFcmNotification(token.toString(),
-        //     title:
-        //     "${await GetStorage().read("user")["username"]} liked you video",
-        //     body: "Enjoy",
-        //     image: RestUrl.profileUrl +
-        //         await GetStorage().read("user")["avatar"].toString());
-        // await notificationsController.sendChatNotifcations(userId,
-        //     "${await GetStorage().read("user")["username"]} liked your video!");
+        sendNotification(token.toString(),
+            title: "New Likes!",
+            body: "${GetStorage().read("userName")} liked your video");
       }
     }).onError((error, stackTrace) {});
+  }
 
-    if (isLike == 0) {
-      isLiked = false;
-    } else {
-      isLiked = true;
-    }
+  Future<void> videoLikeStatus(
+    int videoId,
+  ) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post('video/like-by-id', queryParameters: {
+      "video_id": "$videoId",
+    }).then((value) async {
+      if ((value.data["data"]["is_like"] ?? 0) == 0) {
+        isLiked.value = false;
+      } else {
+        isLiked.value = true;
+      }
+      // getAllVideos(false);
+      totalLikes.value = value.data["data"]["likes"] ?? 0;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
 
-    return isLiked;
+  Future<void> followUnfollowStatus(int userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-by-userid",
+        queryParameters: {"user_id": userId}).then((value) {
+      if (value.data["data"]["is_follow"] == 0) {
+        isUserFollowed.value = false;
+      } else {
+        isUserFollowed.value = true;
+      }
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
   }
 
   Future<void> followUnfollowUser(int userId, String action,
@@ -152,11 +180,7 @@ class SoundVideosController extends GetxController
       "publisher_user_id": userId,
       "action": "$action"
     }).then((value) {
-      if (value.data["status"]) {
-      } else {
-        errorToast(value.data["message"]);
-      }
-      getVideosBySound(Get.arguments["sound_name"] ?? "");
+      followUnfollowStatus(userId);
     }).onError((error, stackTrace) {});
   }
 
@@ -167,8 +191,8 @@ class SoundVideosController extends GetxController
     await dio.post("user/is-user-blocked",
         queryParameters: {"blocked_user": userId}).then((value) {
       isUserBlocked.value = value.data["status"];
-      // getAllVideos();
-    }).onError((error, stackTrace) => errorToast(error.toString()));
+      // getAllVideos(false);
+    }).onError((error, stackTrace) {});
     return isUserBlocked.value;
   }
 
@@ -181,15 +205,11 @@ class SoundVideosController extends GetxController
       "action": isBlocked ? "Unblock" : "Block"
     }).then((value) {
       if (value.data["status"]) {
-        getVideosBySound(Get.arguments["sound_name"] ?? "");
-
         successToast(value.data["message"]);
       } else {
         errorToast(value.data["message"]);
       }
-    }).onError((error, stackTrace) {
-      errorToast(error.toString());
-    });
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> deleteUserVideo(int videoId) async {

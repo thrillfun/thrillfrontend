@@ -16,6 +16,7 @@ import '../../../../rest/models/site_settings_model.dart';
 import '../../../../rest/models/user_videos_model.dart';
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/utils.dart';
+import '../../../comments/controllers/comments_controller.dart';
 
 class OthersProfileVideosController extends GetxController
     with StateMixin<RxList<Videos>> {
@@ -32,6 +33,12 @@ class OthersProfileVideosController extends GetxController
   var nextPageUrl = "https://thrill.fun/api/video/user-videos?page=1".obs;
   var currentPage = 1.obs;
   var nextPage = 2.obs;
+  var isLikeEnable = true.obs;
+  var isLiked = false.obs;
+  var totalLikes = 0.obs;
+
+  var isUserFollowed = false.obs;
+  var commentsController = Get.find<CommentsController>();
   @override
   void onInit() {
     if (userVideos.isNotEmpty) {
@@ -51,35 +58,6 @@ class OthersProfileVideosController extends GetxController
     super.onClose();
   }
 
-  Future<void> notInterested(int videoId) async {
-    dio.options.headers = {
-      "Authorization": "Bearer ${await GetStorage().read("token")}"
-    };
-    dio.post("video/change_interest", queryParameters: {
-      "content_id": videoId,
-      "filter_by": "tag"
-    }).then((value) {
-      value.data["status"]
-          ? successToast(value.data["message"])
-          : errorToast(value.data["message"]);
-      getUserVideos();
-    }).onError((error, stackTrace) {
-      Logger().wtf(error);
-    });
-  }
-
-  Future<void> postVideoView(int videoId) async {
-    dio.options.headers = {
-      "Authorization": "Bearer ${await GetStorage().read("token")}"
-    };
-    dio.post("video/view", queryParameters: {"video_id": videoId}).then(
-        (value) {
-      if (value.data["status"]) {
-        Logger().wtf("View posted successfully");
-      }
-    }).onError((error, stackTrace) {});
-  }
-
   Future<void> getUserVideos() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -91,6 +69,11 @@ class OthersProfileVideosController extends GetxController
       "user_id": "${Get.arguments["profileId"]}"
     }).then((response) {
       userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+      userVideos.removeWhere((element) => element.id == null);
+      userVideos.refresh();
+      commentsController.getComments(userVideos[0].id ?? 0);
+      videoLikeStatus(userVideos[0].id ?? 0);
+      followUnfollowStatus(userVideos[0].user!.id!);
       change(userVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(userVideos, status: RxStatus.error());
@@ -132,11 +115,43 @@ class OthersProfileVideosController extends GetxController
           userVideos.add(element);
         });
         userVideos.refresh();
+        commentsController.getComments(userVideos[0].id ?? 0);
+        videoLikeStatus(userVideos[0].id ?? 0);
+        followUnfollowStatus(userVideos[0].user!.id!);
       }
       change(userVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(userVideos, status: RxStatus.error(error.toString()));
     });
+  }
+
+  Future<void> notInterested(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/change_interest", queryParameters: {
+      "content_id": videoId,
+      "filter_by": "tag"
+    }).then((value) {
+      value.data["status"]
+          ? successToast(value.data["message"])
+          : errorToast(value.data["message"]);
+      getUserVideos();
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+    });
+  }
+
+  Future<void> postVideoView(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/view", queryParameters: {"video_id": videoId}).then(
+        (value) {
+      if (value.data["status"]) {
+        Logger().wtf("View posted successfully");
+      }
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> deleteUserVideo(int videoId) async {
@@ -156,9 +171,10 @@ class OthersProfileVideosController extends GetxController
     });
   }
 
-  Future<bool> likeVideo(int isLike, int videoId,
-      {int userId = 0, String? token}) async {
-    var isLiked = false;
+  Future<void> likeVideo(int isLike, int videoId,
+      {int userId = 0, String? token, String userName = ""}) async {
+    isLikeEnable.value = false;
+
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -166,29 +182,53 @@ class OthersProfileVideosController extends GetxController
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      getUserVideos();
+      // getAllVideos(false);
+      videoLikeStatus(videoId);
       if (isLike == 1) {
-        sendNotification(token.toString(), title: "Someone liked your video!");
-        // await notificationsController.sendFcmNotification(token.toString(),
-        //     title:
-        //     "${await GetStorage().read("user")["username"]} liked you video",
-        //     body: "Enjoy",
-        //     image: RestUrl.profileUrl +
-        //         await GetStorage().read("user")["avatar"].toString());
-        // await notificationsController.sendChatNotifcations(userId,
-        //     "${await GetStorage().read("user")["username"]} liked your video!");
+        sendNotification(token.toString(),
+            title: "New Likes!",
+            body: "${GetStorage().read("userName")} liked your video");
+      }
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<void> videoLikeStatus(
+    int videoId,
+  ) async {
+    isLikeEnable.value = false;
+
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post('video/like-by-id', queryParameters: {
+      "video_id": "$videoId",
+    }).then((value) async {
+      if ((value.data["data"]["is_like"] ?? 0) == 0) {
+        isLiked.value = false;
+      } else {
+        isLiked.value = true;
+      }
+      // getAllVideos(false);
+      totalLikes.value = value.data["data"]["likes"] ?? 0;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> followUnfollowStatus(int userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-by-userid",
+        queryParameters: {"user_id": userId}).then((value) {
+      if (value.data["data"]["is_follow"] == 0) {
+        isUserFollowed.value = false;
+      } else {
+        isUserFollowed.value = true;
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().e(error);
     });
-
-    if (isLike == 0) {
-      isLiked = false;
-    } else {
-      isLiked = true;
-    }
-
-    return isLiked;
   }
 
   Future<void> followUnfollowUser(int userId, String action,
@@ -200,10 +240,7 @@ class OthersProfileVideosController extends GetxController
       "publisher_user_id": userId,
       "action": "$action"
     }).then((value) {
-      if (value.data["status"]) {
-      } else {
-        errorToast(value.data["message"]);
-      }
+      followUnfollowStatus(userId);
     }).onError((error, stackTrace) {});
   }
 

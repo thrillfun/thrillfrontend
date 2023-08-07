@@ -16,6 +16,9 @@ import '../../../../rest/models/site_settings_model.dart';
 import '../../../../rest/models/user_private_video_model.dart';
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/utils.dart';
+import '../../../comments/controllers/comments_controller.dart';
+import '../../controllers/profile_controller.dart';
+import '../../user_liked_videos/controllers/user_liked_videos_controller.dart';
 
 class PrivateVideosPlayerController extends GetxController
     with StateMixin<RxList<PrivateVideos>> {
@@ -30,6 +33,13 @@ class PrivateVideosPlayerController extends GetxController
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var nextPageUrl = "https://thrill.fun/api/video/private?page=1".obs;
+  var isLikeEnable = true.obs;
+  var isLiked = false.obs;
+  var totalLikes = 0.obs;
+
+  var isUserFollowed = false.obs;
+  var commentsController =Get.find<CommentsController>();
+  var userLikedController =Get.find<UserLikedVideosController>();
   @override
   void onInit() {
     getUserPrivateVideos();
@@ -86,6 +96,9 @@ class PrivateVideosPlayerController extends GetxController
       nextPageUrl.value =
           UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
               "";
+      commentsController.getComments(privateVideosList[0].id ?? 0);
+      videoLikeStatus(privateVideosList[0].id ?? 0);
+      followUnfollowStatus(privateVideosList[0].user!.id!);
       change(privateVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(privateVideosList, status: RxStatus.error(error.toString()));
@@ -132,9 +145,10 @@ class PrivateVideosPlayerController extends GetxController
     });
   }
 
-  Future<bool> likeVideo(int isLike, int videoId,
-      {int userId = 0, String? token}) async {
-    var isLiked = false;
+  Future<void> likeVideo(int isLike, int videoId,
+      {int userId = 0, String? token, String userName = ""}) async {
+    isLikeEnable.value = false;
+
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -142,21 +156,54 @@ class PrivateVideosPlayerController extends GetxController
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      getUserPrivateVideos();
+      // getAllVideos(false);
+      videoLikeStatus(videoId);
       if (isLike == 1) {
-        sendNotification(token.toString(), title: "Someone liked your video!");
+        sendNotification(token.toString(),
+            title: "New Likes!",
+            body: "${GetStorage().read("userName")} liked your video");
+      }
+      userLikedController.getUserLikedVideos();
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<void> videoLikeStatus(
+      int videoId,
+      ) async {
+    isLikeEnable.value = false;
+
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post('video/like-by-id', queryParameters: {
+      "video_id": "$videoId",
+    }).then((value) async {
+      if ((value.data["data"]["is_like"] ?? 0) == 0) {
+        isLiked.value = false;
+      } else {
+        isLiked.value = true;
+      }
+      // getAllVideos(false);
+      totalLikes.value = value.data["data"]["likes"] ?? 0;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> followUnfollowStatus(int userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-by-userid",
+        queryParameters: {"user_id": userId}).then((value) {
+      if (value.data["data"]["is_follow"] == 0) {
+        isUserFollowed.value = false;
+      } else {
+        isUserFollowed.value = true;
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().e(error);
     });
-
-    if (isLike == 0) {
-      isLiked = false;
-    } else {
-      isLiked = true;
-    }
-
-    return isLiked;
   }
 
   Future<void> followUnfollowUser(int userId, String action,
@@ -168,13 +215,11 @@ class PrivateVideosPlayerController extends GetxController
       "publisher_user_id": userId,
       "action": "$action"
     }).then((value) {
-      if (value.data["status"]) {
-        // getAllVideos();
-      } else {
-        errorToast(value.data["message"]);
-      }
+
+      followUnfollowStatus(userId);
     }).onError((error, stackTrace) {});
   }
+
 
   checkUserBlocked(int userId) async {
     dio.options.headers = {

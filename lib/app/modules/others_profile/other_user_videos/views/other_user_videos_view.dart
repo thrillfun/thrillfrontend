@@ -80,16 +80,24 @@ class OtherUserVideosView extends GetView<OtherUserVideosController> {
                                                     ),
                                                     TextSpan(
                                                         text: " " +
-                                                            controller
+                                                            (controller
                                                                 .userVideos[
                                                                     index]
-                                                                .views!
+                                                                .views??0)
                                                                 .formatViews(),
                                                         style: const TextStyle(
                                                             color: Colors.white,
                                                             fontWeight:
                                                                 FontWeight.w600,
-                                                            fontSize: 16)),
+                                                            fontSize: 16,shadows: <Shadow>[
+
+                                                          Shadow(
+                                                            offset: Offset(0.0, 0.0),
+                                                            blurRadius: 8.0,
+                                                            color: Colors.black,
+                                                          ),
+                                                        ],
+                                                        ),),
                                                   ],
                                                 ),
                                               )

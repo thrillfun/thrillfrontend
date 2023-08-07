@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 
@@ -23,232 +24,192 @@ class HashTagsDetailsView extends GetView<HashTagsDetailsController> {
                   fontSize: 24)),
           elevation: 0,
         ),
-        body: controller.obx(
-          (state) => Container(
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      height: 100,
-                      width: 100,
-                      child: const Icon(
-                        Icons.numbers,
-                        color: ColorManager.colorAccent,
-                        size: 36,
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: ColorManager.colorAccentTransparent),
+        body: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    height: 100,
+                    width: 100,
+                    child: const Icon(
+                      Icons.numbers,
+                      color: ColorManager.colorAccent,
+                      size: 36,
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: Text(
-                        (Get.arguments["hashtag_name"] as String)
-                            .replaceAll("#", ""),
-                        style: const TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 24),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Container(
-                    margin: const EdgeInsets.all(10),
-                    alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: ColorManager.colorAccent),
+                        borderRadius: BorderRadius.circular(50),
+                        color: ColorManager.colorAccentTransparent),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: Text(
+                      (Get.arguments["hashtag_name"] as String)
+                          .replaceAll("#", ""),
+                      style: const TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 24),
                     ),
-                    padding: const EdgeInsets.all(10),
-                    child: InkWell(
-                      onTap: () async {
-                        await controller.addHashtagToFavourite();
-                      },
-                      child: Obx(() => Text.rich(
-                            TextSpan(
-                              children: [
-                                WidgetSpan(
-                                  child: Icon(
-                                    Icons.bookmark,
-                                    size: 18,
-                                    color: ColorManager.colorAccent,
-                                  ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                  margin: const EdgeInsets.all(10),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: ColorManager.colorAccent),
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: InkWell(
+                    onTap: () async {
+                      await controller.addHashtagToFavourite();
+                    },
+                    child: Obx(() => Text.rich(
+                          TextSpan(
+                            children: [
+                              WidgetSpan(
+                                child: Icon(
+                                  Icons.bookmark,
+                                  size: 18,
+                                  color: ColorManager.colorAccent,
                                 ),
-                                controller.isFavouriteHastag.isFalse
-                                    ? TextSpan(
-                                        text: "  Add to Favourites",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            color: ColorManager.colorAccent,
-                                            fontSize: 14))
-                                    : TextSpan(
-                                        text: "  Remove from favourites",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            color: ColorManager.colorAccent,
-                                            fontSize: 14)),
-                              ],
-                            ),
-                          )),
-                    )),
-                SizedBox(
-                  width: Get.width,
-                  height: 50,
-                  child: const Divider(
-                    thickness: 1,
-                  ),
+                              ),
+                              controller.isFavouriteHastag.isFalse
+                                  ? TextSpan(
+                                      text: "  Add to Favourites",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: ColorManager.colorAccent,
+                                          fontSize: 14))
+                                  : TextSpan(
+                                      text: "  Remove from favourites",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: ColorManager.colorAccent,
+                                          fontSize: 14)),
+                            ],
+                          ),
+                        )),
+                  )),
+              SizedBox(
+                width: Get.width,
+                height: 50,
+                child: const Divider(
+                  thickness: 1,
                 ),
-                Expanded(
-                    child: NotificationListener<ScrollEndNotification>(
-                  onNotification: (scrollNotification) {
-                    if (scrollNotification.metrics.pixels ==
-                        scrollNotification.metrics.maxScrollExtent) {
-                      controller.getPaginationVideosByHashTags();
-                    }
+              ),
+              Expanded(
+                  child: NotificationListener<ScrollEndNotification>(
+                onNotification: (scrollNotification) {
+                  if (scrollNotification.metrics.pixels ==
+                      scrollNotification.metrics.maxScrollExtent) {
+                    controller.getPaginationVideosByHashTags();
+                  }
+                  return true;
+                },
+                child: controller.obx(
+                    (state) => GridView.count(
+                          crossAxisCount: 3,
+                          shrinkWrap: true,
+                          childAspectRatio: 0.8,
+                          mainAxisSpacing: 5,
+                          children: List.generate(state!.length, (videoIndex) {
+                            return state[videoIndex].id == null
+                                ? Container(
+                                    color: Colors.red,
+                                    width: controller.bannerAd!.size.width
+                                        .toDouble(),
+                                    height: controller.bannerAd!.size.height
+                                        .toDouble(),
+                                    child: null,
+                                  )
+                                : Stack(
+                                    children: [
+                                      InkWell(
+                                          onTap: () {
+                                            Get.toNamed(
+                                                Routes.HASH_TAGS_VIDEO_PLAYER,
+                                                arguments: {
+                                                  "hashtagId":
+                                                  Get.arguments["hashtagId"],
+                                                  "init_page": videoIndex
+                                                });
 
-                    return true;
-                  },
-                  child: GridView.count(
-                    crossAxisCount: 3,
-                    shrinkWrap: true,
-                    childAspectRatio: 0.8,
-                    mainAxisSpacing: 5,
-                    children: List.generate(
-                        state!.length,
-                        (videoIndex) => Stack(
-                              children: [
-                                InkWell(
-                                    onTap: () {
-                                      Get.toNamed(Routes.HASH_TAGS_VIDEO_PLAYER,
-                                          arguments: {
-                                            "hashtagId": state[videoIndex].id,
-                                            "init_page": videoIndex
-                                          });
-                                      // List<PublicVideos> videosList1 = [
-                                      // ];
-                                      // state!.forEach((element) {
-                                      //   var user = PublicUser(
-                                      //     id: element.user?.id,
-                                      //     name: element.user?.name,
-                                      //     facebook: element.user
-                                      //         ?.facebook,
-                                      //     firstName: element.user
-                                      //         ?.firstName,
-                                      //     lastName: element.user
-                                      //         ?.lastName,
-                                      //     username: element.user
-                                      //         ?.username,
-                                      //     isFollow: 0,
-                                      //   );
-                                      //   videosList1.add(PublicVideos(
-                                      //     id: element.id,
-                                      //     video: element.video,
-                                      //     description: element
-                                      //         .description,
-                                      //     sound: element.sound,
-                                      //     soundName: element.soundName,
-                                      //     soundCategoryName:
-                                      //     element.soundCategoryName,
-                                      //     soundOwner: element
-                                      //         .soundOwner,
-                                      //     filter: element.filter,
-                                      //     likes: element.likes,
-                                      //     views: element.views,
-                                      //     gifImage: element.gifImage,
-                                      //     speed: element.speed,
-                                      //     comments: element.comments,
-                                      //     isDuet: "no",
-                                      //     duetFrom: "",
-                                      //     isCommentable: "yes",
-                                      //     user: user,
-                                      //   ));
-                                      // });
-                                      // Get.to(VideoPlayerItem(
-                                      //   videosList: videosList1,
-                                      //   position: index,
-                                      // ));
-                                      // Get.to(
-                                      //     VideoPlayerScreen(
-                                      //   isLock: false,
-                                      //   isFav: false,
-                                      //   isFeed: false,
-                                      //   position: videoIndex,
-                                      //   hashTagVideos: controller
-                                      //       .hashTagsDetailsList,
-                                      // ));
-                                    },
-                                    child: Card(
-                                      elevation: 10,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                      child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          child: imgNet(RestUrl.gifUrl +
-                                              state[videoIndex]
-                                                  .gifImage
-                                                  .toString())),
-                                    )),
-                                Positioned(
-                                    bottom: 10,
-                                    left: 10,
-                                    right: 10,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        RichText(
-                                          text: TextSpan(
+                                          },
+                                          child: Card(
+                                            elevation: 10,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15)),
+                                            child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                                child: imgNet(RestUrl.gifUrl +
+                                                    state[videoIndex]
+                                                        .gifImage
+                                                        .toString())),
+                                          )),
+                                      Positioned(
+                                          bottom: 10,
+                                          left: 10,
+                                          right: 10,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             children: [
-                                              const WidgetSpan(
-                                                child: Icon(
-                                                  Icons.play_circle,
-                                                  size: 18,
-                                                  color:
-                                                      ColorManager.colorAccent,
+                                              RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    const WidgetSpan(
+                                                      child: Icon(
+                                                        Icons.play_circle,
+                                                        size: 18,
+                                                        color: ColorManager
+                                                            .colorAccent,
+                                                      ),
+                                                    ),
+                                                    TextSpan(
+                                                        text: " " +
+                                                            NumberFormat
+                                                                    .compact()
+                                                                .format(state[
+                                                                        videoIndex]
+                                                                    .views)
+                                                                .toString(),
+                                                        style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 16)),
+                                                  ],
                                                 ),
-                                              ),
-                                              TextSpan(
-                                                  text: " " +
-                                                      NumberFormat.compact()
-                                                          .format(
-                                                              state[videoIndex]
-                                                                  .views)
-                                                          .toString(),
-                                                  style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize: 16)),
+                                              )
                                             ],
-                                          ),
-                                        )
-                                      ],
-                                    ))
-                              ],
-                            )),
-                  ),
-                ))
-              ],
-            ),
+                                          ))
+                                    ],
+                                  );
+                          }),
+                        ),
+                    onLoading: Container(
+                      child: loader(),
+                      height: Get.height,
+                      width: Get.width,
+                      alignment: Alignment.center,
+                    ),
+                    onEmpty:
+                        emptyListWidget(data: "No videos for this hashtag")),
+              ))
+            ],
           ),
-          onLoading: Container(
-            child: loader(),
-            height: Get.height,
-            width: Get.width,
-            alignment: Alignment.center,
-          ),
-          onEmpty: emptyListWidget(data: "No videos for this hashtag"),
         )
 
         // : StaggeredGridView.countBuilder(

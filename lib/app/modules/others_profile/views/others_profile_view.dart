@@ -29,7 +29,40 @@ class OthersProfileView extends GetView<OthersProfileController> {
           (state) => Scaffold(
               extendBodyBehindAppBar: true,
               appBar: AppBar(
+                iconTheme: IconThemeData(color: Colors.white),
                 backgroundColor: Colors.transparent.withOpacity(0.0),
+                actions:   [InkWell(
+                    onTap: () async {
+                      Share.share(
+                          await controller
+                              .createDynamicLink(
+                              controller
+                                  .userProfile
+                                  .value
+                                  .id
+                                  .toString(),
+                              "profile",
+                              controller
+                                  .userProfile
+                                  .value
+                                  .name!,
+                              controller
+                                  .userProfile
+                                  .value
+                                  .avatar!));
+                    },
+                    child: Container(
+                        margin: const EdgeInsets
+                            .symmetric(
+                            horizontal: 10),
+                        padding:
+                        const EdgeInsets.all(15),
+                        child: Icon(
+                          Icons.share,
+                          size: 18,
+                          color: Colors.white
+                              ,
+                        )))],
               ),
               body: Column(
                 children: [
@@ -94,13 +127,15 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                     Visibility(
                                       visible:
                                           state.value.bio.toString().isNotEmpty,
-                                      child: Padding(
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Padding(
                                           padding: EdgeInsets.all(20),
                                           child: ReadMoreText(
                                             state.value.bio.toString() + " ",
                                             trimLines: 2,
                                             colorClickableText:
-                                                ColorManager.colorAccent,
+                                            ColorManager.colorAccent,
                                             trimMode: TrimMode.Line,
                                             trimCollapsedText: 'More',
                                             trimExpandedText: 'Less',
@@ -115,8 +150,8 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w700,
                                                 color:
-                                                    ColorManager.colorAccent),
-                                          )),
+                                                ColorManager.colorAccent),
+                                          )),),
                                     ),
                                     SizedBox(
                                       height: 10,
@@ -136,11 +171,11 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                           },
                                           child: Column(
                                             children: [
-                                              Text('${state.value.following}',
+                                              Obx(() => Text('${state.value.following}',
                                                   style: const TextStyle(
                                                       fontSize: 24,
                                                       fontWeight:
-                                                          FontWeight.w700)),
+                                                      FontWeight.w700))),
                                               const Text(following,
                                                   style: TextStyle(
                                                       fontSize: 14,
@@ -173,17 +208,21 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                             ],
                                           ),
                                         ),
-                                        InkWell(
-                                            onTap: () {
-                                              controller.isFollowingVisible
-                                                  .toggle();
-                                            },
-                                            child: Column(children: [Icon(
-                                              IconlyBroken.user_2,
-                                              size: 28,
-                                              color: ColorManager
-                                                  .dayNightIcon,
-                                            )],)),
+                                        Column(
+                                          children: [
+                                            Text(
+                                                '${state.value.likes == null || state.value.likes!.isEmpty ? 0 : state.value.likes}',
+                                                style: const TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight:
+                                                    FontWeight.w700)),
+                                            const Text(likes,
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                    FontWeight.w300))
+                                          ],
+                                        ),
                                       ],
                                     ),
                                     const SizedBox(
@@ -214,11 +253,7 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                                     controller.followUnfollowUser(
                                                         controller.userProfile
                                                             .value.id!,
-                                                        controller
-                                                                    .userProfile
-                                                                    .value
-                                                                    .isFollow ==
-                                                                0
+                                                        controller.isUserFollowed.isFalse
                                                             ? "follow"
                                                             : "unfollow");
 
@@ -237,10 +272,7 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                                   },
                                                   child: Obx(() => Text(
                                                       controller
-                                                                  .userProfile
-                                                                  .value
-                                                                  .isFollow ==
-                                                              0
+                                                      .isUserFollowed.isFalse
                                                           ? "Follow"
                                                           : "Following",
                                                       style: TextStyle(
@@ -285,46 +317,18 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                         //                     FontWeight.w600,
                                         //               )),
                                         //         ))),
-                                        ClipOval(
-                                          child: InkWell(
-                                              onTap: () async {
-                                                Share.share(
-                                                    await controller
-                                                        .createDynamicLink(
-                                                            controller
-                                                                .userProfile
-                                                                .value
-                                                                .id
-                                                                .toString(),
-                                                            "profile",
-                                                            controller
-                                                                .userProfile
-                                                                .value
-                                                                .name!,
-                                                            controller
-                                                                .userProfile
-                                                                .value
-                                                                .avatar!));
-                                              },
-                                              child: Container(
-                                                  margin: const EdgeInsets
-                                                          .symmetric(
-                                                      horizontal: 10),
-                                                  decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              50),
-                                                      color: ColorManager
-                                                          .colorAccentTransparent),
-                                                  padding:
-                                                      const EdgeInsets.all(15),
-                                                  child: Icon(
-                                                    Icons.share,
-                                                    size: 16,
-                                                    color: ColorManager
-                                                        .dayNightIcon,
-                                                  ))),
-                                        ),
+                                     Padding(padding: EdgeInsets.only(right: 10),child:    InkWell(
+                                         onTap: () {
+                                           controller.isFollowingVisible
+                                               .toggle();
+                                         },
+                                         child: Column(children: [Icon(
+                                           IconlyBroken.user_2,
+                                           size: 28,
+                                           color: ColorManager
+                                               .dayNightIcon,
+                                         )],)),)
+
 
                                       ],
                                     ),
@@ -435,14 +439,16 @@ class OthersProfileView extends GetView<OthersProfileController> {
                                   height: 10,
                                 ),
                                 Text(
+
                                   controller.searchList[0].users![index]
                                       .name
                                       ??
                                       controller.searchList[0].users![index]
                                           .username.toString()
                                   ,
+
                                   style: TextStyle(
-                                      fontWeight: FontWeight.w700),
+                                      fontWeight: FontWeight.w700,),
                                 )
                               ],
                             ),

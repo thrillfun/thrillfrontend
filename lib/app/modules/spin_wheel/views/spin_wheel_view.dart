@@ -314,7 +314,6 @@ class SpinWheelView extends GetView<SpinWheelController> {
               ],
               onAnimationEnd: () {
                 updateSpin();
-                controller.isSpinning.toggle();
               },
             ),
           ),
@@ -342,10 +341,11 @@ class SpinWheelView extends GetView<SpinWheelController> {
                               alignment: Alignment.topCenter,
                               children: [
                                 IgnorePointer(
-                                  child: Lottie.asset("assets/congrats.json",
-                                      fit: BoxFit.fill,
-                                      width: Get.width,
-                                      height: 400),
+                                  child: Lottie.asset(
+                                    "assets/congrats.json",
+                                    fit: BoxFit.contain,
+                                    width: Get.width,
+                                  ),
                                 ),
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -447,10 +447,10 @@ class SpinWheelView extends GetView<SpinWheelController> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    controller.isSpinning.isTrue
+                    controller.isSpinning.isTrue || controller.isRewardWon.isTrue
                         ? Colors.grey
                         : ColorManager.colorPrimaryLight,
-                    controller.isSpinning.isTrue
+                    controller.isSpinning.isTrue|| controller.isRewardWon.isTrue
                         ? Colors.grey
                         : ColorManager.colorAccent
                   ])),
@@ -466,7 +466,7 @@ class SpinWheelView extends GetView<SpinWheelController> {
       ));
 
   spinTheWheelTap() async {
-    if (controller.remainingChance.value > 0) {
+    if (controller.remainingChance.value > 0 && controller.isRewardWon.isFalse)  {
       controller.isSpinning.value = true;
       listForReward.clear();
       controller.streamController!.add(controller.random?.id - 2);

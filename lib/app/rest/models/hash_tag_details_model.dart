@@ -81,7 +81,7 @@ class HashtagRelatedVideos {
       this.soundId});
 
   HashtagRelatedVideos.fromJson(Map<String, dynamic> json) {
-    id = json['id'] ?? 0;
+    id = json['id'] ;
     video = json['video'] ?? "";
     description = json['description'] ?? "";
     sound = json['sound'] ?? "";
@@ -89,11 +89,11 @@ class HashtagRelatedVideos {
     soundCategoryName = json['sound_category_name'] ?? "";
     is_favorite_hasttag = json["is_favorite_hasttag"] ?? 0;
     filter = json['filter'] ?? "";
-    likes = json['likes'] ?? "";
-    views = json['views'] ?? "";
+    likes = json['likes'] ?? 0;
+    views = json['views'] ?? 0;
     gifImage = json['gif_image'] ?? "";
     speed = json['speed'] ?? "";
-    comments = json['comments'] ?? "";
+    comments = json['comments'] ?? 0;
     if (json['hashtags'] != null) {
       hashtags = <Hashtags>[];
       json['hashtags'].forEach((v) {

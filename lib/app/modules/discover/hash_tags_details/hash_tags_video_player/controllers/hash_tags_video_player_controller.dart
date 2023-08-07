@@ -20,6 +20,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../../../rest/rest_urls.dart';
 import '../../../../../utils/utils.dart';
+import '../../../../comments/controllers/comments_controller.dart';
 
 class HashTagsVideoPlayerController extends GetxController
     with StateMixin<RxList<HashtagRelatedVideos>> {
@@ -36,6 +37,12 @@ class HashTagsVideoPlayerController extends GetxController
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var nextPageUrl =
       "https://thrill.fun/api/hashtag/get-videos-by-hashtag?page=1".obs;
+  var isLikeEnable = true.obs;
+  var isLiked = false.obs;
+  var totalLikes = 0.obs;
+
+  var isUserFollowed = false.obs;
+  var commentsController = Get.find<CommentsController>();
   @override
   void onInit() {
     getVideosByHashTags();
@@ -82,14 +89,13 @@ class HashTagsVideoPlayerController extends GetxController
   }
 
   Future<void> getVideosByHashTags() async {
-    if (hashTagsDetailsList.isEmpty) {
-      change(hashTagsDetailsList, status: RxStatus.loading());
-    }
+    change(hashTagsDetailsList, status: RxStatus.loading());
+
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
 
     dio.post("hashtag/get-videos-by-hashtag", queryParameters: {
-      "hashtag_id": "${await GetStorage().read("hashtagId")}"
+      "hashtag_id": "${Get.arguments["hashtagId"]}"
     }).then((value) {
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
       isFavouriteHastag.value =
@@ -97,6 +103,9 @@ class HashTagsVideoPlayerController extends GetxController
       nextPageUrl.value =
           HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
               "";
+      commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
+      videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
+      followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
       change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());
@@ -108,7 +117,7 @@ class HashTagsVideoPlayerController extends GetxController
         "Bearer ${await GetStorage().read("token")}";
 
     dio.post(nextPageUrl.value, queryParameters: {
-      "hashtag_id": "${await GetStorage().read("hashtagId")}"
+      "hashtag_id": "${Get.arguments["hashtagId"]}"
     }).then((value) {
       nextPageUrl.value =
           HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
@@ -118,7 +127,9 @@ class HashTagsVideoPlayerController extends GetxController
             .addAll(HashtagDetailsModel.fromJson(value.data).data!);
       }
       hashTagsDetailsList.refresh();
-
+      commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
+      videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
+      followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
       change(hashTagsDetailsList, status: RxStatus.success());
@@ -131,7 +142,7 @@ class HashTagsVideoPlayerController extends GetxController
         "Bearer ${await GetStorage().read("token")}";
 
     dio.post("hashtag/get-videos-by-hashtag", queryParameters: {
-      "hashtag_id": "${await GetStorage().read("hashtagId")}"
+      "hashtag_id": "${Get.arguments["hashtagId"]}"
     }).then((value) {
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
       isFavouriteHastag.value =
@@ -142,9 +153,10 @@ class HashTagsVideoPlayerController extends GetxController
     });
   }
 
-  Future<bool> likeVideo(int isLike, int videoId,
-      {int userId = 0, String? token}) async {
-    var isLiked = false;
+  Future<void> likeVideo(int isLike, int videoId,
+      {int userId = 0, String? token, String userName = ""}) async {
+    isLikeEnable.value = false;
+
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -152,21 +164,53 @@ class HashTagsVideoPlayerController extends GetxController
       "video_id": "$videoId",
       "is_like": "$isLike"
     }).then((value) async {
-      getVideosByHashTags();
+      // getAllVideos(false);
+      videoLikeStatus(videoId);
       if (isLike == 1) {
-        sendNotification(token.toString(), title: "Someone liked your video!");
+        sendNotification(token.toString(),
+            title: "New Likes!",
+            body: "${GetStorage().read("userName")} liked your video");
+      }
+    }).onError((error, stackTrace) {});
+  }
+
+  Future<void> videoLikeStatus(
+    int videoId,
+  ) async {
+    isLikeEnable.value = false;
+
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post('video/like-by-id', queryParameters: {
+      "video_id": "$videoId",
+    }).then((value) async {
+      if ((value.data["data"]["is_like"] ?? 0) == 0) {
+        isLiked.value = false;
+      } else {
+        isLiked.value = true;
+      }
+      // getAllVideos(false);
+      totalLikes.value = value.data["data"]["likes"] ?? 0;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> followUnfollowStatus(int userId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("user/follow-by-userid",
+        queryParameters: {"user_id": userId}).then((value) {
+      if (value.data["data"]["is_follow"] == 0) {
+        isUserFollowed.value = false;
+      } else {
+        isUserFollowed.value = true;
       }
     }).onError((error, stackTrace) {
-      errorToast(error.toString());
+      Logger().e(error);
     });
-
-    if (isLike == 0) {
-      isLiked = false;
-    } else {
-      isLiked = true;
-    }
-
-    return isLiked;
   }
 
   Future<void> followUnfollowUser(int userId, String action,
@@ -178,11 +222,7 @@ class HashTagsVideoPlayerController extends GetxController
       "publisher_user_id": userId,
       "action": "$action"
     }).then((value) {
-      if (value.data["status"]) {
-        getVideosByHashTags();
-      } else {
-        errorToast(value.data["message"]);
-      }
+      followUnfollowStatus(userId);
     }).onError((error, stackTrace) {});
   }
 

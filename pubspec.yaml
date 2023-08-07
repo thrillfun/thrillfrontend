@@ -106,6 +106,7 @@ dependencies:
   in_app_update: ^4.1.4
   mobile_scanner: ^3.3.0
   lazy_load_listview: 0.0.4
+  wakelock: 0.6.2
   flutter: 
     sdk: flutter
   better_player: 

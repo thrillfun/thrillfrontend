@@ -47,8 +47,11 @@ class DiscoverController extends GetxController
     };
 
     await dio.get("hashtag/top-hashtags-videos").then((value) {
+
       tophashtagvideosList =
           TopHashtagVideosModel.fromJson(value.data).data!.obs;
+
+
       nextPageUrl.value =
           TopHashtagVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
               "";

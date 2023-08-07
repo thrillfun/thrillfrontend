@@ -475,7 +475,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
     var exportOptions = imgly.ExportOptions(
       serialization: imgly.SerializationOptions(
           enabled: true, exportType: imgly.SerializationExportType.object),
-      video: imgly.VideoOptions(quality: 1.0, codec: codec[0]),
+      video: imgly.VideoOptions( codec: codec[0]),
     );
 
     // imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(

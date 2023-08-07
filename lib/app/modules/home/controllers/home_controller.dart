@@ -44,6 +44,8 @@ class HomeController extends GetxController {
   var nativeAdIsLoaded = false.obs;
   InterstitialAd? _interstitialAd;
 
+  var isDialogVisible = false.obs;
+
   // TODO: replace this test ad unit with your own ad unit.
   final String _adUnitId = 'ca-app-pub-3566466065033894/6507076010';
 
@@ -51,11 +53,12 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     loadAd();
-    siteSettingsList.listen((p0) {
-      if (p0.isNotEmpty) {
-        showCustomAd();
-      }
-    });
+    // siteSettingsList.listen((p0) {
+    //   if (p0.isNotEmpty && isDialogVisible.isFalse) {
+    //     showCustomAd();
+    //     isDialogVisible = true.obs;
+    //   }
+    // });
     // ever(nativeAdIsLoaded, (callback) {
     //   if (nativeAdIsLoaded.isTrue && nativeAd != null) {
     //     Get.defaultDialog(content: Container(height: Get.height/2,width: Get.width,child: AdWidget(ad: nativeAd!),));
@@ -217,55 +220,67 @@ class HomeController extends GetxController {
   showCustomAd() {
     siteSettingsList.forEach((element) {
       if (element.name == "advertisement_image") {
-        showGeneralDialog(
-          context: Get.context!,
-          barrierColor: Colors.black12.withOpacity(0.6),
-          // Background color
-          barrierDismissible: false,
-          barrierLabel: 'Dialog',
-          transitionDuration: Duration(milliseconds: 400),
-          pageBuilder: (_, __, ___) {
-            return Scaffold(
-              body: InkWell(
-                onTap: () => Get.toNamed(Routes.SPIN_WHEEL),
-                child: Stack(
-                  children: [
-                    CachedNetworkImage(
-                        fit: BoxFit.fill,
-                        height: Get.height,
-                        width: Get.width,
-                        imageUrl: RestUrl.profileUrl + element.value),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: IconButton(
-                          onPressed: () => Get.back(), icon: Icon(Icons.close)),
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-        // Get.defaultDialog(
-        //     title: "",
-        //     middleText: "",
-        //     backgroundColor: Colors.transparent.withOpacity(0.0),
-        //     contentPadding: EdgeInsets.zero,
-        //     titlePadding: EdgeInsets.zero,
-        //     content:InkWell(
-        //       onTap: ()=>Get.toNamed(Routes.SPIN_WHEEL),
-        //       child:  Stack(
-        //         children: [
-        //
-        //         CachedNetworkImage(
-        //             fit: BoxFit.fill,
-        //             height: Get.height/1.5,
-        //             width: Get.width,
-        //             imageUrl: RestUrl.profileUrl + element.value),
-        //        Align(
-        //          alignment: Alignment.topRight,
-        //          child:  IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.close)),)
-        //       ],),));
+        // showGeneralDialog(
+        //   context: Get.context!,
+        //   barrierColor: Colors.black12.withOpacity(0.6),
+        //   // Background color
+        //   barrierDismissible: false,
+        //   barrierLabel: 'Dialog',
+        //   transitionDuration: Duration(milliseconds: 400),
+        //   pageBuilder: (_, __, ___) {
+        //     return Scaffold(
+        //       backgroundColor: Colors.transparent.withOpacity(0.0),
+        //       body: Container(
+        //         alignment: Alignment.center,
+        //         child: SizedBox(
+        //           height: Get.height / 1.2,
+        //           width: Get.width / 1.2,
+        //           child: InkWell(
+        //             onTap: () {
+        //               Get.back();
+        //               Get.toNamed(Routes.SPIN_WHEEL);
+        //             },
+        //             child: Stack(
+        //               children: [
+        //                 CachedNetworkImage(
+        //                     fit: BoxFit.fill,
+        //                     height: Get.height,
+        //                     width: Get.width,
+        //                     imageUrl: RestUrl.profileUrl + element.value),
+        //                 Align(
+        //                   alignment: Alignment.topRight,
+        //                   child: IconButton(
+        //                       onPressed: () => Get.back(),
+        //                       icon: Icon(Icons.close)),
+        //                 )
+        //               ],
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //     );
+        //   },
+        // );
+        Get.defaultDialog(
+            title: "",
+            middleText: "",
+            backgroundColor: Colors.transparent.withOpacity(0.0),
+            contentPadding: EdgeInsets.zero,
+            titlePadding: EdgeInsets.zero,
+            content:InkWell(
+              onTap: ()=>Get.toNamed(Routes.SPIN_WHEEL),
+              child:  Stack(
+                children: [
+
+                CachedNetworkImage(
+                    fit: BoxFit.fill,
+                    height: Get.height/1.5,
+                    width: Get.width,
+                    imageUrl: RestUrl.profileUrl + element.value),
+               Align(
+                 alignment: Alignment.topRight,
+                 child:  IconButton(onPressed: ()=>Get.back(closeOverlays: true), icon: Icon(Icons.close)),)
+              ],),));
       }
     });
   }
