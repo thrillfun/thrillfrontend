@@ -150,6 +150,7 @@ class Hashtags {
   int? hashtagId;
   String? createdAt;
   String? updatedAt;
+  String? name;
   int? isFavouriteHashtagCount;
   Hashtag? hashtag;
 
@@ -159,6 +160,7 @@ class Hashtags {
       this.hashtagId,
       this.createdAt,
       this.updatedAt,
+      this.name,
       this.isFavouriteHashtagCount,
       this.hashtag});
 
@@ -168,6 +170,7 @@ class Hashtags {
     hashtagId = json['hashtag_id'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    name = json['name'];
     isFavouriteHashtagCount = json['is_favourite_hashtag_count'];
     hashtag =
         json['hashtag'] != null ? new Hashtag.fromJson(json['hashtag']) : null;
@@ -180,6 +183,7 @@ class Hashtags {
     data['hashtag_id'] = this.hashtagId;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    data['name'] = this.name;
     data['is_favourite_hashtag_count'] = this.isFavouriteHashtagCount;
     if (this.hashtag != null) {
       data['hashtag'] = this.hashtag!.toJson();
@@ -311,9 +315,9 @@ class User {
     twitter = json['twitter'] ?? "";
     firebaseToken = json['firebase_token'] ?? "";
     referralCount = json['referral_count'] ?? "";
-    following = json['following'] ?? "";
-    followers = json['followers'] ?? "";
-    likes = json['likes'] ?? "";
+    following = json['following'] ?? 0;
+    followers = json['followers'] ?? 0;
+    likes = json['likes'] ?? 0;
     levels =
         json['levels'] != null ? new Levels.fromJson(json['levels']) : null;
     totalVideos = json['total_videos'] ?? "";

@@ -86,7 +86,7 @@ class WalletTrasactionsView extends GetView<WalletTrasactionsController> {
                                             fontWeight: FontWeight.w700),
                                       ),
                                       Text(
-                                        state[index].transactionStatus??"",
+                                        state[index].transactionStatus ?? "",
                                         textAlign: TextAlign.start,
                                         style: const TextStyle(
                                             color: Colors.black,
@@ -127,12 +127,7 @@ class WalletTrasactionsView extends GetView<WalletTrasactionsController> {
                   ),
                 ),
               ),
-          onLoading: Container(
-            height: Get.height,
-            alignment: Alignment.center,
-            width: Get.width,
-            child: loader(),
-          )),
+          onLoading: walletTransactionsShimmer()),
     );
   }
 }

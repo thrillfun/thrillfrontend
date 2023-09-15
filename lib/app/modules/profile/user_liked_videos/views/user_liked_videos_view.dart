@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:thrill/app/rest/models/user_details_model.dart';
 import 'package:thrill/app/routes/app_pages.dart';
 import 'package:thrill/app/widgets/no_liked_videos.dart';
@@ -47,6 +48,9 @@ class UserLikedVideosView extends GetView<UserLikedVideosController> {
                                 onTap: () {
                                   Get.toNamed(Routes.LIKED_VIDEO_PLAYER,
                                       arguments: {
+                                        'video_id': state[index].id,
+                                        "current_page":
+                                            controller.currentPage.value,
                                         "liked_videos": state,
                                         "init_page": index
                                       });
@@ -100,11 +104,7 @@ class UserLikedVideosView extends GetView<UserLikedVideosController> {
                 ))
               ],
             ),
-      onLoading: Column(
-        children: [
-          Expanded(child: loader()),
-        ],
-      ),
+      onLoading: profileShimmer(),
       onError: (error) => NoLikedVideos(),
       onEmpty: NoLikedVideos(),
     );

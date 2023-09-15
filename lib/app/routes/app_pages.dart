@@ -5,6 +5,8 @@ import '../modules/camera/post_screen/bindings/post_screen_binding.dart';
 import '../modules/camera/post_screen/views/post_screen_view.dart';
 import '../modules/camera/select_sound/bindings/select_sound_binding.dart';
 import '../modules/camera/select_sound/views/select_sound_view.dart';
+import '../modules/camera/video_thumbnail/bindings/video_thumbnail_binding.dart';
+import '../modules/camera/video_thumbnail/views/video_thumbnail_view.dart';
 import '../modules/camera/views/camera_view.dart';
 import '../modules/comments/bindings/comments_binding.dart';
 import '../modules/comments/views/comments_view.dart';
@@ -80,6 +82,8 @@ import '../modules/settings/notifications_settings/bindings/notifications_settin
 import '../modules/settings/notifications_settings/views/notifications_settings_view.dart';
 import '../modules/settings/privacy/bindings/privacy_binding.dart';
 import '../modules/settings/privacy/views/privacy_view.dart';
+import '../modules/settings/privacy_settings/bindings/privacy_settings_binding.dart';
+import '../modules/settings/privacy_settings/views/privacy_settings_view.dart';
 import '../modules/settings/profile_details/bindings/profile_details_binding.dart';
 import '../modules/settings/profile_details/views/profile_details_view.dart';
 import '../modules/settings/qr_code/bindings/qr_code_binding.dart';
@@ -361,6 +365,11 @@ class AppPages {
           page: () => PostScreenView(),
           binding: PostScreenBinding(),
         ),
+        GetPage(
+          name: _Paths.VIDEO_THUMBNAIL,
+          page: () => const VideoThumbnailView(),
+          binding: VideoThumbnailBinding(),
+        ),
       ],
     ),
     GetPage(
@@ -450,6 +459,11 @@ class AppPages {
           name: _Paths.PRIVACY,
           page: () => const PrivacyView(),
           binding: PrivacyBinding(),
+        ),
+        GetPage(
+          name: _Paths.PRIVACY_SETTINGS,
+          page: () => const PrivacySettingsView(),
+          binding: PrivacySettingsBinding(),
         ),
       ],
     ),

@@ -34,7 +34,6 @@ class _HomeViewState extends State<HomeView> {
   var controller = Get.find<HomeController>();
   @override
   Widget build(BuildContext context) {
-
     return Obx(() => controller.connectionType == 0
         ? Scaffold(
             body: NoInternetConnection(),
@@ -94,9 +93,7 @@ class _HomeViewState extends State<HomeView> {
                             curve: Curves.bounceIn);
                         controller.bottomNavIndex.value = index;
                       });
-
-                    }
-                    else {
+                    } else {
                       pageController.animateToPage(index,
                           duration: Duration(microseconds: 300),
                           curve: Curves.bounceIn);

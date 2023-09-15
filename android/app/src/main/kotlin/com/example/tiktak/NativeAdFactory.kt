@@ -102,8 +102,8 @@ class NativeAdFactory : GoogleMobileAdsPlugin.NativeAdFactory {
         // native ad view with this native ad.
         if (nativeAd != null) {
             adView.setNativeAd(nativeAd)
-           nativeAd.let {
-           }
+            nativeAd.let {
+            }
         }
 
         return adView

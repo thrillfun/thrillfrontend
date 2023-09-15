@@ -89,6 +89,8 @@ abstract class Routes {
   static const WITHDRAW = _Paths.WALLET + _Paths.WITHDRAW;
   static const QR_SCAN_VIEW =
       _Paths.SETTINGS + _Paths.QR_CODE + _Paths.QR_SCAN_VIEW;
+  static const PRIVACY_SETTINGS = _Paths.SETTINGS + _Paths.PRIVACY_SETTINGS;
+  static const VIDEO_THUMBNAIL = _Paths.CAMERA + _Paths.VIDEO_THUMBNAIL;
 }
 
 abstract class _Paths {
@@ -153,4 +155,6 @@ abstract class _Paths {
   static const SPLASH_SCREEN = '/splash-screen';
   static const WITHDRAW = '/withdraw';
   static const QR_SCAN_VIEW = '/qr-scan-view';
+  static const PRIVACY_SETTINGS = '/privacy-settings';
+  static const VIDEO_THUMBNAIL = '/video-thumbnail';
 }

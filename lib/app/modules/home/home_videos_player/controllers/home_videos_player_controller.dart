@@ -6,6 +6,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -15,6 +16,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:thrill/app/modules/comments/controllers/comments_controller.dart';
 import 'package:thrill/app/modules/following_videos/controllers/following_videos_controller.dart';
 import 'package:thrill/app/modules/following_videos/views/following_videos_view.dart';
+import 'package:thrill/app/modules/others_profile/others_following/following/views/following_view.dart';
 import 'package:thrill/app/modules/trending_videos/controllers/trending_videos_controller.dart';
 import 'package:thrill/app/modules/trending_videos/views/trending_videos_view.dart';
 import 'package:thrill/app/utils/color_manager.dart';
@@ -74,9 +76,6 @@ class HomeVideosPlayerController extends GetxController {
                       scrollDirection: Axis.vertical,
                       controller: pageController,
                       allowImplicitScrolling: true,
-                      // physics: isAdShowing.isTrue
-                      //     ? NeverScrollableScrollPhysics()
-                      //     : ScrollPhysics(),
                       onPageChanged: (index) async {
                         if (relatedVideosController
                                 .relatedVideosList[index].id !=
@@ -94,16 +93,19 @@ class HomeVideosPlayerController extends GetxController {
                           );
                         }
 
-                        if (index % 8 == 0) {
-                          adsController.loadNativeAd();
+                        if (adsController.adFailedToLoad.isTrue) {
+                          relatedVideosController.relatedVideosList
+                              .removeWhere((element) => element.id == null);
+                          relatedVideosController.relatedVideosList.refresh();
                         }
-
                         if (index ==
                             relatedVideosController.relatedVideosList.length -
                                 1) {
                           relatedVideosController.getPaginationAllVideos(1);
-                          //Get.forceAppUpdate();
                         }
+                        relatedVideosController.postVideoView(
+                            relatedVideosController
+                                .relatedVideosList[index].id!);
                       },
                       itemBuilder: (context, index) {
                         return state![index].id == null
@@ -132,47 +134,55 @@ class HomeVideosPlayerController extends GetxController {
                                         ],
                                       ),
                               )
-                            : RelatedVideosView(
-                                videoUrl: state[index].video.toString(),
-                                pageController: pageController,
-                                nextPage: index + 1,
-                                videoId: state[index].id!,
-                                gifImage: state[index].gifImage,
-                                publicUser: state[index].user,
-                                soundName: state[index].soundName,
-                                UserId: state[index].user!.id,
-                                userName: state[index].user!.username!.obs,
-                                description: state[index].description!.obs,
-                                hashtagsList: state[index].hashtags ?? [],
-                                soundOwner: state[index].soundOwner ?? "",
-                                sound: state[index].sound,
-                                videoLikeStatus:
-                                    state[index].videoLikeStatus.toString(),
-                                isCommentAllowed:
-                                    state[index].isCommentable == "Yes"
+                            : index == state.length - 1 &&
+                                        relatedVideosController
+                                            .nextPageUrl.isNotEmpty ||
+                                    relatedVideosController.isLoading.isTrue
+                                ? Padding(
+                                    padding: EdgeInsets.only(bottom: 80),
+                                    child: videoShimmer(),
+                                  )
+                                : RelatedVideosView(
+                                    videoUrl: state[index].video.toString(),
+                                    pageController: pageController,
+                                    nextPage: index + 1,
+                                    videoId: state[index].id!,
+                                    gifImage: state[index].gifImage,
+                                    publicUser: state[index].user,
+                                    soundName: state[index].soundName,
+                                    UserId: state[index].user!.id,
+                                    userName: state[index].user!.username!.obs,
+                                    description: state[index].description!.obs,
+                                    hashtagsList: state[index].hashtags ?? [],
+                                    soundOwner: state[index].soundOwner ?? "",
+                                    sound: state[index].sound,
+                                    videoLikeStatus:
+                                        state[index].videoLikeStatus.toString(),
+                                    isCommentAllowed:
+                                        state[index].isCommentable == "Yes"
+                                            ? true.obs
+                                            : false.obs,
+                                    like: state[index].likes!.obs,
+                                    isfollow: state[index].user!.isfollow!,
+                                    commentsCount: state[index].comments!.obs,
+                                    isDuetable: state[index].isDuetable == "Yes"
                                         ? true.obs
                                         : false.obs,
-                                like: state[index].likes!.obs,
-                                isfollow: state[index].user!.isfollow!,
-                                commentsCount: state[index].comments!.obs,
-                                soundId: state[index].soundId,
-                                avatar: state[index].user!.avatar,
-                                currentPageIndex: index.obs,
-                                fcmToken: state[index].user!.firebaseToken,
-                                isLastPage:
-                                    index == (state.length - 1) ? true : false,
-                              );
+                                    soundId: state[index].soundId,
+                                    avatar: state[index].user!.avatar,
+                                    currentPageIndex: index.obs,
+                                    fcmToken: state[index].user!.firebaseToken,
+                                    isLastPage: index == (state.length - 1)
+                                        ? true
+                                        : false,
+                                  );
                       }),
                 ],
               ),
               onRefresh: relatedVideosController.refereshVideos),
-          onLoading: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: loader(),
-              )
-            ],
+          onLoading: Padding(
+            padding: EdgeInsets.only(bottom: 80),
+            child: videoShimmer(),
           ),
           onError: (error) => Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -235,13 +245,18 @@ class HomeVideosPlayerController extends GetxController {
                                   0,
                             );
                           }
-                          if (index % 8 == 0) {
-                            adsController.loadNativeAd();
+                          if (adsController.adFailedToLoad.isTrue) {
+                            followingVideosController.followingVideosList
+                                .removeWhere((element) => element.id == null);
+                            followingVideosController.followingVideosList
+                                .refresh();
                           }
-
                           if (index == state!.length - 1) {
                             followingVideosController.getPaginationAllVideos(1);
                           }
+                          followingVideosController.postVideoView(
+                              followingVideosController
+                                  .followingVideosList[index].id!);
                         },
                         itemBuilder: (context, index) {
                           return state![index].id == null
@@ -270,46 +285,57 @@ class HomeVideosPlayerController extends GetxController {
                                           ],
                                         ),
                                 )
-                              : FollowingVideosView(
-                                  videoUrl: state[index].video.toString(),
-                                  pageController: followingPageController!,
-                                  nextPage: index + 1,
-                                  videoId: state[index].id!,
-                                  gifImage: state[index].gifImage,
-                                  publicUser: state[index].user,
-                                  soundName: state[index].soundName,
-                                  UserId: state[index].user!.id,
-                                  userName: state[index].user!.username!.obs,
-                                  description: state[index].description!.obs,
-                                  hashtagsList: state[index].hashtags,
-                                  soundOwner: state[index].soundOwner ?? "",
-                                  sound: state[index].sound,
-                                  videoLikeStatus:
-                                      state[index].videoLikeStatus.toString(),
-                                  isCommentAllowed:
-                                      state[index].isCommentable == "Yes"
-                                          ? true.obs
-                                          : false.obs,
-                                  like: state[index].likes!.obs,
-                                  isfollow: state[index].user!.isfollow!,
-                                  commentsCount: state[index].comments!.obs,
-                                  soundId: state[index].soundId,
-                                  avatar: state[index].user!.avatar,
-                                  currentPageIndex: index.obs,
-                                  fcmToken: state[index].user!.firebaseToken,
-                                );
+                              : index == state.length - 1 &&
+                                          followingVideosController
+                                              .nextPageUrl.isNotEmpty ||
+                                      followingVideosController.isLoading.isTrue
+                                  ? Padding(
+                                      padding: EdgeInsets.only(bottom: 80),
+                                      child: videoShimmer(),
+                                    )
+                                  : FollowingVideosView(
+                                      videoUrl: state[index].video.toString(),
+                                      pageController: followingPageController!,
+                                      nextPage: index + 1,
+                                      videoId: state[index].id!,
+                                      gifImage: state[index].gifImage,
+                                      publicUser: state[index].user,
+                                      soundName: state[index].soundName,
+                                      UserId: state[index].user!.id,
+                                      userName:
+                                          state[index].user!.username!.obs,
+                                      description:
+                                          state[index].description!.obs,
+                                      hashtagsList: state[index].hashtags,
+                                      soundOwner: state[index].soundOwner ?? "",
+                                      sound: state[index].sound,
+                                      videoLikeStatus: state[index]
+                                          .videoLikeStatus
+                                          .toString(),
+                                      isCommentAllowed:
+                                          state[index].isCommentable == "Yes"
+                                              ? true.obs
+                                              : false.obs,
+                                      like: state[index].likes!.obs,
+                                      isfollow: state[index].user!.isfollow!,
+                                      commentsCount: state[index].comments!.obs,
+                                      soundId: state[index].soundId,
+                                      avatar: state[index].user!.avatar,
+                                      currentPageIndex: index.obs,
+                                      isDuetable:
+                                          state[index].isDuetable == "Yes"
+                                              ? true.obs
+                                              : false.obs,
+                                      fcmToken:
+                                          state[index].user!.firebaseToken,
+                                    );
                         }),
                   ],
                 ),
                 onRefresh: followingVideosController.refereshVideos),
-        onLoading: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: loader(),
-            )
-          ],
+        onLoading: Padding(
+          padding: EdgeInsets.only(bottom: 80),
+          child: videoShimmer(),
         ),
         onError: (error) => Center(
           child: NoSearchResult(
@@ -342,46 +368,54 @@ class HomeVideosPlayerController extends GetxController {
                           adsController.loadIntersitialAd();
                           adsController.interstitialAd!.show();
                         }
+                        trendingVideosController.postVideoView(
+                            trendingVideosController
+                                .followingVideosList[index].id!);
                       },
-                      itemBuilder: (context, index) => TrendingVideosView(
-                            videoUrl: state[index].video.toString(),
-                            pageController: trendingPageController!,
-                            nextPage: index + 1,
-                            videoId: state[index].id!,
-                            gifImage: state[index].gifImage,
-                            publicUser: state[index].user,
-                            soundName: state[index].soundName,
-                            UserId: state[index].user!.id,
-                            userName: state[index].user!.username!.obs,
-                            description: state[index].description!.obs,
-                            hashtagsList: state[index].hashtags ?? [],
-                            soundOwner: state[index].soundOwner,
-                            sound: state[index].sound,
-                            videoLikeStatus:
-                                state[index].videoLikeStatus.toString(),
-                            isCommentAllowed:
-                                state[index].isCommentable == "Yes"
-                                    ? true.obs
-                                    : false.obs,
-                            like: state[index].likes!.obs,
-                            isfollow: state[index].user!.isfollow!,
-                            commentsCount: state[index].comments!.obs,
-                            soundId: state[index].soundId,
-                            avatar: state[index].user!.avatar,
-                            currentPageIndex: index.obs,
-                            fcmToken: state[index].user!.firebaseToken,
-                          )),
+                      itemBuilder: (context, index) =>
+                          index == state.length - 1 ||
+                                  trendingVideosController.isLoading.isTrue
+                              ? Padding(
+                                  padding: EdgeInsets.only(bottom: 80),
+                                  child: videoShimmer(),
+                                )
+                              : TrendingVideosView(
+                                  videoUrl: state[index].video.toString(),
+                                  pageController: trendingPageController!,
+                                  nextPage: index + 1,
+                                  videoId: state[index].id!,
+                                  gifImage: state[index].gifImage,
+                                  publicUser: state[index].user,
+                                  soundName: state[index].soundName,
+                                  UserId: state[index].user!.id,
+                                  userName: state[index].user!.username!.obs,
+                                  description: state[index].description!.obs,
+                                  hashtagsList: state[index].hashtags ?? [],
+                                  soundOwner: state[index].soundOwner,
+                                  sound: state[index].sound,
+                                  videoLikeStatus:
+                                      state[index].videoLikeStatus.toString(),
+                                  isCommentAllowed:
+                                      state[index].isCommentable == "Yes"
+                                          ? true.obs
+                                          : false.obs,
+                                  like: state[index].likes!.obs,
+                                  isfollow: state[index].user!.isfollow!,
+                                  commentsCount: state[index].comments!.obs,
+                                  soundId: state[index].soundId,
+                                  avatar: state[index].user!.avatar,
+                                  currentPageIndex: index.obs,
+                                  isDuetable: state[index].isDuetable == "Yes"
+                                      ? true.obs
+                                      : false.obs,
+                                  fcmToken: state[index].user!.firebaseToken,
+                                )),
                 ],
               ),
               onRefresh: trendingVideosController.refereshVideos),
-          onLoading: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: loader(),
-              )
-            ],
+          onLoading: Padding(
+            padding: EdgeInsets.only(bottom: 80),
+            child: videoShimmer(),
           ),
           onError: (error) => Column(
                 mainAxisAlignment: MainAxisAlignment.center,

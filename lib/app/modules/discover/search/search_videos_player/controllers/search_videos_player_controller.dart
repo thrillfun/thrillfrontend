@@ -107,6 +107,8 @@ class SearchVideosPlayerController extends GetxController
     }).then((value) async {
       searchHashtags();
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(), title: "Someone liked your video!");
         // await notificationsController.sendFcmNotification(token.toString(),
         //     title:

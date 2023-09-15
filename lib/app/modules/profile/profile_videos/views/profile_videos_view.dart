@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconly/iconly.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logger/logger.dart';
 import 'package:loop_page_view/loop_page_view.dart';
@@ -63,12 +64,14 @@ class ProfileVideosView extends GetView<ProfileVideosController> {
                 if (state[index].id != null) {
                   commentsController.getComments(state[index].id!);
                   controller.followUnfollowStatus(state[index].id!);
-
                   controller.videoLikeStatus(
-                    state[index].id!,
+                    state[index].id ?? 0,
                   );
                 }
-
+                if (adsController.adFailedToLoad.isTrue) {
+                  state.removeWhere((element) => element.id == null);
+                  state.refresh();
+                }
                 if (index % 8 == 0) {
                   adsController.loadNativeAd();
                 }
@@ -101,43 +104,44 @@ class ProfileVideosView extends GetView<ProfileVideosController> {
                                 ],
                               ),
                       )
-                    : LikedVideos(
-                        videoUrl: state[index].video.toString(),
-                        pageController: pageViewController!,
-                        nextPage: index + 1,
-                        videoId: state[index].id!,
-                        gifImage: state[index].gifImage,
-                        soundName: state[index].soundName,
-                        UserId: state[index].user!.id,
-                        userName: state[index].user!.username!.obs,
-                        description: state[index].description!.obs,
-                        hashtagsList: state[index].hashtags ?? [],
-                        soundOwner: state[index].soundOwner,
-                        sound: state[index].sound,
-                        videoLikeStatus: state[index]
-                            .videoLikeStatus
-                            .toString(), //no such parameter
-                        isCommentAllowed: state[index].isCommentable == "Yes"
-                            ? true.obs
-                            : false.obs,
-                        like: state[index].likes!.obs,
-                        isfollow: 0,
-                        commentsCount: state[index].comments!.obs,
-                        soundId: state[index].soundId,
-                        avatar: state[index].user!.avatar,
-                        currentPageIndex: index.obs,
-                        fcmToken: state[index].user!.firebaseToken,
-                        publicUser: state[index].user,
-                      );
+                    : index == state.length - 1 &&
+                                controller.nextPageUrl.isNotEmpty ||
+                            controller.isLoading.isTrue
+                        ? videoShimmer()
+                        : LikedVideos(
+                            videoUrl: state[index].video.toString(),
+                            pageController: pageViewController!,
+                            nextPage: index + 1,
+                            videoId: state[index].id!,
+                            gifImage: state[index].gifImage,
+                            soundName: state[index].soundName,
+                            UserId: state[index].user!.id,
+                            userName: state[index].user!.username!.obs,
+                            description: state[index].description!.obs,
+                            hashtagsList: state[index].hashtags ?? [],
+                            soundOwner: state[index].soundOwner,
+                            sound: state[index].sound,
+                            videoLikeStatus: state[index]
+                                .videoLikeStatus
+                                .toString(), //no such parameter
+                            isCommentAllowed:
+                                state[index].isCommentable == "Yes"
+                                    ? true.obs
+                                    : false.obs,
+                            like: state[index].likes!.obs,
+                            isfollow: 0,
+                            commentsCount: state[index].comments!.obs,
+                            soundId: state[index].soundId,
+                            avatar: state[index].user!.avatar,
+                            isDuetable: state[index].isDuetable == "Yes"
+                                ? true.obs
+                                : false.obs,
+                            currentPageIndex: index.obs,
+                            fcmToken: state[index].user!.firebaseToken,
+                            publicUser: state[index].user,
+                          );
               }),
-          onLoading: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: loader(),
-              )
-            ],
-          ),
+          onLoading: videoShimmer(),
           onError: (error) => Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -335,6 +339,7 @@ class _LikedVideosState extends State<LikedVideos>
   late AnimationController _controller;
   var isVisible = false.obs;
   var currentDuration = Duration().obs;
+  var isMuted = false.obs;
 
   @override
   void initState() {
@@ -349,7 +354,7 @@ class _LikedVideosState extends State<LikedVideos>
     commentsController.getComments(widget.videoId!);
     videoPlayerController =
         VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
-          ..setLooping(false)
+          ..setLooping(true)
           ..initialize().then((value) {
             relatedVideosController.isInitialised.value = true;
             _controller.repeat();
@@ -369,38 +374,27 @@ class _LikedVideosState extends State<LikedVideos>
     });
 
     currentDuration.listen((duration) async {
-      Future.delayed(Duration(seconds: 1)).then((value) {
-        try {
-          if (Get.isOverlaysOpen || isVisible.isFalse) {
-            setState(() {
-              videoPlayerController.pause();
-            });
-          } else {
-            videoPlayerController.play();
-            setState(() {});
-          }
-        } catch (e) {
-          Logger().e(e);
-        }
-      });
-      /*  //code to automatically take to video less than 10 seconds
-      // if(videoPlayerController.value.duration.inSeconds>=10){
-      //   widget.pageController!.animateToPage(widget.nextPage!,
-      //       duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
-      //   setState(() {});
-      // }*/
-      if (videoPlayerController.value.duration.inSeconds > 0 &&
-          duration.inSeconds > 0) {
-        if (videoPlayerController.value.duration.inSeconds > 10) {
-          if (duration.inSeconds > 0 && duration.inSeconds == 9) {
+      //code to automatically take to video less than 10 seconds
+      /*    if(videoPlayerController.value.duration.inSeconds.isGreaterThan(9)){
+        widget.pageController!.animateToPage(widget.nextPage!,
+            duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+        setState(() {});
+      }*/
+      if (videoPlayerController.value.duration.inSeconds.isGreaterThan(0) &&
+          duration.inSeconds.isGreaterThan(0)) {
+        if (videoPlayerController.value.duration.inSeconds.isGreaterThan(10)) {
+          if (duration.inSeconds.isGreaterThan(0) &&
+              duration.inSeconds.isEqual(9)) {
             await relatedVideosController.postVideoView(widget.videoId!);
           }
         }
       }
-      if (videoPlayerController.value.duration.inSeconds < 10 &&
-          duration.inSeconds > 0) {
-        if (duration.inSeconds == 5) {
-          await relatedVideosController.postVideoView(widget.videoId!);
+      if (videoPlayerController.value.duration.inSeconds.isLowerThan(10) &&
+          duration.inSeconds.isGreaterThan(0)) {
+        if (duration.inSeconds.isEqual(5)) {
+          1.seconds.delay(() async {
+            await relatedVideosController.postVideoView(widget.videoId!);
+          });
         }
       }
     });
@@ -438,17 +432,20 @@ class _LikedVideosState extends State<LikedVideos>
                 });
               },
               onTap: () {
-                if (videoPlayerController.value.isPlaying) {
-                  videoPlayerController.pause();
-                  _controller.stop();
-                  isVisible.value = false;
-                  setState(() {});
+                if (videoPlayerController.value.volume > 0.0) {
+                  setState(() {
+                    videoPlayerController.setVolume(0.0);
+                    // _controller.stop();
+                    // isVisible.value = false;
+                    isMuted.value = true;
+                  });
                 } else {
-                  videoPlayerController.play();
-                  _controller.repeat();
-                  isVisible.value = true;
-
-                  setState(() {});
+                  setState(() {
+                    videoPlayerController.setVolume(1.0);
+                    // _controller.repeat();
+                    // isVisible.value = true;
+                    isMuted.value = false;
+                  });
                 }
               },
               child: Stack(
@@ -515,30 +512,33 @@ class _LikedVideosState extends State<LikedVideos>
                   ),
                   //AspectRatio(aspectRatio: videoPlayerController.value.aspectRatio,child: VideoPlayer(videoPlayerController),)
 
-                  Container(
-                    alignment: Alignment.centerRight,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(
-                              top: 10, bottom: 10, right: 20),
-                          child: Column(
-                            children: [
-                              Obx(() => InkWell(
-                                  child: Icon(
-                                    relatedVideosController.isLiked.isTrue
-                                        ? Icons.favorite
-                                        : Icons.favorite_outline,
-                                    color:
-                                        relatedVideosController.isLiked.isTrue
-                                            ? Colors.red
-                                            : Colors.white,
-                                    size: 25,
-                                  ),
-                                  onTap: () {
-                                    checkForLogin(() {
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: InkWell(
+                      onTap: () => null,
+                      child: Container(
+                        height: Get.height / 2,
+                        width: 150,
+                        alignment: Alignment.centerRight,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(
+                                  top: 10, bottom: 10, right: 20),
+                              child: Obx(() => LikeButton(
+                                    countPostion: CountPostion.bottom,
+                                    likeCountAnimationType:
+                                        LikeCountAnimationType.all,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    circleColor: const CircleColor(
+                                        start: Colors.red, end: Colors.red),
+                                    bubblesColor: const BubblesColor(
+                                      dotPrimaryColor: Colors.red,
+                                      dotSecondaryColor: Colors.red,
+                                    ),
+                                    onTap: (_) {
                                       relatedVideosController.likeVideo(
                                           relatedVideosController
                                                   .isLiked.isFalse
@@ -547,383 +547,235 @@ class _LikedVideosState extends State<LikedVideos>
                                           widget.videoId!,
                                           token: widget.fcmToken,
                                           userName: widget.userName!.value);
-                                    });
-                                  })),
-                              Obx(() => Text(
-                                    relatedVideosController.totalLikes.value
-                                        .toString(),
-                                    style: TextStyle(color: Colors.white),
-                                  ))
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          child: Column(
-                            children: [
-                              IconButton(
-                                  onPressed: () async {
-                                    commentsController
-                                        .getComments(widget.videoId!)
-                                        .then((value) {
-                                      Get.bottomSheet(
-                                        ClipRRect(
-                                          borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(10),
-                                              topRight: Radius.circular(10)),
-                                          child: CommentsView(
-                                            videoId: widget.videoId!,
-                                            userId: widget.UserId,
-                                            isCommentAllowed:
-                                                widget.isCommentAllowed,
-                                            isfollow: relatedVideosController
-                                                    .isUserFollowed.isTrue
-                                                ? 1
-                                                : 0,
-                                            userName: widget.userName!.value,
-                                            avatar: widget.avatar ?? "",
-                                            fcmToken: widget.fcmToken,
-                                            description:
-                                                widget.description?.value,
-                                          ),
-                                        ),
+
+                                      return Future.value(
+                                          relatedVideosController
+                                              .isLiked.isFalse);
+                                    },
+                                    likeBuilder: (bool isLiked) {
+                                      return Obx(() => Icon(
+                                            relatedVideosController
+                                                    .isLiked.isTrue
+                                                ? Icons.favorite
+                                                : Icons.favorite_outline,
+                                            color: relatedVideosController
+                                                    .isLiked.isTrue
+                                                ? Colors.red
+                                                : Colors.white,
+                                            size: 25,
+                                          ));
+                                    },
+                                    likeCount: relatedVideosController
+                                        .totalLikes.value,
+                                    countBuilder: (int? count, bool isLiked,
+                                        String text) {
+                                      return Text(
+                                        relatedVideosController.totalLikes.value
+                                            .toString(),
+                                        style: TextStyle(
+                                            color: relatedVideosController
+                                                    .isLiked.isTrue
+                                                ? Colors.red
+                                                : Colors.white),
                                       );
-                                    });
-                                  },
-                                  icon: const Icon(
-                                    IconlyLight.chat,
-                                    color: Colors.white,
-                                    size: 25,
+                                    },
                                   )),
-                              Obx(() => Text(
-                                    commentsController.commentsCount.value
-                                        .toString(),
-                                    style: const TextStyle(
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              child: Column(
+                                children: [
+                                  IconButton(
+                                      onPressed: () async {
+                                        commentsController
+                                            .getComments(widget.videoId!)
+                                            .then((value) {
+                                          Get.bottomSheet(
+                                            ClipRRect(
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                      topLeft:
+                                                          Radius.circular(10),
+                                                      topRight:
+                                                          Radius.circular(10)),
+                                              child: CommentsView(
+                                                videoId: widget.videoId!,
+                                                userId: widget.UserId,
+                                                isCommentAllowed:
+                                                    widget.isCommentAllowed,
+                                                isfollow:
+                                                    relatedVideosController
+                                                            .isUserFollowed
+                                                            .isTrue
+                                                        ? 1
+                                                        : 0,
+                                                userName:
+                                                    widget.userName!.value,
+                                                avatar: widget.avatar ?? "",
+                                                fcmToken: widget.fcmToken,
+                                                description:
+                                                    widget.description?.value,
+                                              ),
+                                            ),
+                                          );
+                                        });
+                                      },
+                                      icon: const Icon(
+                                        IconlyLight.chat,
+                                        color: Colors.white,
+                                        size: 25,
+                                      )),
+                                  Obx(() => Text(
+                                        commentsController.commentsCount.value
+                                            .toString(),
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
+                                      ))
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(
+                                  right: 10, top: 10, bottom: 10),
+                              child: Column(
+                                children: [
+                                  IconButton(
+                                      onPressed: () async {
+                                        await relatedVideosController
+                                            .createDynamicLink(
+                                                widget.currentPageIndex!.value
+                                                    .toString(),
+                                                "video",
+                                                widget.userName.toString(),
+                                                widget.avatar.toString())
+                                            .then((value) => Share.share(
+                                                'You need to watch this awesome video only on Thrill!!!' +
+                                                    " " +
+                                                    value));
+                                      },
+                                      icon: const Icon(
+                                        Icons.share,
+                                        color: Colors.white,
+                                        size: 22,
+                                      )),
+                                  const Text(
+                                    "Share",
+                                    style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold),
-                                  ))
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(
-                              right: 10, top: 10, bottom: 10),
-                          child: Column(
-                            children: [
-                              IconButton(
-                                  onPressed: () async {
-                                    await relatedVideosController
-                                        .createDynamicLink(
-                                            widget.currentPageIndex!.value
-                                                .toString(),
-                                            "video",
-                                            widget.userName.toString(),
-                                            widget.avatar.toString())
-                                        .then((value) => Share.share(
-                                            'You need to watch this awesome video only on Thrill!!!' +
-                                                " " +
-                                                value));
-                                  },
-                                  icon: const Icon(
-                                    Icons.share,
-                                    color: Colors.white,
-                                    size: 22,
-                                  )),
-                              const Text(
-                                "Share",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(
-                              right: 10, top: 10, bottom: 10),
-                          child: Column(
-                            children: [
-                              IconButton(
-                                  onPressed: () {
-                                    Get.bottomSheet(
-                                        Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              right: 10),
-                                                      child: Column(
-                                                        children: [
-                                                          IconButton(
-                                                            onPressed: () {},
-                                                            icon: const Icon(
-                                                              IconlyLight.plus,
-                                                              color: ColorManager
-                                                                  .colorAccent,
-                                                              size: 30,
-                                                            ),
-                                                          ),
-                                                          const Text(
-                                                            "Duet",
-                                                            style: TextStyle(
-                                                                color: ColorManager
-                                                                    .colorAccent,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          )
-                                                        ],
+                                  )
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(
+                                  right: 10, top: 10, bottom: 10),
+                              child: Column(
+                                children: [
+                                  IconButton(
+                                      onPressed: () async {
+                                        relatedVideosController
+                                            .getVideoFavStatus(widget.videoId!)
+                                            .then((value) =>
+                                                showVideoBottomSheet(() {
+                                                  Get.defaultDialog(
+                                                      content: const Text(
+                                                          "you want to delete this video?"),
+                                                      title: "Are your sure?",
+                                                      confirm: InkWell(
+                                                        child: Container(
+                                                          width: Get.width,
+                                                          alignment:
+                                                              Alignment.center,
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              color: Colors.red
+                                                                  .shade400),
+                                                          child:
+                                                              const Text("Yes"),
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(10),
+                                                        ),
+                                                        onTap: () => relatedVideosController
+                                                            .deleteUserVideo(
+                                                                widget.videoId!)
+                                                            .then((value) =>
+                                                                relatedVideosController
+                                                                    .getUserVideos()
+                                                                    .then((value) =>
+                                                                        Get.back())),
                                                       ),
-                                                    ),
-                                                    Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              right: 10),
-                                                      child: Column(
-                                                        children: [
-                                                          IconButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                if (widget
-                                                                        .UserId ==
-                                                                    GetStorage()
-                                                                        .read(
-                                                                            "userId")) {
-                                                                  Get.defaultDialog(
-                                                                      content: const Text("you want to delete this video?"),
-                                                                      title: "Are your sure?",
-                                                                      confirm: InkWell(
-                                                                        child:
-                                                                            Container(
-                                                                          width:
-                                                                              Get.width,
-                                                                          alignment:
-                                                                              Alignment.center,
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: BorderRadius.circular(10),
-                                                                              color: Colors.red.shade400),
-                                                                          child:
-                                                                              const Text("Yes"),
-                                                                          padding:
-                                                                              const EdgeInsets.all(10),
-                                                                        ),
-                                                                        onTap: () => relatedVideosController.deleteUserVideo(widget.videoId!).then((value) => relatedVideosController
-                                                                            .getUserVideos()
-                                                                            .then((value) =>
-                                                                                Get.back())),
-                                                                      ),
-                                                                      cancel: InkWell(
-                                                                        child:
-                                                                            Container(
-                                                                          width:
-                                                                              Get.width,
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: BorderRadius.circular(10),
-                                                                              color: Colors.green),
-                                                                          child:
-                                                                              const Text("Cancel"),
-                                                                          alignment:
-                                                                              Alignment.center,
-                                                                          padding:
-                                                                              const EdgeInsets.all(10),
-                                                                        ),
-                                                                        onTap: () =>
-                                                                            Get.back(),
-                                                                      ));
+                                                      cancel: InkWell(
+                                                        child: Container(
+                                                          width: Get.width,
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              color:
+                                                                  Colors.green),
+                                                          child: const Text(
+                                                              "Cancel"),
+                                                          alignment:
+                                                              Alignment.center,
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(10),
+                                                        ),
+                                                        onTap: () => Get.back(),
+                                                      ));
+                                                }, () {
+                                                  relatedVideosController
+                                                      .favUnfavVideo(
+                                                          widget.videoId!,
+                                                          relatedVideosController
+                                                                  .isVideoFavourite
+                                                                  .isFalse
+                                                              ? "fav"
+                                                              : "unfav");
+                                                }, () async {
+                                                  await relatedVideosController
+                                                      .createDynamicLink(
+                                                          widget
+                                                              .currentPageIndex!
+                                                              .value
+                                                              .toString(),
+                                                          "video",
+                                                          widget.userName
+                                                              .toString(),
+                                                          widget.avatar
+                                                              .toString())
+                                                      .then((value) =>
+                                                          Clipboard.setData(
+                                                              ClipboardData(
+                                                                  text:
+                                                                      value)));
 
-                                                                  //  showDeleteDialog();
-                                                                } else {
-                                                                  // relatedVideosController
-                                                                  //     .favUnfavVideo(
-                                                                  //         widget
-                                                                  //             .videoId!,
-                                                                  //         "fav");
-                                                                }
-                                                              },
-                                                              icon: widget.UserId ==
-                                                                      GetStorage()
-                                                                          .read(
-                                                                              "userId")
-                                                                  ? const Icon(
-                                                                      Icons
-                                                                          .delete,
-                                                                      color: ColorManager
-                                                                          .red,
-                                                                    )
-                                                                  : const Icon(
-                                                                      Icons
-                                                                          .save,
-                                                                      color: ColorManager
-                                                                          .colorAccent,
-                                                                    )),
-                                                          widget.UserId ==
-                                                                  GetStorage()
-                                                                      .read(
-                                                                          "userId")
-                                                              ? const Text(
-                                                                  "Delete",
-                                                                  style: TextStyle(
-                                                                      color: ColorManager
-                                                                          .red,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
-                                                                )
-                                                              : const Text(
-                                                                  "Save",
-                                                                  style: TextStyle(
-                                                                      color: ColorManager
-                                                                          .colorAccent,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
-                                                                )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              right: 10),
-                                                      child: Column(
-                                                        children: [
-                                                          IconButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                Clipboard.setData(ClipboardData(
-                                                                    text: await relatedVideosController.createDynamicLink(
-                                                                        widget
-                                                                            .currentPageIndex!
-                                                                            .value
-                                                                            .toString(),
-                                                                        "video",
-                                                                        widget
-                                                                            .userName
-                                                                            .toString(),
-                                                                        widget
-                                                                            .avatar
-                                                                            .toString())));
-
-                                                                successToast(
-                                                                    "link copied successfully");
-                                                              },
-                                                              icon: const Icon(
-                                                                Icons.link,
-                                                                color: ColorManager
-                                                                    .colorAccent,
-                                                              )),
-                                                          const Text(
-                                                            "Link",
-                                                            style: TextStyle(
-                                                                color: ColorManager
-                                                                    .colorAccent,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              right: 10),
-                                                      child: Column(
-                                                        children: [
-                                                          IconButton(
-                                                              onPressed: () {
-                                                                Get.back(
-                                                                    closeOverlays:
-                                                                        true);
-                                                                relatedVideosController.downloadAndProcessVideo(
-                                                                    widget
-                                                                        .videoUrl!,
-                                                                    widget
-                                                                        .userName
-                                                                        .toString());
-                                                              },
-                                                              icon: const Icon(
-                                                                Icons.download,
-                                                                color: ColorManager
-                                                                    .colorAccent,
-                                                              )),
-                                                          const Text(
-                                                            "Download",
-                                                            style: TextStyle(
-                                                                color: ColorManager
-                                                                    .colorAccent,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Divider(
-                                                  color: Colors.black
-                                                      .withOpacity(0.3),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                InkWell(
-                                                  onTap: () async {
-                                                    if (await GetStorage()
-                                                            .read("token") ==
-                                                        null) {
-                                                      if (await Permission
-                                                          .phone.isGranted) {
-                                                        await SimDataPlugin
-                                                                .getSimData()
-                                                            .then((value) => value
-                                                                    .cards
-                                                                    .isEmpty
-                                                                ? showLoginBottomSheet(
-                                                                    false.obs)
-                                                                : showLoginBottomSheet(
-                                                                    true.obs));
-                                                      } else {
-                                                        await Permission.phone
-                                                            .request()
-                                                            .then((value) async => await SimDataPlugin
-                                                                    .getSimData()
-                                                                .then((value) => value
-                                                                        .cards
-                                                                        .isEmpty
-                                                                    ? showLoginBottomSheet(
-                                                                        false
-                                                                            .obs)
-                                                                    : showLoginBottomSheet(
-                                                                        true.obs)));
-                                                      }
+                                                  successToast(
+                                                      "link copied successfully");
+                                                }, () async {
+                                                  await relatedVideosController
+                                                      .checkIfVideoReported(
+                                                          widget.videoId!,
+                                                          await GetStorage()
+                                                              .read("userId"))
+                                                      .then((value) async {
+                                                    if (value) {
+                                                      errorToast(
+                                                          "video is already reported");
                                                     } else {
                                                       await relatedVideosController
-                                                          .checkIfVideoReported(
-                                                              widget.videoId!,
-                                                              widget.UserId!)
-                                                          .then((value) async {
-                                                        if (value) {
-                                                          errorToast(
-                                                              "video is already reported");
-                                                        } else {
-                                                          await relatedVideosController
-                                                              .getSiteSettings()
-                                                              .then((_) => showReportDialog(
+                                                          .getSiteSettings()
+                                                          .then((_) =>
+                                                              showReportDialog(
                                                                   widget
                                                                       .videoId!,
                                                                   widget
@@ -931,220 +783,51 @@ class _LikedVideosState extends State<LikedVideos>
                                                                       .value,
                                                                   widget
                                                                       .UserId!));
-                                                        }
-                                                      });
                                                     }
-                                                  },
-                                                  child: Row(
-                                                    children: const [
-                                                      Icon(
-                                                        Icons.chat,
-                                                        color:
-                                                            Color(0xffFF2400),
-                                                        size: 30,
-                                                      ),
-                                                      SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                      Text(
-                                                        "Report...",
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Color(
-                                                                0xffFF2400)),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                const Divider(),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                InkWell(
-                                                  onTap: () async {
-                                                    if (await GetStorage()
-                                                            .read("token") ==
-                                                        null) {
-                                                      if (await Permission
-                                                          .phone.isGranted) {
-                                                        await SimDataPlugin
-                                                                .getSimData()
-                                                            .then((value) => value
-                                                                    .cards
-                                                                    .isEmpty
-                                                                ? showLoginBottomSheet(
-                                                                    false.obs)
-                                                                : showLoginBottomSheet(
-                                                                    true.obs));
-                                                      } else {
-                                                        await Permission.phone
-                                                            .request()
-                                                            .then((value) async => await SimDataPlugin
-                                                                    .getSimData()
-                                                                .then((value) => value
-                                                                        .cards
-                                                                        .isEmpty
-                                                                    ? showLoginBottomSheet(
-                                                                        false
-                                                                            .obs)
-                                                                    : showLoginBottomSheet(
-                                                                        true.obs)));
-                                                      }
-                                                    } else {
-                                                      await relatedVideosController
-                                                          .checkUserBlocked(
-                                                              widget.UserId!)
-                                                          .then((value) async =>
-                                                              await relatedVideosController
-                                                                  .blockUnblockUser(
-                                                                      widget
-                                                                          .UserId!,
-                                                                      value));
-                                                    }
-                                                  },
-                                                  child: Row(
-                                                    children: [
-                                                      const Icon(
-                                                        Icons.block,
-                                                        color: ColorManager
-                                                            .colorAccent,
-                                                        size: 30,
-                                                      ),
-                                                      const SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                      Obx(() => Text(
-                                                            relatedVideosController
-                                                                    .isUserBlocked
-                                                                    .isFalse
-                                                                ? "Block User..."
-                                                                : "Unblock User...",
-                                                            style: const TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: ColorManager
-                                                                    .colorAccent),
-                                                          ))
-                                                    ],
-                                                  ),
-                                                ),
-                                                const Divider(),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                // InkWell(
-                                                //   onTap: () async {
-                                                //     if (await GetStorage()
-                                                //             .read("token") ==
-                                                //         null) {
-                                                //       if (await Permission
-                                                //           .phone.isGranted) {
-                                                //         await SimDataPlugin
-                                                //                 .getSimData()
-                                                //             .then((value) => value
-                                                //                     .cards
-                                                //                     .isEmpty
-                                                //                 ? Get.bottomSheet(
-                                                //                     LoginView(
-                                                //                         false
-                                                //                             .obs))
-                                                //                 : Get.bottomSheet(
-                                                //                     LoginView(true
-                                                //                         .obs)));
-                                                //       } else {
-                                                //         await Permission.phone
-                                                //             .request()
-                                                //             .then((value) async => await SimDataPlugin
-                                                //                     .getSimData()
-                                                //                 .then((value) => value
-                                                //                         .cards
-                                                //                         .isEmpty
-                                                //                     ? Get.bottomSheet(
-                                                //                         LoginView(false
-                                                //                             .obs))
-                                                //                     : Get.bottomSheet(
-                                                //                         LoginView(
-                                                //                             true.obs))));
-                                                //       }
-                                                //     } else {
-                                                //       relatedVideosController
-                                                //           .notInterested(
-                                                //         widget.videoId!,
-                                                //       );
-                                                //     }
-                                                //     // userDetailsController
-                                                //     //     .followUnfollowUser(
-                                                //     //     widget.UserId,
-                                                //     //     widget.isfollow == 0
-                                                //     //         ? "follow"
-                                                //     //         : "unfollow",
-                                                //     //     token: widget
-                                                //     //         .publicUser!
-                                                //     //         .firebaseToken
-                                                //     //         .toString());
-                                                //     // followingVideosController
-                                                //     //     .getAllVideos();
-                                                //   },
-                                                //   child: Row(
-                                                //     children: [
-                                                //       widget.isfollow! == 0
-                                                //           ? const Icon(
-                                                //               Icons.report,
-                                                //               color: ColorManager
-                                                //                   .colorAccent,
-                                                //               size: 30,
-                                                //             )
-                                                //           : const Icon(
-                                                //               Icons.report,
-                                                //               color: ColorManager
-                                                //                   .colorAccent,
-                                                //               size: 30,
-                                                //             ),
-                                                //       const SizedBox(
-                                                //         width: 10,
-                                                //       ),
-                                                //       const Text(
-                                                //         "Not Interested",
-                                                //         style: TextStyle(
-                                                //             fontWeight:
-                                                //                 FontWeight.bold,
-                                                //             color: ColorManager
-                                                //                 .colorAccent),
-                                                //       )
-                                                //     ],
-                                                //   ),
-                                                // )
-                                              ]),
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                        ),
-                                        isScrollControlled: false,
-                                        backgroundColor: Theme.of(context)
-                                            .scaffoldBackgroundColor);
-                                  },
-                                  icon: const Icon(
-                                    IconlyBold.more_circle,
-                                    color: Colors.white,
-                                    size: 25,
-                                  )),
-                              const Text(
-                                "More",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )
-                            ],
-                          ),
+                                                  });
+                                                }, () {
+                                                  Get.back(closeOverlays: true);
+                                                  relatedVideosController
+                                                      .downloadAndProcessVideo(
+                                                          widget.videoUrl!,
+                                                          widget.userName
+                                                              .toString());
+                                                }, () async {
+                                                  await relatedVideosController
+                                                      .checkUserBlocked(
+                                                          widget.UserId!)
+                                                      .then((value) async =>
+                                                          await relatedVideosController
+                                                              .blockUnblockUser(
+                                                                  widget
+                                                                      .UserId!,
+                                                                  value));
+                                                },
+                                                    relatedVideosController
+                                                        .isUserBlocked,
+                                                    relatedVideosController
+                                                        .isVideoFavourite,
+                                                    widget.isDuetable!.value,
+                                                    widget.UserId!));
+                                      },
+                                      icon: const Icon(
+                                        IconlyBold.more_circle,
+                                        color: Colors.white,
+                                        size: 25,
+                                      )),
+                                  const Text(
+                                    "More",
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   Container(
@@ -1205,7 +888,7 @@ class _LikedVideosState extends State<LikedVideos>
                                             : widget.publicUser!.name!,
                                         style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 18,
+                                            fontSize: 16,
                                             fontWeight: FontWeight.w700),
                                       ),
                                       const SizedBox(
@@ -1288,7 +971,7 @@ class _LikedVideosState extends State<LikedVideos>
                                         : widget.publicUser!.name!,
                                     style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 14,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w400),
                                   ),
                                 ],
@@ -1311,15 +994,15 @@ class _LikedVideosState extends State<LikedVideos>
                             trimCollapsedText: 'More',
                             trimExpandedText: 'Less',
                             style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w400,
                                 color: Colors.white),
                             moreStyle: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: ColorManager.colorAccent,
                                 fontWeight: FontWeight.w700),
                             lessStyle: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: ColorManager.colorAccent),
                           ),
@@ -1454,7 +1137,8 @@ class _LikedVideosState extends State<LikedVideos>
                                         " by ${widget.publicUser!.name!.isEmpty ? widget.publicUser!.username : widget.publicUser!.name}",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 12),
                               )),
                               SizedBox(
                                 width: 40,
@@ -1467,6 +1151,24 @@ class _LikedVideosState extends State<LikedVideos>
                   ),
                 ],
               )),
+          IgnorePointer(
+            child: Visibility(
+              visible: isMuted.isTrue,
+              child: Align(
+                  alignment: Alignment.center,
+                  child: ClipOval(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      color: ColorManager.colorAccent.withOpacity(0.5),
+                      child: Icon(
+                        BoxIcons.bx_volume_mute,
+                        size: 25,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )),
+            ),
+          ),
         ],
       ),
     );

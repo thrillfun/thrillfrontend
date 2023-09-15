@@ -16,6 +16,7 @@ import 'package:thrill/app/rest/models/user_videos_model.dart';
 import '../../../../rest/models/site_settings_model.dart';
 import '../../../../rest/rest_urls.dart';
 import '../../../../utils/utils.dart';
+import '../../../bindings/AdsController.dart';
 import '../../../comments/controllers/comments_controller.dart';
 import '../../user_private_videos/controllers/user_private_videos_controller.dart';
 
@@ -37,6 +38,8 @@ class ProfileVideosController extends GetxController
 
   var isUserFollowed = false.obs;
   var commentsController = Get.find<CommentsController>();
+  var isVideoFavourite = false.obs;
+  var adsController = Get.find<AdsController>();
   @override
   void onInit() {
     getUserVideos();
@@ -51,6 +54,35 @@ class ProfileVideosController extends GetxController
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> favUnfavVideo(int videoId, String action) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/do-fav-unfav", queryParameters: {
+      "video_id": "$videoId",
+      "action": action
+    }).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+      getVideoFavStatus(videoId);
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> notInterested(int videoId) async {
@@ -78,31 +110,35 @@ class ProfileVideosController extends GetxController
     if (userVideos.isEmpty) {
       change(userVideos, status: RxStatus.loading());
     }
-    dio
-        .post('/video/user-videos', queryParameters: {
-          "user_id": "${await GetStorage().read("userId")}"
-        })
-        .timeout(const Duration(seconds: 10))
-        .then((response) {
-          userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+    dio.post('/video/user-videos', queryParameters: {
+      "user_id": "${await GetStorage().read("userId")}"
+    }).then((response) {
+      userVideos = UserVideosModel.fromJson(response.data).data!.obs;
+      if (adsController.adFailedToLoad.isTrue) {
+        userVideos.removeWhere((element) => element.id == null);
+        userVideos.refresh();
+        commentsController.getComments(userVideos[0].id ?? 0);
+        videoLikeStatus(userVideos[0].id ?? 0);
+        followUnfollowStatus(userVideos[0].user!.id!);
+      } else {
+        commentsController.getComments(userVideos[1].id ?? 0);
+        videoLikeStatus(userVideos[1].id ?? 0);
+        followUnfollowStatus(userVideos[1].user!.id!);
+      }
 
-          commentsController.getComments(userVideos[1].id ?? 0);
-          videoLikeStatus(userVideos[1].id ?? 0);
-          followUnfollowStatus(userVideos[1].user!.id!);
-          nextPageUrl.value =
-              UserVideosModel.fromJson(response.data).pagination!.nextPageUrl ??
-                  "";
-          change(userVideos, status: RxStatus.success());
-        })
-        .onError((error, stackTrace) {
-          change(userVideos, status: RxStatus.error());
-        });
+      nextPageUrl.value =
+          UserVideosModel.fromJson(response.data).pagination!.nextPageUrl ?? "";
+      change(userVideos, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      change(userVideos, status: RxStatus.error(error.toString()));
+    });
   }
 
   Future<void> getPaginationAllVideos(int page) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
+    isLoading.value = true;
     change(userVideos, status: RxStatus.loadingMore());
 
     dio.post(nextPageUrl.value, queryParameters: {
@@ -113,11 +149,14 @@ class ProfileVideosController extends GetxController
 
         userVideos.refresh();
       }
+      isLoading.value = false;
       change(userVideos, status: RxStatus.success());
 
       nextPageUrl.value =
           UserVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
-    }).onError((error, stackTrace) {});
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
+    });
   }
 
   Future<void> deleteUserVideo(int videoId) async {
@@ -161,6 +200,8 @@ class ProfileVideosController extends GetxController
       // getAllVideos(false);
       videoLikeStatus(videoId);
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
             body: "${GetStorage().read("userName")} liked your video");

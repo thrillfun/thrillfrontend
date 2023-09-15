@@ -150,12 +150,12 @@ class FavouriteSoundsView extends GetView<FavouriteSoundsController> {
                                             ? const Icon(
                                                 Icons
                                                     .pause_circle_filled_outlined,
-                                                size: 25,
+                                                size: 20,
                                                 color: ColorManager.colorAccent,
                                               )
                                             : const Icon(
                                                 IconlyBold.play,
-                                                size: 25,
+                                                size: 20,
                                                 color: ColorManager.colorAccent,
                                               ))
                                       ],
@@ -174,11 +174,14 @@ class FavouriteSoundsView extends GetView<FavouriteSoundsController> {
                                             children: [
                                               Text(
                                                 state[index].name.toString(),
-                                                maxLines: 2,
+                                                maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
                                                     fontWeight: FontWeight.w700,
-                                                    fontSize: 18),
+                                                    fontSize: 16),
+                                              ),
+                                              SizedBox(
+                                                height: 5,
                                               ),
                                               Text(
                                                 state[index].user == null
@@ -188,8 +191,8 @@ class FavouriteSoundsView extends GetView<FavouriteSoundsController> {
                                                         .username
                                                         .toString(),
                                                 style: const TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 14),
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 12),
                                               ),
                                             ]),
                                       ),
@@ -213,6 +216,7 @@ class FavouriteSoundsView extends GetView<FavouriteSoundsController> {
                                     icon: const Icon(
                                       IconlyBold.bookmark,
                                       color: ColorManager.colorAccent,
+                                      size: 22,
                                     ),
                                   ),
                                 ],
@@ -370,7 +374,7 @@ class FavouriteSoundsView extends GetView<FavouriteSoundsController> {
                           })
                 ],
               ),
-        onLoading: loader(),
+        onLoading: searchSoundShimmer(),
         onEmpty: Column(
           children: [emptyListWidget(data: "No favourite sounds")],
         ));

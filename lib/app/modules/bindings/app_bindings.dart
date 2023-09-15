@@ -93,7 +93,7 @@ class AppBindings extends Bindings {
     Get.lazyPut(() => FollowingVideosController(), fenix: true);
     Get.lazyPut(() => TrendingVideosController(), fenix: true);
     Get.lazyPut(() => HomeVideosPlayerController(), fenix: true);
-    Get.lazyPut(() => PostScreenController(), fenix: false);
+    Get.lazyPut(() => PostScreenController(), fenix: true);
     Get.lazyPut(() => ConnectionManagerController(), fenix: false);
   }
 }

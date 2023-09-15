@@ -36,16 +36,20 @@ class HashTagsVideoPlayerController extends GetxController
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var nextPageUrl =
-      "https://thrill.fun/api/hashtag/get-videos-by-hashtag?page=1".obs;
+      "https://thrill.fun/api/hashtag/get-videos-by-hashtag?page=2".obs;
   var isLikeEnable = true.obs;
   var isLiked = false.obs;
   var totalLikes = 0.obs;
-
+  var currentDuration = Duration().obs;
   var isUserFollowed = false.obs;
   var commentsController = Get.find<CommentsController>();
+  var currentPage = 1.obs;
+  var id = 0.obs;
+  var isVideoFavourite = false.obs;
+
   @override
   void onInit() {
-    getVideosByHashTags();
+    getVideoById();
     super.onInit();
   }
 
@@ -57,6 +61,35 @@ class HashTagsVideoPlayerController extends GetxController
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> favUnfavVideo(int videoId, String action) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/do-fav-unfav", queryParameters: {
+      "video_id": "$videoId",
+      "action": action
+    }).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+      getVideoFavStatus(videoId);
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> notInterested(int videoId) async {
@@ -88,21 +121,60 @@ class HashTagsVideoPlayerController extends GetxController
     }).onError((error, stackTrace) {});
   }
 
-  Future<void> getVideosByHashTags() async {
+  Future<void> getVideoById() async {
     change(hashTagsDetailsList, status: RxStatus.loading());
 
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
 
-    dio.post("hashtag/get-videos-by-hashtag", queryParameters: {
-      "hashtag_id": "${Get.arguments["hashtagId"]}"
-    }).then((value) {
+    isLoading.value = true;
+    dio.post('video/video-by-id',
+        queryParameters: {'video_id': Get.arguments['video_id']}).then((value) {
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
+      id.value = HashtagDetailsModel.fromJson(value.data).data![0].id!;
+
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
-      nextPageUrl.value =
-          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
-              "";
+
+      commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
+      videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
+      followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
+      getVideosByHashTags();
+      isLoading.value = false;
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
+
+      Logger().e(error);
+    });
+  }
+
+  Future<void> getVideosByHashTags() async {
+    change(hashTagsDetailsList, status: RxStatus.loading());
+
+    dio.post(
+        "hashtag/get-videos-by-hashtag?page=${Get.arguments['current_page']}",
+        queryParameters: {
+          "hashtag_id": "${Get.arguments["hashtagId"]}"
+        }).then((value) {
+      hashTagsDetailsList
+          .addAll(HashtagDetailsModel.fromJson(value.data).data!.obs);
+
+      hashTagsDetailsList.value = hashTagsDetailsList.value.toSet().toList();
+
+      for (int i = 0; i <= hashTagsDetailsList.length - 1; i++) {
+        if (i != 0 && id.value == hashTagsDetailsList[i].id) {
+          hashTagsDetailsList.removeAt(i);
+          hashTagsDetailsList.refresh();
+          break;
+        }
+      }
+
+      isFavouriteHastag.value =
+          hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+
+      currentPage.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.currentPage!;
+
       commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
       videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
       followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
@@ -115,8 +187,9 @@ class HashTagsVideoPlayerController extends GetxController
   Future<void> getPaginationVideosByHashTags() async {
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
+    isLoading.value = true;
 
-    dio.post(nextPageUrl.value, queryParameters: {
+    await dio.post(nextPageUrl.value, queryParameters: {
       "hashtag_id": "${Get.arguments["hashtagId"]}"
     }).then((value) {
       nextPageUrl.value =
@@ -130,10 +203,18 @@ class HashTagsVideoPlayerController extends GetxController
       commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
       videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
       followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
+
+      currentPage.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.currentPage!;
+
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+      isLoading.value = false;
+
       change(hashTagsDetailsList, status: RxStatus.success());
-    }).onError((error, stackTrace) {});
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
+    });
   }
 
   Future<void> refereshVideosByHashtags() async {
@@ -167,9 +248,11 @@ class HashTagsVideoPlayerController extends GetxController
       // getAllVideos(false);
       videoLikeStatus(videoId);
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
-            body: "${GetStorage().read("userName")} liked your video");
+            body: "${GetStorage().read("username")} liked your video");
       }
     }).onError((error, stackTrace) {});
   }

@@ -49,6 +49,9 @@ class OtherUserVideosView extends GetView<OtherUserVideosController> {
                                   onTap: () {
                                     Get.toNamed(Routes.OTHERS_PROFILE_VIDEOS,
                                         arguments: {
+                                          'current_page':
+                                              controller.currentPage.value,
+                                          "video_id": state[index].id!,
                                           "init_page": index,
                                           "profileId":
                                               Get.arguments["profileId"]
@@ -79,25 +82,28 @@ class OtherUserVideosView extends GetView<OtherUserVideosController> {
                                                       ),
                                                     ),
                                                     TextSpan(
-                                                        text: " " +
-                                                            (controller
-                                                                .userVideos[
-                                                                    index]
-                                                                .views??0)
-                                                                .formatViews(),
-                                                        style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 16,shadows: <Shadow>[
-
+                                                      text: " " +
+                                                          (controller
+                                                                      .userVideos[
+                                                                          index]
+                                                                      .views ??
+                                                                  0)
+                                                              .formatViews(),
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 16,
+                                                        shadows: <Shadow>[
                                                           Shadow(
-                                                            offset: Offset(0.0, 0.0),
+                                                            offset: Offset(
+                                                                0.0, 0.0),
                                                             blurRadius: 8.0,
                                                             color: Colors.black,
                                                           ),
                                                         ],
-                                                        ),),
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
                                               )
@@ -110,11 +116,7 @@ class OtherUserVideosView extends GetView<OtherUserVideosController> {
                 ))
               ],
             ),
-      onLoading: Column(
-        children: [
-          Expanded(child: loader()),
-        ],
-      ),
+      onLoading: profileShimmer(),
       onEmpty: emptyListWidget(),
     );
   }

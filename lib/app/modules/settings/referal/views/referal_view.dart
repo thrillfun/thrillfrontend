@@ -48,12 +48,13 @@ class ReferalView extends GetView<ReferalController> {
             padding: EdgeInsets.symmetric(horizontal: 10),
             child: Text(
               "Refer a friend and get a chance to win Bitcoin worth 1 Lakh!",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
               textAlign: TextAlign.center,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 20, bottom: 20),
+            padding:
+                const EdgeInsets.only(top: 20, bottom: 20, left: 10, right: 10),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -79,7 +80,8 @@ class ReferalView extends GetView<ReferalController> {
                     const Text(
                       "Invite your friend",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                     )
                   ],
                 ),
@@ -109,7 +111,8 @@ class ReferalView extends GetView<ReferalController> {
                       ),
                       const Text("download app",
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.w700))
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 12))
                     ],
                   ),
                 ),
@@ -141,7 +144,8 @@ class ReferalView extends GetView<ReferalController> {
                       ),
                       const Text("You both get reward",
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.w700))
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 12))
                     ],
                   ),
                 ),
@@ -174,7 +178,7 @@ class ReferalView extends GetView<ReferalController> {
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 18,
+                      fontSize: 14,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -249,7 +253,7 @@ class ReferalView extends GetView<ReferalController> {
           child: const Text(
             "Refer Now",
             style: TextStyle(
-                color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
           ),
         ),
       ));

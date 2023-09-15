@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
 import 'package:thrill/app/modules/profile/user_private_videos/views/user_private_videos_view.dart';
 import 'package:thrill/app/modules/profile/user_videos/views/user_videos_view.dart';
@@ -30,325 +31,309 @@ class ProfileView extends GetView<ProfileController> {
     var selectedTab = 0.obs;
 
     return Scaffold(
-        extendBodyBehindAppBar: true,
-        extendBody: true,
-        body: controller.obx(
-            (state) =>
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Stack(
-                    children: [
-                      Container(
-                        height: 250,
-                        decoration: const BoxDecoration(
-                            gradient: ColorManager.postGradient,
-                            borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(30),
-                                bottomRight: Radius.circular(30))),
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).viewPadding.top,
-                          ),
-                          Stack(
-                            alignment: Alignment.topCenter,
-                            children: [
-                              Card(
-                                margin: const EdgeInsets.only(
-                                    left: 20, right: 20, bottom: 20, top: 60),
-                                elevation: 10,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20)),
-                                child: Column(
-                                  children: [
-                                    const SizedBox(
-                                      height: 80,
-                                    ),
-                                    Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 20),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Expanded(
-                                              child: Text(
-                                            '${state!.value.name.toString().isEmpty ? state.value.username : state.value.name}',
-                                            textAlign: TextAlign.center,
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                            style: const TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w700),
-                                          )),
-                                          const SizedBox(
-                                            width: 5,
-                                          ),
-                                          Visibility(
-                                              visible: state.value.isVerified ==
-                                                  'true',
-                                              child: SvgPicture.asset(
-                                                'assets/verified.svg',
-                                              ))
-                                        ],
-                                      ),
-                                    ),
-                                    Text(
-                                      '@${state.value.username}',
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    Visibility(
-                                      visible: state.value.bio
-                                              .toString()
-                                              .isNotEmpty ||
-                                          state.value.bio.toString() != "null",
-                                      child: Padding(
-                                          padding: EdgeInsets.all(20),
-                                          child: ReadMoreText(
-                                            state.value.bio.toString() + " ",
-                                            trimLines: 2,
-                                            textAlign: TextAlign.justify,
-                                            colorClickableText:
-                                                ColorManager.colorAccent,
-                                            trimMode: TrimMode.Line,
-                                            trimCollapsedText: 'More',
-                                            trimExpandedText: 'Less',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400),
-                                            moreStyle: TextStyle(
-                                                fontSize: 14,
-                                                color: ColorManager.colorAccent,
-                                                fontWeight: FontWeight.w700),
-                                            lessStyle: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                                color:
-                                                    ColorManager.colorAccent),
-                                          )),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+      body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Stack(
+          children: [
+            Container(
+              height: 250,
+              decoration: const BoxDecoration(
+                  gradient: ColorManager.postGradient,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30))),
+            ),
+            controller.obx(
+                (state) => Column(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).viewPadding.top,
+                        ),
+                        Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            Card(
+                              margin: const EdgeInsets.only(
+                                  left: 20, right: 20, bottom: 20, top: 60),
+                              elevation: 10,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Column(
+                                children: [
+                                  const SizedBox(
+                                    height: 80,
+                                  ),
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 20),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
+                                          MainAxisAlignment.center,
                                       children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            Get.toNamed(Routes.USERS_FOLLOWING,
-                                                arguments: {"index": 0});
-                                          },
-                                          child: Column(
-                                            children: [
-                                              Text('${state.value.following}',
-                                                  style: const TextStyle(
-                                                      fontSize: 24,
-                                                      fontWeight:
-                                                          FontWeight.w700)),
-                                              const Text(following,
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w300))
-                                            ],
-                                          ),
+                                        Expanded(
+                                            child: Text(
+                                          '${state!.value.name.toString().isEmpty ? state.value.username : state.value.name}',
+                                          textAlign: TextAlign.center,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                          style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700),
+                                        )),
+                                        const SizedBox(
+                                          width: 5,
                                         ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            Get.toNamed(Routes.USERS_FOLLOWING,
-                                                arguments: {"index": 1});
-                                          },
-                                          child: Column(
-                                            children: [
-                                              Text('${state.value.followers}',
-                                                  style: const TextStyle(
-                                                      fontSize: 24,
-                                                      fontWeight:
-                                                          FontWeight.w700)),
-                                              const Text(followers,
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w300))
-                                            ],
-                                          ),
-                                        ),
-                                        Column(
+                                        Visibility(
+                                            visible: state.value.isVerified ==
+                                                'true',
+                                            child: SvgPicture.asset(
+                                              'assets/verified.svg',
+                                            ))
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    '@${state.value.username}',
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  Visibility(
+                                    visible: state.value.bio
+                                            .toString()
+                                            .isNotEmpty ||
+                                        state.value.bio.toString() != "null",
+                                    child: Padding(
+                                        padding: EdgeInsets.all(20),
+                                        child: ReadMoreText(
+                                          state.value.bio.toString() + " ",
+                                          trimLines: 2,
+                                          textAlign: TextAlign.justify,
+                                          colorClickableText:
+                                              ColorManager.colorAccent,
+                                          trimMode: TrimMode.Line,
+                                          trimCollapsedText: 'More',
+                                          trimExpandedText: 'Less',
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400),
+                                          moreStyle: TextStyle(
+                                              fontSize: 14,
+                                              color: ColorManager.colorAccent,
+                                              fontWeight: FontWeight.w700),
+                                          lessStyle: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                              color: ColorManager.colorAccent),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          Get.toNamed(Routes.USERS_FOLLOWING,
+                                              arguments: {"index": 0});
+                                        },
+                                        child: Column(
                                           children: [
-                                            Text(
-                                                '${state.value.likes == null || state.value.likes!.isEmpty ? 0 : state.value.likes}',
+                                            Text('${state.value.following}',
                                                 style: const TextStyle(
                                                     fontSize: 24,
                                                     fontWeight:
                                                         FontWeight.w700)),
-                                            const Text(likes,
+                                            const Text(following,
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight:
                                                         FontWeight.w300))
                                           ],
                                         ),
-                                      ],
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          Get.toNamed(Routes.USERS_FOLLOWING,
+                                              arguments: {"index": 1});
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Text('${state.value.followers}',
+                                                style: const TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight:
+                                                        FontWeight.w700)),
+                                            const Text(followers,
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        FontWeight.w300))
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        children: [
+                                          Text(
+                                              '${NumberFormat.compact().format(double.parse(state.value.likes!) ?? 0)}',
+                                              style: const TextStyle(
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.w700)),
+                                          const Text(likes,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w300))
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Expanded(
+                                          child: InkWell(
+                                        onTap: () async {
+                                          Get.toNamed(Routes.EDIT_PROFILE,
+                                              arguments: {
+                                                "avatar": controller
+                                                    .state!.value.avatar,
+                                                "email": controller
+                                                    .state!.value.email,
+                                                "phone": controller
+                                                    .state!.value.phone,
+                                                "dob":
+                                                    controller.state!.value.dob,
+                                                "username": controller
+                                                    .state!.value.username,
+                                                "name": controller
+                                                    .state!.value.name,
+                                                "last_name": controller
+                                                    .state!.value.lastName,
+                                                "mobile": controller
+                                                    .state!.value.phone,
+                                                "website": controller
+                                                    .state!.value.websiteUrl,
+                                                "bio":
+                                                    controller.state!.value.bio,
+                                                "location": controller
+                                                    .state!.value.location
+                                              });
+                                        },
+                                        child: Container(
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 10, horizontal: 10),
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: ColorManager.colorAccent,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 10, horizontal: 20),
+                                            child: Text("  Edit Profile",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white,
+                                                    fontSize: 18))),
+                                      )),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () => Get.defaultDialog(
+                                  title: "",
+                                  middleText: "",
+                                  backgroundColor:
+                                      Colors.transparent.withOpacity(0.0),
+                                  contentPadding: EdgeInsets.zero,
+                                  content: SizedBox(
+                                    height: Get.height / 2,
+                                    child: imgProfileDialog(
+                                        state.value.avatar.toString()),
+                                  )),
+                              child: Container(
+                                margin: const EdgeInsets.only(top: 20),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                      "assets/profile_progress.svg",
+                                      height: 100,
+                                      width: 100,
+                                      fit: BoxFit.contain,
                                     ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Expanded(
-                                            child: InkWell(
-                                          onTap: () async {
-                                            Get.toNamed(Routes.EDIT_PROFILE,
-                                                arguments: {
-                                                  "avatar": controller
-                                                      .state!.value.avatar,
-                                                  "email": controller
-                                                      .state!.value.email,
-                                                  "phone": controller
-                                                      .state!.value.phone,
-                                                  "dob": controller
-                                                      .state!.value.dob,
-                                                  "username": controller
-                                                      .state!.value.username,
-                                                  "name": controller
-                                                      .state!.value.name,
-                                                  "last_name": controller
-                                                      .state!.value.lastName,
-                                                  "mobile": controller
-                                                      .state!.value.phone,
-                                                  "website": controller
-                                                      .state!.value.websiteUrl,
-                                                  "bio": controller
-                                                      .state!.value.bio,
-                                                  "location": controller
-                                                      .state!.value.location
-                                                });
-                                          },
-                                          child: Container(
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 10,
-                                                      horizontal: 10),
-                                              alignment: Alignment.center,
-                                              decoration: BoxDecoration(
-                                                color: ColorManager.colorAccent,
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 10,
-                                                      horizontal: 20),
-                                              child: Text("  Edit Profile",
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      color: Colors.white,
-                                                      fontSize: 18))),
-                                        )),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
+                                    Container(
+                                      height: 80,
+                                      width: 80,
+                                      child: imgProfileDetails(
+                                          state!.value.avatar.toString()),
+                                    )
                                   ],
                                 ),
                               ),
-                              InkWell(
-                                onTap: () => Get.defaultDialog(
-                                    title: "",
-                                    middleText: "",
-                                    backgroundColor:
-                                        Colors.transparent.withOpacity(0.0),
-                                    contentPadding: EdgeInsets.zero,
-                                    content: SizedBox(
-                                      height: Get.height / 2,
-                                      child: imgProfileDialog(
-                                          state.value.avatar.toString()),
-                                    )),
-                                child: Container(
-                                  margin: const EdgeInsets.only(top: 20),
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        "assets/profile_progress.svg",
-                                        height: 100,
-                                        width: 100,
-                                        fit: BoxFit.contain,
-                                      ),
-                                      Container(
-                                        height: 80,
-                                        width: 80,
-                                        child: imgProfileDetails(
-                                            state!.value.avatar.toString()),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                onError: (error) => NoSearchResult(
+                      text: "No Profile Found!",
+                    ),
+                onLoading: userProfileShimmer(),
+                onEmpty: NoSearchResult(
+                  text: "No Profile Found!",
+                ))
+          ],
+        ),
+        Expanded(
+            child: DefaultTabController(
+                length: 3,
+                child: Scaffold(
+                  body: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TabBar(
+                          onTap: (int index) {
+                            selectedTab.value = index;
+                          },
+                          indicatorPadding:
+                              const EdgeInsets.symmetric(horizontal: 10),
+                          tabs: [
+                            Tab(
+                              text: "Posts",
+                            ),
+                            Tab(
+                              text: "Private",
+                            ),
+                            Tab(
+                              text: "Liked",
+                            )
+                          ]),
+                      Expanded(
+                        child: TabBarView(children: [
+                          UserVideosView(),
+                          UserPrivateVideosView(),
+                          UserLikedVideosView()
+                        ]),
                       )
                     ],
                   ),
-                  Expanded(
-                      child: DefaultTabController(
-                          length: 3,
-                          child: Scaffold(
-                            body: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TabBar(
-                                    onTap: (int index) {
-                                      selectedTab.value = index;
-                                    },
-                                    indicatorPadding:
-                                        const EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                    tabs: [
-                                      Tab(
-                                        text: "Posts",
-                                      ),
-                                      Tab(
-                                        text: "Private",
-                                      ),
-                                      Tab(
-                                        text: "Liked",
-                                      )
-                                    ]),
-                                Expanded(
-                                  child: TabBarView(children: [
-                                    UserVideosView(),
-                                    UserPrivateVideosView(),
-                                    UserLikedVideosView()
-                                  ]),
-                                )
-                              ],
-                            ),
-                          )))
-                ]),
-            onError: (error) => NoSearchResult(
-                  text: "No Profile Found!",
-                ),
-            onLoading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: loader(),
-                )
-              ],
-            ),
-            onEmpty: NoSearchResult(
-              text: "No Profile Found!",
-            )));
+                )))
+      ]),
+    );
   }
 
   showPrivate2PublicDialog(int videoID) {

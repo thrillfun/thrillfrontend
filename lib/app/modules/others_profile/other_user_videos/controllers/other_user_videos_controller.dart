@@ -15,7 +15,7 @@ class OtherUserVideosController extends GetxController
   var scrollController = ScrollController();
   var currentPage = 1.obs;
   var nextPage = 2.obs;
-  var nextPageUrl = "https://thrill.fun/api/video/user-videos?page=1".obs;
+  var nextPageUrl = "https://thrill.fun/api/video/user-videos?page=2".obs;
   @override
   void onInit() {
     getUserVideos();
@@ -51,8 +51,7 @@ class OtherUserVideosController extends GetxController
       userVideos = UserVideosModel.fromJson(response.data).data!.obs;
       userVideos.removeWhere((element) => element.id == null);
       userVideos.refresh();
-      nextPageUrl.value =
-          UserVideosModel.fromJson(response.data).pagination!.nextPageUrl ?? "";
+
       change(userVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(userVideos, status: RxStatus.error());
@@ -77,6 +76,8 @@ class OtherUserVideosController extends GetxController
       }
       nextPageUrl.value =
           UserVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
+      currentPage.value =
+          UserVideosModel.fromJson(value.data).pagination!.currentPage!;
       change(userVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {});
   }

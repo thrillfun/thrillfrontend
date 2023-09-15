@@ -58,7 +58,7 @@ class FavouriteHashtagsView extends GetView<FavouriteHashtagsController> {
                                   style: TextStyle(
                                       color: ColorManager.dayNightText,
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 18),
+                                      fontSize: 16),
                                 )
                               ],
                             ),
@@ -67,13 +67,13 @@ class FavouriteHashtagsView extends GetView<FavouriteHashtagsController> {
                                   ? ""
                                   : state.length.toString()!,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600, fontSize: 14),
+                                  fontWeight: FontWeight.w600, fontSize: 16),
                             ),
                           ],
                         ),
                       ),
                     )),
-        onLoading: loader(),
+        onLoading: searchHastagShimmer(),
         onEmpty: emptyListWidget(data: "No favourite hashtags"));
   }
 }

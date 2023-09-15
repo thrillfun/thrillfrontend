@@ -74,25 +74,13 @@ class SearchView extends GetView<search.SearchController> {
                       Tab(text: "Users")
                     ]),
                 Expanded(
-                    child: controller.obx(
-                        (state) => TabBarView(children: [
-                              searchOverview(),
-                              searchVideos(),
-                              searchSounds(),
-                              searchHashtags(),
-                              searchUsers()
-                            ]),
-                        onEmpty: NoSearchResult(),
-                        onError: (error) => NoSearchResult(),
-                        onLoading: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Center(
-                              child: loader(),
-                            )
-                          ],
-                        )))
+                    child: TabBarView(children: [
+                  searchOverview(),
+                  searchVideos(),
+                  searchSounds(),
+                  searchHashtags(),
+                  searchUsers()
+                ]))
               ],
             )));
   }
@@ -159,7 +147,11 @@ class SearchView extends GetView<search.SearchController> {
                                   height: 50,
                                   width: 50,
                                   child: imgProfile(
-                                      state[0].users![index].avatar!),
+                                      state[0].users![index].avatar ??
+                                          state[0]
+                                              .users![index]
+                                              .avatars
+                                              .toString()),
                                 ),
                                 const SizedBox(
                                   width: 15,
@@ -175,7 +167,7 @@ class SearchView extends GetView<search.SearchController> {
                                               .username
                                               .toString(),
                                       style: const TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w700),
                                     ),
                                     const SizedBox(
@@ -191,7 +183,7 @@ class SearchView extends GetView<search.SearchController> {
                                                   .toString() +
                                               " | ",
                                           style: const TextStyle(
-                                              fontSize: 14,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.w500),
                                         ),
                                         Text(
@@ -250,7 +242,7 @@ class SearchView extends GetView<search.SearchController> {
                                           child: const Text(
                                             "Follow",
                                             style: TextStyle(
-                                              fontSize: 14,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -267,7 +259,7 @@ class SearchView extends GetView<search.SearchController> {
                                           child: const Text(
                                             "Following",
                                             style: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 12,
                                                 fontWeight: FontWeight.w600,
                                                 color:
                                                     ColorManager.colorAccent),
@@ -283,7 +275,7 @@ class SearchView extends GetView<search.SearchController> {
       onEmpty: NoSearchResult(
         text: "No Users!",
       ),
-      onLoading: loader());
+      onLoading: searchUsersShimmer());
 
   searchVideos() => controller.obx(
       (state) => state![0].videos!.isEmpty
@@ -381,7 +373,7 @@ class SearchView extends GetView<search.SearchController> {
       onEmpty: NoSearchResult(
         text: "No Videos!",
       ),
-      onLoading: loader());
+      onLoading: searchVideosShimmer());
 
   searchHashtags() => controller.obx(
       (state) => state![0].hashtags!.isEmpty
@@ -430,7 +422,7 @@ class SearchView extends GetView<search.SearchController> {
                                         : state[0].hashtags![index].name!,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 18,
+                                      fontSize: 14,
                                     ),
                                   )
                                 ],
@@ -456,7 +448,7 @@ class SearchView extends GetView<search.SearchController> {
       onError: (error) => NoSearchResult(
             text: "No Hashtags!",
           ),
-      onLoading: loader());
+      onLoading: searchHastagShimmer());
 
   searchSounds() => controller.obx(
         (state) => state![0].sounds!.isEmpty
@@ -602,13 +594,13 @@ class SearchView extends GetView<search.SearchController> {
                                                 ? const Icon(
                                                     Icons
                                                         .pause_circle_filled_outlined,
-                                                    size: 25,
+                                                    size: 22,
                                                     color: ColorManager
                                                         .colorAccent,
                                                   )
                                                 : const Icon(
                                                     IconlyBold.play,
-                                                    size: 25,
+                                                    size: 22,
                                                     color: ColorManager
                                                         .colorAccent,
                                                   ))
@@ -624,6 +616,8 @@ class SearchView extends GetView<search.SearchController> {
                                           child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               children: [
                                                 Text(
                                                   controller.searchList[0]
@@ -635,7 +629,10 @@ class SearchView extends GetView<search.SearchController> {
                                                   style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.w700,
-                                                      fontSize: 18),
+                                                      fontSize: 16),
+                                                ),
+                                                SizedBox(
+                                                  height: 5,
                                                 ),
                                                 Text(
                                                   controller
@@ -665,8 +662,8 @@ class SearchView extends GetView<search.SearchController> {
                                                       TextOverflow.ellipsis,
                                                   style: const TextStyle(
                                                       fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 14),
+                                                          FontWeight.w400,
+                                                      fontSize: 12),
                                                 ),
                                               ]),
                                         ),
@@ -877,11 +874,7 @@ class SearchView extends GetView<search.SearchController> {
         onEmpty: NoSearchResult(
           text: "No Sounds!",
         ),
-        onLoading: SizedBox(
-          child: loader(),
-          height: Get.height,
-          width: Get.width,
-        ),
+        onLoading: searchSoundShimmer(),
         onError: (error) => NoSearchResult(
           text: "No Sounds!",
         ),
@@ -934,11 +927,15 @@ class SearchView extends GetView<search.SearchController> {
                                         child: Row(
                                           children: [
                                             SizedBox(
-                                              height: 50,
-                                              width: 50,
+                                              height: 35,
+                                              width: 35,
                                               child: imgProfile(state[0]
-                                                  .users![index]
-                                                  .avatar!),
+                                                      .users![index]
+                                                      .avatar ??
+                                                  state[0]
+                                                      .users![index]
+                                                      .avatars ??
+                                                  ""),
                                             ),
                                             const SizedBox(
                                               width: 15,
@@ -955,7 +952,7 @@ class SearchView extends GetView<search.SearchController> {
                                                           .username
                                                           .toString(),
                                                   style: const TextStyle(
-                                                      fontSize: 18,
+                                                      fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.w700),
                                                 ),
@@ -975,7 +972,7 @@ class SearchView extends GetView<search.SearchController> {
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       style: const TextStyle(
-                                                          fontSize: 14,
+                                                          fontSize: 12,
                                                           fontWeight:
                                                               FontWeight.w500),
                                                     )),
@@ -1005,7 +1002,7 @@ class SearchView extends GetView<search.SearchController> {
                                                       style: const TextStyle(
                                                           fontSize: 12,
                                                           fontWeight:
-                                                              FontWeight.w400),
+                                                              FontWeight.w700),
                                                     ))
                                                   ],
                                                 )
@@ -1049,9 +1046,9 @@ class SearchView extends GetView<search.SearchController> {
                                                       child: const Text(
                                                         "Follow",
                                                         style: TextStyle(
-                                                          fontSize: 14,
+                                                          fontSize: 12,
                                                           fontWeight:
-                                                              FontWeight.w600,
+                                                              FontWeight.w700,
                                                         ),
                                                       ),
                                                     )
@@ -1071,9 +1068,9 @@ class SearchView extends GetView<search.SearchController> {
                                                       child: const Text(
                                                         "Following",
                                                         style: TextStyle(
-                                                            fontSize: 14,
+                                                            fontSize: 12,
                                                             fontWeight:
-                                                                FontWeight.w600,
+                                                                FontWeight.w700,
                                                             color: ColorManager
                                                                 .colorAccent),
                                                       ),
@@ -1140,6 +1137,8 @@ class SearchView extends GetView<search.SearchController> {
                                                         TextSpan(
                                                           style:
                                                               const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w700,
                                                             overflow:
                                                                 TextOverflow
                                                                     .ellipsis,
@@ -1245,7 +1244,7 @@ class SearchView extends GetView<search.SearchController> {
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                     fontWeight: FontWeight.w700,
-                                                    fontSize: 18,
+                                                    fontSize: 14,
                                                   ),
                                                 )
                                               ],
@@ -1440,13 +1439,13 @@ class SearchView extends GetView<search.SearchController> {
                                                       ? const Icon(
                                                           Icons
                                                               .pause_circle_filled_outlined,
-                                                          size: 25,
+                                                          size: 22,
                                                           color: ColorManager
                                                               .colorAccent,
                                                         )
                                                       : const Icon(
                                                           IconlyBold.play,
-                                                          size: 25,
+                                                          size: 22,
                                                           color: ColorManager
                                                               .colorAccent,
                                                         ))
@@ -1480,7 +1479,10 @@ class SearchView extends GetView<search.SearchController> {
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w700,
-                                                                  fontSize: 18),
+                                                                  fontSize: 16),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 5,
                                                         ),
                                                         Text(
                                                           controller
@@ -1509,7 +1511,7 @@ class SearchView extends GetView<search.SearchController> {
                                                               const TextStyle(
                                                                   fontWeight:
                                                                       FontWeight
-                                                                          .w500,
+                                                                          .w400,
                                                                   fontSize: 14),
                                                         ),
                                                       ]),
@@ -1821,11 +1823,7 @@ class SearchView extends GetView<search.SearchController> {
                 )
               ],
             ),
-      onLoading: Expanded(
-          child: Center(
-        child: loader(),
-        heightFactor: 10,
-      )),
+      onLoading: searchOverviewShimmer(),
       onError: (error) => NoSearchResult(
             text: "No Search Results!",
           ),

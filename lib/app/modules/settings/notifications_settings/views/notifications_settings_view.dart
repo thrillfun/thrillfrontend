@@ -14,7 +14,12 @@ class NotificationsSettingsView
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Notifications Settings",style: TextStyle(fontSize: 24,fontWeight: FontWeight.w700),),),
+      appBar: AppBar(
+        title: Text(
+          "Notifications Settings",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -24,10 +29,14 @@ class NotificationsSettingsView
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         Row(
                           children: [
-                            const Expanded(child: Text(likes,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20),)),
+                            const Expanded(
+                                child: Text(
+                              likes,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )),
                             FlutterSwitch(
                               onToggle: (bool value) {
                                 controller.likesSwitch.toggle();
@@ -37,8 +46,8 @@ class NotificationsSettingsView
                               width: 45,
                               height: 20,
                               padding: 0,
-                              activeColor: ColorManager.cyan.withOpacity(0.40),
-                              toggleColor: ColorManager.cyan,
+                              activeColor: ColorManager.colorAccentTransparent,
+                              toggleColor: ColorManager.colorAccent,
                               inactiveToggleColor: Colors.black,
                               value: controller.likesSwitch.value,
                             ),
@@ -49,14 +58,20 @@ class NotificationsSettingsView
                         ),
                         const Text(
                           chooseToReceivePushNotificationOnLike,
-                          style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 14),
                         ),
                         const SizedBox(
                           height: 20,
                         ),
                         Row(
                           children: [
-                            const Expanded(child: Text(comments,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20),)),
+                            const Expanded(
+                                child: Text(
+                              comments,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )),
                             FlutterSwitch(
                               onToggle: (bool value) {
                                 controller.commentsSwitch.toggle();
@@ -66,8 +81,8 @@ class NotificationsSettingsView
                               width: 45,
                               height: 20,
                               padding: 0,
-                              activeColor: ColorManager.cyan.withOpacity(0.40),
-                              toggleColor: ColorManager.cyan,
+                              activeColor: ColorManager.colorAccentTransparent,
+                              toggleColor: ColorManager.colorAccent,
                               inactiveToggleColor: Colors.black,
                               value: controller.commentsSwitch.value,
                             ),
@@ -78,14 +93,20 @@ class NotificationsSettingsView
                         ),
                         const Text(
                           chooseToReceivePushNotificationOnComment,
-                          style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 14),
                         ),
                         const SizedBox(
                           height: 20,
                         ),
                         Row(
                           children: [
-                            const Expanded(child: Text(newFollowers,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20),)),
+                            const Expanded(
+                                child: Text(
+                              newFollowers,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )),
                             FlutterSwitch(
                               onToggle: (bool value) {
                                 controller.newFollowerSwitch.toggle();
@@ -95,8 +116,8 @@ class NotificationsSettingsView
                               width: 45,
                               height: 20,
                               padding: 0,
-                              activeColor: ColorManager.cyan.withOpacity(0.40),
-                              toggleColor: ColorManager.cyan,
+                              activeColor: ColorManager.colorAccentTransparent,
+                              toggleColor: ColorManager.colorAccent,
                               inactiveToggleColor: Colors.black,
                               value: controller.newFollowerSwitch.value,
                             ),
@@ -107,14 +128,20 @@ class NotificationsSettingsView
                         ),
                         const Text(
                           chooseToReceivePushNotificationNewFollower,
-                          style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 14),
                         ),
                         const SizedBox(
                           height: 20,
                         ),
                         Row(
                           children: [
-                            const Expanded(child: Text(mentions,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20),)),
+                            const Expanded(
+                                child: Text(
+                              mentions,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )),
                             FlutterSwitch(
                               onToggle: (bool value) {
                                 controller.mentionSwitch.toggle();
@@ -124,8 +151,8 @@ class NotificationsSettingsView
                               width: 45,
                               height: 20,
                               padding: 0,
-                              activeColor: ColorManager.cyan.withOpacity(0.40),
-                              toggleColor: ColorManager.cyan,
+                              activeColor: ColorManager.colorAccentTransparent,
+                              toggleColor: ColorManager.colorAccent,
                               inactiveToggleColor: Colors.black,
                               value: controller.mentionSwitch.value,
                             ),
@@ -136,16 +163,21 @@ class NotificationsSettingsView
                         ),
                         const Text(
                           chooseToReceivePushNotificationMentions,
-                          style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 14),
                         ),
                         const Divider(
                           height: 50,
                           thickness: 2,
                         ),
-
                         Row(
                           children: [
-                            const Expanded(child: Text(directMessages,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20),)),
+                            const Expanded(
+                                child: Text(
+                              directMessages,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )),
                             FlutterSwitch(
                               onToggle: (bool value) {
                                 controller.directMessageSwitch.toggle();
@@ -155,8 +187,8 @@ class NotificationsSettingsView
                               width: 45,
                               height: 20,
                               padding: 0,
-                              activeColor: ColorManager.cyan.withOpacity(0.40),
-                              toggleColor: ColorManager.cyan,
+                              activeColor: ColorManager.colorAccentTransparent,
+                              toggleColor: ColorManager.colorAccent,
                               inactiveToggleColor: Colors.black,
                               value: controller.directMessageSwitch.value,
                             ),
@@ -167,16 +199,21 @@ class NotificationsSettingsView
                         ),
                         const Text(
                           chooseToReceivePushNotificationDirectMessage,
-                          style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 14),
                         ),
                         const Divider(
                           height: 50,
                           thickness: 2,
                         ),
-
                         Row(
                           children: [
-                            const Expanded(child: Text(videoUpdates,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20),)),
+                            const Expanded(
+                                child: Text(
+                              videoUpdates,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )),
                             FlutterSwitch(
                               onToggle: (bool value) {
                                 controller.followerVideoSwitch.toggle();
@@ -187,8 +224,8 @@ class NotificationsSettingsView
                               width: 45,
                               height: 20,
                               padding: 0,
-                              activeColor: ColorManager.cyan.withOpacity(0.40),
-                              toggleColor: ColorManager.cyan,
+                              activeColor: ColorManager.colorAccentTransparent,
+                              toggleColor: ColorManager.colorAccent,
                               inactiveToggleColor: Colors.black,
                               value: controller.followerVideoSwitch.value,
                             ),
@@ -199,7 +236,78 @@ class NotificationsSettingsView
                         ),
                         Text(
                           chooseToReceivePushNotificationVideoUpdates,
-                          style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 14),
+                        ),
+                        const Divider(
+                          height: 50,
+                          thickness: 2,
+                        ),
+                        Row(
+                          children: [
+                            const Expanded(
+                                child: Text(
+                              "Allow Video Downloads",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )),
+                            Obx(() => FlutterSwitch(
+                                  onToggle: (bool value) {
+                                    controller.updateVideoDownloads(value);
+                                  },
+                                  width: 45,
+                                  height: 20,
+                                  padding: 0,
+                                  activeColor:
+                                      ColorManager.colorAccentTransparent,
+                                  toggleColor: ColorManager.colorAccent,
+                                  inactiveToggleColor: Colors.black,
+                                  value: controller.isVideoDownloadble.value,
+                                )),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          chooseToReceivePushNotificationVideoUpdates,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 14),
+                        ),
+                        const Divider(
+                          height: 50,
+                          thickness: 2,
+                        ),
+                        Row(
+                          children: [
+                            const Expanded(
+                                child: Text(
+                              "Allow Video Visibility",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16),
+                            )),
+                            Obx(() => FlutterSwitch(
+                                  onToggle: (bool value) {
+                                    controller.updateIsPostPublic(value);
+                                  },
+                                  width: 45,
+                                  height: 20,
+                                  padding: 0,
+                                  activeColor:
+                                      ColorManager.colorAccentTransparent,
+                                  toggleColor: ColorManager.colorAccent,
+                                  inactiveToggleColor: Colors.black,
+                                  value: controller.isPostPublic.value,
+                                )),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          chooseToReceivePushNotificationVideoUpdates,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 14),
                         ),
                       ],
                     ),

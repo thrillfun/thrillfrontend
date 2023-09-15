@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:thrill/app/modules/profile/user_videos/controllers/user_videos_controller.dart';
+import 'package:thrill/app/utils/strings.dart';
 
 import '../../../../rest/models/user_private_video_model.dart';
 import '../../../../rest/rest_urls.dart';
@@ -13,7 +14,7 @@ class UserPrivateVideosController extends GetxController
   RxList<PrivateVideos> privateVideosList = RxList();
   var storage = GetStorage();
   var userProfile = User().obs;
-  var nextPageUrl = "https://thrill.fun/api/video/private?page=1".obs;
+  var nextPageUrl = "https://thrill.fun/api/video/private?page=2".obs;
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
@@ -42,9 +43,9 @@ class UserPrivateVideosController extends GetxController
     dio.get('/video/private').then((value) {
       privateVideosList.value =
           UserPrivateVideosModel.fromJson(value.data).data!.obs;
-      nextPageUrl.value =
-          UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
-              "";
+      privateVideosList.removeWhere((element) => element.id == null);
+      privateVideosList.refresh();
+
       change(privateVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(privateVideosList, status: RxStatus.error(error.toString()));
@@ -66,7 +67,7 @@ class UserPrivateVideosController extends GetxController
               "";
       if (nextPageUrl.isNotEmpty) {
         UserPrivateVideosModel.fromJson(value.data).data!.forEach((element) {
-          privateVideosList.add(element);
+          privateVideosList.addIf(element.id != null, element);
         });
         privateVideosList.refresh();
       }

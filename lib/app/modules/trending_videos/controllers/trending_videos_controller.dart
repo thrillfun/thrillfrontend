@@ -33,9 +33,10 @@ class TrendingVideosController extends GetxController
 
   RxList<FollowingVideos> followingVideosList = RxList();
   RxList<SiteSettings> siteSettingsList = RxList();
+  var isVideoFavourite = false.obs;
 
   var isUserBlocked = false.obs;
-  var isLoading = true.obs;
+  var isLoading = false.obs;
   var isVideoReported = false.obs;
 
   var isInitialised = false.obs;
@@ -44,6 +45,7 @@ class TrendingVideosController extends GetxController
   var isLiked = false.obs;
   var totalLikes = 0.obs;
   var commentsController = Get.find<CommentsController>();
+  var currentDuration = Duration().obs;
 
   var isUserFollowed = false.obs;
   @override
@@ -55,6 +57,18 @@ class TrendingVideosController extends GetxController
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
   }
 
   Future<void> notInterested(int videoId) async {
@@ -87,7 +101,6 @@ class TrendingVideosController extends GetxController
       if (followingVideosList.isEmpty) {
         // change(relatedVideosList, status: RxStatus.loading());
 
-        isLoading.value = true;
         followingVideosList =
             FollowingVideosModel.fromJson(value.data).data!.obs;
 
@@ -152,16 +165,19 @@ class TrendingVideosController extends GetxController
       // getAllVideos(false);
       videoLikeStatus(videoId);
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
-            body: "${GetStorage().read("userName")??"Anonymous"} liked your video");
+            body:
+                "${GetStorage().read("username") ?? "Anonymous"} liked your video");
       }
     }).onError((error, stackTrace) {});
   }
 
   Future<void> videoLikeStatus(
-      int videoId,
-      ) async {
+    int videoId,
+  ) async {
     isLikeEnable.value = false;
 
     dio.options.headers = {
@@ -197,6 +213,7 @@ class TrendingVideosController extends GetxController
       Logger().e(error);
     });
   }
+
   Future<void> followUnfollowUser(int userId, String action,
       {String? searchQuery}) async {
     dio.options.headers = {
@@ -366,6 +383,7 @@ class TrendingVideosController extends GetxController
       } else {
         errorToast(value.data["message"]);
       }
+      getVideoFavStatus(videoId);
     }).onError((error, stackTrace) {
       Logger().wtf(error);
     });

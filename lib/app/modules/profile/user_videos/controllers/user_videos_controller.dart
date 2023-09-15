@@ -21,7 +21,6 @@ class UserVideosController extends GetxController
   @override
   void onInit() {
     getUserVideos();
-
     super.onInit();
   }
 
@@ -47,8 +46,7 @@ class UserVideosController extends GetxController
       userVideos = UserVideosModel.fromJson(response.data).data!.obs;
       userVideos.removeWhere((element) => element.id == null);
       userVideos.refresh();
-      nextPageUrl.value =
-          UserVideosModel.fromJson(response.data).pagination!.nextPageUrl ?? "";
+
       change(userVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(userVideos, status: RxStatus.error());

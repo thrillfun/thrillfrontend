@@ -125,9 +125,7 @@ class FollowingsView extends GetView<FollowingsController> {
                           ),
                         )),
               ),
-        onLoading: Column(
-          children: [Expanded(child: loader())],
-        ),
+        onLoading: followFollowingShimmer(),
         onEmpty: NoSearchResult(
           text: "You are not following anyone yet!",
         ),

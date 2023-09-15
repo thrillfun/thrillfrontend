@@ -355,11 +355,21 @@ class _CameraState extends State<CameraView>
                                                         true.obs;
                                                     var songPath = '';
                                                     var songName = '';
-
-                                                    if (!(serializationData[
-                                                                "operations"]
-                                                            as List<dynamic>)
-                                                        .contains("audio")) {
+                                                    var isAudioAvailale = 0.obs;
+                                                    List<dynamic> operations =
+                                                        (serializationData[
+                                                                'operations']
+                                                            as List<dynamic>);
+                                                    for (var audio
+                                                        in operations) {
+                                                      if (audio['type'] ==
+                                                          'audio') {
+                                                        isAudioAvailale.value =
+                                                            1;
+                                                      }
+                                                    }
+                                                    if (isAudioAvailale.value ==
+                                                        0) {
                                                       cameraController
                                                           .selectedSound
                                                           .value = "";
@@ -372,6 +382,33 @@ class _CameraState extends State<CameraView>
                                                           .soundOwner
                                                           .value = "";
                                                     }
+                                                    successToast(isAudioAvailale
+                                                            .value
+                                                            .isLowerThan(1)
+                                                        ? "nahi chala bc"
+                                                        : "chal gya bc ");
+                                                    // (serializationData[
+                                                    //             'operations']
+                                                    //         as List<dynamic>)
+                                                    //     .forEach((element) {
+                                                    //   if (element['type'] !=
+                                                    //       'audio') {
+                                                    // cameraController
+                                                    //     .selectedSound
+                                                    //     .value = "";
+                                                    // cameraController
+                                                    //     .userUploadedSound
+                                                    //     .value = "";
+                                                    // cameraController
+                                                    //     .soundName
+                                                    //     .value = "";
+                                                    // cameraController
+                                                    //     .soundOwner
+                                                    //     .value = "";
+                                                    // successToast(
+                                                    //     'yes logic works');
+                                                    //   }
+                                                    // });
                                                     for (int i = 0;
                                                         i <
                                                             serializationData[
@@ -505,7 +542,7 @@ class _CameraState extends State<CameraView>
                                                                       .value
                                                                       .isNotEmpty
                                                                   ? "${cameraController.soundName.value}"
-                                                                  : "",
+                                                                  : null,
                                                               "sound_owner": cameraController
                                                                       .soundOwner
                                                                       .isEmpty
@@ -548,7 +585,7 @@ class _CameraState extends State<CameraView>
                                                                         .value
                                                                         .isNotEmpty
                                                                     ? "${cameraController.soundName.value}"
-                                                                    : "",
+                                                                    : null,
                                                             "sound_owner": cameraController
                                                                     .soundOwner
                                                                     .isEmpty
@@ -742,7 +779,7 @@ class _CameraState extends State<CameraView>
                                                                       .value
                                                                       .isNotEmpty
                                                                   ? "${cameraController.soundName.value}"
-                                                                  : "",
+                                                                  : null,
                                                               "sound_owner": cameraController
                                                                       .soundOwner
                                                                       .isEmpty
@@ -785,7 +822,7 @@ class _CameraState extends State<CameraView>
                                                                         .value
                                                                         .isNotEmpty
                                                                     ? "${cameraController.soundName.value}"
-                                                                    : "",
+                                                                    : null,
                                                             "sound_owner": cameraController
                                                                     .soundOwner
                                                                     .isEmpty
@@ -1197,7 +1234,7 @@ class _CameraState extends State<CameraView>
                                                                         .value
                                                                         .isNotEmpty
                                                                     ? "${cameraController.soundName.value}"
-                                                                    : "",
+                                                                    : null,
                                                                 "sound_owner": cameraController
                                                                         .soundOwner
                                                                         .isEmpty
@@ -1241,7 +1278,7 @@ class _CameraState extends State<CameraView>
                                                                   ? cameraController
                                                                       .soundName
                                                                       .value
-                                                                  : "",
+                                                                  : null,
                                                               "sound_owner": cameraController
                                                                       .soundOwner
                                                                       .isEmpty
@@ -1430,7 +1467,7 @@ class _CameraState extends State<CameraView>
                                                                         .value
                                                                         .isNotEmpty
                                                                     ? "${cameraController.soundName.value}"
-                                                                    : "",
+                                                                    : null,
                                                                 "sound_owner": cameraController
                                                                         .soundOwner
                                                                         .isEmpty
@@ -1472,7 +1509,7 @@ class _CameraState extends State<CameraView>
                                                                       .value
                                                                       .isNotEmpty
                                                                   ? "${cameraController.soundName.value}"
-                                                                  : "",
+                                                                  : null,
                                                               "sound_owner": cameraController
                                                                       .soundOwner
                                                                       .isEmpty
@@ -1522,11 +1559,17 @@ class _CameraState extends State<CameraView>
                                 if (await Permission.audio.isGranted) {
                                   cameraController.getAlbums().then((value) =>
                                       Get.bottomSheet(
-                                          SelectSoundView(
-                                            context: context,
-                                            animationController:
-                                                cameraController
-                                                    .animationController,
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                top: MediaQuery.of(context)
+                                                    .padding
+                                                    .top),
+                                            child: SelectSoundView(
+                                              context: context,
+                                              animationController:
+                                                  cameraController
+                                                      .animationController,
+                                            ),
                                           ),
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
@@ -1539,11 +1582,17 @@ class _CameraState extends State<CameraView>
                                       .then((value) async {
                                     cameraController.getAlbums().then((value) =>
                                         Get.bottomSheet(
-                                            SelectSoundView(
-                                              context: context,
-                                              animationController:
-                                                  cameraController
-                                                      .animationController,
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: MediaQuery.of(context)
+                                                      .padding
+                                                      .top),
+                                              child: SelectSoundView(
+                                                context: context,
+                                                animationController:
+                                                    cameraController
+                                                        .animationController,
+                                              ),
                                             ),
                                             shape: RoundedRectangleBorder(
                                                 borderRadius:
@@ -1555,11 +1604,17 @@ class _CameraState extends State<CameraView>
                                 if (await Permission.storage.isGranted) {
                                   cameraController.getAlbums().then((value) =>
                                       Get.bottomSheet(
-                                          SelectSoundView(
-                                            context: context,
-                                            animationController:
-                                                cameraController
-                                                    .animationController,
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                top: MediaQuery.of(context)
+                                                    .padding
+                                                    .top),
+                                            child: SelectSoundView(
+                                              context: context,
+                                              animationController:
+                                                  cameraController
+                                                      .animationController,
+                                            ),
                                           ),
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
@@ -1571,11 +1626,17 @@ class _CameraState extends State<CameraView>
                                       (value) => cameraController
                                           .getAlbums()
                                           .then((value) => Get.bottomSheet(
-                                              SelectSoundView(
-                                                context: context,
-                                                animationController:
-                                                    cameraController
-                                                        .animationController,
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: MediaQuery.of(context)
+                                                        .padding
+                                                        .top),
+                                                child: SelectSoundView(
+                                                  context: context,
+                                                  animationController:
+                                                      cameraController
+                                                          .animationController,
+                                                ),
                                               ),
                                               shape: RoundedRectangleBorder(
                                                   borderRadius:
@@ -1769,7 +1830,7 @@ class _CameraState extends State<CameraView>
                             : "extracted",
                     "sound_name": cameraController.soundName.value.isNotEmpty
                         ? "${cameraController.soundName.value}"
-                        : "",
+                        : null,
                     "sound_owner": cameraController.soundOwner.isEmpty
                         ? GetStorage().read("userId").toString()
                         : cameraController.soundOwner.value,
@@ -1788,7 +1849,7 @@ class _CameraState extends State<CameraView>
                           : "original",
                   "sound_name": cameraController.soundName.value.isNotEmpty
                       ? cameraController.soundName.value
-                      : "",
+                      : null,
                   "sound_owner": cameraController.soundOwner.isEmpty
                       ? GetStorage().read("userId").toString()
                       : cameraController.soundOwner.value,
@@ -1887,7 +1948,7 @@ class _CameraState extends State<CameraView>
                             : "extracted",
                     "sound_name": cameraController.soundName.value.isNotEmpty
                         ? "${cameraController.soundName.value}"
-                        : "",
+                        : null,
                     "sound_owner": cameraController.soundOwner.isEmpty
                         ? GetStorage().read("userId").toString()
                         : cameraController.soundOwner.value,
@@ -1906,7 +1967,7 @@ class _CameraState extends State<CameraView>
                           : "original",
                   "sound_name": cameraController.soundName.value.isNotEmpty
                       ? "${cameraController.soundName.value}"
-                      : "",
+                      : null,
                   "sound_owner": cameraController.soundOwner.isEmpty
                       ? GetStorage().read("userId").toString()
                       : cameraController.soundOwner.value,
@@ -2298,289 +2359,26 @@ class SelectSoundView extends GetView<SelectSoundController> {
                           (_) => Stack(
                                 alignment: Alignment.topCenter,
                                 children: [
-                                  ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: controller
-                                          .searchList[0].sounds!.length,
-                                      itemBuilder: (context, index) {
-                                        return Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              InkWell(
-                                                onTap: () async {
-                                                  selectedIndex.value = index;
-                                                  cameraController
-                                                          .soundName.value =
-                                                      controller.searchList[0]
-                                                          .sounds![index].name!;
-                                                  cameraController.soundOwner
-                                                      .value = controller
-                                                              .searchList[0]
-                                                              .sounds![index]
-                                                              .soundOwner !=
-                                                          null
-                                                      ? controller
-                                                          .searchList[0]
-                                                          .sounds![index]
-                                                          .soundOwner!
-                                                          .id
-                                                          .toString()
-                                                      : controller.searchList[0]
-                                                          .sounds![index].userId
-                                                          .toString();
-
-                                                  avatar.value = controller
-                                                              .searchList[0]
-                                                              .sounds![index]
-                                                              .soundOwner !=
-                                                          null
-                                                      ? controller
-                                                          .searchList[0]
-                                                          .sounds![index]
-                                                          .soundOwner!
-                                                          .avtars!
-                                                      : "";
-                                                  duration = (await audioPlayer
-                                                      .setUrl(RestUrl
-                                                              .awsSoundUrl +
-                                                          controller
-                                                              .searchList[0]
-                                                              .sounds![index]
-                                                              .sound
-                                                              .toString()))!;
-
-                                                  if (duration.inSeconds < 61) {
-                                                    cameraController
-                                                        .animationController!
-                                                        .duration = duration;
-                                                  } else {
-                                                    cameraController
-                                                            .animationController!
-                                                            .duration =
-                                                        Duration(seconds: 60);
-                                                  }
-                                                  if (cameraController
-                                                      .animationController!
-                                                      .isAnimating) {
-                                                    cameraController
-                                                        .animationController!
-                                                        .forward();
-                                                  }
-                                                  // cameraController
-                                                  //         .timer.value =
-                                                  //     duration!
-                                                  //         .inSeconds!;
-
-                                                  audioTotalDuration.value =
-                                                      duration!;
-                                                  audioPlayer.positionStream
-                                                      .listen((position) async {
-                                                    final oldState =
-                                                        progressNotifier.value;
-                                                    audioDuration.value =
-                                                        position;
-                                                    progressNotifier.value =
-                                                        ProgressBarState(
-                                                      current: position,
-                                                      buffered:
-                                                          oldState.buffered,
-                                                      total: oldState.total,
-                                                    );
-
-                                                    if (position ==
-                                                        oldState.total) {
-                                                      audioPlayer
-                                                          .playerStateStream
-                                                          .drain();
-                                                      await playerController
-                                                          .seekTo(0);
-                                                      await audioPlayer
-                                                          .seek(Duration.zero);
-                                                      audioDuration.value =
-                                                          Duration.zero;
-                                                      // isPlaying.value = false;
-                                                    }
-                                                    print(position);
-                                                  });
-                                                  audioPlayer
-                                                      .bufferedPositionStream
-                                                      .listen((position) {
-                                                    final oldState =
-                                                        progressNotifier.value;
-                                                    audioBuffered.value =
-                                                        position;
-                                                    progressNotifier.value =
-                                                        ProgressBarState(
-                                                      current: oldState.current,
-                                                      buffered: position,
-                                                      total: oldState.total,
-                                                    );
-                                                  });
-
-                                                  playerController
-                                                      .onCurrentDurationChanged
-                                                      .listen((duration) async {
-                                                    audioDuration.value =
-                                                        Duration(
-                                                            seconds: duration);
-
-                                                    Duration playerDuration =
-                                                        Duration(
-                                                            seconds: duration);
-
-                                                    print(duration);
-                                                    if (Duration(
-                                                            seconds:
-                                                                duration) >=
-                                                        audioTotalDuration
-                                                            .value) {
-                                                      audioPlayer
-                                                          .seek(Duration.zero);
-                                                    }
-                                                  });
-
-                                                  audioPlayer.play();
-
-                                                  if (isPlayerVisible.isFalse) {
-                                                    isPlayerVisible.value =
-                                                        true;
-                                                  }
-                                                  isPlayerPlaying.value =
-                                                      audioPlayer.playing;
-                                                },
-                                                child: Stack(
-                                                  alignment: Alignment.center,
-                                                  children: [
-                                                    Container(
-                                                      height: 50,
-                                                      width: 50,
-                                                      child: imgSound(controller
-                                                                  .searchList[0]
-                                                                  .sounds![
-                                                                      index]
-                                                                  .soundOwner !=
-                                                              null
-                                                          ? controller
-                                                              .searchList[0]
-                                                              .sounds![index]
-                                                              .soundOwner!
-                                                              .avtars
-                                                              .toString()
-                                                          : ""),
-                                                    ),
-                                                    Obx(() => isPlayerPlaying
-                                                                .value &&
-                                                            selectedIndex
-                                                                    .value ==
-                                                                index
-                                                        ? const Icon(
-                                                            Icons
-                                                                .pause_circle_filled_outlined,
-                                                            size: 25,
-                                                            color: ColorManager
-                                                                .colorAccent,
-                                                          )
-                                                        : const Icon(
-                                                            IconlyBold.play,
-                                                            size: 25,
-                                                            color: ColorManager
-                                                                .colorAccent,
-                                                          ))
-                                                  ],
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 10,
-                                              ),
-                                              Expanded(
-                                                child: InkWell(
-                                                  child: Container(
-                                                    child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            controller
-                                                                .searchList[0]
-                                                                .sounds![index]
-                                                                .name
-                                                                .toString(),
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: const TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700,
-                                                                fontSize: 18),
-                                                          ),
-                                                          Text(
-                                                            controller
-                                                                        .searchList[
-                                                                            0]
-                                                                        .sounds![
-                                                                            index]
-                                                                        .soundOwner !=
-                                                                    null
-                                                                ? controller
-                                                                        .searchList[
-                                                                            0]
-                                                                        .sounds![
-                                                                            index]
-                                                                        .soundOwner!
-                                                                        .name ??
-                                                                    controller
-                                                                        .searchList[
-                                                                            0]
-                                                                        .sounds![
-                                                                            index]
-                                                                        .soundOwner!
-                                                                        .username!
-                                                                : controller
-                                                                    .searchList[
-                                                                        0]
-                                                                    .sounds![
-                                                                        index]
-                                                                    .username
-                                                                    .toString(),
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: const TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                                fontSize: 14),
-                                                          ),
-                                                        ]),
-                                                  ),
-                                                  onTap: () async {
-                                                    var file = File(
-                                                        saveCacheDirectory +
-                                                            controller
-                                                                .searchList[0]
-                                                                .sounds![index]
-                                                                .sound!);
-                                                    if (await file.exists()) {
-                                                      //     .toString();
-                                                      cameraController
-                                                              .selectedSound
-                                                              .value =
-                                                          file.uri.toString();
-
-                                                      cameraController
-                                                              .userUploadedSound
-                                                              .value =
-                                                          file.uri.toString();
-
+                                  Obx(() => cameraController
+                                          .isSoundsLoading.isFalse
+                                      ? ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: controller
+                                              .searchList[0].sounds!.length,
+                                          itemBuilder: (context, index) {
+                                            return Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  InkWell(
+                                                    onTap: () async {
+                                                      selectedIndex.value =
+                                                          index;
                                                       cameraController
                                                               .soundName.value =
                                                           controller
@@ -2600,8 +2398,12 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                               .sounds![index]
                                                               .soundOwner!
                                                               .id
-                                                              .toString()!
-                                                          : "";
+                                                              .toString()
+                                                          : controller
+                                                              .searchList[0]
+                                                              .sounds![index]
+                                                              .userId
+                                                              .toString();
 
                                                       avatar.value = controller
                                                                   .searchList[0]
@@ -2615,62 +2417,273 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                               .soundOwner!
                                                               .avtars!
                                                           : "";
+                                                      duration = (await audioPlayer
+                                                          .setUrl(RestUrl
+                                                                  .awsSoundUrl +
+                                                              controller
+                                                                  .searchList[0]
+                                                                  .sounds![
+                                                                      index]
+                                                                  .sound
+                                                                  .toString()))!;
 
-                                                      Future.delayed(Duration(
-                                                              milliseconds:
-                                                                  200))
-                                                          .then((value) =>
-                                                              animationController
-                                                                  ?.reset());
-
-                                                      cameraController
-                                                          .setupAudioPlayer(file
-                                                              .path
-                                                              .toString());
-
-                                                      Get.back();
-                                                      if (Get
-                                                          .isBottomSheetOpen!) {
-                                                        Get.back();
+                                                      if (duration.inSeconds <
+                                                          61) {
+                                                        cameraController
+                                                            .animationController!
+                                                            .duration = duration;
+                                                      } else {
+                                                        cameraController
+                                                                .animationController!
+                                                                .duration =
+                                                            Duration(
+                                                                seconds: 60);
                                                       }
-                                                    } else {
-                                                      var currentProgress =
-                                                          "0".obs;
-                                                      Get.defaultDialog(
-                                                          title:
-                                                              "Downloading audio",
-                                                          content: Obx(() =>
+                                                      if (cameraController
+                                                          .animationController!
+                                                          .isAnimating) {
+                                                        cameraController
+                                                            .animationController!
+                                                            .forward();
+                                                      }
+                                                      // cameraController
+                                                      //         .timer.value =
+                                                      //     duration!
+                                                      //         .inSeconds!;
+
+                                                      audioTotalDuration.value =
+                                                          duration!;
+                                                      audioPlayer.positionStream
+                                                          .listen(
+                                                              (position) async {
+                                                        final oldState =
+                                                            progressNotifier
+                                                                .value;
+                                                        audioDuration.value =
+                                                            position;
+                                                        progressNotifier.value =
+                                                            ProgressBarState(
+                                                          current: position,
+                                                          buffered:
+                                                              oldState.buffered,
+                                                          total: oldState.total,
+                                                        );
+
+                                                        if (position ==
+                                                            oldState.total) {
+                                                          audioPlayer
+                                                              .playerStateStream
+                                                              .drain();
+                                                          await playerController
+                                                              .seekTo(0);
+                                                          await audioPlayer
+                                                              .seek(Duration
+                                                                  .zero);
+                                                          audioDuration.value =
+                                                              Duration.zero;
+                                                          // isPlaying.value = false;
+                                                        }
+                                                        print(position);
+                                                      });
+                                                      audioPlayer
+                                                          .bufferedPositionStream
+                                                          .listen((position) {
+                                                        final oldState =
+                                                            progressNotifier
+                                                                .value;
+                                                        audioBuffered.value =
+                                                            position;
+                                                        progressNotifier.value =
+                                                            ProgressBarState(
+                                                          current:
+                                                              oldState.current,
+                                                          buffered: position,
+                                                          total: oldState.total,
+                                                        );
+                                                      });
+
+                                                      playerController
+                                                          .onCurrentDurationChanged
+                                                          .listen(
+                                                              (duration) async {
+                                                        audioDuration.value =
+                                                            Duration(
+                                                                seconds:
+                                                                    duration);
+
+                                                        Duration
+                                                            playerDuration =
+                                                            Duration(
+                                                                seconds:
+                                                                    duration);
+
+                                                        print(duration);
+                                                        if (Duration(
+                                                                seconds:
+                                                                    duration) >=
+                                                            audioTotalDuration
+                                                                .value) {
+                                                          audioPlayer.seek(
+                                                              Duration.zero);
+                                                        }
+                                                      });
+
+                                                      audioPlayer.play();
+
+                                                      if (isPlayerVisible
+                                                          .isFalse) {
+                                                        isPlayerVisible.value =
+                                                            true;
+                                                      }
+                                                      isPlayerPlaying.value =
+                                                          audioPlayer.playing;
+                                                    },
+                                                    child: Stack(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      children: [
+                                                        Container(
+                                                          height: 50,
+                                                          width: 50,
+                                                          child: imgSound(controller
+                                                                      .searchList[
+                                                                          0]
+                                                                      .sounds![
+                                                                          index]
+                                                                      .soundOwner !=
+                                                                  null
+                                                              ? controller
+                                                                  .searchList[0]
+                                                                  .sounds![
+                                                                      index]
+                                                                  .soundOwner!
+                                                                  .avtars
+                                                                  .toString()
+                                                              : ""),
+                                                        ),
+                                                        Obx(() => isPlayerPlaying
+                                                                    .value &&
+                                                                selectedIndex
+                                                                        .value ==
+                                                                    index
+                                                            ? const Icon(
+                                                                Icons
+                                                                    .pause_circle_filled_outlined,
+                                                                size: 25,
+                                                                color: ColorManager
+                                                                    .colorAccent,
+                                                              )
+                                                            : const Icon(
+                                                                IconlyBold.play,
+                                                                size: 25,
+                                                                color: ColorManager
+                                                                    .colorAccent,
+                                                              ))
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Expanded(
+                                                    child: InkWell(
+                                                      child: Container(
+                                                        child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
                                                               Text(
-                                                                  currentProgress
-                                                                      .value)));
-                                                      await FileSupport()
-                                                          .downloadCustomLocation(
-                                                        url:
-                                                            "${RestUrl.awsSoundUrl}${controller.searchList[0].sounds?[index].sound}",
-                                                        path:
-                                                            saveCacheDirectory,
-                                                        filename:
-                                                            basenameWithoutExtension(
                                                                 controller
                                                                     .searchList[
                                                                         0]
                                                                     .sounds![
                                                                         index]
-                                                                    .sound
-                                                                    .toString()),
-                                                        extension: ".mp3",
-                                                        progress:
-                                                            (progress) async {
-                                                          currentProgress
-                                                              .value = progress;
-                                                        },
-                                                      )
-                                                          .then((value) {
-                                                        if (value != null) {
+                                                                    .name
+                                                                    .toString(),
+                                                                maxLines: 1,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                style: const TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w700,
+                                                                    fontSize:
+                                                                        18),
+                                                              ),
+                                                              Text(
+                                                                controller
+                                                                            .searchList[
+                                                                                0]
+                                                                            .sounds![
+                                                                                index]
+                                                                            .soundOwner !=
+                                                                        null
+                                                                    ? controller
+                                                                            .searchList[
+                                                                                0]
+                                                                            .sounds![
+                                                                                index]
+                                                                            .soundOwner!
+                                                                            .name ??
+                                                                        controller
+                                                                            .searchList[
+                                                                                0]
+                                                                            .sounds![
+                                                                                index]
+                                                                            .soundOwner!
+                                                                            .username!
+                                                                    : controller
+                                                                        .searchList[
+                                                                            0]
+                                                                        .sounds![
+                                                                            index]
+                                                                        .username
+                                                                        .toString(),
+                                                                maxLines: 1,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                style: const TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    fontSize:
+                                                                        14),
+                                                              ),
+                                                            ]),
+                                                      ),
+                                                      onTap: () async {
+                                                        cameraController
+                                                                .soundAuthorName
+                                                                .value =
+                                                            controller
+                                                                .searchList[0]
+                                                                .sounds![index]
+                                                                .soundOwner!
+                                                                .username!;
+                                                        var file = File(
+                                                            saveCacheDirectory +
+                                                                controller
+                                                                    .searchList[
+                                                                        0]
+                                                                    .sounds![
+                                                                        index]
+                                                                    .sound!);
+                                                        if (await file
+                                                            .exists()) {
+                                                          //     .toString();
+                                                          cameraController
+                                                                  .selectedSound
+                                                                  .value =
+                                                              file.uri
+                                                                  .toString();
+
                                                           cameraController
                                                                   .userUploadedSound
                                                                   .value =
-                                                              value.uri
+                                                              file.uri
                                                                   .toString();
 
                                                           cameraController
@@ -2696,7 +2709,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                                       index]
                                                                   .soundOwner!
                                                                   .id
-                                                                  .toString()
+                                                                  .toString()!
                                                               : "";
 
                                                           avatar
@@ -2714,9 +2727,17 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                                   .soundOwner!
                                                                   .avtars!
                                                               : "";
+
+                                                          Future.delayed(Duration(
+                                                                  milliseconds:
+                                                                      200))
+                                                              .then((value) =>
+                                                                  animationController
+                                                                      ?.reset());
+
                                                           cameraController
                                                               .setupAudioPlayer(
-                                                                  value.path
+                                                                  file.path
                                                                       .toString());
 
                                                           Get.back();
@@ -2724,74 +2745,171 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                               .isBottomSheetOpen!) {
                                                             Get.back();
                                                           }
+                                                        } else {
+                                                          var currentProgress =
+                                                              "0".obs;
+                                                          Get.defaultDialog(
+                                                              title:
+                                                                  "Downloading audio",
+                                                              content: Obx(() =>
+                                                                  Text(currentProgress
+                                                                      .value)));
+                                                          await FileSupport()
+                                                              .downloadCustomLocation(
+                                                            url:
+                                                                "${RestUrl.awsSoundUrl}${controller.searchList[0].sounds?[index].sound}",
+                                                            path:
+                                                                saveCacheDirectory,
+                                                            filename: basenameWithoutExtension(
+                                                                controller
+                                                                    .searchList[
+                                                                        0]
+                                                                    .sounds![
+                                                                        index]
+                                                                    .sound
+                                                                    .toString()),
+                                                            extension: ".mp3",
+                                                            progress:
+                                                                (progress) async {
+                                                              currentProgress
+                                                                      .value =
+                                                                  progress;
+                                                            },
+                                                          )
+                                                              .then((value) {
+                                                            if (value != null) {
+                                                              cameraController
+                                                                      .userUploadedSound
+                                                                      .value =
+                                                                  value.uri
+                                                                      .toString();
+
+                                                              cameraController
+                                                                      .soundName
+                                                                      .value =
+                                                                  controller
+                                                                      .searchList[
+                                                                          0]
+                                                                      .sounds![
+                                                                          index]
+                                                                      .name!;
+                                                              cameraController
+                                                                  .soundOwner
+                                                                  .value = controller
+                                                                          .searchList[
+                                                                              0]
+                                                                          .sounds![
+                                                                              index]
+                                                                          .soundOwner !=
+                                                                      null
+                                                                  ? controller
+                                                                      .searchList[
+                                                                          0]
+                                                                      .sounds![
+                                                                          index]
+                                                                      .soundOwner!
+                                                                      .id
+                                                                      .toString()
+                                                                  : "";
+
+                                                              avatar
+                                                                  .value = controller
+                                                                          .searchList[
+                                                                              0]
+                                                                          .sounds![
+                                                                              index]
+                                                                          .soundOwner !=
+                                                                      null
+                                                                  ? controller
+                                                                      .searchList[
+                                                                          0]
+                                                                      .sounds![
+                                                                          index]
+                                                                      .soundOwner!
+                                                                      .avtars!
+                                                                  : "";
+                                                              cameraController
+                                                                  .setupAudioPlayer(
+                                                                      value.path
+                                                                          .toString());
+
+                                                              Get.back();
+                                                              if (Get
+                                                                  .isBottomSheetOpen!) {
+                                                                Get.back();
+                                                              }
+                                                            }
+                                                            cameraController
+                                                                    .selectedSound
+                                                                    .value =
+                                                                value!.uri
+                                                                    .toString();
+
+                                                            // Get.toNamed(Routes.CAMERA, arguments: {
+                                                            //   "sound_url": value!.path,
+                                                            //   "sound_name": soundName,
+                                                            //   "sound_owner": userName
+                                                            // });
+                                                          });
+                                                          animationController
+                                                              ?.reset();
                                                         }
-                                                        cameraController
-                                                                .selectedSound
-                                                                .value =
-                                                            value!.uri
-                                                                .toString();
+                                                        duration = (await audioPlayer
+                                                            .setUrl(RestUrl
+                                                                    .awsSoundUrl +
+                                                                controller
+                                                                    .searchList[
+                                                                        0]
+                                                                    .sounds![
+                                                                        index]
+                                                                    .sound
+                                                                    .toString()))!;
 
-                                                        // Get.toNamed(Routes.CAMERA, arguments: {
-                                                        //   "sound_url": value!.path,
-                                                        //   "sound_name": soundName,
-                                                        //   "sound_owner": userName
-                                                        // });
-                                                      });
-                                                      animationController
-                                                          ?.reset();
-                                                    }
-                                                    duration = (await audioPlayer
-                                                        .setUrl(RestUrl
-                                                                .awsSoundUrl +
-                                                            controller
-                                                                .searchList[0]
-                                                                .sounds![index]
-                                                                .sound
-                                                                .toString()))!;
-
-                                                    if (duration.inSeconds <
-                                                        61) {
-                                                      cameraController
-                                                          .animationController!
-                                                          .duration = duration;
-                                                    } else {
-                                                      cameraController
+                                                        if (duration.inSeconds <
+                                                            61) {
+                                                          cameraController
                                                               .animationController!
-                                                              .duration =
-                                                          Duration(seconds: 60);
-                                                    }
-                                                    if (cameraController
-                                                        .animationController!
-                                                        .isAnimating) {
-                                                      cameraController
-                                                          .animationController!
-                                                          .forward();
-                                                    }
-                                                    if (Get
-                                                        .isBottomSheetOpen!) {
-                                                      Get.back();
-                                                    }
-                                                  },
-                                                ),
+                                                              .duration = duration;
+                                                        } else {
+                                                          cameraController
+                                                                  .animationController!
+                                                                  .duration =
+                                                              Duration(
+                                                                  seconds: 60);
+                                                        }
+                                                        if (cameraController
+                                                            .animationController!
+                                                            .isAnimating) {
+                                                          cameraController
+                                                              .animationController!
+                                                              .forward();
+                                                        }
+                                                        if (Get
+                                                            .isBottomSheetOpen!) {
+                                                          Get.back();
+                                                        }
+                                                      },
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    onPressed: () => {
+                                                      // controller.addSoundToFavourite(
+                                                      //     controller.searchList[0].sounds![index].id!,
+                                                      //     controller.searchList[0].sounds![index].isFavouriteSoundCount == 0
+                                                      //         ? "1"
+                                                      //         : "0")
+                                                    },
+                                                    icon: const Icon(
+                                                      IconlyBold.bookmark,
+                                                      color: ColorManager
+                                                          .colorAccent,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              IconButton(
-                                                onPressed: () => {
-                                                  // controller.addSoundToFavourite(
-                                                  //     controller.searchList[0].sounds![index].id!,
-                                                  //     controller.searchList[0].sounds![index].isFavouriteSoundCount == 0
-                                                  //         ? "1"
-                                                  //         : "0")
-                                                },
-                                                icon: const Icon(
-                                                  IconlyBold.bookmark,
-                                                  color:
-                                                      ColorManager.colorAccent,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }),
+                                            );
+                                          })
+                                      : searchSoundShimmer()),
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
@@ -3007,11 +3125,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                           onEmpty: NoSearchResult(
                             text: "No Sounds!",
                           ),
-                          onLoading: SizedBox(
-                            child: loader(),
-                            height: Get.height,
-                            width: Get.width,
-                          )),
+                          onLoading: searchSoundShimmer()),
                     ),
                   ],
                 ),
@@ -3022,26 +3136,258 @@ class SelectSoundView extends GetView<SelectSoundController> {
                           builder: (controller) => Stack(
                                 alignment: Alignment.bottomCenter,
                                 children: [
-                                  Column(
-                                    children: [
-                                      ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount:
-                                              controller.localFilterList.length,
-                                          itemBuilder: (context, index) {
-                                            return Padding(
-                                              padding: const EdgeInsets.all(10),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  InkWell(
-                                                    onTap: () async {
-                                                      selectedIndex.value =
-                                                          index;
+                                  ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount:
+                                          controller.localFilterList.length,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              InkWell(
+                                                onTap: () async {
+                                                  selectedIndex.value = index;
+
+                                                  cameraController
+                                                          .soundName.value =
+                                                      controller
+                                                          .localFilterList[
+                                                              index]
+                                                          .displayNameWOExt;
+
+                                                  cameraController
+                                                          .soundOwner.value =
+                                                      GetStorage()
+                                                          .read("userId");
+
+                                                  avatar.value = controller
+                                                              .localFilterList[
+                                                                  index]
+                                                              .album !=
+                                                          null
+                                                      ? controller
+                                                          .localFilterList[
+                                                              index]
+                                                          .album
+                                                          .toString()
+                                                      : "";
+
+                                                  var file = await toFile(
+                                                      controller
+                                                          .localFilterList[
+                                                              index]
+                                                          .uri!);
+                                                  duration = (await audioPlayer
+                                                      .setAudioSource(
+                                                          AudioSource.file(
+                                                              file.path)))!;
+
+                                                  if (duration.inSeconds < 61) {
+                                                    cameraController
+                                                        .animationController!
+                                                        .duration = duration;
+                                                  } else {
+                                                    cameraController
+                                                            .animationController!
+                                                            .duration =
+                                                        Duration(seconds: 60);
+                                                  }
+                                                  if (cameraController
+                                                      .animationController!
+                                                      .isAnimating) {
+                                                    cameraController
+                                                        .animationController!
+                                                        .forward();
+                                                  }
+                                                  audioTotalDuration.value =
+                                                      duration!;
+                                                  audioPlayer.positionStream
+                                                      .listen((position) async {
+                                                    final oldState =
+                                                        progressNotifier.value;
+                                                    audioDuration.value =
+                                                        position;
+                                                    progressNotifier.value =
+                                                        ProgressBarState(
+                                                      current: position,
+                                                      buffered:
+                                                          oldState.buffered,
+                                                      total: oldState.total,
+                                                    );
+
+                                                    if (position ==
+                                                        oldState.total) {
+                                                      audioPlayer
+                                                          .playerStateStream
+                                                          .drain();
+                                                      await playerController
+                                                          .seekTo(0);
+                                                      await audioPlayer
+                                                          .seek(Duration.zero);
+                                                      audioDuration.value =
+                                                          Duration.zero;
+                                                      // isPlaying.value = false;
+                                                    }
+                                                    print(position);
+                                                  });
+                                                  audioPlayer
+                                                      .bufferedPositionStream
+                                                      .listen((position) {
+                                                    final oldState =
+                                                        progressNotifier.value;
+                                                    audioBuffered.value =
+                                                        position;
+                                                    progressNotifier.value =
+                                                        ProgressBarState(
+                                                      current: oldState.current,
+                                                      buffered: position,
+                                                      total: oldState.total,
+                                                    );
+                                                  });
+
+                                                  playerController
+                                                      .onCurrentDurationChanged
+                                                      .listen((duration) async {
+                                                    audioDuration.value =
+                                                        Duration(
+                                                            seconds: duration);
+
+                                                    Duration playerDuration =
+                                                        Duration(
+                                                            seconds: duration);
+
+                                                    print(duration);
+                                                    if (Duration(
+                                                            seconds:
+                                                                duration) >=
+                                                        audioTotalDuration
+                                                            .value) {
+                                                      audioPlayer
+                                                          .seek(Duration.zero);
+                                                    }
+                                                  });
+
+                                                  audioPlayer.play();
+
+                                                  if (isPlayerVisible.isFalse) {
+                                                    isPlayerVisible.value =
+                                                        true;
+                                                  }
+                                                  isPlayerPlaying.value =
+                                                      audioPlayer.playing;
+                                                },
+                                                child: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    Container(
+                                                      height: 50,
+                                                      width: 50,
+                                                      child: imgSound(controller
+                                                                  .localFilterList[
+                                                                      index]
+                                                                  .artist !=
+                                                              null
+                                                          ? controller
+                                                              .localFilterList[
+                                                                  index]
+                                                              .artist
+                                                              .toString()
+                                                          : ""),
+                                                    ),
+                                                    Obx(() => isPlayerPlaying
+                                                                .value &&
+                                                            selectedIndex
+                                                                    .value ==
+                                                                index
+                                                        ? const Icon(
+                                                            Icons
+                                                                .pause_circle_filled_outlined,
+                                                            size: 25,
+                                                            color: ColorManager
+                                                                .colorAccent,
+                                                          )
+                                                        : const Icon(
+                                                            IconlyBold.play,
+                                                            size: 25,
+                                                            color: ColorManager
+                                                                .colorAccent,
+                                                          ))
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Expanded(
+                                                child: InkWell(
+                                                  child: Container(
+                                                    margin:
+                                                        const EdgeInsets.all(0),
+                                                    child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            controller
+                                                                .localFilterList[
+                                                                    index]
+                                                                .title
+                                                                .toString(),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style:
+                                                                const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                              fontSize: 18,
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            controller
+                                                                        .localFilterList[
+                                                                            index]
+                                                                        .artist ==
+                                                                    null
+                                                                ? ""
+                                                                : controller
+                                                                    .localFilterList[
+                                                                        index]
+                                                                    .artist!
+                                                                    .toString(),
+                                                            style: const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                                fontSize: 14),
+                                                          ),
+                                                        ]),
+                                                  ),
+                                                  onTap: () async {
+                                                    var file = File(
+                                                        saveCacheDirectory +
+                                                            controller
+                                                                .localFilterList[
+                                                                    index]
+                                                                .uri!);
+                                                    cameraController
+                                                        .userUploadedSound
+                                                        .value = "";
+                                                    if (await file.exists()) {
+                                                      //     .toString();
+
+                                                      cameraController
+                                                              .selectedSound
+                                                              .value =
+                                                          file.uri.toString();
 
                                                       cameraController
                                                               .soundName.value =
@@ -3053,8 +3399,10 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                       cameraController
                                                               .soundOwner
                                                               .value =
-                                                          GetStorage()
-                                                              .read("userId");
+                                                          controller
+                                                              .localFilterList[
+                                                                  index]
+                                                              .title;
 
                                                       avatar.value = controller
                                                                   .localFilterList[
@@ -3068,376 +3416,111 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                               .toString()
                                                           : "";
 
-                                                      var file = await toFile(
+                                                      animationController
+                                                          ?.reset();
+
+                                                      cameraController
+                                                          .setupAudioPlayer(file
+                                                              .path
+                                                              .toString());
+                                                      isLocalSound = true.obs;
+                                                      if (Get
+                                                          .isBottomSheetOpen!) {
+                                                        Get.back();
+                                                      }
+                                                    } else {
+                                                      cameraController
+                                                              .selectedSound
+                                                              .value =
                                                           controller
                                                               .localFilterList[
                                                                   index]
-                                                              .uri!);
-                                                      duration = (await audioPlayer
-                                                          .setAudioSource(
-                                                              AudioSource.file(
-                                                                  file.path)))!;
+                                                              .uri
+                                                              .toString();
+                                                      cameraController
+                                                              .soundName.value =
+                                                          controller
+                                                              .localFilterList[
+                                                                  index]
+                                                              .displayNameWOExt;
+                                                      cameraController
+                                                              .soundOwner
+                                                              .value =
+                                                          controller
+                                                              .localFilterList[
+                                                                  index]
+                                                              .title;
 
-                                                      if (duration.inSeconds <
-                                                          61) {
-                                                        cameraController
-                                                            .animationController!
-                                                            .duration = duration;
-                                                      } else {
-                                                        cameraController
-                                                                .animationController!
-                                                                .duration =
-                                                            Duration(
-                                                                seconds: 60);
+                                                      avatar.value = controller
+                                                                  .localFilterList[
+                                                                      index]
+                                                                  .album !=
+                                                              null
+                                                          ? controller
+                                                              .localFilterList[
+                                                                  index]
+                                                              .album
+                                                              .toString()
+                                                          : "";
+
+                                                      isLocalSound = true.obs;
+                                                      Get.back();
+                                                      if (Get
+                                                          .isBottomSheetOpen!) {
+                                                        Get.back();
                                                       }
-                                                      if (cameraController
+                                                    }
+
+                                                    var audioFile =
+                                                        await toFile(controller
+                                                            .localFilterList[
+                                                                index]
+                                                            .uri!);
+                                                    duration = (await audioPlayer
+                                                        .setAudioSource(
+                                                            AudioSource.file(
+                                                                audioFile
+                                                                    .path)))!;
+
+                                                    if (duration.inSeconds <
+                                                        61) {
+                                                      cameraController
                                                           .animationController!
-                                                          .isAnimating) {
-                                                        cameraController
-                                                            .animationController!
-                                                            .forward();
-                                                      }
-                                                      audioTotalDuration.value =
-                                                          duration!;
-                                                      audioPlayer.positionStream
-                                                          .listen(
-                                                              (position) async {
-                                                        final oldState =
-                                                            progressNotifier
-                                                                .value;
-                                                        audioDuration.value =
-                                                            position;
-                                                        progressNotifier.value =
-                                                            ProgressBarState(
-                                                          current: position,
-                                                          buffered:
-                                                              oldState.buffered,
-                                                          total: oldState.total,
-                                                        );
-
-                                                        if (position ==
-                                                            oldState.total) {
-                                                          audioPlayer
-                                                              .playerStateStream
-                                                              .drain();
-                                                          await playerController
-                                                              .seekTo(0);
-                                                          await audioPlayer
-                                                              .seek(Duration
-                                                                  .zero);
-                                                          audioDuration.value =
-                                                              Duration.zero;
-                                                          // isPlaying.value = false;
-                                                        }
-                                                        print(position);
-                                                      });
-                                                      audioPlayer
-                                                          .bufferedPositionStream
-                                                          .listen((position) {
-                                                        final oldState =
-                                                            progressNotifier
-                                                                .value;
-                                                        audioBuffered.value =
-                                                            position;
-                                                        progressNotifier.value =
-                                                            ProgressBarState(
-                                                          current:
-                                                              oldState.current,
-                                                          buffered: position,
-                                                          total: oldState.total,
-                                                        );
-                                                      });
-
-                                                      playerController
-                                                          .onCurrentDurationChanged
-                                                          .listen(
-                                                              (duration) async {
-                                                        audioDuration.value =
-                                                            Duration(
-                                                                seconds:
-                                                                    duration);
-
-                                                        Duration
-                                                            playerDuration =
-                                                            Duration(
-                                                                seconds:
-                                                                    duration);
-
-                                                        print(duration);
-                                                        if (Duration(
-                                                                seconds:
-                                                                    duration) >=
-                                                            audioTotalDuration
-                                                                .value) {
-                                                          audioPlayer.seek(
-                                                              Duration.zero);
-                                                        }
-                                                      });
-
-                                                      audioPlayer.play();
-
-                                                      if (isPlayerVisible
-                                                          .isFalse) {
-                                                        isPlayerVisible.value =
-                                                            true;
-                                                      }
-                                                      isPlayerPlaying.value =
-                                                          audioPlayer.playing;
-                                                    },
-                                                    child: Stack(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      children: [
-                                                        Container(
-                                                          height: 50,
-                                                          width: 50,
-                                                          child: imgSound(controller
-                                                                      .localFilterList[
-                                                                          index]
-                                                                      .artist !=
-                                                                  null
-                                                              ? controller
-                                                                  .localFilterList[
-                                                                      index]
-                                                                  .artist
-                                                                  .toString()
-                                                              : ""),
-                                                        ),
-                                                        Obx(() => isPlayerPlaying
-                                                                    .value &&
-                                                                selectedIndex
-                                                                        .value ==
-                                                                    index
-                                                            ? const Icon(
-                                                                Icons
-                                                                    .pause_circle_filled_outlined,
-                                                                size: 25,
-                                                                color: ColorManager
-                                                                    .colorAccent,
-                                                              )
-                                                            : const Icon(
-                                                                IconlyBold.play,
-                                                                size: 25,
-                                                                color: ColorManager
-                                                                    .colorAccent,
-                                                              ))
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Expanded(
-                                                    child: InkWell(
-                                                      child: Container(
-                                                        margin: const EdgeInsets
-                                                            .all(0),
-                                                        child: Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Text(
-                                                                controller
-                                                                    .localFilterList[
-                                                                        index]
-                                                                    .title
-                                                                    .toString(),
-                                                                maxLines: 1,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                style:
-                                                                    const TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w700,
-                                                                  fontSize: 18,
-                                                                ),
-                                                              ),
-                                                              Text(
-                                                                controller
-                                                                            .localFilterList[
-                                                                                index]
-                                                                            .artist ==
-                                                                        null
-                                                                    ? ""
-                                                                    : controller
-                                                                        .localFilterList[
-                                                                            index]
-                                                                        .artist!
-                                                                        .toString(),
-                                                                style: const TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    fontSize:
-                                                                        14),
-                                                              ),
-                                                            ]),
-                                                      ),
-                                                      onTap: () async {
-                                                        var file = File(
-                                                            saveCacheDirectory +
-                                                                controller
-                                                                    .localFilterList[
-                                                                        index]
-                                                                    .uri!);
-                                                        cameraController
-                                                            .userUploadedSound
-                                                            .value = "";
-                                                        if (await file
-                                                            .exists()) {
-                                                          //     .toString();
-
-                                                          cameraController
-                                                                  .selectedSound
-                                                                  .value =
-                                                              file.uri
-                                                                  .toString();
-
-                                                          cameraController
-                                                                  .soundName
-                                                                  .value =
-                                                              controller
-                                                                  .localFilterList[
-                                                                      index]
-                                                                  .displayNameWOExt;
-
-                                                          cameraController
-                                                                  .soundOwner
-                                                                  .value =
-                                                              controller
-                                                                  .localFilterList[
-                                                                      index]
-                                                                  .title;
-
-                                                          avatar
-                                                              .value = controller
-                                                                      .localFilterList[
-                                                                          index]
-                                                                      .album !=
-                                                                  null
-                                                              ? controller
-                                                                  .localFilterList[
-                                                                      index]
-                                                                  .album
-                                                                  .toString()
-                                                              : "";
-
-                                                          animationController
-                                                              ?.reset();
-
-                                                          cameraController
-                                                              .setupAudioPlayer(
-                                                                  file.path
-                                                                      .toString());
-                                                          isLocalSound =
-                                                              true.obs;
-                                                          Get.back();
-                                                          if (Get
-                                                              .isBottomSheetOpen!) {
-                                                            Get.back();
-                                                          }
-                                                        } else {
-                                                          cameraController
-                                                                  .selectedSound
-                                                                  .value =
-                                                              controller
-                                                                  .localFilterList[
-                                                                      index]
-                                                                  .uri
-                                                                  .toString();
-                                                          cameraController
-                                                                  .soundName
-                                                                  .value =
-                                                              controller
-                                                                  .localFilterList[
-                                                                      index]
-                                                                  .displayNameWOExt;
-                                                          cameraController
-                                                                  .soundOwner
-                                                                  .value =
-                                                              controller
-                                                                  .localFilterList[
-                                                                      index]
-                                                                  .title;
-
-                                                          avatar
-                                                              .value = controller
-                                                                      .localFilterList[
-                                                                          index]
-                                                                      .album !=
-                                                                  null
-                                                              ? controller
-                                                                  .localFilterList[
-                                                                      index]
-                                                                  .album
-                                                                  .toString()
-                                                              : "";
-
-                                                          isLocalSound =
-                                                              true.obs;
-                                                          Get.back();
-                                                          if (Get
-                                                              .isBottomSheetOpen!) {
-                                                            Get.back();
-                                                          }
-                                                        }
-
-                                                        var audioFile =
-                                                            await toFile(controller
-                                                                .localFilterList[
-                                                                    index]
-                                                                .uri!);
-                                                        duration = (await audioPlayer
-                                                            .setAudioSource(
-                                                                AudioSource.file(
-                                                                    audioFile
-                                                                        .path)))!;
-
-                                                        if (duration.inSeconds <
-                                                            61) {
-                                                          cameraController
+                                                          .duration = duration;
+                                                    } else {
+                                                      cameraController
                                                               .animationController!
-                                                              .duration = duration;
-                                                        } else {
-                                                          cameraController
-                                                                  .animationController!
-                                                                  .duration =
-                                                              Duration(
-                                                                  seconds: 60);
-                                                        }
-                                                        if (cameraController
-                                                            .animationController!
-                                                            .isAnimating) {
-                                                          cameraController
-                                                              .animationController!
-                                                              .forward();
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                  IconButton(
-                                                    onPressed: () => {
-                                                      // controller.addSoundToFavourite(
-                                                      //     controller.searchList[0].sounds![index].id!,
-                                                      //     controller.searchList[0].sounds![index].isFavouriteSoundCount == 0
-                                                      //         ? "1"
-                                                      //         : "0")
-                                                    },
-                                                    icon: const Icon(
-                                                      IconlyBold.bookmark,
-                                                      color: ColorManager
-                                                          .colorAccent,
-                                                    ),
-                                                  ),
-                                                ],
+                                                              .duration =
+                                                          Duration(seconds: 60);
+                                                    }
+                                                    if (cameraController
+                                                        .animationController!
+                                                        .isAnimating) {
+                                                      cameraController
+                                                          .animationController!
+                                                          .forward();
+                                                    }
+                                                  },
+                                                ),
                                               ),
-                                            );
-                                          }),
-                                    ],
-                                  ),
+                                              IconButton(
+                                                onPressed: () => {
+                                                  // controller.addSoundToFavourite(
+                                                  //     controller.searchList[0].sounds![index].id!,
+                                                  //     controller.searchList[0].sounds![index].isFavouriteSoundCount == 0
+                                                  //         ? "1"
+                                                  //         : "0")
+                                                },
+                                                icon: const Icon(
+                                                  IconlyBold.bookmark,
+                                                  color:
+                                                      ColorManager.colorAccent,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }),
                                   VisibilityDetector(
                                       key: Key("miniplayer"),
                                       child: Obx(() => Visibility(
@@ -3668,10 +3751,18 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                               onTap: () async {
                                                 selectedIndex.value = index;
                                                 cameraController
+                                                        .soundAuthorName.value =
+                                                    controller
+                                                        .favouriteSounds[index]
+                                                        .user!
+                                                        .username!;
+
+                                                cameraController
                                                         .soundName.value =
                                                     controller
                                                         .favouriteSounds[index]
                                                         .name!;
+
                                                 cameraController
                                                         .soundOwner.value =
                                                     controller
@@ -3923,6 +4014,14 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                                 index]
                                                             .name!;
                                                     cameraController
+                                                            .soundAuthorName
+                                                            .value =
+                                                        controller
+                                                            .favouriteSounds[
+                                                                index]
+                                                            .user!
+                                                            .username!;
+                                                    cameraController
                                                             .selectedSound
                                                             .value =
                                                         file.uri.toString();
@@ -3940,7 +4039,6 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                             .path
                                                             .toString());
 
-                                                    Get.back();
                                                     if (Get
                                                         .isBottomSheetOpen!) {
                                                       Get.back();
@@ -3980,6 +4078,15 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                                 index]
                                                             .userId!
                                                             .toString();
+
+                                                        cameraController
+                                                                .soundAuthorName
+                                                                .value =
+                                                            controller
+                                                                .favouriteSounds[
+                                                                    index]
+                                                                .user!
+                                                                .username!;
                                                         cameraController
                                                                 .selectedSound
                                                                 .value =

@@ -44,7 +44,7 @@ class UserLevelsView extends GetView<UserLevelsController> {
                           data: "Levels for " + state[index].name.toString(),
                           style: {
                             "body": Style(
-                                fontSize: FontSize(24),
+                                fontSize: FontSize(22),
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 textAlign: TextAlign.center),
@@ -68,7 +68,7 @@ class UserLevelsView extends GetView<UserLevelsController> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w400),
                             ),
                           ),
@@ -101,13 +101,13 @@ class UserLevelsView extends GetView<UserLevelsController> {
                                         fontSize: 16,
                                         fontWeight: FontWeight.w700)),
                                 Text(
-                                    "/" +
+                                    " / " +
                                         controller.activityList[index].totalSpin
                                             .toString(),
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
-                                        fontWeight: FontWeight.w400))
+                                        fontWeight: FontWeight.w700))
                               ],
                             ),
                           ),

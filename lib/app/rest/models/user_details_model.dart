@@ -135,7 +135,7 @@ class User {
     referralCount = json['referral_count'] ?? "";
     following = json['following'] ?? "";
     followers = json['followers'] ?? "";
-    likes = json['likes'] ?? "";
+    likes = json['likes'];
     isVerified = json['is_verified'] ?? "";
     levels = json['levels'] != null ? Levels.fromJson(json['levels']) : null;
     totalVideos = json['total_videos'] ?? "";

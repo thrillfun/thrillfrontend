@@ -344,11 +344,7 @@ class UserVideosView extends GetView<UserVideosController> {
                 ))
               ],
             ),
-      onLoading: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [loader()],
-      ),
+      onLoading: profileShimmer(),
       onError: (error) => NoSearchResult(
         text: "No User Videos!",
       ),

@@ -32,16 +32,14 @@ class QrCodeView extends GetView<QrCodeController> {
         Container(
           height: 150,
           width: 150,
-          child: imgProfile(Get.arguments["avatar"]),
+          decoration: BoxDecoration(shape: BoxShape.circle),
+          child: imgProfileDetails(Get.arguments["avatar"]),
         ),
-        Text(GetStorage().read("name") ?? "",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
         Card(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           elevation: 20,
-          margin:
-              const EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+          margin: const EdgeInsets.only(left: 30, right: 30, bottom: 10),
           child: Column(
             children: [
               const SizedBox(
@@ -50,11 +48,11 @@ class QrCodeView extends GetView<QrCodeController> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Text(
-                    "Scan QR Code to follow ${GetStorage().read("name")}",
+                    "Scan QR Code to follow ${GetStorage().read("username")}",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 20)),
+                        fontWeight: FontWeight.w700, fontSize: 16)),
               ),
               RepaintBoundary(
                 key: controller.previewContainer,
@@ -121,7 +119,7 @@ class QrCodeView extends GetView<QrCodeController> {
                       Icon(
                         IconlyBroken.download,
                         color: ColorManager.dayNightIcon,
-                        size: 35,
+                        size: 26,
                       ),
                       const SizedBox(
                         height: 5,
@@ -129,7 +127,7 @@ class QrCodeView extends GetView<QrCodeController> {
                       Text(
                         saveToDevice,
                         style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 15,
                             color: ColorManager.dayNightIcon,
                             fontWeight: FontWeight.w700),
                       )
@@ -165,15 +163,13 @@ class QrCodeView extends GetView<QrCodeController> {
                       Icon(
                         IconlyBroken.scan,
                         color: ColorManager.dayNightIcon,
-                        size: 35,
+                        size: 26,
                       ),
                       const SizedBox(
                         height: 5,
                       ),
                       InkWell(
                         onTap: () async {
-
-
                           // final PendingDynamicLinkData? initialLink =
                           //     await FirebaseDynamicLinks.instance
                           //         .getDynamicLink(Uri.parse(barcodeScanRes));
@@ -195,13 +191,11 @@ class QrCodeView extends GetView<QrCodeController> {
                           //   successToast(initialLink!.link.queryParameters["id"]
                           //       .toString());
                           // }
-
-
                         },
                         child: Text(
                           scanQRCode,
                           style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               color: ColorManager.dayNightIcon,
                               fontWeight: FontWeight.w700),
                         ),

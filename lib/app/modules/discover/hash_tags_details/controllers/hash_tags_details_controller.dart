@@ -11,15 +11,15 @@ import '../../../../rest/rest_urls.dart';
 class HashTagsDetailsController extends GetxController
     with StateMixin<RxList<HashtagRelatedVideos>> {
   RxList<HashtagRelatedVideos> hashTagsDetailsList = RxList();
-  final  _bannerAdId = "ca-app-pub-3566466065033894/8796726228";
+  final _bannerAdId = "ca-app-pub-3566466065033894/8796726228";
   BannerAd? bannerAd;
   var isFavouriteHastag = false.obs;
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
-
+  var currentPage = 1.obs;
   var nextPageUrl =
-      "https://thrill.fun/api/hashtag/top-hashtags-videos?page=1".obs;
+      "https://thrill.fun/api/hashtag/top-hashtags-videos?page=2".obs;
 
   @override
   void onInit() {
@@ -28,7 +28,6 @@ class HashTagsDetailsController extends GetxController
 
   @override
   void onReady() {
-    loadAd();
     getVideosByHashTags();
     super.onReady();
   }
@@ -48,10 +47,8 @@ class HashTagsDetailsController extends GetxController
       "hashtag_id": "${Get.arguments["hashtagId"]}"
     }).then((value) {
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
-      hashTagsDetailsList.removeWhere((element) => element.id==null);
+      hashTagsDetailsList.removeWhere((element) => element.id == null);
       hashTagsDetailsList.refresh();
-
-      change(hashTagsDetailsList, status: RxStatus.success());
 
       if (hashTagsDetailsList.isNotEmpty) {
         isFavouriteHastag.value =
@@ -63,6 +60,9 @@ class HashTagsDetailsController extends GetxController
       } else {
         change(hashTagsDetailsList, status: RxStatus.empty());
       }
+      currentPage.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.currentPage!;
+      change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());
     });
@@ -79,7 +79,6 @@ class HashTagsDetailsController extends GetxController
         hashTagsDetailsList
             .addAll(HashtagDetailsModel.fromJson(value.data).data!);
         hashTagsDetailsList.refresh();
-
       }
 
       hashTagsDetailsList.removeWhere((element) => element.id == null);
@@ -87,7 +86,8 @@ class HashTagsDetailsController extends GetxController
       nextPageUrl.value =
           HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
               "";
-
+      currentPage.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.currentPage!;
       change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {});
   }
@@ -120,7 +120,7 @@ class HashTagsDetailsController extends GetxController
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
-        onAdLoaded: (ad){
+        onAdLoaded: (ad) {
           Logger().wtf(ad);
         },
         onAdFailedToLoad: (ad, err) {

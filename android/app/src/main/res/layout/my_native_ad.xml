@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="50dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="50dp">
+
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:layout_gravity="top|right"
+            android:src="@drawable/google_ads" />
 
         <com.google.android.gms.ads.nativead.MediaView
             android:id="@+id/ad_media"
@@ -34,21 +41,21 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:paddingEnd="5dp"
-                    app:civ_border_color="#00FFFFFF"
                     android:paddingRight="5dp"
-                    app:civ_border_width="2dp"
                     android:paddingBottom="5dp"
-                   />
+                    app:civ_border_color="#00FFFFFF"
+                    app:civ_border_width="2dp" />
+
                 <ImageView
                     android:id="@+id/ad_app_icon_2"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:adjustViewBounds="true"
                     android:paddingEnd="5dp"
-                    android:visibility="gone"
                     android:paddingRight="5dp"
                     android:paddingBottom="5dp"
-                    android:scaleType="centerCrop"/>
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -56,77 +63,96 @@
                     android:layout_marginLeft="10dp"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/ad_headline"
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="test"
-                        android:shadowColor="@color/gnt_black"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:shadowDx="1"
-                        android:shadowDy="1"
-                        android:shadowRadius="5"
-                        android:textStyle="bold" />
+                        android:layout_gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ad_badge" />
+
+                        <TextView
+                            android:id="@+id/ad_headline"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:shadowColor="@color/gnt_black"
+                            android:shadowDx="1"
+                            android:shadowDy="1"
+                            android:shadowRadius="5"
+                            android:text="test"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
                     <TextView
                         android:id="@+id/ad_sponsored"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="bottom"
                         android:shadowColor="@color/gnt_black"
-                        android:textColor="@color/white"
                         android:shadowDx="1"
                         android:shadowDy="1"
                         android:shadowRadius="5"
                         android:text="Sponsored"
+                        android:textColor="@color/white"
                         android:textSize="12sp"
                         android:textStyle="normal" />
 
                     <LinearLayout
-                        android:layout_marginTop="5dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp">
 
                         <TextView
                             android:id="@+id/ad_advertiser"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:text="test"
-                            android:shadowColor="@color/gnt_black"
-                            android:textColor="@color/white"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:shadowColor="@color/gnt_black"
                             android:shadowDx="1"
                             android:shadowDy="1"
                             android:shadowRadius="5"
+                            android:text="test"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:textStyle="normal" />
 
                     </LinearLayout>
+
                     <TextView
                         android:id="@+id/ad_body"
-                        android:textColor="@color/gnt_black"
                         android:layout_width="match_parent"
-                        android:visibility="gone"
                         android:layout_height="wrap_content"
-                        android:textSize="12sp" />
+                        android:shadowColor="@color/gnt_black"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="5"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                     <Button
                         android:id="@+id/ad_call_to_action"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
+                        android:layout_gravity="start"
                         android:layout_marginTop="5dp"
                         android:background="@drawable/rounded_button"
-                        android:text="Learn More"
                         android:paddingLeft="10dp"
+                        android:text="Learn More"
                         android:textAlignment="textStart"
                         android:textColor="#FFFFFF"
-                        android:layout_gravity="start"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
-
 
 
             </LinearLayout>
@@ -144,6 +170,7 @@
                     android:orientation="horizontal"
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp">
+
                     <TextView
                         android:id="@+id/ad_store"
                         android:layout_width="wrap_content"
@@ -152,14 +179,20 @@
                         android:paddingLeft="5dp"
                         android:paddingEnd="5dp"
                         android:paddingRight="5dp"
-                        android:textSize="12sp" />
+                        android:shadowColor="@color/gnt_black"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="5"
+                        android:text="Ad Store"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
 
 
                 </LinearLayout>
 
             </LinearLayout>
         </LinearLayout>
-
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

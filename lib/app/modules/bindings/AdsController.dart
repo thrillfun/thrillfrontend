@@ -4,10 +4,11 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
 
 class AdsController extends GetxController {
-  final String _nativeAdUnitId = 'ca-app-pub-3566466065033894/6507076010';
+  final String _nativeAdUnitId = 'ca-app-pub-3566466065033894/4492561853';
   NativeAd? nativeAd;
   var nativeAdIsLoaded = false.obs;
-  final String _adUnitId = 'ca-app-pub-3566466065033894/4388337265';
+  var adFailedToLoad = false.obs;
+  final String _adUnitId = 'ca-app-pub-3566466065033894/6507076010';
   InterstitialAd? interstitialAd;
   var isInterstitialAdShowing = false.obs;
   @override
@@ -69,16 +70,19 @@ class AdsController extends GetxController {
           onAdLoaded: (ad) {
             print('$NativeAd loaded.');
             nativeAdIsLoaded.value = true;
+            adFailedToLoad.value = false;
           },
           onAdFailedToLoad: (ad, error) async {
             // Dispose the ad here to free resources.
-            Logger().wtf('$NativeAd failedToLoad: $error');
+            adFailedToLoad.value = true;
             loadNativeAd1();
             ad.dispose();
           },
         ),
         request: const AdRequest(),
-        nativeAdOptions: NativeAdOptions(mediaAspectRatio: MediaAspectRatio.any)
+        nativeAdOptions: NativeAdOptions(
+            mediaAspectRatio: MediaAspectRatio.any,
+            requestCustomMuteThisAd: true)
 
         // Optional: Pass custom options to your native ad factory implementation.
         )
@@ -94,17 +98,20 @@ class AdsController extends GetxController {
           onAdLoaded: (ad) {
             print('$NativeAd loaded.');
             nativeAdIsLoaded.value = true;
+            adFailedToLoad.value = false;
           },
           onAdFailedToLoad: (ad, error) async {
             // Dispose the ad here to free resources.
-            Logger().wtf('$NativeAd failedToLoad: $error');
-            loadNativeAd2();
+            adFailedToLoad.value = true;
 
+            loadNativeAd2();
             ad.dispose();
           },
         ),
         request: const AdRequest(),
-        nativeAdOptions: NativeAdOptions(mediaAspectRatio: MediaAspectRatio.any)
+        nativeAdOptions: NativeAdOptions(
+            mediaAspectRatio: MediaAspectRatio.any,
+            requestCustomMuteThisAd: true)
 
         // Optional: Pass custom options to your native ad factory implementation.
         )
@@ -119,17 +126,21 @@ class AdsController extends GetxController {
           onAdLoaded: (ad) {
             print('$NativeAd loaded.');
             nativeAdIsLoaded.value = true;
+            adFailedToLoad.value = false;
           },
           onAdFailedToLoad: (ad, error) async {
             // Dispose the ad here to free resources.
-            Logger().wtf('$NativeAd failedToLoad: $error');
+            adFailedToLoad.value = true;
+
             loadNativeAd3();
 
             ad.dispose();
           },
         ),
         request: const AdRequest(),
-        nativeAdOptions: NativeAdOptions(mediaAspectRatio: MediaAspectRatio.any)
+        nativeAdOptions: NativeAdOptions(
+            mediaAspectRatio: MediaAspectRatio.any,
+            requestCustomMuteThisAd: true)
 
         // Optional: Pass custom options to your native ad factory implementation.
         )
@@ -144,15 +155,48 @@ class AdsController extends GetxController {
           onAdLoaded: (ad) {
             print('$NativeAd loaded.');
             nativeAdIsLoaded.value = true;
+            adFailedToLoad.value = false;
           },
           onAdFailedToLoad: (ad, error) async {
             // Dispose the ad here to free resources.
-            Logger().wtf('$NativeAd failedToLoad: $error');
+            adFailedToLoad.value = true;
+
             ad.dispose();
+            loadNativeAd4();
           },
         ),
         request: const AdRequest(),
-        nativeAdOptions: NativeAdOptions(mediaAspectRatio: MediaAspectRatio.any)
+        nativeAdOptions: NativeAdOptions(
+            mediaAspectRatio: MediaAspectRatio.any,
+            requestCustomMuteThisAd: true)
+
+        // Optional: Pass custom options to your native ad factory implementation.
+        )
+      ..load();
+  }
+
+  loadNativeAd4() async {
+    nativeAd = NativeAd(
+        adUnitId: 'ca-app-pub-3566466065033894/9039396661',
+        factoryId: 'adFactory',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            print('$NativeAd loaded.');
+            nativeAdIsLoaded.value = true;
+            adFailedToLoad.value = false;
+          },
+          onAdFailedToLoad: (ad, error) async {
+            // Dispose the ad here to free resources.
+            adFailedToLoad.value = true;
+
+            ad.dispose();
+            loadNativeAd();
+          },
+        ),
+        request: const AdRequest(),
+        nativeAdOptions: NativeAdOptions(
+            mediaAspectRatio: MediaAspectRatio.any,
+            requestCustomMuteThisAd: true)
 
         // Optional: Pass custom options to your native ad factory implementation.
         )

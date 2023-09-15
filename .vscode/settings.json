@@ -3,5 +3,10 @@
   "workbench.colorCustomizations": {
     "minimap.background": "#00000000",
     "scrollbar.shadow": "#00000000"
-  }
+  },
+  "editor.fontSize": 11,
+  "chat.editor.fontSize": 1,
+  "terminal.integrated.fontSize": 11,
+  "debug.console.fontSize": 11,
+  "scm.inputFontSize": 11
 }

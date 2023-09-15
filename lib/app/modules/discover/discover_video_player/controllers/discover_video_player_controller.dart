@@ -11,6 +11,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:thrill/app/modules/bindings/AdsController.dart';
 
 import '../../../../rest/models/hash_tag_details_model.dart';
 import '../../../../rest/models/site_settings_model.dart';
@@ -25,6 +26,7 @@ class DiscoverVideoPlayerController extends GetxController
   var isLoading = false.obs;
   var isVideoReported = false.obs;
   RxList<HashtagRelatedVideos> hashTagsDetailsList = RxList();
+  var isVideoFavourite = false.obs;
 
   var isFavouriteHastag = false.obs;
   var isInitialised = false.obs;
@@ -32,7 +34,7 @@ class DiscoverVideoPlayerController extends GetxController
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   var nextPageUrl =
-      "https://thrill.fun/api/hashtag/get-videos-by-hashtag?page=1".obs;
+      "https://thrill.fun/api/hashtag/get-videos-by-hashtag?page=2".obs;
   final String _nativeAdUnitId = 'ca-app-pub-3566466065033894/6507076010';
   NativeAd? nativeAd;
   var nativeAdIsLoaded = false.obs;
@@ -42,6 +44,8 @@ class DiscoverVideoPlayerController extends GetxController
 
   var isUserFollowed = false.obs;
   var commentsController = Get.find<CommentsController>();
+  var currentDuration = Duration().obs;
+  var adsController = Get.find<AdsController>();
   @override
   void onInit() {
     refereshVideos();
@@ -58,11 +62,39 @@ class DiscoverVideoPlayerController extends GetxController
     super.onClose();
   }
 
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> favUnfavVideo(int videoId, String action) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/do-fav-unfav", queryParameters: {
+      "video_id": "$videoId",
+      "action": action
+    }).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+      getVideoFavStatus(videoId);
+    }).onError((error, stackTrace) {});
+  }
+
   /// Loads a native ad.
   Future<void> getVideosByHashTags() async {
-    if (hashTagsDetailsList.isEmpty) {
-      change(hashTagsDetailsList, status: RxStatus.loading());
-    }
+    change(hashTagsDetailsList, status: RxStatus.loading());
+
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
 
@@ -72,10 +104,11 @@ class DiscoverVideoPlayerController extends GetxController
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
-      nextPageUrl.value =
-          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
-              "";
 
+      if (adsController.adFailedToLoad.isTrue) {
+        hashTagsDetailsList.removeWhere((element) => element.id == null);
+        hashTagsDetailsList.refresh();
+      }
       commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
       videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
       followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
@@ -89,17 +122,22 @@ class DiscoverVideoPlayerController extends GetxController
     dio.options.headers["Authorization"] =
         "Bearer ${await GetStorage().read("token")}";
 
+    isLoading.value = true;
     dio.post(nextPageUrl.value, queryParameters: {
-      "hashtag_id": "${await GetStorage().read("hashtagId")}"
+      "hashtag_id": "${Get.arguments["hashtagId"]}"
     }).then((value) {
       nextPageUrl.value =
           HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
               "";
-      if (nextPageUrl.isNotEmpty) {
-        hashTagsDetailsList
-            .addAll(HashtagDetailsModel.fromJson(value.data).data!);
+
+      hashTagsDetailsList
+          .addAll(HashtagDetailsModel.fromJson(value.data).data!);
+      isLoading.value = false;
+
+      if (adsController.adFailedToLoad.isTrue) {
+        hashTagsDetailsList.removeWhere((element) => element.id == null);
+        hashTagsDetailsList.refresh();
       }
-      hashTagsDetailsList.refresh();
 
       commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
       videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
@@ -107,7 +145,9 @@ class DiscoverVideoPlayerController extends GetxController
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
       change(hashTagsDetailsList, status: RxStatus.success());
-    }).onError((error, stackTrace) {});
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
+    });
   }
 
   Future<void> refereshVideos() async {
@@ -121,6 +161,9 @@ class DiscoverVideoPlayerController extends GetxController
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
+      commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
+      videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
+      followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
       change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());
@@ -182,9 +225,11 @@ class DiscoverVideoPlayerController extends GetxController
       // getAllVideos(false);
       videoLikeStatus(videoId);
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
-            body: "${GetStorage().read("userName")} liked your video");
+            body: "${GetStorage().read("username")} liked your video");
       }
     }).onError((error, stackTrace) {});
   }

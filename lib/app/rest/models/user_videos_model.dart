@@ -152,6 +152,7 @@ class Hashtags {
   int? id;
   int? videoId;
   int? hashtagId;
+  String? name;
   String? createdAt;
   String? updatedAt;
   int? isFavouriteHashtagCount;
@@ -161,6 +162,7 @@ class Hashtags {
       {this.id,
       this.videoId,
       this.hashtagId,
+      this.name,
       this.createdAt,
       this.updatedAt,
       this.isFavouriteHashtagCount,
@@ -170,6 +172,7 @@ class Hashtags {
     id = json['id'];
     videoId = json['video_id'];
     hashtagId = json['hashtag_id'];
+    name = json['name'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     isFavouriteHashtagCount = json['is_favourite_hashtag_count'];
@@ -182,6 +185,7 @@ class Hashtags {
     data['id'] = this.id;
     data['video_id'] = this.videoId;
     data['hashtag_id'] = this.hashtagId;
+    data['name'] = this.name;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['is_favourite_hashtag_count'] = this.isFavouriteHashtagCount;

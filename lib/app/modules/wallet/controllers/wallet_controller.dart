@@ -79,11 +79,11 @@ class WalletController extends GetxController with StateMixin<RxList<Balance>> {
     startStreams();
   }
 
-  startStreams(){
+  startStreams() {
     ethusdChannel.stream.listen((event) {
       ethPer.value = double.parse(jsonDecode(event)['P']).toStringAsFixed(2);
       ethPrice.value =
-      (double.parse(jsonDecode(event)['c']).toStringAsFixed(6));
+          (double.parse(jsonDecode(event)['c']).toStringAsFixed(6));
     });
     btcusdtChannel.stream.listen((event) {
       btcPer.value = double.parse(jsonDecode(event)['P']).toStringAsFixed(2);

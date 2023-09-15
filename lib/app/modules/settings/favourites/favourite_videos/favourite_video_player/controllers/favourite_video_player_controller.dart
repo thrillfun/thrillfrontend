@@ -48,6 +48,8 @@ class FavouriteVideoPlayerController extends GetxController
   var commentsController = Get.find<CommentsController>();
   NativeAd? nativeAd;
   var nativeAdIsLoaded = false.obs;
+  var currentDuration = Duration().obs;
+  var isVideoFavourite = false.obs;
 
   @override
   void onInit() {
@@ -63,6 +65,35 @@ class FavouriteVideoPlayerController extends GetxController
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> favUnfavVideo(int videoId, String action) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/do-fav-unfav", queryParameters: {
+      "video_id": "$videoId",
+      "action": action
+    }).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+      getVideoFavStatus(videoId);
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> notInterested(int videoId) async {
@@ -108,9 +139,11 @@ class FavouriteVideoPlayerController extends GetxController
       // getAllVideos(false);
       videoLikeStatus(videoId);
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
-            body: "${GetStorage().read("userName")} liked your video");
+            body: "${GetStorage().read("username")} liked your video");
       }
     }).onError((error, stackTrace) {});
   }
@@ -126,13 +159,14 @@ class FavouriteVideoPlayerController extends GetxController
     dio.post('video/like-by-id', queryParameters: {
       "video_id": "$videoId",
     }).then((value) async {
+      totalLikes.value = value.data["data"]["likes"] ?? 0;
+
       if ((value.data["data"]["is_like"] ?? 0) == 0) {
         isLiked.value = false;
       } else {
         isLiked.value = true;
       }
       // getAllVideos(false);
-      totalLikes.value = value.data["data"]["likes"] ?? 0;
     }).onError((error, stackTrace) {
       Logger().e(error);
     });
@@ -190,6 +224,7 @@ class FavouriteVideoPlayerController extends GetxController
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
+    isLoading.value = true;
 
     dio.get(nextPageUrl.value).then((value) {
       if (nextPageUrl.isNotEmpty) {
@@ -204,8 +239,10 @@ class FavouriteVideoPlayerController extends GetxController
               .pagination!
               .nextPageUrl ??
           "";
+      isLoading.value = false;
       change(favouriteVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {
+      isLoading.value = false;
       Logger().wtf(error);
     });
   }

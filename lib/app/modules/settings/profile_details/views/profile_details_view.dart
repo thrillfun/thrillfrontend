@@ -70,7 +70,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                     // ),
                   ],
                 ),
-            onLoading: loader()),
+            onLoading: manageAccountShimmer()),
       ),
     );
   }
@@ -78,35 +78,8 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
   profilePicLayout() => SizedBox(
         height: 160,
         width: 160,
-        child: CachedNetworkImage(
-            placeholder: (a, b) => Center(
-                  child: loader(),
-                ),
-            height: 160,
-            width: 160,
-            imageBuilder: (context, imageProvider) => Container(
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                        image: imageProvider, fit: BoxFit.contain),
-                  ),
-                ),
-            errorWidget: (context, string, dynamic) => CachedNetworkImage(
-                placeholder: (a, b) => Center(
-                      child: loader(),
-                    ),
-                fit: BoxFit.contain,
-                imageBuilder: (context, imageProvider) => Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                            image: imageProvider, fit: BoxFit.contain),
-                      ),
-                    ),
-                imageUrl: RestUrl.placeholderImage),
-            imageUrl: RestUrl.profileUrl +
-                controller.userProfile.value.avatar.toString()),
+        child:
+            imgProfileDetails(controller.userProfile.value.avatar.toString()),
       );
   aboutYouLayout() => controller.obx((state) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +88,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
             "About You",
             style: TextStyle(
               fontWeight: FontWeight.w700,
-              fontSize: 20,
+              fontSize: 18,
             ),
           ),
           const SizedBox(
@@ -133,7 +106,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                 "Name",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 20,
+                  fontSize: 16,
                 ),
               ),
               Flexible(
@@ -146,8 +119,8 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                           Text(
                             controller.userProfile.value.name.toString(),
                             style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
                             ),
                           ),
                           const SizedBox(
@@ -173,10 +146,10 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                 "Username",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 20,
+                  fontSize: 16,
                 ),
               ),
-              Flexible(
+              Expanded(
                   child: Container(
                       width: Get.width,
                       alignment: Alignment.centerRight,
@@ -185,9 +158,10 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                         children: [
                           Text(
                             "@" + state!.value.username.toString(),
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
                             ),
                           ),
                           const SizedBox(
@@ -213,7 +187,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                 "Bio",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 20,
+                  fontSize: 16,
                 ),
               ),
               Flexible(
@@ -223,7 +197,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Flexible(
+                          Expanded(
                               child: Text(
                             state!.value.bio.toString().isEmpty
                                 ? "N/A"
@@ -232,7 +206,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 20),
+                                fontWeight: FontWeight.w400, fontSize: 16),
                           )),
                           const SizedBox(
                             width: 10,
@@ -255,9 +229,9 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
               ),
               Text(
                 "DOB",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
-              Flexible(
+              Expanded(
                   child: Container(
                       width: Get.width,
                       alignment: Alignment.centerRight,
@@ -269,7 +243,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                                 ? "N/A"
                                 : state!.value.dob.toString(),
                             style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 20),
+                                fontWeight: FontWeight.w400, fontSize: 16),
                           ),
                           const SizedBox(
                             width: 10,
@@ -292,7 +266,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
               ),
               Text(
                 "Gender",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
               Flexible(
                   child: Container(
@@ -306,7 +280,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                                 ? "N/A"
                                 : state!.value.gender.toString(),
                             style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 20),
+                                fontWeight: FontWeight.w400, fontSize: 16),
                           ),
                           const SizedBox(
                             width: 10,
@@ -329,9 +303,9 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
               ),
               Text(
                 "Email",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
-              Flexible(
+              Expanded(
                   child: Container(
                       width: Get.width,
                       alignment: Alignment.centerRight,
@@ -342,8 +316,9 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                             state!.value.email.toString().isEmpty
                                 ? "N/A"
                                 : state!.value.email.toString(),
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 20),
+                                fontWeight: FontWeight.w400, fontSize: 16),
                           ),
                           const SizedBox(
                             width: 10,
@@ -366,9 +341,9 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
               ),
               Text(
                 "Mobile",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
-              Flexible(
+              Expanded(
                   child: Container(
                       width: Get.width,
                       alignment: Alignment.centerRight,
@@ -380,7 +355,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                                 ? "N/A"
                                 : state!.value.phone.toString(),
                             style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 20),
+                                fontWeight: FontWeight.w400, fontSize: 16),
                           ),
                           const SizedBox(
                             width: 10,

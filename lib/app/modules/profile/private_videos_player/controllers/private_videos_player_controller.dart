@@ -32,14 +32,15 @@ class PrivateVideosPlayerController extends GetxController
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
-  var nextPageUrl = "https://thrill.fun/api/video/private?page=1".obs;
+  var nextPageUrl = "https://thrill.fun/api/video/private?page=2".obs;
   var isLikeEnable = true.obs;
   var isLiked = false.obs;
   var totalLikes = 0.obs;
+  var isVideoFavourite = false.obs;
 
   var isUserFollowed = false.obs;
-  var commentsController =Get.find<CommentsController>();
-  var userLikedController =Get.find<UserLikedVideosController>();
+  var commentsController = Get.find<CommentsController>();
+  var userLikedController = Get.find<UserLikedVideosController>();
   @override
   void onInit() {
     getUserPrivateVideos();
@@ -54,6 +55,35 @@ class PrivateVideosPlayerController extends GetxController
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> favUnfavVideo(int videoId, String action) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/do-fav-unfav", queryParameters: {
+      "video_id": "$videoId",
+      "action": action
+    }).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+      getVideoFavStatus(videoId);
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> notInterested(int videoId) async {
@@ -72,17 +102,19 @@ class PrivateVideosPlayerController extends GetxController
       Logger().wtf(error);
     });
   }
+
   Future<void> postVideoView(int videoId) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
     dio.post("video/view", queryParameters: {"video_id": videoId}).then(
-            (value) {
-          if (value.data["status"]) {
-            Logger().wtf("View posted successfully");
-          }
-        }).onError((error, stackTrace) {});
+        (value) {
+      if (value.data["status"]) {
+        Logger().wtf("View posted successfully");
+      }
+    }).onError((error, stackTrace) {});
   }
+
   getUserPrivateVideos() async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -93,9 +125,7 @@ class PrivateVideosPlayerController extends GetxController
     dio.get('/video/private').then((value) {
       privateVideosList.value =
           UserPrivateVideosModel.fromJson(value.data).data!.obs;
-      nextPageUrl.value =
-          UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
-              "";
+
       commentsController.getComments(privateVideosList[0].id ?? 0);
       videoLikeStatus(privateVideosList[0].id ?? 0);
       followUnfollowStatus(privateVideosList[0].user!.id!);
@@ -112,6 +142,7 @@ class PrivateVideosPlayerController extends GetxController
     if (privateVideosList.isEmpty) {
       change(privateVideosList, status: RxStatus.loading());
     }
+    isLoading.value = true;
     dio.post(nextPageUrl.value, queryParameters: {
       "user_id": "${Get.arguments["profileId"]}"
     }).then((value) {
@@ -124,8 +155,12 @@ class PrivateVideosPlayerController extends GetxController
       nextPageUrl.value =
           UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
               "";
+      isLoading.value = false;
+
       change(privateVideosList, status: RxStatus.success());
-    }).onError((error, stackTrace) {});
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
+    });
   }
 
   Future<void> deleteUserVideo(int videoId) async {
@@ -159,6 +194,8 @@ class PrivateVideosPlayerController extends GetxController
       // getAllVideos(false);
       videoLikeStatus(videoId);
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
             body: "${GetStorage().read("userName")} liked your video");
@@ -168,8 +205,8 @@ class PrivateVideosPlayerController extends GetxController
   }
 
   Future<void> videoLikeStatus(
-      int videoId,
-      ) async {
+    int videoId,
+  ) async {
     isLikeEnable.value = false;
 
     dio.options.headers = {
@@ -215,11 +252,9 @@ class PrivateVideosPlayerController extends GetxController
       "publisher_user_id": userId,
       "action": "$action"
     }).then((value) {
-
       followUnfollowStatus(userId);
     }).onError((error, stackTrace) {});
   }
-
 
   checkUserBlocked(int userId) async {
     dio.options.headers = {

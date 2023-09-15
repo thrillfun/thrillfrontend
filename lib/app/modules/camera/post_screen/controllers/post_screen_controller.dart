@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart' as dioForm;
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -11,6 +12,7 @@ import 'package:hashtagable/hashtagable.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:retry/retry.dart';
 import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/app/modules/related_videos/controllers/related_videos_controller.dart';
 import 'package:thrill/app/utils/color_manager.dart';
@@ -20,13 +22,16 @@ import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../../rest/models/followers_model.dart';
+import '../../../../rest/models/search_model.dart' as search;
 import '../../../../rest/models/top_hashtags_videos_model.dart' as topHashtags;
 import '../../../../rest/models/video_field_model.dart';
 import '../../../../rest/rest_urls.dart';
 import '../../../../routes/app_pages.dart';
+import '../../../../utils/enum.dart';
 import '../../../../utils/strings.dart';
 
-class PostScreenController extends GetxController {
+class PostScreenController extends GetxController
+    with GetSingleTickerProviderStateMixin, StateMixin<dynamic> {
   String? selectedSound;
   bool? isFromGallery;
 
@@ -57,7 +62,7 @@ class PostScreenController extends GetxController {
 
   TextEditingController searchController = TextEditingController();
 
-  TextEditingController textEditingController = TextEditingController();
+  var textEditingController = TextEditingController().obs;
   RxList<Languages> languagesList = RxList();
   RxList<Categories> categoriesList = RxList();
   RxList<Hashtags> hashtagsList = RxList();
@@ -68,26 +73,70 @@ class PostScreenController extends GetxController {
   int currentUnix = DateTime.now().millisecondsSinceEpoch;
   var snackBarMessageText = ''.obs;
   var followersModel = RxList<Followers>();
-
+  RxList<search.SearchData> searchList = RxList();
+  var selectedThumbnail = ''.obs;
+  RxList<FileSystemEntity> thumbnailEntities = RxList();
+  var currentSelectedFrame = 999.obs;
+  var isThumbnailReady = false.obs;
+  AnimationController? progressAnimationController;
+  var isPLayerPlaying = false.obs;
+  var customSelectedThumbnail = ''.obs;
+  FileUploadStatus? fileUploadStatus;
+  var backPressed = false.obs;
   @override
   void onInit() {
     super.onInit();
-    videoPlayerController = VideoPlayerController.file(videoFile.value)
-      ..initialize()
-      ..setLooping(true);
+
+    extractFrames(Get.arguments["file_path"]);
+    progressAnimationController = AnimationController(vsync: this);
+
     // createGIF(currentUnix);
+  }
+
+  Future<bool> onBackPressed() async {
+    var tempDirectory = await getTemporaryDirectory();
+    final dir = Directory(tempDirectory.path + "/videos");
+    if (!await Directory(dir.path).exists()) {
+      await Directory(dir.path).create();
+    }
+    Get.defaultDialog(
+      title: "Are you sure?",
+      middleText: "Are you sure you want to discard changes",
+      cancel: ElevatedButton(
+          onPressed: () {
+            backPressed.value = false;
+            Get.back();
+          },
+          child: const Text("Cancel")),
+      confirm: ElevatedButton(
+          onPressed: () async {
+            backPressed.value = true;
+
+            await dir.delete(recursive: true);
+            Get.back();
+            Get.offAllNamed(Routes.HOME);
+          },
+          child: const Text("Ok")),
+    );
+    return Future.value(backPressed.value);
   }
 
   @override
   void onReady() {
     getTopHashTagVideos();
     getVideoClips();
+    searchHashtags('');
     super.onReady();
   }
 
-  @override
-  void onClose() {
-    super.onClose();
+  Future<void> searchHashtags(String searchQuery) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.get("hashtag/search?search=$searchQuery").then((value) {
+      searchList.value =
+          search.SearchHashTagsModel.fromJson(value.data).data!.obs;
+    }).onError((error, stackTrace) {});
   }
 
   getTopHashTagVideos() async {
@@ -177,6 +226,7 @@ class PostScreenController extends GetxController {
     // }).onError((error, stackTrace) {
     //   Logger().wtf(error);
     // });
+    fileUploadStatus = FileUploadStatus.uploading;
 
     await _videoS3
         .uploadFile(
@@ -193,27 +243,31 @@ class PostScreenController extends GetxController {
       print("============================> Video Upload Success!!!!");
       if (isOriginal == "original") {
         postUpload("$currentUnix.mp4", basename(soundUrl.toString()),
-            "$currentUnix.gif", desc, soundName,
+            "$currentUnix.jpg", desc, soundName,
             soundOwner: soundOwner);
       } else if (isOriginal == "extracted") {
         File file = await toFile(soundUrl);
         awsUploadSound(file.path, "$currentUnix").then((value) async =>
             postUpload("$currentUnix.mp4", "$currentUnix.mp3",
-                "$currentUnix.gif", desc, "original",
+                "$currentUnix.jpg", desc, soundName,
                 soundOwner: soundOwner));
       } else {
         File file = await toFile(soundUrl);
         awsUploadSound(file.path, "$currentUnix").then((value) async =>
             postUpload("$currentUnix.mp4", "$currentUnix.mp3",
-                "$currentUnix.gif", desc, soundName,
+                "$currentUnix.jpg", desc, soundName,
                 soundOwner: soundOwner));
       }
+      fileUploadStatus = FileUploadStatus.success;
+    }).onError((error, stackTrace) {
+      fileUploadStatus = FileUploadStatus.failed;
     });
   }
 
   Future<void> awsUploadSound(String file, String currentUnix) async {
     var _soundS3 = SimpleS3();
     snackBarMessageText.value = "Uploading gif";
+    fileUploadStatus = FileUploadStatus.uploading;
 
     // Get.defaultDialog(
     //     content: StreamBuilder<dynamic>(
@@ -240,57 +294,95 @@ class PostScreenController extends GetxController {
     )
         .then((value) {
       Logger().wtf(value);
+      fileUploadStatus = FileUploadStatus.success;
+    }).onError((error, stackTrace) {
+      fileUploadStatus = FileUploadStatus.failed;
     });
   }
 
-  Future<String> createGIF() async {
-    String outputPath = '$saveCacheDirectory$currentUnix.gif';
-    FFmpegKit.execute(
-            "-y -i ${videoFile.value.path} -r 18 -s 175x280 -t 3 $outputPath")
-        .then((session) async {
-      final returnCode = await session.getReturnCode();
+  Future<Directory> checkforDirectory() async {
+    var tempDirectory = await getTemporaryDirectory();
+    final dir = Directory(tempDirectory.path + "/frames/");
+    if (await dir.exists()) {
+      await dir.delete(recursive: true);
+    }
+    await dir.create();
 
-      if (ReturnCode.isSuccess(returnCode)) {
-        Logger().wtf("success");
-        await uploadGif(textEditingController.text, soundName, soundOwner);
-      } else {
-        errorToast("thumbnail uploaded failed");
-        Logger().wtf("failed");
-      }
-    });
+    return dir;
+  }
 
-    // Get.defaultDialog(
-    //     content: StreamBuilder<dynamic>(
-    //         stream: simpleS3.getUploadPercentage,
-    //         builder: (context, snapshot) {
-    //           return Text(
-    //             snapshot.data != null
-    //                 ? "Uploaded: ${snapshot.data}"
-    //                 : "Uploading gif please wait",
-    //           );
-    //         }),
-    //     barrierDismissible: false);
+  extractFrames(String videoFilePath) async {
+    change(selectedThumbnail, status: RxStatus.loading());
+    var directory = await checkforDirectory();
+    thumbnailEntities.clear();
+    if (directory.existsSync()) {
+      FFmpegKit.execute(
+              '-i $videoFilePath -r 1 -f image2 ${directory.path}image-%3d.jpg')
+          .then((session) async {
+        final returnCode = await session.getReturnCode();
+        if (ReturnCode.isSuccess(returnCode)) {
+          var frameFiles = await directory.list().toList();
+          thumbnailEntities.value = await getFilesFromFolder(directory);
+          selectedThumbnail.value = thumbnailEntities[0].path;
+        } else {
+          change(selectedThumbnail,
+              status: RxStatus.error('Something went wrong'));
+        }
+      }).then((value) {
+        isThumbnailReady.value = true;
+        change(selectedThumbnail, status: RxStatus.success());
+      });
+    }
+  }
 
-    return outputPath;
+  createGIF() async {
+    await uploadGif(textEditingController.value.text, soundName, soundOwner);
+    // String outputPath = '$saveCacheDirectory$currentUnix.jpg';
+    // FFmpegKit.execute(
+    //         "-y -i ${videoFile.value.path} -r 18 -s 175x280 -t 3 $outputPath")
+    //     .then((session) async {
+    //   final returnCode = await session.getReturnCode();
+
+    //   if (ReturnCode.isSuccess(returnCode)) {
+    //     Logger().wtf("success");
+
+    //   } else {
+    //     errorToast("thumbnail uploaded failed");
+    //     Logger().wtf("failed");
+    //   }
+    // });
+
+    // // Get.defaultDialog(
+    // //     content: StreamBuilder<dynamic>(
+    // //         stream: simpleS3.getUploadPercentage,
+    // //         builder: (context, snapshot) {
+    // //           return Text(
+    // //             snapshot.data != null
+    // //                 ? "Uploaded: ${snapshot.data}"
+    // //                 : "Uploading gif please wait",
+    // //           );
+    // //         }),
+    // //     barrierDismissible: false);
+
+    // return outputPath;
   }
 
   uploadGif(String desc, String soundName, String owner) async {
     snackBarMessageText.value = "Uploading gif";
 
-    var uint8list = (await VideoThumbnail.thumbnailData(
-      video: videoFile.value.path,
-      imageFormat: ImageFormat.JPEG,
-      maxWidth:
-          128, // specify the width of the thumbnail, let the height auto-scaled to keep the source aspect ratio
-      quality: 25,
-    ))!;
-
     GetSnackBar(
       backgroundGradient: ColorManager.postGradient,
       snackPosition: SnackPosition.TOP,
       snackStyle: SnackStyle.GROUNDED,
-      icon: Image.memory(
-        uint8list,
+      progressIndicatorController: progressAnimationController,
+      icon: Image.file(
+        currentSelectedFrame.value == 999
+            ? File(customSelectedThumbnail.isNotEmpty
+                ? customSelectedThumbnail.value
+                : thumbnailEntities[0].path)
+            : File(customSelectedThumbnail.isNotEmpty
+                ? customSelectedThumbnail.value
+                : thumbnailEntities[currentSelectedFrame.value].path),
         height: 50,
         width: 50,
       ),
@@ -307,18 +399,25 @@ class PostScreenController extends GetxController {
       isDismissible: false,
       showProgressIndicator: true,
     ).show();
-
+    fileUploadStatus = FileUploadStatus.uploading;
+    Logger().wtf(fileUploadStatus);
     Get.offAllNamed(Routes.HOME);
 
     await simpleS3
         .uploadFile(
-      File('$saveCacheDirectory$currentUnix.gif'),
+      currentSelectedFrame.value == 999
+          ? File(customSelectedThumbnail.isNotEmpty
+              ? customSelectedThumbnail.value
+              : thumbnailEntities[0].path)
+          : File(customSelectedThumbnail.isNotEmpty
+              ? customSelectedThumbnail.value
+              : thumbnailEntities[currentSelectedFrame.value].path),
       "thrillvideonew",
       "ap-south-1:79285cd8-42a4-4d69-8330-0d02e2d7fc0b",
       AWSRegions.apSouth1,
       debugLog: true,
       s3FolderPath: "gif",
-      fileName: '$currentUnix.gif',
+      fileName: '$currentUnix.jpg',
       accessControl: S3AccessControl.publicRead,
     )
         .then((value) async {
@@ -326,13 +425,20 @@ class PostScreenController extends GetxController {
     }).onError((error, stackTrace) {
       Get.back(closeOverlays: true);
       Logger().wtf(error);
+      fileUploadStatus = FileUploadStatus.failed;
+    });
+    simpleS3.getUploadPercentage.listen((event) {
+      var percentage = event as String;
+      progressAnimationController?.animateTo(double.parse(percentage));
+      progressAnimationController?.forward();
     });
   }
 
   postUpload(String videoId, String soundId, String gifId, String desc,
       String soundName,
       {String soundOwner = ""}) async {
-    String tagList = jsonEncode(extractHashTags(textEditingController.text));
+    String tagList =
+        jsonEncode(extractHashTags(textEditingController.value.text));
     snackBarMessageText.value = "posting video";
 
     dio.options.headers = {
@@ -345,13 +451,15 @@ class PostScreenController extends GetxController {
           : soundOwner,
       "video": videoId,
       "sound": soundId,
-      "sound_name": soundName == null || soundName.toString().isEmpty
+      "sound_name": soundName.toString().isEmpty
           ? "Original by ${GetStorage().read("name") ?? GetStorage().read("userName").toString()}"
           : soundName,
       "language": 1,
       "category": 1,
       "hashtags": tagList,
       "visibility": selectedPrivacy.value,
+      'is_duetable':
+          GetStorage().read('isVideoDownloadble') == true ? "Yes" : "No",
       "is_comment_allowed": allowComments.isFalse ? 0 : 1,
       "is_commentable": allowComments.isFalse ? "No" : "Yes",
       "description": desc,

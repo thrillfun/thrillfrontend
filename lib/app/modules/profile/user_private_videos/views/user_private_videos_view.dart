@@ -381,9 +381,7 @@ class UserPrivateVideosView extends GetView<UserPrivateVideosController> {
                   ))
                 ],
               ),
-        onLoading: Column(
-          children: [Expanded(child: loader())],
-        ),
+        onLoading: profileShimmer(),
         onEmpty: Column(
           children: [Expanded(child: NoLikedVideos())],
         ));

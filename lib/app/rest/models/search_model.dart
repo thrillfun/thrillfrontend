@@ -236,6 +236,7 @@ class UsersList {
   String? dob;
   String? phone;
   String? avatar;
+  String? avatars;
   String? socialLoginId;
   String? socialLoginType;
   String? firstName;
@@ -267,6 +268,7 @@ class UsersList {
       this.dob,
       this.phone,
       this.avatar,
+      this.avatars,
       this.socialLoginId,
       this.socialLoginType,
       this.firstName,
@@ -297,7 +299,8 @@ class UsersList {
     email = json['email'] ?? "";
     dob = json['dob'] ?? "";
     phone = json['phone'];
-    avatar = json['avatar'] ?? "";
+    avatar = json['avatar'];
+    avatars = json["avtars"];
     socialLoginId = json['social_login_id'];
     socialLoginType = json['social_login_type'];
     firstName = json['first_name'] ?? "";
@@ -332,6 +335,7 @@ class UsersList {
     data['dob'] = this.dob;
     data['phone'] = this.phone;
     data['avatar'] = this.avatar;
+    data['avtars'] = this.avatars;
     data['social_login_id'] = this.socialLoginId;
     data['social_login_type'] = this.socialLoginType;
     data['first_name'] = this.firstName;
@@ -651,7 +655,7 @@ class SoundOwner {
 
   SoundOwner.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name'] ;
+    name = json['name'];
     username = json['username'] ?? "";
     email = json['email'] ?? "";
     dob = json['dob'] ?? "";

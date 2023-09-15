@@ -54,6 +54,7 @@ class SoundsController extends GetxController
   var isVideosLoading = false.obs;
   var title = "";
   int id = Get.arguments["sound_id"];
+  var currentPage = 1.obs;
   final progressNotifier = ValueNotifier<ProgressBarState>(
     ProgressBarState(
       current: Duration.zero,
@@ -61,6 +62,7 @@ class SoundsController extends GetxController
       total: Duration.zero,
     ),
   );
+  var nextPageUrl = "https://thrill.fun/api/sound/videosbysound?page=2".obs;
 
   @override
   void onInit() {
@@ -96,8 +98,8 @@ class SoundsController extends GetxController
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
 
-    await dio.post("sound/get",
-        queryParameters: {"id": id}).then((value) async {
+    await dio
+        .post("sound/get", queryParameters: {"id": id}).then((value) async {
       soundDetails = SoundDetailsModel.fromJson(value.data).data!;
       await getVideosBySound(soundDetails.sound!);
       change(soundDetails, status: RxStatus.success());
@@ -113,14 +115,37 @@ class SoundsController extends GetxController
         (value) {
       videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
 
-      videoList.removeWhere((element) => element.id==null);
+      videoList.removeWhere((element) => element.id == null);
       videoList.refresh();
       change(soundDetails, status: RxStatus.success());
-
-        }).onError((error, stackTrace) {
+    }).onError((error, stackTrace) {
       Logger().wtf(error);
       change(soundDetails, status: RxStatus.error(error.toString()));
+    });
+  }
 
+  Future<void> getPaginationVideosBySound() async {
+    change(soundDetails, status: RxStatus.loading());
+    if (videoList.isEmpty) {
+      change(soundDetails, status: RxStatus.loading());
+    }
+    dio.post(nextPageUrl.value,
+        queryParameters: {"sound": soundDetails.sound!}).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        VideosBySoundModel.fromJson(value.data).data!.forEach((element) {
+          videoList.addIf(element.id != null, element);
+        });
+        videoList.refresh();
+      }
+      nextPageUrl.value =
+          VideosBySoundModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
+
+      currentPage.value =
+          VideosBySoundModel.fromJson(value.data).pagination!.currentPage!;
+      change(soundDetails, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+      change(soundDetails, status: RxStatus.error(error.toString()));
     });
   }
 
@@ -185,7 +210,7 @@ class SoundsController extends GetxController
     try {
       var file = File(saveCacheDirectory + soundUrl.value);
 
-      if(file.existsSync()){
+      if (file.existsSync()) {
         cameraController.userUploadedSound.value = file.uri.toString();
         cameraController.soundName = soundName;
         cameraController.soundOwner = userName;
@@ -197,8 +222,7 @@ class SoundsController extends GetxController
         }, condition: file.path.isNotEmpty);
 
         Get.toNamed(Routes.CAMERA);
-      }
-      else{
+      } else {
         Get.defaultDialog(
             title: "Downloading audio",
             content: Obx(() => Text(currentProgress.value)));

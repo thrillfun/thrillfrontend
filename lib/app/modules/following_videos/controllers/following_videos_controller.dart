@@ -23,6 +23,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../rest/models/following_videos_model.dart';
 import '../../../rest/models/site_settings_model.dart';
+import '../../bindings/AdsController.dart';
 import '../../comments/controllers/comments_controller.dart';
 
 class FollowingVideosController extends GetxController
@@ -51,6 +52,10 @@ class FollowingVideosController extends GetxController
 
   var isUserFollowed = false.obs;
   var commentsController = Get.find<CommentsController>();
+  var adsController = Get.find<AdsController>();
+  var isVideoFavourite = false.obs;
+  var currentDuration = Duration().obs;
+
   @override
   void onReady() {
     getAllVideos(true);
@@ -60,6 +65,18 @@ class FollowingVideosController extends GetxController
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
   }
 
   Future<void> notInterested(int videoId) async {
@@ -111,6 +128,8 @@ class FollowingVideosController extends GetxController
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
+    isLoading.value = true;
+
     if (followingVideosList.isEmpty) {
       change(followingVideosList, status: RxStatus.loading());
     }
@@ -121,13 +140,17 @@ class FollowingVideosController extends GetxController
         });
         followingVideosList.refresh();
       }
+      adsController.loadNativeAd();
 
       nextPageUrl.value =
           FollowingVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
               "";
+      isLoading.value = false;
 
       change(followingVideosList, status: RxStatus.success());
-    }).onError((error, stackTrace) {});
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
+    });
   }
 
   Future<void> refereshVideos() async {
@@ -176,17 +199,18 @@ class FollowingVideosController extends GetxController
       // getAllVideos(false);
       videoLikeStatus(videoId);
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
-            body: "${GetStorage().read("userName")} liked your video");
+            body: "${GetStorage().read("username")} liked your video");
       }
     }).onError((error, stackTrace) {});
   }
 
-
   Future<void> videoLikeStatus(
-      int videoId,
-      ) async {
+    int videoId,
+  ) async {
     isLikeEnable.value = false;
 
     dio.options.headers = {
@@ -223,7 +247,7 @@ class FollowingVideosController extends GetxController
     });
   }
 
-  Future<void> followUnfollowUser(int userId, String action,int index,
+  Future<void> followUnfollowUser(int userId, String action, int index,
       {String? searchQuery}) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -233,7 +257,7 @@ class FollowingVideosController extends GetxController
       "action": "$action"
     }).then((value) {
       if (value.data["status"]) {
-      refereshVideos();
+        refereshVideos();
       } else {
         errorToast(value.data["message"]);
       }
@@ -424,6 +448,7 @@ class FollowingVideosController extends GetxController
       } else {
         errorToast(value.data["message"]);
       }
+      getVideoFavStatus(videoId);
     }).onError((error, stackTrace) {
       Logger().wtf(error);
     });

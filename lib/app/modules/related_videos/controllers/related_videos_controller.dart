@@ -11,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
+import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:thrill/app/modules/bindings/AdsController.dart';
 import 'package:thrill/app/modules/comments/controllers/comments_controller.dart';
 import 'package:thrill/app/rest/models/related_videos_model.dart';
 import 'package:thrill/app/rest/rest_urls.dart';
@@ -22,13 +24,14 @@ import '../../../rest/models/site_settings_model.dart';
 import '../../../routes/app_pages.dart';
 
 class RelatedVideosController extends GetxController
-    with StateMixin<RxList<RelatedVideos>> {
+    with StateMixin<RxList<RelatedVideos>>, GetSingleTickerProviderStateMixin {
   late VideoPlayerController videoPlayerController;
 
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
 
   RxList<RelatedVideos> relatedVideosList = RxList();
   RxList<SiteSettings> siteSettingsList = RxList();
+  var adsController = Get.find<AdsController>();
 
   var isUserBlocked = false.obs;
   var isLoading = false.obs;
@@ -45,9 +48,10 @@ class RelatedVideosController extends GetxController
   var totalLikes = 0.obs;
 
   var isUserFollowed = false.obs;
-  var commentsController =Get.find<CommentsController>();
+  var commentsController = Get.find<CommentsController>();
   var isDialogVisible = false.obs;
-
+  var isVideoFavourite = false.obs;
+  var currentDuration = Duration().obs;
   @override
   void onInit() {
     super.onInit();
@@ -99,6 +103,11 @@ class RelatedVideosController extends GetxController
       relatedVideosList.value =
           RelatedVideosModel.fromJson(value.data).data!.obs;
       commentsController.getComments(relatedVideosList[0].id ?? 0);
+
+      if (adsController.nativeAd == null) {
+        relatedVideosList.removeWhere((element) => element.id == null);
+      }
+      relatedVideosList.refresh();
       videoLikeStatus(relatedVideosList[0].id ?? 0);
       followUnfollowStatus(relatedVideosList[0].user!.id!);
       change(relatedVideosList, status: RxStatus.success());
@@ -111,17 +120,27 @@ class RelatedVideosController extends GetxController
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
-
+    isLoading.value = true;
     dio.get(nextPageUrl.value).then((value) {
       if (nextPageUrl.isNotEmpty) {
         relatedVideosList.addAll(RelatedVideosModel.fromJson(value.data).data!);
       }
+
       relatedVideosList.refresh();
+      adsController.loadNativeAd();
+      if (adsController.adFailedToLoad.isTrue) {
+        relatedVideosList.removeWhere((element) => element.id == null);
+        relatedVideosList.refresh();
+      }
       nextPageUrl.value =
           RelatedVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
+
+      isLoading.value = false;
+
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       Logger().wtf(error);
+      isLoading.value = false;
     });
   }
 
@@ -154,7 +173,9 @@ class RelatedVideosController extends GetxController
       if (value.data["status"]) {
         Logger().wtf("View posted successfully");
       }
-    }).onError((error, stackTrace) {});
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
   }
 
   Future<void> likeVideo(int isLike, int videoId,
@@ -170,10 +191,13 @@ class RelatedVideosController extends GetxController
     }).then((value) async {
       // getAllVideos(false);
       videoLikeStatus(videoId);
+
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
-            body: "${GetStorage().read("userName")} liked your video");
+            body: "${GetStorage().read("username")} liked your video");
       }
     }).onError((error, stackTrace) {});
   }
@@ -226,7 +250,6 @@ class RelatedVideosController extends GetxController
       "publisher_user_id": userId,
       "action": "$action"
     }).then((value) {
-
       followUnfollowStatus(userId);
     }).onError((error, stackTrace) {});
   }
@@ -362,6 +385,18 @@ class RelatedVideosController extends GetxController
     return isVideoReported.value;
   }
 
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
   Future<void> favUnfavVideo(int videoId, String action) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
@@ -375,6 +410,7 @@ class RelatedVideosController extends GetxController
       } else {
         errorToast(value.data["message"]);
       }
+      getVideoFavStatus(videoId);
     }).onError((error, stackTrace) {});
   }
 
@@ -429,6 +465,7 @@ class RelatedVideosController extends GetxController
       Logger().wtf(error);
     });
   }
+
   showCustomAd() {
     siteSettingsList.forEach((element) {
       if (element.name == "advertisement_image") {
@@ -479,23 +516,27 @@ class RelatedVideosController extends GetxController
             backgroundColor: Colors.transparent.withOpacity(0.0),
             contentPadding: EdgeInsets.zero,
             titlePadding: EdgeInsets.zero,
-            content:InkWell(
-              onTap: ()=>Get.toNamed(Routes.SPIN_WHEEL),
-              child:  Stack(
+            content: InkWell(
+              onTap: () => Get.toNamed(Routes.SPIN_WHEEL),
+              child: Stack(
                 children: [
-
                   CachedNetworkImage(
                       fit: BoxFit.fill,
-                      height: Get.height/1.2,
+                      height: Get.height / 1.2,
                       width: Get.width,
                       imageUrl: RestUrl.profileUrl + element.value),
                   Align(
                     alignment: Alignment.topRight,
-                    child:  IconButton(onPressed: (){
-                      Get.back(closeOverlays: true);
-                      isDialogVisible.value=false;
-                      }, icon: Icon(Icons.close)),)
-                ],),));
+                    child: IconButton(
+                        onPressed: () {
+                          Get.back(closeOverlays: true);
+                          isDialogVisible.value = false;
+                        },
+                        icon: Icon(Icons.close)),
+                  )
+                ],
+              ),
+            ));
       }
     });
   }

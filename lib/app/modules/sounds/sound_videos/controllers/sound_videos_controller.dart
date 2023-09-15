@@ -37,9 +37,14 @@ class SoundVideosController extends GetxController
 
   var isUserFollowed = false.obs;
   var commentsController = Get.find<CommentsController>();
+  var currentDuration = Duration().obs;
+  var nextPageUrl = "https://thrill.fun/api/sound/videosbysound?page=2".obs;
+  var id = 0.obs;
+  var isVideoFavourite = false.obs;
+
   @override
   void onInit() {
-    getVideosBySound(Get.arguments["sound_name"] ?? "");
+    getVideoById();
     super.onInit();
   }
 
@@ -51,6 +56,35 @@ class SoundVideosController extends GetxController
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getVideoFavStatus(int videoId) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    await dio.post("video/fav_status_by_Videoid",
+        queryParameters: {"video_id": videoId}).then((value) {
+      isVideoFavourite.value = value.data["data"]["is_fav"] == 0 ? false : true;
+    }).onError((error, stackTrace) {
+      Logger().e(error);
+    });
+  }
+
+  Future<void> favUnfavVideo(int videoId, String action) async {
+    dio.options.headers = {
+      "Authorization": "Bearer ${await GetStorage().read("token")}"
+    };
+    dio.post("video/do-fav-unfav", queryParameters: {
+      "video_id": "$videoId",
+      "action": action
+    }).then((value) {
+      if (value.data["status"]) {
+        successToast(value.data["message"]);
+      } else {
+        errorToast(value.data["message"]);
+      }
+      getVideoFavStatus(videoId);
+    }).onError((error, stackTrace) {});
   }
 
   Future<void> notInterested(int videoId) async {
@@ -82,18 +116,75 @@ class SoundVideosController extends GetxController
     }).onError((error, stackTrace) {});
   }
 
+  Future<void> getVideoById() async {
+    dio.options.headers["Authorization"] =
+        "Bearer ${await GetStorage().read("token")}";
+    change(videoList, status: RxStatus.loading());
+
+    isLoading.value = true;
+    dio.post('video/video-by-id',
+        queryParameters: {'video_id': Get.arguments['video_id']}).then((value) {
+      videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
+
+      id.value = VideosBySoundModel.fromJson(value.data).data![0].id!;
+
+      commentsController.getComments(videoList[0].id ?? 0);
+      videoLikeStatus(videoList[0].id ?? 0);
+      followUnfollowStatus(videoList[0].user!.id!);
+      getVideosBySound(Get.arguments["sound_name"] ?? "");
+
+      isLoading.value = false;
+      change(videoList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
+      Logger().e(error);
+    });
+  }
+
   Future<void> getVideosBySound(String soundName) async {
+    change(videoList, status: RxStatus.loading());
+
+    dio.post("sound/videosbysound?page=${Get.arguments['current_page']}",
+        queryParameters: {"sound": soundName}).then((value) {
+      videoList.addAll(VideosBySoundModel.fromJson(value.data).data!.obs);
+
+      for (int i = 0; i <= videoList.length; i++) {
+        if (i != 0 && id.value == videoList[i].id) {
+          videoList.removeAt(i);
+          break;
+        }
+      }
+      videoList.removeWhere((element) => element.id == null);
+      videoList.refresh();
+      change(videoList, status: RxStatus.success());
+    }).onError((error, stackTrace) {
+      Logger().wtf(error);
+      change(videoList, status: RxStatus.error(error.toString()));
+    });
+  }
+
+  Future<void> getPaginationVideosBySound() async {
+    change(videoList, status: RxStatus.loading());
     if (videoList.isEmpty) {
       change(videoList, status: RxStatus.loading());
     }
-    dio.options.headers = {
-      "Authorization": "Bearer ${await GetStorage().read("token")}"
-    };
-    dio.post("sound/videosbysound", queryParameters: {"sound": soundName}).then(
-        (value) {
-      videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
+    isLoading.value = true;
+    dio.post(nextPageUrl.value,
+        queryParameters: {"sound": Get.arguments["sound_name"]}).then((value) {
+      if (nextPageUrl.isNotEmpty) {
+        VideosBySoundModel.fromJson(value.data).data!.forEach((element) {
+          videoList.addIf(element.id != null, element);
+        });
+        videoList.refresh();
+      }
+      nextPageUrl.value =
+          VideosBySoundModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "https://thrill.fun/api/sound/videosbysound?page=1";
+
+      isLoading.value = false;
       change(videoList, status: RxStatus.success());
     }).onError((error, stackTrace) {
+      isLoading.value = false;
       Logger().wtf(error);
       change(videoList, status: RxStatus.error(error.toString()));
     });
@@ -108,6 +199,8 @@ class SoundVideosController extends GetxController
     dio.post("sound/videosbysound", queryParameters: {"sound": soundName}).then(
         (value) {
       videoList = VideosBySoundModel.fromJson(value.data).data!.obs;
+      videoLikeStatus(videoList[0].id ?? 0);
+      followUnfollowStatus(videoList[0].user!.id!);
       change(videoList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       Logger().wtf(error);
@@ -126,10 +219,13 @@ class SoundVideosController extends GetxController
     }).then((value) async {
       // getAllVideos(false);
       videoLikeStatus(videoId);
+
       if (isLike == 1) {
+        showLikeDialog();
+
         sendNotification(token.toString(),
             title: "New Likes!",
-            body: "${GetStorage().read("userName")} liked your video");
+            body: "${GetStorage().read("username")} liked your video");
       }
     }).onError((error, stackTrace) {});
   }

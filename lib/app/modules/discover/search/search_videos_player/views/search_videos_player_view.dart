@@ -9,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loop_page_view/loop_page_view.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -51,6 +52,9 @@ class SearchVideosPlayerView extends GetView<SearchVideosPlayerController> {
               itemCount: state![0].videos!.length,
               scrollDirection: Axis.vertical,
               controller: pageViewController,
+              onPageChanged: (index) {
+                controller.postVideoView(state[index].id!);
+              },
               itemBuilder: (context, index) {
                 _controller = AnimationController(vsync: Scaffold.of(context));
                 return SearchVideos(
@@ -80,20 +84,17 @@ class SearchVideosPlayerView extends GetView<SearchVideosPlayerController> {
                       .isfollow!, //state[0]!.videos![index].isfollow!,
                   commentsCount: state[0]!.videos![index].comments!.obs,
                   soundId: state[0]!.videos![index].soundId,
+                  isDuetable: state[0].videos![index].isDuetable == "Yes"
+                      ? true.obs
+                      : false.obs,
+
                   avatar: state[0]!.videos![index].user!.avatar,
                   currentPageIndex: index.obs,
                   fcmToken: state[0]!.videos![index].user!.firebaseToken,
                   publicUser: state[0]!.videos![index].user,
                 );
               }),
-          onLoading: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: loader(),
-              )
-            ],
-          ),
+          onLoading: videoShimmer(),
           onError: (error) => NoSearchResult(
                 text: "No Videos!",
               ),
@@ -254,6 +255,7 @@ class _SearchVideosState extends State<SearchVideos>
   late AnimationController _controller;
   var isVisible = false.obs;
   var currentDuration = Duration().obs;
+  var isMuted = false.obs;
 
   @override
   void initState() {
@@ -266,7 +268,7 @@ class _SearchVideosState extends State<SearchVideos>
     );
     videoPlayerController =
         VideoPlayerController.network(RestUrl.videoUrl + widget.videoUrl!)
-          ..setLooping(false)
+          ..setLooping(true)
           ..initialize().then((value) {
             relatedVideosController.isInitialised.value = true;
             _controller.repeat();
@@ -277,11 +279,11 @@ class _SearchVideosState extends State<SearchVideos>
       currentDuration.value = videoPlayerController.value.position;
 
       if (videoPlayerController.value.duration ==
-          videoPlayerController.value.position &&
+              videoPlayerController.value.position &&
           videoPlayerController.value.position > Duration.zero) {
-        widget.pageController!.animateToPage(widget.nextPage!,
-            duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
-        setState(() {});
+        // widget.pageController!.animateToPage(widget.nextPage!,
+        //     duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+        // setState(() {});
       }
 
       Future.delayed(const Duration(seconds: 1)).then((value) {
@@ -292,29 +294,32 @@ class _SearchVideosState extends State<SearchVideos>
         }
       });
     });
-    currentDuration.listen((duration) async {
-      /*  //code to automatically take to video less than 10 seconds
-      // if(videoPlayerController.value.duration.inSeconds>=10){
-      //   widget.pageController!.animateToPage(widget.nextPage!,
-      //       duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
-      //   setState(() {});
-      // }*/
-      if (videoPlayerController.value.duration.inSeconds > 0 &&
-          duration.inSeconds > 0) {
-        if (videoPlayerController.value.duration.inSeconds > 10) {
-          if (duration.inSeconds > 0 && duration.inSeconds == 9) {
-            await relatedVideosController.postVideoView(widget.videoId!);
-          }
-        }
-      }
-      if (videoPlayerController.value.duration.inSeconds < 10 &&
-          duration.inSeconds > 0) {
-        if (duration.inSeconds == 5) {
-          await relatedVideosController.postVideoView(widget.videoId!);
-        }
-      }
-    });
-    setState(() {});
+    // currentDuration.listen((duration) async {
+    //   //code to automatically take to video less than 10 seconds
+    //   /*    if(videoPlayerController.value.duration.inSeconds.isGreaterThan(9)){
+    //     widget.pageController!.animateToPage(widget.nextPage!,
+    //         duration: const Duration(milliseconds: 700), curve: Curves.easeOut);
+    //     setState(() {});
+    //   }*/
+    //   if (videoPlayerController.value.duration.inSeconds.isGreaterThan(0) &&
+    //       duration.inSeconds.isGreaterThan(0)) {
+    //     if (videoPlayerController.value.duration.inSeconds.isGreaterThan(10)) {
+    //       if (duration.inSeconds.isGreaterThan(0) &&
+    //           duration.inSeconds.isEqual(9)) {
+    //         await relatedVideosController.postVideoView(widget.videoId!);
+    //       }
+    //     }
+    //   }
+    //   if (videoPlayerController.value.duration.inSeconds.isLowerThan(10) &&
+    //       duration.inSeconds.isGreaterThan(0)) {
+    //     if (duration.inSeconds.isEqual(5)) {
+    //       1.seconds.delay(() async {
+    //         await relatedVideosController.postVideoView(widget.videoId!);
+    //       });
+    //     }
+    //   }
+    // });
+    // setState(() {});
 
     relatedVideosController.checkUserBlocked(widget.UserId!);
   }
@@ -352,17 +357,20 @@ class _SearchVideosState extends State<SearchVideos>
                 });
               },
               onTap: () {
-                if (videoPlayerController.value.isPlaying) {
-                  videoPlayerController.pause();
-                  _controller.stop();
-                  isVisible.value = false;
-                  setState(() {});
+                if (videoPlayerController.value.volume > 0.0) {
+                  setState(() {
+                    videoPlayerController.setVolume(0.0);
+                    // _controller.stop();
+                    // isVisible.value = false;
+                    isMuted.value = true;
+                  });
                 } else {
-                  videoPlayerController.play();
-                  _controller.repeat();
-                  isVisible.value = true;
-
-                  setState(() {});
+                  setState(() {
+                    videoPlayerController.setVolume(1.0);
+                    // _controller.repeat();
+                    // isVisible.value = true;
+                    isMuted.value = false;
+                  });
                 }
               },
               child: Stack(
@@ -710,11 +718,10 @@ class _SearchVideosState extends State<SearchVideos>
                                                                           padding:
                                                                               const EdgeInsets.all(10),
                                                                         ),
-                                                                        onTap: () => relatedVideosController
-                                                                            .deleteUserVideo(widget
-                                                                                .videoId!)
+                                                                        onTap: () => relatedVideosController.deleteUserVideo(widget.videoId!).then((value) => relatedVideosController
+                                                                            .searchHashtags()
                                                                             .then((value) =>
-                                                                               relatedVideosController.searchHashtags().then((value) => Get.back()) ),
+                                                                                Get.back())),
                                                                       ),
                                                                       cancel: InkWell(
                                                                         child:
@@ -1300,9 +1307,8 @@ class _SearchVideosState extends State<SearchVideos>
                                     height: 5,
                                   ),
                                   Text(
-                                    widget.publicUser!.name??
-                                         widget.publicUser!.username!
-                                        ,
+                                    widget.publicUser!.name ??
+                                        widget.publicUser!.username!,
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 14,
@@ -1361,10 +1367,15 @@ class _SearchVideosState extends State<SearchVideos>
                                         Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                             arguments: {
                                               "hashtag_name":
-                                              "${widget.hashtagsList![index].hashtag!=null?widget.hashtagsList![index].hashtag!.name: widget.hashtagsList![index].name}",
-                                              "hashtagId":
-                                              widget.hashtagsList![index].hashtag!=null?widget.hashtagsList![index].hashtag!.id: widget.hashtagsList![index].id
-
+                                                  "${widget.hashtagsList![index].hashtag != null ? widget.hashtagsList![index].hashtag!.name : widget.hashtagsList![index].name}",
+                                              "hashtagId": widget
+                                                          .hashtagsList![index]
+                                                          .hashtag !=
+                                                      null
+                                                  ? widget.hashtagsList![index]
+                                                      .hashtag!.id
+                                                  : widget
+                                                      .hashtagsList![index].id
                                             });
                                       },
                                       child: Container(
@@ -1470,9 +1481,9 @@ class _SearchVideosState extends State<SearchVideos>
                                             .toLowerCase()
                                             .contains("original")
                                     ? widget.soundName! +
-                                        " by ${widget.publicUser!.name?? widget.publicUser!.username}"
+                                        " by ${widget.publicUser!.name ?? widget.publicUser!.username}"
                                     : "Original Sound" +
-                                        " by ${widget.publicUser!.name?? widget.publicUser!.username }",
+                                        " by ${widget.publicUser!.name ?? widget.publicUser!.username}",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(color: Colors.white),
@@ -1488,6 +1499,24 @@ class _SearchVideosState extends State<SearchVideos>
                   ),
                 ],
               )),
+          IgnorePointer(
+            child: Visibility(
+              visible: isMuted.isTrue,
+              child: Align(
+                  alignment: Alignment.center,
+                  child: ClipOval(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      color: ColorManager.colorAccent.withOpacity(0.5),
+                      child: Icon(
+                        BoxIcons.bx_volume_mute,
+                        size: 25,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )),
+            ),
+          ),
         ],
       ),
     );

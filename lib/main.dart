@@ -41,8 +41,10 @@ void main() async {
     '62C93BF848F45761C3536701626D0E50',
     '3AA759594FD19961A79D03130D1F9A87',
     '355A9ECF92AB39727391C9EFAACA9CD5',
-    'E832C8BE9072FDD05A1B4C879E930D1E'
+    'E832C8BE9072FDD05A1B4C879E930D1E',
+    '208258E465B7DF6E083B77CFAF7D2049'
   ]));
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
 
   FlutterError.onError = (errorDetails) {
@@ -114,7 +116,7 @@ void main() async {
     },
   );
   VESDK.unlockWithLicense("assets/vesdk_android_license");
-
+  await enableWakeLock();
   runApp(
     GetMaterialApp(
       title: "Thrill",

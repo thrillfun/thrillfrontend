@@ -9,7 +9,8 @@ class UserLikedVideosController extends GetxController
     with StateMixin<RxList<LikedVideos>> {
   RxList<LikedVideos> likedVideos = RxList<LikedVideos>();
 
-  var nextPageUrl = "https://thrill.fun/api/user/user-liked-videos?page=1".obs;
+  var nextPageUrl = "https://thrill.fun/api/user/user-liked-videos?page=2".obs;
+  var currentPage = 1.obs;
   var dio = Dio(BaseOptions(
     baseUrl: RestUrl.baseUrl,
   ));
@@ -58,12 +59,9 @@ class UserLikedVideosController extends GetxController
       "user_id": "${await GetStorage().read("userId")}"
     }).then((result) {
       likedVideos = UserLikedVideosModel.fromJson(result.data).data!.obs;
-
+      likedVideos.removeWhere((element) => element.id == null);
+      likedVideos.refresh;
       change(likedVideos, status: RxStatus.success());
-
-      nextPageUrl.value =
-          UserLikedVideosModel.fromJson(result.data).pagination!.nextPageUrl ??
-              "";
     }).onError((error, stackTrace) {
       print(error);
       change(likedVideos, status: RxStatus.error(error.toString()));
@@ -82,13 +80,16 @@ class UserLikedVideosController extends GetxController
     }).then((value) {
       if (nextPageUrl.isNotEmpty) {
         UserLikedVideosModel.fromJson(value.data).data!.forEach((element) {
-          likedVideos.add(element);
+          likedVideos.addIf(element.id != null, element);
         });
         likedVideos.refresh();
       }
       nextPageUrl.value =
           UserLikedVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
               "";
+
+      currentPage.value =
+          UserLikedVideosModel.fromJson(value.data).pagination!.currentPage!;
       change(likedVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {});
   }

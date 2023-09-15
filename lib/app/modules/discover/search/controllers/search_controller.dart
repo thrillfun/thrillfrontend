@@ -47,11 +47,14 @@ class SearchController extends GetxController
     });
   }
 
-
-  Future<void> followUnfollowUser(int userId, String action,
-      {String? searchQuery, String fcmToken="",
-        String image="",
-        String name="",}) async {
+  Future<void> followUnfollowUser(
+    int userId,
+    String action, {
+    String? searchQuery,
+    String fcmToken = "",
+    String image = "",
+    String name = "",
+  }) async {
     dio.options.headers = {
       "Authorization": "Bearer ${await GetStorage().read("token")}"
     };
@@ -78,7 +81,7 @@ class SearchController extends GetxController
     var dio = Dio(BaseOptions(baseUrl: "https://fcm.googleapis.com/fcm"));
     dio.options.headers = {
       "Authorization":
-      "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
+          "key= AAAAzWymZ2o:APA91bGABMolgt7oiBiFeTU7aCEj_hL-HSLlwiCxNGaxkRl385anrsMMNLjuuqmYnV7atq8vZ5LCNBPt3lPNA1-0ZDKuCJHezvoRBpL9VGvixJ-HHqPScZlwhjeQJPhbsiLDSTtZK-MN"
     };
     final data = {
       "to": fcmToken,
@@ -86,14 +89,13 @@ class SearchController extends GetxController
       "priority": "high",
       "image": image,
       "data": {
-        "url":image,
-        "body":body,
-        "title":title,
+        "url": image,
+        "body": body,
+        "title": title,
         "click_action": "FLUTTER_NOTIFICATION_CLICK",
         "id": "1",
         "status": "done",
-        "image":
-        image
+        "image": image
       }
     };
     dio.post("/send", data: jsonEncode(data)).then((value) {
@@ -102,9 +104,10 @@ class SearchController extends GetxController
       Logger().wtf(error);
     });
   }
+
   Future<void> addSoundToFavourite(int id, String action) async {
     dio.options.headers["Authorization"] =
-    "Bearer ${await GetStorage().read("token")}";
+        "Bearer ${await GetStorage().read("token")}";
     dio.post(
       "favorite/add-to-favorite",
       queryParameters: {"id": id, "type": "sound", "action": action},

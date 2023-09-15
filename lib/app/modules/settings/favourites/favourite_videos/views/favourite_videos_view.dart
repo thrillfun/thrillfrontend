@@ -59,11 +59,13 @@ class FavouriteVideosView extends GetView<FavouriteVideosController> {
                                               ),
                                             ),
                                             TextSpan(
-                                              text: "  " +
-                                                  state[index]
-                                                      .views!
-                                                      .formatViews(),
-                                            ),
+                                                text: "  " +
+                                                    state[index]
+                                                        .views!
+                                                        .formatViews(),
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w700)),
                                           ],
                                         ),
                                       ),
@@ -85,13 +87,16 @@ class FavouriteVideosView extends GetView<FavouriteVideosController> {
                                   const SizedBox(
                                     width: 10,
                                   ),
-                                  Text(
+                                  Expanded(
+                                      child: Text(
                                     state[index].user!.name ??
                                         state[index].user!.username.toString(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.w500),
-                                  )
+                                        fontWeight: FontWeight.w700),
+                                  ))
                                 ],
                               )
                             ],
@@ -107,7 +112,7 @@ class FavouriteVideosView extends GetView<FavouriteVideosController> {
                       }),
                     )),
               ),
-        onLoading: loader(),
+        onLoading: searchVideosShimmer(),
         onEmpty: emptyListWidget(data: "No favourite videos"));
   }
 }

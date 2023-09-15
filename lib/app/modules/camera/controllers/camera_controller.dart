@@ -30,6 +30,7 @@ import '../../../routes/app_pages.dart';
 import '../../../utils/page_manager.dart';
 import '../../../utils/strings.dart';
 import '../../../utils/utils.dart';
+import '../select_sound/controllers/select_sound_controller.dart';
 
 class CameraController extends GetxController with GetTickerProviderStateMixin {
   var fileSupport = FileSupport();
@@ -41,6 +42,8 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
   List<imgly.AudioClip> audioClips = [];
   List<imgly.AudioClip> selectedAudioClips = [];
   List<imgly.AudioClipCategory> audioClipCategories = [];
+  List<imgly.AudioClip> onlineAudioClips = [];
+
   final OnAudioQuery audioQuery = OnAudioQuery();
   var selectedSoundPath = "".obs;
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
@@ -65,6 +68,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
   var userUploadedSound = "".obs;
   var soundName = "".obs;
   var soundOwner = "".obs;
+  var soundAuthorName = ''.obs;
   var thumbnail = "".obs;
   final progressNotifier = ValueNotifier<ProgressBarState>(
     ProgressBarState(
@@ -73,6 +77,8 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
       total: Duration.zero,
     ),
   );
+
+  var selectSoundController = Get.find<SelectSoundController>();
 
   @override
   void onInit() {
@@ -133,7 +139,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
         confirm: ElevatedButton(
             onPressed: () async {
               uint8list.clear();
-              dir.deleteSync(recursive: true);
+              await dir.delete(recursive: true);
               Get.offAllNamed(Routes.HOME);
             },
             child: Text("Ok")),
@@ -217,9 +223,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
             .obs;
       });
     }
-    try {} catch (e) {
-      Logger().wtf(e);
-    } finally {
+    try {
       if (!isGallery) {
         var tempDirectory = await getTemporaryDirectory();
         final dir = Directory(tempDirectory.path + "/videos");
@@ -423,7 +427,9 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
           }
         });
       }
-    }
+    } catch (e) {
+      Logger().wtf(e);
+    } finally {}
   }
 
   Future<imgly.Configuration> setConfig(
@@ -436,6 +442,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
     soundsList.clear();
     audioClipCategories.clear();
     selectedAudioClips.add(imgly.AudioClip(userName.toString(), audioFile.path,
+        artist: soundAuthorName.value,
         title: userName,
         thumbnailURI: "https://sunrust.org/wiki/images/a/a9/Gallery_icon.png"));
 
@@ -475,7 +482,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
     var exportOptions = imgly.ExportOptions(
       serialization: imgly.SerializationOptions(
           enabled: true, exportType: imgly.SerializationExportType.object),
-      video: imgly.VideoOptions( codec: codec[0]),
+      video: imgly.VideoOptions(codec: codec[0]),
     );
 
     // imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
@@ -483,6 +490,9 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
     //     alignment: imgly.AlignmentMode.topLeft);
 
     var stickerList = [
+      imgly.StickerCategory.existing("imgly_sticker_category_emoticons"),
+      imgly.StickerCategory.existing("imgly_sticker_category_shapes"),
+      imgly.StickerCategory.existing("imgly_sticker_category_animated"),
       imgly.StickerCategory.giphy(
           imgly.GiphyStickerProvider("Q1ltQCCxdfmLcaL6SpUhEo5OW6cBP6p0"))
     ];
@@ -491,21 +501,90 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
       minimumDuration: 5,
       maximumDuration: maxDuration,
     );
+    final categories = <imgly.FilterCategory>[
+      imgly.FilterCategory('Custom', 'Custom',
+          thumbnailUri:
+              'https://upload.wikimedia.org/wikipedia/commons/5/5e/Neutral_density_filter_demonstration.jpg',
+          items: [
+            imgly.Filter.existing("imgly_lut_ad1920"),
+            imgly.Filter.existing("imgly_lut_bw"),
+            imgly.Filter.existing("imgly_lut_x400"),
+            imgly.Filter.existing("imgly_lut_litho"),
+            imgly.Filter.existing("imgly_lut_sepiahigh"),
+            imgly.Filter.existing("imgly_lut_plate"),
+            imgly.Filter.existing("imgly_lut_sin"),
+            imgly.Filter.existing("imgly_lut_blues"),
+            imgly.Filter.existing("imgly_lut_front"),
+            imgly.Filter.existing("imgly_lut_texas"),
+            imgly.Filter.existing("imgly_lut_celsius"),
+            imgly.Filter.existing("imgly_lut_cool"),
+            imgly.Filter.existing("imgly_lut_chest"),
+            imgly.Filter.existing("imgly_lut_winter"),
+            imgly.Filter.existing("imgly_lut_kdynamic"),
+            imgly.Filter.existing("imgly_lut_fall"),
+            imgly.Filter.existing("imgly_lut_lenin"),
+            imgly.Filter.existing("imgly_lut_pola669"),
+            imgly.Filter.existing("imgly_lut_elder"),
+            imgly.Filter.existing("imgly_lut_orchid"),
+            imgly.Filter.existing("imgly_lut_bleached"),
+            imgly.Filter.existing("imgly_lut_bleachedblue"),
+            imgly.Filter.existing("imgly_lut_breeze"),
+            imgly.Filter.existing("imgly_lut_blueshadows"),
+            imgly.Filter.existing("imgly_lut_sunset"),
+            imgly.Filter.existing("imgly_lut_eighties"),
+            imgly.Filter.existing("imgly_lut_evening"),
+            imgly.Filter.existing("imgly_lut_k2"),
+            imgly.Filter.existing("imgly_lut_nogreen"),
+            imgly.Filter.existing("imgly_lut_ancient"),
+            imgly.Filter.existing("imgly_lut_cottoncandy"),
+            imgly.Filter.existing("imgly_lut_classic"),
+            imgly.Filter.existing("imgly_lut_colorful"),
+            imgly.Filter.existing("imgly_lut_creamy"),
+            imgly.Filter.existing("imgly_lut_fixie"),
+            imgly.Filter.existing("imgly_lut_food"),
+            imgly.Filter.existing("imgly_lut_fridge"),
+            imgly.Filter.existing("imgly_lut_glam"),
+            imgly.Filter.existing("imgly_lut_gobblin"),
+            imgly.Filter.existing("imgly_lut_highcontrast"),
+            imgly.Filter.existing("imgly_lut_highcarb"),
+            imgly.Filter.existing("imgly_lut_k1"),
+            imgly.Filter.existing("imgly_lut_k6"),
+            imgly.Filter.existing("imgly_lut_keen"),
+            imgly.Filter.existing("imgly_lut_lomo"),
+            imgly.Filter.existing("imgly_lut_lomo100"),
+            imgly.Filter.existing("imgly_lut_lucid"),
+            imgly.Filter.existing("imgly_lut_mellow"),
+            imgly.Filter.existing("imgly_lut_neat"),
+            imgly.Filter.existing("imgly_lut_pale"),
+            imgly.Filter.existing("imgly_lut_pitched"),
+            imgly.Filter.existing("imgly_lut_polasx"),
+            imgly.Filter.existing("imgly_lut_pro400"),
+            imgly.Filter.existing("imgly_lut_quozi"),
+            imgly.Filter.existing("imgly_lut_settled"),
+            imgly.Filter.existing("imgly_lut_seventies"),
+            imgly.Filter.existing("imgly_lut_soft"),
+            imgly.Filter.existing("imgly_lut_steel"),
+            imgly.Filter.existing("imgly_lut_summer"),
+            imgly.Filter.existing("imgly_lut_tender"),
+            imgly.Filter.existing("imgly_lut_twilight"),
+            imgly.Filter.existing("imgly_duotone_desert"),
+            imgly.Filter.existing("imgly_duotone_peach"),
+            imgly.Filter.existing("imgly_duotone_clash"),
+            imgly.Filter.existing("imgly_duotone_plum"),
+            imgly.Filter.existing("imgly_duotone_breezy"),
+            imgly.Filter.existing("imgly_duotone_deepblue"),
+            imgly.Filter.existing("imgly_duotone_frog"),
+            imgly.Filter.existing("imgly_duotone_sunset"),
+          ]),
+    ];
 
     final configuration = imgly.Configuration(
-      tools: [
-        imgly.Tool.audio,
-        imgly.Tool.composition,
-        imgly.Tool.sticker,
-        imgly.Tool.text,
-        imgly.Tool.textDesign,
-        imgly.Tool.transform,
-        imgly.Tool.trim,
-      ],
       theme: imgly.ThemeOptions(imgly.Theme(
         "default_editor_theme",
       )),
       trim: trimOptions,
+      filter:
+          imgly.FilterOptions(categories: categories, flattenCategories: true),
       sticker:
           imgly.StickerOptions(personalStickers: true, categories: stickerList),
       audio: audioOptions,
@@ -550,10 +629,15 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
   Future<void> getSoundsList() async {
     dio.options.headers["Authorization"] =
         "Bearer ${GetStorage().read("token")}";
-
+    isSoundsLoading.value = true;
     dio.post("/sound/list").then((value) {
       soundsList = SoundsModel.fromJson(value.data).data!.obs;
+      if (soundsList.isNotEmpty) {
+        isSoundsLoading.value = false;
+      }
     }).onError((error, stackTrace) {
+      isSoundsLoading.value = false;
+
       Logger().wtf(error);
     });
   }

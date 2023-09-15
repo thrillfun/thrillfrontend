@@ -702,7 +702,7 @@ class _OthersLikedVideosState extends State<OthersLikedVideos>
                                                                           ),
                                                                           onTap: () => relatedVideosController
                                                                               .deleteUserVideo(widget.videoId!)
-                                                                              .then((value) =>relatedVideosController.getOtherUserVideos().then((value) => Get.back())),
+                                                                              .then((value) => relatedVideosController.getOtherUserVideos().then((value) => Get.back())),
                                                                         ),
                                                                         cancel:
                                                                             InkWell(
