@@ -10,6 +10,7 @@ import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
@@ -155,15 +156,112 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
 
   Future<void> getAlbums() async {
     localSoundsList.clear();
-    List<SongModel> filterList = await audioQuery.querySongs();
-    localSoundsList = filterList
-        .where((element) => element.fileExtension.contains("mp3"))
-        .toList()
-        .obs;
-    if (filterList.isNotEmpty) {
-      localFilterList.value = localSoundsList.toList();
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    if (androidInfo.version.sdkInt > 31) {
+      if (await Permission.audio.isGranted) {
+        List<SongModel> filterList = await audioQuery.querySongs();
+        localSoundsList = filterList
+            .where((element) => element.fileExtension.contains("mp3"))
+            .toList()
+            .obs;
+        if (filterList.isNotEmpty) {
+          localFilterList.value = localSoundsList.toList();
+        } else {
+          localFilterList = localSoundsList;
+        }
+        // refreshAlreadyCapturedImages();
+      } else if (await Permission.audio.isDenied ||
+          await Permission.audio.isPermanentlyDenied) {
+        await openAppSettings().then((value) async {
+          if (value) {
+            List<SongModel> filterList = await audioQuery.querySongs();
+            localSoundsList = filterList
+                .where((element) => element.fileExtension.contains("mp3"))
+                .toList()
+                .obs;
+            if (filterList.isNotEmpty) {
+              localFilterList.value = localSoundsList.toList();
+            } else {
+              localFilterList = localSoundsList;
+            }
+          } else {
+            errorToast('Audio Permission not granted!');
+          }
+        });
+      } else {
+        await Permission.audio.request().then((value) async {
+          List<SongModel> filterList = await audioQuery.querySongs();
+          localSoundsList = filterList
+              .where((element) => element.fileExtension.contains("mp3"))
+              .toList()
+              .obs;
+          if (filterList.isNotEmpty) {
+            localFilterList.value = localSoundsList.toList();
+          } else {
+            localFilterList = localSoundsList;
+          }
+        });
+      }
     } else {
-      localFilterList = localSoundsList;
+      if (await Permission.storage.isGranted) {
+        List<SongModel> filterList = await audioQuery.querySongs();
+        localSoundsList = filterList
+            .where((element) => element.fileExtension.contains("mp3"))
+            .toList()
+            .obs;
+        if (filterList.isNotEmpty) {
+          localFilterList.value = localSoundsList.toList();
+        } else {
+          localFilterList = localSoundsList;
+        }
+      } else if (await Permission.storage.isPermanentlyDenied ||
+          await Permission.storage.isDenied) {
+        await openAppSettings().then((value) async {
+          if (value) {
+            List<SongModel> filterList = await audioQuery.querySongs();
+            localSoundsList = filterList
+                .where((element) => element.fileExtension.contains("mp3"))
+                .toList()
+                .obs;
+            if (filterList.isNotEmpty) {
+              localFilterList.value = localSoundsList.toList();
+            } else {
+              localFilterList = localSoundsList;
+            }
+          } else {
+            errorToast('Audio Permission not granted!');
+          }
+        });
+      } else {
+        await Permission.storage.request().then((value) async {
+          List<SongModel> filterList = await audioQuery.querySongs();
+          localSoundsList = filterList
+              .where((element) => element.fileExtension.contains("mp3"))
+              .toList()
+              .obs;
+          if (filterList.isNotEmpty) {
+            localFilterList.value = localSoundsList.toList();
+          } else {
+            localFilterList = localSoundsList;
+          }
+        });
+      }
+
+      if (!await Permission.audio.isGranted) {
+        await Permission.audio.request().then((value) async {
+          List<SongModel> filterList = await audioQuery.querySongs();
+          localSoundsList = filterList
+              .where((element) => element.fileExtension.contains("mp3"))
+              .toList()
+              .obs;
+          if (filterList.isNotEmpty) {
+            localFilterList.value = localSoundsList.toList();
+          } else {
+            localFilterList = localSoundsList;
+          }
+        });
+      } else {}
     }
   }
 

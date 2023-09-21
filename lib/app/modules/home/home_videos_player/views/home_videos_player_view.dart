@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
+import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sim_data/sim_data.dart';
 import 'package:thrill/app/modules/following_videos/controllers/following_videos_controller.dart';
@@ -87,10 +88,10 @@ class _HomeVideosPlayerViewState extends State<HomeVideosPlayerView>
                                               controller.selectedIndex.value
                                           ? 16
                                           : 16,
-                                  fontWeight:  index ==
-                                      controller.selectedIndex.value
-                                      ? FontWeight.bold
-                                      : FontWeight.normal),
+                                      fontWeight: index ==
+                                              controller.selectedIndex.value
+                                          ? FontWeight.bold
+                                          : FontWeight.normal),
                                 ),
                                 SizedBox(
                                   height: 10,
@@ -118,22 +119,9 @@ class _HomeVideosPlayerViewState extends State<HomeVideosPlayerView>
                       AndroidDeviceInfo androidInfo =
                           await deviceInfo.androidInfo;
                       checkForLogin(() async {
-                        if (androidInfo.version.sdkInt > 31) {
-                          if (await Permission.audio.isGranted) {
-                            Get.toNamed(Routes.CAMERA, arguments: {
-                              "sound_url": "".obs,
-                              "sound_owner": GetStorage()
-                                      .read("name")
-                                      .toString()
-                                      .isEmpty
-                                  ? GetStorage().read("username").toString().obs
-                                  : GetStorage().read("name").toString().obs
-                            });
-                            // refreshAlreadyCapturedImages();
-                          } else {
-                            await Permission.audio
-                                .request()
-                                .then((value) async {
+                        try {
+                          if (androidInfo.version.sdkInt > 31) {
+                            if (await Permission.audio.isGranted) {
                               Get.toNamed(Routes.CAMERA, arguments: {
                                 "sound_url": "".obs,
                                 "sound_owner": GetStorage()
@@ -146,35 +134,115 @@ class _HomeVideosPlayerViewState extends State<HomeVideosPlayerView>
                                         .obs
                                     : GetStorage().read("name").toString().obs
                               });
-                            });
-                          }
-                        } else {
-                          if (await Permission.storage.isGranted) {
-                            Get.toNamed(Routes.CAMERA, arguments: {
-                              "sound_url": "".obs,
-                              "sound_owner": GetStorage()
-                                      .read("name")
-                                      .toString()
-                                      .isEmpty
-                                  ? GetStorage().read("username").toString().obs
-                                  : GetStorage().read("name").toString().obs
-                            });
-                            // refreshAlreadyCapturedImages();
+                              // refreshAlreadyCapturedImages();
+                            } else if (await Permission.audio.isDenied ||
+                                await Permission.audio.isPermanentlyDenied ||
+                                await Permission.audio.isLimited) {
+                              await Permission.audio
+                                  .request()
+                                  .then((value) async => value.isGranted
+                                      ? Get.toNamed(Routes.CAMERA, arguments: {
+                                          "sound_url": "".obs,
+                                          "sound_owner": GetStorage()
+                                                  .read("name")
+                                                  .toString()
+                                                  .isEmpty
+                                              ? GetStorage()
+                                                  .read("username")
+                                                  .toString()
+                                                  .obs
+                                              : GetStorage()
+                                                  .read("name")
+                                                  .toString()
+                                                  .obs
+                                        })
+                                      : await openAppSettings().then((value) {
+                                          if (value) {
+                                            Get.toNamed(Routes.CAMERA,
+                                                arguments: {
+                                                  "sound_url": "".obs,
+                                                  "sound_owner": GetStorage()
+                                                          .read("name")
+                                                          .toString()
+                                                          .isEmpty
+                                                      ? GetStorage()
+                                                          .read("username")
+                                                          .toString()
+                                                          .obs
+                                                      : GetStorage()
+                                                          .read("name")
+                                                          .toString()
+                                                          .obs
+                                                });
+                                          } else {
+                                            errorToast(
+                                                'Audio Permission not granted!');
+                                          }
+                                        }));
+                            }
                           } else {
-                            await Permission.storage.request().then((value) =>
-                                Get.toNamed(Routes.CAMERA, arguments: {
-                                  "sound_url": "".obs,
-                                  "sound_owner": GetStorage()
-                                          .read("name")
-                                          .toString()
-                                          .isEmpty
-                                      ? GetStorage()
-                                          .read("username")
-                                          .toString()
-                                          .obs
-                                      : GetStorage().read("name").toString().obs
-                                }));
+                            if (await Permission.storage.isGranted) {
+                              Get.toNamed(Routes.CAMERA, arguments: {
+                                "sound_url": "".obs,
+                                "sound_owner": GetStorage()
+                                        .read("name")
+                                        .toString()
+                                        .isEmpty
+                                    ? GetStorage()
+                                        .read("username")
+                                        .toString()
+                                        .obs
+                                    : GetStorage().read("name").toString().obs
+                              });
+                              // refreshAlreadyCapturedImages();
+                            } else if (await Permission.storage.isDenied ||
+                                await Permission.storage.isPermanentlyDenied ||
+                                await Permission.storage.isLimited) {
+                              await Permission.storage
+                                  .request()
+                                  .then((value) async => value.isGranted
+                                      ? Get.toNamed(Routes.CAMERA, arguments: {
+                                          "sound_url": "".obs,
+                                          "sound_owner": GetStorage()
+                                                  .read("name")
+                                                  .toString()
+                                                  .isEmpty
+                                              ? GetStorage()
+                                                  .read("username")
+                                                  .toString()
+                                                  .obs
+                                              : GetStorage()
+                                                  .read("name")
+                                                  .toString()
+                                                  .obs
+                                        })
+                                      : await openAppSettings().then((value) {
+                                          if (value) {
+                                            Get.toNamed(Routes.CAMERA,
+                                                arguments: {
+                                                  "sound_url": "".obs,
+                                                  "sound_owner": GetStorage()
+                                                          .read("name")
+                                                          .toString()
+                                                          .isEmpty
+                                                      ? GetStorage()
+                                                          .read("username")
+                                                          .toString()
+                                                          .obs
+                                                      : GetStorage()
+                                                          .read("name")
+                                                          .toString()
+                                                          .obs
+                                                });
+                                          } else {
+                                            errorToast(
+                                                'Audio Permission not granted!');
+                                          }
+                                        }));
+                            }
                           }
+                        } catch (e) {
+                          Logger().e(e);
                         }
                       });
                     },

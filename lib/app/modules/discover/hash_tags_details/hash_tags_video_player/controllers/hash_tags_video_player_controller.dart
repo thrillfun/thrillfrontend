@@ -178,6 +178,9 @@ class HashTagsVideoPlayerController extends GetxController
       commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
       videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
       followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
+      nextPageUrl.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
       change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());

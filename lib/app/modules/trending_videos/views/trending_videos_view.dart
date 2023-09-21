@@ -9,6 +9,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:like_button/like_button.dart';
+import 'package:logger/logger.dart';
 import 'package:loop_page_view/loop_page_view.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:readmore/readmore.dart';
@@ -768,46 +769,104 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                               DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                               AndroidDeviceInfo androidInfo =
                                   await deviceInfo.androidInfo;
-                              if (androidInfo.version.sdkInt > 31) {
-                                if (await Permission.audio.isGranted) {
-                                  Get.toNamed(Routes.SOUNDS, arguments: {
-                                    "sound_id": widget.soundId,
-                                    "user_id": widget.UserId,
-                                    "user_name": widget.userName!.value,
-                                    "avatars": widget.avatar,
-                                    "sound_name": widget.soundName.toString(),
-                                    "sound_url": widget.sound,
-                                  });
-                                  // refreshAlreadyCapturedImages();
-                                } else {
-                                  await Permission.audio
-                                      .request()
-                                      .then((value) async {
+
+                              try {
+                                if (androidInfo.version.sdkInt > 31) {
+                                  if (await Permission.audio.isGranted) {
                                     Get.toNamed(Routes.SOUNDS, arguments: {
                                       "sound_id": widget.soundId,
                                       "sound_name": widget.soundName.toString(),
                                       "sound_url": widget.sound,
                                     });
-                                  });
-                                }
-                              } else {
-                                if (await Permission.storage.isGranted) {
-                                  Get.toNamed(Routes.SOUNDS, arguments: {
-                                    "sound_id": widget.soundId,
-                                    "sound_name": widget.soundName.toString(),
-                                    "sound_url": widget.sound,
-                                  });
-                                  // refreshAlreadyCapturedImages();
-                                } else {
-                                  await Permission.storage.request().then(
-                                      (value) => Get.toNamed(Routes.SOUNDS,
-                                              arguments: {
-                                                "sound_id": widget.soundId,
-                                                "sound_name":
-                                                    widget.soundName.toString(),
-                                                "sound_url": widget.sound,
+                                    // refreshAlreadyCapturedImages();
+                                  } else if (await Permission.audio.isDenied ||
+                                      await Permission
+                                          .audio.isPermanentlyDenied ||
+                                      await Permission.audio.isLimited) {
+                                    await Permission.audio.request().then(
+                                        (value) async => value.isGranted
+                                            ? Get.toNamed(Routes.SOUNDS,
+                                                arguments: {
+                                                    "sound_id": widget.soundId,
+                                                    "sound_name": widget
+                                                        .soundName
+                                                        .toString(),
+                                                    "sound_url": widget.sound,
+                                                  })
+                                            : await openAppSettings()
+                                                .then((value) {
+                                                if (value) {
+                                                  Get.toNamed(Routes.SOUNDS,
+                                                      arguments: {
+                                                        "sound_id":
+                                                            widget.soundId,
+                                                        "sound_name": widget
+                                                            .soundName
+                                                            .toString(),
+                                                        "sound_url":
+                                                            widget.sound,
+                                                      });
+                                                } else {
+                                                  errorToast(
+                                                      'Audio Permission not granted!');
+                                                }
                                               }));
+                                  }
+                                } else {
+                                  if (await Permission.storage.isGranted) {
+                                    Get.toNamed(Routes.SOUNDS, arguments: {
+                                      "sound_url": "".obs,
+                                      "sound_owner": GetStorage()
+                                              .read("name")
+                                              .toString()
+                                              .isEmpty
+                                          ? GetStorage()
+                                              .read("username")
+                                              .toString()
+                                              .obs
+                                          : GetStorage()
+                                              .read("name")
+                                              .toString()
+                                              .obs
+                                    });
+                                    // refreshAlreadyCapturedImages();
+                                  } else if (await Permission
+                                          .storage.isDenied ||
+                                      await Permission
+                                          .storage.isPermanentlyDenied ||
+                                      await Permission.storage.isLimited) {
+                                    await Permission.storage.request().then(
+                                        (value) async => value.isGranted
+                                            ? Get.toNamed(Routes.SOUNDS,
+                                                arguments: {
+                                                    "sound_id": widget.soundId,
+                                                    "sound_name": widget
+                                                        .soundName
+                                                        .toString(),
+                                                    "sound_url": widget.sound,
+                                                  })
+                                            : await openAppSettings()
+                                                .then((value) {
+                                                if (value) {
+                                                  Get.toNamed(Routes.SOUNDS,
+                                                      arguments: {
+                                                        "sound_id":
+                                                            widget.soundId,
+                                                        "sound_name": widget
+                                                            .soundName
+                                                            .toString(),
+                                                        "sound_url":
+                                                            widget.sound,
+                                                      });
+                                                } else {
+                                                  errorToast(
+                                                      'Audio Permission not granted!');
+                                                }
+                                              }));
+                                  }
                                 }
+                              } catch (e) {
+                                Logger().e(e);
                               }
                             });
                           },

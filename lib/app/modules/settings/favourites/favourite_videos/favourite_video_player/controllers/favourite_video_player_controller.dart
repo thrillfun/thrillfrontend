@@ -214,6 +214,10 @@ class FavouriteVideoPlayerController extends GetxController
       commentsController.getComments(favouriteVideos[0].id ?? 0);
       videoLikeStatus(favouriteVideos[0].id ?? 0);
       followUnfollowStatus(favouriteVideos[0].user!.id!);
+      nextPageUrl.value = fav.FavouriteVideosModel.fromJson(value.data)
+              .pagination!
+              .nextPageUrl ??
+          "";
       change(favouriteVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(favouriteVideos, status: RxStatus.error());

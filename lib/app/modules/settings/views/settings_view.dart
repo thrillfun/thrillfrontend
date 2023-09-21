@@ -174,20 +174,19 @@ class SettingsView extends GetView<SettingsController> {
                       Get.toNamed(Routes.NOTIFICATIONS_SETTINGS);
                       //  Navigator.pushNamed(context, '/pushNotification');
                     },
-                    child:
-                        mainTile(IconlyBroken.notification, pushNotification)),
-                GestureDetector(
-                    onTap: () {
-                      Get.toNamed(Routes.PRIVACY_SETTINGS);
-                    },
-                    child:
-                        mainTile(IconlyBroken.shield_done, "Privacy Settings")),
+                    child: mainTile(IconlyBroken.setting, 'Settings')),
+                // GestureDetector(
+                //     onTap: () {
+                //       Get.toNamed(Routes.PRIVACY_SETTINGS);
+                //     },
+                //     child:
+                //         mainTile(IconlyBroken.shield_done, "Privacy Settings")),
                 GestureDetector(
                     onTap: () {
                       Get.toNamed(Routes.TERMS_OF_SERVICE);
                       //Navigator.pushNamed(context, '/termsOfService');
                     },
-                    child: mainTile(IconlyBroken.shield_done, termsOfService)),
+                    child: mainTile(IconlyBroken.paper, termsOfService)),
                 // GestureDetector(
                 //     onTap: () {
                 //       switchAccountLayout();
@@ -198,7 +197,7 @@ class SettingsView extends GetView<SettingsController> {
                     onTap: () {
                       Get.toNamed(Routes.PRIVACY);
                     },
-                    child: mainTile(IconlyBroken.shield_done, privacy)),
+                    child: mainTile(IconlyBroken.lock, privacy)),
                 GestureDetector(
                     onTap: () async {
                       Get.defaultDialog(

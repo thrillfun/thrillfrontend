@@ -407,7 +407,7 @@ class _LikedVideosState extends State<LikedVideos>
                             },
                             child: Obx(() => relatedVideosController
                                     .isInitialised.isFalse
-                                ? loader()
+                                ? videoShimmer()
                                 : SizedBox(
                                     height: videoPlayerController
                                                 .value.aspectRatio <
@@ -823,8 +823,8 @@ class _LikedVideosState extends State<LikedVideos>
                                     Container(
                                       margin: const EdgeInsets.only(left: 8),
                                       alignment: Alignment.bottomLeft,
-                                      width: 60,
-                                      height: 60,
+                                      width: 45,
+                                      height: 45,
                                       child: imgProfile(
                                           widget.publicUser!.avatar.toString()),
                                     ),
@@ -843,7 +843,7 @@ class _LikedVideosState extends State<LikedVideos>
                                                   : widget.publicUser!.name!,
                                               style: const TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 16,
+                                                  fontSize: 14,
                                                   fontWeight: FontWeight.w700),
                                             ),
                                             const SizedBox(
@@ -930,15 +930,15 @@ class _LikedVideosState extends State<LikedVideos>
                                   trimMode: TrimMode.Line,
                                   trimCollapsedText: 'More',
                                   trimExpandedText: 'Less',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
                                       color: Colors.white),
-                                  moreStyle: TextStyle(
+                                  moreStyle: const TextStyle(
                                       fontSize: 12,
                                       color: ColorManager.colorAccent,
                                       fontWeight: FontWeight.w700),
-                                  lessStyle: TextStyle(
+                                  lessStyle: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                       color: ColorManager.colorAccent),
@@ -1011,47 +1011,109 @@ class _LikedVideosState extends State<LikedVideos>
                                       DeviceInfoPlugin();
                                   AndroidDeviceInfo androidInfo =
                                       await deviceInfo.androidInfo;
-                                  if (androidInfo.version.sdkInt > 31) {
-                                    if (await Permission.audio.isGranted) {
-                                      Get.toNamed(Routes.SOUNDS, arguments: {
-                                        "sound_id": widget.soundId,
-                                        "sound_name":
-                                            widget.soundName.toString(),
-                                        "sound_url": widget.sound,
-                                      });
-                                      // refreshAlreadyCapturedImages();
-                                    } else {
-                                      await Permission.audio
-                                          .request()
-                                          .then((value) async {
+                                  try {
+                                    if (androidInfo.version.sdkInt > 31) {
+                                      if (await Permission.audio.isGranted) {
                                         Get.toNamed(Routes.SOUNDS, arguments: {
                                           "sound_id": widget.soundId,
                                           "sound_name":
                                               widget.soundName.toString(),
                                           "sound_url": widget.sound,
                                         });
-                                      });
-                                    }
-                                  } else {
-                                    if (await Permission.storage.isGranted) {
-                                      Get.toNamed(Routes.SOUNDS, arguments: {
-                                        "sound_id": widget.soundId,
-                                        "sound_name":
-                                            widget.soundName.toString(),
-                                        "sound_url": widget.sound,
-                                      });
-                                      // refreshAlreadyCapturedImages();
-                                    } else {
-                                      await Permission.storage.request().then(
-                                          (value) => Get.toNamed(Routes.SOUNDS,
-                                                  arguments: {
-                                                    "sound_id": widget.soundId,
-                                                    "sound_name": widget
-                                                        .soundName
-                                                        .toString(),
-                                                    "sound_url": widget.sound,
+                                        // refreshAlreadyCapturedImages();
+                                      } else if (await Permission
+                                              .audio.isDenied ||
+                                          await Permission
+                                              .audio.isPermanentlyDenied ||
+                                          await Permission.audio.isLimited) {
+                                        await Permission.audio.request().then(
+                                            (value) async => value.isGranted
+                                                ? Get.toNamed(Routes.SOUNDS,
+                                                    arguments: {
+                                                        "sound_id":
+                                                            widget.soundId,
+                                                        "sound_name": widget
+                                                            .soundName
+                                                            .toString(),
+                                                        "sound_url":
+                                                            widget.sound,
+                                                      })
+                                                : await openAppSettings()
+                                                    .then((value) {
+                                                    if (value) {
+                                                      Get.toNamed(Routes.SOUNDS,
+                                                          arguments: {
+                                                            "sound_id":
+                                                                widget.soundId,
+                                                            "sound_name": widget
+                                                                .soundName
+                                                                .toString(),
+                                                            "sound_url":
+                                                                widget.sound,
+                                                          });
+                                                    } else {
+                                                      errorToast(
+                                                          'Audio Permission not granted!');
+                                                    }
                                                   }));
+                                      }
+                                    } else {
+                                      if (await Permission.storage.isGranted) {
+                                        Get.toNamed(Routes.SOUNDS, arguments: {
+                                          "sound_url": "".obs,
+                                          "sound_owner": GetStorage()
+                                                  .read("name")
+                                                  .toString()
+                                                  .isEmpty
+                                              ? GetStorage()
+                                                  .read("username")
+                                                  .toString()
+                                                  .obs
+                                              : GetStorage()
+                                                  .read("name")
+                                                  .toString()
+                                                  .obs
+                                        });
+                                        // refreshAlreadyCapturedImages();
+                                      } else if (await Permission
+                                              .storage.isDenied ||
+                                          await Permission
+                                              .storage.isPermanentlyDenied ||
+                                          await Permission.storage.isLimited) {
+                                        await Permission.storage.request().then(
+                                            (value) async => value.isGranted
+                                                ? Get.toNamed(Routes.SOUNDS,
+                                                    arguments: {
+                                                        "sound_id":
+                                                            widget.soundId,
+                                                        "sound_name": widget
+                                                            .soundName
+                                                            .toString(),
+                                                        "sound_url":
+                                                            widget.sound,
+                                                      })
+                                                : await openAppSettings()
+                                                    .then((value) {
+                                                    if (value) {
+                                                      Get.toNamed(Routes.SOUNDS,
+                                                          arguments: {
+                                                            "sound_id":
+                                                                widget.soundId,
+                                                            "sound_name": widget
+                                                                .soundName
+                                                                .toString(),
+                                                            "sound_url":
+                                                                widget.sound,
+                                                          });
+                                                    } else {
+                                                      errorToast(
+                                                          'Audio Permission not granted!');
+                                                    }
+                                                  }));
+                                      }
                                     }
+                                  } catch (e) {
+                                    Logger().e(e);
                                   }
                                 },
                                 child: Row(

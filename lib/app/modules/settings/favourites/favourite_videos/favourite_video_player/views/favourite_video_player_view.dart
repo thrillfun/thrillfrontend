@@ -78,12 +78,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                 return state![index].id == null
                     ? Obx(
                         () => adsController.nativeAdIsLoaded.isFalse
-                            ? Container(
-                                height: Get.height,
-                                width: Get.width,
-                                child: loader(),
-                                alignment: Alignment.center,
-                              )
+                            ? videoShimmer()
                             : Stack(
                                 alignment: Alignment.bottomCenter,
                                 children: [
@@ -141,20 +136,13 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
                             soundId: state[index].soundId,
                           );
               }),
-          onLoading: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: loader(),
-              )
-            ],
-          ),
+          onLoading: videoShimmer(),
           onError: (error) => Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Center(
                     child: Text(
-                      "No videos found",
+                      "No following Videos",
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
@@ -467,7 +455,7 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                       },
                       child: Obx(() => relatedVideosController
                               .isInitialised.isFalse
-                          ? loader()
+                          ? videoShimmer()
                           : SizedBox(
                               height:
                                   videoPlayerController.value.aspectRatio < 1.5
@@ -655,7 +643,7 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                             ),
                             Container(
                               margin: const EdgeInsets.only(
-                                  right: 10, top: 10, bottom: 80),
+                                  right: 10, top: 10, bottom: 25),
                               child: Column(
                                 children: [
                                   IconButton(
@@ -852,8 +840,8 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                               Container(
                                 margin: const EdgeInsets.only(left: 8),
                                 alignment: Alignment.bottomLeft,
-                                width: 60,
-                                height: 60,
+                                width: 45,
+                                height: 45,
                                 child: imgProfile(
                                     widget.publicUser!.avatar.toString()),
                               ),
@@ -871,7 +859,7 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                                             : widget.publicUser!.username!,
                                         style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 18,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w700),
                                       ),
                                       const SizedBox(
@@ -926,7 +914,7 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                                         widget.publicUser!.username!,
                                     style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 14,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w400),
                                   ),
                                 ],
@@ -948,16 +936,16 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                             trimMode: TrimMode.Line,
                             trimCollapsedText: 'More',
                             trimExpandedText: 'Less',
-                            style: TextStyle(
-                                fontSize: 14,
+                            style: const TextStyle(
+                                fontSize: 12,
                                 fontWeight: FontWeight.w400,
                                 color: Colors.white),
-                            moreStyle: TextStyle(
-                                fontSize: 14,
+                            moreStyle: const TextStyle(
+                                fontSize: 12,
                                 color: ColorManager.colorAccent,
                                 fontWeight: FontWeight.w700),
-                            lessStyle: TextStyle(
-                                fontSize: 14,
+                            lessStyle: const TextStyle(
+                                fontSize: 1412,
                                 fontWeight: FontWeight.w700,
                                 color: ColorManager.colorAccent),
                           ),
@@ -973,6 +961,7 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                             child: ListView.builder(
                                 itemCount: widget.hashtagsList?.length,
                                 shrinkWrap: true,
+                                itemExtent: 50,
                                 scrollDirection: Axis.horizontal,
                                 itemBuilder: (context, index) => InkWell(
                                       onTap: () async {
@@ -1022,43 +1011,99 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                             AndroidDeviceInfo androidInfo =
                                 await deviceInfo.androidInfo;
-                            if (androidInfo.version.sdkInt > 31) {
-                              if (await Permission.audio.isGranted) {
-                                Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_id": widget.soundId,
-                                  "sound_name": widget.soundName.toString(),
-                                  "sound_url": widget.sound,
-                                });
-                                // refreshAlreadyCapturedImages();
-                              } else {
-                                await Permission.audio
-                                    .request()
-                                    .then((value) async {
+
+                            try {
+                              if (androidInfo.version.sdkInt > 31) {
+                                if (await Permission.audio.isGranted) {
                                   Get.toNamed(Routes.SOUNDS, arguments: {
                                     "sound_id": widget.soundId,
                                     "sound_name": widget.soundName.toString(),
                                     "sound_url": widget.sound,
                                   });
-                                });
-                              }
-                            } else {
-                              if (await Permission.storage.isGranted) {
-                                Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_id": widget.soundId,
-                                  "sound_name": widget.soundName.toString(),
-                                  "sound_url": widget.sound,
-                                });
-                                // refreshAlreadyCapturedImages();
+                                  // refreshAlreadyCapturedImages();
+                                } else if (await Permission.audio.isDenied ||
+                                    await Permission
+                                        .audio.isPermanentlyDenied ||
+                                    await Permission.audio.isLimited) {
+                                  await Permission.audio.request().then(
+                                      (value) async => value.isGranted
+                                          ? Get.toNamed(Routes.SOUNDS,
+                                              arguments: {
+                                                  "sound_id": widget.soundId,
+                                                  "sound_name": widget.soundName
+                                                      .toString(),
+                                                  "sound_url": widget.sound,
+                                                })
+                                          : await openAppSettings()
+                                              .then((value) {
+                                              if (value) {
+                                                Get.toNamed(Routes.SOUNDS,
+                                                    arguments: {
+                                                      "sound_id":
+                                                          widget.soundId,
+                                                      "sound_name": widget
+                                                          .soundName
+                                                          .toString(),
+                                                      "sound_url": widget.sound,
+                                                    });
+                                              } else {
+                                                errorToast(
+                                                    'Audio Permission not granted!');
+                                              }
+                                            }));
+                                }
                               } else {
-                                await Permission.storage.request().then(
-                                    (value) =>
-                                        Get.toNamed(Routes.SOUNDS, arguments: {
-                                          "sound_id": widget.soundId,
-                                          "sound_name":
-                                              widget.soundName.toString(),
-                                          "sound_url": widget.sound,
-                                        }));
+                                if (await Permission.storage.isGranted) {
+                                  Get.toNamed(Routes.SOUNDS, arguments: {
+                                    "sound_url": "".obs,
+                                    "sound_owner": GetStorage()
+                                            .read("name")
+                                            .toString()
+                                            .isEmpty
+                                        ? GetStorage()
+                                            .read("username")
+                                            .toString()
+                                            .obs
+                                        : GetStorage()
+                                            .read("name")
+                                            .toString()
+                                            .obs
+                                  });
+                                  // refreshAlreadyCapturedImages();
+                                } else if (await Permission.storage.isDenied ||
+                                    await Permission
+                                        .storage.isPermanentlyDenied ||
+                                    await Permission.storage.isLimited) {
+                                  await Permission.storage.request().then(
+                                      (value) async => value.isGranted
+                                          ? Get.toNamed(Routes.SOUNDS,
+                                              arguments: {
+                                                  "sound_id": widget.soundId,
+                                                  "sound_name": widget.soundName
+                                                      .toString(),
+                                                  "sound_url": widget.sound,
+                                                })
+                                          : await openAppSettings()
+                                              .then((value) {
+                                              if (value) {
+                                                Get.toNamed(Routes.SOUNDS,
+                                                    arguments: {
+                                                      "sound_id":
+                                                          widget.soundId,
+                                                      "sound_name": widget
+                                                          .soundName
+                                                          .toString(),
+                                                      "sound_url": widget.sound,
+                                                    });
+                                              } else {
+                                                errorToast(
+                                                    'Audio Permission not granted!');
+                                              }
+                                            }));
+                                }
                               }
+                            } catch (e) {
+                              Logger().e(e);
                             }
                           },
                           child: Row(
@@ -1095,7 +1140,8 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                                         " by ${widget.publicUser!.name ?? widget.publicUser!.username}",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 12),
                               )),
                               SizedBox(
                                 width: 40,

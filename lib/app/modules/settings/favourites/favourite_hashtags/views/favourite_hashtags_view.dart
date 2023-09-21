@@ -24,9 +24,12 @@ class FavouriteHashtagsView extends GetView<FavouriteHashtagsController> {
                 itemBuilder: (context, index) => InkWell(
                       onTap: () async {
                         await GetStorage().write("hashtagId", state[index].id);
+                        // discoverController
+
                         Get.toNamed(Routes.HASH_TAGS_DETAILS, arguments: {
-                          "hashtag_name": "${state[index].name}"
-                        }); // discoverController
+                          "hashtag_name": "${state[index].name}",
+                          "hashtagId": state[index].id
+                        });
                       },
                       child: Container(
                         margin: const EdgeInsets.symmetric(

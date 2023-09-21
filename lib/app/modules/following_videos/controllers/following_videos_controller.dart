@@ -38,7 +38,7 @@ class FollowingVideosController extends GetxController
   RxList<SiteSettings> siteSettingsList = RxList();
 
   var isUserBlocked = true.obs;
-  var isLoading = true.obs;
+  var isLoading = false.obs;
   var isVideoReported = false.obs;
 
   var isInitialised = false.obs;
@@ -117,7 +117,8 @@ class FollowingVideosController extends GetxController
       videoLikeStatus(followingVideosList[0].id ?? 0);
       followUnfollowStatus(followingVideosList[0].user!.id!);
       nextPageUrl.value =
-          FollowingVideosModel.fromJson(value.data).pagination!.nextPageUrl!;
+          FollowingVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
       change(followingVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followingVideosList, status: RxStatus.error());

@@ -140,6 +140,8 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
 
           await settingsController.getUserProfile();
           await profileController.getUserProfile();
+
+          Get.close(1);
         } else {
           errorToast(value.data["message"]);
         }
@@ -166,7 +168,7 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
 
           await settingsController.getUserProfile();
           await profileController.getUserProfile();
-          // Get.close(1);
+          Get.close(1);
         } else {
           errorToast(value.data["message"]);
         }
@@ -226,6 +228,8 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
     await ImageCropper().cropImage(
       cropStyle: CropStyle.circle,
       sourcePath: imageUri,
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 30,
       aspectRatioPresets: [
         CropAspectRatioPreset.square,
         CropAspectRatioPreset.ratio3x2,
@@ -248,10 +252,12 @@ class EditProfileController extends GetxController with StateMixin<Rx<User>> {
     ).then((croppedImage) async {
       if (croppedImage != null) {
         imagePath.value = croppedImage!.path;
-        await updateProfile();
-        await settingsController.getUserProfile();
-        await profileController.getUserProfile();
-        await getUserProfile();
+        await updateProfile().then((value) async {
+          await settingsController.getUserProfile();
+          await profileController.getUserProfile();
+          await getUserProfile();
+          Get.close(1);
+        });
       }
     });
   }

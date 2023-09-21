@@ -82,14 +82,11 @@ class HomeVideosPlayerController extends GetxController {
                             null) {
                           commentsController.getComments(relatedVideosController
                               .relatedVideosList[index].id!);
-                          relatedVideosController.followUnfollowStatus(
-                              relatedVideosController
-                                  .relatedVideosList[index].id!);
+                          relatedVideosController
+                              .followUnfollowStatus(state[index].user!.id!);
                           relatedCurrentIndex.value = index;
                           relatedVideosController.videoLikeStatus(
-                            relatedVideosController
-                                    .relatedVideosList[index].id ??
-                                0,
+                            state[index].id ?? 0,
                           );
                         }
 
@@ -230,21 +227,16 @@ class HomeVideosPlayerController extends GetxController {
                         allowImplicitScrolling: true,
                         onPageChanged: (index) async {
                           //loadFollowingAd();
-                          if (followingVideosController
-                                  .followingVideosList[index].id !=
-                              null) {
-                            commentsController.getComments(
-                                followingVideosController
-                                    .followingVideosList[index].id!);
-                            followingVideosController.followUnfollowStatus(
-                                followingVideosController
-                                    .followingVideosList[index].id!);
-                            followingVideosController.videoLikeStatus(
+                          commentsController.getComments(
                               followingVideosController
-                                      .followingVideosList[index].id ??
-                                  0,
-                            );
-                          }
+                                  .followingVideosList[index].id!);
+                          followingVideosController
+                              .followUnfollowStatus(state[index].user!.id!);
+                          followingVideosController.videoLikeStatus(
+                            followingVideosController
+                                    .followingVideosList[index].id ??
+                                0,
+                          );
                           if (adsController.adFailedToLoad.isTrue) {
                             followingVideosController.followingVideosList
                                 .removeWhere((element) => element.id == null);
@@ -354,16 +346,15 @@ class HomeVideosPlayerController extends GetxController {
                       allowImplicitScrolling: true,
                       controller: trendingPageController,
                       onPageChanged: (index) async {
-                        commentsController.getComments(trendingVideosController
-                            .followingVideosList[index].id!);
-                        trendingVideosController.followUnfollowStatus(
-                            trendingVideosController
-                                .followingVideosList[index].id!);
+                        trendingVideosController
+                            .followUnfollowStatus(state[index].user!.id!);
                         trendingVideosController.videoLikeStatus(
                           trendingVideosController
                                   .followingVideosList[index].id ??
                               0,
                         );
+                        commentsController.getComments(trendingVideosController
+                            .followingVideosList[index].id!);
                         if (index % 8 == 0 && index != 0) {
                           adsController.loadIntersitialAd();
                           adsController.interstitialAd!.show();
@@ -372,44 +363,47 @@ class HomeVideosPlayerController extends GetxController {
                             trendingVideosController
                                 .followingVideosList[index].id!);
                       },
-                      itemBuilder: (context, index) =>
-                          index == state.length - 1 ||
-                                  trendingVideosController.isLoading.isTrue
-                              ? Padding(
-                                  padding: EdgeInsets.only(bottom: 80),
-                                  child: videoShimmer(),
-                                )
-                              : TrendingVideosView(
-                                  videoUrl: state[index].video.toString(),
-                                  pageController: trendingPageController!,
-                                  nextPage: index + 1,
-                                  videoId: state[index].id!,
-                                  gifImage: state[index].gifImage,
-                                  publicUser: state[index].user,
-                                  soundName: state[index].soundName,
-                                  UserId: state[index].user!.id,
-                                  userName: state[index].user!.username!.obs,
-                                  description: state[index].description!.obs,
-                                  hashtagsList: state[index].hashtags ?? [],
-                                  soundOwner: state[index].soundOwner,
-                                  sound: state[index].sound,
-                                  videoLikeStatus:
-                                      state[index].videoLikeStatus.toString(),
-                                  isCommentAllowed:
-                                      state[index].isCommentable == "Yes"
-                                          ? true.obs
-                                          : false.obs,
-                                  like: state[index].likes!.obs,
-                                  isfollow: state[index].user!.isfollow!,
-                                  commentsCount: state[index].comments!.obs,
-                                  soundId: state[index].soundId,
-                                  avatar: state[index].user!.avatar,
-                                  currentPageIndex: index.obs,
-                                  isDuetable: state[index].isDuetable == "Yes"
+                      itemBuilder: (context, index) => index ==
+                                  state.length - 1 ||
+                              trendingVideosController.isLoading.isTrue
+                          ? Padding(
+                              padding: EdgeInsets.only(bottom: 80),
+                              child: videoShimmer(),
+                            )
+                          : TrendingVideosView(
+                              videoUrl: state[index].video.toString(),
+                              pageController: trendingPageController!,
+                              nextPage: index + 1,
+                              videoId: state[index].id!,
+                              gifImage: state[index].gifImage,
+                              publicUser: state[index].user,
+                              soundName: state[index].soundName,
+                              UserId: state[index].user!.id,
+                              userName: state[index].user!.username!.obs,
+                              description: state[index].description!.obs,
+                              hashtagsList: state[index].hashtags ?? [],
+                              soundOwner: state[index].soundOwner,
+                              sound: state[index].sound,
+                              videoLikeStatus:
+                                  state[index].videoLikeStatus.toString(),
+                              isCommentAllowed:
+                                  state[index].isCommentable == "Yes"
                                       ? true.obs
                                       : false.obs,
-                                  fcmToken: state[index].user!.firebaseToken,
-                                )),
+                              like: state[index].likes!.obs,
+                              isfollow:
+                                  trendingVideosController.isUserFollowed.isTrue
+                                      ? 1
+                                      : 0,
+                              commentsCount: state[index].comments!.obs,
+                              soundId: state[index].soundId,
+                              avatar: state[index].user!.avatar,
+                              currentPageIndex: index.obs,
+                              isDuetable: state[index].isDuetable == "Yes"
+                                  ? true.obs
+                                  : false.obs,
+                              fcmToken: state[index].user!.firebaseToken,
+                            )),
                 ],
               ),
               onRefresh: trendingVideosController.refereshVideos),

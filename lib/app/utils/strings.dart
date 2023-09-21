@@ -159,6 +159,12 @@ const String chooseToReceivePushNotificationDirectMessage =
     'Choose if you like to receive push notification when someone send you direct message';
 const String chooseToReceivePushNotificationVideoUpdates =
     'Choose if you like to receive push notification when someone on your following list post new video';
+
+const String chooseToAllowVideoDownloads =
+    'Choose if you like to allow other users to download your videos.';
+
+const String chooseToKeepYourVideoVisible =
+    'Choose if you like users to see your videos.';
 const String cache = 'Cache : ';
 const String clear = 'Clear';
 const String download = 'Download : ';

@@ -12,6 +12,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconly/iconly.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:like_button/like_button.dart';
+import 'package:logger/logger.dart';
 import 'package:loop_page_view/loop_page_view.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:readmore/readmore.dart';
@@ -77,10 +78,7 @@ class DiscoverVideoPlayerView extends GetView<DiscoverVideoPlayerController> {
                 _controller = AnimationController(vsync: Scaffold.of(context));
                 return Obx(() => state[index].id == null
                     ? adsController.nativeAdIsLoaded.isFalse
-                        ? Align(
-                            alignment: Alignment.center,
-                            child: loader(),
-                          )
+                        ? videoShimmer()
                         : Stack(
                             alignment: Alignment.bottomCenter,
                             children: [
@@ -421,7 +419,7 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                       },
                       child: Obx(() => relatedVideosController
                               .isInitialised.isFalse
-                          ? loader()
+                          ? videoShimmer()
                           : SizedBox(
                               height:
                                   videoPlayerController.value.aspectRatio < 1.5
@@ -609,7 +607,7 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                             ),
                             Container(
                               margin: const EdgeInsets.only(
-                                  right: 10, top: 10, bottom: 80),
+                                  right: 10, top: 10, bottom: 25),
                               child: Column(
                                 children: [
                                   IconButton(
@@ -806,8 +804,8 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                               Container(
                                 margin: const EdgeInsets.only(left: 8),
                                 alignment: Alignment.bottomLeft,
-                                width: 60,
-                                height: 60,
+                                width: 45,
+                                height: 45,
                                 child: imgProfile(
                                     widget.publicUser!.avatar.toString()),
                               ),
@@ -825,7 +823,7 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                                             : widget.publicUser!.username!,
                                         style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 18,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w700),
                                       ),
                                       const SizedBox(
@@ -881,7 +879,7 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                                         : widget.publicUser!.name!,
                                     style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 14,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w400),
                                   ),
                                 ],
@@ -904,15 +902,15 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                             trimCollapsedText: 'More',
                             trimExpandedText: 'Less',
                             style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w400,
                                 color: Colors.white),
                             moreStyle: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: ColorManager.colorAccent,
                                 fontWeight: FontWeight.w700),
                             lessStyle: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: ColorManager.colorAccent),
                           ),
@@ -922,43 +920,47 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                           child: Container(
                             height: 35,
                             margin: const EdgeInsets.symmetric(horizontal: 10),
-                            child: ListView.builder(
-                                itemCount: widget.hashtagsList?.length,
-                                shrinkWrap: true,
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) => InkWell(
-                                      onTap: () async {
-                                        await GetStorage().write("hashtagId",
-                                            widget.hashtagsList![index].id);
-                                        Get.toNamed(Routes.HASH_TAGS_DETAILS,
-                                            arguments: {
-                                              "hashtag_name":
-                                                  "${widget.hashtagsList![index].name}",
-                                              "hashtagId":
-                                                  widget.hashtagsList![index].id
-                                            });
-                                      },
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            color: ColorManager.colorAccent,
-                                            border: Border.all(
-                                                color: Colors.transparent),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                    Radius.circular(5))),
-                                        margin: const EdgeInsets.only(
-                                            right: 5, top: 5, bottom: 5),
-                                        padding: const EdgeInsets.all(5),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          widget.hashtagsList![index].name
-                                              .toString(),
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10),
-                                        ),
-                                      ),
-                                    )),
+                            child: Expanded(
+                                child: ListView.builder(
+                                    itemCount: widget.hashtagsList?.length,
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.horizontal,
+                                    itemExtent: 50,
+                                    itemBuilder: (context, index) => InkWell(
+                                          onTap: () async {
+                                            await GetStorage().write(
+                                                "hashtagId",
+                                                widget.hashtagsList![index].id);
+                                            Get.toNamed(
+                                                Routes.HASH_TAGS_DETAILS,
+                                                arguments: {
+                                                  "hashtag_name":
+                                                      "${widget.hashtagsList![index].name}",
+                                                  "hashtagId": widget
+                                                      .hashtagsList![index].id
+                                                });
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: ColorManager.colorAccent,
+                                                border: Border.all(
+                                                    color: Colors.transparent),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                        Radius.circular(5))),
+                                            margin: const EdgeInsets.only(
+                                                right: 5, top: 5, bottom: 5),
+                                            padding: const EdgeInsets.all(5),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              widget.hashtagsList![index].name
+                                                  .toString(),
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10),
+                                            ),
+                                          ),
+                                        ))),
                           ),
                         ),
                         GestureDetector(
@@ -969,43 +971,99 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                             AndroidDeviceInfo androidInfo =
                                 await deviceInfo.androidInfo;
-                            if (androidInfo.version.sdkInt > 31) {
-                              if (await Permission.audio.isGranted) {
-                                Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_id": widget.soundId,
-                                  "sound_name": widget.soundName.toString(),
-                                  "sound_url": widget.sound,
-                                });
-                                // refreshAlreadyCapturedImages();
-                              } else {
-                                await Permission.audio
-                                    .request()
-                                    .then((value) async {
+
+                            try {
+                              if (androidInfo.version.sdkInt > 31) {
+                                if (await Permission.audio.isGranted) {
                                   Get.toNamed(Routes.SOUNDS, arguments: {
                                     "sound_id": widget.soundId,
                                     "sound_name": widget.soundName.toString(),
                                     "sound_url": widget.sound,
                                   });
-                                });
-                              }
-                            } else {
-                              if (await Permission.storage.isGranted) {
-                                Get.toNamed(Routes.SOUNDS, arguments: {
-                                  "sound_id": widget.soundId,
-                                  "sound_name": widget.soundName.toString(),
-                                  "sound_url": widget.sound,
-                                });
-                                // refreshAlreadyCapturedImages();
+                                  // refreshAlreadyCapturedImages();
+                                } else if (await Permission.audio.isDenied ||
+                                    await Permission
+                                        .audio.isPermanentlyDenied ||
+                                    await Permission.audio.isLimited) {
+                                  await Permission.audio.request().then(
+                                      (value) async => value.isGranted
+                                          ? Get.toNamed(Routes.SOUNDS,
+                                              arguments: {
+                                                  "sound_id": widget.soundId,
+                                                  "sound_name": widget.soundName
+                                                      .toString(),
+                                                  "sound_url": widget.sound,
+                                                })
+                                          : await openAppSettings()
+                                              .then((value) {
+                                              if (value) {
+                                                Get.toNamed(Routes.SOUNDS,
+                                                    arguments: {
+                                                      "sound_id":
+                                                          widget.soundId,
+                                                      "sound_name": widget
+                                                          .soundName
+                                                          .toString(),
+                                                      "sound_url": widget.sound,
+                                                    });
+                                              } else {
+                                                errorToast(
+                                                    'Audio Permission not granted!');
+                                              }
+                                            }));
+                                }
                               } else {
-                                await Permission.storage.request().then(
-                                    (value) =>
-                                        Get.toNamed(Routes.SOUNDS, arguments: {
-                                          "sound_id": widget.soundId,
-                                          "sound_name":
-                                              widget.soundName.toString(),
-                                          "sound_url": widget.sound,
-                                        }));
+                                if (await Permission.storage.isGranted) {
+                                  Get.toNamed(Routes.SOUNDS, arguments: {
+                                    "sound_url": "".obs,
+                                    "sound_owner": GetStorage()
+                                            .read("name")
+                                            .toString()
+                                            .isEmpty
+                                        ? GetStorage()
+                                            .read("username")
+                                            .toString()
+                                            .obs
+                                        : GetStorage()
+                                            .read("name")
+                                            .toString()
+                                            .obs
+                                  });
+                                  // refreshAlreadyCapturedImages();
+                                } else if (await Permission.storage.isDenied ||
+                                    await Permission
+                                        .storage.isPermanentlyDenied ||
+                                    await Permission.storage.isLimited) {
+                                  await Permission.storage.request().then(
+                                      (value) async => value.isGranted
+                                          ? Get.toNamed(Routes.SOUNDS,
+                                              arguments: {
+                                                  "sound_id": widget.soundId,
+                                                  "sound_name": widget.soundName
+                                                      .toString(),
+                                                  "sound_url": widget.sound,
+                                                })
+                                          : await openAppSettings()
+                                              .then((value) {
+                                              if (value) {
+                                                Get.toNamed(Routes.SOUNDS,
+                                                    arguments: {
+                                                      "sound_id":
+                                                          widget.soundId,
+                                                      "sound_name": widget
+                                                          .soundName
+                                                          .toString(),
+                                                      "sound_url": widget.sound,
+                                                    });
+                                              } else {
+                                                errorToast(
+                                                    'Audio Permission not granted!');
+                                              }
+                                            }));
+                                }
                               }
+                            } catch (e) {
+                              Logger().e(e);
                             }
                           },
                           child: Row(
@@ -1042,7 +1100,8 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                                         " by ${widget.publicUser!.name!.isEmpty ? widget.publicUser!.username : widget.publicUser!.name}",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 12),
                               )),
                               SizedBox(
                                 width: 40,

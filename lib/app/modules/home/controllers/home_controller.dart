@@ -69,22 +69,12 @@ class HomeController extends GetxController {
       InAppUpdate.checkForUpdate().then((updateInfo) {
         if (updateInfo.updateAvailability ==
             UpdateAvailability.updateAvailable) {
-          if (updateInfo.immediateUpdateAllowed) {
-            // Perform immediate update
-            InAppUpdate.performImmediateUpdate().then((appUpdateResult) {
-              if (appUpdateResult == AppUpdateResult.success) {
-                //App Update successful
-              }
-            });
-          } else if (updateInfo.flexibleUpdateAllowed) {
-            //Perform flexible update
-            InAppUpdate.startFlexibleUpdate().then((appUpdateResult) {
-              if (appUpdateResult == AppUpdateResult.success) {
-                //App Update successful
-                InAppUpdate.completeFlexibleUpdate();
-              }
-            });
-          }
+          InAppUpdate.startFlexibleUpdate().then((appUpdateResult) {
+            if (appUpdateResult == AppUpdateResult.success) {
+              //App Update successful
+              InAppUpdate.completeFlexibleUpdate();
+            }
+          });
         }
       });
     } catch (e) {
@@ -267,20 +257,24 @@ class HomeController extends GetxController {
             backgroundColor: Colors.transparent.withOpacity(0.0),
             contentPadding: EdgeInsets.zero,
             titlePadding: EdgeInsets.zero,
-            content:InkWell(
-              onTap: ()=>Get.toNamed(Routes.SPIN_WHEEL),
-              child:  Stack(
+            content: InkWell(
+              onTap: () => Get.toNamed(Routes.SPIN_WHEEL),
+              child: Stack(
                 children: [
-
-                CachedNetworkImage(
-                    fit: BoxFit.fill,
-                    height: Get.height/1.5,
-                    width: Get.width,
-                    imageUrl: RestUrl.profileUrl + element.value),
-               Align(
-                 alignment: Alignment.topRight,
-                 child:  IconButton(onPressed: ()=>Get.back(closeOverlays: true), icon: Icon(Icons.close)),)
-              ],),));
+                  CachedNetworkImage(
+                      fit: BoxFit.fill,
+                      height: Get.height / 1.5,
+                      width: Get.width,
+                      imageUrl: RestUrl.profileUrl + element.value),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                        onPressed: () => Get.back(closeOverlays: true),
+                        icon: Icon(Icons.close)),
+                  )
+                ],
+              ),
+            ));
       }
     });
   }

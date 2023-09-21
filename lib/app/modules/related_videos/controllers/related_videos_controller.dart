@@ -110,6 +110,8 @@ class RelatedVideosController extends GetxController
       relatedVideosList.refresh();
       videoLikeStatus(relatedVideosList[0].id ?? 0);
       followUnfollowStatus(relatedVideosList[0].user!.id!);
+      nextPageUrl.value =
+          RelatedVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
       change(relatedVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(relatedVideosList, status: RxStatus.error(error.toString()));

@@ -6,6 +6,8 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -466,7 +468,7 @@ showVideoBottomSheet(
 
 errorToast(dynamic message) async {
   Get.showSnackbar(GetSnackBar(
-    duration: const Duration(seconds: 30),
+    duration: const Duration(seconds: 10),
     barBlur: 10,
     borderColor: Colors.red.shade800,
     borderWidth: 1.5,
@@ -661,9 +663,12 @@ void seek(Duration position) {
 
 showLikeDialog() {
   Get.dialog(
-      Lottie.asset('assets/like.json',
-          height: Get.height / 3, width: Get.width / 3),
-      barrierColor: Colors.transparent.withOpacity(0.0));
+    Align(
+      alignment: Alignment.center,
+      child: Lottie.asset('assets/like.json', height: 150, width: 150),
+    ),
+    barrierColor: Colors.transparent.withOpacity(0.0),
+  );
 
   1.seconds.delay().then((value) => Get.back());
 }
@@ -769,24 +774,21 @@ Widget imgProfileDetails(String imagePath) => Container(
 
 Widget imgProfileDialog(String imagePath) => Container(
       child: CachedNetworkImage(
-          fit: BoxFit.fill,
+          fit: BoxFit.contain,
           imageBuilder: (context, imageProvider) => Container(
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(10),
+                  shape: BoxShape.circle,
                   image:
-                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                      DecorationImage(image: imageProvider, fit: BoxFit.fill),
                 ),
               ),
           errorWidget: (context, string, dynamic) => CachedNetworkImage(
               fit: BoxFit.fill,
               imageBuilder: (context, imageProvider) => Container(
                     decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(10),
                       image: DecorationImage(
-                          image: imageProvider, fit: BoxFit.fill),
+                          image: imageProvider, fit: BoxFit.contain),
                     ),
                   ),
               imageUrl: RestUrl.placeholderImage),
@@ -4283,6 +4285,495 @@ manageAccountShimmer() => Shimmer.fromColors(
             ),
           ],
         )
+      ],
+    ),
+    baseColor: Colors.grey.withOpacity(0.3),
+    highlightColor: ColorManager.colorAccent.withOpacity(0.3));
+
+spinLevelsShimmer() => Shimmer.fromColors(
+    child: Wrap(
+      children: List.generate(
+          4,
+          (index) => Container(
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage("assets/spin_background.png"),
+                        fit: BoxFit.fill)),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Icon(
+                      index == 0
+                          ? Iconsax.video_octagon
+                          : index == 1
+                              ? Iconsax.people
+                              : index == 2
+                                  ? Iconsax.share
+                                  : Iconsax.activity,
+                      size: 65,
+                      color: Colors.white,
+                    ),
+                    Html(
+                      data: "Levels for  Users",
+                      style: {
+                        "body": Style(
+                            fontSize: FontSize(22),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            textAlign: TextAlign.center),
+                      },
+                    ),
+                    Container(
+                      width: 20,
+                      height: 4,
+                      margin: EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                    ),
+                    Visibility(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          "Complete targets to earn spins!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Earned Spins: ",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                            Text("0",
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700)),
+                            Text(" / " + "100",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700))
+                          ],
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                        visible: false,
+                        child: const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Text(
+                            'Level Completed!',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700),
+                          ),
+                        )),
+                    Visibility(
+                      visible: true,
+                      child: Divider(
+                        thickness: 1,
+                      ),
+                    ),
+                    Visibility(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 10, right: 10, top: 10, bottom: 10),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Align(
+                              alignment: Alignment.center,
+                              child: FAProgressBar(
+                                currentValue: 1,
+                                size: 7,
+                                maxValue: 100,
+                                changeColorValue: 100,
+                                changeProgressColor: Colors.white,
+                                backgroundColor:
+                                    ColorManager.colorAccentTransparent,
+                                progressColor: Colors.white,
+                                animatedDuration:
+                                    const Duration(milliseconds: 300),
+                                direction: Axis.horizontal,
+                                verticalDirection: VerticalDirection.up,
+                                formatValueFixed: 2,
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: ClipOval(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  height: 30,
+                                  width: 30,
+                                  color: ColorManager.colorPrimaryLight,
+                                  child: ClipOval(
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      width: 24,
+                                      height: 24,
+                                      child: Text(
+                                        '0',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ClipOval(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  height: 30,
+                                  width: 30,
+                                  color: ColorManager.colorPrimaryLight,
+                                  child: ClipOval(
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      width: 24,
+                                      height: 24,
+                                      child: Text('0',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+    ),
+    baseColor: Colors.grey.withOpacity(0.3),
+    highlightColor: ColorManager.colorAccent.withOpacity(0.3));
+
+spinWheelShimmer() => Shimmer.fromColors(
+    child: Column(
+      children: [
+        GlassmorphicContainer(
+          width: Get.width,
+          height: 100,
+          borderRadius: 10,
+          blur: 20,
+          margin: const EdgeInsets.all(10),
+          alignment: Alignment.bottomCenter,
+          border: 2,
+          linearGradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xff0A8381).withOpacity(0.7),
+                Colors.black.withOpacity(0.7),
+                Color(0xff1D5855).withOpacity(0.7),
+              ]),
+          borderGradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFffffff).withOpacity(0.0),
+              Color((0xFFFFFFFF)).withOpacity(0.0),
+            ],
+          ),
+          child: Container(
+            decoration: const BoxDecoration(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CachedNetworkImage(imageUrl: RestUrl.assetsUrl + "gift.png"),
+                const SizedBox(
+                  width: 20,
+                ),
+                Row(
+                  children: [
+                    Obx(() => Text(
+                          "0",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 44,
+                              color: Colors.white),
+                        )),
+                    const Text(
+                      "Available \nChances ",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                          color: Colors.white),
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Obx(() => Text(
+                          "0",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: Colors.white),
+                        )),
+                    const Text(
+                      "Last Reward  ",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                          color: Colors.white),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+        Container(
+          height: Get.height / 2,
+          decoration: BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
+        ),
+        Container(
+          width: Get.width,
+          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          padding: const EdgeInsets.all(10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(
+                Radius.circular(10),
+              ),
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    ColorManager.colorAccent,
+                    ColorManager.colorAccent
+                  ])),
+          child: const Text(
+            "Spin the wheel!",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        Wrap(
+          children: List.generate(
+              4,
+              (index) => Container(
+                    margin: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage("assets/spin_background.png"),
+                            fit: BoxFit.fill)),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Icon(
+                          index == 0
+                              ? Iconsax.video_octagon
+                              : index == 1
+                                  ? Iconsax.people
+                                  : index == 2
+                                      ? Iconsax.share
+                                      : Iconsax.activity,
+                          size: 65,
+                          color: Colors.white,
+                        ),
+                        Html(
+                          data: "Levels for  Users",
+                          style: {
+                            "body": Style(
+                                fontSize: FontSize(22),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                textAlign: TextAlign.center),
+                          },
+                        ),
+                        Container(
+                          width: 20,
+                          height: 4,
+                          margin: EdgeInsets.only(bottom: 10),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20)),
+                        ),
+                        Visibility(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              "Complete targets to earn spins!",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "Earned Spins: ",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                Text("0",
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700)),
+                                Text(" / " + "100",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700))
+                              ],
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                            visible: false,
+                            child: const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                'Level Completed!',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            )),
+                        Visibility(
+                          visible: true,
+                          child: Divider(
+                            thickness: 1,
+                          ),
+                        ),
+                        Visibility(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 10, right: 10, top: 10, bottom: 10),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: FAProgressBar(
+                                    currentValue: 1,
+                                    size: 7,
+                                    maxValue: 100,
+                                    changeColorValue: 100,
+                                    changeProgressColor: Colors.white,
+                                    backgroundColor:
+                                        ColorManager.colorAccentTransparent,
+                                    progressColor: Colors.white,
+                                    animatedDuration:
+                                        const Duration(milliseconds: 300),
+                                    direction: Axis.horizontal,
+                                    verticalDirection: VerticalDirection.up,
+                                    formatValueFixed: 2,
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: ClipOval(
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      height: 30,
+                                      width: 30,
+                                      color: ColorManager.colorPrimaryLight,
+                                      child: ClipOval(
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          width: 24,
+                                          height: 24,
+                                          child: Text(
+                                            '0',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ClipOval(
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      height: 30,
+                                      width: 30,
+                                      color: ColorManager.colorPrimaryLight,
+                                      child: ClipOval(
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          width: 24,
+                                          height: 24,
+                                          child: Text('0',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w700)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+        ),
       ],
     ),
     baseColor: Colors.grey.withOpacity(0.3),

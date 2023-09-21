@@ -269,8 +269,8 @@ class NotificationsSettingsView
                         const SizedBox(
                           height: 10,
                         ),
-                        Text(
-                          chooseToReceivePushNotificationVideoUpdates,
+                        const Text(
+                          chooseToAllowVideoDownloads,
                           style: TextStyle(
                               fontWeight: FontWeight.w400, fontSize: 14),
                         ),
@@ -304,8 +304,8 @@ class NotificationsSettingsView
                         const SizedBox(
                           height: 10,
                         ),
-                        Text(
-                          chooseToReceivePushNotificationVideoUpdates,
+                        const Text(
+                          chooseToKeepYourVideoVisible,
                           style: TextStyle(
                               fontWeight: FontWeight.w400, fontSize: 14),
                         ),

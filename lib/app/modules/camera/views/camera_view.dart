@@ -3134,7 +3134,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                     Expanded(
                       child: GetX<SelectSoundController>(
                           builder: (controller) => Stack(
-                                alignment: Alignment.bottomCenter,
+                                alignment: Alignment.topCenter,
                                 children: [
                                   ListView.builder(
                                       shrinkWrap: true,
@@ -3163,7 +3163,8 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                   cameraController
                                                           .soundOwner.value =
                                                       GetStorage()
-                                                          .read("userId");
+                                                          .read("userId")
+                                                          .toString();
 
                                                   avatar.value = controller
                                                               .localFilterList[
@@ -3521,7 +3522,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                           ),
                                         );
                                       }),
-                                  VisibilityDetector(
+                                     Align(child: VisibilityDetector(
                                       key: Key("miniplayer"),
                                       child: Obx(() => Visibility(
                                           visible: isPlayerVisible.value,
@@ -3719,7 +3720,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                     audioPlayer.playing
                                               }
                                           })
-                                ],
+                           ,alignment: Alignment.bottomCenter,)  ],
                               )),
                     ),
                   ],

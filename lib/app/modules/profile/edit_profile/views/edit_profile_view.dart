@@ -97,8 +97,8 @@ class EditProfileView extends GetView<EditProfileController> {
                     width: Get.width,
                   ),
                   SizedBox(
-                    height: 100,
-                    width: 100,
+                    height: 80,
+                    width: 80,
                     child: imgProfile(state!.value.avatar!),
                   ),
                   Container(
@@ -123,6 +123,7 @@ class EditProfileView extends GetView<EditProfileController> {
           TextFormField(
             controller: controller.userNameController,
             focusNode: controller.userNode,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             onChanged: (value) {
               controller.userName.value = value;
             },
@@ -142,6 +143,7 @@ class EditProfileView extends GetView<EditProfileController> {
           TextFormField(
             focusNode: controller.nameNode,
             controller: controller.nameController,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             decoration: const InputDecoration(
               filled: true,
               prefixIcon: Icon(
@@ -159,6 +161,7 @@ class EditProfileView extends GetView<EditProfileController> {
           Visibility(
             visible: controller.mobile.value.isEmpty,
             child: TextFormField(
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
               controller: controller.emailController,
               focusNode: FocusNode(),
               onChanged: (value) {
@@ -179,6 +182,7 @@ class EditProfileView extends GetView<EditProfileController> {
           Visibility(
             visible: controller.email.value.isEmpty,
             child: TextFormField(
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
               controller: controller.mobileController,
               focusNode: FocusNode(),
               onChanged: (value) {
@@ -199,6 +203,7 @@ class EditProfileView extends GetView<EditProfileController> {
 
           TextFormField(
             focusNode: controller.urlNode,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             controller: controller.webSiteController,
             decoration: const InputDecoration(
               filled: true,
@@ -217,6 +222,7 @@ class EditProfileView extends GetView<EditProfileController> {
 
           TextFormField(
             focusNode: controller.bioNode,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             controller: controller.bioController,
             maxLength: 150,
             maxLines: null,
@@ -236,6 +242,7 @@ class EditProfileView extends GetView<EditProfileController> {
           ),
           TextFormField(
             focusNode: controller.locationNode,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             controller: controller.locationController,
             decoration: const InputDecoration(
               filled: true,
@@ -295,6 +302,8 @@ class EditProfileView extends GetView<EditProfileController> {
                   ),
                   Obx(() => Text(
                         "  " + controller.dob.value.toString(),
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w500),
                       ))
                 ],
               ),
@@ -351,7 +360,7 @@ class EditProfileView extends GetView<EditProfileController> {
                           Text(
                             controller.genderList[index],
                             style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: controller.genderSelectIndex.value ==
                                             index &&
@@ -389,7 +398,7 @@ class EditProfileView extends GetView<EditProfileController> {
 
   submitButtonLayout() => InkWell(
         onTap: () async {
-          await controller.updateProfile();
+          await controller.updateProfile().then((value) {});
         },
         child: Container(
           width: Get.width,
@@ -409,7 +418,8 @@ class EditProfileView extends GetView<EditProfileController> {
                   ])),
           child: const Text(
             "Save Profile",
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(
+                color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
           ),
         ),
       );

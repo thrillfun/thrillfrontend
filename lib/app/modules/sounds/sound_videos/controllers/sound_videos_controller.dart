@@ -156,6 +156,8 @@ class SoundVideosController extends GetxController
       }
       videoList.removeWhere((element) => element.id == null);
       videoList.refresh();
+      nextPageUrl.value =
+          VideosBySoundModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
       change(videoList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       Logger().wtf(error);
@@ -178,8 +180,7 @@ class SoundVideosController extends GetxController
         videoList.refresh();
       }
       nextPageUrl.value =
-          VideosBySoundModel.fromJson(value.data).pagination!.nextPageUrl ??
-              "https://thrill.fun/api/sound/videosbysound?page=1";
+          VideosBySoundModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
 
       isLoading.value = false;
       change(videoList, status: RxStatus.success());

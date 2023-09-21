@@ -63,11 +63,7 @@ class SpinWheelView extends GetView<SpinWheelController> {
               ],
             ),
           ),
-          onLoading: Container(
-            child: loader(),
-            height: Get.height,
-            width: Get.width,
-          ),
+          onLoading: spinWheelShimmer(),
         )
       ],
     ));

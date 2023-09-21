@@ -129,6 +129,9 @@ class PrivateVideosPlayerController extends GetxController
       commentsController.getComments(privateVideosList[0].id ?? 0);
       videoLikeStatus(privateVideosList[0].id ?? 0);
       followUnfollowStatus(privateVideosList[0].user!.id!);
+      nextPageUrl.value =
+          UserPrivateVideosModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
       change(privateVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(privateVideosList, status: RxStatus.error(error.toString()));

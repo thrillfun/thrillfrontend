@@ -2,6 +2,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
@@ -64,18 +65,23 @@ class SelectSoundController extends GetxController with StateMixin<dynamic> {
   }
 
   Future<void> getLocalSounds() async {
-    List<SongModel> filterList = await audioQuery.querySongs();
-    localSoundsList = filterList
-        .where((element) => element.fileExtension.contains("mp3"))
-        .toList()
-        .obs;
-    if (filterList.isNotEmpty) {
-      localFilterList.value = localSoundsList.toList();
-    } else {
-      localFilterList = localSoundsList;
-    }
     if (!await audioQuery.permissionsStatus()) {
-      await audioQuery.permissionsRequest();
+      await audioQuery.permissionsRequest().then((value) async {
+        if (value) {
+          List<SongModel> filterList = await audioQuery.querySongs();
+          localSoundsList = filterList
+              .where((element) => element.fileExtension.contains("mp3"))
+              .toList()
+              .obs;
+          if (filterList.isNotEmpty) {
+            localFilterList.value = localSoundsList.toList();
+          } else {
+            localFilterList = localSoundsList;
+          }
+        } else {
+          errorToast('audio permission not granted');
+        }
+      });
     }
   }
 

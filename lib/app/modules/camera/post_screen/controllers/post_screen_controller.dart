@@ -374,30 +374,54 @@ class PostScreenController extends GetxController
       backgroundGradient: ColorManager.postGradient,
       snackPosition: SnackPosition.TOP,
       snackStyle: SnackStyle.GROUNDED,
+      backgroundColor: Colors.transparent.withOpacity(0.0),
       progressIndicatorController: progressAnimationController,
-      icon: Image.file(
-        currentSelectedFrame.value == 999
-            ? File(customSelectedThumbnail.isNotEmpty
-                ? customSelectedThumbnail.value
-                : thumbnailEntities[0].path)
-            : File(customSelectedThumbnail.isNotEmpty
-                ? customSelectedThumbnail.value
-                : thumbnailEntities[currentSelectedFrame.value].path),
-        height: 50,
-        width: 50,
+      borderRadius: 10,
+      margin: EdgeInsets.all(10),
+      barBlur: 10,
+      borderColor: ColorManager.colorAccent,
+      icon: Container(
+        decoration: BoxDecoration(
+            border: Border.all(color: ColorManager.colorAccent),
+            borderRadius: BorderRadius.circular(5)),
+        margin: EdgeInsets.all(5),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(5),
+          child: Image.file(
+            currentSelectedFrame.value == 999
+                ? File(customSelectedThumbnail.isNotEmpty
+                    ? customSelectedThumbnail.value
+                    : thumbnailEntities[0].path)
+                : File(customSelectedThumbnail.isNotEmpty
+                    ? customSelectedThumbnail.value
+                    : thumbnailEntities[currentSelectedFrame.value].path),
+            fit: BoxFit.fill,
+          ),
+        ),
       ),
       messageText: const Text(
         "Uploading Video please wait.......",
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.white, fontSize: 10),
       ),
       titleText: const Text(
         "Uploading......",
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        style: TextStyle(
+            color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
       ),
       message: "",
       title: "",
-      isDismissible: false,
-      showProgressIndicator: true,
+      mainButton: IconButton(
+        onPressed: () {
+          Get.back();
+        },
+        icon: const Icon(
+          Icons.close,
+          color: Colors.white,
+        ),
+      ),
+      isDismissible: true,
+      shouldIconPulse: true,
+      showProgressIndicator: false,
     ).show();
     fileUploadStatus = FileUploadStatus.uploading;
     Logger().wtf(fileUploadStatus);

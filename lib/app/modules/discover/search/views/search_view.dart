@@ -387,10 +387,9 @@ class SearchView extends GetView<search.SearchController> {
                   itemCount: state![0].hashtags!.length,
                   itemBuilder: (context, index) => InkWell(
                         onTap: () async {
-                          await GetStorage()
-                              .write("hashtagId", state[0].hashtags![index].id);
                           Get.toNamed(Routes.HASH_TAGS_DETAILS, arguments: {
-                            "hashtag_name": "${state[0].hashtags![index].name}"
+                            "hashtag_name": "${state[0].hashtags![index].name}",
+                            "hashtagId": state[0].hashtags![index].id
                           });
                         },
                         child: Container(
@@ -1194,12 +1193,12 @@ class SearchView extends GetView<search.SearchController> {
                                 itemCount: state[0].hashtags!.take(4).length,
                                 itemBuilder: (context, index) => InkWell(
                                       onTap: () async {
-                                        await GetStorage().write("hashtagId",
-                                            state[0].hashtags![index].id);
                                         Get.toNamed(Routes.HASH_TAGS_DETAILS,
                                             arguments: {
                                               "hashtag_name":
-                                                  "${state[0].hashtags![index].name}"
+                                                  "${state[0].hashtags![index].name}",
+                                              "hashtagId":
+                                                  state[0].hashtags![index].id
                                             });
                                       },
                                       child: Container(

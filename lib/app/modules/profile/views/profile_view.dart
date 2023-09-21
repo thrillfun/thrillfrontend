@@ -259,7 +259,9 @@ class ProfileView extends GetView<ProfileController> {
                                   backgroundColor:
                                       Colors.transparent.withOpacity(0.0),
                                   contentPadding: EdgeInsets.zero,
-                                  content: SizedBox(
+                                  content: Container(
+                                    decoration:
+                                        BoxDecoration(shape: BoxShape.circle),
                                     height: Get.height / 2,
                                     child: imgProfileDialog(
                                         state.value.avatar.toString()),

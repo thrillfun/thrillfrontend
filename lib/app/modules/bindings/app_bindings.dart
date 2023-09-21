@@ -69,7 +69,7 @@ class AppBindings extends Bindings {
     Get.lazyPut(() => UsersFollowingController(), fenix: true);
     Get.lazyPut(() => FollowingsController(), fenix: true);
     Get.lazyPut(() => FollowersController(), fenix: true);
-    Get.put(SpinWheelController());
+    Get.lazyPut(() => SpinWheelController());
     Get.lazyPut(() => UserLevelsController(), fenix: true);
     Get.lazyPut(() => OthersProfileController(), fenix: true);
     Get.lazyPut(() => OtherUserVideosController(), fenix: true);

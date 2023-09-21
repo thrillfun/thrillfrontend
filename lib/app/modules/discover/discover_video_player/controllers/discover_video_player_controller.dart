@@ -104,7 +104,9 @@ class DiscoverVideoPlayerController extends GetxController
       hashTagsDetailsList = HashtagDetailsModel.fromJson(value.data).data!.obs;
       isFavouriteHastag.value =
           hashTagsDetailsList[0].is_favorite_hasttag == 0 ? false : true;
-
+      nextPageUrl.value =
+          HashtagDetailsModel.fromJson(value.data).pagination!.nextPageUrl ??
+              "";
       if (adsController.adFailedToLoad.isTrue) {
         hashTagsDetailsList.removeWhere((element) => element.id == null);
         hashTagsDetailsList.refresh();
@@ -112,6 +114,7 @@ class DiscoverVideoPlayerController extends GetxController
       commentsController.getComments(hashTagsDetailsList[0].id ?? 0);
       videoLikeStatus(hashTagsDetailsList[0].id ?? 0);
       followUnfollowStatus(hashTagsDetailsList[0].user!.id!);
+
       change(hashTagsDetailsList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(hashTagsDetailsList, status: RxStatus.error());

@@ -179,7 +179,9 @@ class LikedVideoPlayerController extends GetxController
 
       await userLikedVideosController.getUserLikedVideos();
       isLoading.value = false;
-
+      nextPageUrl.value =
+          UserLikedVideosModel.fromJson(result.data).pagination!.nextPageUrl ??
+              "";
       change(likedVideos, status: RxStatus.success());
     }).onError((error, stackTrace) {
       isLoading.value = false;
@@ -234,7 +236,7 @@ class LikedVideoPlayerController extends GetxController
 
         sendNotification(token.toString(),
             title: "New Likes!",
-            body: "${GetStorage().read("userName")} liked your video");
+            body: "${GetStorage().read("username")} liked your video");
       } else {
         getUserLikedVideos();
       }

@@ -111,9 +111,10 @@ class TrendingVideosController extends GetxController
 
         change(followingVideosList, status: RxStatus.success());
       }
+      followUnfollowStatus(followingVideosList[0].user!.id!);
+
       commentsController.getComments(followingVideosList[0].id ?? 0);
       videoLikeStatus(followingVideosList[0].id ?? 0);
-      followUnfollowStatus(followingVideosList[0].user!.id!);
       change(followingVideosList, status: RxStatus.success());
     }).onError((error, stackTrace) {
       change(followingVideosList, status: RxStatus.error());
@@ -204,10 +205,10 @@ class TrendingVideosController extends GetxController
     };
     dio.post("user/follow-by-userid",
         queryParameters: {"user_id": userId}).then((value) {
-      if (value.data["data"]["is_follow"] == 0) {
-        isUserFollowed.value = false;
-      } else {
+      if (value.data["data"]["is_follow"] == 1) {
         isUserFollowed.value = true;
+      } else {
+        isUserFollowed.value = false;
       }
     }).onError((error, stackTrace) {
       Logger().e(error);
@@ -224,7 +225,7 @@ class TrendingVideosController extends GetxController
       "action": "$action"
     }).then((value) {
       if (value.data["status"]) {
-        getAllVideos(false);
+        followUnfollowStatus(userId);
       } else {
         errorToast(value.data["message"]);
       }

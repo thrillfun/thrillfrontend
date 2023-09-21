@@ -56,6 +56,12 @@ class OtpverifyController extends GetxController with StateMixin<dynamic> {
 
         await storage.write(
             "userId", UserDetailsModel.fromJson(value.data).data!.user!.id!);
+        await storage.write("name",
+            UserDetailsModel.fromJson(value.data).data!.user!.name ?? "");
+        await storage.write("avatar",
+            UserDetailsModel.fromJson(value.data).data!.user!.avatar ?? "");
+        await storage.write("username",
+            UserDetailsModel.fromJson(value.data).data!.user!.username ?? "");
 
         await storage
             .write("token",
