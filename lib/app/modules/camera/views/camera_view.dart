@@ -9,6 +9,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart' as camera;
 import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
+import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -44,9 +47,6 @@ import '../../../utils/page_manager.dart';
 import '../../../utils/strings.dart';
 import '../../../utils/utils.dart';
 import '../controllers/camera_controller.dart' as camController;
-
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 
 import '../select_sound/controllers/select_sound_controller.dart';
 
@@ -325,518 +325,11 @@ class _CameraState extends State<CameraView>
                                                     source: ImageSource.gallery)
                                                 .then((value) async {
                                               if (value != null) {
-                                                if (cameraController
-                                                    .selectedSound.value
-                                                    .toString()
-                                                    .isNotEmpty) {
-                                                  await VESDK
-                                                      .openEditor(
-                                                          Video(value.path),
-                                                          configuration: await cameraController.setConfig(
-                                                              cameraController
-                                                                  .localSoundsList,
-                                                              cameraController
-                                                                  .soundName
-                                                                  .value,
-                                                              maxDuration:
-                                                                  cameraController
-                                                                      .animationController!
-                                                                      .duration!
-                                                                      .inSeconds
-                                                                      .toDouble()))
-                                                      .then((video) async {
-                                                    var file = await toFile(
-                                                        video!.video);
-                                                    Map<dynamic, dynamic>
-                                                        serializationData =
-                                                        await video
-                                                            .serialization;
-                                                    var recentSelection =
-                                                        true.obs;
-                                                    var songPath = '';
-                                                    var songName = '';
-                                                    var isAudioAvailale = 0.obs;
-                                                    List<dynamic> operations =
-                                                        (serializationData[
-                                                                'operations']
-                                                            as List<dynamic>);
-                                                    for (var audio
-                                                        in operations) {
-                                                      if (audio['type'] ==
-                                                          'audio') {
-                                                        isAudioAvailale.value =
-                                                            1;
-                                                      }
-                                                    }
-                                                    if (isAudioAvailale.value ==
-                                                        0) {
-                                                      cameraController
-                                                          .selectedSound
-                                                          .value = "";
-                                                      cameraController
-                                                          .userUploadedSound
-                                                          .value = "";
-                                                      cameraController
-                                                          .soundName.value = "";
-                                                      cameraController
-                                                          .soundOwner
-                                                          .value = "";
-                                                    }
-                                                    successToast(isAudioAvailale
-                                                            .value
-                                                            .isLowerThan(1)
-                                                        ? "nahi chala bc"
-                                                        : "chal gya bc ");
-                                                    // (serializationData[
-                                                    //             'operations']
-                                                    //         as List<dynamic>)
-                                                    //     .forEach((element) {
-                                                    //   if (element['type'] !=
-                                                    //       'audio') {
-                                                    // cameraController
-                                                    //     .selectedSound
-                                                    //     .value = "";
-                                                    // cameraController
-                                                    //     .userUploadedSound
-                                                    //     .value = "";
-                                                    // cameraController
-                                                    //     .soundName
-                                                    //     .value = "";
-                                                    // cameraController
-                                                    //     .soundOwner
-                                                    //     .value = "";
-                                                    // successToast(
-                                                    //     'yes logic works');
-                                                    //   }
-                                                    // });
-                                                    for (int i = 0;
-                                                        i <
-                                                            serializationData[
-                                                                    "operations"]
-                                                                .toList()
-                                                                .length;
-                                                        i++) {
-                                                      if (serializationData[
-                                                                  "operations"]
-                                                              [i]["type"] ==
-                                                          "audio") {
-                                                        recentSelection.value =
-                                                            false;
-                                                      }
-
-                                                      for (var element
-                                                          in cameraController
-                                                              .localSoundsList) {
-                                                        print(element);
-                                                        if (serializationData[
-                                                                        "operations"]
-                                                                    [
-                                                                    i]["options"]
-                                                                ["clips"] !=
-                                                            null) {
-                                                          for (int j = 0;
-                                                              j <
-                                                                  serializationData["operations"][i]
-                                                                              [
-                                                                              "options"]
-                                                                          [
-                                                                          "clips"]
-                                                                      .toList()
-                                                                      .length;
-                                                              j++) {
-                                                            List<dynamic>
-                                                                clipsList =
-                                                                serializationData["operations"][i]
-                                                                            [
-                                                                            "options"]
-                                                                        [
-                                                                        "clips"]
-                                                                    .toList();
-                                                            if (clipsList
-                                                                .isNotEmpty) {
-                                                              if (element
-                                                                      .title ==
-                                                                  serializationData["operations"][i]["options"]["clips"][j]
-                                                                              ["options"]
-                                                                          [
-                                                                          "identifier"]
-                                                                      .toString()) {
-                                                                cameraController
-                                                                        .selectedSound
-                                                                        .value =
-                                                                    element.uri
-                                                                        .toString();
-                                                                songPath = element
-                                                                    .uri
-                                                                    .toString();
-                                                                songName = element
-                                                                    .displayName;
-                                                                cameraController
-                                                                        .soundName
-                                                                        .value =
-                                                                    element
-                                                                        .displayName;
-                                                              } else if (element
-                                                                          .title !=
-                                                                      serializationData["operations"][i]["options"]["clips"][j]["options"]["identifier"]
-                                                                          .toString() &&
-                                                                  cameraController
-                                                                          .selectedSound
-                                                                          .value ==
-                                                                      cameraController
-                                                                          .userUploadedSound
-                                                                          .value) {
-                                                                cameraController
-                                                                        .selectedSound
-                                                                        .value =
-                                                                    cameraController
-                                                                        .userUploadedSound
-                                                                        .value;
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                      }
-                                                      print(serializationData[
-                                                              "operations"][i]
-                                                          ["type"]);
-                                                    }
-                                                    await GetStorage().write(
-                                                        "serialization",
-                                                        jsonEncode(await video
-                                                            .serialization));
-
-                                                    if (cameraController
-                                                            .selectedSound
-                                                            .value
-                                                            .isEmpty &&
-                                                        cameraController
-                                                            .userUploadedSound
-                                                            .value
-                                                            .isEmpty) {
-                                                      await FFmpegKit.execute(
-                                                              "-y -i ${video!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
-                                                          .then((audio) async {
-                                                        Get.toNamed(
-                                                            Routes.POST_SCREEN,
-                                                            arguments: {
-                                                              "sound_url":
-                                                                  "${saveCacheDirectory}originalAudio.mp3",
-                                                              "file_path": video
-                                                                  .video
-                                                                  .substring(
-                                                                      7,
-                                                                      video
-                                                                          .video
-                                                                          .length),
-                                                              "is_original": isLocalSound
-                                                                      .isTrue
-                                                                  ? "local"
-                                                                  : cameraController
-                                                                          .userUploadedSound
-                                                                          .isNotEmpty
-                                                                      ? "original"
-                                                                      : "extracted",
-                                                              "sound_name": cameraController
-                                                                      .soundName
-                                                                      .value
-                                                                      .isNotEmpty
-                                                                  ? "${cameraController.soundName.value}"
-                                                                  : null,
-                                                              "sound_owner": cameraController
-                                                                      .soundOwner
-                                                                      .isEmpty
-                                                                  ? GetStorage()
-                                                                      .read(
-                                                                          "userId")
-                                                                      .toString()
-                                                                  : cameraController
-                                                                      .soundOwner
-                                                                      .value,
-                                                            });
-                                                      });
-                                                    } else {
-                                                      Get.toNamed(
-                                                          Routes.POST_SCREEN,
-                                                          arguments: {
-                                                            "sound_url": cameraController
-                                                                    .selectedSound
-                                                                    .value
-                                                                    .isEmpty
-                                                                ? cameraController
-                                                                    .userUploadedSound
-                                                                    .value
-                                                                : cameraController
-                                                                    .selectedSound
-                                                                    .value,
-                                                            "file_path":
-                                                                file.path,
-                                                            "is_original": isLocalSound
-                                                                    .isTrue
-                                                                ? "local"
-                                                                : cameraController
-                                                                        .userUploadedSound
-                                                                        .isNotEmpty
-                                                                    ? "original"
-                                                                    : "original",
-                                                            "sound_name":
-                                                                cameraController
-                                                                        .soundName
-                                                                        .value
-                                                                        .isNotEmpty
-                                                                    ? "${cameraController.soundName.value}"
-                                                                    : null,
-                                                            "sound_owner": cameraController
-                                                                    .soundOwner
-                                                                    .isEmpty
-                                                                ? GetStorage()
-                                                                    .read(
-                                                                        "userId")
-                                                                    .toString()
-                                                                : cameraController
-                                                                    .soundOwner
-                                                                    .value,
-                                                          });
-                                                    }
-                                                  });
-                                                } else {
-                                                  await VESDK
-                                                      .openEditor(
-                                                          Video(value.path),
-                                                          configuration: await cameraController.setConfig(
-                                                              cameraController
-                                                                  .localSoundsList,
-                                                              cameraController
-                                                                  .soundName
-                                                                  .value,
-                                                              maxDuration:
-                                                                  cameraController
-                                                                      .animationController!
-                                                                      .duration!
-                                                                      .inSeconds
-                                                                      .toDouble()))
-                                                      .then((video) async {
-                                                    var file = await toFile(
-                                                        video!.video);
-                                                    Map<dynamic, dynamic>
-                                                        serializationData =
-                                                        await video
-                                                            .serialization;
-                                                    var recentSelection =
-                                                        true.obs;
-                                                    var songPath = '';
-                                                    var songName = '';
-
-                                                    if (!(serializationData[
-                                                                "operations"]
-                                                            as List<dynamic>)
-                                                        .contains("audio")) {
-                                                      cameraController
-                                                          .selectedSound
-                                                          .value = "";
-                                                      cameraController
-                                                          .userUploadedSound
-                                                          .value = "";
-                                                      cameraController
-                                                          .soundName.value = "";
-                                                      cameraController
-                                                          .soundOwner
-                                                          .value = "";
-                                                    }
-                                                    for (int i = 0;
-                                                        i <
-                                                            serializationData[
-                                                                    "operations"]
-                                                                .toList()
-                                                                .length;
-                                                        i++) {
-                                                      if (serializationData[
-                                                                  "operations"]
-                                                              [i]["type"] ==
-                                                          "audio") {
-                                                        recentSelection.value =
-                                                            false;
-                                                      }
-
-                                                      for (var element
-                                                          in cameraController
-                                                              .localSoundsList) {
-                                                        print(element);
-                                                        if (serializationData[
-                                                                        "operations"]
-                                                                    [
-                                                                    i]["options"]
-                                                                ["clips"] !=
-                                                            null) {
-                                                          for (int j = 0;
-                                                              j <
-                                                                  serializationData["operations"][i]
-                                                                              [
-                                                                              "options"]
-                                                                          [
-                                                                          "clips"]
-                                                                      .toList()
-                                                                      .length;
-                                                              j++) {
-                                                            List<dynamic>
-                                                                clipsList =
-                                                                serializationData["operations"][i]
-                                                                            [
-                                                                            "options"]
-                                                                        [
-                                                                        "clips"]
-                                                                    .toList();
-                                                            if (clipsList
-                                                                .isNotEmpty) {
-                                                              if (element
-                                                                      .title ==
-                                                                  serializationData["operations"][i]["options"]["clips"][j]
-                                                                              ["options"]
-                                                                          [
-                                                                          "identifier"]
-                                                                      .toString()) {
-                                                                cameraController
-                                                                        .selectedSound
-                                                                        .value =
-                                                                    element.uri
-                                                                        .toString();
-                                                                songPath = element
-                                                                    .uri
-                                                                    .toString();
-                                                                songName = element
-                                                                    .displayName;
-                                                                cameraController
-                                                                        .soundName
-                                                                        .value =
-                                                                    element
-                                                                        .displayName;
-                                                                isLocalSound
-                                                                        .value =
-                                                                    true;
-                                                              } else if (element
-                                                                          .title !=
-                                                                      serializationData["operations"][i]["options"]["clips"][j]["options"]["identifier"]
-                                                                          .toString() &&
-                                                                  cameraController
-                                                                          .selectedSound
-                                                                          .value ==
-                                                                      cameraController
-                                                                          .userUploadedSound
-                                                                          .value) {
-                                                                cameraController
-                                                                        .selectedSound
-                                                                        .value =
-                                                                    cameraController
-                                                                        .userUploadedSound
-                                                                        .value;
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                      }
-                                                      print(serializationData[
-                                                              "operations"][i]
-                                                          ["type"]);
-                                                    }
-                                                    await GetStorage().write(
-                                                        "serialization",
-                                                        jsonEncode(await video
-                                                            .serialization));
-
-                                                    if (cameraController
-                                                            .selectedSound
-                                                            .value
-                                                            .isEmpty &&
-                                                        cameraController
-                                                            .userUploadedSound
-                                                            .value
-                                                            .isEmpty) {
-                                                      await FFmpegKit.execute(
-                                                              "-y -i ${video!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
-                                                          .then((audio) async {
-                                                        Get.toNamed(
-                                                            Routes.POST_SCREEN,
-                                                            arguments: {
-                                                              "sound_url":
-                                                                  "${saveCacheDirectory}originalAudio.mp3",
-                                                              "file_path": video
-                                                                  .video
-                                                                  .substring(
-                                                                      7,
-                                                                      video
-                                                                          .video
-                                                                          .length),
-                                                              "is_original": isLocalSound
-                                                                      .isTrue
-                                                                  ? "local"
-                                                                  : cameraController
-                                                                          .userUploadedSound
-                                                                          .isNotEmpty
-                                                                      ? "original"
-                                                                      : "extracted",
-                                                              "sound_name": cameraController
-                                                                      .soundName
-                                                                      .value
-                                                                      .isNotEmpty
-                                                                  ? "${cameraController.soundName.value}"
-                                                                  : null,
-                                                              "sound_owner": cameraController
-                                                                      .soundOwner
-                                                                      .isEmpty
-                                                                  ? GetStorage()
-                                                                      .read(
-                                                                          "userId")
-                                                                      .toString()
-                                                                  : cameraController
-                                                                      .soundOwner
-                                                                      .value,
-                                                            });
-                                                      });
-                                                    } else {
-                                                      Get.toNamed(
-                                                          Routes.POST_SCREEN,
-                                                          arguments: {
-                                                            "sound_url": cameraController
-                                                                    .selectedSound
-                                                                    .value
-                                                                    .isEmpty
-                                                                ? cameraController
-                                                                    .userUploadedSound
-                                                                    .value
-                                                                : cameraController
-                                                                    .selectedSound
-                                                                    .value,
-                                                            "file_path":
-                                                                file.path,
-                                                            "is_original": isLocalSound
-                                                                    .isTrue
-                                                                ? "local"
-                                                                : cameraController
-                                                                        .userUploadedSound
-                                                                        .isNotEmpty
-                                                                    ? "original"
-                                                                    : "original",
-                                                            "sound_name":
-                                                                cameraController
-                                                                        .soundName
-                                                                        .value
-                                                                        .isNotEmpty
-                                                                    ? "${cameraController.soundName.value}"
-                                                                    : null,
-                                                            "sound_owner": cameraController
-                                                                    .soundOwner
-                                                                    .isEmpty
-                                                                ? GetStorage()
-                                                                    .read(
-                                                                        "userId")
-                                                                    .toString()
-                                                                : cameraController
-                                                                    .soundOwner
-                                                                    .value,
-                                                          });
-                                                    }
-                                                  });
-                                                }
+                                                Get.toNamed(
+                                                    Routes.VIDEO_THUMBNAIL,
+                                                    arguments: {
+                                                      'video_file': value.path
+                                                    });
                                               }
                                             });
                                           },
@@ -1023,508 +516,69 @@ class _CameraState extends State<CameraView>
                                                       .audioPlayer
                                                       .stop();
                                                 }
+                                                var tempDirectory =
+                                                    await getTemporaryDirectory();
+                                                final dir = Directory(
+                                                    tempDirectory.path);
+                                                if (!await Directory(dir.path)
+                                                    .exists()) {
+                                                  await Directory(dir.path)
+                                                      .create();
+                                                }
+                                                var outputFile = File(
+                                                    '${dir.path}/output.mp4');
+                                                ;
+                                                if (outputFile.existsSync()) {
+                                                  await outputFile.delete(
+                                                      recursive: true);
+                                                }
+
                                                 setState(() {});
-                                                try {
-                                                  cameraController
-                                                      .getVideoClips();
 
-                                                  var exportOptions =
-                                                      imgly.ExportOptions(
-                                                    serialization: imgly
-                                                        .SerializationOptions(
-                                                            enabled: true,
-                                                            exportType: imgly
-                                                                .SerializationExportType
-                                                                .object),
-                                                    video: imgly.VideoOptions(
-                                                        quality: 0.9,
-                                                        codec: imgly.VideoCodec
-                                                            .values[0]),
-                                                  );
+                                                cameraController
+                                                    .getVideoClips();
 
-                                                  // imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
-                                                  //     RestUrl.assetsUrl + "transparent_logo.png",
-                                                  //     alignment: imgly.AlignmentMode.topLeft);
+                                                List<String> pathList = [];
+                                                cameraController.entities
+                                                    .forEach((element) {
+                                                  pathList.add(element.path);
+                                                });
+                                                final File file = File(
+                                                    '${dir.path}/txt/join_video.txt');
 
-                                                  var stickerList = [
-                                                    imgly.StickerCategory.giphy(
-                                                        imgly.GiphyStickerProvider(
-                                                            "Q1ltQCCxdfmLcaL6SpUhEo5OW6cBP6p0"))
-                                                  ];
+                                                if (!file.existsSync()) {
+                                                  file.create(recursive: true);
+                                                }
+                                                await file.writeAsString(
+                                                    "file ${pathList.join("\nfile ")} ");
 
-                                                  var trimOptions =
-                                                      imgly.TrimOptions(
-                                                    minimumDuration: 5,
-                                                    maximumDuration: 60,
-                                                  );
+                                                var mergeVideosCommand =
+                                                    '-f concat -safe 0 -i ${dir.path}/txt/join_video.txt -c:v copy -c:a aac ${dir.path}/output.mp4';
 
-                                                  if (cameraController
-                                                      .selectedSound.value
-                                                      .toString()
-                                                      .isNotEmpty) {
-                                                    await cameraController
-                                                        .getVideoClips();
-                                                    await VESDK
-                                                        .openEditor(
-                                                            Video.composition(
-                                                                videos: cameraController
-                                                                    .videosList),
-                                                            configuration: await cameraController.setConfig(
-                                                                cameraController
-                                                                    .localSoundsList,
-                                                                cameraController
-                                                                    .soundName
-                                                                    .value,
-                                                                maxDuration: cameraController
-                                                                    .animationController!
-                                                                    .duration!
-                                                                    .inSeconds
-                                                                    .toDouble()))
-                                                        .then((video) async {
-                                                      var file = await toFile(
-                                                          video!.video);
-                                                      Map<dynamic, dynamic>
-                                                          serializationData =
-                                                          await video
-                                                              .serialization;
-                                                      var recentSelection =
-                                                          true.obs;
-                                                      var songPath = '';
-                                                      var songName = '';
+                                                await FFmpegKit.executeAsync(
+                                                    mergeVideosCommand,
+                                                    (value) async {
+                                                  var returnCode = await value
+                                                      .getReturnCode();
 
-                                                      if (!(serializationData[
-                                                                  "operations"]
-                                                              as List<dynamic>)
-                                                          .contains("audio")) {
-                                                        cameraController
-                                                            .selectedSound
-                                                            .value = "";
-                                                      }
-                                                      for (int i = 0;
-                                                          i <
-                                                              serializationData[
-                                                                      "operations"]
-                                                                  .toList()
-                                                                  .length;
-                                                          i++) {
-                                                        if (serializationData[
-                                                                    "operations"]
-                                                                [i]["type"] ==
-                                                            "audio") {
-                                                          recentSelection
-                                                              .value = false;
-                                                        }
-
-                                                        for (var element
-                                                            in cameraController
-                                                                .localSoundsList) {
-                                                          print(element);
-                                                          if (serializationData[
-                                                                          "operations"][i]
-                                                                      [
-                                                                      "options"]
-                                                                  ["clips"] !=
-                                                              null) {
-                                                            for (int j = 0;
-                                                                j <
-                                                                    serializationData["operations"][i]["options"]
-                                                                            [
-                                                                            "clips"]
-                                                                        .toList()
-                                                                        .length;
-                                                                j++) {
-                                                              List<dynamic>
-                                                                  clipsList =
-                                                                  serializationData["operations"][i]
-                                                                              [
-                                                                              "options"]
-                                                                          [
-                                                                          "clips"]
-                                                                      .toList();
-                                                              if (clipsList
-                                                                  .isNotEmpty) {
-                                                                if (element
-                                                                        .title ==
-                                                                    serializationData["operations"][i]["options"]["clips"][j]["options"]
-                                                                            [
-                                                                            "identifier"]
-                                                                        .toString()) {
-                                                                  cameraController
-                                                                          .selectedSound
-                                                                          .value =
-                                                                      element
-                                                                          .uri
-                                                                          .toString();
-                                                                  songPath = element
-                                                                      .uri
-                                                                      .toString();
-                                                                  songName = element
-                                                                      .displayName;
-                                                                  cameraController
-                                                                          .soundName
-                                                                          .value =
-                                                                      element
-                                                                          .displayName;
-                                                                } else if (element
-                                                                            .title !=
-                                                                        serializationData["operations"][i]["options"]["clips"][j]["options"]["identifier"]
-                                                                            .toString() &&
-                                                                    cameraController
-                                                                            .selectedSound
-                                                                            .value ==
-                                                                        cameraController
-                                                                            .userUploadedSound
-                                                                            .value) {
-                                                                  cameraController
-                                                                          .selectedSound
-                                                                          .value =
-                                                                      cameraController
-                                                                          .userUploadedSound
-                                                                          .value;
-                                                                }
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                        print(serializationData[
-                                                                "operations"][i]
-                                                            ["type"]);
-                                                      }
-
-                                                      if (cameraController
-                                                              .selectedSound
-                                                              .value
-                                                              .isEmpty &&
-                                                          cameraController
-                                                              .userUploadedSound
-                                                              .value
-                                                              .isEmpty) {
-                                                        await FFmpegKit.execute(
-                                                                "-y -i ${video!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
-                                                            .then(
-                                                                (audio) async {
-                                                          Get.toNamed(
-                                                              Routes
-                                                                  .POST_SCREEN,
-                                                              arguments: {
-                                                                "sound_url":
-                                                                    "${saveCacheDirectory}originalAudio.mp3",
-                                                                "file_path": video
-                                                                    .video
-                                                                    .substring(
-                                                                        7,
-                                                                        video
-                                                                            .video
-                                                                            .length),
-                                                                "is_original": isLocalSound.isTrue &&
-                                                                        cameraController
-                                                                            .userUploadedSound
-                                                                            .isEmpty &&
-                                                                        cameraController
-                                                                            .selectedSound
-                                                                            .isEmpty
-                                                                    ? "local"
-                                                                    : cameraController
-                                                                            .userUploadedSound
-                                                                            .isNotEmpty
-                                                                        ? "original"
-                                                                        : "extracted",
-                                                                "sound_name": cameraController
-                                                                        .soundName
-                                                                        .value
-                                                                        .isNotEmpty
-                                                                    ? "${cameraController.soundName.value}"
-                                                                    : null,
-                                                                "sound_owner": cameraController
-                                                                        .soundOwner
-                                                                        .isEmpty
-                                                                    ? GetStorage()
-                                                                        .read(
-                                                                            "userId")
-                                                                        .toString()
-                                                                    : cameraController
-                                                                        .soundOwner
-                                                                        .value,
-                                                              });
+                                                  if (ReturnCode.isSuccess(
+                                                      returnCode)) {
+                                                    Get.toNamed(
+                                                        Routes.VIDEO_THUMBNAIL,
+                                                        arguments: {
+                                                          'video_file':
+                                                              "${dir.path}/output.mp4"
                                                         });
-                                                      } else {
-                                                        Get.toNamed(
-                                                            Routes.POST_SCREEN,
-                                                            arguments: {
-                                                              "sound_url": cameraController
-                                                                      .selectedSound
-                                                                      .value
-                                                                      .isEmpty
-                                                                  ? cameraController
-                                                                      .userUploadedSound
-                                                                      .value
-                                                                  : cameraController
-                                                                      .selectedSound
-                                                                      .value,
-                                                              "file_path":
-                                                                  file.path,
-                                                              "is_original": isLocalSound
-                                                                      .isTrue
-                                                                  ? "local"
-                                                                  : cameraController
-                                                                          .userUploadedSound
-                                                                          .isNotEmpty
-                                                                      ? "original"
-                                                                      : "original",
-                                                              "sound_name": cameraController
-                                                                      .soundName
-                                                                      .value
-                                                                      .isNotEmpty
-                                                                  ? cameraController
-                                                                      .soundName
-                                                                      .value
-                                                                  : null,
-                                                              "sound_owner": cameraController
-                                                                      .soundOwner
-                                                                      .isEmpty
-                                                                  ? GetStorage()
-                                                                      .read(
-                                                                          "userId")
-                                                                      .toString()
-                                                                  : cameraController
-                                                                      .soundOwner
-                                                                      .value,
-                                                            });
-                                                      }
-                                                    });
                                                   } else {
-                                                    await cameraController
-                                                        .getVideoClips();
-                                                    await VESDK
-                                                        .openEditor(
-                                                            Video.composition(
-                                                                videos: cameraController
-                                                                    .videosList),
-                                                            configuration: await cameraController.setConfig(
-                                                                cameraController
-                                                                    .localSoundsList,
-                                                                cameraController
-                                                                    .soundName
-                                                                    .value,
-                                                                maxDuration: cameraController
-                                                                    .animationController!
-                                                                    .duration!
-                                                                    .inSeconds
-                                                                    .toDouble()))
-                                                        .then((video) async {
-                                                      var file = await toFile(
-                                                          video!.video);
-                                                      Map<dynamic, dynamic>
-                                                          serializationData =
-                                                          await video
-                                                              .serialization;
-                                                      var recentSelection =
-                                                          true.obs;
-                                                      var songPath = '';
-                                                      var songName = '';
-
-                                                      if (!(serializationData[
-                                                                  "operations"]
-                                                              as List<dynamic>)
-                                                          .contains("audio")) {
-                                                        cameraController
-                                                            .selectedSound
-                                                            .value = "";
-                                                      }
-                                                      for (int i = 0;
-                                                          i <
-                                                              serializationData[
-                                                                      "operations"]
-                                                                  .toList()
-                                                                  .length;
-                                                          i++) {
-                                                        if (serializationData[
-                                                                    "operations"]
-                                                                [i]["type"] ==
-                                                            "audio") {
-                                                          recentSelection
-                                                              .value = false;
-                                                        }
-
-                                                        for (var element
-                                                            in cameraController
-                                                                .localSoundsList) {
-                                                          print(element);
-                                                          if (serializationData[
-                                                                          "operations"][i]
-                                                                      [
-                                                                      "options"]
-                                                                  ["clips"] !=
-                                                              null) {
-                                                            for (int j = 0;
-                                                                j <
-                                                                    serializationData["operations"][i]["options"]
-                                                                            [
-                                                                            "clips"]
-                                                                        .toList()
-                                                                        .length;
-                                                                j++) {
-                                                              List<dynamic>
-                                                                  clipsList =
-                                                                  serializationData["operations"][i]
-                                                                              [
-                                                                              "options"]
-                                                                          [
-                                                                          "clips"]
-                                                                      .toList();
-                                                              if (clipsList
-                                                                  .isNotEmpty) {
-                                                                if (element
-                                                                        .title ==
-                                                                    serializationData["operations"][i]["options"]["clips"][j]["options"]
-                                                                            [
-                                                                            "identifier"]
-                                                                        .toString()) {
-                                                                  cameraController
-                                                                          .selectedSound
-                                                                          .value =
-                                                                      element
-                                                                          .uri
-                                                                          .toString();
-                                                                  songPath = element
-                                                                      .uri
-                                                                      .toString();
-                                                                  songName = element
-                                                                      .displayName;
-                                                                  cameraController
-                                                                          .soundName
-                                                                          .value =
-                                                                      element
-                                                                          .displayName;
-                                                                  isLocalSound
-                                                                          .value =
-                                                                      true;
-                                                                } else if (element
-                                                                            .title !=
-                                                                        serializationData["operations"][i]["options"]["clips"][j]["options"]["identifier"]
-                                                                            .toString() &&
-                                                                    cameraController
-                                                                            .selectedSound
-                                                                            .value ==
-                                                                        cameraController
-                                                                            .userUploadedSound
-                                                                            .value) {
-                                                                  cameraController
-                                                                          .selectedSound
-                                                                          .value =
-                                                                      cameraController
-                                                                          .userUploadedSound
-                                                                          .value;
-                                                                }
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                        print(serializationData[
-                                                                "operations"][i]
-                                                            ["type"]);
-                                                      }
-                                                      await GetStorage().write(
-                                                          "serialization",
-                                                          jsonEncode(await video
-                                                              .serialization));
-
-                                                      if (cameraController
-                                                              .selectedSound
-                                                              .value
-                                                              .isEmpty &&
-                                                          cameraController
-                                                              .userUploadedSound
-                                                              .value
-                                                              .isEmpty) {
-                                                        await FFmpegKit.execute(
-                                                                "-y -i ${video!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
-                                                            .then(
-                                                                (audio) async {
-                                                          Get.toNamed(
-                                                              Routes
-                                                                  .POST_SCREEN,
-                                                              arguments: {
-                                                                "sound_url":
-                                                                    "${saveCacheDirectory}originalAudio.mp3",
-                                                                "file_path": video
-                                                                    .video
-                                                                    .substring(
-                                                                        7,
-                                                                        video
-                                                                            .video
-                                                                            .length),
-                                                                "is_original": isLocalSound
-                                                                        .isTrue
-                                                                    ? "local"
-                                                                    : cameraController
-                                                                            .userUploadedSound
-                                                                            .isNotEmpty
-                                                                        ? "original"
-                                                                        : "extracted",
-                                                                "sound_name": cameraController
-                                                                        .soundName
-                                                                        .value
-                                                                        .isNotEmpty
-                                                                    ? "${cameraController.soundName.value}"
-                                                                    : null,
-                                                                "sound_owner": cameraController
-                                                                        .soundOwner
-                                                                        .isEmpty
-                                                                    ? GetStorage()
-                                                                        .read(
-                                                                            "userId")
-                                                                        .toString()
-                                                                    : cameraController
-                                                                        .soundOwner
-                                                                        .value,
-                                                              });
-                                                        });
-                                                      } else {
-                                                        Get.toNamed(
-                                                            Routes.POST_SCREEN,
-                                                            arguments: {
-                                                              "sound_url": cameraController
-                                                                      .selectedSound
-                                                                      .value
-                                                                      .isEmpty
-                                                                  ? cameraController
-                                                                      .userUploadedSound
-                                                                      .value
-                                                                  : cameraController
-                                                                      .selectedSound
-                                                                      .value,
-                                                              "file_path":
-                                                                  file.path,
-                                                              "is_original": isLocalSound
-                                                                      .isTrue
-                                                                  ? "local"
-                                                                  : cameraController
-                                                                          .userUploadedSound
-                                                                          .isNotEmpty
-                                                                      ? "original"
-                                                                      : "original",
-                                                              "sound_name": cameraController
-                                                                      .soundName
-                                                                      .value
-                                                                      .isNotEmpty
-                                                                  ? "${cameraController.soundName.value}"
-                                                                  : null,
-                                                              "sound_owner": cameraController
-                                                                      .soundOwner
-                                                                      .isEmpty
-                                                                  ? GetStorage()
-                                                                      .read(
-                                                                          "userId")
-                                                                      .toString()
-                                                                  : cameraController
-                                                                      .soundOwner
-                                                                      .value,
-                                                            });
-                                                      }
-                                                    });
+                                                    errorToast(returnCode!
+                                                        .getValue()
+                                                        .toString());
                                                   }
-                                                } catch (e) {}
+                                                }, (log) {
+                                                  Logger().w(
+                                                      "Log Message: ${log.getMessage()}");
+                                                });
+
                                               },
                                               child: const Icon(
                                                 FontAwesome.check,
@@ -1712,6 +766,13 @@ class _CameraState extends State<CameraView>
   }
 
   Future<bool> onWillPopScope() async {
+    var tempDirectory = await getTemporaryDirectory();
+    final dir = Directory(tempDirectory.path);
+    if (!await Directory(dir.path).exists()) {
+      await Directory(dir.path).create();
+    }
+    final File file = File('${dir.path}/txt/join_video.txt');
+    await file.delete(recursive: true);
     await cameraController.deleteFilesandReturn();
     return true;
   }
@@ -1739,245 +800,68 @@ class _CameraState extends State<CameraView>
         if (cameraController.isPlayerInit.value) {
           await cameraController.audioPlayer.stop();
         }
-        try {
-          if (cameraController.selectedSound.value.toString().isNotEmpty) {
-            await VESDK
-                .openEditor(
-                    Video.composition(videos: cameraController.videosList),
-                    configuration: await cameraController.setConfig(
-                        cameraController.localSoundsList,
-                        cameraController.soundName.value,
-                        maxDuration: cameraController
-                            .animationController!.duration!.inSeconds
-                            .toDouble()))
-                .then((video) async {
-              if (video == null) {
-                cameraController.getVideoClips();
-              }
-              var file = await toFile(video!.video);
-              Map<dynamic, dynamic> serializationData =
-                  await video.serialization;
-              var recentSelection = true.obs;
-              var songPath = '';
-              var songName = '';
-
-              if (!(serializationData["operations"] as List<dynamic>)
-                  .contains("audio")) {
-                cameraController.selectedSound.value = "";
-              }
-              for (int i = 0;
-                  i < serializationData["operations"].toList().length;
-                  i++) {
-                if (serializationData["operations"][i]["type"] == "audio") {
-                  recentSelection.value = false;
-                }
-
-                for (var element in cameraController.localSoundsList) {
-                  print(element);
-                  if (serializationData["operations"][i]["options"]["clips"] !=
-                      null) {
-                    for (int j = 0;
-                        j <
-                            serializationData["operations"][i]["options"]
-                                    ["clips"]
-                                .toList()
-                                .length;
-                        j++) {
-                      List<dynamic> clipsList = serializationData["operations"]
-                              [i]["options"]["clips"]
-                          .toList();
-                      if (clipsList.isNotEmpty) {
-                        if (element.title ==
-                            serializationData["operations"][i]["options"]
-                                    ["clips"][j]["options"]["identifier"]
-                                .toString()) {
-                          cameraController.selectedSound.value =
-                              element.uri.toString();
-                          songPath = element.uri.toString();
-                          songName = element.displayName;
-                          cameraController.soundName.value =
-                              element.displayName;
-                        } else if (element.title !=
-                                serializationData["operations"][i]["options"]
-                                        ["clips"][j]["options"]["identifier"]
-                                    .toString() &&
-                            cameraController.selectedSound.value ==
-                                cameraController.userUploadedSound.value) {
-                          cameraController.selectedSound.value =
-                              cameraController.userUploadedSound.value;
-                        }
-                      }
-                    }
-                  }
-                }
-                print(serializationData["operations"][i]["type"]);
-              }
-              video.serialization;
-              if (cameraController.selectedSound.value.isEmpty &&
-                  cameraController.userUploadedSound.value.isEmpty) {
-                await FFmpegKit.execute(
-                        "-y -i ${video!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
-                    .then((audio) async {
-                  Get.toNamed(Routes.POST_SCREEN, arguments: {
-                    "sound_url": "${saveCacheDirectory}originalAudio.mp3",
-                    "file_path": video.video.substring(7, video.video.length),
-                    "is_original": isLocalSound.isTrue &&
-                            cameraController.userUploadedSound.isEmpty &&
-                            cameraController.selectedSound.isEmpty
-                        ? "local"
-                        : cameraController.userUploadedSound.isNotEmpty
-                            ? "original"
-                            : "extracted",
-                    "sound_name": cameraController.soundName.value.isNotEmpty
-                        ? "${cameraController.soundName.value}"
-                        : null,
-                    "sound_owner": cameraController.soundOwner.isEmpty
-                        ? GetStorage().read("userId").toString()
-                        : cameraController.soundOwner.value,
-                  });
-                });
-              } else {
-                Get.toNamed(Routes.POST_SCREEN, arguments: {
-                  "sound_url": cameraController.selectedSound.value.isEmpty
-                      ? cameraController.userUploadedSound.value
-                      : cameraController.selectedSound.value,
-                  "file_path": file.path,
-                  "is_original": isLocalSound.isTrue
-                      ? "local"
-                      : cameraController.userUploadedSound.isNotEmpty
-                          ? "original"
-                          : "original",
-                  "sound_name": cameraController.soundName.value.isNotEmpty
-                      ? cameraController.soundName.value
-                      : null,
-                  "sound_owner": cameraController.soundOwner.isEmpty
-                      ? GetStorage().read("userId").toString()
-                      : cameraController.soundOwner.value,
-                });
-              }
-            });
-          } else {
-            await VESDK
-                .openEditor(
-                    Video.composition(videos: cameraController.videosList),
-                    configuration: await cameraController.setConfig(
-                        cameraController.localSoundsList,
-                        cameraController.soundName.value,
-                        maxDuration: cameraController
-                            .animationController!.duration!.inSeconds
-                            .toDouble()))
-                .then((video) async {
-              if (video == null) {
-                await cameraController.getVideoClips();
-              }
-              var file = await toFile(video!.video);
-
-              Map<dynamic, dynamic> serializationData =
-                  await video.serialization;
-              var recentSelection = true.obs;
-              var songPath = '';
-              var songName = '';
-
-              await GetStorage().write(
-                  "serialization", jsonEncode(await video.serialization));
-
-              if (!(serializationData["operations"] as List<dynamic>)
-                  .contains("audio")) {
-                cameraController.selectedSound.value = "";
-              }
-              for (int i = 0;
-                  i < serializationData["operations"].toList().length;
-                  i++) {
-                if (serializationData["operations"][i]["type"] == "audio") {
-                  recentSelection.value = false;
-                }
-
-                for (var element in cameraController.localSoundsList) {
-                  print(element);
-                  if (serializationData["operations"][i]["options"]["clips"] !=
-                      null) {
-                    for (int j = 0;
-                        j <
-                            serializationData["operations"][i]["options"]
-                                    ["clips"]
-                                .toList()
-                                .length;
-                        j++) {
-                      List<dynamic> clipsList = serializationData["operations"]
-                              [i]["options"]["clips"]
-                          .toList();
-                      if (clipsList.isNotEmpty) {
-                        if (element.title ==
-                            serializationData["operations"][i]["options"]
-                                    ["clips"][j]["options"]["identifier"]
-                                .toString()) {
-                          cameraController.selectedSound.value =
-                              element.uri.toString();
-                          songPath = element.uri.toString();
-                          songName = element.displayName;
-                          cameraController.soundName.value =
-                              element.displayName;
-                          isLocalSound.value = true;
-                        } else if (element.title !=
-                                serializationData["operations"][i]["options"]
-                                        ["clips"][j]["options"]["identifier"]
-                                    .toString() &&
-                            cameraController.selectedSound.value ==
-                                cameraController.userUploadedSound.value) {
-                          cameraController.selectedSound.value =
-                              cameraController.userUploadedSound.value;
-                        }
-                      }
-                    }
-                  }
-                }
-                print(serializationData["operations"][i]["type"]);
-              }
-              if (cameraController.selectedSound.value.isEmpty &&
-                  cameraController.userUploadedSound.value.isEmpty) {
-                await FFmpegKit.execute(
-                        "-y -i ${video!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
-                    .then((audio) async {
-                  Get.toNamed(Routes.POST_SCREEN, arguments: {
-                    "sound_url": "${saveCacheDirectory}originalAudio.mp3",
-                    "file_path": video.video.substring(7, video.video.length),
-                    "is_original": isLocalSound.isTrue
-                        ? "local"
-                        : cameraController.userUploadedSound.isNotEmpty
-                            ? "original"
-                            : "extracted",
-                    "sound_name": cameraController.soundName.value.isNotEmpty
-                        ? "${cameraController.soundName.value}"
-                        : null,
-                    "sound_owner": cameraController.soundOwner.isEmpty
-                        ? GetStorage().read("userId").toString()
-                        : cameraController.soundOwner.value,
-                  });
-                });
-              } else {
-                Get.toNamed(Routes.POST_SCREEN, arguments: {
-                  "sound_url": cameraController.selectedSound.value.isEmpty
-                      ? cameraController.userUploadedSound.value
-                      : cameraController.selectedSound.value,
-                  "file_path": file.path,
-                  "is_original": isLocalSound.isTrue
-                      ? "local"
-                      : cameraController.userUploadedSound.isNotEmpty
-                          ? "original"
-                          : "original",
-                  "sound_name": cameraController.soundName.value.isNotEmpty
-                      ? "${cameraController.soundName.value}"
-                      : null,
-                  "sound_owner": cameraController.soundOwner.isEmpty
-                      ? GetStorage().read("userId").toString()
-                      : cameraController.soundOwner.value,
-                });
-              }
-            });
-          }
-        } catch (e) {
-          Logger().wtf(e);
+        var tempDirectory =
+        await getTemporaryDirectory();
+        final dir = Directory(
+            tempDirectory.path);
+        if (!await Directory(dir.path)
+            .exists()) {
+          await Directory(dir.path)
+              .create();
         }
+        var outputFile = File(
+            '${dir.path}/output.mp4');
+        ;
+        if (outputFile.existsSync()) {
+          await outputFile.delete(
+              recursive: true);
+        }
+
+        setState(() {});
+
+        cameraController
+            .getVideoClips();
+
+        List<String> pathList = [];
+        cameraController.entities
+            .forEach((element) {
+          pathList.add(element.path);
+        });
+        final File file = File(
+            '${dir.path}/txt/join_video.txt');
+
+        if (!file.existsSync()) {
+          file.create(recursive: true);
+        }
+        await file.writeAsString(
+            "file ${pathList.join("\nfile ")} ");
+
+        var mergeVideosCommand =
+            '-f concat -safe 0 -i ${dir.path}/txt/join_video.txt -c:v copy -c:a aac ${dir.path}/output.mp4';
+
+        await FFmpegKit.executeAsync(
+            mergeVideosCommand,
+                (value) async {
+              var returnCode = await value
+                  .getReturnCode();
+
+              if (ReturnCode.isSuccess(
+                  returnCode)) {
+                Get.toNamed(
+                    Routes.VIDEO_THUMBNAIL,
+                    arguments: {
+                      'video_file':
+                      "${dir.path}/output.mp4"
+                    });
+              } else {
+                errorToast(returnCode!
+                    .getValue()
+                    .toString());
+              }
+            }, (log) {
+          Logger().w(
+              "Log Message: ${log.getMessage()}");
+        });
       }
     });
 
@@ -2056,11 +940,6 @@ class _CameraState extends State<CameraView>
         Future.delayed(Duration(milliseconds: 200))
             .then((value) => cameraController.animationController!.forward());
       }
-
-      // animationController!.reverse(
-      //     from: animationController?.value == 0.0
-      //         ? 1.0
-      //         : animationController?.value);
     }
   }
 
@@ -2097,7 +976,6 @@ class _CameraState extends State<CameraView>
         });
         // Set and initialize the new camera
         onNewCameraSelected(cameras[0]);
-        // refreshAlreadyCapturedImages();
       } else {
         await Permission.camera.request();
         await Permission.storage.request();
@@ -2114,7 +992,6 @@ class _CameraState extends State<CameraView>
     }
 
     try {
-      // startTimer();
       await _controller?.startVideoRecording().then((value) => {
             setState(() {
               loaderWidth = 70;
@@ -2153,13 +1030,7 @@ class _CameraState extends State<CameraView>
                   '-y -i ${file.path} -filter_complex "[0:v]setpts=${defaultVideoSpeed.value}*PTS[v]" -map "[v]" ${tempPath.path}output.mp4')
               .then((session) async {
             final returnCode = await session.getReturnCode();
-            if (ReturnCode.isSuccess(returnCode)) {
-              print("============================> GIF Success!!!!");
-              Get.back();
-            } else {
-              print("============================> GIF Failed!!!!");
-              Get.back();
-            }
+            Get.back();
           });
           videoFile = File("${tempPath.path}output.mp4");
           checkDirectory().then((value) async {
@@ -2247,28 +1118,7 @@ class _CameraState extends State<CameraView>
       });
     }
 
-    // Update UI if _controller updated
 
-    // try {
-    //   await cameraController.initialize();
-    //   // await Future.wait([
-    //   //   cameraController
-    //   //       .getMinExposureOffset()
-    //   //       .then((value) => _minAvailableExposureOffset = value),
-    //   //   cameraController
-    //   //       .getMaxExposureOffset()
-    //   //       .then((value) => _maxAvailableExposureOffset = value),
-    //   //   cameraController
-    //   //       .getMaxZoomLevel()
-    //   //       .then((value) => _maxAvailableZoom = value),
-    //   //   cameraController
-    //   //       .getMinZoomLevel()
-    //   //       .then((value) => _minAvailableZoom = value),
-    //   // ]);
-    //
-    // } on CameraException catch (e) {
-    //   print('Error initializing camera: $e');
-    // }
 
     if (mounted) {
       setState(() {
@@ -2446,10 +1296,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                             .animationController!
                                                             .forward();
                                                       }
-                                                      // cameraController
-                                                      //         .timer.value =
-                                                      //     duration!
-                                                      //         .inSeconds!;
+
 
                                                       audioTotalDuration.value =
                                                           duration!;
@@ -2656,9 +1503,22 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                       ),
                                                       onTap: () async {
                                                         cameraController
-                                                                .soundAuthorName
-                                                                .value =
-                                                            controller
+                                                            .soundAuthorName
+                                                            .value = controller
+                                                                    .searchList[
+                                                                        0]
+                                                                    .sounds![
+                                                                        index]
+                                                                    .soundOwner ==
+                                                                null
+                                                            ? controller
+                                                                    .searchList[
+                                                                        0]
+                                                                    .sounds![
+                                                                        index]
+                                                                    .username ??
+                                                                ""
+                                                            : controller
                                                                 .searchList[0]
                                                                 .sounds![index]
                                                                 .soundOwner!
@@ -3522,205 +2382,212 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                           ),
                                         );
                                       }),
-                                     Align(child: VisibilityDetector(
-                                      key: Key("miniplayer"),
-                                      child: Obx(() => Visibility(
-                                          visible: isPlayerVisible.value,
-                                          child: SizedBox(
-                                            height: 80,
-                                            child: Card(
-                                              margin: EdgeInsets.all(0),
-                                              shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      width: 2,
-                                                      color: ColorManager
-                                                          .colorAccent
-                                                          .withOpacity(0.4)),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
-                                              child: Padding(
-                                                padding: EdgeInsets.all(10),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: [
-                                                    Stack(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      children: [
-                                                        Container(
-                                                          height: 50,
-                                                          width: 50,
-                                                          child: Obx(() =>
-                                                              imgSound(avatar
-                                                                  .value)),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Expanded(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                    .symmetric(
-                                                                horizontal: 10),
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Obx(() => Text(
-                                                                  cameraController
-                                                                      .soundName
-                                                                      .value,
-                                                                  maxLines: 1,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                  style: const TextStyle(
-                                                                      fontSize:
-                                                                          16,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w700),
-                                                                )),
-                                                            Obx(() => Text(
-                                                                  cameraController
-                                                                      .soundName
-                                                                      .value,
-                                                                  style: const TextStyle(
-                                                                      fontSize:
-                                                                          12,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
-                                                                )),
-                                                            Obx(() => ProgressBar(
-                                                                thumbRadius: 5,
-                                                                barHeight: 3,
-                                                                baseBarColor:
-                                                                    ColorManager
-                                                                        .colorAccentTransparent,
-                                                                bufferedBarColor:
-                                                                    ColorManager
-                                                                        .colorAccentTransparent,
-                                                                timeLabelLocation:
-                                                                    TimeLabelLocation
-                                                                        .none,
-                                                                thumbColor:
-                                                                    ColorManager
-                                                                        .colorAccent,
-                                                                progressBarColor:
-                                                                    ColorManager
-                                                                        .colorAccent,
-                                                                buffered:
-                                                                    progressNotifier
-                                                                        .value
-                                                                        .buffered,
-                                                                progress:
-                                                                    audioDuration
+                                  Align(
+                                    child: VisibilityDetector(
+                                        key: Key("miniplayer"),
+                                        child: Obx(() => Visibility(
+                                            visible: isPlayerVisible.value,
+                                            child: SizedBox(
+                                              height: 80,
+                                              child: Card(
+                                                margin: EdgeInsets.all(0),
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 2,
+                                                        color: ColorManager
+                                                            .colorAccent
+                                                            .withOpacity(0.4)),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Stack(
+                                                        alignment:
+                                                            Alignment.center,
+                                                        children: [
+                                                          Container(
+                                                            height: 50,
+                                                            width: 50,
+                                                            child: Obx(() =>
+                                                                imgSound(avatar
+                                                                    .value)),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Expanded(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                      .symmetric(
+                                                                  horizontal:
+                                                                      10),
+                                                          child: Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Obx(() => Text(
+                                                                    cameraController
+                                                                        .soundName
                                                                         .value,
-                                                                onSeek: (duration) =>
-                                                                    audioPlayer
-                                                                        .seek(
-                                                                            duration),
-                                                                total:
-                                                                    audioTotalDuration
-                                                                        .value))
-                                                          ],
+                                                                    maxLines: 1,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight.w700),
+                                                                  )),
+                                                              Obx(() => Text(
+                                                                    cameraController
+                                                                        .soundName
+                                                                        .value,
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight.w400),
+                                                                  )),
+                                                              Obx(() => ProgressBar(
+                                                                  thumbRadius:
+                                                                      5,
+                                                                  barHeight: 3,
+                                                                  baseBarColor:
+                                                                      ColorManager
+                                                                          .colorAccentTransparent,
+                                                                  bufferedBarColor:
+                                                                      ColorManager
+                                                                          .colorAccentTransparent,
+                                                                  timeLabelLocation:
+                                                                      TimeLabelLocation
+                                                                          .none,
+                                                                  thumbColor:
+                                                                      ColorManager
+                                                                          .colorAccent,
+                                                                  progressBarColor:
+                                                                      ColorManager
+                                                                          .colorAccent,
+                                                                  buffered:
+                                                                      progressNotifier
+                                                                          .value
+                                                                          .buffered,
+                                                                  progress:
+                                                                      audioDuration
+                                                                          .value,
+                                                                  onSeek: (duration) =>
+                                                                      audioPlayer
+                                                                          .seek(
+                                                                              duration),
+                                                                  total:
+                                                                      audioTotalDuration
+                                                                          .value))
+                                                            ],
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    InkWell(
-                                                      onTap: () {
-                                                        if (audioDuration
-                                                                    .value >=
-                                                                audioTotalDuration
-                                                                    .value &&
-                                                            audioTotalDuration
-                                                                    .value !=
-                                                                Duration.zero) {
-                                                          audioPlayer
-                                                              .seek(
-                                                                  Duration.zero)
-                                                              .then((value) {
-                                                            if (audioPlayer
-                                                                .playing) {
-                                                              audioPlayer
-                                                                  .pause();
-                                                            } else {
-                                                              audioPlayer
-                                                                  .play();
-                                                            }
-                                                          });
-                                                        }
-                                                        if (audioPlayer
-                                                            .playing) {
-                                                          audioPlayer.pause();
-                                                        } else {
-                                                          audioPlayer.play();
-                                                        }
-                                                        isPlayerPlaying.value =
-                                                            audioPlayer.playing;
-                                                      },
-                                                      child: Obx(() => isPlayerPlaying
-                                                                  .value &&
-                                                              audioDuration
-                                                                      .value <=
+                                                      InkWell(
+                                                        onTap: () {
+                                                          if (audioDuration
+                                                                      .value >=
                                                                   audioTotalDuration
                                                                       .value &&
                                                               audioTotalDuration
                                                                       .value !=
-                                                                  Duration.zero
-                                                          ? const Icon(
-                                                              Icons
-                                                                  .pause_circle_filled_outlined,
-                                                              size: 50,
-                                                              color: ColorManager
-                                                                  .colorAccent,
-                                                            )
-                                                          : audioDuration
-                                                                          .value >=
-                                                                      audioTotalDuration
-                                                                          .value &&
-                                                                  audioTotalDuration
-                                                                          .value !=
-                                                                      Duration
-                                                                          .zero &&
-                                                                  isPlayerPlaying
-                                                                      .value
-                                                              ? const Icon(
-                                                                  Icons
-                                                                      .refresh_rounded,
-                                                                  size: 50,
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                )
-                                                              : const Icon(
-                                                                  IconlyBold
-                                                                      .play,
-                                                                  size: 50,
-                                                                  color: ColorManager
-                                                                      .colorAccent,
-                                                                )),
-                                                    )
-                                                  ],
+                                                                  Duration
+                                                                      .zero) {
+                                                            audioPlayer
+                                                                .seek(Duration
+                                                                    .zero)
+                                                                .then((value) {
+                                                              if (audioPlayer
+                                                                  .playing) {
+                                                                audioPlayer
+                                                                    .pause();
+                                                              } else {
+                                                                audioPlayer
+                                                                    .play();
+                                                              }
+                                                            });
+                                                          }
+                                                          if (audioPlayer
+                                                              .playing) {
+                                                            audioPlayer.pause();
+                                                          } else {
+                                                            audioPlayer.play();
+                                                          }
+                                                          isPlayerPlaying
+                                                                  .value =
+                                                              audioPlayer
+                                                                  .playing;
+                                                        },
+                                                        child: Obx(() => isPlayerPlaying
+                                                                    .value &&
+                                                                audioDuration
+                                                                        .value <=
+                                                                    audioTotalDuration
+                                                                        .value &&
+                                                                audioTotalDuration
+                                                                        .value !=
+                                                                    Duration
+                                                                        .zero
+                                                            ? const Icon(
+                                                                Icons
+                                                                    .pause_circle_filled_outlined,
+                                                                size: 50,
+                                                                color: ColorManager
+                                                                    .colorAccent,
+                                                              )
+                                                            : audioDuration.value >=
+                                                                        audioTotalDuration
+                                                                            .value &&
+                                                                    audioTotalDuration
+                                                                            .value !=
+                                                                        Duration
+                                                                            .zero &&
+                                                                    isPlayerPlaying
+                                                                        .value
+                                                                ? const Icon(
+                                                                    Icons
+                                                                        .refresh_rounded,
+                                                                    size: 50,
+                                                                    color: ColorManager
+                                                                        .colorAccent,
+                                                                  )
+                                                                : const Icon(
+                                                                    IconlyBold
+                                                                        .play,
+                                                                    size: 50,
+                                                                    color: ColorManager
+                                                                        .colorAccent,
+                                                                  )),
+                                                      )
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ))),
-                                      onVisibilityChanged: (info) => {
-                                            if (info.visibleFraction < 0.9)
-                                              {
-                                                audioPlayer.stop(),
-                                                isPlayerPlaying.value =
-                                                    audioPlayer.playing
-                                              }
-                                          })
-                           ,alignment: Alignment.bottomCenter,)  ],
+                                            ))),
+                                        onVisibilityChanged: (info) => {
+                                              if (info.visibleFraction < 0.9)
+                                                {
+                                                  audioPlayer.stop(),
+                                                  isPlayerPlaying.value =
+                                                      audioPlayer.playing
+                                                }
+                                            }),
+                                    alignment: Alignment.bottomCenter,
+                                  )
+                                ],
                               )),
                     ),
                   ],

@@ -762,9 +762,12 @@ class _TrendingVideosViewState extends State<TrendingVideosView>
                         ),
                         GestureDetector(
                           onTap: () async {
+                            await  GetStorage().write('sound_id', widget.soundId);
                             checkForLogin(() async {
+
                               await GetStorage()
                                   .write("profileId", widget.UserId);
+
 
                               DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                               AndroidDeviceInfo androidInfo =

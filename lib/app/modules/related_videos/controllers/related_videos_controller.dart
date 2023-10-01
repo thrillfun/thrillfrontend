@@ -130,10 +130,10 @@ class RelatedVideosController extends GetxController
 
       relatedVideosList.refresh();
       adsController.loadNativeAd();
-      if (adsController.adFailedToLoad.isTrue) {
-        relatedVideosList.removeWhere((element) => element.id == null);
-        relatedVideosList.refresh();
-      }
+      // if (adsController.adFailedToLoad.isTrue) {
+      //   relatedVideosList.removeWhere((element) => element.id == null);
+      //   relatedVideosList.refresh();
+      // }
       nextPageUrl.value =
           RelatedVideosModel.fromJson(value.data).pagination!.nextPageUrl ?? "";
 

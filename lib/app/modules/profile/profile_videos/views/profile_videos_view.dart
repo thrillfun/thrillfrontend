@@ -58,7 +58,7 @@ class ProfileVideosView extends GetView<ProfileVideosController> {
               controller: pageViewController,
               allowImplicitScrolling: true,
               onPageChanged: (index) {
-                if (index == state!.length - 1) {
+                if (index == state!.length - 1  && controller.nextPageUrl.isNotEmpty) {
                   controller.getPaginationAllVideos(0);
                 }
                 if (state[index].id != null) {
@@ -1059,7 +1059,7 @@ class _LikedVideosState extends State<LikedVideos>
                             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                             AndroidDeviceInfo androidInfo =
                                 await deviceInfo.androidInfo;
-
+                            await  GetStorage().write('sound_id', widget.soundId);
                             try {
                               if (androidInfo.version.sdkInt > 31) {
                                 if (await Permission.audio.isGranted) {

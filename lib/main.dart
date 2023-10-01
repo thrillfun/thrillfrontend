@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:camera/camera.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -35,16 +36,16 @@ void main() async {
       await Permission.notification.isDenied) {
     await Permission.notification.request();
   }
-  MobileAds.instance.initialize();
-  MobileAds.instance
-      .updateRequestConfiguration(RequestConfiguration(testDeviceIds: [
-    '62C93BF848F45761C3536701626D0E50',
-    '3AA759594FD19961A79D03130D1F9A87',
-    '355A9ECF92AB39727391C9EFAACA9CD5',
-    'E832C8BE9072FDD05A1B4C879E930D1E',
-    '208258E465B7DF6E083B77CFAF7D2049'
-  ]));
-
+  // MobileAds.instance.initialize();
+  // MobileAds.instance
+  //     .updateRequestConfiguration(RequestConfiguration(testDeviceIds: [
+  //   '62C93BF848F45761C3536701626D0E50',
+  //   '3AA759594FD19961A79D03130D1F9A87',
+  //   '355A9ECF92AB39727391C9EFAACA9CD5',
+  //   'E832C8BE9072FDD05A1B4C879E930D1E',
+  //   '208258E465B7DF6E083B77CFAF7D2049'
+  // ]));
+  await FacebookAudienceNetwork.init(testingId: '362ce0c4-b919-4b9b-9688-b7c59fdb2690');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
 
   FlutterError.onError = (errorDetails) {

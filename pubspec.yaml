@@ -26,14 +26,14 @@ dependencies:
   flutter_fortune_wheel: any
   audioplayers: any
   file_support: ^1.0.7
-  ffmpeg_kit_flutter_full_gpl: any
+  ffmpeg_kit_flutter:
   video_player: any
   qr_flutter: any
   flutter_svg: any
   syncfusion_flutter_sliders: any
   file_picker: any
   share_plus: any
-  preload_page_view: any
+  preload_page_view: 0.2.0
   url_launcher: any
   google_mobile_ads: any
   firebase_database: any
@@ -113,7 +113,9 @@ dependencies:
   dotted_border: 2.0.0+3
   shimmer: 3.0.0
   infinite_scroll_pagination: 4.0.0
-  flutter: 
+  facebook_audience_network: 1.0.1
+  video_trimmer: 2.0.1
+  flutter:
     sdk: flutter
   better_player: 
     git: https://github.com/tintran-dev/betterplayer.git

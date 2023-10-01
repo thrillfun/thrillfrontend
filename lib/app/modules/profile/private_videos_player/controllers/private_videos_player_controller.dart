@@ -32,7 +32,7 @@ class PrivateVideosPlayerController extends GetxController
   var fileSupport = FileSupport();
   RxList<SiteSettings> siteSettingsList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
-  var nextPageUrl = "https://thrill.fun/api/video/private?page=2".obs;
+  var nextPageUrl = "".obs;
   var isLikeEnable = true.obs;
   var isLiked = false.obs;
   var totalLikes = 0.obs;

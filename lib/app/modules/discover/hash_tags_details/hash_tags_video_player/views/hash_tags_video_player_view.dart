@@ -54,7 +54,7 @@ class HashTagsVideoPlayerView extends GetView<HashTagsVideoPlayerController> {
               controller: pageViewController,
               allowImplicitScrolling: true,
               onPageChanged: (index) {
-                if (index == state.length - 1) {
+                if (index == state.length - 1 && controller.nextPageUrl.isNotEmpty) {
                   controller.getPaginationVideosByHashTags();
                 }
                 if (index % 4 == 0) {
@@ -1005,7 +1005,7 @@ class _HashtagVideosState extends State<HashtagVideos>
                           onTap: () async {
                             await GetStorage()
                                 .write("profileId", widget.UserId);
-
+                            await  GetStorage().write('sound_id', widget.soundId);
                             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                             AndroidDeviceInfo androidInfo =
                                 await deviceInfo.androidInfo;

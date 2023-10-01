@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:get/get.dart';
 
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
+
 import 'package:uri_to_file/uri_to_file.dart';
 import 'package:file_support/file_support.dart';
 import 'package:get/get.dart';
@@ -101,14 +101,10 @@ class VideoEditingController extends GetxController {
                   .then((ffmpegValue) async {
                 final returnCode = await ffmpegValue.getReturnCode();
                 var data = await ffmpegValue.getOutput();
-                if (ReturnCode.isSuccess(returnCode)) {
-                  Get.toNamed(Routes.POST_SCREEN, arguments: {
-                    "sound_url": selectedSound,
-                    "file_path": "$saveCacheDirectory/selectedVideo.mp4"
-                  });
-                } else {
-                  errorToast(data.toString());
-                }
+                Get.toNamed(Routes.POST_SCREEN, arguments: {
+                  "sound_url": selectedSound,
+                  "file_path": "$saveCacheDirectory/selectedVideo.mp4"
+                });
               });
             } else {
               await FFmpegKit.execute(

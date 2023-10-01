@@ -9,8 +9,8 @@ class NoSearchResult extends StatelessWidget {
   String? text = "No results found!";
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Align(alignment: Alignment.center,child: Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Lottie.asset("assets/not_found.json", height: 250, width: 250),
         Padding(
@@ -25,6 +25,6 @@ class NoSearchResult extends StatelessWidget {
           ),
         )
       ],
-    );
+    ),);
   }
 }

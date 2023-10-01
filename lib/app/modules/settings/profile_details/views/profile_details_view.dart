@@ -11,6 +11,7 @@ import '../../../../utils/utils.dart';
 
 class ProfileDetailsView extends GetView<ProfileDetailsController> {
   const ProfileDetailsView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,12 +76,13 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
     );
   }
 
-  profilePicLayout() => SizedBox(
-        height: 160,
-        width: 160,
+  profilePicLayout() => Container(
+        height: Get.height / 3,
+        width: Get.width / 3,
         child:
             imgProfileDetails(controller.userProfile.value.avatar.toString()),
       );
+
   aboutYouLayout() => controller.obx((state) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,30 +192,20 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
                   fontSize: 16,
                 ),
               ),
-              Flexible(
-                  child: Container(
-                      width: Get.width,
-                      alignment: Alignment.centerRight,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Expanded(
-                              child: Text(
-                            state!.value.bio.toString().isEmpty
-                                ? "N/A"
-                                : state!.value.bio.toString(),
-                            textAlign: TextAlign.justify,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400, fontSize: 16),
-                          )),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Flexible(child: Icon(IconlyLight.arrow_right_square))
-                        ],
-                      )))
+              Expanded(
+                  child: Text(
+                state!.value.bio.toString().isEmpty
+                    ? "N/A"
+                    : state!.value.bio.toString(),
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+              )),
+              const SizedBox(
+                width: 10,
+              ),
+              Icon(IconlyLight.arrow_right_square)
             ],
           ),
           const SizedBox(
@@ -367,6 +359,7 @@ class ProfileDetailsView extends GetView<ProfileDetailsController> {
           ),
         ],
       ));
+
   socialLayout() => controller.obx((state) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

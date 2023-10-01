@@ -5,8 +5,7 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -35,7 +34,8 @@ import '../select_sound/controllers/select_sound_controller.dart';
 
 class CameraController extends GetxController with GetTickerProviderStateMixin {
   var fileSupport = FileSupport();
-
+  late  imgly.Configuration configuration;
+  late imgly.AudioOptions audioOptions;
   var isSoundsLoading = false.obs;
   RxList<Sounds> soundsList = RxList();
   RxList<SongModel> localSoundsList = RxList();
@@ -248,20 +248,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
         });
       }
 
-      if (!await Permission.audio.isGranted) {
-        await Permission.audio.request().then((value) async {
-          List<SongModel> filterList = await audioQuery.querySongs();
-          localSoundsList = filterList
-              .where((element) => element.fileExtension.contains("mp3"))
-              .toList()
-              .obs;
-          if (filterList.isNotEmpty) {
-            localFilterList.value = localSoundsList.toList();
-          } else {
-            localFilterList = localSoundsList;
-          }
-        });
-      } else {}
+
     }
   }
 
@@ -307,232 +294,11 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
     });
   }
 
-  Future<void> openEditor(bool isGallery, String path, String selectedSound,
-      int id, String owner, bool isLocalSound) async {
-    var file = File(selectedSound);
 
-    List<SongModel> albums = [];
-    if (await Permission.audio.isGranted == false) {
-      await Permission.audio.request().then((value) async {
-        List<SongModel> filterList = await OnAudioQuery().querySongs();
-        albums = filterList
-            .where((element) => element.fileExtension.contains("mp3"))
-            .toList()
-            .obs;
-      });
-    }
-    try {
-      if (!isGallery) {
-        var tempDirectory = await getTemporaryDirectory();
-        final dir = Directory(tempDirectory.path + "/videos");
-        if (!await Directory(dir.path).exists()) {
-          await Directory(dir.path).create();
-        }
-        final List<FileSystemEntity> entities = await dir.list().toList();
-
-        List<String> videosList = <String>[];
-
-        entities.forEach((element) {
-          videosList.add(element.path);
-        });
-
-        await VESDK
-            .openEditor(Video.composition(videos: videosList),
-                configuration: await setConfig(albums, owner))
-            .then((value) async {
-          Map<dynamic, dynamic> serializationData = await value?.serialization;
-          var recentSelection = true.obs;
-          var songPath = '';
-          var songName = '';
-          for (int i = 0;
-              i < serializationData["operations"].toList().length;
-              i++) {
-            if (serializationData["operations"][i]["type"] == "audio") {
-              recentSelection.value = false;
-            }
-            for (var element in albums) {
-              print(element);
-              if (serializationData["operations"][i]["options"]["clips"] !=
-                  null) {
-                for (int j = 0;
-                    j <
-                        serializationData["operations"][i]["options"]["clips"]
-                            .toList()
-                            .length;
-                    j++) {
-                  List<dynamic> clipsList = serializationData["operations"][i]
-                          ["options"]["clips"]
-                      .toList();
-                  if (clipsList.isNotEmpty) {
-                    if (element.title.contains(serializationData["operations"]
-                            [i]["options"]["clips"][j]["options"]["identifier"]
-                        .toString())) {
-                      selectedSound = element.uri.toString();
-                      songPath = element.uri.toString();
-                      songName = element.displayName;
-                    }
-                  }
-                }
-              }
-            }
-            print(serializationData["operations"][i]["type"]);
-          }
-
-          if (value == null) {
-            dir.exists().then((value) => dir.delete(recursive: true));
-          }
-
-          // await dir.delete(recursive: true);
-          file = File(selectedSound);
-          if (recentSelection.isFalse) {
-            if (value != null) {
-              if (await file.exists()) {
-                Get.toNamed(Routes.POST_SCREEN, arguments: {
-                  "sound_url": basename(selectedSound.toString()),
-                  "file_path": value.video,
-                  "is_original":
-                      selectedSound.isNotEmpty && !isLocalSound ? false : true,
-                  "sound_name":
-                      selectedSound.isNotEmpty ? "sound by $owner" : "",
-                  "sound_owner": owner.isEmpty
-                      ? GetStorage().read("userId").toString()
-                      : owner,
-                });
-              } else {
-                Get.toNamed(Routes.POST_SCREEN, arguments: {
-                  "sound_url": selectedSound.isNotEmpty && !isLocalSound
-                      ? basename(selectedSound.toString())
-                      : selectedSound,
-                  "file_path": value.video.substring(7, value.video.length),
-                  "is_original":
-                      selectedSound.isNotEmpty && !isLocalSound ? false : true,
-                  "sound_name":
-                      selectedSound.isNotEmpty ? "sound by $owner" : "",
-                  "sound_owner": owner.isEmpty
-                      ? GetStorage().read("userId").toString()
-                      : owner,
-                });
-              }
-            }
-          } else {
-            if (file.existsSync()) {
-              await FFmpegKit.execute(
-                      '-y -i ${value!.video.substring(7, value.video.length)} -i $selectedSound -map 0:v -map 1:a  -shortest ${saveCacheDirectory}selectedVideo.mp4')
-                  .then((ffmpegValue) async {
-                final returnCode = await ffmpegValue.getReturnCode();
-                var data = await ffmpegValue.getOutput();
-                if (ReturnCode.isSuccess(returnCode)) {
-                  Get.toNamed(Routes.POST_SCREEN, arguments: {
-                    "sound_url": selectedSound,
-                    "file_path": "${saveCacheDirectory}selectedVideo.mp4",
-                    "is_original": selectedSound.isNotEmpty && !isLocalSound
-                        ? false
-                        : true,
-                    "sound_name":
-                        selectedSound.isNotEmpty ? "sound by $owner" : "",
-                    "sound_owner": owner.isEmpty
-                        ? GetStorage().read("userId").toString()
-                        : owner,
-                  });
-                } else {
-                  Logger().wtf(data);
-                }
-              });
-            } else {
-              await FFmpegKit.execute(
-                      "-y -i ${value!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
-                  .then((audio) async {
-                Get.toNamed(Routes.POST_SCREEN, arguments: {
-                  "sound_url": "${saveCacheDirectory}originalAudio.mp3",
-                  "file_path": value.video.substring(7, value.video.length),
-                  "is_original":
-                      selectedSound.isNotEmpty && !isLocalSound ? false : true,
-                  "sound_name":
-                      selectedSound.isNotEmpty ? "sound by $owner" : "",
-                  "sound_owner": owner.isEmpty
-                      ? GetStorage().read("userId").toString()
-                      : owner,
-                });
-              });
-            }
-          }
-        });
-      } else {
-        await VESDK
-            .openEditor(Video(path),
-                configuration: await setConfig(albums, owner))
-            .then((value) async {
-          Map<dynamic, dynamic> serializationData = await value?.serialization;
-
-          print("data=>" + serializationData.toString());
-
-          List<dynamic> operationData =
-              serializationData['operations'].toList();
-
-          var isOriginal = true.obs;
-          var songPath = '';
-          var songName = '';
-          var file = await toFile(selectedSound);
-
-          operationData.forEach((operation) async {
-            Map<dynamic, dynamic> data = operation['options'];
-            if (data.containsKey("clips")) {
-              isOriginal.value = false;
-              songPath = file.path;
-              songName = basename(file.path);
-            }
-          });
-          if (!isOriginal.value) {
-            if (value != null) {
-              Get.toNamed(Routes.POST_SCREEN, arguments: {
-                "file_path": value.video.substring(7, value.video.length),
-                "sound_url": file.existsSync() ? songPath : selectedSound,
-                "is_original": false,
-                "sound_owner": owner,
-              });
-            }
-          } else if (selectedSound.isNotEmpty) {
-            await FFmpegKit.execute(
-                    '-y -i ${value!.video} -i $selectedSound -map 0:v -map 1:a  -shortest $saveCacheDirectory/selectedVideo.mp4')
-                .then((ffmpegValue) async {
-              final returnCode = await ffmpegValue.getReturnCode();
-              var data = await ffmpegValue.getOutput();
-              if (ReturnCode.isSuccess(returnCode)) {
-                Get.toNamed(Routes.POST_SCREEN, arguments: {
-                  "sound_url": selectedSound,
-                  "file_path": "$saveCacheDirectory/selectedVideo.mp4",
-                  "is_original":
-                      selectedSound.isNotEmpty && !isLocalSound ? false : true,
-                  "sound_name":
-                      selectedSound.isNotEmpty ? "sound by $owner" : "",
-                  "sound_owner": owner,
-                });
-              } else {
-                Logger().wtf(data);
-              }
-            });
-          } else {
-            await FFmpegKit.execute(
-                    "-y -i ${value!.video} -map 0:a -acodec libmp3lame ${saveCacheDirectory}originalAudio.mp3")
-                .then((audio) async {
-              Get.toNamed(Routes.POST_SCREEN, arguments: {
-                "sound_url": "${saveCacheDirectory}originalAudio.mp3",
-                "file_path": value.video.substring(7, value.video.length),
-                "is_original": true,
-                "sound_owner": owner,
-              });
-            });
-          }
-        });
-      }
-    } catch (e) {
-      Logger().wtf(e);
-    } finally {}
-  }
 
   Future<imgly.Configuration> setConfig(
       List<SongModel> albums, String? userName,
-      {double maxDuration = 60}) async {
+      {double maxDuration = 60,imgly.Tool? tool}) async {
     var audioFile = File(
         selectedSound.isEmpty ? userUploadedSound.value : selectedSound.value);
     selectedAudioClips.clear();
@@ -549,43 +315,29 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
         audioClips.add(imgly.AudioClip(
           element.title,
           element.uri.toString(),
-          title: element.title,
-          artist: element.artist,
+
         ));
       });
-    }
 
-    if (soundsList.isNotEmpty) {
-      List<imgly.AudioClip> onlineAudioClips = [];
-      soundsList.forEach((element) {
-        onlineAudioClips.add(imgly.AudioClip(element.name.toString(),
-            RestUrl.soundUrl + element.sound.toString(),
-            title: element.name));
-      });
-    }
-
-    if (selectedSound.isNotEmpty || userUploadedSound.isNotEmpty) {
-      audioClipCategories.add(imgly.AudioClipCategory("", "selected sound",
-          thumbnailURI: "assets/logo2.png", items: selectedAudioClips));
     }
     audioClipCategories.add(
       imgly.AudioClipCategory("audio_cat_1", "local",
           thumbnailURI: "assets/logo2.png", items: audioClips),
     );
 
-    var audioOptions = imgly.AudioOptions(categories: audioClipCategories);
 
-    var codec = imgly.VideoCodec.values;
+    if (selectedSound.isNotEmpty || userUploadedSound.isNotEmpty) {
+      audioClipCategories.add(imgly.AudioClipCategory("", "selected sound",
+          thumbnailURI: "assets/logo2.png", items: selectedAudioClips));
+    }
+
+    audioOptions = imgly.AudioOptions(categories: audioClipCategories);
+
 
     var exportOptions = imgly.ExportOptions(
       serialization: imgly.SerializationOptions(
           enabled: true, exportType: imgly.SerializationExportType.object),
-      video: imgly.VideoOptions(codec: codec[0]),
     );
-
-    // imgly.WatermarkOptions waterMarkOptions = imgly.WatermarkOptions(
-    //     RestUrl.assetsUrl + "transparent_logo.png",
-    //     alignment: imgly.AlignmentMode.topLeft);
 
     var stickerList = [
       imgly.StickerCategory.existing("imgly_sticker_category_emoticons"),
@@ -641,7 +393,7 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
             imgly.Filter.existing("imgly_lut_fixie"),
             imgly.Filter.existing("imgly_lut_food"),
             imgly.Filter.existing("imgly_lut_fridge"),
-            imgly.Filter.existing("imgly_lut_glam"),
+            // imgly.Filter.existing("imgly_lut_glam"),
             imgly.Filter.existing("imgly_lut_gobblin"),
             imgly.Filter.existing("imgly_lut_highcontrast"),
             imgly.Filter.existing("imgly_lut_highcarb"),
@@ -675,20 +427,46 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
             imgly.Filter.existing("imgly_duotone_sunset"),
           ]),
     ];
+    List<imgly.Tool> toolsList=[];
 
-    final configuration = imgly.Configuration(
-      theme: imgly.ThemeOptions(imgly.Theme(
-        "default_editor_theme",
-      )),
-      trim: trimOptions,
-      filter:
-          imgly.FilterOptions(categories: categories, flattenCategories: true),
-      sticker:
-          imgly.StickerOptions(personalStickers: true, categories: stickerList),
-      audio: audioOptions,
-      export: exportOptions,
-      // watermark: waterMarkOptions,
-    );
+    if(tool!=null){
+      toolsList.add(tool);
+    }
+    if(audioClipCategories.isEmpty &&localSoundsList.isEmpty){
+      configuration=imgly.Configuration(
+        theme: imgly.ThemeOptions(imgly.Theme(
+          "default_editor_theme",
+        )),
+        trim: trimOptions,
+        tools: toolsList.isNotEmpty?toolsList:[],
+        filter:
+        imgly.FilterOptions(categories: categories, flattenCategories: true),
+        sticker:
+        imgly.StickerOptions(personalStickers: true, categories: stickerList),
+        export: exportOptions,
+        // watermark: waterMarkOptions,
+      );
+    }
+
+
+    else{
+      configuration=imgly.Configuration(
+        theme: imgly.ThemeOptions(imgly.Theme(
+          "default_editor_theme",
+        )),
+        trim: trimOptions,
+        filter:
+
+        imgly.FilterOptions(categories: categories, flattenCategories: true),
+        tools: toolsList.isNotEmpty?toolsList:[],
+
+        sticker:
+        imgly.StickerOptions(personalStickers: true, categories: stickerList),
+        audio:audioOptions,
+        export: exportOptions,
+        // watermark: waterMarkOptions,
+      );
+    }
 
     return configuration;
   }

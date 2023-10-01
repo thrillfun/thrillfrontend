@@ -57,7 +57,7 @@ class DiscoverVideoPlayerView extends GetView<DiscoverVideoPlayerController> {
               controller: pageViewController,
               allowImplicitScrolling: true,
               onPageChanged: (index) async {
-                if (index == state.length) {
+                if (index == state.length -1 && controller.nextPageUrl.isNotEmpty) {
                   controller.getPaginationVideosByHashTags();
                 }
                 if (index % 2 == 0) {
@@ -920,8 +920,7 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                           child: Container(
                             height: 35,
                             margin: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Expanded(
-                                child: ListView.builder(
+                            child: ListView.builder(
                                     itemCount: widget.hashtagsList?.length,
                                     shrinkWrap: true,
                                     scrollDirection: Axis.horizontal,
@@ -960,14 +959,14 @@ class _DiscoverVideosState extends State<DiscoverVideos>
                                                   fontSize: 10),
                                             ),
                                           ),
-                                        ))),
+                                        )),
                           ),
                         ),
                         GestureDetector(
                           onTap: () async {
                             await GetStorage()
                                 .write("profileId", widget.UserId);
-
+                            await  GetStorage().write('sound_id', widget.soundId);
                             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                             AndroidDeviceInfo androidInfo =
                                 await deviceInfo.androidInfo;

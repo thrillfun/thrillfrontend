@@ -89,8 +89,8 @@ android {
         applicationId "com.thrill.media"
         minSdkVersion 24
         targetSdkVersion 34
-        versionCode 50
-        versionName '1.7.10'
+        versionCode 52
+        versionName '1.7.12'
     }
 
     signingConfigs {
@@ -127,5 +127,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.facebook.android:audience-network-sdk:6.+'
 
 }

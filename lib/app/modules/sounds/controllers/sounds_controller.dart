@@ -53,7 +53,7 @@ class SoundsController extends GetxController
   RxList<VideosBySound> videoList = RxList();
   var isVideosLoading = false.obs;
   var title = "";
-  int id = Get.arguments["sound_id"];
+  RxInt id = 0.obs;
   var currentPage = 1.obs;
   final progressNotifier = ValueNotifier<ProgressBarState>(
     ProgressBarState(
@@ -99,7 +99,7 @@ class SoundsController extends GetxController
     };
 
     await dio
-        .post("sound/get", queryParameters: {"id": id}).then((value) async {
+        .post("sound/get", queryParameters: {"id": await GetStorage().read('sound_id')}).then((value) async {
       soundDetails = SoundDetailsModel.fromJson(value.data).data!;
       await getVideosBySound(soundDetails.sound!);
       change(soundDetails, status: RxStatus.success());

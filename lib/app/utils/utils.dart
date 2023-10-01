@@ -748,9 +748,7 @@ Widget imgProfile(String imagePath) => Container(
 
 Widget imgProfileDetails(String imagePath) => Container(
       child: CachedNetworkImage(
-          fit: BoxFit.fill,
           imageBuilder: (context, imageProvider) => Container(
-                width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image:
@@ -774,7 +772,6 @@ Widget imgProfileDetails(String imagePath) => Container(
 
 Widget imgProfileDialog(String imagePath) => Container(
       child: CachedNetworkImage(
-          fit: BoxFit.contain,
           imageBuilder: (context, imageProvider) => Container(
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
@@ -784,11 +781,10 @@ Widget imgProfileDialog(String imagePath) => Container(
                 ),
               ),
           errorWidget: (context, string, dynamic) => CachedNetworkImage(
-              fit: BoxFit.fill,
               imageBuilder: (context, imageProvider) => Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: imageProvider, fit: BoxFit.contain),
+                          image: imageProvider, fit: BoxFit.fill),
                     ),
                   ),
               imageUrl: RestUrl.placeholderImage),

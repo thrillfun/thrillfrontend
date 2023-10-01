@@ -4,6 +4,8 @@ import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
+import 'package:facebook_audience_network/ad/ad_interstitial.dart';
+import 'package:facebook_audience_network/ad/ad_native.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -73,6 +75,7 @@ class HomeVideosPlayerController extends GetxController {
                 children: [
                   PageView.builder(
                       itemCount: state!.length,
+
                       scrollDirection: Axis.vertical,
                       controller: pageController,
                       allowImplicitScrolling: true,
@@ -90,14 +93,14 @@ class HomeVideosPlayerController extends GetxController {
                           );
                         }
 
-                        if (adsController.adFailedToLoad.isTrue) {
-                          relatedVideosController.relatedVideosList
-                              .removeWhere((element) => element.id == null);
-                          relatedVideosController.relatedVideosList.refresh();
-                        }
+                        // if (adsController.adFailedToLoad.isTrue) {
+                        //   relatedVideosController.relatedVideosList
+                        //       .removeWhere((element) => element.id == null);
+                        //   relatedVideosController.relatedVideosList.refresh();
+                        // }
                         if (index ==
                             relatedVideosController.relatedVideosList.length -
-                                1) {
+                                1 && relatedVideosController.nextPageUrl.isNotEmpty) {
                           relatedVideosController.getPaginationAllVideos(1);
                         }
                         relatedVideosController.postVideoView(
@@ -107,7 +110,7 @@ class HomeVideosPlayerController extends GetxController {
                       itemBuilder: (context, index) {
                         return state![index].id == null
                             ? Obx(
-                                () => adsController.nativeAdIsLoaded.isFalse
+                                () => adsController.nativeAdIsLoaded.isTrue
                                     ? Container(
                                         height: Get.height,
                                         width: Get.width,
@@ -124,8 +127,23 @@ class HomeVideosPlayerController extends GetxController {
                                                 bottom: MediaQuery.of(context)
                                                     .viewPadding
                                                     .bottom),
-                                            child: AdWidget(
-                                              ad: adsController.nativeAd!,
+                                            child: FacebookNativeAd(
+                                              placementId: "549167759165615_551513495597708",
+                                              adType: NativeAdType.NATIVE_AD,
+                                              width: Get.width,
+                                              height: Get.height,
+                                              backgroundColor: Colors.blue,
+                                              titleColor: Colors.white,
+                                              descriptionColor: Colors.white,
+                                              buttonColor: Colors.deepPurple,
+                                              buttonTitleColor: Colors.white,
+                                              buttonBorderColor: Colors.white,
+                                              keepAlive: false, //set true if you do not want adview to refresh on widget rebuild
+                                              keepExpandedWhileLoading: false, // set false if you want to collapse the native ad view when the ad is loading
+                                              expandAnimationDuraion: 300, //in milliseconds. Expands the adview with animation when ad is loaded
+                                              listener: (result, value) {
+                                                print("Native Ad: $result --> $value");
+                                              },
                                             ),
                                           ),
                                         ],
@@ -234,8 +252,7 @@ class HomeVideosPlayerController extends GetxController {
                               .followUnfollowStatus(state[index].user!.id!);
                           followingVideosController.videoLikeStatus(
                             followingVideosController
-                                    .followingVideosList[index].id ??
-                                0,
+                                    .followingVideosList[index].id!,
                           );
                           if (adsController.adFailedToLoad.isTrue) {
                             followingVideosController.followingVideosList
@@ -243,7 +260,7 @@ class HomeVideosPlayerController extends GetxController {
                             followingVideosController.followingVideosList
                                 .refresh();
                           }
-                          if (index == state!.length - 1) {
+                          if (index == state!.length - 1 && followingVideosController.nextPageUrl.isNotEmpty) {
                             followingVideosController.getPaginationAllVideos(1);
                           }
                           followingVideosController.postVideoView(
@@ -356,6 +373,21 @@ class HomeVideosPlayerController extends GetxController {
                         commentsController.getComments(trendingVideosController
                             .followingVideosList[index].id!);
                         if (index % 8 == 0 && index != 0) {
+                          FacebookInterstitialAd.loadInterstitialAd(
+                            placementId: "1681151722369604_1721226651695444",
+                            listener: (result, value) {
+                              switch(result){
+                                case InterstitialAdResult.LOADED:
+                                  FacebookInterstitialAd.showInterstitialAd(delay: 5000);
+                                  break;
+                                case InterstitialAdResult.ERROR:
+                                  errorToast('$result : $value');
+                                  break;
+                                default:
+                                  Logger().wtf('$result : $value');
+                              };
+                            },
+                          );
                           adsController.loadIntersitialAd();
                           adsController.interstitialAd!.show();
                         }

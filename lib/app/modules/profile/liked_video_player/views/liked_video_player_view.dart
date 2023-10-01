@@ -58,7 +58,7 @@ class LikedVideoPlayerView extends GetView<LikedVideoPlayerController> {
                   itemCount: state.length,
                   scrollDirection: Axis.vertical,
                   onPageChanged: (index) {
-                    if (index == state!.length - 1) {
+                    if (index == state!.length - 1 && controller.nextPageUrl.isNotEmpty) {
                       controller.getPaginationAllVideos();
                     }
 
@@ -1006,7 +1006,7 @@ class _LikedVideosState extends State<LikedVideos>
                                 onTap: () async {
                                   await GetStorage()
                                       .write("profileId", widget.UserId);
-
+                                  await  GetStorage().write('sound_id', widget.soundId);
                                   DeviceInfoPlugin deviceInfo =
                                       DeviceInfoPlugin();
                                   AndroidDeviceInfo androidInfo =

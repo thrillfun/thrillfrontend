@@ -65,8 +65,7 @@ class SoundVideosView extends GetView<SoundVideosController> {
                   state.refresh();
                 }
                 controller.postVideoView(state[index].id!);
-                if (index == state.length - 1 &&
-                    state.length.isGreaterThan(5)) {
+                if (index == state.length - 1  && controller.nextPageUrl.isNotEmpty) {
                   controller.getPaginationVideosBySound();
                 }
               },
@@ -984,7 +983,7 @@ class _SoundVideosState extends State<SoundVideos>
                           onTap: () async {
                             await GetStorage()
                                 .write("profileId", widget.UserId);
-
+                            await  GetStorage().write('sound_id', widget.soundId);
                             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                             AndroidDeviceInfo androidInfo =
                                 await deviceInfo.androidInfo;

@@ -780,6 +780,7 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                         ),
                         GestureDetector(
                           onTap: () async {
+                           await  GetStorage().write('sound_id', widget.soundId);
                             checkForLogin(() async {
                               await GetStorage()
                                   .write("profileId", widget.UserId);
@@ -833,7 +834,8 @@ class _RelatedVideosViewState extends State<RelatedVideosView>
                                 } else {
                                   if (await Permission.storage.isGranted) {
                                     Get.toNamed(Routes.SOUNDS, arguments: {
-                                      "sound_url": "".obs,
+                                      "sound_id ":widget.soundId,
+                                      "sound_url": widget.sound,
                                       "sound_owner": GetStorage()
                                               .read("name")
                                               .toString()

@@ -775,6 +775,7 @@ class _FollowingVideosViewState extends State<FollowingVideosView>
                         ),
                         GestureDetector(
                           onTap: () async {
+                            await  GetStorage().write('sound_id', widget.soundId);
                             await GetStorage()
                                 .write("profileId", widget.UserId);
 

@@ -67,7 +67,7 @@ class OthersProfileVideosView extends GetView<OthersProfileVideosController> {
                         state[index].id ?? 0,
                       );
                     }
-                    if (index == state!.length - 1) {
+                    if (index == state!.length - 1 && controller.nextPageUrl.isNotEmpty) {
                       controller
                           .getPaginationAllVideos(controller.nextPage.value);
                     }
@@ -152,9 +152,9 @@ class OthersProfileVideosView extends GetView<OthersProfileVideosController> {
           onError: (error) => NoSearchResult(
                 text: "No Videos!",
               ),
-          onEmpty: NoSearchResult(
+          onEmpty: Align(alignment: Alignment.center,child: NoSearchResult(
             text: "No Videos!",
-          )),
+          ),)),
     );
   }
 
@@ -999,7 +999,7 @@ class _OthersVideosState extends State<OthersVideos>
                             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                             AndroidDeviceInfo androidInfo =
                                 await deviceInfo.androidInfo;
-
+                            await  GetStorage().write('sound_id', widget.soundId);
                             try {
                               if (androidInfo.version.sdkInt > 31) {
                                 if (await Permission.audio.isGranted) {

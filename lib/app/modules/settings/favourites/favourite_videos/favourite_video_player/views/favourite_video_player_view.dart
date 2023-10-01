@@ -57,7 +57,7 @@ class FavouriteVideoPlayerView extends GetView<FavouriteVideoPlayerController> {
               controller: pageViewController,
               allowImplicitScrolling: true,
               onPageChanged: (index) {
-                if (index == state.length - 1) {
+                if (index == state.length - 1 && controller.nextPageUrl.isNotEmpty) {
                   controller.getPaginationAllVideos(1);
                   //Get.forceAppUpdate();
                 }
@@ -1007,7 +1007,7 @@ class _FavouriteVideosState extends State<FavouriteVideos>
                           onTap: () async {
                             await GetStorage()
                                 .write("profileId", widget.UserId);
-
+                            await  GetStorage().write('sound_id', widget.soundId);
                             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                             AndroidDeviceInfo androidInfo =
                                 await deviceInfo.androidInfo;

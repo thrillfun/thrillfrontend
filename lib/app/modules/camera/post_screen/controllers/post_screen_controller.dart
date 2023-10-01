@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart' as dioForm;
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -320,14 +319,9 @@ class PostScreenController extends GetxController
               '-i $videoFilePath -r 1 -f image2 ${directory.path}image-%3d.jpg')
           .then((session) async {
         final returnCode = await session.getReturnCode();
-        if (ReturnCode.isSuccess(returnCode)) {
-          var frameFiles = await directory.list().toList();
-          thumbnailEntities.value = await getFilesFromFolder(directory);
-          selectedThumbnail.value = thumbnailEntities[0].path;
-        } else {
-          change(selectedThumbnail,
-              status: RxStatus.error('Something went wrong'));
-        }
+        var frameFiles = await directory.list().toList();
+        thumbnailEntities.value = await getFilesFromFolder(directory);
+        selectedThumbnail.value = thumbnailEntities[0].path;
       }).then((value) {
         isThumbnailReady.value = true;
         change(selectedThumbnail, status: RxStatus.success());
