@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
@@ -30,10 +29,8 @@ class HomeController extends GetxController {
   var pageController = PageController();
   List<Widget> homeScreens = [];
   final info = NetworkInfo();
-  BetterPlayerEventType? eventType;
   final count = 0.obs;
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
-  var playerController = BetterPlayerListVideoPlayerController();
   RxList<SiteSettings> siteSettingsList = RxList();
   var connectionType = 1.obs;
 

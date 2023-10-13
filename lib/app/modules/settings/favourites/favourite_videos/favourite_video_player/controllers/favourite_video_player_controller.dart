@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:better_player/better_player.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:file_support/file_support.dart';
@@ -24,7 +22,6 @@ import '../../../../../comments/controllers/comments_controller.dart';
 
 class FavouriteVideoPlayerController extends GetxController
     with StateMixin<RxList<fav.Data>> {
-  BetterPlayerEventType? eventType;
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
   RxList<fav.Data> favouriteVideos = RxList();
 

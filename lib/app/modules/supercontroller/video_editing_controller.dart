@@ -7,7 +7,6 @@ import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
 import 'package:on_audio_query/on_audio_query.dart';
 
-import 'package:uri_to_file/uri_to_file.dart';
 import 'package:file_support/file_support.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -133,7 +132,7 @@ class VideoEditingController extends GetxController {
           var isOriginal = true.obs;
           var songPath = '';
           var songName = '';
-          var file = await toFile(selectedSound);
+          var file = File(selectedSound);
 
           operationData.forEach((operation) async {
             Map<dynamic, dynamic> data = operation['options'];

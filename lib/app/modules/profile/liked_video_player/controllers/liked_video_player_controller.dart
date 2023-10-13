@@ -1,4 +1,3 @@
-import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -8,7 +7,6 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:file_support/file_support.dart';
@@ -30,7 +28,6 @@ class LikedVideoPlayerController extends GetxController
     with StateMixin<RxList<LikedVideos>> {
   RxList<LikedVideos> likedVideos = RxList<LikedVideos>();
 
-  BetterPlayerEventType? eventType;
   VideoPlayerController? videoPlayerController;
   var isUserBlocked = false.obs;
   var isLoading = false.obs;

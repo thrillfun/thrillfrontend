@@ -9,7 +9,6 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:imgly_sdk/imgly_sdk.dart' as imgly;
@@ -19,7 +18,6 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:uri_to_file/uri_to_file.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -71,6 +69,13 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
   var soundOwner = "".obs;
   var soundAuthorName = ''.obs;
   var thumbnail = "".obs;
+  var videoFile =''.obs;
+
+  var audioImageUrl = ''.obs;
+  var selectedAudioVolume =0.obs;
+  var selectedVideoVolume =0.obs;
+
+  var selectedSoundUrl =''.obs;
   final progressNotifier = ValueNotifier<ProgressBarState>(
     ProgressBarState(
       current: Duration.zero,
@@ -258,9 +263,8 @@ class CameraController extends GetxController with GetTickerProviderStateMixin {
     audioPlayer = AudioPlayer();
     duration = (await audioPlayer.setUrl(soundPath))!;
 
-    await playerController.preparePlayer(soundPath).then((value) {
-      isPlayerInit.value = true;
-    });
+    await playerController.preparePlayer(path: soundPath).then((value) => isPlayerInit.value = true);
+
 
     audioTotalDuration.value = duration;
 

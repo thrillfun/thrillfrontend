@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -62,26 +61,26 @@ class QrCodeView extends GetView<QrCodeController> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Obx(() => Visibility(
-                          visible: controller.qrData.value.isNotEmpty,
-                          child: Padding(
-                            padding: EdgeInsets.all(10),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: QrImage(
-                                eyeStyle: const QrEyeStyle(
-                                  eyeShape: QrEyeShape.circle,
-                                  color: ColorManager.colorAccent,
-                                ),
-                                foregroundColor: ColorManager.colorAccent,
-                                dataModuleStyle: const QrDataModuleStyle(
-                                    dataModuleShape: QrDataModuleShape.circle),
-                                data: controller.qrData.value,
-                                version: QrVersions.auto,
-                                embeddedImageStyle: QrEmbeddedImageStyle(),
-                              ),
-                            ),
-                          ))),
+                      // Obx(() => Visibility(
+                      //     visible: controller.qrData.value.isNotEmpty,
+                      //     child: Padding(
+                      //       padding: EdgeInsets.all(10),
+                      //       child: ClipRRect(
+                      //         borderRadius: BorderRadius.circular(10),
+                      //         child: QrImage(
+                      //           eyeStyle: const QrEyeStyle(
+                      //             eyeShape: QrEyeShape.circle,
+                      //             color: ColorManager.colorAccent,
+                      //           ),
+                      //           foregroundColor: ColorManager.colorAccent,
+                      //           dataModuleStyle: const QrDataModuleStyle(
+                      //               dataModuleShape: QrDataModuleShape.circle),
+                      //           data: controller.qrData.value,
+                      //           version: QrVersions.auto,
+                      //           embeddedImageStyle: QrEmbeddedImageStyle(),
+                      //         ),
+                      //       ),
+                      //     ))),
                       Card(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),

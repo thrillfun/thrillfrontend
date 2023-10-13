@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
@@ -45,10 +44,8 @@ class HomeVideosPlayerController extends GetxController {
   var isVisibleIndicator = [true, false, false];
   List<Widget> videoScreens = [];
   final info = NetworkInfo();
-  BetterPlayerEventType? eventType;
   final count = 0.obs;
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));
-  var playerController = BetterPlayerListVideoPlayerController();
   var followingVideosController = Get.find<FollowingVideosController>();
   var trendingVideosController = Get.find<TrendingVideosController>();
   var relatedVideosController = Get.find<RelatedVideosController>();

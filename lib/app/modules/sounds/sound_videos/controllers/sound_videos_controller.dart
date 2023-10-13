@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:file_support/file_support.dart';
@@ -21,7 +20,6 @@ import '../../../comments/controllers/comments_controller.dart';
 class SoundVideosController extends GetxController
     with StateMixin<RxList<VideosBySound>> {
   //TODO: Implement SoundVideosController
-  BetterPlayerEventType? eventType;
 
   RxList<VideosBySound> videoList = RxList();
   var dio = Dio(BaseOptions(baseUrl: RestUrl.baseUrl));

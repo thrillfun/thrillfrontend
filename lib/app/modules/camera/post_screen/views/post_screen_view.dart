@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:better_player/better_player.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,6 +19,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:iconly/iconly.dart';
 import 'package:lottie/lottie.dart';
 import 'package:multi_trigger_autocomplete/multi_trigger_autocomplete.dart';
+import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:thrill/app/modules/camera/controllers/camera_controller.dart';
 import 'package:thrill/app/rest/models/video_field_model.dart';
 import 'package:thrill/app/utils/utils.dart';
@@ -30,11 +30,10 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../utils/color_manager.dart';
 import '../controllers/post_screen_controller.dart';
-import 'package:hashtagable/hashtagable.dart';
 
 class PostScreenView extends GetView<PostScreenController> {
   PostScreenView({Key? key}) : super(key: key);
-
+  var selected = [].obs;
   var isPLayerPlaying = true.obs;
   var isPlayerVisible = true.obs;
   var cameraController = Get.find<CameraController>();
@@ -45,6 +44,7 @@ class PostScreenView extends GetView<PostScreenController> {
   var textEditingController = TextEditingController();
 
   var isEditable = false.obs;
+
   @override
   Widget build(BuildContext context) {
     textsoundName.value = controller.soundName;
@@ -66,9 +66,9 @@ class PostScreenView extends GetView<PostScreenController> {
   }
 
   videoLayout() => Obx(() => PortalTarget(
-        visible: isSuggestionVisible.value,
-        anchor:
-            const Aligned(follower: Alignment.center, target: Alignment.center),
+        visible: true,
+        anchor: const Aligned(
+            follower: Alignment.bottomCenter, target: Alignment.bottomCenter),
         portalFollower: Container(
             decoration: BoxDecoration(
                 color: Theme.of(Get.context!).scaffoldBackgroundColor,
@@ -90,38 +90,54 @@ class PostScreenView extends GetView<PostScreenController> {
                                   controller.searchList[0].hashtags!.length,
                               itemBuilder: (context, index) => InkWell(
                                     onTap: () {
-                                      controller.textEditingController.value.text = controller
-                                              .textEditingController.value.text
-                                              .replaceAll(
-                                                  lastChangedText.value, ' ') +
-                                          (controller.textEditingController
-                                                      .value.text
-                                                      .substring(controller
-                                                          .textEditingController
-                                                          .value
-                                                          .selection
-                                                          .baseOffset) +
-                                                  controller.searchList[0]
-                                                      .hashtags![index].name
-                                                      .toString())
-                                              .toString()
-                                              .replaceAll(RegExp(" " + controller.textEditingController.value.text.substring(controller.textEditingController.value.selection.extentOffset)), '');
+                                      var addedString = '';
+                                      controller.inputHashtags.forEach((element) {
+                                        if(!controller.richTextController.value.text.contains(element)){
+                                          addedString = controller
+                                              .richTextController!.value.text;
+                                          for (int i = 0;
+                                          i <= addedString.length -1 ;
+                                          i++) {
+                                            if (addedString[i] == ' ') {
+                                              addedString = addedString +
+                                                  ' ' +
+                                                  controller.inputHashtags.last;
+                                              break;
+                                            }
+                                          }
+                                          controller.richTextController.value
+                                              .text = addedString;
 
-                                      final List<String> hashTags =
-                                          extractHashTags(controller
-                                              .textEditingController
-                                              .value
-                                              .text);
+                                          // controller
+                                          //     .textEditingController.value.text
+                                          //     .replaceAll(
+                                          //     lastChangedText.value, ' ') +
+                                          //     (controller.textEditingController
+                                          //         .value.text
+                                          //         .substring(controller
+                                          //         .textEditingController
+                                          //         .value
+                                          //         .selection
+                                          //         .baseOffset) +
+                                          //         controller.searchList[0]
+                                          //             .hashtags![index].name
+                                          //             .toString())
+                                          //         .toString()
+                                          //         .replaceAll(RegExp(" " + controller.textEditingController.value.text.substring(controller.textEditingController.value.selection.extentOffset)), '');
+                                        }
 
-                                      controller.textEditingController.value
-                                              .selection =
-                                          TextSelection.fromPosition(
-                                              TextPosition(
-                                                  offset: controller
-                                                      .textEditingController
-                                                      .value
-                                                      .text
-                                                      .length));
+                                        // final List<String> hashTags =
+                                        //     extractHashTags(controller
+                                        //         .textEditingController
+                                        //         .value
+                                        //         .text);
+
+                                        controller.richTextController.value
+                                            .selection =
+                                            TextSelection.fromPosition(
+                                                TextPosition(
+                                                    offset: addedString.length));
+                                      });
                                     },
                                     child: Container(
                                         padding: const EdgeInsets.all(10),
@@ -226,12 +242,13 @@ class PostScreenView extends GetView<PostScreenController> {
                                         child: Obx(() => Image.file(
                                               File(controller
                                                       .customSelectedThumbnail
-                                                      .isNotEmpty
-                                                  ? controller
-                                                      .customSelectedThumbnail
                                                       .value
+                                                      .isEmpty
+                                                  ? controller
+                                                      .selectedThumbnail.value
                                                   : controller
-                                                      .selectedThumbnail.value),
+                                                      .customSelectedThumbnail
+                                                      .value),
                                               fit: BoxFit.fill,
                                             )),
                                       ),
@@ -245,12 +262,13 @@ class PostScreenView extends GetView<PostScreenController> {
                                                     child: Obx(() => Image.file(
                                                           File(controller
                                                                   .customSelectedThumbnail
-                                                                  .isNotEmpty
+                                                                  .value
+                                                                  .isEmpty
                                                               ? controller
-                                                                  .customSelectedThumbnail
+                                                                  .selectedThumbnail
                                                                   .value
                                                               : controller
-                                                                  .selectedThumbnail
+                                                                  .customSelectedThumbnail
                                                                   .value),
                                                           height: Get.height,
                                                           width: Get.width,
@@ -472,60 +490,28 @@ class PostScreenView extends GetView<PostScreenController> {
                             )),
                         Flexible(
                             child: SizedBox(
-                                child: Obx(() => HashTagTextField(
-                                      controller: controller
-                                          .textEditingController.value,
-                                      onChanged: (value) {
-                                        if (value.isEmpty) {
-                                          isSuggestionVisible.value = false;
-                                        }
-                                        if (controller.textEditingController
-                                                .value.text
-                                                .substring(controller
-                                                        .textEditingController
-                                                        .value
-                                                        .selection
-                                                        .baseOffset -
-                                                    1) ==
-                                            "#") {}
-                                        if (controller.textEditingController
-                                                    .value.text
-                                                    .substring(controller
-                                                            .textEditingController
-                                                            .value
-                                                            .selection
-                                                            .baseOffset -
-                                                        1) ==
-                                                ' ' ||
-                                            value.isEmpty) {
-                                          isSuggestionVisible.value = false;
-                                        }
-                                        controller.searchHashtags(value
-                                            .toString()
-                                            .replaceAll(RegExp('#'), ' '));
-                                      },
-                                      onDetectionTyped: (text) {
-                                        isSuggestionVisible.value = true;
+                                child: Obx(() => TextFormField(
+                                  maxLines: 10,
+                                  controller: controller
+                                      .richTextController.value,
+                                  // onChanged: (text){
+                                  //   for(int i=text.length -1;i>=0;i--){
+                                  //     if(text[i]=="#"){
+                                  //       controller.searchHashtags(text.substring(i,text.length-1));
+                                  //       break;
+                                  //     }
+                                  //   }
+                                  // },
+                                  decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.all(10),
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      hintText: "Write a caption......",
+                                      hintStyle: TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      )),
 
-                                        if (text.contains(RegExp('#'))) {}
-                                        lastChangedText.value = text;
-
-                                        controller.searchHashtags(text
-                                            .toString()
-                                            .replaceAll(RegExp('#'), ''));
-                                      },
-                                      decoratedStyle: const TextStyle(
-                                          color: ColorManager.colorAccent),
-                                      maxLines: 10,
-                                      decoration: const InputDecoration(
-                                          contentPadding: EdgeInsets.all(10),
-                                          enabledBorder: InputBorder.none,
-                                          focusedBorder: InputBorder.none,
-                                          hintText: "Write a caption......",
-                                          hintStyle: TextStyle(
-                                            fontStyle: FontStyle.italic,
-                                          )),
-                                    )))),
+                                )))),
                         // Expanded(child: descriptionLayout()),
                       ],
                     ),
@@ -646,6 +632,7 @@ class PostScreenView extends GetView<PostScreenController> {
           ],
         ),
       ));
+
   chipSelectionLayout() => Padding(
         padding: const EdgeInsets.only(left: 10, right: 10),
         child: SingleChildScrollView(
@@ -669,46 +656,84 @@ class PostScreenView extends GetView<PostScreenController> {
       );
 
   descriptionLayout() => Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        margin: const EdgeInsets.only(left: 10, right: 10, bottom: 0, top: 10),
-        child: HashTagTextField(
-          decoratedStyle: const TextStyle(color: ColorManager.colorAccent),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      margin: const EdgeInsets.only(left: 10, right: 10, bottom: 0, top: 10),
+      child: TextFormField(
           controller: controller.textEditingController.value,
-          maxLines: 10,
-          onChanged: (String txt) {
-            controller.currentText.value = txt;
-
-            controller.searchItems.clear();
-
-            if (txt.isEmpty) {
-              controller.searchItems.value = [];
-            } else {
-              controller.tophashtagvideosList.forEach((element) {
-                if (element.hashtagName!.toLowerCase().contains(
-                    extractHashTags(txt)
-                        .last
-                        .toString()
-                        .replaceAll(RegExp("#"), '')
-                        .toLowerCase())) {
-                  print(extractHashTags(txt).last.toString());
-                  controller.searchItems.add(element.hashtagName);
-                }
-              });
-              controller.lastChangedWord.value = txt;
+          onFieldSubmitted: (text) {
+            for (int i = 0; i < text.length; i++) {
+              successToast(text);
+              if (text[i] == '') break;
             }
+            ;
+            for (int i = text.length - 1; i >= 0; i--) {
+              successToast(text);
+              if (text[i] == '#') break;
+            }
+            ;
           },
-          decoration: const InputDecoration(
-              contentPadding: EdgeInsets.all(10),
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              hintText: "Write a caption......",
-              hintStyle: TextStyle(
-                fontStyle: FontStyle.italic,
-              )),
-        ),
-        alignment: Alignment.topLeft,
+          onChanged: (value) {},
+          decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+              prefixIcon: controller.searchItems.isEmpty
+                  ? null
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: Wrap(
+                          spacing: 5,
+                          runSpacing: 5,
+                          children: controller.searchItems.map((s) {
+                            return Chip(
+                                backgroundColor: Colors.blue[100],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                label: Text(s,
+                                    style: TextStyle(color: Colors.blue[900])),
+                                onDeleted: () {
+                                  controller.searchItems.remove(s);
+                                });
+                          }).toList()),
+                    )))
+
+      // HashTagTextField(
+      //   decoratedStyle: const TextStyle(color: ColorManager.colorAccent),
+      //   controller: controller.textEditingController.value,
+      //   maxLines: 10,
+      //   onChanged: (String txt) {
+      //     controller.currentText.value = txt;
+      //
+      //     controller.searchItems.clear();
+      //
+      //     if (txt.isEmpty) {
+      //       controller.searchItems.value = [];
+      //     } else {
+      //       controller.tophashtagvideosList.forEach((element) {
+      //         if (element.hashtagName!.toLowerCase().contains(
+      //             extractHashTags(txt)
+      //                 .last
+      //                 .toString()
+      //                 .replaceAll(RegExp("#"), '')
+      //                 .toLowerCase())) {
+      //           print(extractHashTags(txt).last.toString());
+      //           controller.searchItems.add(element.hashtagName);
+      //         }
+      //       });
+      //       controller.lastChangedWord.value = txt;
+      //     }
+      //   },
+      //   decoration: const InputDecoration(
+      //       contentPadding: EdgeInsets.all(10),
+      //       enabledBorder: InputBorder.none,
+      //       focusedBorder: InputBorder.none,
+      //       hintText: "Write a caption......",
+      //       hintStyle: TextStyle(
+      //         fontStyle: FontStyle.italic,
+      //       )),
+      // ),
       );
 
   hashTagLayout() => InkWell(
@@ -1073,7 +1098,9 @@ class PostScreenView extends GetView<PostScreenController> {
 
 class PostScreenVideoPlayer extends StatefulWidget {
   PostScreenVideoPlayer(this.videoFile);
+
   File? videoFile;
+
   @override
   State<PostScreenVideoPlayer> createState() => _PostScreenVideoPlayerState();
 }

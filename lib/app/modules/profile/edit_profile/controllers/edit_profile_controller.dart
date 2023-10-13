@@ -13,7 +13,6 @@ import 'package:thrill/app/utils/utils.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:iconly/iconly.dart';
-import 'package:uri_to_file/uri_to_file.dart';
 
 import '../../../../utils/color_manager.dart';
 import '../../../settings/controllers/settings_controller.dart';

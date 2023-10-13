@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:better_player/better_player.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
-import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:file_support/file_support.dart';
@@ -24,7 +22,6 @@ class SearchVideosPlayerController extends GetxController
     with StateMixin<RxList<SearchData>> {
   RxList<SearchData> searchList = RxList();
 
-  BetterPlayerEventType? eventType;
   var isUserBlocked = false.obs;
   var isLoading = false.obs;
   var isVideoReported = false.obs;

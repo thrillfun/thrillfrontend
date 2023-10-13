@@ -1,18 +1,19 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:easy_audio_trimmer/easy_audio_trimmer.dart' as audioTrimmer;
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
+import 'package:ffmpeg_kit_flutter/media_information_session.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thrill/app/utils/utils.dart';
-import 'package:uri_to_file/uri_to_file.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:video_trimmer/video_trimmer.dart';
+import 'package:video_trimmer/video_trimmer.dart' ;
 
 import '../../../../routes/app_pages.dart';
 import '../../../../utils/strings.dart';
@@ -38,17 +39,74 @@ class VideoThumbnailController extends GetxController {
   late imgly.Configuration configuration;
   late VideoEditorResult editedFile;
   var isInitialised = false.obs;
+  MediaInformationSession? audioMediaInfo;
+  MediaInformationSession? mediaInfo;
+  var isAudioTrimmerInitialised = false.obs;
+  var videoFile = ''.obs;
+
+  audioTrimmer.Trimmer? soundTrimmer;
+
+  var audioStartValue =0.0.obs;
+  var audioEndValue=0.0.obs;
   @override
   void onInit() {
     super.onInit();
-    extractFrames(File(Get.arguments['video_file']).path);
+    // extractFrames(File(videoFile.value).path);
   }
 
   @override
   void onReady() {
+
+    if (cameraController.selectedSound.value.isNotEmpty ||
+        cameraController.userUploadedSound.value.isNotEmpty){
+      videoFile.value = '${saveCacheDirectory}output.mp4';
+
+    }
+    else
+   {
+     videoFile.value = Get.arguments['video_file'];
+   }
+
+    getVideoDuration();
+
     super.onReady();
   }
 
+  getVideoDuration()async {
+    mediaInfo =
+    await FFprobeKit.getMediaInformation(videoFile.value);
+    if (cameraController.selectedSound.value.isNotEmpty ||
+        cameraController.userUploadedSound.value.isNotEmpty) {
+      audioMediaInfo = await FFprobeKit.getMediaInformation(
+          cameraController.selectedSound.value.isNotEmpty
+              ? cameraController.userUploadedSound.value
+              : cameraController.selectedSound.value);
+
+      if (await audioMediaInfo!.getDuration() <
+          await mediaInfo!.getDuration()) {
+        Duration totalDuration =
+        Duration(seconds: await audioMediaInfo!.getDuration());
+        videoDuration.value = totalDuration;
+      } else if (await audioMediaInfo!.getDuration() >
+          await mediaInfo!.getDuration()) {
+        Duration totalDuration =
+        Duration(seconds: await mediaInfo!.getDuration());
+        videoDuration.value = totalDuration;
+      }
+    }
+  }
+  Future<void> initTrimmer(String audioFile) async {
+    isAudioTrimmerInitialised.value = false;
+    if(soundTrimmer!=null){
+      soundTrimmer?.dispose();
+      soundTrimmer=null;
+    }
+    soundTrimmer = audioTrimmer.Trimmer();
+    var file = File(audioFile);
+    await soundTrimmer?.loadAudio(audioFile:file).then((value) {
+      isAudioTrimmerInitialised.value=true;
+    });
+  }
   @override
   void onClose() {
     trimmer?.dispose();
@@ -64,23 +122,22 @@ class VideoThumbnailController extends GetxController {
     }
   }
 
-  Future<void> initialiseVideoTrimmer(String videoFile) async {
 
+
+  Future<void> initialiseVideoTrimmer(String videoFile) async {
     isInitialised.value = false;
 
+    if(trimmer!=null){
+      trimmer?.dispose();
+      trimmer=null;
+    }
     trimmer = Trimmer();
-    await trimmer
-        ?.loadVideo(videoFile: File(videoFile))
-    .then((value) {
+    print(videoFile);
+    var file = File(videoFile);
+    await trimmer?.loadVideo(videoFile: file).then((value) {
       isInitialised.value = true;
-    })
-        ;
-    // trimmer.videoPlayerController!.addListener(() {
-    // });
-    var mediaInfo =
-        await FFprobeKit.getMediaInformation(Get.arguments['video_file']);
-    Duration totalDuration = Duration(seconds: await mediaInfo.getDuration());
-    videoDuration.value = totalDuration;
+    });
+
   }
 
   extractFrames(String videoFilePath) async {
@@ -112,25 +169,25 @@ class VideoThumbnailController extends GetxController {
     return dir;
   }
 
-  Future<VideoEditorResult> openGalleryEditor(String videoFile, {imgly.Tool? tool}) async {
-    editedFile = (await VESDK
-        .openEditor(Video(videoFile),
-            configuration: await setConfig(cameraController.localSoundsList,
-                cameraController.soundName.value,
-                maxDuration: cameraController
-                    .animationController!.duration!.inSeconds
-                    .toDouble(),
-                tool: tool)))!;
+  Future<VideoEditorResult> openGalleryEditor(String videoFile,
+      {imgly.Tool? tool}) async {
+    editedFile = (await VESDK.openEditor(Video(videoFile),
+        configuration: await setConfig(
+            cameraController.localSoundsList, cameraController.soundName.value,
+            maxDuration: cameraController
+                .animationController!.duration!.inSeconds
+                .toDouble(),
+            tool: tool)))!;
 
-    if (editedFile.video != null) {
-      var file = await toFile(editedFile.video);
+    if (editedFile.video.isNotEmpty) {
+      var file = File(editedFile.video);
       Map<dynamic, dynamic> serializationData = await editedFile.serialization;
       var recentSelection = true.obs;
       var songPath = '';
       var songName = '';
       var isAudioAvailale = 0.obs;
       List<dynamic> operations =
-      (serializationData['operations'] as List<dynamic>);
+          (serializationData['operations'] as List<dynamic>);
       for (var audio in operations) {
         if (audio['type'] == 'audio') {
           isAudioAvailale.value = 1;
@@ -143,40 +200,38 @@ class VideoThumbnailController extends GetxController {
         cameraController.soundOwner.value = "";
       }
       for (int i = 0;
-      i < serializationData["operations"].toList().length;
-      i++) {
+          i < serializationData["operations"].toList().length;
+          i++) {
         if (serializationData["operations"][i]["type"] == "audio") {
           recentSelection.value = false;
         }
 
         for (var element in cameraController.localSoundsList) {
           print(element);
-          if (serializationData["operations"][i]["options"]["clips"] !=
-              null) {
+          if (serializationData["operations"][i]["options"]["clips"] != null) {
             for (int j = 0;
-            j <
-                serializationData["operations"][i]["options"]["clips"]
-                    .toList()
-                    .length;
-            j++) {
+                j <
+                    serializationData["operations"][i]["options"]["clips"]
+                        .toList()
+                        .length;
+                j++) {
               List<dynamic> clipsList = serializationData["operations"][i]
-              ["options"]["clips"]
+                      ["options"]["clips"]
                   .toList();
               if (clipsList.isNotEmpty) {
                 if (element.title ==
                     serializationData["operations"][i]["options"]["clips"][j]
-                    ["options"]["identifier"]
+                            ["options"]["identifier"]
                         .toString()) {
-                  cameraController.selectedSound.value =
-                      element.uri.toString();
+                  cameraController.selectedSound.value = element.uri.toString();
                   songPath = element.uri.toString();
                   songName = element.displayName;
                   cameraController.soundName.value = element.displayName;
                   isLocalSound.value = true;
                 } else if (element.title !=
-                    serializationData["operations"][i]["options"]["clips"]
-                    [j]["options"]["identifier"]
-                        .toString() &&
+                        serializationData["operations"][i]["options"]["clips"]
+                                [j]["options"]["identifier"]
+                            .toString() &&
                     cameraController.selectedSound.value ==
                         cameraController.userUploadedSound.value) {
                   cameraController.selectedSound.value =
@@ -232,7 +287,6 @@ class VideoThumbnailController extends GetxController {
       // video.release();
     }
     return editedFile;
-
   }
 
   openPostScreen(String filePath) async {

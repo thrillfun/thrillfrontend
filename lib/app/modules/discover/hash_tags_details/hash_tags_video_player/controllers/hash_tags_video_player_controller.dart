@@ -1,4 +1,3 @@
-import 'package:better_player/better_player.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -8,7 +7,6 @@ import '../../../../../rest/models/site_settings_model.dart';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:file_support/file_support.dart';
@@ -24,7 +22,6 @@ import '../../../../comments/controllers/comments_controller.dart';
 
 class HashTagsVideoPlayerController extends GetxController
     with StateMixin<RxList<HashtagRelatedVideos>> {
-  BetterPlayerEventType? eventType;
   var isUserBlocked = false.obs;
   var isLoading = false.obs;
   var isVideoReported = false.obs;

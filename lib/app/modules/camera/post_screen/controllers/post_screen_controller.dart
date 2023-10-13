@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:dio/dio.dart' as dioForm;
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:hashtagable/hashtagable.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,7 +16,6 @@ import 'package:simple_s3/simple_s3.dart';
 import 'package:thrill/app/modules/related_videos/controllers/related_videos_controller.dart';
 import 'package:thrill/app/utils/color_manager.dart';
 import 'package:thrill/app/utils/utils.dart';
-import 'package:uri_to_file/uri_to_file.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -28,6 +27,7 @@ import '../../../../rest/rest_urls.dart';
 import '../../../../routes/app_pages.dart';
 import '../../../../utils/enum.dart';
 import '../../../../utils/strings.dart';
+import'package:rich_text_controller/rich_text_controller.dart';
 
 class PostScreenController extends GetxController
     with GetSingleTickerProviderStateMixin, StateMixin<dynamic> {
@@ -59,6 +59,7 @@ class PostScreenController extends GetxController
   var entities = RxList<FileSystemEntity>();
   var videosList = RxList<String>();
 
+  late Rx<RichTextController> richTextController;
   TextEditingController searchController = TextEditingController();
 
   var textEditingController = TextEditingController().obs;
@@ -82,6 +83,10 @@ class PostScreenController extends GetxController
   var customSelectedThumbnail = ''.obs;
   FileUploadStatus? fileUploadStatus;
   var backPressed = false.obs;
+  var regexp = RegExp(r"\B#[a-zA-Z0-9]+\b");
+
+  RxList<String> inputHashtags =
+RxList();
   @override
   void onInit() {
     super.onInit();
@@ -124,7 +129,44 @@ class PostScreenController extends GetxController
   void onReady() {
     getTopHashTagVideos();
     getVideoClips();
-    searchHashtags('');
+    searchHashtags('s');
+    richTextController = RichTextController(
+      patternMatchMap: {
+        //
+        //* Returns every Hashtag with red color
+        //
+        RegExp(r"\B#[a-zA-Z0-9]+\b"):TextStyle(color:ColorManager.colorAccent),
+        //
+        //* Returns every Mention with blue color and bold style.
+        //
+        RegExp(r"\B@[a-zA-Z0-9]+\b"):TextStyle(fontWeight: FontWeight.w800 ,color:Colors.blue,),
+        //
+        //* Returns every word after '!' with yellow color and italic style.
+        //
+        RegExp(r"\B![a-zA-Z0-9]+\b"):TextStyle(color:Colors.yellow, fontStyle:FontStyle.italic),
+        // add as many expressions as you need!
+      },
+      //* starting v1.2.0
+      // Now you have the option to add string Matching!
+      //! Assertion: Only one of the two matching options can be given at a time!
+
+      //* starting v1.1.0
+      //* Now you have an onMatch callback that gives you access to a List<String>
+      //* which contains all matched strings
+      onMatch: (List<String> matches){
+        searchHashtags(matches.last);
+
+        inputHashtags.add(matches.last);
+        // Do something with matches.
+        //! P.S
+        // as long as you're typing, the controller will keep updating the list.
+      },
+      deleteOnBack: false,
+      regExpMultiLine: true,
+      // You can control the [RegExp] options used:
+      regExpUnicode: true,
+
+    ).obs;
     super.onReady();
   }
 
@@ -245,13 +287,13 @@ class PostScreenController extends GetxController
             "$currentUnix.jpg", desc, soundName,
             soundOwner: soundOwner);
       } else if (isOriginal == "extracted") {
-        File file = await toFile(soundUrl);
+        File file = File(soundUrl);
         awsUploadSound(file.path, "$currentUnix").then((value) async =>
             postUpload("$currentUnix.mp4", "$currentUnix.mp3",
                 "$currentUnix.jpg", desc, soundName,
                 soundOwner: soundOwner));
       } else {
-        File file = await toFile(soundUrl);
+        File file = File(soundUrl);
         awsUploadSound(file.path, "$currentUnix").then((value) async =>
             postUpload("$currentUnix.mp4", "$currentUnix.mp3",
                 "$currentUnix.jpg", desc, soundName,
@@ -315,17 +357,24 @@ class PostScreenController extends GetxController
     var directory = await checkforDirectory();
     thumbnailEntities.clear();
     if (directory.existsSync()) {
-      FFmpegKit.execute(
-              '-i $videoFilePath -r 1 -f image2 ${directory.path}image-%3d.jpg')
-          .then((session) async {
+      String extractFramesCommand='-i $videoFilePath -r 1 -f image2 ${directory.path}image-%3d.jpg';
+      await FFmpegKit.executeAsync(extractFramesCommand,(session)async {
         final returnCode = await session.getReturnCode();
         var frameFiles = await directory.list().toList();
-        thumbnailEntities.value = await getFilesFromFolder(directory);
-        selectedThumbnail.value = thumbnailEntities[0].path;
-      }).then((value) {
-        isThumbnailReady.value = true;
-        change(selectedThumbnail, status: RxStatus.success());
+
+        if(ReturnCode.isSuccess(returnCode)){
+          thumbnailEntities.value = await getFilesFromFolder(directory);
+          selectedThumbnail.value = thumbnailEntities[0].path;
+          isThumbnailReady.value = true;
+          change(selectedThumbnail, status: RxStatus.success());
+        }
+        else{
+          change(selectedThumbnail,status: RxStatus.error(returnCode?.getValue().toString()));
+        }
+      },(log){
+          Logger().w(log.getMessage());
       });
+
     }
   }
 
@@ -456,7 +505,7 @@ class PostScreenController extends GetxController
       String soundName,
       {String soundOwner = ""}) async {
     String tagList =
-        jsonEncode(extractHashTags(textEditingController.value.text));
+        jsonEncode([userHashtagsList]);
     snackBarMessageText.value = "posting video";
 
     dio.options.headers = {

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:file_support/file_support.dart';
@@ -22,7 +21,6 @@ import '../../user_liked_videos/controllers/user_liked_videos_controller.dart';
 
 class PrivateVideosPlayerController extends GetxController
     with StateMixin<RxList<PrivateVideos>> {
-  BetterPlayerEventType? eventType;
   var isUserBlocked = false.obs;
   var isLoading = false.obs;
   var isVideoReported = false.obs;

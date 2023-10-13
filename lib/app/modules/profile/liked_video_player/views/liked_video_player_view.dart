@@ -1,4 +1,3 @@
-import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/gestures.dart';
@@ -39,7 +38,6 @@ class LikedVideoPlayerView extends GetView<LikedVideoPlayerController> {
   LikedVideoPlayerView({Key? key}) : super(key: key);
   var pageViewController = PageController();
 
-  var playerController = BetterPlayerListVideoPlayerController();
   var commentsController = Get.find<CommentsController>();
   AnimationController? _controller;
   var pageController = PageController();

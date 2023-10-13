@@ -11,6 +11,8 @@ import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
+import 'package:ffmpeg_kit_flutter/media_information.dart';
+import 'package:ffmpeg_kit_flutter/media_information_session.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:file_support/file_support.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,9 +32,9 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:thrill/app/modules/supercontroller/video_editing_controller.dart';
+import 'package:thrill/app/widgets/focus_detector.dart';
 import 'package:thrill/app/widgets/no_search_result.dart';
 import 'package:torch_light/torch_light.dart';
-import 'package:uri_to_file/uri_to_file.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -320,16 +322,467 @@ class _CameraState extends State<CameraView>
                                                 .withOpacity(0.2)),
                                         child: InkWell(
                                           onTap: () async {
+                                            var isVideoPlaying = true.obs;
+                                            var currentDuration =
+                                                Duration.zero.obs;
                                             await ImagePicker()
                                                 .pickVideo(
                                                     source: ImageSource.gallery)
                                                 .then((value) async {
                                               if (value != null) {
-                                                Get.toNamed(
-                                                    Routes.VIDEO_THUMBNAIL,
-                                                    arguments: {
-                                                      'video_file': value.path
+                                                if (cameraController
+                                                        .selectedSound
+                                                        .value
+                                                        .isNotEmpty ||
+                                                    cameraController
+                                                        .userUploadedSound
+                                                        .value
+                                                        .isNotEmpty) {
+                                                  var audioPlayer =
+                                                      AudioPlayer();
+                                                  var audioFile = File(
+                                                      cameraController
+                                                          .userUploadedSound
+                                                          .value);
+                                                  await audioPlayer
+                                                      .setUrl(audioFile.path);
+
+                                                  MediaInformationSession
+                                                      audioInfo =
+                                                      await FFprobeKit
+                                                          .getMediaInformation(cameraController
+                                                                  .selectedSound
+                                                                  .value
+                                                                  .isEmpty
+                                                              ? cameraController
+                                                                  .userUploadedSound
+                                                                  .value
+                                                              : cameraController
+                                                                  .selectedSound
+                                                                  .value);
+
+                                                  MediaInformationSession
+                                                      videoInfo =
+                                                      await FFprobeKit
+                                                          .getMediaInformation(
+                                                              value.path);
+                                                  Duration videoDuration =
+                                                      Duration(
+                                                          seconds: await videoInfo
+                                                              .getDuration());
+                                                  Duration audioDuration =
+                                                      Duration(
+                                                          seconds: await audioInfo
+                                                              .getDuration());
+                                                  if (videoDuration.inSeconds <
+                                                      audioDuration.inSeconds) {
+                                                    var videoPlayerController =
+                                                        VideoPlayerController.file(
+                                                            File(value.path),
+                                                            videoPlayerOptions:
+                                                                VideoPlayerOptions(
+                                                                    mixWithOthers:
+                                                                        true))
+                                                          ..initialize();
+
+                                                    videoPlayerController
+                                                        .addListener(() async {
+                                                      currentDuration.value =
+                                                          videoPlayerController
+                                                              .value.position;
                                                     });
+                                                    cameraController
+                                                            .selectedVideoVolume
+                                                            .value =
+                                                        videoPlayerController
+                                                                .value.volume
+                                                                .toInt() *
+                                                            100;
+                                                    cameraController
+                                                        .selectedAudioVolume
+                                                        .value = audioPlayer
+                                                            .volume
+                                                            .toInt() *
+                                                        100;
+
+                                                    Get.bottomSheet(
+                                                        FocusDetector(
+                                                            onVisibilityGained:
+                                                                () {},
+                                                            onVisibilityLost:
+                                                                () async {
+                                                              if (videoPlayerController
+                                                                  .value
+                                                                  .isPlaying) {
+                                                                await videoPlayerController
+                                                                    .pause()
+                                                                    .then(
+                                                                        (value) {
+                                                                  isVideoPlaying
+                                                                          .value =
+                                                                      false;
+                                                                  audioPlayer
+                                                                      .pause();
+                                                                });
+                                                              } else {
+                                                                await videoPlayerController
+                                                                    .play()
+                                                                    .then(
+                                                                        (value) {
+                                                                  isVideoPlaying
+                                                                          .value =
+                                                                      true;
+
+                                                                  audioPlayer
+                                                                      .play();
+                                                                });
+                                                              }
+                                                              setState(() {});
+                                                            },
+                                                            onForegroundLost:
+                                                                () async {
+                                                              if (videoPlayerController
+                                                                  .value
+                                                                  .isPlaying) {
+                                                                await videoPlayerController
+                                                                    .pause()
+                                                                    .then(
+                                                                        (value) {
+                                                                  isVideoPlaying
+                                                                          .value =
+                                                                      false;
+                                                                  audioPlayer
+                                                                      .pause();
+                                                                });
+                                                              } else {
+                                                                await videoPlayerController
+                                                                    .play()
+                                                                    .then(
+                                                                        (value) {
+                                                                  isVideoPlaying
+                                                                          .value =
+                                                                      true;
+
+                                                                  audioPlayer
+                                                                      .play();
+                                                                });
+                                                              }
+                                                              setState(() {});
+                                                            },
+                                                            onForegroundGained:
+                                                                () {},
+                                                            onFocusLost:
+                                                                () async {
+                                                              if (videoPlayerController
+                                                                  .value
+                                                                  .isPlaying) {
+                                                                await videoPlayerController
+                                                                    .pause()
+                                                                    .then(
+                                                                        (value) {
+                                                                  isVideoPlaying
+                                                                          .value =
+                                                                      false;
+                                                                  audioPlayer
+                                                                      .pause();
+                                                                });
+                                                              } else {
+                                                                await videoPlayerController
+                                                                    .play()
+                                                                    .then(
+                                                                        (value) {
+                                                                  isVideoPlaying
+                                                                          .value =
+                                                                      true;
+
+                                                                  audioPlayer
+                                                                      .play();
+                                                                });
+                                                              }
+                                                              setState(() {});
+                                                            },
+                                                            onFocusGained:
+                                                                () {},
+                                                            child: Column(
+                                                              children: [
+                                                                Container(
+                                                                  child:
+                                                                      ClipRRect(
+                                                                    child:
+                                                                        AspectRatio(
+                                                                      aspectRatio: videoPlayerController
+                                                                          .value
+                                                                          .aspectRatio,
+                                                                      child: VideoPlayer(
+                                                                          videoPlayerController),
+                                                                    ),
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            10),
+                                                                  ),
+                                                                  height:
+                                                                      Get.height /
+                                                                          2,
+                                                                  width:
+                                                                      Get.width /
+                                                                          2,
+                                                                ),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceEvenly,
+                                                                  children: [
+                                                                    Padding(
+                                                                      padding: EdgeInsets.only(
+                                                                          left:
+                                                                              10),
+                                                                      child:
+                                                                          ClipOval(
+                                                                        child:
+                                                                            Container(
+                                                                          height:
+                                                                              35,
+                                                                          width:
+                                                                              35,
+                                                                          color:
+                                                                              ColorManager.colorAccent,
+                                                                          child: IconButton(
+                                                                              padding: EdgeInsets.zero,
+                                                                              onPressed: () async {
+                                                                                if (videoPlayerController.value.isPlaying) {
+                                                                                  await videoPlayerController.pause().then((value) {
+                                                                                    isVideoPlaying.value = false;
+                                                                                    audioPlayer.pause();
+                                                                                  });
+                                                                                } else {
+                                                                                  await videoPlayerController.play().then((value) {
+                                                                                    isVideoPlaying.value = true;
+
+                                                                                    audioPlayer.play();
+                                                                                  });
+                                                                                }
+                                                                                setState(() {});
+                                                                              },
+                                                                              icon: Obx(() => isVideoPlaying.isFalse
+                                                                                  ? Icon(
+                                                                                      Icons.play_arrow,
+                                                                                      size: 20,
+                                                                                    )
+                                                                                  : Icon(
+                                                                                      Icons.pause,
+                                                                                      size: 20,
+                                                                                    ))),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    Expanded(
+                                                                        child:
+                                                                            Align(
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      child: Obx(() => Text(currentDuration
+                                                                              .value
+                                                                              .toHHMMSS() +
+                                                                          "/" +
+                                                                          videoPlayerController
+                                                                              .value
+                                                                              .duration
+                                                                              .toHHMMSS())),
+                                                                    ))
+                                                                  ],
+                                                                ),
+                                                                Card(
+                                                                    elevation:
+                                                                        5,
+                                                                    margin: EdgeInsets
+                                                                        .all(
+                                                                            10),
+                                                                    child:
+                                                                        Padding(
+                                                                      padding:
+                                                                          EdgeInsets.all(
+                                                                              10),
+                                                                      child:
+                                                                          Column(
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              imgSound(RestUrl.profileUrl + cameraController.audioImageUrl.value),
+                                                                              SizedBox(
+                                                                                width: 10,
+                                                                              ),
+                                                                              Expanded(
+                                                                                  child: Text(
+                                                                                cameraController.soundName.value,
+                                                                                overflow: TextOverflow.ellipsis,
+                                                                              ))
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Icon(Icons.speaker),
+                                                                              Expanded(
+                                                                                  child: Obx(() => Slider(
+                                                                                      min: 0,
+                                                                                      max: 100,
+                                                                                      value: cameraController.selectedAudioVolume.value.toDouble(),
+                                                                                      onChanged: (value) async {
+                                                                                        cameraController.selectedAudioVolume.value = value.toInt();
+
+                                                                                        await audioPlayer.setVolume(cameraController.selectedAudioVolume.value.toDouble() / 100);
+                                                                                        setState(() {});
+                                                                                      }))),
+                                                                              Obx(() => Text(cameraController.selectedAudioVolume.value.toString()))
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )),
+                                                                Card(
+                                                                    elevation:
+                                                                        5,
+                                                                    margin: EdgeInsets
+                                                                        .all(
+                                                                            10),
+                                                                    child:
+                                                                        Padding(
+                                                                      padding:
+                                                                          EdgeInsets.all(
+                                                                              10),
+                                                                      child:
+                                                                          Column(
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              Expanded(
+                                                                                  child: Text(
+                                                                                'Camera Audio',
+                                                                                overflow: TextOverflow.ellipsis,
+                                                                              ))
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Icon(Icons.speaker),
+                                                                              Expanded(
+                                                                                  child: Obx(() => Slider(
+                                                                                      min: 0,
+                                                                                      max: 100,
+                                                                                      value: cameraController.selectedVideoVolume.value.toDouble(),
+                                                                                      onChanged: (value) async {
+                                                                                        cameraController.selectedVideoVolume.value = value.toInt();
+                                                                                        await videoPlayerController.setVolume(cameraController.selectedVideoVolume.value.toDouble() / 100);
+                                                                                        setState(() {});
+                                                                                      }))),
+                                                                              Obx(() => Text(cameraController.selectedVideoVolume.value.toString()))
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )),
+                                                                Align(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .bottomCenter,
+                                                                  child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceBetween,
+                                                                      children: [
+                                                                        Container(
+                                                                          child: InkWell(
+                                                                              child: Text(
+                                                                                "Cancel",
+                                                                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                                                                              ),
+                                                                              onTap: () {
+                                                                                Get.back();
+                                                                              }),
+                                                                          padding:
+                                                                              EdgeInsets.all(10),
+                                                                        ),
+                                                                        Container(
+                                                                          child: InkWell(
+                                                                              child: Text(
+                                                                                "Done",
+                                                                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                String replaceAudio = '-y  -ss ${Duration.zero} -accurate_seek -i ${value.path}   -i ${cameraController.selectedSound.value.isEmpty ? cameraController.userUploadedSound.value : cameraController.selectedSound.value} -filter_complex "[0:a]volume=${cameraController.selectedVideoVolume.value}[a0];[1:a]volume=${cameraController.selectedAudioVolume.value}[a1];[a0][a1]amix=inputs=2:duration=shortest" -map 0:v? -map 1:a -t $videoDuration -c:v copy ${saveCacheDirectory}output.mp4';
+
+                                                                                await FFmpegKit.executeAsync(replaceAudio, (session) async {
+                                                                                  var returnCode = await session.getReturnCode();
+
+                                                                                  if (ReturnCode.isSuccess(returnCode)) {
+                                                                                    Get.toNamed(Routes.VIDEO_THUMBNAIL, arguments: {
+                                                                                      'video_file': ' ${saveCacheDirectory}output.mp4'
+                                                                                    });
+                                                                                  }
+                                                                                }, (log) {
+                                                                                  Logger().wtf(log.getMessage());
+                                                                                });
+                                                                              }),
+                                                                          padding:
+                                                                              EdgeInsets.all(10),
+                                                                        )
+                                                                      ]),
+                                                                )
+                                                              ],
+                                                            )),
+                                                        isScrollControlled:
+                                                            true,
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        15)),
+                                                        backgroundColor: Theme
+                                                                .of(Get
+                                                                    .context!)
+                                                            .scaffoldBackgroundColor,
+                                                        ignoreSafeArea: false);
+                                                    // String replaceAudio =
+                                                    //     '-y  -ss ${Duration.zero} -accurate_seek -i ${value.path}   -i ${cameraController.selectedSound.value.isEmpty ? cameraController.userUploadedSound.value : cameraController.selectedSound.value} -filter_complex "[0:a]volume=${cameraController.selectedVideoVolume.value}[a0];[1:a]volume=${cameraController.selectedAudioVolume.value}[a1];[a0][a1]amix=inputs=2:duration=shortest" -map 0:v? -map 1:a -t $videoDuration -c:v copy ${saveCacheDirectory}output.mp4';
+                                                    //
+                                                    // await FFmpegKit
+                                                    //     .executeAsync(
+                                                    //         replaceAudio,
+                                                    //         (session) async {
+                                                    //   var returnCode =
+                                                    //       await session
+                                                    //           .getReturnCode();
+                                                    //
+                                                    //   if (ReturnCode.isSuccess(
+                                                    //       returnCode)) {
+                                                    //
+                                                    //     // Get.toNamed(
+                                                    //     //     Routes
+                                                    //     //         .VIDEO_THUMBNAIL,
+                                                    //     //     arguments: {
+                                                    //     //       'video_file':
+                                                    //     //       ' ${saveCacheDirectory}output.mp4'
+                                                    //     //     });
+                                                    //   }
+                                                    // }, (log) {
+                                                    //   Logger().wtf(
+                                                    //       log.getMessage());
+                                                    // });
+                                                  } else {
+                                                    Get.toNamed(
+                                                        Routes.VIDEO_THUMBNAIL,
+                                                        arguments: {
+                                                          'video_file':
+                                                              value.path
+                                                        });
+                                                  }
+                                                } else {
+                                                  Get.toNamed(
+                                                      Routes.VIDEO_THUMBNAIL,
+                                                      arguments: {
+                                                        'video_file': value.path
+                                                      });
+                                                }
                                               }
                                             });
                                           },
@@ -359,7 +812,7 @@ class _CameraState extends State<CameraView>
 
                                               isRecordingRunning();
                                             } on camera
-                                                .CameraException catch (e) {
+                                            .CameraException catch (e) {
                                               errorToast(e.toString());
                                             }
                                           } else {
@@ -569,16 +1022,11 @@ class _CameraState extends State<CameraView>
                                                           'video_file':
                                                               "${dir.path}/output.mp4"
                                                         });
-                                                  } else {
-                                                    errorToast(returnCode!
-                                                        .getValue()
-                                                        .toString());
                                                   }
                                                 }, (log) {
                                                   Logger().w(
                                                       "Log Message: ${log.getMessage()}");
                                                 });
-
                                               },
                                               child: const Icon(
                                                 FontAwesome.check,
@@ -800,67 +1248,46 @@ class _CameraState extends State<CameraView>
         if (cameraController.isPlayerInit.value) {
           await cameraController.audioPlayer.stop();
         }
-        var tempDirectory =
-        await getTemporaryDirectory();
-        final dir = Directory(
-            tempDirectory.path);
-        if (!await Directory(dir.path)
-            .exists()) {
-          await Directory(dir.path)
-              .create();
+        var tempDirectory = await getTemporaryDirectory();
+        final dir = Directory(tempDirectory.path);
+        if (!await Directory(dir.path).exists()) {
+          await Directory(dir.path).create();
         }
-        var outputFile = File(
-            '${dir.path}/output.mp4');
+        var outputFile = File('${dir.path}/output.mp4');
         ;
         if (outputFile.existsSync()) {
-          await outputFile.delete(
-              recursive: true);
+          await outputFile.delete(recursive: true);
         }
 
         setState(() {});
 
-        cameraController
-            .getVideoClips();
+        cameraController.getVideoClips();
 
         List<String> pathList = [];
-        cameraController.entities
-            .forEach((element) {
+        cameraController.entities.forEach((element) {
           pathList.add(element.path);
         });
-        final File file = File(
-            '${dir.path}/txt/join_video.txt');
+        final File file = File('${dir.path}/txt/join_video.txt');
 
         if (!file.existsSync()) {
           file.create(recursive: true);
         }
-        await file.writeAsString(
-            "file ${pathList.join("\nfile ")} ");
+        await file.writeAsString("file ${pathList.join("\nfile ")} ");
 
         var mergeVideosCommand =
             '-f concat -safe 0 -i ${dir.path}/txt/join_video.txt -c:v copy -c:a aac ${dir.path}/output.mp4';
 
-        await FFmpegKit.executeAsync(
-            mergeVideosCommand,
-                (value) async {
-              var returnCode = await value
-                  .getReturnCode();
+        await FFmpegKit.executeAsync(mergeVideosCommand, (value) async {
+          var returnCode = await value.getReturnCode();
 
-              if (ReturnCode.isSuccess(
-                  returnCode)) {
-                Get.toNamed(
-                    Routes.VIDEO_THUMBNAIL,
-                    arguments: {
-                      'video_file':
-                      "${dir.path}/output.mp4"
-                    });
-              } else {
-                errorToast(returnCode!
-                    .getValue()
-                    .toString());
-              }
-            }, (log) {
-          Logger().w(
-              "Log Message: ${log.getMessage()}");
+          if (ReturnCode.isSuccess(returnCode)) {
+            Get.toNamed(Routes.VIDEO_THUMBNAIL,
+                arguments: {'video_file': "${dir.path}/output.mp4"});
+          } else {
+            errorToast(returnCode!.getValue().toString());
+          }
+        }, (log) {
+          Logger().w("Log Message: ${log.getMessage()}");
         });
       }
     });
@@ -1118,8 +1545,6 @@ class _CameraState extends State<CameraView>
       });
     }
 
-
-
     if (mounted) {
       setState(() {
         _isCameraInitialized = _controller!.value.isInitialized;
@@ -1227,6 +1652,20 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                 children: [
                                                   InkWell(
                                                     onTap: () async {
+                                                      cameraController
+                                                          .audioImageUrl
+                                                          .value = controller
+                                                                  .searchList[0]
+                                                                  .sounds![
+                                                                      index]
+                                                                  .soundOwner !=
+                                                              null
+                                                          ? controller
+                                                              .searchList[0]
+                                                              .sounds![index]
+                                                              .soundOwner!
+                                                              .avtars!
+                                                          : '';
                                                       selectedIndex.value =
                                                           index;
                                                       cameraController
@@ -1267,6 +1706,15 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                               .soundOwner!
                                                               .avtars!
                                                           : "";
+
+                                                      cameraController
+                                                              .selectedSoundUrl
+                                                              .value =
+                                                          controller
+                                                              .searchList[0]
+                                                              .sounds![index]
+                                                              .sound
+                                                              .toString();
                                                       duration = (await audioPlayer
                                                           .setUrl(RestUrl
                                                                   .awsSoundUrl +
@@ -1296,7 +1744,6 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                             .animationController!
                                                             .forward();
                                                       }
-
 
                                                       audioTotalDuration.value =
                                                           duration!;
@@ -1815,7 +2262,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                           child: Padding(
                                                             padding:
                                                                 const EdgeInsets
-                                                                        .symmetric(
+                                                                    .symmetric(
                                                                     horizontal:
                                                                         10),
                                                             child: Column(
@@ -2038,11 +2485,9 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                           .toString()
                                                       : "";
 
-                                                  var file = await toFile(
-                                                      controller
-                                                          .localFilterList[
-                                                              index]
-                                                          .uri!);
+                                                  var file = File(controller
+                                                      .localFilterList[index]
+                                                      .uri!);
                                                   duration = (await audioPlayer
                                                       .setAudioSource(
                                                           AudioSource.file(
@@ -2332,8 +2777,8 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                       }
                                                     }
 
-                                                    var audioFile =
-                                                        await toFile(controller
+                                                    var audioFile = File(
+                                                        controller
                                                             .localFilterList[
                                                                 index]
                                                             .uri!);
@@ -2341,6 +2786,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                         .setAudioSource(
                                                             AudioSource.file(
                                                                 audioFile
+                                                                    .absolute
                                                                     .path)))!;
 
                                                     if (duration.inSeconds <
@@ -2424,7 +2870,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                         child: Padding(
                                                           padding:
                                                               const EdgeInsets
-                                                                      .symmetric(
+                                                                  .symmetric(
                                                                   horizontal:
                                                                       10),
                                                           child: Column(
@@ -3061,7 +3507,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                               Expanded(
                                                 child: Padding(
                                                   padding: const EdgeInsets
-                                                          .symmetric(
+                                                      .symmetric(
                                                       horizontal: 10),
                                                   child: Column(
                                                     mainAxisAlignment:

@@ -1,4 +1,3 @@
-import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/gestures.dart';
@@ -41,7 +40,6 @@ class DiscoverVideoPlayerView extends GetView<DiscoverVideoPlayerController> {
   var pageViewController =
       PageController(initialPage: Get.arguments["init_page"] ?? 0);
 
-  var playerController = BetterPlayerListVideoPlayerController();
   var commentsController = Get.find<CommentsController>();
   var adsController = Get.find<AdsController>();
   AnimationController? _controller;

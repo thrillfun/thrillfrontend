@@ -462,8 +462,9 @@ showVideoBottomSheet(
             ),
           ]),
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         isScrollControlled: false,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+
         backgroundColor: Theme.of(Get.context!).scaffoldBackgroundColor);
 
 errorToast(dynamic message) async {

@@ -11,9 +11,9 @@ import ly.img.android.pesdk.ui.model.state.UiConfigMainMenu
 
 class MainActivity: FlutterActivity() {
     companion object {
-        init {
-          StateHandler.replaceStateClass(UiConfigMainMenu::class.java, NativeConfigurationInjection::class.java)
-        }
+//        init {
+//          StateHandler.replaceStateClass(UiConfigMainMenu::class.java, NativeConfigurationInjection::class.java)
+//        }
     }
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
@@ -28,4 +28,4 @@ class MainActivity: FlutterActivity() {
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "adFactory")
     }
-}
+} 

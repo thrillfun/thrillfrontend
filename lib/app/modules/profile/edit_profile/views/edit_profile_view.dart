@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iconly/iconly.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -260,7 +260,7 @@ class EditProfileView extends GetView<EditProfileController> {
           ),
           InkWell(
             onTap: () {
-              DatePicker.showDatePicker(Get.context!,
+              DatePickerBdaya.showDatePicker(Get.context!,
                   showTitleActions: true,
                   minTime: DateTime(1920, 12, 12),
                   maxTime: DateTime.now(), onChanged: (date) {

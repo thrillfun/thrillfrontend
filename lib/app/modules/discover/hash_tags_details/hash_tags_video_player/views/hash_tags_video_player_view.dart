@@ -1,4 +1,3 @@
-import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/gestures.dart';
@@ -41,7 +40,6 @@ class HashTagsVideoPlayerView extends GetView<HashTagsVideoPlayerController> {
   late AnimationController _controller;
 
   var pageViewController = PageController();
-  var playerController = BetterPlayerListVideoPlayerController();
   var adsController = Get.find<AdsController>();
   @override
   Widget build(BuildContext context) {
