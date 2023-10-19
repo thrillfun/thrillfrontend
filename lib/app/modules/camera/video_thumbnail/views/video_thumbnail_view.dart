@@ -4,8 +4,8 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_audio_trimmer/easy_audio_trimmer.dart' as audioTrimmer;
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:thrill/app/utils/color_manager.dart';
 import 'package:thrill/app/utils/utils.dart';
+import 'package:thrill/app/widgets/audio_trimmer.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_trimmer/video_trimmer.dart';
@@ -35,12 +36,10 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
     var cameraController = Get.find<CameraController>();
     var isLocalSound = false.obs;
 
-    if (cameraController.selectedSound.value.isEmpty &&
-        cameraController.userUploadedSound.value.isEmpty) {
-      controller.initialiseVideoTrimmer(Get.arguments['video_file']);
-    } else {
-      controller.initialiseVideoTrimmer('${saveCacheDirectory}output.mp4');
+    if (controller.videoFile.isNotEmpty) {
+      controller.initialiseVideoTrimmer(controller.videoFile.value);
     }
+
 
     return Scaffold(
       appBar: AppBar(
@@ -123,8 +122,8 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
               }
               controller.editedFile.release();
             },
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Text(
                   'Post',
                   style: TextStyle(
@@ -146,33 +145,18 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
             children: [
               Obx(() => controller.isInitialised.isTrue
                   ? Align(
-                      child: VideoViewer(trimmer: controller.trimmer!),
                       alignment: Alignment.center,
+                      child: AspectRatio(
+                        aspectRatio: controller
+                            .videoPlayerController!.value.aspectRatio,
+                        child: VideoPlayer(
+                            controller.videoPlayerController!),
+                      ),
                     )
                   : Align(
                       alignment: Alignment.center,
                       child: loader(),
                     )),
-              Obx(
-                () => Align(
-                    alignment: Alignment.topCenter,
-                    child: controller.isInitialised.isTrue
-                        ? TrimViewer(
-                            editorProperties: const TrimEditorProperties(
-                                circlePaintColor: ColorManager.colorAccent,
-                                borderPaintColor: ColorManager.colorAccent),
-                            trimmer: controller.trimmer!,
-                            viewerHeight: 50.0,
-                            viewerWidth: 250,
-                            maxVideoLength: const Duration(seconds: 60),
-                            onChangeStart: (value) =>
-                                controller.startValue.value = value,
-                            onChangeEnd: (value) {
-                              controller.endValue.value = value;
-                            },
-                          )
-                        : loader()),
-              ),
               Obx(() => Visibility(
                   visible: controller.isInitialised.isTrue,
                   child: Align(
@@ -183,27 +167,14 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
                           color: ColorManager.colorAccent.withOpacity(0.3)),
                       child: IconButton(
                           onPressed: () {
-                            if (controller.trimmer != null &&
-                                controller.trimmer?.videoPlayerController !=
-                                    null) {
-                              controller.trimmer!.videoPlayerController!.value
-                                      .isPlaying
-                                  ? controller.trimmer?.videoPlayerController!
-                                      .pause()
-                                  : controller.trimmer?.videoPlayerController!
-                                      .play();
-                              controller.trimmer!.videoPlayerController!.value
-                                      .isPlaying
-                                  ? controller.isVideoPlaying.value = true
-                                  : controller.isVideoPlaying.value = false;
-                            }
+                            controller.playPauseVideo();
                           },
                           icon: Obx(() => controller.isVideoPlaying.isTrue
-                              ? Icon(
+                              ? const Icon(
                                   Icons.pause,
                                   color: Colors.white,
                                 )
-                              : Icon(
+                              : const Icon(
                                   Icons.play_arrow,
                                   color: Colors.white,
                                 ))),
@@ -263,11 +234,19 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   InkWell(
-                    child: Icon(Icons.crop),
+                    child: const Icon(
+                      Icons.crop,
+                      color: ColorManager.colorPrimaryLight,
+                    ),
                     onTap: () async {
                       Get.bottomSheet(
-                        Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).padding.top),child: TrimmerView(File(controller.videoFile.value)),)
-                          ,
+                          Padding(
+                            padding: EdgeInsets.only(
+                                top: MediaQuery.of(context).padding.top),
+                            child: TrimmerView(
+                                File(Get.arguments['video_file']),
+                                controller.videoDuration.value.inSeconds),
+                          ),
                           isScrollControlled: true);
                       // await controller.trimmer?.saveTrimmedVideo(
                       //     startValue: controller.startValue.value,
@@ -304,14 +283,37 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
                     height: 10,
                   ),
                   InkWell(
-                    child: Icon(Icons.library_music),
+                    child: const Icon(
+                      Icons.library_music,
+                      color: ColorManager.colorPrimaryLight,
+                    ),
                     onTap: () async {
-                      Get.bottomSheet(
-                          Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).padding.top),child: AudioTrimmerView(File(   cameraController.selectedSound.value.isNotEmpty
-                              ? cameraController.userUploadedSound.value
-                              : cameraController.selectedSound.value)),)
-                          ,
-                          isScrollControlled: true);
+                      try {
+                        if (cameraController.selectedSound.value.isNotEmpty ||
+                            cameraController
+                                .userUploadedSound.value.isNotEmpty) {
+                          controller.getVideoDuration();
+                          Get.bottomSheet(
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).padding.top),
+                                child: AudioTrimmerView(
+                                    File(cameraController
+                                            .selectedSound.value.isNotEmpty
+                                        ? cameraController
+                                            .userUploadedSound.value
+                                        : cameraController.selectedSound.value),
+                                    controller.videoDuration.value.inSeconds,),
+                              ),
+                              isScrollControlled: false);
+                        } else {
+                          errorToast(
+                              "please select a audio file before trimming audio");
+                        }
+                      } catch (e) {
+                        errorToast(e.toString());
+                      }
+
                       // if (controller.endValue.value -
                       //         controller.startValue.value <
                       //     5000) {
@@ -362,69 +364,38 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
                     height: 10,
                   ),
                   InkWell(
-                    child: Icon(Icons.tag_faces_sharp),
+                    child: const Icon(
+                      Icons.tag_faces_sharp,
+                      color: ColorManager.colorPrimaryLight,
+                    ),
                     onTap: () async {
-                      if (controller.endValue.value -
-                              controller.startValue.value <
-                          5000) {
-                        controller
-                            .openGalleryEditor(controller.videoFile.value,
-                                tool: imgly.Tool.sticker)
-                            .then((value) {
-                          if (value != null) {
-                            controller.videoFile.value = value.video;
-                            controller.initialiseVideoTrimmer(value.video);
-                          }
-                        });
-                      } else {
-                        await controller.trimmer?.saveTrimmedVideo(
-                            startValue: controller.startValue.value,
-                            endValue: controller.endValue.value,
-                            storageDir: StorageDir.temporaryDirectory,
-                            videoFileName:
-                                '${DateTime.now().millisecondsSinceEpoch}',
-                            onSave: (videoFile) async {
-                              if (videoFile != null) {
-                                controller.videoFile.value = videoFile;
-                                controller.openGalleryEditor(videoFile,
-                                    tool: imgly.Tool.sticker);
-                              }
-                            });
-                      }
+                      controller
+                          .openGalleryEditor(controller.videoFile.value,
+                              tool: imgly.Tool.sticker)
+                          .then((value) {
+                        if (value != null) {
+                          controller.videoFile.value = value.video;
+                          controller.initialiseVideoTrimmer(value.video);
+                        }
+                      });
                     },
                   ),
                   const SizedBox(
                     height: 10,
                   ),
                   InkWell(
-                    child: Icon(Icons.font_download),
+                    child: const Icon(
+                      Icons.font_download,
+                      color: ColorManager.colorPrimaryLight,
+                    ),
                     onTap: () async {
-                      if (controller.endValue.value -
-                              controller.startValue.value <
-                          5000) {
-                        controller
-                            .openGalleryEditor(controller.videoFile.value,
-                                tool: imgly.Tool.textDesign)
-                            .then((value) {
-                          controller.videoFile.value = value.video;
-                          controller.initialiseVideoTrimmer(value.video);
-                        });
-                      } else {
-                        await controller.trimmer?.saveTrimmedVideo(
-                            startValue: controller.startValue.value,
-                            endValue: controller.endValue.value,
-                            storageDir: StorageDir.temporaryDirectory,
-                            videoFileName:
-                                '${DateTime.now().millisecondsSinceEpoch}',
-                            onSave: (videoFile) async {
-                              if (videoFile != null) {
-                                controller.videoFile.value = videoFile;
-                                controller.openGalleryEditor(videoFile,
-                                    tool: imgly.Tool.textDesign);
-                              }
-                            });
-                      }
-
+                      controller
+                          .openGalleryEditor(controller.videoFile.value,
+                              tool: imgly.Tool.textDesign)
+                          .then((value) {
+                        controller.videoFile.value = value.video;
+                        controller.initialiseVideoTrimmer(value.video);
+                      });
                       // await controller.trimmer!.saveTrimmedVideo(
                       //     startValue: controller.startValue.value,
                       //     endValue: controller.endValue.value,
@@ -442,34 +413,19 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
                     height: 10,
                   ),
                   InkWell(
-                    child: Icon(Icons.edit_road),
+                    child: const Icon(
+                      Icons.edit_road,
+                      color: ColorManager.colorPrimaryLight,
+                    ),
                     onTap: () async {
-                      if (controller.endValue.value -
-                              controller.startValue.value <
-                          5000) {
-                        controller
-                            .openGalleryEditor(controller.videoFile.value,
-                                tool: imgly.Tool.filter)
-                            .then((value) async {
-                          controller.videoFile.value = value.video;
-                          //  await controller.trimmer!.loadVideo(videoFile: File(value!.video));
-                          controller.initialiseVideoTrimmer(value.video);
-                        });
-                      } else {
-                        await controller.trimmer?.saveTrimmedVideo(
-                            startValue: controller.startValue.value,
-                            endValue: controller.endValue.value,
-                            storageDir: StorageDir.temporaryDirectory,
-                            videoFileName:
-                                '${DateTime.now().millisecondsSinceEpoch}',
-                            onSave: (videoFile) async {
-                              if (videoFile != null) {
-                                controller.videoFile.value = videoFile;
-                                controller.openGalleryEditor(videoFile,
-                                    tool: imgly.Tool.filter);
-                              }
-                            });
-                      }
+                      controller
+                          .openGalleryEditor(controller.videoFile.value,
+                              tool: imgly.Tool.filter)
+                          .then((value) async {
+                        controller.videoFile.value = value.video;
+                        //  await controller.trimmer!.loadVideo(videoFile: File(value!.video));
+                        controller.initialiseVideoTrimmer(value.video);
+                      });
                     },
                   ),
                 ],
@@ -583,13 +539,13 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
                               cameraController.soundName.value = "";
                             },
                             child: Padding(
-                              padding: EdgeInsets.only(right: 10),
+                              padding: const EdgeInsets.only(right: 10),
                               child: Icon(
                                 IconlyBold.close_square,
                                 color: Colors.red.shade800,
                               ),
                             )))),
-                    Icon(
+                    const Icon(
                       IonIcons.musical_notes_sharp,
                       color: Colors.white,
                     ),
@@ -614,160 +570,12 @@ class VideoThumbnailView extends GetView<VideoThumbnailController> {
     );
   }
 }
-class AudioTrimmerView extends StatefulWidget {
-  final File file;
 
-  const AudioTrimmerView(this.file, {Key? key}) : super(key: key);
-  @override
-  State<AudioTrimmerView> createState() => _AudioTrimmerViewState();
-}
-
-class _AudioTrimmerViewState extends State<AudioTrimmerView> {
-  final audioTrimmer.Trimmer _trimmer = audioTrimmer.Trimmer();
-
-  double _startValue = 0.0;
-  double _endValue = 0.0;
-
-  bool _isPlaying = false;
-  bool _progressVisibility = false;
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _loadAudio();
-  }
-
-  void _loadAudio() async {
-    setState(() {
-      isLoading = true;
-    });
-    await _trimmer.loadAudio(audioFile: widget.file);
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  _saveAudio() {
-    setState(() {
-      _progressVisibility = true;
-    });
-
-    _trimmer.saveTrimmedAudio(
-      startValue: _startValue,
-      endValue: _endValue,
-      audioFileName: DateTime.now().millisecondsSinceEpoch.toString(),
-      onSave: (outputPath) {
-        setState(() {
-          _progressVisibility = false;
-        });
-        debugPrint('OUTPUT PATH: $outputPath');
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (Navigator.of(context).userGestureInProgress) {
-          return false;
-        } else {
-          return true;
-        }
-      },
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: const Text("Audio Trimmer"),
-        ),
-        body: isLoading
-            ? const CircularProgressIndicator()
-            : Center(
-          child: Container(
-            padding: const EdgeInsets.only(bottom: 30.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Visibility(
-                  visible: _progressVisibility,
-                  child: LinearProgressIndicator(
-                    backgroundColor:
-                    Theme.of(context).primaryColor.withOpacity(0.5),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed:
-                  _progressVisibility ? null : () => _saveAudio(),
-                  child: const Text("SAVE"),
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: audioTrimmer.TrimViewer(
-                      trimmer: _trimmer,
-                      viewerHeight: 100,
-                      viewerWidth: MediaQuery.of(context).size.width,
-                      durationStyle: audioTrimmer.DurationStyle.FORMAT_MM_SS,
-                      backgroundColor: Theme.of(context).primaryColor,
-                      barColor: Colors.white,
-                      durationTextStyle: TextStyle(
-                          color: Theme.of(context).primaryColor),
-                      allowAudioSelection: true,
-                      editorProperties: audioTrimmer.TrimEditorProperties(
-                        circleSize: 10,
-                        borderPaintColor: Colors.pink,
-                        borderWidth: 4,
-                        borderRadius: 5,
-                        circlePaintColor: Colors.pink.shade800,
-                      ),
-                      areaProperties:
-                      audioTrimmer.TrimAreaProperties.edgeBlur(blurEdges: true),
-                      onChangeStart: (value) => _startValue = value,
-                      onChangeEnd: (value) => _endValue = value,
-                      onChangePlaybackState: (value) {
-                        if (mounted) {
-                          setState(() => _isPlaying = value);
-                        }
-                      },
-                    ),
-                  ),
-                ),
-                TextButton(
-                  child: _isPlaying
-                      ? Icon(
-                    Icons.pause,
-                    size: 80.0,
-                    color: Theme.of(context).primaryColor,
-                  )
-                      : Icon(
-                    Icons.play_arrow,
-                    size: 80.0,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  onPressed: () async {
-                    bool playbackState =
-                    await _trimmer.audioPlaybackControl(
-                      startValue: _startValue,
-                      endValue: _endValue,
-                    );
-                    setState(() => _isPlaying = playbackState);
-                  },
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 class TrimmerView extends StatefulWidget {
   final File file;
+  int duration = 0;
 
-  TrimmerView(this.file);
+  TrimmerView(this.file, this.duration);
 
   @override
   _TrimmerViewState createState() => _TrimmerViewState();
@@ -824,45 +632,47 @@ class _TrimmerViewState extends State<TrimmerView> {
           child: Builder(
         builder: (context) => Center(
           child: Container(
-            padding: EdgeInsets.only(bottom: 30.0),
+            padding: const EdgeInsets.only(bottom: 30.0),
             color: Colors.black,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-
                 Visibility(
                   visible: _progressVisibility,
-                  child: LinearProgressIndicator(
+                  child: const LinearProgressIndicator(
                     backgroundColor: Colors.red,
                   ),
                 ),
-               Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).padding.top),child:  ElevatedButton(
-                 onPressed: _progressVisibility
-                     ? null
-                     : () async {
-                   _saveVideo().then((outputPath)async  {
+                Padding(
+                  padding:
+                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  child: ElevatedButton(
+                    onPressed: _progressVisibility
+                        ? null
+                        : () async {
+                      await _trimmer.saveTrimmedVideo(
+                          startValue: _startValue,
+                          endValue: _endValue,
+                          videoFileName: '${DateTime.now().millisecondsSinceEpoch}',
+                          onSave: (String? outputPath) async {
+                            controller.videoFile.value = outputPath ??
+                                controller.videoFile.value;
+                            await controller.initialiseVideoTrimmer(
+                                controller.videoFile.value);
 
-                     await _trimmer
-                         .saveTrimmedVideo(
-                         startValue: controller.startValue.value,
-                         endValue: controller.endValue.value,
-                         onSave: (String? outputPath) async {
-                           controller.videoFile.value =
-                               outputPath ?? controller.videoFile.value;
-                           await controller
-                               .initialiseVideoTrimmer(controller.videoFile.value);
-                           if(Get.isOverlaysOpen){
-                             Get.back();
-                           }
-                           print('OUTPUT PATH: $outputPath');
-                         });
+                            if (Get.isOverlaysOpen) {
+                              Get.back();
+                            }
+                            setState(() {
 
-
-                   });
-                 },
-                 child: Text("SAVE"),
-               ),),
+                            });
+                            print('OUTPUT PATH: $outputPath');
+                          });
+                          },
+                    child: const Text("SAVE"),
+                  ),
+                ),
                 Expanded(
                   child: VideoViewer(trimmer: _trimmer),
                 ),
@@ -871,22 +681,32 @@ class _TrimmerViewState extends State<TrimmerView> {
                     trimmer: _trimmer,
                     viewerHeight: 50.0,
                     viewerWidth: MediaQuery.of(context).size.width,
-                    maxVideoLength: controller.videoDuration.value,
-                    onChangeStart: (value) =>
-                        controller.startValue.value = value,
-                    onChangeEnd: (value) => controller.endValue.value = value,
+                    maxVideoLength: Duration(seconds: widget.duration),
+                    onChangeStart: (value) {
+                      _startValue = value;
+                      setState(() {
+
+                      });
+                    }
+                        ,
+                    onChangeEnd: (value) {
+                      _endValue = value;
+                      setState(() {
+
+                      });
+                    },
                     onChangePlaybackState: (value) =>
                         setState(() => _isPlaying = value),
                   ),
                 ),
                 TextButton(
                   child: _isPlaying
-                      ? Icon(
+                      ? const Icon(
                           Icons.pause,
                           size: 80.0,
                           color: Colors.white,
                         )
-                      : Icon(
+                      : const Icon(
                           Icons.play_arrow,
                           size: 80.0,
                           color: Colors.white,

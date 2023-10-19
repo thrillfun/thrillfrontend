@@ -42,7 +42,7 @@ class VideoThumbnailController extends GetxController {
   MediaInformationSession? audioMediaInfo;
   MediaInformationSession? mediaInfo;
   var isAudioTrimmerInitialised = false.obs;
-  var videoFile = ''.obs;
+  RxString videoFile = (Get.arguments['video_file'] as String).obs;
 
   audioTrimmer.Trimmer? soundTrimmer;
 
@@ -51,49 +51,51 @@ class VideoThumbnailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    getVideoDuration();
+
     // extractFrames(File(videoFile.value).path);
   }
 
   @override
   void onReady() {
-
-    if (cameraController.selectedSound.value.isNotEmpty ||
-        cameraController.userUploadedSound.value.isNotEmpty){
-      videoFile.value = '${saveCacheDirectory}output.mp4';
-
-    }
-    else
-   {
-     videoFile.value = Get.arguments['video_file'];
-   }
-
-    getVideoDuration();
-
     super.onReady();
   }
 
+  setVideoPlayer(String videofile){
+    if(videoPlayerController!=null){
+      videoPlayerController!.dispose();
+      videoPlayerController=null;
+    }
+    videoPlayerController = VideoPlayerController.file(File(videoFile.value))..initialize().then((value) {
+      playPauseVideo();
+    });
+    getVideoDuration();
+  }
   getVideoDuration()async {
     mediaInfo =
     await FFprobeKit.getMediaInformation(videoFile.value);
-    if (cameraController.selectedSound.value.isNotEmpty ||
-        cameraController.userUploadedSound.value.isNotEmpty) {
-      audioMediaInfo = await FFprobeKit.getMediaInformation(
-          cameraController.selectedSound.value.isNotEmpty
-              ? cameraController.userUploadedSound.value
-              : cameraController.selectedSound.value);
 
-      if (await audioMediaInfo!.getDuration() <
-          await mediaInfo!.getDuration()) {
-        Duration totalDuration =
-        Duration(seconds: await audioMediaInfo!.getDuration());
-        videoDuration.value = totalDuration;
-      } else if (await audioMediaInfo!.getDuration() >
-          await mediaInfo!.getDuration()) {
-        Duration totalDuration =
-        Duration(seconds: await mediaInfo!.getDuration());
-        videoDuration.value = totalDuration;
-      }
-    }
+   videoDuration.value=Duration(seconds: await mediaInfo!.getDuration());
+
+    // if (cameraController.selectedSound.value.isNotEmpty ||
+    //     cameraController.userUploadedSound.value.isNotEmpty) {
+    //   audioMediaInfo = await FFprobeKit.getMediaInformation(
+    //       cameraController.selectedSound.value.isNotEmpty
+    //           ? cameraController.userUploadedSound.value
+    //           : cameraController.selectedSound.value);
+    //
+    //   if (await audioMediaInfo!.getDuration() <
+    //       await mediaInfo!.getDuration()) {
+    //     Duration totalDuration =
+    //     Duration(seconds: await audioMediaInfo!.getDuration());
+    //     videoDuration.value = totalDuration;
+    //   } else if (await audioMediaInfo!.getDuration() >
+    //       await mediaInfo!.getDuration()) {
+    //     Duration totalDuration =
+    //     Duration(seconds: await mediaInfo!.getDuration());
+    //     videoDuration.value = totalDuration;
+    //   }
+    // }
   }
   Future<void> initTrimmer(String audioFile) async {
     isAudioTrimmerInitialised.value = false;
@@ -120,23 +122,22 @@ class VideoThumbnailController extends GetxController {
           ? videoPlayerController!.pause()
           : videoPlayerController!.play();
     }
+    isVideoPlaying.value = videoPlayerController!.value.isPlaying;
   }
 
 
 
   Future<void> initialiseVideoTrimmer(String videoFile) async {
     isInitialised.value = false;
-
-    if(trimmer!=null){
-      trimmer?.dispose();
-      trimmer=null;
-    }
     trimmer = Trimmer();
     print(videoFile);
     var file = File(videoFile);
+    setVideoPlayer(videoFile);
+
     await trimmer?.loadVideo(videoFile: file).then((value) {
       isInitialised.value = true;
     });
+    getVideoDuration();
 
   }
 

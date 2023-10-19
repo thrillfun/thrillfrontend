@@ -1984,13 +1984,13 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                           cameraController
                                                                   .selectedSound
                                                                   .value =
-                                                              file.uri
+                                                              file.path
                                                                   .toString();
 
                                                           cameraController
                                                                   .userUploadedSound
                                                                   .value =
-                                                              file.uri
+                                                              file.path
                                                                   .toString();
 
                                                           cameraController
@@ -2088,7 +2088,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                               cameraController
                                                                       .userUploadedSound
                                                                       .value =
-                                                                  value.uri
+                                                                  value!.path
                                                                       .toString();
 
                                                               cameraController
@@ -2137,7 +2137,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                                   : "";
                                                               cameraController
                                                                   .setupAudioPlayer(
-                                                                      value.path
+                                                                  value!.path
                                                                           .toString());
 
                                                               Get.back();
@@ -2149,7 +2149,7 @@ class SelectSoundView extends GetView<SelectSoundController> {
                                                             cameraController
                                                                     .selectedSound
                                                                     .value =
-                                                                value!.uri
+                                                                value!.path
                                                                     .toString();
 
                                                             // Get.toNamed(Routes.CAMERA, arguments: {
